@@ -548,6 +548,161 @@
             margin-bottom: 1rem;
         }
 
+        /* Lesson Accordion */
+        .lesson-accordion {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .lesson-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 1.5rem;
+            background: linear-gradient(135deg, #00606B 0%, #004F58 100%);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .lesson-header:hover {
+            background: linear-gradient(135deg, #007580 0%, #005A65 100%);
+        }
+
+        .lesson-header h4 {
+            color: var(--pure-white);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lesson-header h4 i {
+            transition: transform 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .lesson-accordion.open .lesson-header h4 i {
+            transform: rotate(180deg);
+        }
+
+        .lesson-count {
+            background: rgba(47, 133, 146, 0.5);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--frost-white);
+        }
+
+        .lesson-videos {
+            display: none;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .lesson-accordion.open .lesson-videos {
+            display: grid;
+        }
+
+        .lesson-videos {
+            display: none;
+        }
+
+        /* Video Thumbnails */
+        .video-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .video-thumb::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            transition: background 0.3s;
+        }
+
+        .video-card:hover .video-thumb::before {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .video-thumb i {
+            font-size: 3rem;
+            color: var(--pure-white);
+            position: relative;
+            z-index: 1;
+            opacity: 0.8;
+            transition: all 0.3s;
+        }
+
+        .video-card:hover .video-thumb i {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .video-card {
+            cursor: pointer;
+        }
+
+        .video-card h4 {
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        /* Video Modal */
+        .video-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .video-modal-content {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            aspect-ratio: 16/9;
+        }
+
+        .video-modal-content iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .close-video {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            font-size: 2.5rem;
+            color: var(--pure-white);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-video:hover {
+            color: #2F8592;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hamburger {
@@ -682,43 +837,294 @@
         <!-- Practitioner Course -->
         <div class="course-content active" id="practitioner">
             <div class="course-header">
-                <h3>קורס NLP פרקטישנר</h3>
-                <p>הבסיס לטיפול ב-NLP - למד את הטכניקות היסודיות</p>
+                <h3>קורס NLP פרקטישנר (מלא!!)</h3>
+                <p>51 סרטונים | 7 שיעורים מקיפים | גישה חינמית מלאה</p>
             </div>
-            <div class="videos-grid">
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 1: מבוא ל-NLP</h4>
-                    <p>הכרות עם עולם ה-NLP והעקרונות הבסיסיים</p>
+
+            <!-- Lesson 1 -->
+            <div class="lesson-accordion">
+                <div class="lesson-header" onclick="toggleLesson(this)">
+                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 1: מבוא ל-NLP ויסודות</h4>
+                    <span class="lesson-count">8 חלקים</span>
                 </div>
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 2: מערכות ייצוג</h4>
-                    <p>הבנת האופן שבו אנשים מעבדים מידע</p>
-                </div>
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 3: ראפור ויצירת קשר</h4>
-                    <p>טכניקות ליצירת קשר עמוק עם המטופל</p>
-                </div>
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 4: עוגנים</h4>
-                    <p>כיצד ליצור ולהשתמש בעוגנים רגשיים</p>
-                </div>
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 5: שינוי אמונות</h4>
-                    <p>טכניקות לשינוי אמונות מגבילות</p>
-                </div>
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 6: תת-מודעות</h4>
-                    <p>עבודה עם התת-מודע לשינוי עמוק</p>
+                <div class="lesson-videos">
+                    <div class="video-card" onclick="playVideo('HdJTrqV-8kw')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/HdJTrqV-8kw/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 1: איך NLP יכול לשנות את חייך?</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('I4r3oERlZpc')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/I4r3oERlZpc/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 2: מהן האמונות שמסתתרות בתת המודע?</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('zGuxyfbYdUY')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/zGuxyfbYdUY/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 3: מה זה (תכל'ס) NLP?</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('fo90wrXPJjQ')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/fo90wrXPJjQ/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 4: שלוש הנחות יסוד משנות חיים</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('kccllbuObhs')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/kccllbuObhs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 5: מודע, תת מודע ומודל התקשורת</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('ahN0Q2wGVa0')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ahN0Q2wGVa0/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 6: תקשורת לא מילולית וקליברציה</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('Nt8MK8CNvYo')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/Nt8MK8CNvYo/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 7: ראפור ויצירת כימיה</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('-PMCuz1jiMk')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/-PMCuz1jiMk/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 8: סיכום השיעור</h4>
+                    </div>
                 </div>
             </div>
+
+            <!-- Lesson 2 -->
+            <div class="lesson-accordion">
+                <div class="lesson-header" onclick="toggleLesson(this)">
+                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 2: עמדות תפיסה ומערכות יחסים</h4>
+                    <span class="lesson-count">6 חלקים</span>
+                </div>
+                <div class="lesson-videos">
+                    <div class="video-card" onclick="playVideo('3u52ghUdM9E')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/3u52ghUdM9E/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 1: מודל "רמות לוגיות"</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('lfDEJFV3EO0')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/lfDEJFV3EO0/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 2: הנחות יסוד במערכות יחסים</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('ldz6Kb9hqW8')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ldz6Kb9hqW8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 3: עמדת תפיסה ראשונה</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('-qk4et9hKCc')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/-qk4et9hKCc/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 4: עמדת תפיסה שנייה</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('ZxpaiqBCN-A')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ZxpaiqBCN-A/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 5: עמדת תפיסה שלישית</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('NtzzbQKPfuQ')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/NtzzbQKPfuQ/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 6: טכניקת טיול בין עמדות</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson 3 -->
+            <div class="lesson-accordion">
+                <div class="lesson-header" onclick="toggleLesson(this)">
+                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 3: שאלות עוצמתיות והצבת מטרות</h4>
+                    <span class="lesson-count">7 חלקים</span>
+                </div>
+                <div class="lesson-videos">
+                    <div class="video-card" onclick="playVideo('5EEb8n1rkk8')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/5EEb8n1rkk8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 1: כלי ההשפעה העוצמתי ביותר</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('JlRGFcHIlaY')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/JlRGFcHIlaY/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 2: שאלות של הכללות</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('9vOt4qMDErY')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/9vOt4qMDErY/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 3: שאלות של השמטות</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('M5WYHElp77Y')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/M5WYHElp77Y/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 4: שאלות של עיוותים</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('_8wvtMUInNg')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/_8wvtMUInNg/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 5: 5 עקרונות זהב להצבת מטרה</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('HfeTbx94Z_A')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/HfeTbx94Z_A/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 6: מודל SMART</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('wxswFMy0FFs')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/wxswFMy0FFs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 7: טכניקת וולט דיסני</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson 4 -->
+            <div class="lesson-accordion">
+                <div class="lesson-header" onclick="toggleLesson(this)">
+                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 4: השפה של המוח ומערכות ייצוג</h4>
+                    <span class="lesson-count">7 חלקים</span>
+                </div>
+                <div class="lesson-videos">
+                    <div class="video-card" onclick="playVideo('bYgv5dLr5DU')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/bYgv5dLr5DU/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 1: השפה של המוח</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('rfeUPA9HcU4')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/rfeUPA9HcU4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 2: תפיסת ההתנהגויות</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('deckGQrRYd4')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/deckGQrRYd4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 3: מערכות הייצוג של המוח</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('cSGrhFYSDmE')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/cSGrhFYSDmE/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 4: שימוש במערכות ייצוג</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('gG-3I_TcHe4')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/gG-3I_TcHe4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 5: חושים ותתי חושים (סמ"דים)</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('b_b4hhclmR8')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/b_b4hhclmR8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 6: התניות ושינוי תפיסת המציאות</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('itbteM8UjBE')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/itbteM8UjBE/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 7: שינוי הרגלים והתניות חדשות</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson 5 -->
+            <div class="lesson-accordion">
+                <div class="lesson-header" onclick="toggleLesson(this)">
+                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 5: צרכים אנושיים ומבנה האישיות</h4>
+                    <span class="lesson-count">7 חלקים</span>
+                </div>
+                <div class="lesson-videos">
+                    <div class="video-card" onclick="playVideo('BNBPxr-Qec0')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/BNBPxr-Qec0/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 1: סיכום השיעורים האחרונים</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('h7b8sX0z4nw')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/h7b8sX0z4nw/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 2: גמישות מחשבתית וכוונה חיובית</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('mphxQlNsGYM')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/mphxQlNsGYM/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 3: מודל הצרכים האנושיים</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('Y8ulYYg5XDk')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/Y8ulYYg5XDk/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 4: סיכום מודל הצרכים</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('dNKcCwvjVWk')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/dNKcCwvjVWk/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 5: מבנה האישיות בתת המודע</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('Gp7gT4TC1n8')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/Gp7gT4TC1n8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 6: הכוח של מחשבה נכונה</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('5SDIvzco0K4')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/5SDIvzco0K4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 7: טכניקה לשינוי הרגלים</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson 6 -->
+            <div class="lesson-accordion">
+                <div class="lesson-header" onclick="toggleLesson(this)">
+                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 6: מסגור, שליטה ברגשות ועוגנים</h4>
+                    <span class="lesson-count">8 חלקים</span>
+                </div>
+                <div class="lesson-videos">
+                    <div class="video-card" onclick="playVideo('EeGfP30AiLs')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/EeGfP30AiLs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 1: איך פרשנות עובדת? (מסגור)</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('I_tnGW-RYmE')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/I_tnGW-RYmE/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 2: שינוי פרשנות (ריפריים)</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('akbG-4zxER4')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/akbG-4zxER4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 3: יצירת פרשנות והשפעה</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('AO6lf_seCqs')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/AO6lf_seCqs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 4: פוקוס ושחרור מחשבות</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('NcSAnR6WWD4')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/NcSAnR6WWD4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 5: שליטה ברגשות - משולש הסטייט</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('bceR1CAGv34')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/bceR1CAGv34/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 6: אסטרטגיה למצבים רגשיים</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('kndSAREj7qQ')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/kndSAREj7qQ/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 7: כניסה לפוקוס ושינוי רגשי</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('X9SUBv6maGs')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/X9SUBv6maGs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 8: התניות ועוגנים פסיכולוגיים</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson 7 -->
+            <div class="lesson-accordion">
+                <div class="lesson-header" onclick="toggleLesson(this)">
+                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 7: אמונות וציר הזמן</h4>
+                    <span class="lesson-count">8 חלקים</span>
+                </div>
+                <div class="lesson-videos">
+                    <div class="video-card" onclick="playVideo('97cbIvdEz8Q')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/97cbIvdEz8Q/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 1: רמות לוגיות - שינוי צורת חשיבה</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('ieDGCAvev4w')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ieDGCAvev4w/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 2: לעשות הכי טוב ברגע נתון</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('ySTzDrBml10')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ySTzDrBml10/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 3: אין כשלון, יש משוב</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('zWKwwChuEfs')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/zWKwwChuEfs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 4: אמונות מגבילות בתת המודע</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('On9odKKss24')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/On9odKKss24/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 5: סוגי האמונות בתת המודע</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('BE5RLAj1Be4')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/BE5RLAj1Be4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 6: איך נוצרות אמונות?</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('K_JGmX8Cq-I')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/K_JGmX8Cq-I/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 7: דפוסי שפה וזיהוי אמונות</h4>
+                    </div>
+                    <div class="video-card" onclick="playVideo('EeFCN9Tddh8')">
+                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/EeFCN9Tddh8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
+                        <h4>חלק 8: טכניקת ציר הזמן</h4>
+                    </div>
+                </div>
+            </div>
+
             <div style="text-align: center; margin-top: 2rem;">
                 <p style="color: #2F8592; margin-bottom: 1rem;">מבחן לקבלת תעודת פרקטישנר: 1,000 ₪</p>
+            </div>
+        </div>
+
+        <!-- Video Modal -->
+        <div id="videoModal" class="video-modal" onclick="closeVideo()">
+            <div class="video-modal-content" onclick="event.stopPropagation()">
+                <span class="close-video" onclick="closeVideo()">&times;</span>
+                <iframe id="videoFrame" src="" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
             </div>
         </div>
 
@@ -930,6 +1336,37 @@
                     document.querySelector('.nav-links').classList.remove('active');
                 }
             });
+        });
+
+        // Toggle lesson accordion
+        function toggleLesson(header) {
+            const accordion = header.parentElement;
+            accordion.classList.toggle('open');
+        }
+
+        // Play video in modal
+        function playVideo(videoId) {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('videoFrame');
+            iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close video modal
+        function closeVideo() {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('videoFrame');
+            iframe.src = '';
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeVideo();
+            }
         });
     </script>
 </body>

@@ -6,6 +6,8 @@
     <title>מטפל לכל אחד - ריפוי הנפש לכל אדם</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --deep-petrol: #003B46;
@@ -1077,6 +1079,319 @@
             opacity: 0.7;
         }
 
+        /* ===== Auth Styles ===== */
+        .auth-buttons {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .btn-login {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--frost-white);
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            background: var(--pure-white);
+            color: var(--deep-petrol);
+        }
+
+        .btn-signup {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            border: none;
+            color: var(--deep-petrol);
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px var(--gold-glow);
+        }
+
+        .user-menu {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--deep-petrol);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(0, 59, 70, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 0.5rem;
+            min-width: 180px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+            border: 1px solid rgba(47, 133, 146, 0.2);
+        }
+
+        .user-dropdown.active {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1rem;
+            color: var(--frost-white);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .user-dropdown a:hover {
+            background: rgba(47, 133, 146, 0.2);
+        }
+
+        .user-dropdown a i {
+            width: 20px;
+            color: var(--gold);
+        }
+
+        /* ===== Auth Modal ===== */
+        .auth-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .auth-modal.active {
+            display: flex;
+        }
+
+        .auth-modal-content {
+            background: linear-gradient(135deg, var(--muted-teal) 0%, var(--deep-petrol) 100%);
+            border-radius: 24px;
+            padding: 2.5rem;
+            max-width: 420px;
+            width: 100%;
+            position: relative;
+            border: 1px solid rgba(47, 133, 146, 0.3);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .auth-modal-close {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 1.5rem;
+            color: var(--frost-white);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .auth-modal-close:hover {
+            color: var(--gold);
+        }
+
+        .auth-modal h2 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-modal-subtitle {
+            text-align: center;
+            color: var(--frost-white);
+            margin-bottom: 2rem;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            color: var(--frost-white);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 0.9rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(47, 133, 146, 0.3);
+            background: rgba(0, 59, 70, 0.5);
+            color: var(--pure-white);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(232, 241, 242, 0.5);
+        }
+
+        .auth-form .btn-primary {
+            margin-top: 0.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            color: var(--frost-white);
+            font-size: 0.9rem;
+        }
+
+        .auth-divider::before, .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(47, 133, 146, 0.3);
+        }
+
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            width: 100%;
+            padding: 0.9rem;
+            border-radius: 12px;
+            border: 1px solid rgba(47, 133, 146, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--pure-white);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-google:hover {
+            background: var(--pure-white);
+            color: var(--deep-petrol);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--frost-white);
+        }
+
+        .auth-switch a {
+            color: var(--gold);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== Dashboard Link ===== */
+        .dashboard-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(47, 133, 146, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: var(--gold);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .dashboard-btn:hover {
+            background: var(--gold);
+            color: var(--deep-petrol);
+        }
+
+        /* ===== Video Watched Indicator ===== */
+        .video-card.watched .video-thumb::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            z-index: 2;
+        }
+
+        /* ===== Progress Bar ===== */
+        .course-progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .course-progress-fill {
+            background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease-out;
+        }
+
+        .course-progress-text {
+            text-align: center;
+            margin-top: 0.5rem;
+            color: var(--frost-white);
+            font-size: 0.9rem;
+        }
+
         /* ===== Responsive ===== */
         @media (max-width: 900px) {
             nav {
@@ -1186,12 +1501,102 @@
             <li><a href="#become-therapist">להיות מטפל</a></li>
             <li><a href="#contact">צור קשר</a></li>
         </ul>
+        <!-- Auth Buttons (shown when logged out) -->
+        <div class="auth-buttons" id="auth-buttons">
+            <button class="btn-login" onclick="openAuthModal('login')">התחברות</button>
+            <button class="btn-signup" onclick="openAuthModal('signup')">הרשמה</button>
+        </div>
+
+        <!-- User Menu (shown when logged in) -->
+        <div class="user-menu" id="user-menu" style="position: relative;">
+            <span class="user-name" style="color: var(--frost-white); font-size: 0.9rem;"></span>
+            <div class="user-avatar" onclick="toggleUserDropdown()">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="user-dropdown" id="user-dropdown">
+                <a href="#" onclick="openDashboard()"><i class="fa-solid fa-gauge"></i> האזור האישי</a>
+                <a href="#courses"><i class="fa-solid fa-graduation-cap"></i> הקורסים שלי</a>
+                <a href="#" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> התנתקות</a>
+            </div>
+        </div>
+
         <div class="hamburger" onclick="toggleMenu()">
             <span></span>
             <span></span>
             <span></span>
         </div>
     </nav>
+
+    <!-- Auth Modal -->
+    <div class="auth-modal" id="auth-modal">
+        <div class="auth-modal-content">
+            <span class="auth-modal-close" onclick="closeAuthModal()">&times;</span>
+
+            <!-- Login Form -->
+            <div id="login-form">
+                <h2>התחברות</h2>
+                <p class="auth-modal-subtitle">ברוכים השבים למטפל לכל אחד</p>
+                <form class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>אימייל</label>
+                        <input type="email" id="login-email" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>סיסמה</label>
+                        <input type="password" id="login-password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        התחברות
+                    </button>
+                </form>
+                <div class="auth-divider">או</div>
+                <button class="btn-google" onclick="handleGoogleLogin()">
+                    <i class="fa-brands fa-google"></i>
+                    המשך עם Google
+                </button>
+                <p class="auth-switch">
+                    עדיין אין לך חשבון? <a onclick="switchAuthForm('signup')">הרשמה</a>
+                </p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signup-form" style="display: none;">
+                <h2>הרשמה</h2>
+                <p class="auth-modal-subtitle">הצטרף למשפחת מטפל לכל אחד</p>
+                <form class="auth-form" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label>שם מלא</label>
+                        <input type="text" id="signup-name" placeholder="השם שלך" required>
+                    </div>
+                    <div class="form-group">
+                        <label>אימייל</label>
+                        <input type="email" id="signup-email" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>טלפון</label>
+                        <input type="tel" id="signup-phone" placeholder="050-0000000">
+                    </div>
+                    <div class="form-group">
+                        <label>סיסמה</label>
+                        <input type="password" id="signup-password" placeholder="לפחות 6 תווים" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-user-plus"></i>
+                        יצירת חשבון
+                    </button>
+                </form>
+                <div class="auth-divider">או</div>
+                <button class="btn-google" onclick="handleGoogleLogin()">
+                    <i class="fa-brands fa-google"></i>
+                    המשך עם Google
+                </button>
+                <p class="auth-switch">
+                    כבר יש לך חשבון? <a onclick="switchAuthForm('login')">התחברות</a>
+                </p>
+            </div>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section class="hero" id="home">
@@ -1919,6 +2324,386 @@
             el.style.transform = 'translateY(30px)';
             el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
             observer.observe(el);
+        });
+
+        // ============================================================================
+        // Supabase Integration
+        // ============================================================================
+
+        const SUPABASE_URL = 'https://fixepvxcwcfsoazjsldz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpeGVwdnhjd2Nmc29hempzbGR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1MDQ4OTAsImV4cCI6MjA4NDA4MDg5MH0.fX82WEKfOp3fuFoU2KFbn_R16WO6vXdXMDmpdcC8840';
+
+        // Initialize Supabase
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ============================================================================
+        // Auth Functions
+        // ============================================================================
+
+        // Open auth modal
+        function openAuthModal(type) {
+            document.getElementById('auth-modal').classList.add('active');
+            switchAuthForm(type);
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close auth modal
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Switch between login and signup forms
+        function switchAuthForm(type) {
+            document.getElementById('login-form').style.display = type === 'login' ? 'block' : 'none';
+            document.getElementById('signup-form').style.display = type === 'signup' ? 'block' : 'none';
+        }
+
+        // Handle login
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                showLoading();
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+
+                closeAuthModal();
+                showToast('התחברת בהצלחה!', 'success');
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast(error.message || 'שגיאה בהתחברות', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Handle signup
+        async function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const phone = document.getElementById('signup-phone').value;
+            const password = document.getElementById('signup-password').value;
+
+            try {
+                showLoading();
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: name,
+                            phone: phone
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                closeAuthModal();
+                showToast('נרשמת בהצלחה! בדוק את האימייל לאימות.', 'success');
+            } catch (error) {
+                console.error('Signup error:', error);
+                showToast(error.message || 'שגיאה בהרשמה', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Handle Google login
+        async function handleGoogleLogin() {
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin
+                    }
+                });
+
+                if (error) throw error;
+            } catch (error) {
+                console.error('Google login error:', error);
+                showToast('שגיאה בהתחברות עם Google', 'error');
+            }
+        }
+
+        // Handle logout
+        async function handleLogout() {
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                showToast('התנתקת בהצלחה', 'success');
+                document.getElementById('user-dropdown').classList.remove('active');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showToast('שגיאה בהתנתקות', 'error');
+            }
+        }
+
+        // Toggle user dropdown
+        function toggleUserDropdown() {
+            document.getElementById('user-dropdown').classList.toggle('active');
+        }
+
+        // Open dashboard (placeholder)
+        function openDashboard() {
+            showToast('האזור האישי בפיתוח', 'info');
+        }
+
+        // Update UI based on auth state
+        function updateAuthUI(user) {
+            const authButtons = document.getElementById('auth-buttons');
+            const userMenu = document.getElementById('user-menu');
+            const userName = userMenu.querySelector('.user-name');
+
+            if (user) {
+                authButtons.style.display = 'none';
+                userMenu.style.display = 'flex';
+                userName.textContent = user.user_metadata?.full_name || user.email?.split('@')[0] || 'משתמש';
+            } else {
+                authButtons.style.display = 'flex';
+                userMenu.style.display = 'none';
+            }
+        }
+
+        // ============================================================================
+        // Course Progress Functions
+        // ============================================================================
+
+        // Mark video as watched
+        async function markVideoWatched(videoId, lessonNumber) {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+
+            try {
+                await supabaseClient.from('course_progress').upsert({
+                    user_id: user.id,
+                    video_id: videoId,
+                    course_type: 'practitioner',
+                    lesson_number: lessonNumber,
+                    completed: true,
+                    completed_at: new Date().toISOString()
+                }, {
+                    onConflict: 'user_id,video_id'
+                });
+
+                // Update UI
+                const videoCard = document.querySelector(`[onclick="playVideo('${videoId}')"]`);
+                if (videoCard) {
+                    videoCard.classList.add('watched');
+                }
+
+                updateCourseProgress();
+            } catch (error) {
+                console.error('Error marking video watched:', error);
+            }
+        }
+
+        // Load watched videos
+        async function loadWatchedVideos() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('course_progress')
+                    .select('video_id')
+                    .eq('user_id', user.id)
+                    .eq('completed', true);
+
+                if (error) throw error;
+
+                data.forEach(item => {
+                    const videoCard = document.querySelector(`[onclick="playVideo('${item.video_id}')"]`);
+                    if (videoCard) {
+                        videoCard.classList.add('watched');
+                    }
+                });
+
+                updateCourseProgress();
+            } catch (error) {
+                console.error('Error loading watched videos:', error);
+            }
+        }
+
+        // Update course progress bar
+        async function updateCourseProgress() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+
+            const totalVideos = 51; // Total videos in practitioner course
+            const watchedCards = document.querySelectorAll('.video-card.watched').length;
+            const percentage = Math.round((watchedCards / totalVideos) * 100);
+
+            // Create or update progress bar
+            let progressContainer = document.getElementById('course-progress-container');
+            if (!progressContainer) {
+                progressContainer = document.createElement('div');
+                progressContainer.id = 'course-progress-container';
+                progressContainer.innerHTML = `
+                    <div class="course-progress-bar">
+                        <div class="course-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p class="course-progress-text">התקדמות: <span>0</span>%</p>
+                `;
+                const courseHeader = document.querySelector('#practitioner .course-header');
+                if (courseHeader) {
+                    courseHeader.appendChild(progressContainer);
+                }
+            }
+
+            progressContainer.querySelector('.course-progress-fill').style.width = percentage + '%';
+            progressContainer.querySelector('.course-progress-text span').textContent = percentage;
+        }
+
+        // Override playVideo to track progress
+        const originalPlayVideo = playVideo;
+        playVideo = function(videoId) {
+            originalPlayVideo(videoId);
+
+            // Mark as watched after 10 seconds
+            setTimeout(() => {
+                const lessonAccordion = document.querySelector('.lesson-accordion.open');
+                const lessonNumber = lessonAccordion ?
+                    Array.from(document.querySelectorAll('.lesson-accordion')).indexOf(lessonAccordion) + 1 : 1;
+                markVideoWatched(videoId, lessonNumber);
+            }, 10000);
+        };
+
+        // ============================================================================
+        // Contact Form with Supabase
+        // ============================================================================
+
+        async function submitContactRequest(type, data) {
+            try {
+                const { error } = await supabaseClient.from('contact_requests').insert({
+                    request_type: type,
+                    name: data.name,
+                    phone: data.phone,
+                    email: data.email || null,
+                    message: data.message || null
+                });
+
+                if (error) throw error;
+                showToast('הבקשה נשלחה בהצלחה! נחזור אליך בהקדם.', 'success');
+                return true;
+            } catch (error) {
+                console.error('Error submitting contact:', error);
+                showToast('שגיאה בשליחת הבקשה', 'error');
+                return false;
+            }
+        }
+
+        // ============================================================================
+        // UI Helper Functions
+        // ============================================================================
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                color: white;
+                font-weight: 500;
+                z-index: 9999;
+                animation: slideUp 0.3s ease-out;
+                background: ${type === 'success' ? '#2F8592' : type === 'error' ? '#FF6F61' : '#00606B'};
+            `;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideUp {
+                    from { opacity: 0; transform: translate(-50%, 20px); }
+                    to { opacity: 1; transform: translate(-50%, 0); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, 20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showLoading() {
+            const loader = document.createElement('div');
+            loader.id = 'global-loader';
+            loader.innerHTML = `
+                <div style="
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 59, 70, 0.9);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                ">
+                    <div style="
+                        width: 50px;
+                        height: 50px;
+                        border: 3px solid rgba(212, 175, 55, 0.3);
+                        border-top-color: #D4AF37;
+                        border-radius: 50%;
+                        animation: spin 1s linear infinite;
+                    "></div>
+                </div>
+            `;
+            document.body.appendChild(loader);
+        }
+
+        function hideLoading() {
+            const loader = document.getElementById('global-loader');
+            if (loader) loader.remove();
+        }
+
+        // ============================================================================
+        // Initialize Auth Listener
+        // ============================================================================
+
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event);
+            updateAuthUI(session?.user);
+
+            if (session?.user) {
+                loadWatchedVideos();
+            }
+        });
+
+        // Check initial auth state
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+            updateAuthUI(session?.user);
+            if (session?.user) {
+                loadWatchedVideos();
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                document.getElementById('user-dropdown').classList.remove('active');
+            }
+        });
+
+        // Close auth modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAuthModal();
+            }
         });
     </script>
 </body>

@@ -2909,6 +2909,11 @@
         const SUPABASE_URL = 'https://vhzdrywvpgaqyivprbds.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoemRyeXd2cGdhcXlpdnByYmRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2NjkwMTksImV4cCI6MjA4NDI0NTAxOX0.h0fCrmenxcXFhtFO0UtqYVMqyl0EAjGt5g7OY1FZ9-I';
 
+        // ============================================================================
+        // Context Aware Signup - Pending Action State
+        // ============================================================================
+        let pendingAction = null; // 'patient' | 'therapist' | null
+
         // Initialize Supabase
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -2950,8 +2955,12 @@
 
                 if (error) throw error;
 
-                closeAuthModal();
-                showToast('התחברת בהצלחה!', 'success');
+                // If there's a pending action, let onAuthStateChange handle it
+                if (!pendingAction) {
+                    closeAuthModal();
+                    showToast('התחברת בהצלחה!', 'success');
+                }
+                // Otherwise onAuthStateChange will close modal and open the right form
             } catch (error) {
                 console.error('Login error:', error);
                 showToast(error.message || 'שגיאה בהתחברות', 'error');
@@ -2983,8 +2992,12 @@
 
                 if (error) throw error;
 
-                closeAuthModal();
-                showToast('נרשמת בהצלחה! בדוק את האימייל לאימות.', 'success');
+                // If there's a pending action, let onAuthStateChange handle it
+                if (!pendingAction) {
+                    closeAuthModal();
+                    showToast('נרשמת בהצלחה!', 'success');
+                }
+                // Otherwise onAuthStateChange will close modal and open the right form
             } catch (error) {
                 console.error('Signup error:', error);
                 showToast(error.message || 'שגיאה בהרשמה', 'error');
@@ -2996,6 +3009,11 @@
         // Handle Google login
         async function handleGoogleLogin() {
             try {
+                // Save pending action to localStorage for OAuth redirect flow
+                if (pendingAction) {
+                    localStorage.setItem('pendingAction', pendingAction);
+                }
+
                 const { data, error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
@@ -3257,14 +3275,49 @@
 
             if (session?.user) {
                 loadWatchedVideos();
+
+                // Context Aware Signup: Handle pending action after login/signup
+                if (event === 'SIGNED_IN' && pendingAction) {
+                    // Small delay to ensure UI is ready
+                    setTimeout(() => {
+                        closeAuthModal();
+
+                        if (pendingAction === 'patient') {
+                            showToast('מעולה! עכשיו אפשר למלא את השאלון', 'success');
+                            openQuestionnaire();
+                        } else if (pendingAction === 'therapist') {
+                            showToast('מעולה! עכשיו אפשר להגיש בקשת הצטרפות', 'success');
+                            openTherapistForm();
+                        }
+
+                        // Clear pending action
+                        pendingAction = null;
+                    }, 500);
+                }
             }
         });
 
-        // Check initial auth state
+        // Check initial auth state and handle OAuth redirect
         supabaseClient.auth.getSession().then(({ data: { session } }) => {
             updateAuthUI(session?.user);
             if (session?.user) {
                 loadWatchedVideos();
+
+                // Check for pending action from localStorage (OAuth redirect flow)
+                const storedPendingAction = localStorage.getItem('pendingAction');
+                if (storedPendingAction) {
+                    localStorage.removeItem('pendingAction');
+
+                    setTimeout(() => {
+                        if (storedPendingAction === 'patient') {
+                            showToast('מעולה! עכשיו אפשר למלא את השאלון', 'success');
+                            openQuestionnaire();
+                        } else if (storedPendingAction === 'therapist') {
+                            showToast('מעולה! עכשיו אפשר להגיש בקשת הצטרפות', 'success');
+                            openTherapistForm();
+                        }
+                    }, 500);
+                }
             }
         });
 
@@ -3292,10 +3345,15 @@
             const { data: { user } } = await supabaseClient.auth.getUser();
 
             if (!user) {
-                showToast('יש להתחבר תחילה כדי למלא את השאלון', 'error');
-                openAuthModal('login');
+                // Context Aware: Remember user wants to be a patient
+                pendingAction = 'patient';
+                showToast('נרשם או התחבר כדי להמשיך', 'info');
+                openAuthModal('signup');
                 return;
             }
+
+            // Clear pending action since user is logged in
+            pendingAction = null;
 
             // Check if user already submitted a request
             const { data: existingPatient } = await supabaseClient
@@ -3440,10 +3498,15 @@
             const { data: { user } } = await supabaseClient.auth.getUser();
 
             if (!user) {
-                showToast('יש להתחבר תחילה כדי להירשם כמטפל', 'error');
-                openAuthModal('login');
+                // Context Aware: Remember user wants to be a therapist
+                pendingAction = 'therapist';
+                showToast('נרשם או התחבר כדי להמשיך', 'info');
+                openAuthModal('signup');
                 return;
             }
+
+            // Clear pending action since user is logged in
+            pendingAction = null;
 
             // Check if user already registered as therapist
             const { data: existingTherapist } = await supabaseClient

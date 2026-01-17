@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הצטרף כמטפל | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --pure-white: #FFFFFF;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --coral: #FF6F61;
+            --gradient-main: radial-gradient(ellipse at 30% 20%, #2F8592 0%, #00606B 40%, #003B46 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--gradient-main);
+            color: var(--pure-white);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatUp 15s infinite;
+            box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold-glow);
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(-100vh) scale(1); }
+        }
+
+        /* Container */
+        .landing-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--deep-petrol);
+            font-size: 1.3rem;
+            box-shadow: 0 4px 20px var(--gold-glow);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--pure-white);
+        }
+
+        /* Hero Content */
+        .hero-content {
+            text-align: center;
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-icon {
+            font-size: 3.5rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 25px var(--gold-glow));
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--pure-white) 0%, var(--frost-white) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .description {
+            font-size: 1.05rem;
+            color: var(--frost-white);
+            line-height: 1.8;
+        }
+
+        /* Benefits */
+        .benefits {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            max-width: 600px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(47, 133, 146, 0.3);
+            padding: 0.6rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--frost-white);
+        }
+
+        .benefit-item i {
+            color: var(--gold);
+        }
+
+        /* Form Card */
+        .form-card {
+            background: rgba(0, 59, 70, 0.7);
+            border: 1px solid rgba(47, 133, 146, 0.3);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-title {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--pure-white);
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--frost-white);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border: 1px solid rgba(47, 133, 146, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--pure-white);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(232, 241, 242, 0.5);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group select option {
+            background: var(--deep-petrol);
+            color: var(--pure-white);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            color: var(--deep-petrol);
+            box-shadow: 0 8px 30px var(--gold-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px var(--gold-glow);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .success-message h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--pure-white);
+        }
+
+        .success-message p {
+            color: var(--frost-white);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            padding-top: 3rem;
+            text-align: center;
+            color: var(--frost-white);
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .toast-success { background: var(--dusty-aqua); }
+        .toast-error { background: var(--coral); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .landing-container {
+                padding: 1.5rem;
+            }
+
+            .form-card {
+                padding: 1.8rem;
+            }
+
+            .benefits {
+                gap: 0.8rem;
+            }
+
+            .benefit-item {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="landing-container">
+        <!-- Logo -->
+        <div class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-hands-holding-heart"></i></div>
+            <span class="logo-text">מטפל לכל אחד</span>
+        </div>
+
+        <!-- Hero Content -->
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fa-solid fa-hand-holding-heart"></i>
+                הצטרף לצוות המטפלים שלנו
+            </div>
+            <div class="hero-icon"><i class="fa-solid fa-user-doctor"></i></div>
+            <h1>רוצה להפיץ את האור?</h1>
+            <p class="tagline">הצטרף כמטפל מתנדב</p>
+            <p class="description">
+                הצטרף לצוות של מטפלים מקצועיים שבחרו לתת מעצמם ולעזור לאנשים שבאמת צריכים.
+                קבל הכשרות, ליווי מקצועי, וההזדמנות לעשות שינוי אמיתי.
+            </p>
+        </div>
+
+        <!-- Benefits -->
+        <div class="benefits">
+            <div class="benefit-item"><i class="fa-solid fa-graduation-cap"></i> הכשרות מתמשכות</div>
+            <div class="benefit-item"><i class="fa-solid fa-users"></i> קהילה תומכת</div>
+            <div class="benefit-item"><i class="fa-solid fa-building"></i> קליניקות בפריסה ארצית</div>
+            <div class="benefit-item"><i class="fa-solid fa-certificate"></i> תעודות מוכרות</div>
+            <div class="benefit-item"><i class="fa-solid fa-user-tie"></i> סופרוויז'ן מקצועי</div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card">
+            <form id="therapist-form">
+                <h3 class="form-title">השאר פרטים ונחזור אליך</h3>
+
+                <div class="form-group">
+                    <label for="fullName">שם מלא *</label>
+                    <input type="text" id="fullName" name="fullName" required placeholder="הכנס את שמך המלא">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">טלפון *</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="050-0000000">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">אימייל *</label>
+                    <input type="email" id="email" name="email" required placeholder="example@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="experience">ניסיון בטיפול</label>
+                    <select id="experience" name="experience">
+                        <option value="">בחר...</option>
+                        <option value="none">אין ניסיון - רוצה ללמוד</option>
+                        <option value="student">סטודנט/בהכשרה</option>
+                        <option value="1-2">1-2 שנים</option>
+                        <option value="3-5">3-5 שנים</option>
+                        <option value="5+">5+ שנים</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">ספר לנו קצת על עצמך</label>
+                    <textarea id="message" name="message" placeholder="מה מניע אותך להצטרף? מה הרקע שלך?"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submit-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    שלח בקשת הצטרפות
+                </button>
+            </form>
+
+            <div class="success-message" id="success-message">
+                <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <h2>הבקשה נשלחה בהצלחה!</h2>
+                <p>נחזור אליך בהקדם לשיחת היכרות</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>מטפל לכל אחד - ריפוי הנפש לכל אדם</p>
+        </div>
+    </div>
+
+    <script src="js/supabase-client.js"></script>
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 20;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Form submission
+        document.getElementById('therapist-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submit-btn');
+            const form = e.target;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
+
+            try {
+                const formData = {
+                    full_name: document.getElementById('fullName').value,
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value,
+                    experience: document.getElementById('experience').value,
+                    message: document.getElementById('message').value,
+                    type: 'new_therapist',
+                    source: 'instagram_landing'
+                };
+
+                await ContactRequests.submit(formData);
+
+                form.style.display = 'none';
+                document.getElementById('success-message').classList.add('show');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('אירעה שגיאה, נסה שוב', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שלח בקשת הצטרפות';
+            }
+        });
+    </script>
+</body>
+</html>

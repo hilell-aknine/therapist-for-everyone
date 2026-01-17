@@ -2049,6 +2049,126 @@
         </div>
     </div>
 
+    <!-- Therapist Registration Modal -->
+    <div class="questionnaire-modal" id="therapist-modal">
+        <div class="questionnaire-content" style="max-width: 550px;">
+            <span class="questionnaire-close" onclick="closeTherapistForm()">&times;</span>
+
+            <!-- Therapist Form -->
+            <div id="therapist-form-container">
+                <div class="questionnaire-header">
+                    <div class="questionnaire-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                    <h2>הצטרפות כמטפל</h2>
+                    <p>הצטרף לצוות המטפלים שלנו ועזור לאחרים</p>
+                </div>
+
+                <form class="questionnaire-form" id="therapist-registration" onsubmit="submitTherapistForm(event)">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-user"></i> שם מלא *</label>
+                        <input type="text" id="t-name" placeholder="השם המלא שלך" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-brain"></i> תחום התמחות *</label>
+                        <select id="t-specialization" required>
+                            <option value="">בחר התמחות...</option>
+                            <option value="NLP">NLP - תכנות נוירו-לשוני</option>
+                            <option value="CBT">CBT - טיפול קוגניטיבי-התנהגותי</option>
+                            <option value="coaching">אימון אישי (קואצ'ינג)</option>
+                            <option value="trauma">טיפול בטראומה</option>
+                            <option value="family">טיפול משפחתי</option>
+                            <option value="couples">טיפול זוגי</option>
+                            <option value="children">טיפול בילדים ונוער</option>
+                            <option value="anxiety">חרדות ודיכאון</option>
+                            <option value="addiction">התמכרויות</option>
+                            <option value="other">אחר</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-city"></i> עיר מגורים *</label>
+                        <select id="t-city" required>
+                            <option value="">בחר עיר...</option>
+                            <option value="תל אביב">תל אביב</option>
+                            <option value="ירושלים">ירושלים</option>
+                            <option value="חיפה">חיפה</option>
+                            <option value="באר שבע">באר שבע</option>
+                            <option value="ראשון לציון">ראשון לציון</option>
+                            <option value="פתח תקווה">פתח תקווה</option>
+                            <option value="אשדוד">אשדוד</option>
+                            <option value="נתניה">נתניה</option>
+                            <option value="חולון">חולון</option>
+                            <option value="בני ברק">בני ברק</option>
+                            <option value="רמת גן">רמת גן</option>
+                            <option value="אשקלון">אשקלון</option>
+                            <option value="רחובות">רחובות</option>
+                            <option value="בת ים">בת ים</option>
+                            <option value="הרצליה">הרצליה</option>
+                            <option value="כפר סבא">כפר סבא</option>
+                            <option value="רעננה">רעננה</option>
+                            <option value="מודיעין">מודיעין</option>
+                            <option value="אילת">אילת</option>
+                            <option value="online">עבודה מרחוק בלבד</option>
+                            <option value="other">אחר</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="t-other-city-group" style="display: none;">
+                        <label><i class="fa-solid fa-map-marker-alt"></i> שם העיר</label>
+                        <input type="text" id="t-other-city" placeholder="הזן את שם העיר">
+                    </div>
+
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-calendar"></i> שנות ניסיון *</label>
+                            <input type="number" id="t-experience" min="0" max="50" placeholder="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-shekel-sign"></i> מחיר לפגישה</label>
+                            <input type="number" id="t-price" min="0" placeholder="0 = התנדבות">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-phone"></i> מספר טלפון *</label>
+                        <input type="tel" id="t-phone" placeholder="050-0000000" required pattern="[0-9\-]{9,12}">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-comment"></i> ספר על עצמך</label>
+                        <textarea id="t-bio" placeholder="רקע מקצועי, גישה טיפולית, מה מניע אותך..." rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.8rem;">
+                        <input type="checkbox" id="t-online" style="width: 20px; height: 20px; accent-color: var(--gold);">
+                        <label for="t-online" style="margin: 0; cursor: pointer;">
+                            <i class="fa-solid fa-video"></i> אני עובד/ת גם בזום (טיפול מרחוק)
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        שלח בקשת הצטרפות
+                    </button>
+
+                    <p class="required-note">* שדות חובה | הבקשה תיבדק על ידי הצוות</p>
+                </form>
+            </div>
+
+            <!-- Success Message -->
+            <div class="questionnaire-success" id="therapist-success">
+                <i class="fa-solid fa-circle-check"></i>
+                <h3>הבקשה נשלחה בהצלחה!</h3>
+                <p>צוות מטפל לכל אחד יבדוק את הבקשה ויצור איתך קשר</p>
+                <button class="btn btn-primary" onclick="closeTherapistForm()" style="margin-top: 1.5rem;">
+                    <i class="fa-solid fa-check"></i>
+                    סגור
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <section class="hero" id="home">
         <div class="hero-container">
@@ -2065,10 +2185,10 @@
                     <i class="fa-solid fa-heart"></i>
                     אני רוצה מטפל
                 </button>
-                <a href="#become-therapist" class="btn btn-secondary">
+                <button onclick="openTherapistForm()" class="btn btn-secondary">
                     <i class="fa-solid fa-hand-holding-heart"></i>
                     אני רוצה להיות מטפל
-                </a>
+                </button>
             </div>
         </div>
     </section>
@@ -2606,10 +2726,10 @@
             <div class="highlight-box">
                 <h3>למה להצטרף אלינו?</h3>
                 <p>להיות חלק ממשהו גדול מעצמך. לעזור לאנשים שבאמת צריכים. לצמוח מקצועית ואישית. להפיץ את האור.</p>
-                <a href="#contact" class="btn btn-primary">
-                    <i class="fa-solid fa-users"></i>
-                    הצטרף לצוות
-                </a>
+                <button onclick="openTherapistForm()" class="btn btn-primary">
+                    <i class="fa-solid fa-user-plus"></i>
+                    הגש בקשת הצטרפות
+                </button>
             </div>
 
             <div class="process-section">
@@ -3310,6 +3430,167 @@
                 hideLoading();
             }
         }
+
+        // ============================================================================
+        // Therapist Registration Functions
+        // ============================================================================
+
+        // Open therapist registration form - only for logged in users
+        async function openTherapistForm() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            if (!user) {
+                showToast('יש להתחבר תחילה כדי להירשם כמטפל', 'error');
+                openAuthModal('login');
+                return;
+            }
+
+            // Check if user already registered as therapist
+            const { data: existingTherapist } = await supabaseClient
+                .from('therapists')
+                .select('id, is_active')
+                .eq('user_id', user.id)
+                .single();
+
+            if (existingTherapist) {
+                if (existingTherapist.is_active) {
+                    showToast('אתה כבר רשום כמטפל פעיל במערכת!', 'info');
+                } else {
+                    showToast('הבקשה שלך להצטרפות ממתינה לאישור', 'info');
+                }
+                return;
+            }
+
+            // Reset form
+            document.getElementById('therapist-registration').reset();
+            document.getElementById('therapist-form-container').style.display = 'block';
+            document.getElementById('therapist-success').classList.remove('active');
+            document.getElementById('t-other-city-group').style.display = 'none';
+
+            // Pre-fill from profile
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('full_name, phone')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                if (profile.full_name) document.getElementById('t-name').value = profile.full_name;
+                if (profile.phone) document.getElementById('t-phone').value = profile.phone;
+            }
+
+            document.getElementById('therapist-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close therapist form
+        function closeTherapistForm() {
+            document.getElementById('therapist-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Handle city selection change for therapist form
+        document.getElementById('t-city').addEventListener('change', function() {
+            const otherGroup = document.getElementById('t-other-city-group');
+            const otherInput = document.getElementById('t-other-city');
+
+            if (this.value === 'other') {
+                otherGroup.style.display = 'block';
+                otherInput.required = true;
+            } else {
+                otherGroup.style.display = 'none';
+                otherInput.required = false;
+            }
+        });
+
+        // Submit therapist registration to Supabase
+        async function submitTherapistForm(event) {
+            event.preventDefault();
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            if (!user) {
+                showToast('יש להתחבר תחילה', 'error');
+                return;
+            }
+
+            // Get form values
+            const name = document.getElementById('t-name').value;
+            const specialization = document.getElementById('t-specialization').value;
+            let city = document.getElementById('t-city').value;
+            if (city === 'other') {
+                city = document.getElementById('t-other-city').value;
+            }
+            const experience = parseInt(document.getElementById('t-experience').value) || 0;
+            const price = parseInt(document.getElementById('t-price').value) || 0;
+            const phone = document.getElementById('t-phone').value;
+            const bio = document.getElementById('t-bio').value;
+            const worksOnline = document.getElementById('t-online').checked;
+
+            try {
+                showLoading();
+
+                // Update profile with name and phone
+                await supabaseClient
+                    .from('profiles')
+                    .update({
+                        full_name: name,
+                        phone: phone,
+                        role: 'therapist'
+                    })
+                    .eq('id', user.id);
+
+                // Insert therapist record
+                const { data, error } = await supabaseClient
+                    .from('therapists')
+                    .insert({
+                        user_id: user.id,
+                        bio: bio,
+                        specializations: [specialization],
+                        experience_years: experience,
+                        city: city,
+                        location: city,
+                        price_per_session: price,
+                        works_online: worksOnline,
+                        is_active: false, // Needs admin approval
+                        is_verified: false
+                    })
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Also create a contact request for notification
+                await supabaseClient
+                    .from('contact_requests')
+                    .insert({
+                        name: name,
+                        phone: phone,
+                        email: user.email,
+                        request_type: 'therapist',
+                        message: `התמחות: ${specialization}\nעיר: ${city}\nניסיון: ${experience} שנים\nמחיר: ${price || 'התנדבות'}\nזום: ${worksOnline ? 'כן' : 'לא'}\n\n${bio}`
+                    });
+
+                // Show success
+                document.getElementById('therapist-form-container').style.display = 'none';
+                document.getElementById('therapist-success').classList.add('active');
+
+                showToast('הבקשה נשלחה בהצלחה!', 'success');
+
+            } catch (error) {
+                console.error('Error submitting therapist form:', error);
+                showToast('שגיאה בשליחת הבקשה. נסה שוב.', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Close therapist modal with Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeTherapistForm();
+            }
+        });
     </script>
 </body>
 </html>

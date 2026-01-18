@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דאשבורד ניהול - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-dark: #0f1419;
+            --bg-card: #1a1f2e;
+            --bg-card-hover: #242b3d;
+            --border-color: #2d3548;
+            --text-primary: #ffffff;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.2);
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --info: #58a6ff;
+            --teal: #2F8592;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border-color);
+            padding: 1.5rem;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-logo i {
+            font-size: 1.8rem;
+            color: var(--gold);
+        }
+
+        .sidebar-logo span {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: var(--gold-glow);
+            color: var(--gold);
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            left: 1.5rem;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            background: var(--bg-dark);
+            border-radius: 8px;
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-dark);
+            font-weight: 700;
+        }
+
+        .admin-details {
+            flex: 1;
+        }
+
+        .admin-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .admin-role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-right: 260px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.pending { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .stat-icon.interview { background: rgba(88, 166, 255, 0.2); color: var(--info); }
+        .stat-icon.active { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .stat-icon.rejected { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--bg-card);
+            padding: 0.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-tab {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-tab:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .filter-tab.active {
+            background: var(--gold);
+            color: var(--bg-dark);
+            font-weight: 600;
+        }
+
+        .filter-tab .count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.1rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        .filter-tab.active .count {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Candidates Table */
+        .candidates-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .candidates-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .candidates-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
+            width: 200px;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box i {
+            color: var(--text-muted);
+        }
+
+        /* Candidate Cards */
+        .candidates-list {
+            padding: 1rem;
+        }
+
+        .candidate-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .candidate-card:hover {
+            border-color: var(--gold);
+        }
+
+        .candidate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .candidate-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .candidate-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--teal), var(--gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .candidate-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .candidate-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .candidate-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .candidate-meta i {
+            color: var(--gold);
+            font-size: 0.8rem;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-badge.screening_submitted {
+            background: rgba(210, 153, 34, 0.2);
+            color: var(--warning);
+        }
+
+        .status-badge.interview_pending {
+            background: rgba(88, 166, 255, 0.2);
+            color: var(--info);
+        }
+
+        .status-badge.active {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--success);
+        }
+
+        .status-badge.rejected {
+            background: rgba(248, 81, 73, 0.2);
+            color: var(--danger);
+        }
+
+        .candidate-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            font-size: 0.85rem;
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+            margin-bottom: 0.2rem;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .candidate-actions {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-view {
+            background: var(--gold-glow);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+
+        .btn-view:hover {
+            background: var(--gold);
+            color: var(--bg-dark);
+        }
+
+        .btn-interview {
+            background: rgba(88, 166, 255, 0.2);
+            color: var(--info);
+            border: 1px solid var(--info);
+        }
+
+        .btn-interview:hover {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-approve {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .btn-approve:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-reject {
+            background: rgba(248, 81, 73, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-reject:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .modal-title i {
+            color: var(--gold);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .questionnaire-section {
+            margin-bottom: 2rem;
+        }
+
+        .questionnaire-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title i {
+            font-size: 0.9rem;
+        }
+
+        .questionnaire-answer {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.2rem;
+            line-height: 1.8;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            color: var(--text-primary);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .modal-footer .btn {
+            padding: 0.8rem 1.5rem;
+        }
+
+        /* Access Denied */
+        .access-denied {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .access-denied i {
+            font-size: 5rem;
+            color: var(--danger);
+            margin-bottom: 1.5rem;
+        }
+
+        .access-denied h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .access-denied p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .access-denied .btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+
+        /* Loading */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 10000;
+        }
+
+        .toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: var(--success); color: white; }
+        .toast.error { background: var(--danger); color: white; }
+        .toast.info { background: var(--info); color: white; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-right: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem;
+                background: var(--bg-card);
+                border-bottom: 1px solid var(--border-color);
+                position: sticky;
+                top: 0;
+                z-index: 50;
+            }
+
+            .hamburger {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 0.5rem;
+            }
+
+            .hamburger span {
+                width: 25px;
+                height: 2px;
+                background: var(--text-primary);
+            }
+        }
+
+        @media (min-width: 901px) {
+            .mobile-header {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading State -->
+    <div class="loading-container" id="loading-screen">
+        <div class="spinner"></div>
+        <p>טוען...</p>
+    </div>
+
+    <!-- Access Denied State -->
+    <div class="access-denied" id="access-denied" style="display: none;">
+        <i class="fa-solid fa-shield-halved"></i>
+        <h1>גישה נדחתה</h1>
+        <p>אין לך הרשאה לצפות בעמוד זה.<br>רק מנהלי מערכת יכולים לגשת לדאשבורד.</p>
+        <a href="index.html" class="btn btn-view">
+            <i class="fa-solid fa-home"></i>
+            חזרה לדף הבית
+        </a>
+    </div>
+
+    <!-- Main Dashboard (hidden until auth) -->
+    <div id="dashboard-container" style="display: none;">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fa-solid fa-hands-holding-heart" style="color: var(--gold); font-size: 1.5rem;"></i>
+                <span style="font-weight: 700;">דאשבורד ניהול</span>
+            </div>
+            <button class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-hands-holding-heart"></i>
+                <span>מטפל לכל אחד</span>
+            </div>
+
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="#" class="active">
+                        <i class="fa-solid fa-users"></i>
+                        <span>מועמדים</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="index.html">
+                        <i class="fa-solid fa-home"></i>
+                        <span>חזרה לאתר</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="admin-info">
+                    <div class="admin-avatar" id="admin-avatar">M</div>
+                    <div class="admin-details">
+                        <div class="admin-name" id="admin-name">מנהל</div>
+                        <div class="admin-role">מנהל מערכת</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">ניהול מועמדים</h1>
+                    <p class="page-subtitle">צפה ונהל בקשות הצטרפות של מטפלים</p>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon pending">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div class="stat-value" id="stat-pending">0</div>
+                    <div class="stat-label">ממתינים לסינון</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon interview">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-value" id="stat-interview">0</div>
+                    <div class="stat-label">ממתינים לראיון</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon active">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div class="stat-value" id="stat-active">0</div>
+                    <div class="stat-label">מטפלים פעילים</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rejected">
+                        <i class="fa-solid fa-user-xmark"></i>
+                    </div>
+                    <div class="stat-value" id="stat-rejected">0</div>
+                    <div class="stat-label">נדחו</div>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="screening_submitted" onclick="filterCandidates('screening_submitted')">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    ממתינים לסינון
+                    <span class="count" id="filter-count-pending">0</span>
+                </button>
+                <button class="filter-tab" data-filter="interview_pending" onclick="filterCandidates('interview_pending')">
+                    <i class="fa-solid fa-calendar"></i>
+                    לראיון
+                    <span class="count" id="filter-count-interview">0</span>
+                </button>
+                <button class="filter-tab" data-filter="active" onclick="filterCandidates('active')">
+                    <i class="fa-solid fa-check-circle"></i>
+                    פעילים
+                    <span class="count" id="filter-count-active">0</span>
+                </button>
+                <button class="filter-tab" data-filter="rejected" onclick="filterCandidates('rejected')">
+                    <i class="fa-solid fa-times-circle"></i>
+                    נדחו
+                    <span class="count" id="filter-count-rejected">0</span>
+                </button>
+                <button class="filter-tab" data-filter="all" onclick="filterCandidates('all')">
+                    <i class="fa-solid fa-list"></i>
+                    הכל
+                </button>
+            </div>
+
+            <!-- Candidates Container -->
+            <div class="candidates-container">
+                <div class="candidates-header">
+                    <h2 class="candidates-title">רשימת מועמדים</h2>
+                    <div class="search-box">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" placeholder="חיפוש לפי שם..." id="search-input" oninput="searchCandidates()">
+                    </div>
+                </div>
+                <div class="candidates-list" id="candidates-list">
+                    <!-- Candidates will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- View Candidate Modal -->
+    <div class="modal-overlay" id="candidate-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span id="modal-candidate-name">תיק מועמד</span>
+                </h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <!-- Actions will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://vhzdrywvpgaqyivprbds.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoemRyeXd2cGdhcXlpdnByYmRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2NjkwMTksImV4cCI6MjA4NDI0NTAxOX0.h0fCrmenxcXFhtFO0UtqYVMqyl0EAjGt5g7OY1FZ9-I';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Admin emails (authorized users)
+        const ADMIN_EMAILS = [
+            'hilellaknine@gmail.com',
+            'alus2132@gmail.com'
+        ];
+
+        let currentUser = null;
+        let allCandidates = [];
+        let currentFilter = 'screening_submitted';
+        let currentCandidate = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAdminAccess();
+        });
+
+        async function checkAdminAccess() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            if (!user) {
+                showAccessDenied();
+                return;
+            }
+
+            if (!ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+                showAccessDenied();
+                return;
+            }
+
+            // User is admin
+            currentUser = user;
+            showDashboard();
+            loadCandidates();
+        }
+
+        function showAccessDenied() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('access-denied').style.display = 'flex';
+        }
+
+        function showDashboard() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('dashboard-container').style.display = 'block';
+
+            // Set admin info
+            const name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+            document.getElementById('admin-name').textContent = name;
+            document.getElementById('admin-avatar').textContent = name.charAt(0).toUpperCase();
+        }
+
+        async function loadCandidates() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('therapists')
+                    .select(`
+                        *,
+                        profiles (full_name, email, phone)
+                    `)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allCandidates = data || [];
+                updateStats();
+                renderCandidates();
+
+            } catch (error) {
+                console.error('Error loading candidates:', error);
+                showToast('שגיאה בטעינת המועמדים', 'error');
+            }
+        }
+
+        function updateStats() {
+            const pending = allCandidates.filter(c => c.status === 'screening_submitted').length;
+            const interview = allCandidates.filter(c => c.status === 'interview_pending').length;
+            const active = allCandidates.filter(c => c.status === 'active').length;
+            const rejected = allCandidates.filter(c => c.status === 'rejected').length;
+
+            document.getElementById('stat-pending').textContent = pending;
+            document.getElementById('stat-interview').textContent = interview;
+            document.getElementById('stat-active').textContent = active;
+            document.getElementById('stat-rejected').textContent = rejected;
+
+            document.getElementById('filter-count-pending').textContent = pending;
+            document.getElementById('filter-count-interview').textContent = interview;
+            document.getElementById('filter-count-active').textContent = active;
+            document.getElementById('filter-count-rejected').textContent = rejected;
+        }
+
+        function filterCandidates(filter) {
+            currentFilter = filter;
+
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.filter === filter) {
+                    tab.classList.add('active');
+                }
+            });
+
+            renderCandidates();
+        }
+
+        function searchCandidates() {
+            renderCandidates();
+        }
+
+        function renderCandidates() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+
+            let filtered = allCandidates;
+
+            // Filter by status
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(c => c.status === currentFilter);
+            }
+
+            // Filter by search
+            if (searchTerm) {
+                filtered = filtered.filter(c => {
+                    const name = c.profiles?.full_name || '';
+                    const email = c.profiles?.email || '';
+                    return name.toLowerCase().includes(searchTerm) ||
+                           email.toLowerCase().includes(searchTerm);
+                });
+            }
+
+            const container = document.getElementById('candidates-list');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-inbox"></i>
+                        <h3>אין מועמדים</h3>
+                        <p>לא נמצאו מועמדים בקטגוריה זו</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(candidate => renderCandidateCard(candidate)).join('');
+        }
+
+        function renderCandidateCard(candidate) {
+            const name = candidate.profiles?.full_name || 'לא ידוע';
+            const email = candidate.profiles?.email || '';
+            const phone = candidate.profiles?.phone || candidate.phone || '';
+            const specialization = candidate.specializations?.[0] || '';
+            const city = candidate.city || candidate.location || '';
+            const experience = candidate.experience_years || 0;
+            const createdAt = new Date(candidate.created_at).toLocaleDateString('he-IL');
+            const statusLabels = {
+                'applicant': 'ממתין',
+                'screening_submitted': 'ממתין לסינון',
+                'interview_pending': 'ממתין לראיון',
+                'interview_passed': 'עבר ראיון',
+                'active': 'פעיל',
+                'rejected': 'נדחה'
+            };
+
+            return `
+                <div class="candidate-card">
+                    <div class="candidate-header">
+                        <div class="candidate-info">
+                            <div class="candidate-avatar">${name.charAt(0)}</div>
+                            <div>
+                                <div class="candidate-name">${name}</div>
+                                <div class="candidate-meta">
+                                    <span><i class="fa-solid fa-envelope"></i> ${email}</span>
+                                    <span><i class="fa-solid fa-phone"></i> ${phone}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="status-badge ${candidate.status}">${statusLabels[candidate.status] || candidate.status}</span>
+                    </div>
+                    <div class="candidate-details">
+                        <div class="detail-item">
+                            <div class="detail-label">התמחות</div>
+                            <div class="detail-value">${specialization || '-'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">עיר</div>
+                            <div class="detail-value">${city || '-'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">ניסיון</div>
+                            <div class="detail-value">${experience} שנים</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">תאריך הגשה</div>
+                            <div class="detail-value">${createdAt}</div>
+                        </div>
+                    </div>
+                    <div class="candidate-actions">
+                        <button class="btn btn-view" onclick="viewCandidate('${candidate.id}')">
+                            <i class="fa-solid fa-eye"></i>
+                            צפה בתיק
+                        </button>
+                        ${renderActionButtons(candidate)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderActionButtons(candidate) {
+            let buttons = '';
+
+            switch (candidate.status) {
+                case 'screening_submitted':
+                    buttons = `
+                        <button class="btn btn-interview" onclick="updateStatus('${candidate.id}', 'interview_pending')">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            עבר לראיון
+                        </button>
+                        <button class="btn btn-reject" onclick="updateStatus('${candidate.id}', 'rejected')">
+                            <i class="fa-solid fa-times"></i>
+                            דחה
+                        </button>
+                    `;
+                    break;
+                case 'interview_pending':
+                    buttons = `
+                        <button class="btn btn-approve" onclick="updateStatus('${candidate.id}', 'active')">
+                            <i class="fa-solid fa-check"></i>
+                            אשר סופית
+                        </button>
+                        <button class="btn btn-reject" onclick="updateStatus('${candidate.id}', 'rejected')">
+                            <i class="fa-solid fa-times"></i>
+                            דחה
+                        </button>
+                    `;
+                    break;
+                case 'rejected':
+                    buttons = `
+                        <button class="btn btn-interview" onclick="updateStatus('${candidate.id}', 'interview_pending')">
+                            <i class="fa-solid fa-undo"></i>
+                            שחזר לראיון
+                        </button>
+                    `;
+                    break;
+                case 'active':
+                    buttons = `
+                        <button class="btn btn-reject" onclick="updateStatus('${candidate.id}', 'rejected')">
+                            <i class="fa-solid fa-ban"></i>
+                            השעה
+                        </button>
+                    `;
+                    break;
+            }
+
+            return buttons;
+        }
+
+        function viewCandidate(id) {
+            const candidate = allCandidates.find(c => c.id === id);
+            if (!candidate) return;
+
+            currentCandidate = candidate;
+            const name = candidate.profiles?.full_name || 'לא ידוע';
+            const questionnaire = candidate.questionnaire_data || {};
+
+            document.getElementById('modal-candidate-name').textContent = `תיק מועמד: ${name}`;
+
+            document.getElementById('modal-body').innerHTML = `
+                <div class="questionnaire-section">
+                    <h3 class="section-title">
+                        <i class="fa-solid fa-brain"></i>
+                        מקרה מורכב שטיפל בו
+                    </h3>
+                    <div class="questionnaire-answer">${questionnaire.case_study || 'לא צוין'}</div>
+                </div>
+
+                <div class="questionnaire-section">
+                    <h3 class="section-title">
+                        <i class="fa-solid fa-heart-crack"></i>
+                        טכניקות לטיפול בטראומה
+                    </h3>
+                    <div class="questionnaire-answer">${questionnaire.trauma_techniques || 'לא צוין'}</div>
+                </div>
+
+                <div class="questionnaire-section">
+                    <h3 class="section-title">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        התמודדות עם התנגדויות
+                    </h3>
+                    <div class="questionnaire-answer">${questionnaire.handling_resistance || 'לא צוין'}</div>
+                </div>
+
+                <div class="questionnaire-section">
+                    <h3 class="section-title">
+                        <i class="fa-solid fa-heart"></i>
+                        למה בחר להיות מטפל
+                    </h3>
+                    <div class="questionnaire-answer">${questionnaire.why_therapist || 'לא צוין'}</div>
+                </div>
+
+                <div class="questionnaire-section">
+                    <h3 class="section-title">
+                        <i class="fa-solid fa-star"></i>
+                        חזון ותפקיד
+                    </h3>
+                    <div class="questionnaire-answer">${questionnaire.role_vision || 'לא צוין'}</div>
+                </div>
+
+                ${candidate.bio ? `
+                <div class="questionnaire-section">
+                    <h3 class="section-title">
+                        <i class="fa-solid fa-user"></i>
+                        ביוגרפיה
+                    </h3>
+                    <div class="questionnaire-answer">${candidate.bio}</div>
+                </div>
+                ` : ''}
+            `;
+
+            // Render footer actions
+            document.getElementById('modal-footer').innerHTML = `
+                <button class="btn btn-view" onclick="closeModal()">
+                    <i class="fa-solid fa-times"></i>
+                    סגור
+                </button>
+                ${renderActionButtons(candidate)}
+            `;
+
+            document.getElementById('candidate-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('candidate-modal').classList.remove('active');
+            currentCandidate = null;
+        }
+
+        async function updateStatus(id, newStatus) {
+            try {
+                const updateData = { status: newStatus };
+
+                // If activating, also set is_active
+                if (newStatus === 'active') {
+                    updateData.is_active = true;
+                    updateData.is_verified = true;
+                } else {
+                    updateData.is_active = false;
+                }
+
+                const { error } = await supabaseClient
+                    .from('therapists')
+                    .update(updateData)
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showToast('הסטטוס עודכן בהצלחה!', 'success');
+                closeModal();
+                await loadCandidates();
+
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showToast('שגיאה בעדכון הסטטוס', 'error');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} active`;
+
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // Close modal with Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('candidate-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'candidate-modal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

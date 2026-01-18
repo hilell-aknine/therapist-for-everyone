@@ -1523,6 +1523,189 @@
             color: var(--frost-white);
         }
 
+        /* ===== Multi-Step Screening Form ===== */
+        .screening-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 3500;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .screening-modal.active {
+            display: flex;
+        }
+
+        .screening-content {
+            background: linear-gradient(135deg, var(--muted-teal) 0%, var(--deep-petrol) 100%);
+            border-radius: 24px;
+            padding: 2.5rem;
+            max-width: 650px;
+            width: 100%;
+            position: relative;
+            border: 1px solid rgba(47, 133, 146, 0.3);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .screening-progress {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .screening-progress-step {
+            width: 40px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .screening-progress-step.active {
+            background: var(--gold);
+        }
+
+        .screening-progress-step.completed {
+            background: var(--gold);
+        }
+
+        .screening-step {
+            display: none;
+        }
+
+        .screening-step.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .screening-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .screening-header .step-indicator {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .screening-header h2 {
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            color: var(--pure-white);
+        }
+
+        .screening-header p {
+            color: var(--frost-white);
+            font-size: 0.95rem;
+        }
+
+        .screening-question {
+            margin-bottom: 1.5rem;
+        }
+
+        .screening-question label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+            color: var(--pure-white);
+        }
+
+        .screening-question label i {
+            color: var(--gold);
+            margin-left: 0.5rem;
+        }
+
+        .screening-question textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid rgba(47, 133, 146, 0.5);
+            border-radius: 12px;
+            background: rgba(0, 59, 70, 0.5);
+            color: var(--pure-white);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .screening-question textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        .screening-question textarea::placeholder {
+            color: rgba(232, 241, 242, 0.5);
+        }
+
+        .screening-question .char-count {
+            text-align: left;
+            font-size: 0.8rem;
+            color: var(--frost-white);
+            opacity: 0.7;
+            margin-top: 0.4rem;
+        }
+
+        .screening-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .screening-buttons .btn {
+            flex: 1;
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: var(--frost-white);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--frost-white);
+        }
+
+        .screening-tip {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .screening-tip i {
+            color: var(--gold);
+            margin-left: 0.5rem;
+        }
+
+        .screening-tip p {
+            font-size: 0.9rem;
+            color: var(--frost-white);
+            margin: 0;
+        }
+
         /* ===== Responsive ===== */
 
         /* Mobile/Tablet - 900px */
@@ -2165,6 +2348,136 @@
                     <i class="fa-solid fa-check"></i>
                     סגור
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screening Questionnaire Modal (Multi-Step) -->
+    <div class="screening-modal" id="screening-modal">
+        <div class="screening-content">
+            <span class="questionnaire-close" onclick="closeScreeningModal()">&times;</span>
+
+            <!-- Progress Bar -->
+            <div class="screening-progress">
+                <div class="screening-progress-step active" data-step="1"></div>
+                <div class="screening-progress-step" data-step="2"></div>
+                <div class="screening-progress-step" data-step="3"></div>
+            </div>
+
+            <!-- Step 1: Introduction -->
+            <div class="screening-step active" data-step="1">
+                <div class="screening-header">
+                    <span class="step-indicator">שלב 1 מתוך 3</span>
+                    <h2><i class="fa-solid fa-clipboard-list"></i> שאלון סינון מקצועי</h2>
+                    <p>עזור לנו להכיר אותך טוב יותר כמטפל</p>
+                </div>
+
+                <div class="screening-tip">
+                    <p><i class="fa-solid fa-lightbulb"></i> קח את הזמן לענות בפירוט. התשובות שלך יעזרו ל-AI שלנו להעריך את ההתאמה לפרויקט.</p>
+                </div>
+
+                <div class="screening-question">
+                    <label>
+                        <i class="fa-solid fa-brain"></i>
+                        תאר מקרה מורכב שטיפלת בו באמצעות NLP או טכניקות טיפוליות אחרות. מה היה האתגר ואיך התמודדת איתו?
+                    </label>
+                    <textarea id="sq-case-study" placeholder="תאר את המקרה, הגישה שבחרת, והתוצאות..." required></textarea>
+                    <div class="char-count"><span id="sq-case-count">0</span>/1000</div>
+                </div>
+
+                <div class="screening-buttons">
+                    <button type="button" class="btn btn-primary" onclick="nextScreeningStep(2)">
+                        המשך <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Professional Skills -->
+            <div class="screening-step" data-step="2">
+                <div class="screening-header">
+                    <span class="step-indicator">שלב 2 מתוך 3</span>
+                    <h2><i class="fa-solid fa-toolbox"></i> מיומנויות מקצועיות</h2>
+                    <p>ספר לנו על הכלים והטכניקות שלך</p>
+                </div>
+
+                <div class="screening-question">
+                    <label>
+                        <i class="fa-solid fa-heart-crack"></i>
+                        באילו טכניקות אתה משתמש לשחרור טראומה? תן דוגמאות ספציפיות.
+                    </label>
+                    <textarea id="sq-trauma-techniques" placeholder="פרט טכניקות כמו: EMDR, Timeline Therapy, Parts Integration, Reframe..." required></textarea>
+                    <div class="char-count"><span id="sq-trauma-count">0</span>/800</div>
+                </div>
+
+                <div class="screening-question">
+                    <label>
+                        <i class="fa-solid fa-shield-halved"></i>
+                        איך אתה מתמודד עם התנגדויות של מטופלים? תן דוגמה ממקרה אמיתי.
+                    </label>
+                    <textarea id="sq-resistance" placeholder="תאר מצב של התנגדות ואיך התמודדת איתו..." required></textarea>
+                    <div class="char-count"><span id="sq-resistance-count">0</span>/800</div>
+                </div>
+
+                <div class="screening-buttons">
+                    <button type="button" class="btn btn-back" onclick="prevScreeningStep(1)">
+                        <i class="fa-solid fa-arrow-right"></i> חזור
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="nextScreeningStep(3)">
+                        המשך <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Vision & Motivation -->
+            <div class="screening-step" data-step="3">
+                <div class="screening-header">
+                    <span class="step-indicator">שלב 3 מתוך 3</span>
+                    <h2><i class="fa-solid fa-star"></i> חזון ומוטיבציה</h2>
+                    <p>מה מניע אותך להיות מטפל?</p>
+                </div>
+
+                <div class="screening-question">
+                    <label>
+                        <i class="fa-solid fa-heart"></i>
+                        למה בחרת להיות מטפל? מה המוטיבציה העמוקה שלך?
+                    </label>
+                    <textarea id="sq-why-therapist" placeholder="שתף את הסיפור האישי שלך..." required></textarea>
+                    <div class="char-count"><span id="sq-why-count">0</span>/800</div>
+                </div>
+
+                <div class="screening-question">
+                    <label>
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                        איך אתה רואה את התפקיד שלך בשינוי חיי המטופל? מה ההבטחה שאתה נותן?
+                    </label>
+                    <textarea id="sq-role-vision" placeholder="תאר את החזון שלך כמטפל ומה אתה מביא למטופלים..." required></textarea>
+                    <div class="char-count"><span id="sq-role-count">0</span>/800</div>
+                </div>
+
+                <div class="screening-buttons">
+                    <button type="button" class="btn btn-back" onclick="prevScreeningStep(2)">
+                        <i class="fa-solid fa-arrow-right"></i> חזור
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="submitScreeningForm()">
+                        <i class="fa-solid fa-paper-plane"></i> שלח שאלון
+                    </button>
+                </div>
+            </div>
+
+            <!-- Success Step -->
+            <div class="screening-step" data-step="success">
+                <div class="questionnaire-success active" style="display: block;">
+                    <i class="fa-solid fa-robot"></i>
+                    <h3>תודה! השאלון נשלח בהצלחה</h3>
+                    <p>ה-AI שלנו מנתח את התשובות שלך.<br>נחזור אליך בקרוב לתיאום ראיון.</p>
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(212, 175, 55, 0.1); border-radius: 12px;">
+                        <p style="font-size: 0.9rem; margin: 0;"><i class="fa-solid fa-clock" style="color: var(--gold);"></i> זמן תגובה ממוצע: 24-48 שעות</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="closeScreeningModal()" style="margin-top: 1.5rem;">
+                        <i class="fa-solid fa-check"></i>
+                        סגור
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -3603,7 +3916,7 @@
                     })
                     .eq('id', user.id);
 
-                // Insert therapist record
+                // Insert therapist record with 'applicant' status
                 const { data, error } = await supabaseClient
                     .from('therapists')
                     .insert({
@@ -3615,7 +3928,8 @@
                         location: city,
                         price_per_session: price,
                         works_online: worksOnline,
-                        is_active: false, // Needs admin approval
+                        status: 'applicant', // Initial status
+                        is_active: false,
                         is_verified: false
                     })
                     .select()
@@ -3634,11 +3948,14 @@
                         message: `התמחות: ${specialization}\nעיר: ${city}\nניסיון: ${experience} שנים\nמחיר: ${price || 'התנדבות'}\nזום: ${worksOnline ? 'כן' : 'לא'}\n\n${bio}`
                     });
 
-                // Show success
-                document.getElementById('therapist-form-container').style.display = 'none';
-                document.getElementById('therapist-success').classList.add('active');
+                // Close therapist form and open screening questionnaire
+                closeTherapistForm();
+                showToast('מעולה! עכשיו נמשיך לשאלון הסינון המקצועי', 'success');
 
-                showToast('הבקשה נשלחה בהצלחה!', 'success');
+                // Small delay before opening screening modal
+                setTimeout(() => {
+                    openScreeningModal(data.id);
+                }, 500);
 
             } catch (error) {
                 console.error('Error submitting therapist form:', error);
@@ -3652,8 +3969,209 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeTherapistForm();
+                closeScreeningModal();
             }
         });
+
+        // ============================================================================
+        // SCREENING QUESTIONNAIRE FUNCTIONS
+        // ============================================================================
+
+        let currentScreeningStep = 1;
+        let currentTherapistId = null; // Store the therapist ID for the screening form
+
+        // Open screening modal
+        function openScreeningModal(therapistId) {
+            currentTherapistId = therapistId;
+            currentScreeningStep = 1;
+
+            // Reset all steps
+            document.querySelectorAll('.screening-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.querySelectorAll('.screening-progress-step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+
+            // Show first step
+            document.querySelector('.screening-step[data-step="1"]').classList.add('active');
+            document.querySelector('.screening-progress-step[data-step="1"]').classList.add('active');
+
+            // Clear all textareas
+            document.getElementById('sq-case-study').value = '';
+            document.getElementById('sq-trauma-techniques').value = '';
+            document.getElementById('sq-resistance').value = '';
+            document.getElementById('sq-why-therapist').value = '';
+            document.getElementById('sq-role-vision').value = '';
+
+            // Reset character counts
+            updateCharCount('sq-case-study', 'sq-case-count');
+            updateCharCount('sq-trauma-techniques', 'sq-trauma-count');
+            updateCharCount('sq-resistance', 'sq-resistance-count');
+            updateCharCount('sq-why-therapist', 'sq-why-count');
+            updateCharCount('sq-role-vision', 'sq-role-count');
+
+            document.getElementById('screening-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close screening modal
+        function closeScreeningModal() {
+            document.getElementById('screening-modal').classList.remove('active');
+            document.body.style.overflow = '';
+            currentTherapistId = null;
+        }
+
+        // Navigate to next step
+        function nextScreeningStep(step) {
+            // Validate current step before moving
+            if (!validateScreeningStep(currentScreeningStep)) {
+                return;
+            }
+
+            // Hide current step
+            document.querySelector(`.screening-step[data-step="${currentScreeningStep}"]`).classList.remove('active');
+            document.querySelector(`.screening-progress-step[data-step="${currentScreeningStep}"]`).classList.remove('active');
+            document.querySelector(`.screening-progress-step[data-step="${currentScreeningStep}"]`).classList.add('completed');
+
+            // Show next step
+            currentScreeningStep = step;
+            document.querySelector(`.screening-step[data-step="${step}"]`).classList.add('active');
+            if (step <= 3) {
+                document.querySelector(`.screening-progress-step[data-step="${step}"]`).classList.add('active');
+            }
+        }
+
+        // Navigate to previous step
+        function prevScreeningStep(step) {
+            // Hide current step
+            document.querySelector(`.screening-step[data-step="${currentScreeningStep}"]`).classList.remove('active');
+            document.querySelector(`.screening-progress-step[data-step="${currentScreeningStep}"]`).classList.remove('active');
+
+            // Show previous step
+            currentScreeningStep = step;
+            document.querySelector(`.screening-step[data-step="${step}"]`).classList.add('active');
+            document.querySelector(`.screening-progress-step[data-step="${step}"]`).classList.remove('completed');
+            document.querySelector(`.screening-progress-step[data-step="${step}"]`).classList.add('active');
+        }
+
+        // Validate current step
+        function validateScreeningStep(step) {
+            let isValid = true;
+            let fields = [];
+
+            switch(step) {
+                case 1:
+                    fields = ['sq-case-study'];
+                    break;
+                case 2:
+                    fields = ['sq-trauma-techniques', 'sq-resistance'];
+                    break;
+                case 3:
+                    fields = ['sq-why-therapist', 'sq-role-vision'];
+                    break;
+            }
+
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim() || field.value.trim().length < 50) {
+                    field.style.borderColor = 'var(--coral)';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = '';
+                }
+            });
+
+            if (!isValid) {
+                showToast('אנא מלא את כל השדות (מינימום 50 תווים לכל שאלה)', 'error');
+            }
+
+            return isValid;
+        }
+
+        // Update character count
+        function updateCharCount(textareaId, countId) {
+            const textarea = document.getElementById(textareaId);
+            const count = document.getElementById(countId);
+            if (textarea && count) {
+                count.textContent = textarea.value.length;
+            }
+        }
+
+        // Add event listeners for character counts
+        ['sq-case-study', 'sq-trauma-techniques', 'sq-resistance', 'sq-why-therapist', 'sq-role-vision'].forEach(id => {
+            const textarea = document.getElementById(id);
+            if (textarea) {
+                const countId = id.replace('sq-', 'sq-').replace('-study', '-count').replace('-techniques', '-count').replace('-resistance', '-count').replace('-therapist', '-count').replace('-vision', '-count');
+                const countMap = {
+                    'sq-case-study': 'sq-case-count',
+                    'sq-trauma-techniques': 'sq-trauma-count',
+                    'sq-resistance': 'sq-resistance-count',
+                    'sq-why-therapist': 'sq-why-count',
+                    'sq-role-vision': 'sq-role-count'
+                };
+                textarea.addEventListener('input', () => updateCharCount(id, countMap[id]));
+            }
+        });
+
+        // Submit screening form to Supabase
+        async function submitScreeningForm() {
+            // Validate last step
+            if (!validateScreeningStep(3)) {
+                return;
+            }
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            if (!user) {
+                showToast('יש להתחבר תחילה', 'error');
+                return;
+            }
+
+            // Collect all answers
+            const questionnaireData = {
+                case_study: document.getElementById('sq-case-study').value.trim(),
+                trauma_techniques: document.getElementById('sq-trauma-techniques').value.trim(),
+                handling_resistance: document.getElementById('sq-resistance').value.trim(),
+                why_therapist: document.getElementById('sq-why-therapist').value.trim(),
+                role_vision: document.getElementById('sq-role-vision').value.trim(),
+                submitted_at: new Date().toISOString()
+            };
+
+            try {
+                showLoading();
+
+                // Update therapist record with questionnaire data and status
+                const { data, error } = await supabaseClient
+                    .from('therapists')
+                    .update({
+                        questionnaire_data: questionnaireData,
+                        status: 'screening_submitted'
+                    })
+                    .eq('user_id', user.id)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Show success step
+                document.querySelectorAll('.screening-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+                document.querySelectorAll('.screening-progress-step').forEach(step => {
+                    step.classList.add('completed');
+                });
+                document.querySelector('.screening-step[data-step="success"]').classList.add('active');
+
+                showToast('השאלון נשלח בהצלחה!', 'success');
+
+            } catch (error) {
+                console.error('Error submitting screening form:', error);
+                showToast('שגיאה בשליחת השאלון. נסה שוב.', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
     </script>
 </body>
 </html>

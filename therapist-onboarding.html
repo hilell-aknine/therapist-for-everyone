@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הצטרפות כמטפל - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --pure-white: #FFFFFF;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --coral: #FF6F61;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, var(--muted-teal) 0%, var(--deep-petrol) 100%);
+            min-height: 100vh;
+            color: var(--pure-white);
+            line-height: 1.7;
+        }
+
+        /* Header */
+        .header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 59, 70, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            color: var(--pure-white);
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            color: var(--gold);
+        }
+
+        .logo span {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--frost-white);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--gold);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Progress Steps */
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active {
+            background: var(--gold);
+            color: var(--deep-petrol);
+            font-weight: 600;
+        }
+
+        .progress-step.completed {
+            background: rgba(212, 175, 55, 0.3);
+            color: var(--gold);
+        }
+
+        .progress-step i {
+            font-size: 1rem;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: rgba(0, 59, 70, 0.6);
+            border-radius: 24px;
+            padding: 2.5rem;
+            border: 1px solid rgba(47, 133, 146, 0.3);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-header .icon {
+            font-size: 3rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .form-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: var(--frost-white);
+            font-size: 1rem;
+        }
+
+        /* Form Steps */
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group label i {
+            color: var(--gold);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(47, 133, 146, 0.5);
+            border-radius: 12px;
+            background: rgba(0, 59, 70, 0.5);
+            color: var(--pure-white);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(232, 241, 242, 0.5);
+        }
+
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23D4AF37' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
+            background-size: 1.5rem;
+            padding-left: 2.5rem;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--gold);
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .char-count {
+            text-align: left;
+            font-size: 0.8rem;
+            color: var(--frost-white);
+            opacity: 0.7;
+            margin-top: 0.4rem;
+        }
+
+        /* Tip Box */
+        .tip-box {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tip-box p {
+            font-size: 0.9rem;
+            color: var(--frost-white);
+            margin: 0;
+        }
+
+        .tip-box i {
+            color: var(--gold);
+            margin-left: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: var(--deep-petrol);
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--gold-glow);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: var(--frost-white);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--frost-white);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .form-buttons .btn {
+            flex: 1;
+        }
+
+        .required-note {
+            font-size: 0.85rem;
+            color: var(--frost-white);
+            opacity: 0.7;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        /* Success State */
+        .success-container {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success-container .icon {
+            font-size: 5rem;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .success-container h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-container p {
+            color: var(--frost-white);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-info {
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .success-info p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 59, 70, 0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(212, 175, 55, 0.3);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 10000;
+        }
+
+        .toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--gold);
+            color: var(--deep-petrol);
+        }
+
+        .toast.error {
+            background: var(--coral);
+            color: white;
+        }
+
+        .toast.info {
+            background: var(--dusty-aqua);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .logo span {
+                display: none;
+            }
+
+            .container {
+                margin: 1rem auto;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-container {
+                flex-wrap: wrap;
+            }
+
+            .progress-step {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-hands-holding-heart"></i>
+            <span>מטפל לכל אחד</span>
+        </a>
+        <a href="index.html" class="back-btn">
+            <i class="fa-solid fa-arrow-right"></i>
+            חזרה לאתר
+        </a>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Progress Steps -->
+        <div class="progress-container">
+            <div class="progress-step active" data-step="1">
+                <i class="fa-solid fa-user"></i>
+                <span>פרטים בסיסיים</span>
+            </div>
+            <div class="progress-step" data-step="2">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <span>שאלון מקצועי</span>
+            </div>
+            <div class="progress-step" data-step="3">
+                <i class="fa-solid fa-star"></i>
+                <span>חזון ומוטיבציה</span>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card">
+            <!-- Step 1: Basic Info -->
+            <div class="form-step active" data-step="1">
+                <div class="form-header">
+                    <div class="icon"><i class="fa-solid fa-user-doctor"></i></div>
+                    <h1>הצטרפות כמטפל</h1>
+                    <p>ספר לנו על עצמך</p>
+                </div>
+
+                <form id="basic-info-form">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-user"></i> שם מלא *</label>
+                        <input type="text" id="t-name" placeholder="השם המלא שלך" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-brain"></i> תחום התמחות *</label>
+                        <select id="t-specialization" required>
+                            <option value="">בחר התמחות...</option>
+                            <option value="NLP">NLP - תכנות נוירו-לשוני</option>
+                            <option value="CBT">CBT - טיפול קוגניטיבי-התנהגותי</option>
+                            <option value="coaching">אימון אישי (קואצ'ינג)</option>
+                            <option value="trauma">טיפול בטראומה</option>
+                            <option value="family">טיפול משפחתי</option>
+                            <option value="couples">טיפול זוגי</option>
+                            <option value="children">טיפול בילדים ונוער</option>
+                            <option value="anxiety">חרדות ודיכאון</option>
+                            <option value="addiction">התמכרויות</option>
+                            <option value="other">אחר</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-city"></i> עיר מגורים *</label>
+                        <select id="t-city" required>
+                            <option value="">בחר עיר...</option>
+                            <option value="תל אביב">תל אביב</option>
+                            <option value="ירושלים">ירושלים</option>
+                            <option value="חיפה">חיפה</option>
+                            <option value="באר שבע">באר שבע</option>
+                            <option value="ראשון לציון">ראשון לציון</option>
+                            <option value="פתח תקווה">פתח תקווה</option>
+                            <option value="אשדוד">אשדוד</option>
+                            <option value="נתניה">נתניה</option>
+                            <option value="חולון">חולון</option>
+                            <option value="בני ברק">בני ברק</option>
+                            <option value="רמת גן">רמת גן</option>
+                            <option value="אשקלון">אשקלון</option>
+                            <option value="רחובות">רחובות</option>
+                            <option value="בת ים">בת ים</option>
+                            <option value="הרצליה">הרצליה</option>
+                            <option value="כפר סבא">כפר סבא</option>
+                            <option value="רעננה">רעננה</option>
+                            <option value="מודיעין">מודיעין</option>
+                            <option value="אילת">אילת</option>
+                            <option value="online">עבודה מרחוק בלבד</option>
+                            <option value="other">אחר</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="other-city-group" style="display: none;">
+                        <label><i class="fa-solid fa-map-marker-alt"></i> שם העיר</label>
+                        <input type="text" id="t-other-city" placeholder="הזן את שם העיר">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-calendar"></i> שנות ניסיון *</label>
+                            <input type="number" id="t-experience" min="0" max="50" placeholder="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-shekel-sign"></i> מחיר לפגישה</label>
+                            <input type="number" id="t-price" min="0" placeholder="0 = התנדבות">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-phone"></i> מספר טלפון *</label>
+                        <input type="tel" id="t-phone" placeholder="050-0000000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-comment"></i> ספר על עצמך</label>
+                        <textarea id="t-bio" placeholder="רקע מקצועי, גישה טיפולית, מה מניע אותך..." rows="3"></textarea>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="t-online">
+                        <label for="t-online">
+                            <i class="fa-solid fa-video"></i> אני עובד/ת גם בזום (טיפול מרחוק)
+                        </label>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">
+                            המשך לשאלון <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                    </div>
+
+                    <p class="required-note">* שדות חובה</p>
+                </form>
+            </div>
+
+            <!-- Step 2: Professional Questionnaire -->
+            <div class="form-step" data-step="2">
+                <div class="form-header">
+                    <div class="icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <h1>שאלון סינון מקצועי</h1>
+                    <p>עזור לנו להכיר אותך טוב יותר כמטפל</p>
+                </div>
+
+                <div class="tip-box">
+                    <p><i class="fa-solid fa-lightbulb"></i> קח את הזמן לענות בפירוט. התשובות שלך יעזרו ל-AI שלנו להעריך את ההתאמה לפרויקט.</p>
+                </div>
+
+                <form id="questionnaire-form-1">
+                    <div class="form-group">
+                        <label>
+                            <i class="fa-solid fa-brain"></i>
+                            תאר מקרה מורכב שטיפלת בו באמצעות NLP או טכניקות טיפוליות אחרות. מה היה האתגר ואיך התמודדת איתו?
+                        </label>
+                        <textarea id="sq-case-study" placeholder="תאר את המקרה, הגישה שבחרת, והתוצאות..." required></textarea>
+                        <div class="char-count"><span id="sq-case-count">0</span>/1000</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fa-solid fa-heart-crack"></i>
+                            באילו טכניקות אתה משתמש לשחרור טראומה? תן דוגמאות ספציפיות.
+                        </label>
+                        <textarea id="sq-trauma-techniques" placeholder="פרט טכניקות כמו: EMDR, Timeline Therapy, Parts Integration, Reframe..." required></textarea>
+                        <div class="char-count"><span id="sq-trauma-count">0</span>/800</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fa-solid fa-shield-halved"></i>
+                            איך אתה מתמודד עם התנגדויות של מטופלים? תן דוגמה ממקרה אמיתי.
+                        </label>
+                        <textarea id="sq-resistance" placeholder="תאר מצב של התנגדות ואיך התמודדת איתו..." required></textarea>
+                        <div class="char-count"><span id="sq-resistance-count">0</span>/800</div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goToStep(1)">
+                            <i class="fa-solid fa-arrow-right"></i> חזור
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            המשך <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 3: Vision & Motivation -->
+            <div class="form-step" data-step="3">
+                <div class="form-header">
+                    <div class="icon"><i class="fa-solid fa-star"></i></div>
+                    <h1>חזון ומוטיבציה</h1>
+                    <p>מה מניע אותך להיות מטפל?</p>
+                </div>
+
+                <form id="questionnaire-form-2">
+                    <div class="form-group">
+                        <label>
+                            <i class="fa-solid fa-heart"></i>
+                            למה בחרת להיות מטפל? מה המוטיבציה העמוקה שלך?
+                        </label>
+                        <textarea id="sq-why-therapist" placeholder="שתף את הסיפור האישי שלך..." required></textarea>
+                        <div class="char-count"><span id="sq-why-count">0</span>/800</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fa-solid fa-hand-holding-heart"></i>
+                            איך אתה רואה את התפקיד שלך בשינוי חיי המטופל? מה ההבטחה שאתה נותן?
+                        </label>
+                        <textarea id="sq-role-vision" placeholder="תאר את החזון שלך כמטפל ומה אתה מביא למטופלים..." required></textarea>
+                        <div class="char-count"><span id="sq-role-count">0</span>/800</div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="goToStep(2)">
+                            <i class="fa-solid fa-arrow-right"></i> חזור
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-paper-plane"></i> שלח בקשת הצטרפות
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Success Step -->
+            <div class="form-step" data-step="success">
+                <div class="success-container">
+                    <div class="icon"><i class="fa-solid fa-robot"></i></div>
+                    <h2>תודה! הבקשה נשלחה בהצלחה</h2>
+                    <p>ה-AI שלנו מנתח את התשובות שלך.<br>נחזור אליך בקרוב לתיאום ראיון.</p>
+
+                    <div class="success-info">
+                        <p><i class="fa-solid fa-clock" style="color: var(--gold);"></i> זמן תגובה ממוצע: 24-48 שעות</p>
+                    </div>
+
+                    <a href="index.html" class="btn btn-primary">
+                        <i class="fa-solid fa-home"></i>
+                        חזרה לדף הבית
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+        <p>שולח את הבקשה...</p>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://vhzdrywvpgaqyivprbds.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoemRyeXd2cGdhcXlpdnByYmRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2NjkwMTksImV4cCI6MjA4NDI0NTAxOX0.h0fCrmenxcXFhtFO0UtqYVMqyl0EAjGt5g7OY1FZ9-I';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentStep = 1;
+        let currentUser = null;
+        let therapistData = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if user is logged in
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            if (!user) {
+                // Not logged in - redirect to main page
+                showToast('יש להתחבר כדי להצטרף כמטפל', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+                return;
+            }
+
+            currentUser = user;
+
+            // Check if user already registered as therapist
+            const { data: existingTherapist } = await supabaseClient
+                .from('therapists')
+                .select('id, status')
+                .eq('user_id', user.id)
+                .single();
+
+            if (existingTherapist) {
+                if (existingTherapist.status === 'active') {
+                    showToast('אתה כבר רשום כמטפל פעיל במערכת!', 'info');
+                } else {
+                    showToast('הבקשה שלך להצטרפות ממתינה לאישור', 'info');
+                }
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+                return;
+            }
+
+            // Pre-fill from profile
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('full_name, phone')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                if (profile.full_name) document.getElementById('t-name').value = profile.full_name;
+                if (profile.phone) document.getElementById('t-phone').value = profile.phone;
+            }
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // City selection change
+            document.getElementById('t-city').addEventListener('change', function() {
+                const otherGroup = document.getElementById('other-city-group');
+                const otherInput = document.getElementById('t-other-city');
+
+                if (this.value === 'other') {
+                    otherGroup.style.display = 'block';
+                    otherInput.required = true;
+                } else {
+                    otherGroup.style.display = 'none';
+                    otherInput.required = false;
+                }
+            });
+
+            // Character count listeners
+            const textareas = [
+                { id: 'sq-case-study', countId: 'sq-case-count' },
+                { id: 'sq-trauma-techniques', countId: 'sq-trauma-count' },
+                { id: 'sq-resistance', countId: 'sq-resistance-count' },
+                { id: 'sq-why-therapist', countId: 'sq-why-count' },
+                { id: 'sq-role-vision', countId: 'sq-role-count' }
+            ];
+
+            textareas.forEach(({ id, countId }) => {
+                const textarea = document.getElementById(id);
+                const count = document.getElementById(countId);
+                if (textarea && count) {
+                    textarea.addEventListener('input', () => {
+                        count.textContent = textarea.value.length;
+                    });
+                }
+            });
+
+            // Form submissions
+            document.getElementById('basic-info-form').addEventListener('submit', handleBasicInfoSubmit);
+            document.getElementById('questionnaire-form-1').addEventListener('submit', handleQuestionnaire1Submit);
+            document.getElementById('questionnaire-form-2').addEventListener('submit', handleFinalSubmit);
+        }
+
+        function goToStep(step) {
+            // Hide current step
+            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.remove('active');
+
+            if (step > currentStep) {
+                document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.add('completed');
+            } else {
+                document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.remove('completed');
+            }
+
+            // Show new step
+            currentStep = step;
+            document.querySelector(`.form-step[data-step="${step}"]`).classList.add('active');
+
+            if (step !== 'success') {
+                document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function handleBasicInfoSubmit(e) {
+            e.preventDefault();
+
+            // Collect basic info
+            let city = document.getElementById('t-city').value;
+            if (city === 'other') {
+                city = document.getElementById('t-other-city').value;
+            }
+
+            therapistData = {
+                name: document.getElementById('t-name').value,
+                specialization: document.getElementById('t-specialization').value,
+                city: city,
+                experience: parseInt(document.getElementById('t-experience').value) || 0,
+                price: parseInt(document.getElementById('t-price').value) || 0,
+                phone: document.getElementById('t-phone').value,
+                bio: document.getElementById('t-bio').value,
+                worksOnline: document.getElementById('t-online').checked
+            };
+
+            goToStep(2);
+        }
+
+        function handleQuestionnaire1Submit(e) {
+            e.preventDefault();
+
+            // Validate minimum length
+            const fields = ['sq-case-study', 'sq-trauma-techniques', 'sq-resistance'];
+            let isValid = true;
+
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field.value.trim().length < 50) {
+                    field.style.borderColor = 'var(--coral)';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = '';
+                }
+            });
+
+            if (!isValid) {
+                showToast('אנא מלא את כל השדות (מינימום 50 תווים לכל שאלה)', 'error');
+                return;
+            }
+
+            // Save questionnaire part 1
+            therapistData.questionnaire = {
+                case_study: document.getElementById('sq-case-study').value.trim(),
+                trauma_techniques: document.getElementById('sq-trauma-techniques').value.trim(),
+                handling_resistance: document.getElementById('sq-resistance').value.trim()
+            };
+
+            goToStep(3);
+        }
+
+        async function handleFinalSubmit(e) {
+            e.preventDefault();
+
+            // Validate minimum length
+            const fields = ['sq-why-therapist', 'sq-role-vision'];
+            let isValid = true;
+
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field.value.trim().length < 50) {
+                    field.style.borderColor = 'var(--coral)';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = '';
+                }
+            });
+
+            if (!isValid) {
+                showToast('אנא מלא את כל השדות (מינימום 50 תווים לכל שאלה)', 'error');
+                return;
+            }
+
+            // Complete questionnaire data
+            therapistData.questionnaire.why_therapist = document.getElementById('sq-why-therapist').value.trim();
+            therapistData.questionnaire.role_vision = document.getElementById('sq-role-vision').value.trim();
+            therapistData.questionnaire.submitted_at = new Date().toISOString();
+
+            // Submit to Supabase
+            await submitToSupabase();
+        }
+
+        async function submitToSupabase() {
+            showLoading();
+
+            try {
+                // Update profile
+                await supabaseClient
+                    .from('profiles')
+                    .update({
+                        full_name: therapistData.name,
+                        phone: therapistData.phone,
+                        role: 'therapist'
+                    })
+                    .eq('id', currentUser.id);
+
+                // Insert therapist record
+                const { data, error } = await supabaseClient
+                    .from('therapists')
+                    .insert({
+                        user_id: currentUser.id,
+                        bio: therapistData.bio,
+                        specializations: [therapistData.specialization],
+                        experience_years: therapistData.experience,
+                        city: therapistData.city,
+                        location: therapistData.city,
+                        price_per_session: therapistData.price,
+                        works_online: therapistData.worksOnline,
+                        status: 'screening_submitted',
+                        questionnaire_data: therapistData.questionnaire,
+                        is_active: false,
+                        is_verified: false
+                    })
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Create contact request for notification
+                await supabaseClient
+                    .from('contact_requests')
+                    .insert({
+                        name: therapistData.name,
+                        phone: therapistData.phone,
+                        email: currentUser.email,
+                        request_type: 'therapist',
+                        message: `התמחות: ${therapistData.specialization}\nעיר: ${therapistData.city}\nניסיון: ${therapistData.experience} שנים\nמחיר: ${therapistData.price || 'התנדבות'}\nזום: ${therapistData.worksOnline ? 'כן' : 'לא'}\n\n${therapistData.bio}`
+                    });
+
+                hideLoading();
+                showToast('הבקשה נשלחה בהצלחה!', 'success');
+
+                // Show success step
+                goToStep('success');
+
+                // Mark all progress steps as completed
+                document.querySelectorAll('.progress-step').forEach(step => {
+                    step.classList.remove('active');
+                    step.classList.add('completed');
+                });
+
+            } catch (error) {
+                console.error('Error submitting:', error);
+                hideLoading();
+                showToast('שגיאה בשליחת הבקשה. נסה שוב.', 'error');
+            }
+        }
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} active`;
+
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

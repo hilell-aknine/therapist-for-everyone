@@ -993,10 +993,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('therapists')
-                    .select(`
-                        *,
-                        profiles (full_name, email, phone)
-                    `)
+                    .select('*')
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
@@ -1059,10 +1056,12 @@
             // Filter by search
             if (searchTerm) {
                 filtered = filtered.filter(c => {
-                    const name = c.profiles?.full_name || '';
-                    const email = c.profiles?.email || '';
+                    const name = c.full_name || c.name || '';
+                    const email = c.email || '';
+                    const phone = c.phone || '';
                     return name.toLowerCase().includes(searchTerm) ||
-                           email.toLowerCase().includes(searchTerm);
+                           email.toLowerCase().includes(searchTerm) ||
+                           phone.includes(searchTerm);
                 });
             }
 
@@ -1083,13 +1082,13 @@
         }
 
         function renderCandidateCard(candidate) {
-            const name = candidate.profiles?.full_name || 'לא ידוע';
-            const email = candidate.profiles?.email || '';
-            const phone = candidate.profiles?.phone || candidate.phone || '';
+            const name = candidate.full_name || candidate.name || 'מועמד';
+            const email = candidate.email || '';
+            const phone = candidate.phone || '';
             const specialization = candidate.specializations?.[0] || '';
             const city = candidate.city || candidate.location || '';
             const experience = candidate.experience_years || 0;
-            const createdAt = new Date(candidate.created_at).toLocaleDateString('he-IL');
+            const createdAt = candidate.created_at ? new Date(candidate.created_at).toLocaleDateString('he-IL') : '-';
             const statusLabels = {
                 'applicant': 'ממתין',
                 'screening_submitted': 'ממתין לסינון',
@@ -1107,8 +1106,9 @@
                             <div>
                                 <div class="candidate-name">${name}</div>
                                 <div class="candidate-meta">
-                                    <span><i class="fa-solid fa-envelope"></i> ${email}</span>
-                                    <span><i class="fa-solid fa-phone"></i> ${phone}</span>
+                                    ${email ? `<span><i class="fa-solid fa-envelope"></i> ${email}</span>` : ''}
+                                    ${phone ? `<span><i class="fa-solid fa-phone"></i> ${phone}</span>` : ''}
+                                    ${!email && !phone ? '<span style="color: var(--text-muted);">אין פרטי קשר</span>' : ''}
                                 </div>
                             </div>
                         </div>
@@ -1197,7 +1197,7 @@
             if (!candidate) return;
 
             currentCandidate = candidate;
-            const name = candidate.profiles?.full_name || 'לא ידוע';
+            const name = candidate.full_name || candidate.name || 'מועמד';
             const questionnaire = candidate.questionnaire_data || {};
 
             document.getElementById('modal-candidate-name').textContent = `תיק מועמד: ${name}`;

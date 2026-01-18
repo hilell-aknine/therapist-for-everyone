@@ -941,11 +941,14 @@
                     })
                     .eq('id', currentUser.id);
 
-                // Insert therapist record
-                const { data, error } = await supabaseClient
+                // Upsert therapist record (insert or update if exists)
+                const { error } = await supabaseClient
                     .from('therapists')
-                    .insert({
+                    .upsert({
                         user_id: currentUser.id,
+                        email: currentUser.email,
+                        full_name: therapistData.name,
+                        phone: therapistData.phone,
                         bio: therapistData.bio,
                         specializations: [therapistData.specialization],
                         experience_years: therapistData.experience,
@@ -957,9 +960,7 @@
                         questionnaire_data: therapistData.questionnaire,
                         is_active: false,
                         is_verified: false
-                    })
-                    .select()
-                    .single();
+                    }, { onConflict: 'user_id' });
 
                 if (error) throw error;
 

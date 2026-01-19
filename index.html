@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
+            /* Original branding colors */
             --deep-petrol: #003B46;
             --muted-teal: #00606B;
             --dusty-aqua: #2F8592;
@@ -20,6 +21,13 @@
             --gold-glow: rgba(212, 175, 55, 0.3);
             --coral: #FF6F61;
             --gradient-main: radial-gradient(ellipse at 30% 20%, #2F8592 0%, #00606B 40%, #003B46 100%);
+
+            /* Mobile-optimized color palette */
+            --bg-primary: #166672;
+            --color-accent: #EBC85E;
+            --btn-secondary-border: #3D8B95;
+            --text-main: #FFFFFF;
+            --text-subtitle: #E3B64F;
         }
 
         * {
@@ -159,16 +167,34 @@
             display: none;
             flex-direction: column;
             cursor: pointer;
-            gap: 5px;
-            padding: 0.5rem;
+            gap: 6px;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .hamburger:hover {
+            background: rgba(235, 200, 94, 0.1);
         }
 
         .hamburger span {
-            width: 26px;
-            height: 2px;
-            background: var(--pure-white);
-            border-radius: 2px;
+            width: 28px;
+            height: 3px;
+            background: var(--color-accent);
+            border-radius: 3px;
             transition: all 0.3s;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
         }
 
         /* ===== Hero Section ===== */
@@ -1638,8 +1664,68 @@
             }
         }
 
-        /* Tablet - 768px */
+        /* Tablet - 768px - Mobile Responsive Design */
         @media (max-width: 768px) {
+            /* Hero Section - Vertical Layout */
+            .hero {
+                min-height: 100svh;
+                padding-top: 80px;
+            }
+
+            .hero-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 2rem 1.5rem;
+            }
+
+            .hero-badge {
+                margin-top: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero h1 {
+                font-size: clamp(2rem, 8vw, 2.8rem);
+                word-break: keep-all;
+                hyphens: none;
+            }
+
+            .hero .tagline {
+                font-size: clamp(1.1rem, 4vw, 1.5rem);
+                color: var(--text-subtitle);
+            }
+
+            .hero-description {
+                font-size: 1rem;
+                padding: 0 0.5rem;
+            }
+
+            /* CTA Buttons - Full Width Stacked */
+            .cta-buttons {
+                flex-direction: column;
+                width: 100%;
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+
+            .cta-buttons .btn {
+                width: 100%;
+                max-width: 100%;
+                padding: 1.1rem 1.5rem;
+                font-size: 1.05rem;
+                justify-content: center;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, var(--color-accent) 0%, var(--gold-light) 100%);
+            }
+
+            .btn-secondary {
+                border: 2px solid var(--btn-secondary-border);
+            }
+
+            /* Grid layouts */
             .two-columns {
                 grid-template-columns: 1fr;
             }
@@ -1669,37 +1755,71 @@
             .highlight-box h3 {
                 font-size: 1.5rem;
             }
+
+            /* Section typography */
+            .section-title {
+                font-size: clamp(1.6rem, 5vw, 2.2rem);
+            }
+
+            .section-subtitle {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
         }
 
         @media (max-width: 480px) {
+            /* Navigation adjustments */
+            nav {
+                padding: 0.8rem 1rem;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .logo-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+
+            /* Hero for small phones */
             .hero h1 {
-                font-size: 2.2rem;
+                font-size: clamp(1.75rem, 7vw, 2.2rem);
+                line-height: 1.2;
             }
 
             .hero .tagline {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
+                color: var(--text-subtitle);
             }
 
             .hero-icon {
-                font-size: 3rem;
+                font-size: 2.8rem;
             }
 
             .hero-badge {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
                 padding: 0.5rem 1rem;
             }
 
             .hero-description {
-                font-size: 1rem;
+                font-size: 0.95rem;
+                line-height: 1.7;
             }
 
+            /* CTA Buttons - extra padding for thumb */
             .cta-buttons {
                 flex-direction: column;
+                padding: 0;
+                gap: 0.875rem;
             }
 
-            .btn {
+            .cta-buttons .btn {
                 width: 100%;
-                justify-content: center;
+                padding: 1rem 1.25rem;
+                font-size: 1rem;
+                min-height: 52px;
             }
 
             .courses-tabs {
@@ -1712,11 +1832,15 @@
 
             /* Section headers */
             .section-title {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
             }
 
             .section-subtitle {
-                font-size: 1rem;
+                font-size: 0.95rem;
+            }
+
+            section {
+                padding: 4rem 1rem;
             }
 
             /* Cards - מסך קטן מאוד */
@@ -2700,7 +2824,12 @@
 
         // Toggle mobile menu
         function toggleMenu() {
-            document.querySelector('.nav-links').classList.toggle('active');
+            const hamburger = document.querySelector('.hamburger');
+            const navLinks = document.querySelector('.nav-links');
+
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+
             // הצג/הסתר כפתורי Auth במובייל
             const authButtons = document.getElementById('auth-buttons');
             if (authButtons && window.innerWidth <= 900) {

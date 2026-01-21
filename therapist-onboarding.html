@@ -7,6 +7,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        // Legal Gate Check - runs immediately
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for scripts to initialize
+            await new Promise(r => setTimeout(r, 100));
+            if (window.AuthGuard) {
+                const hasConsent = await AuthGuard.checkLegalConsent();
+                if (!hasConsent) return; // Will redirect to legal-gate.html
+            }
+        });
+    </script>
     <style>
         :root {
             --deep-petrol: #003B46;
@@ -942,7 +955,8 @@
                     .eq('id', currentUser.id);
 
                 // Upsert therapist record (insert or update if exists)
-                const { error } = await supabaseClient
+                // Use select() to get the therapist ID for AI analysis
+                const { data: therapistRecord, error } = await supabaseClient
                     .from('therapists')
                     .upsert({
                         user_id: currentUser.id,
@@ -960,7 +974,9 @@
                         questionnaire_data: therapistData.questionnaire,
                         is_active: false,
                         is_verified: false
-                    }, { onConflict: 'user_id' });
+                    }, { onConflict: 'user_id' })
+                    .select('id')
+                    .single();
 
                 if (error) throw error;
 
@@ -987,10 +1003,66 @@
                     step.classList.add('completed');
                 });
 
+                // ===== AUTOMATIC AI ANALYSIS (Background) =====
+                // Run in background - don't block user experience
+                if (therapistRecord?.id) {
+                    runBackgroundAIAnalysis(therapistRecord.id, therapistData.name, therapistData.questionnaire);
+                }
+
             } catch (error) {
                 console.error('Error submitting:', error);
                 hideLoading();
                 showToast('שגיאה בשליחת הבקשה. נסה שוב.', 'error');
+            }
+        }
+
+        // Background AI Analysis - runs after form submission
+        async function runBackgroundAIAnalysis(therapistId, candidateName, questionnaireData) {
+            console.log('Starting background AI analysis for therapist:', therapistId);
+
+            try {
+                // Call the Edge Function
+                const { data, error: invokeError } = await supabaseClient.functions.invoke('analyze-therapist', {
+                    body: {
+                        questionnaire_data: questionnaireData,
+                        candidate_name: candidateName
+                    }
+                });
+
+                if (invokeError) {
+                    console.error('AI Analysis Edge Function error:', invokeError);
+                    return;
+                }
+
+                if (!data || !data.success) {
+                    console.error('AI Analysis failed:', data?.error);
+                    return;
+                }
+
+                // Extract AI results
+                const { score: aiScore, summary: aiSummary, tags: aiTags, interview_tips: aiInterviewTips } = data.data;
+
+                console.log('AI Analysis complete:', { aiScore, aiSummary, aiTags });
+
+                // Save to database
+                const { error: updateError } = await supabaseClient
+                    .from('therapists')
+                    .update({
+                        ai_score: aiScore,
+                        ai_summary: aiSummary,
+                        ai_tags: aiTags,
+                        ai_interview_tips: aiInterviewTips || []
+                    })
+                    .eq('id', therapistId);
+
+                if (updateError) {
+                    console.error('Failed to save AI analysis:', updateError);
+                } else {
+                    console.log('AI analysis saved successfully for therapist:', therapistId);
+                }
+
+            } catch (err) {
+                console.error('Background AI analysis error:', err);
             }
         }
 

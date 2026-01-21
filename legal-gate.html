@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הסכם שימוש - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --pure-white: #FFFFFF;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --coral: #FF6F61;
+            --danger: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, var(--muted-teal) 0%, var(--deep-petrol) 100%);
+            min-height: 100vh;
+            color: var(--pure-white);
+            line-height: 1.8;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 59, 70, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            color: var(--pure-white);
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: var(--gold);
+        }
+
+        .logo span {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        /* Main Container */
+        .container {
+            flex: 1;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            width: 100%;
+        }
+
+        /* Card */
+        .legal-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .legal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legal-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--gold);
+        }
+
+        .legal-header p {
+            color: var(--frost-white);
+            opacity: 0.8;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        /* Terms Content */
+        .terms-content {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .terms-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terms-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .terms-content::-webkit-scrollbar-thumb {
+            background: var(--dusty-aqua);
+            border-radius: 4px;
+        }
+
+        .terms-content h2 {
+            font-size: 1.2rem;
+            color: var(--gold);
+            margin: 1.5rem 0 0.8rem;
+        }
+
+        .terms-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .terms-content p {
+            color: var(--frost-white);
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .terms-content ul {
+            margin: 0.5rem 0 1rem 1.5rem;
+            color: var(--frost-white);
+            opacity: 0.9;
+        }
+
+        .terms-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Checkbox Agreement */
+        .agreement-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .agreement-checkbox:hover {
+            background: rgba(212, 175, 55, 0.15);
+        }
+
+        .agreement-checkbox input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-top: 2px;
+            accent-color: var(--gold);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .agreement-checkbox label {
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .agreement-checkbox label strong {
+            color: var(--gold);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem 2rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        .submit-btn.disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: not-allowed;
+        }
+
+        .submit-btn.enabled {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            color: var(--deep-petrol);
+            box-shadow: 0 4px 20px var(--gold-glow);
+        }
+
+        .submit-btn.enabled:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--gold-glow);
+        }
+
+        .submit-btn.loading {
+            pointer-events: none;
+        }
+
+        .submit-btn .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--deep-petrol);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .submit-btn.loading .spinner {
+            display: block;
+        }
+
+        .submit-btn.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Info Note */
+        .info-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: rgba(47, 133, 146, 0.2);
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--frost-white);
+        }
+
+        .info-note i {
+            color: var(--dusty-aqua);
+            margin-top: 3px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--frost-white);
+            opacity: 0.6;
+            font-size: 0.85rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 9999;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--dusty-aqua);
+        }
+
+        .toast.error {
+            background: var(--coral);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .legal-card {
+                padding: 1.5rem;
+            }
+
+            .legal-header h1 {
+                font-size: 1.4rem;
+            }
+
+            .terms-content {
+                max-height: 300px;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>מטפל לכל אחד</span>
+        </a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="legal-card">
+            <div class="legal-header">
+                <h1><i class="fa-solid fa-file-contract"></i> הסכם שימוש ותנאי השירות</h1>
+                <p>אנא קרא/י בעיון את תנאי השימוש לפני ההמשך</p>
+                <span class="version-badge" id="version-badge">גרסה 1.0</span>
+            </div>
+
+            <div class="terms-content">
+                <h2>1. מבוא והגדרות</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+
+                <h2>2. תנאי השימוש בפלטפורמה</h2>
+                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <ul>
+                    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
+                    <li>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</li>
+                    <li>Ut enim ad minim veniam, quis nostrud exercitation</li>
+                    <li>Ullamco laboris nisi ut aliquip ex ea commodo consequat</li>
+                </ul>
+
+                <h2>3. אחריות המשתמש</h2>
+                <p>Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida.</p>
+
+                <h2>4. הגבלת אחריות</h2>
+                <p>Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis, id tincidunt sapien risus a quam. Maecenas fermentum consequat mi.</p>
+
+                <h2>5. פרטיות ואבטחת מידע</h2>
+                <p>Donec enim diam, vulputate a, vestibulum et, tempor et, urna. Mauris elementum mauris vitae tortor. In dapibus augue non sapien. Aliquam ante. Curabitur bibendum justo non orci.</p>
+
+                <h2>6. סודיות טיפולית</h2>
+                <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam.</p>
+                <ul>
+                    <li>Nullam quis risus eget urna mollis ornare vel eu leo</li>
+                    <li>Cum sociis natoque penatibus et magnis dis parturient montes</li>
+                    <li>Nascetur ridiculus mus. Nullam id dolor id nibh ultricies</li>
+                </ul>
+
+                <h2>7. ביטול והפסקת שירות</h2>
+                <p>Aenean lacinia bibendum nulla sed consectetur. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Sed posuere consectetur est at lobortis.</p>
+
+                <h2>8. שינויים בתנאי השימוש</h2>
+                <p>Vestibulum id ligula porta felis euismod semper. Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+            </div>
+
+            <div class="agreement-checkbox" onclick="toggleCheckbox()">
+                <input type="checkbox" id="agree-checkbox">
+                <label for="agree-checkbox">
+                    אני מאשר/ת כי קראתי את <strong>תנאי השימוש והמדיניות</strong> במלואם,
+                    ואני מסכים/ה לכל התנאים המפורטים לעיל. אני מבין/ה שחתימתי מהווה
+                    הסכמה מחייבת מבחינה משפטית.
+                </label>
+            </div>
+
+            <button class="submit-btn disabled" id="submit-btn" disabled onclick="signAgreement()">
+                <span class="btn-text"><i class="fa-solid fa-signature"></i> אני מסכים/ה - המשך לפורטל</span>
+                <span class="spinner"></span>
+            </button>
+
+            <div class="info-note">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>החתימה שלך נשמרת באופן מאובטח יחד עם כתובת ה-IP והתאריך לצורך תיעוד משפטי.</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 מטפל לכל אחד. כל הזכויות שמורות.</p>
+    </footer>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Scripts -->
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        // ============================================================================
+        // Legal Gate Page Logic
+        // ============================================================================
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for Supabase to initialize
+            await waitForSupabase();
+
+            // Check if user is logged in
+            const user = await AuthGuard.getCurrentUser();
+
+            if (!user) {
+                showToast('יש להתחבר תחילה', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+                return;
+            }
+
+            // Check if already signed
+            const hasConsent = await AuthGuard.hasLegalConsent(user.id);
+
+            if (hasConsent) {
+                showToast('כבר חתמת על ההסכם, מעביר אותך...', 'success');
+                setTimeout(() => {
+                    redirectToDashboard();
+                }, 1500);
+                return;
+            }
+
+            // Update version badge
+            document.getElementById('version-badge').textContent =
+                `גרסה ${AuthGuard.getLegalVersion()}`;
+        });
+
+        // Wait for Supabase client
+        function waitForSupabase() {
+            return new Promise((resolve) => {
+                if (window.supabaseClient) {
+                    resolve();
+                } else {
+                    const check = setInterval(() => {
+                        if (window.supabaseClient) {
+                            clearInterval(check);
+                            resolve();
+                        }
+                    }, 50);
+                }
+            });
+        }
+
+        // Toggle checkbox
+        function toggleCheckbox() {
+            const checkbox = document.getElementById('agree-checkbox');
+            checkbox.checked = !checkbox.checked;
+            updateButtonState();
+        }
+
+        // Update button state based on checkbox
+        function updateButtonState() {
+            const checkbox = document.getElementById('agree-checkbox');
+            const btn = document.getElementById('submit-btn');
+
+            if (checkbox.checked) {
+                btn.classList.remove('disabled');
+                btn.classList.add('enabled');
+                btn.disabled = false;
+            } else {
+                btn.classList.remove('enabled');
+                btn.classList.add('disabled');
+                btn.disabled = true;
+            }
+        }
+
+        // Prevent checkbox label click from double-toggling
+        document.getElementById('agree-checkbox').addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateButtonState();
+        });
+
+        // Sign the agreement
+        async function signAgreement() {
+            const btn = document.getElementById('submit-btn');
+
+            // Prevent double-click
+            if (btn.classList.contains('loading')) return;
+
+            btn.classList.add('loading');
+
+            try {
+                const result = await AuthGuard.signLegalAgreement();
+
+                if (result.success) {
+                    showToast('ההסכם נחתם בהצלחה! מעביר אותך...', 'success');
+                    setTimeout(() => {
+                        redirectToDashboard();
+                    }, 1500);
+                } else {
+                    throw new Error(result.error || 'שגיאה בחתימה');
+                }
+
+            } catch (error) {
+                console.error('Error signing agreement:', error);
+                showToast('שגיאה בחתימה: ' + error.message, 'error');
+                btn.classList.remove('loading');
+            }
+        }
+
+        // Redirect based on user role
+        async function redirectToDashboard() {
+            const user = await AuthGuard.getCurrentUser();
+
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const role = await AuthGuard.getUserRole(user.id);
+
+            switch (role) {
+                case 'admin':
+                    window.location.href = 'admin-dashboard.html';
+                    break;
+                case 'therapist':
+                    window.location.href = 'therapist-onboarding.html'; // Or therapist-dashboard when ready
+                    break;
+                case 'patient':
+                    window.location.href = 'landing-patient.html'; // Or patient-dashboard when ready
+                    break;
+                default:
+                    window.location.href = 'index.html';
+            }
+        }
+
+        // Show toast message
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

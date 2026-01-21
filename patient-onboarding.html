@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הרשמה לטיפול - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <style>
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --pure-white: #FFFFFF;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --coral: #FF6F61;
+            --soft-green: #4CAF50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, var(--dusty-aqua) 0%, var(--muted-teal) 50%, var(--deep-petrol) 100%);
+            min-height: 100vh;
+            color: var(--pure-white);
+            line-height: 1.8;
+        }
+
+        /* Header */
+        .header {
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 59, 70, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            color: var(--pure-white);
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            color: var(--gold);
+        }
+
+        .logo span {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--frost-white);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--gold);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1.5rem 3rem;
+        }
+
+        /* Welcome Message */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            border: 2px solid var(--gold);
+        }
+
+        .welcome-icon i {
+            font-size: 2.5rem;
+            color: var(--gold);
+        }
+
+        .welcome-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: var(--frost-white);
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section:last-of-type {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title i {
+            font-size: 1rem;
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--frost-white);
+        }
+
+        .form-group label .required {
+            color: var(--coral);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--pure-white);
+            font-family: 'Heebo', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 10px center;
+            background-size: 24px;
+            padding-left: 2.5rem;
+        }
+
+        .form-group select option {
+            background: var(--deep-petrol);
+            color: var(--pure-white);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Radio Options */
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .radio-option input {
+            display: none;
+        }
+
+        .radio-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .radio-option label i {
+            font-size: 1.2rem;
+        }
+
+        .radio-option input:checked + label {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+        }
+
+        .radio-option label:hover {
+            border-color: var(--dusty-aqua);
+            background: rgba(47, 133, 146, 0.1);
+        }
+
+        /* Privacy Note */
+        .privacy-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: rgba(47, 133, 146, 0.15);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--frost-white);
+        }
+
+        .privacy-note i {
+            color: var(--dusty-aqua);
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 1.1rem 2rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            color: var(--deep-petrol);
+            box-shadow: 0 4px 20px var(--gold-glow);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--gold-glow);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn .spinner {
+            display: none;
+            width: 22px;
+            height: 22px;
+            border: 3px solid var(--deep-petrol);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .submit-btn.loading .spinner {
+            display: block;
+        }
+
+        .submit-btn.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 9999;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: var(--soft-green); }
+        .toast.error { background: var(--coral); }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 1rem 2rem;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .welcome-section h1 {
+                font-size: 1.5rem;
+            }
+
+            .radio-group {
+                flex-direction: column;
+            }
+
+            .radio-option {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>מטפל לכל אחד</span>
+        </a>
+        <a href="landing-patient.html" class="back-btn">
+            <i class="fa-solid fa-arrow-right"></i>
+            חזרה
+        </a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-icon">
+                <i class="fa-solid fa-hand-holding-heart"></i>
+            </div>
+            <h1>ברוכים הבאים</h1>
+            <p>מלאו את הפרטים הבאים ונתאים לכם מטפל מקצועי</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card">
+            <form id="patient-form">
+                <!-- Personal Details -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fa-solid fa-user"></i>
+                        פרטים אישיים
+                    </div>
+
+                    <div class="form-group">
+                        <label>שם מלא <span class="required">*</span></label>
+                        <input type="text" id="full-name" name="full_name" required
+                               placeholder="השם המלא שלך">
+                    </div>
+
+                    <div class="form-group">
+                        <label>טלפון נייד <span class="required">*</span></label>
+                        <input type="tel" id="phone" name="phone" required
+                               placeholder="050-0000000" pattern="[0-9\-]+">
+                    </div>
+
+                    <div class="form-group">
+                        <label>עיר מגורים <span class="required">*</span></label>
+                        <select id="city" name="city" required>
+                            <option value="">בחר עיר...</option>
+                            <option value="תל אביב">תל אביב</option>
+                            <option value="ירושלים">ירושלים</option>
+                            <option value="חיפה">חיפה</option>
+                            <option value="באר שבע">באר שבע</option>
+                            <option value="ראשון לציון">ראשון לציון</option>
+                            <option value="פתח תקווה">פתח תקווה</option>
+                            <option value="אשדוד">אשדוד</option>
+                            <option value="נתניה">נתניה</option>
+                            <option value="חולון">חולון</option>
+                            <option value="בני ברק">בני ברק</option>
+                            <option value="רמת גן">רמת גן</option>
+                            <option value="אשקלון">אשקלון</option>
+                            <option value="הרצליה">הרצליה</option>
+                            <option value="כפר סבא">כפר סבא</option>
+                            <option value="רעננה">רעננה</option>
+                            <option value="מודיעין">מודיעין</option>
+                            <option value="other">אחר</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="other-city-group" style="display: none;">
+                        <label>שם העיר</label>
+                        <input type="text" id="other-city" name="other_city"
+                               placeholder="הזן את שם העיר">
+                    </div>
+                </div>
+
+                <!-- Therapy Preferences -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fa-solid fa-sliders"></i>
+                        העדפות טיפול
+                    </div>
+
+                    <div class="form-group">
+                        <label>איך תעדיפו לקבל את הטיפול? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="pref-zoom" name="therapy_preference" value="zoom" required>
+                                <label for="pref-zoom">
+                                    <i class="fa-solid fa-video"></i>
+                                    זום / אונליין
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="pref-frontal" name="therapy_preference" value="frontal">
+                                <label for="pref-frontal">
+                                    <i class="fa-solid fa-people-arrows"></i>
+                                    פרונטלי / פנים אל פנים
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="pref-both" name="therapy_preference" value="both">
+                                <label for="pref-both">
+                                    <i class="fa-solid fa-arrows-left-right"></i>
+                                    גמיש - שניהם
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>העדפת מגדר מטפל/ת</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="gender-male" name="therapist_gender" value="male">
+                                <label for="gender-male">
+                                    <i class="fa-solid fa-mars"></i>
+                                    מטפל
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="gender-female" name="therapist_gender" value="female">
+                                <label for="gender-female">
+                                    <i class="fa-solid fa-venus"></i>
+                                    מטפלת
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="gender-any" name="therapist_gender" value="any" checked>
+                                <label for="gender-any">
+                                    <i class="fa-solid fa-equals"></i>
+                                    לא משנה
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reason for Seeking Help -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fa-solid fa-comment-medical"></i>
+                        ספרו לנו קצת
+                    </div>
+
+                    <div class="form-group">
+                        <label>במה נוכל לעזור? <span class="required">*</span></label>
+                        <textarea id="main-concern" name="main_concern" required
+                                  placeholder="תארו בקצרה את מה שאתם חווים או מחפשים... (כל מה שתרגישו בנוח לשתף)"></textarea>
+                    </div>
+                </div>
+
+                <!-- Privacy Note -->
+                <div class="privacy-note">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>המידע שלכם נשמר באופן מאובטח ומוגן. אנחנו מתחייבים לסודיות מלאה ולשימוש במידע רק לצורך התאמת מטפל מתאים עבורכם.</span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" id="submit-btn">
+                    <span class="btn-text"><i class="fa-solid fa-paper-plane"></i> שלחו בקשה</span>
+                    <span class="spinner"></span>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Patient Flow Script -->
+    <script src="js/patient-flow.js"></script>
+</body>
+</html>

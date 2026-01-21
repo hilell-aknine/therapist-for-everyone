@@ -1355,42 +1355,71 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://vhzdrywvpgaqyivprbds.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoemRyeXd2cGdhcXlpdnByYmRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2NjkwMTksImV4cCI6MjA4NDI0NTAxOX0.h0fCrmenxcXFhtFO0UtqYVMqyl0EAjGt5g7OY1FZ9-I';
-
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Admin emails (authorized users)
-        const ADMIN_EMAILS = [
-            'hilellaknine@gmail.com',
-            'alus2132@gmail.com'
-        ];
+        // ============================================================================
+        // Admin Dashboard - Uses AuthGuard for DB-based role verification
+        // NO hardcoded emails - admin check is done via profiles.role = 'admin'
+        // ============================================================================
 
         let currentUser = null;
         let allCandidates = [];
         let currentFilter = 'screening_submitted';
         let currentCandidate = null;
 
-        // Initialize
+        // Initialize - Wait for AuthGuard to be ready
         document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for supabase-client.js and auth-guard.js to initialize
+            await waitForAuthGuard();
             await checkAdminAccess();
         });
 
+        // Wait for AuthGuard to be available
+        function waitForAuthGuard() {
+            return new Promise((resolve) => {
+                if (window.AuthGuard && window.supabaseClient) {
+                    resolve();
+                } else {
+                    const check = setInterval(() => {
+                        if (window.AuthGuard && window.supabaseClient) {
+                            clearInterval(check);
+                            resolve();
+                        }
+                    }, 50);
+                    // Timeout after 5 seconds
+                    setTimeout(() => {
+                        clearInterval(check);
+                        console.error('AuthGuard not loaded');
+                        resolve();
+                    }, 5000);
+                }
+            });
+        }
+
         async function checkAdminAccess() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
+            // Step 1: Check if user is logged in
+            const user = await AuthGuard.getCurrentUser();
 
             if (!user) {
                 showAccessDenied();
                 return;
             }
 
-            if (!ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+            // Step 2: Check legal consent first
+            const hasConsent = await AuthGuard.hasLegalConsent(user.id);
+            if (!hasConsent) {
+                window.location.href = 'legal-gate.html';
+                return;
+            }
+
+            // Step 3: Check if user is admin (via DB, NOT hardcoded emails!)
+            const isAdmin = await AuthGuard.isAdmin(user.id);
+
+            if (!isAdmin) {
+                console.log('Access denied: User is not an admin (checked via profiles.role)');
                 showAccessDenied();
                 return;
             }
 
-            // User is admin
+            // User is admin - show dashboard
             currentUser = user;
             showDashboard();
             loadCandidates();
@@ -1413,7 +1442,7 @@
 
         async function loadCandidates() {
             try {
-                const { data, error } = await supabaseClient
+                const { data, error } = await window.supabaseClient
                     .from('therapists')
                     .select('*')
                     .order('ai_score', { ascending: false, nullsFirst: false })
@@ -1881,7 +1910,7 @@
                 console.log('Calling Edge Function: analyze-therapist');
                 console.log('Payload:', { questionnaire_data: questionnaire, candidate_name: candidateName });
 
-                const { data, error: invokeError } = await supabaseClient.functions.invoke('analyze-therapist', {
+                const { data, error: invokeError } = await window.supabaseClient.functions.invoke('analyze-therapist', {
                     body: {
                         questionnaire_data: questionnaire,
                         candidate_name: candidateName
@@ -1909,7 +1938,7 @@
 
                 // ===== SAVE TO DATABASE =====
                 console.log('Saving to database...');
-                const { error: dbError } = await supabaseClient
+                const { error: dbError } = await window.supabaseClient
                     .from('therapists')
                     .update({
                         ai_score: aiScore,
@@ -2031,7 +2060,7 @@
                     updateData.is_active = false;
                 }
 
-                const { error } = await supabaseClient
+                const { error } = await window.supabaseClient
                     .from('therapists')
                     .update(updateData)
                     .eq('id', id);

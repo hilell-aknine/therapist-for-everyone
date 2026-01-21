@@ -10,15 +10,18 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/auth-guard.js"></script>
     <script>
-        // Legal Gate Check - runs immediately
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Wait for scripts to initialize
-            await new Promise(r => setTimeout(r, 100));
-            if (window.AuthGuard) {
-                const hasConsent = await AuthGuard.checkLegalConsent();
-                if (!hasConsent) return; // Will redirect to legal-gate.html
-            }
-        });
+        // NOTE: Legal Gate check DISABLED for onboarding
+        // Legal consent will be enforced later at matching/approval phase
+        // Keeping auth-guard.js loaded for future use
+
+        // DISABLED:
+        // document.addEventListener('DOMContentLoaded', async () => {
+        //     await new Promise(r => setTimeout(r, 100));
+        //     if (window.AuthGuard) {
+        //         const hasConsent = await AuthGuard.checkLegalConsent();
+        //         if (!hasConsent) return;
+        //     }
+        // });
     </script>
     <style>
         :root {

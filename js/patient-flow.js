@@ -40,7 +40,8 @@
         });
     }
 
-    // Check if user has access (logged in + legal consent)
+    // Check if user has access (logged in)
+    // NOTE: Legal consent check REMOVED - will be enforced later at matching phase
     async function checkAccess() {
         const user = await AuthGuard.getCurrentUser();
 
@@ -52,12 +53,12 @@
             return false;
         }
 
-        // Check legal consent
-        const hasConsent = await AuthGuard.hasLegalConsent(user.id);
-        if (!hasConsent) {
-            window.location.href = 'legal-gate.html';
-            return false;
-        }
+        // DISABLED: Legal consent will be checked later, not during onboarding
+        // const hasConsent = await AuthGuard.hasLegalConsent(user.id);
+        // if (!hasConsent) {
+        //     window.location.href = 'legal-gate.html';
+        //     return false;
+        // }
 
         // Check if already registered as patient
         const existingPatient = await checkExistingPatient(user.id);

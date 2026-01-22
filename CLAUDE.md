@@ -6,9 +6,22 @@
 ## 1. Project Vision & Core Principles
 * **Purpose:** A community portal for high-quality therapists offering subsidized/free mental health support.
 * **Key Distinction:** Not just a directory. A managed community with AI screening and strict quality control.
-* **The "Iron Rule" (Critical):** **NO ACTION without Legal Consent.**
-    * No user (Therapist or Patient) can access the dashboard or view data without a valid, signed record in the `legal_consents` table.
-    * This check must happen on *every* page load (Middleware/Auth Guard).
+
+### Lead Capture First Policy (IMPORTANT!)
+* **Onboarding forms DO NOT require login.**
+* Anyone can fill out the patient/therapist questionnaire without creating an account.
+* Data is saved directly to DB as a "lead" (contact_requests or patients/therapists tables).
+* Login/Auth is NOT a critical point for lead capture.
+
+### Legal Gate Policy
+* **Legal consent is required ONLY for:**
+    * Accessing dashboards (admin/therapist/patient dashboards)
+    * Matching phase (before being assigned a therapist)
+    * Viewing sensitive data
+* **Legal consent is NOT required for:**
+    * Filling onboarding forms
+    * Leaving contact details
+    * Browsing public pages
 
 ## 2. User Roles & Permissions (Supabase RLS)
 * **Admin ("God Mode"):**

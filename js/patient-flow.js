@@ -40,36 +40,25 @@
         });
     }
 
-    // Check if user has access (logged in)
-    // NOTE: Legal consent check REMOVED - will be enforced later at matching phase
+    // Check if user has access
+    // NOTE: Auth is NOT required for lead capture - forms work for everyone
     async function checkAccess() {
-        const user = await AuthGuard.getCurrentUser();
+        // Check if user is logged in (optional - for prefill and duplicate check)
+        const user = window.AuthGuard ? await AuthGuard.getCurrentUser() : null;
 
-        if (!user) {
-            showToast('יש להתחבר תחילה', 'error');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1500);
-            return false;
+        if (user) {
+            // If logged in, check if already registered as patient
+            const existingPatient = await checkExistingPatient(user.id);
+            if (existingPatient) {
+                showToast('כבר נרשמת כמטופל, מעביר אותך...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'patient-dashboard.html';
+                }, 1500);
+                return false;
+            }
         }
 
-        // DISABLED: Legal consent will be checked later, not during onboarding
-        // const hasConsent = await AuthGuard.hasLegalConsent(user.id);
-        // if (!hasConsent) {
-        //     window.location.href = 'legal-gate.html';
-        //     return false;
-        // }
-
-        // Check if already registered as patient
-        const existingPatient = await checkExistingPatient(user.id);
-        if (existingPatient) {
-            showToast('כבר נרשמת כמטופל, מעביר אותך...', 'success');
-            setTimeout(() => {
-                window.location.href = 'patient-dashboard.html';
-            }, 1500);
-            return false;
-        }
-
+        // No login required - anyone can fill the form
         return true;
     }
 
@@ -94,9 +83,12 @@
         }
     }
 
-    // Pre-fill form with user data from profile
+    // Pre-fill form with user data from profile (if logged in)
     async function prefillUserData() {
         try {
+            // Only prefill if user is logged in
+            if (!window.AuthGuard) return;
+
             const user = await AuthGuard.getCurrentUser();
             if (!user) return;
 
@@ -156,9 +148,6 @@
         submitBtn.disabled = true;
 
         try {
-            const user = await AuthGuard.getCurrentUser();
-            if (!user) throw new Error('משתמש לא מחובר');
-
             // Collect form data
             const formData = collectFormData();
 
@@ -167,21 +156,28 @@
                 throw new Error('אנא מלאו את כל השדות הנדרשים');
             }
 
-            // Step 1: Insert into patients table
-            await insertPatientRecord(user.id, formData);
+            // Check if user is logged in (optional)
+            const user = window.AuthGuard ? await AuthGuard.getCurrentUser() : null;
 
-            // Step 2: Update profile role to 'patient'
-            await updateProfileRole(user.id, 'patient');
+            if (user) {
+                // Logged in user - save to patients table
+                await insertPatientRecord(user.id, formData);
+                await updateProfileRole(user.id, 'patient');
+                await updateProfileDetails(user.id, formData);
 
-            // Step 3: Update profile with name and phone if changed
-            await updateProfileDetails(user.id, formData);
+                showToast('הבקשה נשלחה בהצלחה! מעביר אותך...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'patient-dashboard.html';
+                }, 2000);
+            } else {
+                // Anonymous user - save as lead to contact_requests
+                await insertContactRequest(formData);
 
-            // Success!
-            showToast('הבקשה נשלחה בהצלחה! מעביר אותך...', 'success');
-
-            setTimeout(() => {
-                window.location.href = 'patient-dashboard.html';
-            }, 2000);
+                showToast('הפרטים נשלחו בהצלחה! ניצור איתך קשר בהקדם', 'success');
+                setTimeout(() => {
+                    window.location.href = 'thank-you.html';
+                }, 2000);
+            }
 
         } catch (error) {
             console.error('Error submitting form:', error);
@@ -248,6 +244,36 @@
     // ============================================================================
     // Database Operations
     // ============================================================================
+
+    // Insert anonymous lead to contact_requests table
+    async function insertContactRequest(formData) {
+        const contactData = {
+            full_name: formData.full_name,
+            phone: formData.phone,
+            email: formData.email || null,
+            city: formData.city,
+            request_type: 'patient',
+            therapy_preference: formData.therapy_preference,
+            therapist_gender: formData.therapist_gender,
+            message: formData.main_concern,
+            status: 'new',
+            source: 'patient-onboarding'
+        };
+
+        const { data, error } = await window.supabaseClient
+            .from('contact_requests')
+            .insert(contactData)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error inserting contact request:', error);
+            throw new Error('שגיאה בשמירת הפרטים');
+        }
+
+        console.log('Contact request created:', data);
+        return data;
+    }
 
     async function insertPatientRecord(userId, formData) {
         const patientData = {

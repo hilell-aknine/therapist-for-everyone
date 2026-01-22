@@ -745,51 +745,45 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
-            // Check if user is logged in
+            // Check if user is logged in (optional - for prefill and duplicate check)
             const { data: { user } } = await supabaseClient.auth.getUser();
 
-            if (!user) {
-                // Not logged in - redirect to main page
-                showToast('יש להתחבר כדי להצטרף כמטפל', 'error');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1500);
-                return;
-            }
+            if (user) {
+                currentUser = user;
 
-            currentUser = user;
+                // Check if user already registered as therapist
+                const { data: existingTherapist } = await supabaseClient
+                    .from('therapists')
+                    .select('id, status')
+                    .eq('user_id', user.id)
+                    .single();
 
-            // Check if user already registered as therapist
-            const { data: existingTherapist } = await supabaseClient
-                .from('therapists')
-                .select('id, status')
-                .eq('user_id', user.id)
-                .single();
-
-            if (existingTherapist) {
-                if (existingTherapist.status === 'active') {
-                    showToast('אתה כבר רשום כמטפל פעיל במערכת!', 'info');
-                } else {
-                    showToast('הבקשה שלך להצטרפות ממתינה לאישור', 'info');
+                if (existingTherapist) {
+                    if (existingTherapist.status === 'active') {
+                        showToast('אתה כבר רשום כמטפל פעיל במערכת!', 'info');
+                    } else {
+                        showToast('הבקשה שלך להצטרפות ממתינה לאישור', 'info');
+                    }
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                    return;
                 }
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
-                return;
+
+                // Pre-fill from profile
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('full_name, phone')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile) {
+                    if (profile.full_name) document.getElementById('t-name').value = profile.full_name;
+                    if (profile.phone) document.getElementById('t-phone').value = profile.phone;
+                }
             }
 
-            // Pre-fill from profile
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('full_name, phone')
-                .eq('id', user.id)
-                .single();
-
-            if (profile) {
-                if (profile.full_name) document.getElementById('t-name').value = profile.full_name;
-                if (profile.phone) document.getElementById('t-phone').value = profile.phone;
-            }
-
+            // No login required - anyone can fill the form
             // Setup event listeners
             setupEventListeners();
         });
@@ -947,52 +941,72 @@
             showLoading();
 
             try {
-                // Update profile
-                await supabaseClient
-                    .from('profiles')
-                    .update({
-                        full_name: therapistData.name,
-                        phone: therapistData.phone,
-                        role: 'therapist'
-                    })
-                    .eq('id', currentUser.id);
+                let therapistRecord = null;
 
-                // Upsert therapist record (insert or update if exists)
-                // Use select() to get the therapist ID for AI analysis
-                const { data: therapistRecord, error } = await supabaseClient
-                    .from('therapists')
-                    .upsert({
-                        user_id: currentUser.id,
-                        email: currentUser.email,
-                        full_name: therapistData.name,
-                        phone: therapistData.phone,
-                        bio: therapistData.bio,
-                        specializations: [therapistData.specialization],
-                        experience_years: therapistData.experience,
-                        city: therapistData.city,
-                        location: therapistData.city,
-                        price_per_session: therapistData.price,
-                        works_online: therapistData.worksOnline,
-                        status: 'screening_submitted',
-                        questionnaire_data: therapistData.questionnaire,
-                        is_active: false,
-                        is_verified: false
-                    }, { onConflict: 'user_id' })
-                    .select('id')
-                    .single();
+                if (currentUser) {
+                    // LOGGED IN USER - Full flow with therapists table
+                    // Update profile
+                    await supabaseClient
+                        .from('profiles')
+                        .update({
+                            full_name: therapistData.name,
+                            phone: therapistData.phone,
+                            role: 'therapist'
+                        })
+                        .eq('id', currentUser.id);
 
-                if (error) throw error;
+                    // Upsert therapist record (insert or update if exists)
+                    const { data, error } = await supabaseClient
+                        .from('therapists')
+                        .upsert({
+                            user_id: currentUser.id,
+                            email: currentUser.email,
+                            full_name: therapistData.name,
+                            phone: therapistData.phone,
+                            bio: therapistData.bio,
+                            specializations: [therapistData.specialization],
+                            experience_years: therapistData.experience,
+                            city: therapistData.city,
+                            location: therapistData.city,
+                            price_per_session: therapistData.price,
+                            works_online: therapistData.worksOnline,
+                            status: 'screening_submitted',
+                            questionnaire_data: therapistData.questionnaire,
+                            is_active: false,
+                            is_verified: false
+                        }, { onConflict: 'user_id' })
+                        .select('id')
+                        .single();
 
-                // Create contact request for notification
-                await supabaseClient
-                    .from('contact_requests')
-                    .insert({
-                        name: therapistData.name,
-                        phone: therapistData.phone,
-                        email: currentUser.email,
-                        request_type: 'therapist',
-                        message: `התמחות: ${therapistData.specialization}\nעיר: ${therapistData.city}\nניסיון: ${therapistData.experience} שנים\nמחיר: ${therapistData.price || 'התנדבות'}\nזום: ${therapistData.worksOnline ? 'כן' : 'לא'}\n\n${therapistData.bio}`
-                    });
+                    if (error) throw error;
+                    therapistRecord = data;
+
+                    // Create contact request for notification
+                    await supabaseClient
+                        .from('contact_requests')
+                        .insert({
+                            name: therapistData.name,
+                            phone: therapistData.phone,
+                            email: currentUser.email,
+                            request_type: 'therapist',
+                            message: `התמחות: ${therapistData.specialization}\nעיר: ${therapistData.city}\nניסיון: ${therapistData.experience} שנים\nמחיר: ${therapistData.price || 'התנדבות'}\nזום: ${therapistData.worksOnline ? 'כן' : 'לא'}\n\n${therapistData.bio}`
+                        });
+                } else {
+                    // ANONYMOUS USER - Save as lead to contact_requests only
+                    const { error } = await supabaseClient
+                        .from('contact_requests')
+                        .insert({
+                            full_name: therapistData.name,
+                            phone: therapistData.phone,
+                            request_type: 'therapist',
+                            city: therapistData.city,
+                            status: 'new',
+                            source: 'therapist-onboarding',
+                            message: `התמחות: ${therapistData.specialization}\nעיר: ${therapistData.city}\nניסיון: ${therapistData.experience} שנים\nמחיר: ${therapistData.price || 'התנדבות'}\nזום: ${therapistData.worksOnline ? 'כן' : 'לא'}\n\nביו: ${therapistData.bio}\n\n--- שאלון מקצועי ---\nמקרה מורכב: ${therapistData.questionnaire?.case_study || ''}\nטכניקות טראומה: ${therapistData.questionnaire?.trauma_techniques || ''}\nהתנגדויות: ${therapistData.questionnaire?.handling_resistance || ''}\nמוטיבציה: ${therapistData.questionnaire?.why_therapist || ''}\nחזון: ${therapistData.questionnaire?.role_vision || ''}`
+                        });
+
+                    if (error) throw error;
+                }
 
                 hideLoading();
                 showToast('הבקשה נשלחה בהצלחה!', 'success');
@@ -1007,7 +1021,7 @@
                 });
 
                 // ===== AUTOMATIC AI ANALYSIS (Background) =====
-                // Run in background - don't block user experience
+                // Run in background - only for logged in users with therapist record
                 if (therapistRecord?.id) {
                     runBackgroundAIAnalysis(therapistRecord.id, therapistData.name, therapistData.questionnaire);
                 }

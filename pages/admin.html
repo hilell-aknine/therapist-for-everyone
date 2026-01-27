@@ -490,9 +490,10 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        // Supabase Configuration
         const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let patients = [];
         let therapists = [];
@@ -501,7 +502,7 @@
         let currentTherapistFilter = 'all';
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await db.auth.getSession();
             if (session) showDashboard(session.user);
         });
 
@@ -510,7 +511,7 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                const { data, error } = await db.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 showDashboard(data.user);
             } catch (error) {
@@ -519,7 +520,7 @@
         });
 
         async function logout() {
-            await supabase.auth.signOut();
+            await db.auth.signOut();
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
         }
@@ -537,19 +538,19 @@
         }
 
         async function loadPatients() {
-            const { data } = await supabase.from('patients').select('*').order('created_at', { ascending: false });
+            const { data } = await db.from('patients').select('*').order('created_at', { ascending: false });
             patients = data || [];
             renderPatients();
         }
 
         async function loadTherapists() {
-            const { data } = await supabase.from('therapists').select('*').order('created_at', { ascending: false });
+            const { data } = await db.from('therapists').select('*').order('created_at', { ascending: false });
             therapists = data || [];
             renderTherapists();
         }
 
         async function loadMatches() {
-            const { data } = await supabase.from('matches').select('*, therapists(full_name), patients(full_name)').order('created_at', { ascending: false });
+            const { data } = await db.from('matches').select('*, therapists(full_name), patients(full_name)').order('created_at', { ascending: false });
             matches = data || [];
             renderMatches();
         }
@@ -781,7 +782,7 @@
 
         async function updatePatientStatus(id) {
             const status = document.getElementById('patient-status-select').value;
-            const { error } = await supabase.from('patients').update({ status }).eq('id', id);
+            const { error } = await db.from('patients').update({ status }).eq('id', id);
             if (error) { showToast('שגיאה בעדכון', 'error'); return; }
             showToast('הסטטוס עודכן', 'success');
             closeModal('patient-modal');
@@ -790,7 +791,7 @@
 
         async function updateTherapistStatus(id) {
             const status = document.getElementById('therapist-status-select').value;
-            const { error } = await supabase.from('therapists').update({ status }).eq('id', id);
+            const { error } = await db.from('therapists').update({ status }).eq('id', id);
             if (error) { showToast('שגיאה בעדכון', 'error'); return; }
             showToast('הסטטוס עודכן', 'success');
             closeModal('therapist-modal');
@@ -798,7 +799,7 @@
         }
 
         async function togglePatientVerification(id, verified) {
-            const { error } = await supabase.from('patients').update({
+            const { error } = await db.from('patients').update({
                 id_verified: verified,
                 verified_at: verified ? new Date().toISOString() : null
             }).eq('id', id);
@@ -808,7 +809,7 @@
         }
 
         async function toggleTherapistVerification(id, verified) {
-            const { error } = await supabase.from('therapists').update({
+            const { error } = await db.from('therapists').update({
                 documents_verified: verified,
                 verified_at: verified ? new Date().toISOString() : null
             }).eq('id', id);
@@ -818,7 +819,7 @@
         }
 
         async function approveTherapist(id) {
-            const { error } = await supabase.from('therapists').update({ status: 'approved' }).eq('id', id);
+            const { error } = await db.from('therapists').update({ status: 'approved' }).eq('id', id);
             if (error) { showToast('שגיאה באישור', 'error'); return; }
             showToast('המטפל אושר!', 'success');
             loadTherapists();
@@ -828,7 +829,7 @@
             const therapistId = document.getElementById('match-therapist-select').value;
             if (!therapistId) { showToast('בחר מטפל', 'error'); return; }
 
-            const { error } = await supabase.from('matches').insert({
+            const { error } = await db.from('matches').insert({
                 patient_id: patientId,
                 therapist_id: therapistId,
                 status: 'new'
@@ -840,14 +841,14 @@
                 return;
             }
 
-            await supabase.from('patients').update({ status: 'matched' }).eq('id', patientId);
+            await db.from('patients').update({ status: 'matched' }).eq('id', patientId);
             showToast('השידוך נוצר!', 'success');
             closeModal('patient-modal');
             loadAllData();
         }
 
         async function updateMatchStatus(id, status) {
-            const { error } = await supabase.from('matches').update({ status }).eq('id', id);
+            const { error } = await db.from('matches').update({ status }).eq('id', id);
             if (error) { showToast('שגיאה בעדכון', 'error'); return; }
             showToast('הסטטוס עודכן', 'success');
             loadMatches();

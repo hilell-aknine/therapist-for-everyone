@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>בקשה לטיפול - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2F8592;
+            --primary-dark: #003B46;
+            --gold: #D4AF37;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #1a1a2e;
+            --text-light: #6c757d;
+            --border: #e0e0e0;
+            --success: #28a745;
+            --error: #dc3545;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .header p { opacity: 0.9; }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .form-card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title i { color: var(--gold); }
+        .form-group { margin-bottom: 1.5rem; }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        label .required { color: var(--error); }
+        .label-hint {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        textarea { min-height: 100px; resize: vertical; }
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .checkbox-group label { margin: 0; font-weight: 400; cursor: pointer; }
+        .radio-group { display: flex; flex-wrap: wrap; gap: 1rem; }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.2rem;
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .radio-option:hover { border-color: var(--primary); }
+        .radio-option input[type="radio"] { width: 18px; height: 18px; }
+        .info-box {
+            background: linear-gradient(135deg, rgba(47, 133, 146, 0.1), rgba(0, 59, 70, 0.05));
+            border: 1px solid rgba(47, 133, 146, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--primary-dark);
+        }
+        .info-box i { color: var(--primary); margin-left: 0.5rem; }
+        .sensitive-notice {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        .sensitive-notice i { color: var(--gold); font-size: 1.1rem; flex-shrink: 0; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), #c9a227);
+            color: var(--primary-dark);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { background: var(--success); color: white; }
+        .toast.error { background: var(--error); color: white; }
+        .success-message { text-align: center; padding: 3rem 2rem; }
+        .success-message i { font-size: 4rem; color: var(--success); margin-bottom: 1rem; }
+        .success-message h2 { color: var(--primary-dark); margin-bottom: 1rem; }
+        .success-message p { color: var(--text-light); }
+        .hidden { display: none; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 600px) {
+            .row { grid-template-columns: 1fr; }
+            .container { padding: 1rem; }
+            .form-card { padding: 1.5rem; }
+            .radio-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fa-solid fa-heart-pulse"></i> מטפל לכל אחד</h1>
+        <p>בקשה לקבלת טיפול רגשי</p>
+    </div>
+
+    <div class="container">
+        <form id="patient-form">
+            <!-- Section 1: Basic Info -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-user"></i> פרטים אישיים</h2>
+
+                <div class="info-box">
+                    <i class="fa-solid fa-lock"></i>
+                    כל המידע שתמסור/י ישמר בסודיות מוחלטת ויהיה נגיש רק לצוות המקצועי.
+                </div>
+
+                <div class="form-group">
+                    <label>שם מלא <span class="required">*</span></label>
+                    <input type="text" name="full_name" required placeholder="שם פרטי ומשפחה">
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>טלפון <span class="required">*</span></label>
+                        <input type="tel" name="phone" required placeholder="050-0000000">
+                    </div>
+                    <div class="form-group">
+                        <label>אימייל</label>
+                        <input type="email" name="email" placeholder="your@email.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>עיר מגורים</label>
+                    <input type="text" name="city" placeholder="תל אביב">
+                </div>
+
+                <div class="form-group">
+                    <label>איש קשר לחירום <span class="label-hint">(שם + טלפון)</span></label>
+                    <input type="text" name="emergency_contact" placeholder="שם ומספר טלפון">
+                </div>
+            </div>
+
+            <!-- Section 2: Preferences -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-sliders"></i> העדפות טיפול</h2>
+
+                <div class="form-group">
+                    <label>איך תעדיף/י לקבל טיפול? <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="therapy_type" value="online" required>
+                            <span><i class="fa-solid fa-video"></i> זום (אונליין)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="therapy_type" value="in_person">
+                            <span><i class="fa-solid fa-building"></i> פרונטלי</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="therapy_type" value="both">
+                            <span><i class="fa-solid fa-check-double"></i> שניהם</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>העדפת מגדר המטפל/ת</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="therapist_gender_preference" value="any" checked>
+                            <span>לא משנה</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="therapist_gender_preference" value="female">
+                            <span>מטפלת (אישה)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="therapist_gender_preference" value="male">
+                            <span>מטפל (גבר)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Deep Questions -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-comments"></i> ספר/י לנו על עצמך</h2>
+
+                <div class="form-group">
+                    <label>מה הסיבה העיקרית שאת/ה מחפש/ת טיפול? <span class="required">*</span></label>
+                    <textarea name="q_main_reason" required placeholder="תאר/י בקצרה את המצב או האתגר שאיתו את/ה מתמודד/ת..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>האם עברת טיפול רגשי בעבר?</label>
+                    <textarea name="q_previous_therapy" placeholder="אם כן, ספר/י בקצרה על הניסיון..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>מה את/ה מקווה להשיג מהטיפול?</label>
+                    <textarea name="q_expectations" placeholder="מה היית רוצה שישתנה בחיים שלך?"></textarea>
+                </div>
+            </div>
+
+            <!-- Section 4: Sensitive Info (Optional) -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-shield-heart"></i> מידע רגיש (אופציונלי)</h2>
+
+                <div class="sensitive-notice">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <div>
+                        המידע הבא יעזור לנו למצוא את המטפל/ת המתאים/ה ביותר עבורך.
+                        <strong>הכל אופציונלי</strong> - שתף/י רק מה שנוח לך.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>רקע משפחתי <span class="label-hint">(יחסים עם הורים, אחים, זוגיות)</span></label>
+                    <textarea name="q_family_background" placeholder="אופציונלי - שתף/י רק אם נוח לך..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>רקע רפואי רלוונטי <span class="label-hint">(מחלות כרוניות, אשפוזים)</span></label>
+                    <textarea name="q_medical_history" placeholder="אופציונלי..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>תרופות <span class="label-hint">(אם נוטל/ת כרגע)</span></label>
+                    <input type="text" name="q_medications" placeholder="אופציונלי...">
+                </div>
+
+                <div class="form-group">
+                    <label>מידע נוסף שחשוב לך לשתף</label>
+                    <textarea name="q_additional_info" placeholder="כל מידע שיכול לעזור לנו..."></textarea>
+                </div>
+            </div>
+
+            <!-- Section 5: Declarations -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-shield-check"></i> הצהרות</h2>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="age_confirmed" name="age_confirmed" required>
+                        <label for="age_confirmed">
+                            אני מצהיר/ה שאני מעל גיל 18 <span class="required">*</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="health_declaration_confirmed" name="health_declaration_confirmed" required>
+                        <label for="health_declaration_confirmed">
+                            אני מאשר/ת שהמידע שמסרתי נכון למיטב ידיעתי, ומבין/ה שהשירות אינו מחליף טיפול רפואי או פסיכיאטרי <span class="required">*</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms_confirmed" name="terms_confirmed" required>
+                        <label for="terms_confirmed">
+                            אני מאשר/ת שקראתי והבנתי את תנאי השימוש ומדיניות הפרטיות <span class="required">*</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submit-btn">
+                <i class="fa-solid fa-paper-plane"></i>
+                שליחת הבקשה
+            </button>
+        </form>
+
+        <!-- Success Message -->
+        <div class="form-card hidden" id="success-message">
+            <div class="success-message">
+                <i class="fa-solid fa-circle-check"></i>
+                <h2>הבקשה נשלחה בהצלחה!</h2>
+                <p>תודה על פנייתך. נבדוק את הפרטים וניצור איתך קשר בהקדם.<br>בינתיים, אנחנו כאן בשבילך.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const form = document.getElementById('patient-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const successMessage = document.getElementById('success-message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
+
+            try {
+                const formData = new FormData(form);
+
+                const questionnaire = {
+                    main_reason: formData.get('q_main_reason') || '',
+                    previous_therapy: formData.get('q_previous_therapy') || '',
+                    expectations: formData.get('q_expectations') || '',
+                    family_background: formData.get('q_family_background') || '',
+                    medical_history: formData.get('q_medical_history') || '',
+                    medications: formData.get('q_medications') || '',
+                    emergency_contact: formData.get('emergency_contact') || '',
+                    additional_info: formData.get('q_additional_info') || ''
+                };
+
+                const data = {
+                    full_name: formData.get('full_name'),
+                    email: formData.get('email') || null,
+                    phone: formData.get('phone'),
+                    city: formData.get('city') || null,
+                    therapy_type: formData.get('therapy_type'),
+                    therapist_gender_preference: formData.get('therapist_gender_preference') || 'any',
+                    questionnaire: questionnaire,
+                    age_confirmed: formData.get('age_confirmed') === 'on',
+                    health_declaration_confirmed: formData.get('health_declaration_confirmed') === 'on',
+                    terms_confirmed: formData.get('terms_confirmed') === 'on',
+                    id_verified: false,
+                    status: 'new'
+                };
+
+                const { error } = await supabase.from('patients').insert(data);
+                if (error) throw error;
+
+                form.classList.add('hidden');
+                successMessage.classList.remove('hidden');
+                showToast('הבקשה נשלחה בהצלחה!', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('שגיאה בשליחת הטופס. נסה שוב.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שליחת הבקשה';
+            }
+        });
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+    </script>
+</body>
+</html>

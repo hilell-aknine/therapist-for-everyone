@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הצטרפות כמטפל/ת - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2F8592;
+            --primary-dark: #003B46;
+            --gold: #D4AF37;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #1a1a2e;
+            --text-light: #6c757d;
+            --border: #e0e0e0;
+            --success: #28a745;
+            --error: #dc3545;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .header p { opacity: 0.9; }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .form-card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title i { color: var(--gold); }
+        .form-group { margin-bottom: 1.5rem; }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        label .required { color: var(--error); }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        textarea { min-height: 120px; resize: vertical; }
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .checkbox-group label { margin: 0; font-weight: 400; cursor: pointer; }
+        .info-box {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        .info-box i { color: var(--gold); font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), #c9a227);
+            color: var(--primary-dark);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { background: var(--success); color: white; }
+        .toast.error { background: var(--error); color: white; }
+        .success-message { text-align: center; padding: 3rem 2rem; }
+        .success-message i { font-size: 4rem; color: var(--success); margin-bottom: 1rem; }
+        .success-message h2 { color: var(--primary-dark); margin-bottom: 1rem; }
+        .success-message p { color: var(--text-light); margin-bottom: 1rem; }
+        .whatsapp-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #25D366;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+        .whatsapp-link:hover { opacity: 0.9; }
+        .hidden { display: none; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 600px) {
+            .row { grid-template-columns: 1fr; }
+            .container { padding: 1rem; }
+            .form-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fa-solid fa-hand-holding-heart"></i> מטפל לכל אחד</h1>
+        <p>הצטרפו למאגר המטפלים שלנו</p>
+    </div>
+
+    <div class="container">
+        <form id="therapist-form">
+            <!-- Section 1: Basic Info -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-user"></i> פרטים אישיים</h2>
+
+                <div class="form-group">
+                    <label>שם מלא <span class="required">*</span></label>
+                    <input type="text" name="full_name" required placeholder="שם פרטי ומשפחה">
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>טלפון <span class="required">*</span></label>
+                        <input type="tel" name="phone" required placeholder="050-0000000">
+                    </div>
+                    <div class="form-group">
+                        <label>אימייל</label>
+                        <input type="email" name="email" placeholder="your@email.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>עיר מגורים</label>
+                    <input type="text" name="city" placeholder="תל אביב">
+                </div>
+            </div>
+
+            <!-- Section 2: Professional Info -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-graduation-cap"></i> מידע מקצועי</h2>
+
+                <div class="form-group">
+                    <label>תחום התמחות <span class="required">*</span></label>
+                    <select name="specialization" required>
+                        <option value="">בחר התמחות...</option>
+                        <option value="trauma">טראומה ו-PTSD</option>
+                        <option value="anxiety">חרדה ודיכאון</option>
+                        <option value="relationships">זוגיות ומשפחה</option>
+                        <option value="children">ילדים ונוער</option>
+                        <option value="addiction">התמכרויות</option>
+                        <option value="general">טיפול כללי</option>
+                        <option value="other">אחר</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>שנות ניסיון</label>
+                        <input type="number" name="experience_years" min="0" max="50" placeholder="5">
+                    </div>
+                    <div class="form-group">
+                        <label>מספר רישיון</label>
+                        <input type="text" name="license_number" placeholder="אופציונלי">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>השכלה והכשרה</label>
+                    <textarea name="education" placeholder="תואר, מכון הכשרה, קורסים רלוונטיים..."></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>עבודה בזום</label>
+                        <select name="works_online">
+                            <option value="true">כן</option>
+                            <option value="false">לא</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>עבודה פרונטלית</label>
+                        <select name="works_in_person">
+                            <option value="false">לא</option>
+                            <option value="true">כן</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>כמה שעות בשבוע תוכל/י להקדיש?</label>
+                    <input type="number" name="available_hours_per_week" min="1" max="40" placeholder="5">
+                </div>
+            </div>
+
+            <!-- Section 3: Deep Questions -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-comments"></i> שאלות עומק</h2>
+
+                <div class="form-group">
+                    <label>למה בחרת להיות מטפל/ת? <span class="required">*</span></label>
+                    <textarea name="q_why_therapist" required placeholder="ספר/י לנו על המוטיבציה שלך..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>תאר/י מקרה מורכב שטיפלת בו (ללא פרטים מזהים)</label>
+                    <textarea name="q_case_study" placeholder="מה היה האתגר? איך התמודדת?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>מה הגישה הטיפולית שלך?</label>
+                    <textarea name="q_approach" placeholder="איזה שיטות וטכניקות את/ה משתמש/ת?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>האם את/ה בסופרוויז'ן? תאר/י.</label>
+                    <textarea name="q_supervision" placeholder="סוג הסופרוויז'ן, תדירות..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>איך את/ה שומר/ת על גבולות מקצועיים?</label>
+                    <textarea name="q_boundaries" placeholder=""></textarea>
+                </div>
+            </div>
+
+            <!-- Section 4: Documents Note -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-file-certificate"></i> אימות מסמכים</h2>
+
+                <div class="info-box">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <div>
+                        <strong>שליחת מסמכים לאימות</strong><br>
+                        לאחר שליחת הטופס, יש לשלוח את המסמכים הבאים בוואטסאפ או במייל:<br>
+                        • תעודת הסמכה / רישיון<br>
+                        • תעודת זהות<br>
+                        • קורות חיים (אופציונלי)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Declarations -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-shield-check"></i> הצהרות</h2>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="age_confirmed" name="age_confirmed" required>
+                        <label for="age_confirmed">
+                            אני מצהיר/ה שאני מעל גיל 18 <span class="required">*</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms_confirmed" name="terms_confirmed" required>
+                        <label for="terms_confirmed">
+                            אני מאשר/ת שקראתי והבנתי את תנאי השימוש ומדיניות הפרטיות <span class="required">*</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submit-btn">
+                <i class="fa-solid fa-paper-plane"></i>
+                שליחת הבקשה
+            </button>
+        </form>
+
+        <!-- Success Message -->
+        <div class="form-card hidden" id="success-message">
+            <div class="success-message">
+                <i class="fa-solid fa-circle-check"></i>
+                <h2>הבקשה נשלחה בהצלחה!</h2>
+                <p>תודה על פנייתך. כעת יש לשלוח את המסמכים לאימות:</p>
+                <a href="https://wa.me/972501234567?text=שלום, שלחתי בקשה להצטרף כמטפל. מצרף מסמכים לאימות." class="whatsapp-link" target="_blank">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    שלח מסמכים בוואטסאפ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const form = document.getElementById('therapist-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const successMessage = document.getElementById('success-message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
+
+            try {
+                const formData = new FormData(form);
+
+                const questionnaire = {
+                    why_therapist: formData.get('q_why_therapist') || '',
+                    case_study: formData.get('q_case_study') || '',
+                    approach: formData.get('q_approach') || '',
+                    supervision: formData.get('q_supervision') || '',
+                    boundaries: formData.get('q_boundaries') || ''
+                };
+
+                const data = {
+                    full_name: formData.get('full_name'),
+                    email: formData.get('email') || null,
+                    phone: formData.get('phone'),
+                    city: formData.get('city') || null,
+                    specialization: formData.get('specialization'),
+                    experience_years: parseInt(formData.get('experience_years')) || 0,
+                    license_number: formData.get('license_number') || null,
+                    education: formData.get('education') || null,
+                    works_online: formData.get('works_online') === 'true',
+                    works_in_person: formData.get('works_in_person') === 'true',
+                    available_hours_per_week: parseInt(formData.get('available_hours_per_week')) || null,
+                    questionnaire: questionnaire,
+                    age_confirmed: formData.get('age_confirmed') === 'on',
+                    terms_confirmed: formData.get('terms_confirmed') === 'on',
+                    documents_verified: false,
+                    status: 'new'
+                };
+
+                const { error } = await supabase.from('therapists').insert(data);
+                if (error) throw error;
+
+                form.classList.add('hidden');
+                successMessage.classList.remove('hidden');
+                showToast('הבקשה נשלחה בהצלחה!', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('שגיאה בשליחת הטופס. נסה שוב.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שליחת הבקשה';
+            }
+        });
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+    </script>
+</body>
+</html>

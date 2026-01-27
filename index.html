@@ -3686,54 +3686,9 @@
 
         // Open questionnaire - works for everyone (no login required)
         async function openQuestionnaire() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-
-            // If logged in, check if already submitted
-            if (user) {
-                const { data: existingPatient } = await supabaseClient
-                    .from('patients')
-                    .select('id, status')
-                    .eq('user_id', user.id)
-                    .single();
-
-                if (existingPatient) {
-                    const statusMessages = {
-                        'pending': 'הבקשה שלך ממתינה לטיפול. ניצור איתך קשר בהקדם!',
-                        'matched': 'מצאנו לך מטפל מתאים! נציג יצור איתך קשר.',
-                        'in_treatment': 'אתה כבר בתהליך טיפול.',
-                        'completed': 'הטיפול שלך הסתיים. תודה שבחרת בנו!',
-                        'cancelled': 'הבקשה שלך בוטלה. תוכל לשלוח בקשה חדשה.'
-                    };
-
-                    if (existingPatient.status !== 'cancelled') {
-                        showToast(statusMessages[existingPatient.status] || 'כבר יש לך בקשה פעילה', 'info');
-                        return;
-                    }
-                }
-            }
-
-            // Reset form
-            document.getElementById('patient-questionnaire').reset();
-            document.getElementById('questionnaire-form-container').style.display = 'block';
-            document.getElementById('questionnaire-success').classList.remove('active');
-            document.getElementById('other-city-group').style.display = 'none';
-
-            // Pre-fill from profile if logged in
-            if (user) {
-                const { data: profile } = await supabaseClient
-                    .from('profiles')
-                    .select('full_name, phone')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profile) {
-                    if (profile.full_name) document.getElementById('q-name').value = profile.full_name;
-                    if (profile.phone) document.getElementById('q-phone').value = profile.phone;
-                }
-            }
-
-            document.getElementById('questionnaire-modal').classList.add('active');
-            document.body.style.overflow = 'hidden';
+            // Redirect to patient join page (works without login)
+            // The comprehensive form has all fields synced with the database
+            window.location.href = 'pages/join-patient.html';
         }
 
         // Close questionnaire

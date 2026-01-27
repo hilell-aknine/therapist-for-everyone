@@ -375,9 +375,10 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        // Supabase Configuration
         const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const form = document.getElementById('patient-form');
         const submitBtn = document.getElementById('submit-btn');
@@ -417,7 +418,7 @@
                     status: 'new'
                 };
 
-                const { error } = await supabase.from('patients').insert(data);
+                const { error } = await db.from('patients').insert(data);
                 if (error) throw error;
 
                 form.classList.add('hidden');

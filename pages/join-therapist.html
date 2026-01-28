@@ -66,6 +66,11 @@
             font-weight: 500;
         }
         label .required { color: var(--error); }
+        label .hint {
+            font-weight: 400;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
         input, select, textarea {
             width: 100%;
             padding: 0.9rem 1rem;
@@ -88,6 +93,7 @@
             background: #f8f9fa;
             border-radius: 10px;
             border: 1px solid var(--border);
+            margin-bottom: 0.8rem;
         }
         .checkbox-group input[type="checkbox"] {
             width: 20px;
@@ -96,6 +102,12 @@
             flex-shrink: 0;
         }
         .checkbox-group label { margin: 0; font-weight: 400; cursor: pointer; }
+        .checkbox-group.disabled {
+            opacity: 0.6;
+        }
+        .checkbox-group.disabled label {
+            cursor: not-allowed;
+        }
         .info-box {
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
             border: 1px solid rgba(212, 175, 55, 0.3);
@@ -108,6 +120,171 @@
             gap: 0.8rem;
         }
         .info-box i { color: var(--gold); font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+        .info-box.warning {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+            border-color: rgba(220, 53, 69, 0.3);
+        }
+        .info-box.warning i { color: var(--error); }
+
+        /* Radio cards */
+        .radio-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .radio-card {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .radio-card:hover {
+            border-color: var(--primary);
+        }
+        .radio-card input {
+            display: none;
+        }
+        .radio-card input:checked + .radio-content {
+            color: var(--primary);
+        }
+        .radio-card:has(input:checked) {
+            border-color: var(--primary);
+            background: rgba(47, 133, 146, 0.05);
+        }
+        .radio-content strong {
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .radio-content small {
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        /* Yes/No toggle */
+        .yes-no-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .yes-no-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 0;
+            font-weight: 400;
+        }
+        .yes-no-group input:checked + span {
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .yes-no-group label:has(input:checked) {
+            border-color: var(--primary);
+            background: rgba(47, 133, 146, 0.05);
+        }
+        .conditional-field {
+            margin-top: 0.8rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        .conditional-field.show {
+            display: block;
+        }
+
+        /* Terms box (scroll-lock) */
+        .terms-box {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fafafa;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        .terms-box h4 {
+            color: var(--primary-dark);
+            margin: 1.5rem 0 0.8rem 0;
+            font-size: 1rem;
+        }
+        .terms-box h4:first-child {
+            margin-top: 0;
+        }
+        .terms-box p {
+            margin-bottom: 0.8rem;
+        }
+        .scroll-hint {
+            text-align: center;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, rgba(47, 133, 146, 0.1), rgba(47, 133, 146, 0.05));
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .scroll-hint.hidden {
+            display: none;
+        }
+
+        /* Signature canvas */
+        .signature-section {
+            margin-top: 1.5rem;
+        }
+        .signature-canvas-container {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            position: relative;
+            background: white;
+        }
+        #signature-canvas {
+            width: 100%;
+            height: 150px;
+            display: block;
+            cursor: crosshair;
+        }
+        .signature-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-light);
+            pointer-events: none;
+            font-size: 0.9rem;
+        }
+        .signature-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+        .btn-clear {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        .btn-clear:hover {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
         .btn {
             display: inline-flex;
             align-items: center;
@@ -121,6 +298,7 @@
             font-weight: 600;
             cursor: pointer;
             width: 100%;
+            transition: all 0.2s;
         }
         .btn-primary {
             background: linear-gradient(135deg, var(--gold), #c9a227);
@@ -166,6 +344,7 @@
             .row { grid-template-columns: 1fr; }
             .container { padding: 1rem; }
             .form-card { padding: 1.5rem; }
+            .radio-cards { flex-direction: column; }
         }
     </style>
 </head>
@@ -192,8 +371,24 @@
                         <input type="tel" name="phone" required placeholder="050-0000000">
                     </div>
                     <div class="form-group">
-                        <label>אימייל</label>
-                        <input type="email" name="email" placeholder="your@email.com">
+                        <label>אימייל <span class="required">*</span></label>
+                        <input type="email" name="email" required placeholder="your@email.com">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>תאריך לידה</label>
+                        <input type="date" name="birth_date">
+                    </div>
+                    <div class="form-group">
+                        <label>מגדר</label>
+                        <select name="gender">
+                            <option value="">בחר/י</option>
+                            <option value="male">זכר</option>
+                            <option value="female">נקבה</option>
+                            <option value="other">אחר</option>
+                        </select>
                     </div>
                 </div>
 
@@ -221,10 +416,24 @@
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label>שיטות טיפול <span class="hint">(ניתן לבחור מספר שיטות)</span></label>
+                    <select name="treatment_methods" multiple style="min-height: 120px;">
+                        <option value="CBT">CBT - טיפול קוגניטיבי-התנהגותי</option>
+                        <option value="dynamic">פסיכודינמי</option>
+                        <option value="NLP">NLP</option>
+                        <option value="coaching">אימון / קואצ'ינג</option>
+                        <option value="psychodrama">פסיכודרמה</option>
+                        <option value="art_therapy">טיפול באמנות</option>
+                        <option value="EMDR">EMDR</option>
+                        <option value="other">אחר</option>
+                    </select>
+                </div>
+
                 <div class="row">
                     <div class="form-group">
-                        <label>שנות ניסיון</label>
-                        <input type="number" name="experience_years" min="0" max="50" placeholder="5">
+                        <label>שנת תחילת עיסוק <span class="required">*</span></label>
+                        <input type="number" name="practice_start_year" required min="1970" max="2026" placeholder="2015">
                     </div>
                     <div class="form-group">
                         <label>מספר רישיון</label>
@@ -239,58 +448,182 @@
 
                 <div class="row">
                     <div class="form-group">
-                        <label>עבודה בזום</label>
-                        <select name="works_online">
-                            <option value="true">כן</option>
-                            <option value="false">לא</option>
-                        </select>
+                        <label>כמה מטופלים עברו אצלך עד היום? <span class="hint">(הערכה)</span></label>
+                        <input type="number" name="total_patients_estimate" min="0" placeholder="100">
                     </div>
                     <div class="form-group">
-                        <label>עבודה פרונטלית</label>
-                        <select name="works_in_person">
-                            <option value="false">לא</option>
-                            <option value="true">כן</option>
-                        </select>
+                        <label>כמה מטופלים פעילים יש לך כיום?</label>
+                        <input type="number" name="current_active_patients" min="0" placeholder="10">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>כמה שעות בשבוע תוכל/י להקדיש?</label>
-                    <input type="number" name="available_hours_per_week" min="1" max="40" placeholder="5">
+                    <label>נוכחות דיגיטלית <span class="hint">(לינקדאין, אתר אישי וכו')</span></label>
+                    <input type="url" name="social_link" placeholder="https://linkedin.com/in/...">
                 </div>
             </div>
 
-            <!-- Section 3: Deep Questions -->
+            <!-- Section 3: Deep Questions (UPGRADED) -->
             <div class="form-card">
-                <h2 class="section-title"><i class="fa-solid fa-comments"></i> שאלות עומק</h2>
+                <h2 class="section-title"><i class="fa-solid fa-heart"></i> עומק ומניע</h2>
 
-                <div class="form-group">
-                    <label>למה בחרת להיות מטפל/ת? <span class="required">*</span></label>
-                    <textarea name="q_why_therapist" required placeholder="ספר/י לנו על המוטיבציה שלך..."></textarea>
+                <div class="info-box">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <div>השאלות הבאות עוזרות לנו להכיר אותך טוב יותר ולהתאים לך מטופלים בצורה מיטבית.</div>
                 </div>
 
                 <div class="form-group">
-                    <label>תאר/י מקרה מורכב שטיפלת בו (ללא פרטים מזהים)</label>
-                    <textarea name="q_case_study" placeholder="מה היה האתגר? איך התמודדת?"></textarea>
+                    <label>למה בחרת במקצוע הטיפול? מהו הדבר שאתה הכי אוהב במקצוע? <span class="required">*</span></label>
+                    <textarea name="q_why_profession" required placeholder="ספר/י לנו על המוטיבציה שלך, מה מניע אותך, ומה אתה הכי אוהב בעבודה הזו..."></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>מה הגישה הטיפולית שלך?</label>
-                    <textarea name="q_approach" placeholder="איזה שיטות וטכניקות את/ה משתמש/ת?"></textarea>
+                    <label>תאר/י בקצרה מקרה מורכב מהקליניקה ואיך התמודדת איתו <span class="hint">(ללא פרטים מזהים)</span></label>
+                    <textarea name="q_case_study" placeholder="מה היה האתגר? איזו גישה בחרת? מה למדת מהמקרה?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>מהם האתגרים הגדולים שלך כמטפל/ת?</label>
+                    <textarea name="q_challenges" placeholder="אתגרים מקצועיים, רגשיים, לוגיסטיים..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>למה בחרת להצטרף לפרויקט 'מטפל לכל אחד' דווקא עכשיו? <span class="required">*</span></label>
+                    <textarea name="q_why_join" required placeholder="מה הביא אותך אלינו? מה אתה מקווה לתרום ולקבל מהפרויקט?"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>האם את/ה בסופרוויז'ן? תאר/י.</label>
-                    <textarea name="q_supervision" placeholder="סוג הסופרוויז'ן, תדירות..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>איך את/ה שומר/ת על גבולות מקצועיים?</label>
-                    <textarea name="q_boundaries" placeholder=""></textarea>
+                    <textarea name="q_supervision" placeholder="סוג הסופרוויז'ן, תדירות, כמה זמן..."></textarea>
                 </div>
             </div>
 
-            <!-- Section 4: Documents Note -->
+            <!-- Section 4: Health & Commitment (NEW) -->
+            <div class="form-card">
+                <h2 class="section-title"><i class="fa-solid fa-clipboard-check"></i> בריאות והתחייבות</h2>
+
+                <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--primary);">הצהרת בריאות</h3>
+
+                <div class="form-group">
+                    <label>האם ישנן בעיות רפואיות המונעות ממך מתן טיפול?</label>
+                    <div class="yes-no-group">
+                        <label>
+                            <input type="radio" name="has_medical_issues" value="no" checked>
+                            <span>לא</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="has_medical_issues" value="yes">
+                            <span>כן</span>
+                        </label>
+                    </div>
+                    <div class="conditional-field" id="medical-details-field">
+                        <label>פרט/י:</label>
+                        <textarea name="medical_issues_details" placeholder="תיאור הבעיה הרפואית..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>האם את/ה נוטל/ת תרופות פסיכיאטריות?</label>
+                    <div class="yes-no-group">
+                        <label>
+                            <input type="radio" name="takes_psychiatric_meds" value="no" checked>
+                            <span>לא</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="takes_psychiatric_meds" value="yes">
+                            <span>כן</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>האם את/ה נמצא/ת בטיפול בעצמך?</label>
+                    <div class="yes-no-group">
+                        <label>
+                            <input type="radio" name="in_personal_therapy" value="no" checked>
+                            <span>לא</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="in_personal_therapy" value="yes">
+                            <span>כן</span>
+                        </label>
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+
+                <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--primary);">התחייבות לפרויקט</h3>
+
+                <div class="form-group">
+                    <label>כמה שעות טיפול בחודש תוכל/י להקדיש? <span class="required">*</span></label>
+                    <div class="radio-cards">
+                        <label class="radio-card">
+                            <input type="radio" name="monthly_hours" value="10" required>
+                            <div class="radio-content">
+                                <strong>10 שעות</strong>
+                                <small>מינימום</small>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="monthly_hours" value="15">
+                            <div class="radio-content">
+                                <strong>15 שעות</strong>
+                                <small>מומלץ</small>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="monthly_hours" value="20">
+                            <div class="radio-content">
+                                <strong>20+ שעות</strong>
+                                <small>מקסימום</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>תקופת התחייבות <span class="required">*</span></label>
+                    <select name="commitment_duration" required>
+                        <option value="">בחר/י...</option>
+                        <option value="6">6 חודשים (מינימום)</option>
+                        <option value="12">שנה</option>
+                        <option value="24">שנתיים</option>
+                        <option value="unlimited">ללא הגבלה</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>אופן הטיפול המועדף <span class="required">*</span></label>
+                    <div class="radio-cards">
+                        <label class="radio-card">
+                            <input type="radio" name="therapy_mode" value="zoom" required>
+                            <div class="radio-content">
+                                <i class="fa-solid fa-video" style="color: var(--primary); margin-bottom: 0.3rem;"></i>
+                                <strong>זום</strong>
+                                <small>טיפול מרחוק</small>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="therapy_mode" value="clinic">
+                            <div class="radio-content">
+                                <i class="fa-solid fa-building" style="color: var(--primary); margin-bottom: 0.3rem;"></i>
+                                <strong>קליניקה</strong>
+                                <small>פנים אל פנים</small>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="therapy_mode" value="hybrid">
+                            <div class="radio-content">
+                                <i class="fa-solid fa-arrows-rotate" style="color: var(--primary); margin-bottom: 0.3rem;"></i>
+                                <strong>משולב</strong>
+                                <small>שניהם</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Documents Note -->
             <div class="form-card">
                 <h2 class="section-title"><i class="fa-solid fa-file-certificate"></i> אימות מסמכים</h2>
 
@@ -301,35 +634,95 @@
                         לאחר שליחת הטופס, יש לשלוח את המסמכים הבאים בוואטסאפ או במייל:<br>
                         • תעודת הסמכה / רישיון<br>
                         • תעודת זהות<br>
-                        • קורות חיים (אופציונלי)
+                        • אישור ביטוח אחריות מקצועית
                     </div>
                 </div>
             </div>
 
-            <!-- Section 5: Declarations -->
+            <!-- Section 6: Legal Agreement (SCROLL-LOCK) -->
             <div class="form-card">
-                <h2 class="section-title"><i class="fa-solid fa-shield-check"></i> הצהרות</h2>
+                <h2 class="section-title"><i class="fa-solid fa-shield-check"></i> הסכם הצטרפות</h2>
+
+                <div class="info-box warning">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <div>נא לקרוא את ההסכם בעיון. יש לגלול עד סוף הטקסט כדי לאשר.</div>
+                </div>
+
+                <div class="terms-box" id="terms-box">
+                    <h4>הסכם הצטרפות, קוד אתי וכתב שיפוי – למטפל/ת</h4>
+
+                    <h4>1. מעמד המטפל: מתנדב עצמאי (Independent Volunteer)</h4>
+                    <p><strong>1.1 העדר יחסי עובד-מעביד:</strong> אני מצהיר/ה כי פעילותי באתר הינה התנדבותית כספק שירות עצמאי. לא מתקיימים ביני לבין הנהלת האתר יחסי עובד-מעביד, שליחות או שותפות. אינני זכאי/ת לתשלום, תנאים סוציאליים או פיצויים מהאתר.</p>
+                    <p><strong>1.2 תואר מותר לשימוש:</strong> בכל פרסום חיצוני (לינקדאין, אתר אישי), הנני רשאי/ת להציג את עצמי כ"מתנדב/ת במיזם" בלבד, ולא כ"מטפל מורשה מטעם המיזם" או כנציג רשמי שלו.</p>
+
+                    <h4>2. אחריות מקצועית, חוקית ופיזית</h4>
+                    <p><strong>2.1 אחריות מקצועית מלאה:</strong> הפלטפורמה משמשת כלוח מודעות טכנולוגי בלבד. כל האחריות המקצועית, האתית והטיפולית חלה עלי בלבד.</p>
+                    <p><strong>2.2 חובת הדיווח (Mandatory Reporting):</strong> ידוע לי כי חובות דיווח על פי חוק (כגון חובת דיווח על קטין בסיכון, חסר ישע או אלימות במשפחה) חלות עלי אישית כמטפל. הדיווח להנהלת האתר אינו מהווה תחליף לדיווח לרשויות.</p>
+                    <p><strong>2.3 אחריות למקום הטיפול:</strong> במידה והטיפול מתקיים בקליניקה פיזית, האחריות לביטוח המקום (צד ג') ובטיחות המטופל מוטלת עלי בלבד. האתר אינו אחראי לכל נזק גוף או רכוש.</p>
+                    <p><strong>2.4 הדרכה מקצועית:</strong> ידוע לי כי האתר אינו מספק הדרכה מקצועית. באחריותי לדאוג להדרכה (סופרוויז'ן) חיצונית.</p>
+
+                    <h4>3. שמירת רשומות ומחיקת מידע</h4>
+                    <p><strong>3.1 מדיניות מחיקה:</strong> ידוע לי כי נתוני המטופלים וההתקשרות נמחקים משרתי האתר באופן אוטומטי 90 יום לאחר סיום הטיפול.</p>
+                    <p><strong>3.2 חובת תיעוד עצמאית:</strong> באחריותי הבלעדית לנהל, לשמור ולאבטח את הרשומה הטיפולית במערכות שלי. לא תהיה לי כל טענה כלפי האתר בגין אובדן מידע שנמחק מהשרתים.</p>
+
+                    <h4>4. חופש פעולה מסחרי וטיפולי</h4>
+                    <p><strong>4.1 המשך התקשרות:</strong> הפלטפורמה אינה צד להתנהלות הכספית. זכותי להציע שירותים בתשלום (במהלך או בתום 10 המפגשים), וזאת באחריותי הבלעדית.</p>
+                    <p><strong>4.2 סיום התקשרות:</strong> זכותי לסיים את ההתנדבות בכל עת. מצופה ממני לנהוג במקצועיות ולבצע סיום תהליך מכבד.</p>
+
+                    <h4>5. מדיניות השעיה ובירור</h4>
+                    <p>ידוע לי כי להנהלת האתר שמורה הזכות להפסיק את גישתי למערכת בכל עת וללא נימוק, וזאת במידה ויעלה חשש כי פעילותי פוגעת בשמו הטוב של המיזם או בבטיחות המשתמשים.</p>
+
+                    <h4>6. ביטוח ושיפוי</h4>
+                    <p><strong>6.1 ביטוח:</strong> אני מתחייב/ת להחזיק בביטוח אחריות מקצועית בתוקף המכסה את כל פעילותי.</p>
+                    <p><strong>6.2 שיפוי (Indemnification):</strong> אני משחרר/ת את הפלטפורמה מכל אחריות לנזק שייגרם למטופל, ומתחייב/ת לשפות את מפעילת האתר בגין כל תביעה שתופנה כלפיה עקב מעשה או מחדל שלי.</p>
+                </div>
+
+                <div class="scroll-hint" id="scroll-hint">
+                    <i class="fa-solid fa-arrow-down"></i>
+                    גלול/י למטה כדי לקרוא את כל ההסכם
+                </div>
 
                 <div class="form-group">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="age_confirmed" name="age_confirmed" required>
-                        <label for="age_confirmed">
-                            אני מצהיר/ה שאני מעל גיל 18 <span class="required">*</span>
+                    <div class="checkbox-group disabled" id="insurance-checkbox-group">
+                        <input type="checkbox" id="has_insurance" name="has_insurance" disabled required>
+                        <label for="has_insurance">
+                            אני מאשר/ת שיש ברשותי ביטוח אחריות מקצועית בתוקף <span class="required">*</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="terms_confirmed" name="terms_confirmed" required>
-                        <label for="terms_confirmed">
-                            אני מאשר/ת שקראתי והבנתי את תנאי השימוש ומדיניות הפרטיות <span class="required">*</span>
+                    <div class="checkbox-group disabled" id="responsibility-checkbox-group">
+                        <input type="checkbox" id="accepts_responsibility" name="accepts_responsibility" disabled required>
+                        <label for="accepts_responsibility">
+                            אני מבין/ה שכל האחריות המקצועית, החוקית (דיווח) והתיעודית היא עלי בלבד <span class="required">*</span>
                         </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group disabled" id="waiver-checkbox-group">
+                        <input type="checkbox" id="waiver_confirmed" name="waiver_confirmed" disabled required>
+                        <label for="waiver_confirmed">
+                            אני משחרר/ת את האתר מכל אחריות לטיפול או לתוצאותיו <span class="required">*</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Digital Signature -->
+                <div class="signature-section">
+                    <label>חתימה דיגיטלית <span class="required">*</span></label>
+                    <div class="signature-canvas-container">
+                        <canvas id="signature-canvas"></canvas>
+                        <div class="signature-placeholder" id="signature-placeholder">חתום/י כאן</div>
+                    </div>
+                    <div class="signature-actions">
+                        <button type="button" class="btn-clear" onclick="clearSignature()">נקה חתימה</button>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" id="submit-btn">
+            <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
                 <i class="fa-solid fa-paper-plane"></i>
                 שליחת הבקשה
             </button>
@@ -340,7 +733,8 @@
             <div class="success-message">
                 <i class="fa-solid fa-circle-check"></i>
                 <h2>הבקשה נשלחה בהצלחה!</h2>
-                <p>תודה על פנייתך. כעת יש לשלוח את המסמכים לאימות:</p>
+                <p>פרטיך התקבלו. אנו נבחן את הבקשה ונחזור אליך בהקדם לאישור הצטרפות לקהילה.</p>
+                <p>כעת יש לשלוח את המסמכים לאימות:</p>
                 <a href="https://wa.me/972501234567?text=שלום, שלחתי בקשה להצטרף כמטפל. מצרף מסמכים לאימות." class="whatsapp-link" target="_blank">
                     <i class="fa-brands fa-whatsapp"></i>
                     שלח מסמכים בוואטסאפ
@@ -360,38 +754,235 @@
         const form = document.getElementById('therapist-form');
         const submitBtn = document.getElementById('submit-btn');
         const successMessage = document.getElementById('success-message');
+        const termsBox = document.getElementById('terms-box');
+        const scrollHint = document.getElementById('scroll-hint');
 
+        // ===================
+        // SCROLL-LOCK MECHANISM
+        // ===================
+        let hasScrolledToBottom = false;
+
+        termsBox.addEventListener('scroll', () => {
+            const scrolledToBottom = termsBox.scrollHeight - termsBox.scrollTop <= termsBox.clientHeight + 10;
+            if (scrolledToBottom && !hasScrolledToBottom) {
+                hasScrolledToBottom = true;
+                enableCheckboxes();
+                scrollHint.classList.add('hidden');
+            }
+        });
+
+        function enableCheckboxes() {
+            const checkboxGroups = [
+                'insurance-checkbox-group',
+                'responsibility-checkbox-group',
+                'waiver-checkbox-group'
+            ];
+
+            checkboxGroups.forEach(id => {
+                const group = document.getElementById(id);
+                const checkbox = group.querySelector('input[type="checkbox"]');
+                group.classList.remove('disabled');
+                checkbox.disabled = false;
+            });
+        }
+
+        // ===================
+        // SIGNATURE CANVAS
+        // ===================
+        const canvas = document.getElementById('signature-canvas');
+        const ctx = canvas.getContext('2d');
+        const placeholder = document.getElementById('signature-placeholder');
+        let isDrawing = false;
+        let hasSignature = false;
+
+        // Set canvas size
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = 150;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Drawing functions
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches) {
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top
+                };
+            }
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            placeholder.style.display = 'none';
+            e.preventDefault();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            hasSignature = true;
+            e.preventDefault();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            validateForm();
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false;
+            placeholder.style.display = 'block';
+            validateForm();
+        }
+
+        // ===================
+        // CONDITIONAL FIELDS
+        // ===================
+        document.querySelectorAll('input[name="has_medical_issues"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const field = document.getElementById('medical-details-field');
+                if (document.querySelector('input[name="has_medical_issues"]:checked').value === 'yes') {
+                    field.classList.add('show');
+                } else {
+                    field.classList.remove('show');
+                }
+            });
+        });
+
+        // ===================
+        // FORM VALIDATION
+        // ===================
+        function validateForm() {
+            const insuranceChecked = document.getElementById('has_insurance').checked;
+            const responsibilityChecked = document.getElementById('accepts_responsibility').checked;
+            const waiverChecked = document.getElementById('waiver_confirmed').checked;
+
+            const allChecked = insuranceChecked && responsibilityChecked && waiverChecked;
+            const canSubmit = hasScrolledToBottom && allChecked && hasSignature;
+
+            submitBtn.disabled = !canSubmit;
+        }
+
+        // Listen for checkbox changes
+        ['has_insurance', 'accepts_responsibility', 'waiver_confirmed'].forEach(id => {
+            document.getElementById(id).addEventListener('change', validateForm);
+        });
+
+        // ===================
+        // FORM SUBMISSION
+        // ===================
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!hasSignature) {
+                showToast('נא לחתום על ההסכם', 'error');
+                return;
+            }
+
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
 
             try {
                 const formData = new FormData(form);
 
+                // Get signature as base64
+                const signatureData = canvas.toDataURL('image/png');
+
+                // Get selected treatment methods
+                const treatmentMethods = Array.from(
+                    document.querySelectorAll('select[name="treatment_methods"] option:checked')
+                ).map(opt => opt.value);
+
+                // Build questionnaire JSONB
                 const questionnaire = {
-                    why_therapist: formData.get('q_why_therapist') || '',
+                    // Deep questions
+                    why_profession: formData.get('q_why_profession') || '',
                     case_study: formData.get('q_case_study') || '',
-                    approach: formData.get('q_approach') || '',
+                    challenges: formData.get('q_challenges') || '',
+                    why_join: formData.get('q_why_join') || '',
                     supervision: formData.get('q_supervision') || '',
-                    boundaries: formData.get('q_boundaries') || ''
+
+                    // Health declarations
+                    health: {
+                        has_medical_issues: formData.get('has_medical_issues') === 'yes',
+                        medical_issues_details: formData.get('medical_issues_details') || '',
+                        takes_psychiatric_meds: formData.get('takes_psychiatric_meds') === 'yes',
+                        in_personal_therapy: formData.get('in_personal_therapy') === 'yes'
+                    },
+
+                    // Commitment
+                    commitment: {
+                        monthly_hours: parseInt(formData.get('monthly_hours')) || 10,
+                        duration_months: formData.get('commitment_duration'),
+                        therapy_mode: formData.get('therapy_mode')
+                    },
+
+                    // Practice info
+                    practice: {
+                        total_patients_estimate: parseInt(formData.get('total_patients_estimate')) || 0,
+                        current_active_patients: parseInt(formData.get('current_active_patients')) || 0,
+                        treatment_methods: treatmentMethods
+                    },
+
+                    // Legal confirmations
+                    legal: {
+                        has_insurance: formData.get('has_insurance') === 'on',
+                        accepts_responsibility: formData.get('accepts_responsibility') === 'on',
+                        waiver_confirmed: formData.get('waiver_confirmed') === 'on',
+                        scrolled_terms: hasScrolledToBottom,
+                        signed_at: new Date().toISOString()
+                    }
                 };
+
+                // Calculate experience years
+                const practiceStartYear = parseInt(formData.get('practice_start_year'));
+                const currentYear = new Date().getFullYear();
+                const experienceYears = practiceStartYear ? currentYear - practiceStartYear : 0;
 
                 const data = {
                     full_name: formData.get('full_name'),
                     email: formData.get('email') || null,
                     phone: formData.get('phone'),
                     city: formData.get('city') || null,
+                    birth_date: formData.get('birth_date') || null,
+                    gender: formData.get('gender') || null,
                     specialization: formData.get('specialization'),
-                    experience_years: parseInt(formData.get('experience_years')) || 0,
+                    experience_years: experienceYears,
                     license_number: formData.get('license_number') || null,
                     education: formData.get('education') || null,
-                    works_online: formData.get('works_online') === 'true',
-                    works_in_person: formData.get('works_in_person') === 'true',
-                    available_hours_per_week: parseInt(formData.get('available_hours_per_week')) || null,
+                    works_online: formData.get('therapy_mode') === 'zoom' || formData.get('therapy_mode') === 'hybrid',
+                    works_in_person: formData.get('therapy_mode') === 'clinic' || formData.get('therapy_mode') === 'hybrid',
+                    available_hours_per_week: Math.ceil(parseInt(formData.get('monthly_hours') || 10) / 4),
+                    social_link: formData.get('social_link') || null,
                     questionnaire: questionnaire,
-                    age_confirmed: formData.get('age_confirmed') === 'on',
-                    terms_confirmed: formData.get('terms_confirmed') === 'on',
+                    signature_data: signatureData,
+                    age_confirmed: true,
+                    terms_confirmed: true,
                     documents_verified: false,
                     status: 'new'
                 };

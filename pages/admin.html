@@ -119,6 +119,7 @@
 
         .status-badge { padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
         .status-new { background: rgba(212, 175, 55, 0.2); color: var(--gold); }
+        .status-pending_review { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
         .status-waiting { background: rgba(88, 166, 255, 0.2); color: var(--info); }
         .status-matched, .status-approved { background: rgba(88, 166, 255, 0.2); color: var(--info); }
         .status-in_treatment, .status-active { background: rgba(63, 185, 80, 0.2); color: var(--success); }
@@ -154,10 +155,11 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             width: 90%;
-            max-width: 700px;
+            max-width: 800px;
             max-height: 90vh;
             overflow: hidden;
         }
+        .modal-body { max-height: 70vh; }
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -168,7 +170,7 @@
         .modal-header h2 { display: flex; align-items: center; gap: 0.5rem; }
         .modal-header h2 i { color: var(--gold); }
         .modal-close { background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; }
-        .modal-body { padding: 1.5rem; overflow-y: auto; max-height: 60vh; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; padding: 1.5rem; border-top: 1px solid var(--border); }
 
         .detail-row { display: flex; padding: 0.8rem 0; border-bottom: 1px solid var(--border); }
@@ -185,6 +187,78 @@
             line-height: 1.6;
             white-space: pre-wrap;
         }
+
+        /* Tags/Badges for therapy methods */
+        .method-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .method-tag {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            padding: 0.3rem 0.7rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        /* Section dividers */
+        .modal-section-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--gold);
+            font-weight: 600;
+        }
+        .modal-section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        .modal-section-divider i { font-size: 0.9rem; }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            margin: 0.8rem 0;
+        }
+        .stat-box {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 0.8rem;
+            text-align: center;
+        }
+        .stat-box .value { font-size: 1.3rem; font-weight: 700; color: var(--gold); }
+        .stat-box .label { font-size: 0.75rem; color: var(--text-secondary); }
+
+        /* Health indicators */
+        .health-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+        .health-indicator.yes { background: rgba(248, 81, 73, 0.15); color: var(--danger); }
+        .health-indicator.no { background: rgba(63, 185, 80, 0.15); color: var(--success); }
+
+        /* Social link button */
+        .social-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--info);
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .social-link-btn:hover { background: rgba(88, 166, 255, 0.25); }
 
         .verification-toggle {
             display: flex;
@@ -422,6 +496,7 @@
                                     <th>שם</th>
                                     <th>טלפון</th>
                                     <th>התמחות</th>
+                                    <th>ניסיון</th>
                                     <th>מסמכים</th>
                                     <th>סטטוס</th>
                                     <th>תאריך</th>
@@ -621,7 +696,7 @@
 
             const tbody = document.getElementById('therapists-table');
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטפלים</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטפלים</td></tr>';
                 return;
             }
             tbody.innerHTML = filtered.map(t => `
@@ -629,6 +704,7 @@
                     <td><strong>${t.full_name}</strong></td>
                     <td><a href="tel:${t.phone}" style="color:var(--info);text-decoration:none;">${t.phone || '-'}</a></td>
                     <td>${t.specialization || '-'}</td>
+                    <td style="text-align:center;">${t.experience_years || 0} שנים</td>
                     <td><span class="verified-badge ${t.documents_verified ? 'yes' : 'no'}">
                         <i class="fa-solid ${t.documents_verified ? 'fa-check-circle' : 'fa-clock'}"></i>
                         ${t.documents_verified ? 'מאומת' : 'ממתין'}
@@ -736,22 +812,105 @@
             if (!t) return;
             document.getElementById('modal-therapist-name').textContent = t.full_name;
             const q = t.questionnaire || {};
+            const health = q.health || {};
+            const commitment = q.commitment || {};
+            const practice = q.practice || {};
+
+            // Format treatment methods as tags
+            const methods = practice.treatment_methods || [];
+            const methodTags = Array.isArray(methods) && methods.length > 0
+                ? `<div class="method-tags">${methods.map(m => `<span class="method-tag">${m}</span>`).join('')}</div>`
+                : '-';
+
+            // Format therapy mode
+            const therapyModeLabels = { 'zoom': 'זום בלבד', 'clinic': 'קליניקה בלבד', 'hybrid': 'משולב' };
+            const therapyMode = therapyModeLabels[commitment.therapy_mode] || commitment.therapy_mode || '-';
 
             document.getElementById('therapist-modal-body').innerHTML = `
+                <!-- BASIC INFO -->
+                <div class="modal-section-divider"><i class="fa-solid fa-user"></i> פרטים אישיים</div>
                 <div class="detail-row"><div class="detail-label">טלפון</div><div class="detail-value"><a href="tel:${t.phone}" style="color:var(--info);">${t.phone || '-'}</a></div></div>
                 <div class="detail-row"><div class="detail-label">אימייל</div><div class="detail-value">${t.email || '-'}</div></div>
                 <div class="detail-row"><div class="detail-label">עיר</div><div class="detail-value">${t.city || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">מגדר</div><div class="detail-value">${genderDisplayLabel(t.gender)}</div></div>
+                ${t.social_link ? `<div class="detail-row"><div class="detail-label">קישור חיצוני</div><div class="detail-value"><a href="${t.social_link}" target="_blank" class="social-link-btn"><i class="fa-solid fa-external-link"></i> פתח פרופיל</a></div></div>` : ''}
+
+                <!-- PROFESSIONAL INFO -->
+                <div class="modal-section-divider"><i class="fa-solid fa-briefcase-medical"></i> מידע מקצועי</div>
                 <div class="detail-row"><div class="detail-label">התמחות</div><div class="detail-value">${t.specialization || '-'}</div></div>
-                <div class="detail-row"><div class="detail-label">שנות ניסיון</div><div class="detail-value">${t.experience_years || 0}</div></div>
+                <div class="detail-row"><div class="detail-label">שיטות טיפול</div><div class="detail-value">${methodTags}</div></div>
                 <div class="detail-row"><div class="detail-label">רישיון</div><div class="detail-value">${t.license_number || '-'}</div></div>
-                <div class="detail-row"><div class="detail-label">עבודה בזום</div><div class="detail-value">${t.works_online ? 'כן' : 'לא'}</div></div>
-                <div class="detail-row"><div class="detail-label">עבודה פרונטלית</div><div class="detail-value">${t.works_in_person ? 'כן' : 'לא'}</div></div>
-                <div class="detail-row"><div class="detail-label">שעות פנויות/שבוע</div><div class="detail-value">${t.available_hours_per_week || '-'}</div></div>
+                ${t.education ? `<div class="detail-row"><div class="detail-label">השכלה</div><div class="detail-value" style="white-space:pre-wrap;">${t.education}</div></div>` : ''}
+
+                <!-- STATS -->
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="value">${t.experience_years || 0}</div>
+                        <div class="label">שנות ניסיון</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value">${practice.total_patients_estimate || 0}</div>
+                        <div class="label">מטופלים לאורך הקריירה</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value">${practice.current_active_patients || 0}</div>
+                        <div class="label">מטופלים פעילים</div>
+                    </div>
+                </div>
+
+                <!-- WORK MODE & COMMITMENT -->
+                <div class="modal-section-divider"><i class="fa-solid fa-calendar-check"></i> התחייבות ואופן עבודה</div>
+                <div class="detail-row"><div class="detail-label">עבודה בזום</div><div class="detail-value">${t.works_online ? '<span style="color:var(--success);">✓ כן</span>' : 'לא'}</div></div>
+                <div class="detail-row"><div class="detail-label">עבודה פרונטלית</div><div class="detail-value">${t.works_in_person ? '<span style="color:var(--success);">✓ כן</span>' : 'לא'}</div></div>
+                <div class="detail-row"><div class="detail-label">אופן מועדף</div><div class="detail-value">${therapyMode}</div></div>
+                <div class="detail-row"><div class="detail-label">שעות בחודש</div><div class="detail-value">${commitment.monthly_hours || t.available_hours_per_week * 4 || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">תקופת התחייבות</div><div class="detail-value">${commitment.duration_months || '-'}</div></div>
+
+                <!-- HEALTH DECLARATION -->
+                <div class="modal-section-divider"><i class="fa-solid fa-heart-pulse"></i> הצהרת בריאות</div>
+                <div class="detail-row">
+                    <div class="detail-label">בעיות רפואיות</div>
+                    <div class="detail-value">
+                        <span class="health-indicator ${health.has_medical_issues ? 'yes' : 'no'}">
+                            <i class="fa-solid ${health.has_medical_issues ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                            ${health.has_medical_issues ? 'יש' : 'אין'}
+                        </span>
+                    </div>
+                </div>
+                ${health.has_medical_issues && health.medical_issues_details ? `<div class="questionnaire-answer" style="margin-top:0.5rem;">${health.medical_issues_details}</div>` : ''}
+                <div class="detail-row">
+                    <div class="detail-label">תרופות פסיכיאטריות</div>
+                    <div class="detail-value">
+                        <span class="health-indicator ${health.takes_psychiatric_meds ? 'yes' : 'no'}">
+                            ${health.takes_psychiatric_meds ? 'כן' : 'לא'}
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">בטיפול אישי</div>
+                    <div class="detail-value">
+                        <span class="health-indicator no">
+                            ${health.in_personal_therapy ? 'כן' : 'לא'}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- DEEP PROFILE -->
+                <div class="modal-section-divider"><i class="fa-solid fa-heart"></i> פרופיל עומק</div>
+                ${q.why_profession ? `<div class="detail-section"><h4><i class="fa-solid fa-lightbulb"></i> למה בחרת במקצוע הטיפול?</h4><div class="questionnaire-answer">${q.why_profession}</div></div>` : ''}
+                ${q.why_join ? `<div class="detail-section"><h4><i class="fa-solid fa-handshake-angle"></i> למה הצטרפת לפרויקט?</h4><div class="questionnaire-answer">${q.why_join}</div></div>` : ''}
+                ${q.experience ? `<div class="detail-section"><h4><i class="fa-solid fa-briefcase"></i> ניסיון מעשי</h4><div class="questionnaire-answer">${q.experience}</div></div>` : ''}
+                ${q.case_study ? `<div class="detail-section"><h4><i class="fa-solid fa-brain"></i> מקרה מורכב (Case Study)</h4><div class="questionnaire-answer">${q.case_study}</div></div>` : ''}
+                ${q.challenges ? `<div class="detail-section"><h4><i class="fa-solid fa-mountain"></i> אתגרים</h4><div class="questionnaire-answer">${q.challenges}</div></div>` : ''}
+
+                <!-- ADMIN SECTION -->
+                <div class="modal-section-divider"><i class="fa-solid fa-cog"></i> ניהול</div>
                 <div class="detail-row">
                     <div class="detail-label">סטטוס</div>
                     <div class="detail-value">
                         <select id="therapist-status-select">
                             <option value="new" ${t.status === 'new' ? 'selected' : ''}>חדש</option>
+                            <option value="pending_review" ${t.status === 'pending_review' ? 'selected' : ''}>בבדיקה</option>
                             <option value="approved" ${t.status === 'approved' ? 'selected' : ''}>מאושר</option>
                             <option value="active" ${t.status === 'active' ? 'selected' : ''}>פעיל</option>
                             <option value="inactive" ${t.status === 'inactive' ? 'selected' : ''}>לא פעיל</option>
@@ -770,14 +929,17 @@
                     <span style="color: ${t.documents_verified ? 'var(--success)' : 'var(--text-secondary)'};">${t.documents_verified ? 'מאומת' : 'לא מאומת'}</span>
                 </div>
 
-                ${t.education ? `<div class="detail-section"><h4><i class="fa-solid fa-graduation-cap"></i> השכלה</h4><div class="questionnaire-answer">${t.education}</div></div>` : ''}
-                ${q.why_therapist ? `<div class="detail-section"><h4><i class="fa-solid fa-heart"></i> למה בחר להיות מטפל</h4><div class="questionnaire-answer">${q.why_therapist}</div></div>` : ''}
-                ${q.case_study ? `<div class="detail-section"><h4><i class="fa-solid fa-brain"></i> מקרה מורכב</h4><div class="questionnaire-answer">${q.case_study}</div></div>` : ''}
-                ${q.approach ? `<div class="detail-section"><h4><i class="fa-solid fa-compass"></i> גישה טיפולית</h4><div class="questionnaire-answer">${q.approach}</div></div>` : ''}
-                ${q.supervision ? `<div class="detail-section"><h4><i class="fa-solid fa-users"></i> סופרוויז'ן</h4><div class="questionnaire-answer">${q.supervision}</div></div>` : ''}
-                ${q.boundaries ? `<div class="detail-section"><h4><i class="fa-solid fa-shield"></i> גבולות מקצועיים</h4><div class="questionnaire-answer">${q.boundaries}</div></div>` : ''}
+                <div class="detail-row" style="margin-top:1rem;">
+                    <div class="detail-label">תאריך הרשמה</div>
+                    <div class="detail-value">${formatDate(t.created_at)}</div>
+                </div>
             `;
             document.getElementById('therapist-modal').classList.add('active');
+        }
+
+        function genderDisplayLabel(gender) {
+            const labels = { 'male': 'זכר', 'female': 'נקבה', 'other': 'אחר' };
+            return labels[gender] || gender || '-';
         }
 
         async function updatePatientStatus(id) {
@@ -857,7 +1019,7 @@
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
         function statusLabel(status) {
-            const labels = { 'new': 'חדש', 'waiting': 'ממתין', 'matched': 'שובץ', 'in_treatment': 'בטיפול', 'completed': 'הושלם', 'rejected': 'נדחה', 'approved': 'מאושר', 'active': 'פעיל', 'inactive': 'לא פעיל', 'cancelled': 'בוטל' };
+            const labels = { 'new': 'חדש', 'pending_review': 'בבדיקה', 'waiting': 'ממתין', 'matched': 'שובץ', 'in_treatment': 'בטיפול', 'completed': 'הושלם', 'rejected': 'נדחה', 'approved': 'מאושר', 'active': 'פעיל', 'inactive': 'לא פעיל', 'cancelled': 'בוטל' };
             return labels[status] || status;
         }
 

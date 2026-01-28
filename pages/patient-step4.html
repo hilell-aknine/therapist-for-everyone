@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שלב 4 - התחייבות וסיום | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2F8592;
+            --primary-dark: #003B46;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #1a1a2e;
+            --text-light: #6c757d;
+            --border: #e0e0e0;
+            --success: #28a745;
+            --error: #dc3545;
+            --warning: #ffc107;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.5rem; margin-bottom: 0.3rem; }
+        .header p { opacity: 0.9; font-size: 0.9rem; }
+
+        .progress-container {
+            background: white;
+            padding: 2rem 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: -50%;
+            width: 100%;
+            height: 3px;
+            background: var(--border);
+            z-index: 1;
+        }
+        .step.completed:not(:last-child)::after {
+            background: var(--gold);
+        }
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--text-light);
+            position: relative;
+            z-index: 2;
+        }
+        .step.active .step-circle {
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+        }
+        .step.completed .step-circle {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: white;
+        }
+        .step-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        .step.active .step-label { color: var(--primary-dark); font-weight: 600; }
+        .step.completed .step-label { color: var(--gold); }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .form-card {
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .step-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        .step-icon i { font-size: 1.5rem; color: white; }
+        .step-header h2 { color: var(--primary-dark); margin-bottom: 0.5rem; }
+        .step-header p { color: var(--text-light); font-size: 0.95rem; }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin: 1.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title i { color: var(--gold); }
+        .section-title:first-child { margin-top: 0; }
+
+        /* Terms Scroll Box */
+        .terms-container {
+            position: relative;
+        }
+        .terms-box {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.2rem;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        .terms-box h4 {
+            color: var(--primary-dark);
+            margin: 1rem 0 0.5rem;
+        }
+        .terms-box h4:first-child { margin-top: 0; }
+        .terms-box p { margin-bottom: 0.8rem; }
+        .terms-box .warning-box {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin: 1rem 0;
+            color: var(--error);
+        }
+        .scroll-indicator {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .scroll-indicator.hidden { display: none; }
+        .scroll-indicator i { animation: bounce 1s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(3px); }
+        }
+
+        /* Checkboxes */
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .checkbox-item:hover {
+            border-color: var(--primary);
+        }
+        .checkbox-item.checked {
+            border-color: var(--success);
+            background: rgba(40, 167, 69, 0.05);
+        }
+        .checkbox-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .checkbox-item input {
+            width: 22px;
+            height: 22px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            accent-color: var(--success);
+            cursor: pointer;
+        }
+        .checkbox-item.disabled input {
+            cursor: not-allowed;
+        }
+        .checkbox-item label {
+            cursor: pointer;
+            line-height: 1.5;
+        }
+        .checkbox-item.disabled label {
+            cursor: not-allowed;
+        }
+        .checkbox-item .required { color: var(--error); }
+        .checkbox-item.minor-only { display: none; }
+
+        /* Signature Canvas */
+        .signature-section {
+            margin-top: 1.5rem;
+        }
+        .signature-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .signature-label label { margin-bottom: 0; }
+        .btn-clear-signature {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: underline;
+        }
+        .btn-clear-signature:hover { color: var(--error); }
+        .signature-canvas-container {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .signature-canvas-container.has-signature {
+            border-style: solid;
+            border-color: var(--success);
+        }
+        #signature-canvas {
+            width: 100%;
+            height: 150px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        .signature-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-light);
+            pointer-events: none;
+            font-size: 0.9rem;
+        }
+        .signature-canvas-container.has-signature .signature-placeholder {
+            display: none;
+        }
+
+        /* Age Check */
+        .age-check {
+            background: rgba(255, 193, 7, 0.1);
+            border: 2px solid var(--warning);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .age-check label {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+        .age-check input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--warning);
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--success), #20c997);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-secondary {
+            background: white;
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Success State */
+        .success-container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--success), #20c997);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            animation: successPop 0.5s ease;
+        }
+        .success-icon i { font-size: 3rem; color: white; }
+        @keyframes successPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .success-container h2 { color: var(--primary-dark); margin-bottom: 1rem; }
+        .success-container p { color: var(--text-light); line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.05rem; }
+        .btn-home {
+            background: var(--primary);
+            color: white;
+            display: inline-flex;
+            padding: 1rem 2rem;
+        }
+        .btn-home:hover { background: var(--primary-dark); }
+
+        .hidden { display: none !important; }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            background: var(--error);
+            color: white;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { background: var(--success); }
+
+        @media (max-width: 600px) {
+            .header { padding: 1rem; }
+            .container { padding: 1rem; }
+            .form-card { padding: 1.5rem; border-radius: 16px; }
+            .step-label { font-size: 0.65rem; }
+            .step-circle { width: 35px; height: 35px; font-size: 0.9rem; }
+            .btn-container { flex-direction: column-reverse; }
+            .terms-box { max-height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fa-solid fa-heart-pulse"></i> מטפל לכל אחד</h1>
+        <p>בקשה לקבלת טיפול רגשי</p>
+    </div>
+
+    <div class="progress-container" id="progress-bar">
+        <div class="progress-steps">
+            <div class="step completed">
+                <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+                <span class="step-label">סינון והיכרות</span>
+            </div>
+            <div class="step completed">
+                <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+                <span class="step-label">דינמיקה משפחתית</span>
+            </div>
+            <div class="step completed">
+                <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+                <span class="step-label">ציפיות ורפואי</span>
+            </div>
+            <div class="step active">
+                <div class="step-circle">4</div>
+                <span class="step-label">התחייבות</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Form View -->
+        <div id="form-view">
+            <div class="form-card">
+                <div class="step-header">
+                    <div class="step-icon"><i class="fa-solid fa-file-signature"></i></div>
+                    <h2>הסכם תנאי שימוש</h2>
+                    <p>נא לקרוא את התנאים בעיון לפני אישור</p>
+                </div>
+
+                <div class="terms-container">
+                    <div class="terms-box" id="terms-box">
+                        <h4>הסכם תנאי שימוש, הצהרת פרטיות ואישור הורים</h4>
+
+                        <h4>1. הצהרת בטיחות וחירום (Non-Emergency)</h4>
+                        <div class="warning-box">
+                            <strong>אזהרה חמורה:</strong> פלטפורמת "מטפל לכל אחד" אינה מוקד חירום ואינה מספקת מענה למצבי מצוקה אקוטית, אובדנות או סכנת חיים.
+                        </div>
+                        <p>הנני מצהיר/ה כי אינני נמצא/ת כרגע במצב מסכן חיים לי או לסובבים אותי.</p>
+                        <p>(ידוע לי שבמקרה חירום עלי לפנות מיידית למוקד 100, לחדר מיון, או לער"ן 1201).</p>
+
+                        <h4>2. קטינים ואישור הורים</h4>
+                        <p><strong>למשתמש בגיר (מעל 18):</strong> אני מצהיר/ה כי אני מעל גיל 18 וכשיר/ה משפטית לאשר הסכם זה.</p>
+                        <p><strong>למשתמש קטין (מתחת ל-18):</strong> השימוש במערכת מחייב הסכמה וליווי של הורה/אפוטרופוס. ההורה מאשר כי הוא מודע לטיב השירות ונותן את הסכמתו.</p>
+
+                        <h4>3. מהות השירות: "לוח מודעות חכם"</h4>
+                        <p><strong>3.1</strong> הפלטפורמה כמתווך טכנולוגי: האתר משמש כזירה לחיבור בין מבקשי סיוע למתנדבים. הנהלת האתר אינה מוסד רפואי/פסיכולוגי.</p>
+                        <p><strong>3.2</strong> הגדרת הטיפול: השירות מוגדר כליווי, תמיכה, אימון או ייעוץ. הוא אינו מהווה תחליף לטיפול פסיכיאטרי מוסדי.</p>
+                        <p><strong>3.3</strong> אחריות המטפל: האחריות המקצועית לבדיקת התאמת הטיפול ולתוכן המפגשים חלה באופן בלעדי על המטפל/ת.</p>
+
+                        <h4>4. פרטיות ומחיקת מידע</h4>
+                        <p><strong>4.1</strong> מחיקת מידע (Data Retention): ידוע לי כי כל המידע הטכני והמשובים במערכת יימחקו או יעברו אנונימיזציה מלאה 90 יום לאחר סיום ההתקשרות.</p>
+                        <p><strong>4.2</strong> פיקוח טכנולוגי: המערכת עושה שימוש בכלי ניטור אוטומטיים (AI) לאיתור חריגות קיצוניות בשביעות רצון.</p>
+                        <p><strong>4.3</strong> הפרדה: להנהלת האתר אין גישה לתוכן השיחות עצמן (המתקיימות בזום/קליניקה), אלא רק לנתוני הבקרה.</p>
+
+                        <h4>5. המשך טיפול בתשלום ("היום שאחרי")</h4>
+                        <p>הפלטפורמה מעניקה עד 10 מפגשים ללא עלות. במידה והצדדים יבחרו להמשיך קשר בתשלום לאחר מכסה זו - הדבר נעשה בהסכמתם הבלעדית ומחוץ לאחריות הפלטפורמה.</p>
+
+                        <h4>6. זמינות וטכנולוגיה</h4>
+                        <p>האתר אינו אחראי לתקלות טכניות בתוכנות צד ג' (כגון זום) או לאי-קבלת קישור מהמטפל.</p>
+
+                        <h4>7. ויתור ושיפוי (Waiver)</h4>
+                        <p>השימוש באתר ניתן כמות שהוא ("As Is"). הנני מוותר/ת על כל טענה כלפי מפעילת האתר בגין נזק שייגרם כתוצאה מהשימוש בשירות.</p>
+                    </div>
+
+                    <div class="scroll-indicator" id="scroll-indicator">
+                        <i class="fa-solid fa-chevron-down"></i>
+                        גלול/י למטה כדי לקרוא את כל התנאים
+                    </div>
+                </div>
+
+                <form id="step4-form">
+                    <h3 class="section-title"><i class="fa-solid fa-square-check"></i> אישורים</h3>
+
+                    <div class="age-check">
+                        <label>
+                            <input type="checkbox" id="is_minor" onchange="toggleMinorConsent()">
+                            <span>אני מתחת לגיל 18 (קטין/ה)</span>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-item disabled" id="terms-checkbox" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" id="terms_confirmed" name="terms_confirmed" required disabled>
+                        <label for="terms_confirmed">
+                            אני מאשר/ת שקראתי את תנאי השימוש <span class="required">*</span>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-item disabled" id="emergency-checkbox" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" id="not_emergency" name="not_emergency" required disabled>
+                        <label for="not_emergency">
+                            אני מצהיר/ה שאינני במצב חירום <span class="required">*</span>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-item minor-only disabled" id="parent-checkbox" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" id="parent_consent" name="parent_consent" disabled>
+                        <label for="parent_consent">
+                            אני ההורה/אפוטרופוס ומאשר/ת את קבלת הטיפול <span class="required">*</span>
+                        </label>
+                    </div>
+
+                    <div class="signature-section">
+                        <div class="signature-label">
+                            <label>חתימה דיגיטלית <span class="required">*</span></label>
+                            <button type="button" class="btn-clear-signature" onclick="clearSignature()">נקה חתימה</button>
+                        </div>
+                        <div class="signature-canvas-container" id="signature-container">
+                            <canvas id="signature-canvas"></canvas>
+                            <span class="signature-placeholder">חתום/י כאן</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-container">
+                        <a href="patient-step3.html" class="btn btn-secondary">
+                            <i class="fa-solid fa-arrow-right"></i>
+                            חזרה
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+                            <i class="fa-solid fa-paper-plane"></i>
+                            שליחת הבקשה
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success View -->
+        <div id="success-view" class="hidden">
+            <div class="form-card">
+                <div class="success-container">
+                    <div class="success-icon">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h2>אנו שמחים מאוד על הצעד שעשית!</h2>
+                    <p>
+                        אנו נעשה הכל בשביל לעזור לך.
+                        <br>ברגע שנמצא את המטפל הכי מקצועי ומתאים עבורך, הוא ייצור איתך קשר בהקדם.
+                    </p>
+                    <a href="../index.html" class="btn btn-home">
+                        <i class="fa-solid fa-home"></i>
+                        חזרה לדף הבית
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let formData = {};
+        let isMinor = false;
+        let hasScrolledToBottom = false;
+        let hasSignature = false;
+
+        // Signature canvas setup
+        const canvas = document.getElementById('signature-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        function resizeCanvas() {
+            const container = document.getElementById('signature-container');
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = 150;
+            ctx.strokeStyle = '#1a1a2e';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches) {
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top
+                };
+            }
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const coords = getCoords(e);
+            lastX = coords.x;
+            lastY = coords.y;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const coords = getCoords(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(coords.x, coords.y);
+            ctx.stroke();
+            lastX = coords.x;
+            lastY = coords.y;
+
+            if (!hasSignature) {
+                hasSignature = true;
+                document.getElementById('signature-container').classList.add('has-signature');
+                updateSubmitButton();
+            }
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false;
+            document.getElementById('signature-container').classList.remove('has-signature');
+            updateSubmitButton();
+        }
+
+        // Event listeners for signature
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // Scroll lock mechanism
+        const termsBox = document.getElementById('terms-box');
+        termsBox.addEventListener('scroll', () => {
+            const scrolledToBottom = termsBox.scrollHeight - termsBox.scrollTop <= termsBox.clientHeight + 10;
+            if (scrolledToBottom && !hasScrolledToBottom) {
+                hasScrolledToBottom = true;
+                document.getElementById('scroll-indicator').classList.add('hidden');
+                enableCheckboxes();
+            }
+        });
+
+        function enableCheckboxes() {
+            document.getElementById('terms-checkbox').classList.remove('disabled');
+            document.getElementById('terms-checkbox').querySelector('input').disabled = false;
+            document.getElementById('emergency-checkbox').classList.remove('disabled');
+            document.getElementById('emergency-checkbox').querySelector('input').disabled = false;
+            if (isMinor) {
+                document.getElementById('parent-checkbox').classList.remove('disabled');
+                document.getElementById('parent-checkbox').querySelector('input').disabled = false;
+            }
+        }
+
+        function toggleMinorConsent() {
+            isMinor = document.getElementById('is_minor').checked;
+            const parentCheckbox = document.getElementById('parent-checkbox');
+            if (isMinor) {
+                parentCheckbox.style.display = 'flex';
+                if (hasScrolledToBottom) {
+                    parentCheckbox.classList.remove('disabled');
+                    parentCheckbox.querySelector('input').disabled = false;
+                }
+            } else {
+                parentCheckbox.style.display = 'none';
+                parentCheckbox.querySelector('input').checked = false;
+                parentCheckbox.classList.remove('checked');
+            }
+            updateSubmitButton();
+        }
+
+        function toggleCheckbox(item) {
+            if (item.classList.contains('disabled')) return;
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            item.classList.toggle('checked', checkbox.checked);
+            updateSubmitButton();
+        }
+
+        function updateSubmitButton() {
+            const termsConfirmed = document.getElementById('terms_confirmed').checked;
+            const notEmergency = document.getElementById('not_emergency').checked;
+            const parentConsent = !isMinor || document.getElementById('parent_consent').checked;
+
+            const canSubmit = termsConfirmed && notEmergency && parentConsent && hasSignature;
+            document.getElementById('submit-btn').disabled = !canSubmit;
+        }
+
+        // Initialize checkbox click handlers
+        document.querySelectorAll('.checkbox-item input').forEach(input => {
+            input.addEventListener('change', function() {
+                this.closest('.checkbox-item').classList.toggle('checked', this.checked);
+                updateSubmitButton();
+            });
+        });
+
+        // Check if previous steps were completed
+        document.addEventListener('DOMContentLoaded', () => {
+            formData = JSON.parse(localStorage.getItem('patientForm') || '{}');
+
+            if (!formData.full_name || !formData.therapy_type || !formData.mother_relationship) {
+                window.location.href = 'patient-step1.html';
+                return;
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        });
+
+        // Form submission
+        document.getElementById('step4-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const termsConfirmed = document.getElementById('terms_confirmed').checked;
+            const notEmergency = document.getElementById('not_emergency').checked;
+            const parentConsent = !isMinor || document.getElementById('parent_consent').checked;
+
+            if (!termsConfirmed || !notEmergency || !parentConsent) {
+                showToast('יש לאשר את כל ההצהרות');
+                return;
+            }
+
+            if (!hasSignature) {
+                showToast('יש לחתום בתיבת החתימה');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
+
+            try {
+                // Get signature as base64
+                const signatureData = canvas.toDataURL('image/png');
+
+                // Build questionnaire object according to spec
+                const questionnaire = {
+                    main_reason: formData.main_reason || '',
+                    previous_therapy_history: formData.previous_therapy_history || '',
+                    expectations: formData.expectations || '',
+                    why_now: formData.why_now || '',
+                    fears: formData.fears || '',
+                    medical_background: {
+                        chronic_issues: formData.chronic_issues || '',
+                        medications: formData.medications || '',
+                        other_treatment: formData.other_treatment || false
+                    },
+                    family_dynamics: {
+                        mother_name: formData.mother_name || '',
+                        mother_relationship: formData.mother_relationship || '',
+                        father_name: formData.father_name || '',
+                        father_relationship: formData.father_relationship || '',
+                        siblings_count: formData.siblings_count || 0,
+                        siblings_details: formData.siblings_details || []
+                    },
+                    inner_world: {
+                        early_memory: formData.early_memory || '',
+                        open_space: formData.open_space || ''
+                    }
+                };
+
+                // Build final data object
+                const data = {
+                    full_name: formData.full_name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    city: formData.city || null,
+                    birth_date: formData.birth_date || null,
+                    gender: formData.gender || null,
+                    marital_status: formData.marital_status || null,
+                    occupation: formData.occupation || null,
+                    military_service: formData.military_service || null,
+                    social_link: formData.social_link || null,
+                    therapy_type: formData.therapy_type,
+                    therapist_gender_preference: formData.therapist_gender_preference || 'any',
+                    questionnaire: questionnaire,
+                    signature_data: signatureData,
+                    legal_consent_date: new Date().toISOString(),
+                    is_minor: isMinor,
+                    parent_consent: isMinor ? parentConsent : null,
+                    status: 'new'
+                };
+
+                // Submit to Supabase
+                const { error } = await db.from('patients').insert(data);
+                if (error) throw error;
+
+                // Clear localStorage
+                localStorage.removeItem('patientForm');
+
+                // Show success
+                document.getElementById('form-view').classList.add('hidden');
+                document.getElementById('progress-bar').classList.add('hidden');
+                document.getElementById('success-view').classList.remove('hidden');
+                showToast('הבקשה נשלחה בהצלחה!', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('שגיאה בשליחת הטופס. נסה שוב.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שליחת הבקשה';
+            }
+        });
+
+        function showToast(message, type = 'error') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>

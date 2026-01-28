@@ -12,8 +12,8 @@
     }
     window._supabaseClientInitialized = true;
 
-    const SUPABASE_URL = 'https://vhzdrywvpgaqyivprbds.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoemRyeXd2cGdhcXlpdnByYmRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2NjkwMTksImV4cCI6MjA4NDI0NTAxOX0.h0fCrmenxcXFhtFO0UtqYVMqyl0EAjGt5g7OY1FZ9-I';
+    const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
 
     // Initialize Supabase client (use existing or create new)
     // Note: window.supabase comes from the CDN script

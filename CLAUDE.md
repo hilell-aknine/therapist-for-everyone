@@ -1,54 +1,272 @@
-# CLAUDE.md - Project Context & Guidelines
-**Project Name:** Therapists for Everyone (פורטל מטפלים לכולם)
-**Tech Stack:** Vanilla JS, HTML, CSS (Tailwind via CDN), Supabase (Auth, DB, Edge Functions).
-**Environment:** Localhost development, Deploy to Vercel (Future).
+# CLAUDE.md - מטפל לכל אחד
 
-## 1. Project Vision & Core Principles
-* **Purpose:** A community portal for high-quality therapists offering subsidized/free mental health support.
-* **Key Distinction:** Not just a directory. A managed community with AI screening and strict quality control.
+## Quick Reference
+```
+Project: Therapists for Everyone (פורטל מטפלים לכולם)
+Stack: HTML, Vanilla JS, Tailwind CDN, Supabase
+Live: https://hilell-aknine.github.io/therapist-for-everyone/
+Repo: https://github.com/hilell-aknine/therapist-for-everyone
+```
 
-### Lead Capture First Policy (IMPORTANT!)
-* **Onboarding forms DO NOT require login.**
-* Anyone can fill out the patient/therapist questionnaire without creating an account.
-* Data is saved directly to DB as a "lead" (contact_requests or patients/therapists tables).
-* Login/Auth is NOT a critical point for lead capture.
+---
 
-### Legal Gate Policy
-* **Legal consent is required ONLY for:**
-    * Accessing dashboards (admin/therapist/patient dashboards)
-    * Matching phase (before being assigned a therapist)
-    * Viewing sensitive data
-* **Legal consent is NOT required for:**
-    * Filling onboarding forms
-    * Leaving contact details
-    * Browsing public pages
+## 1. Project Vision
 
-## 2. User Roles & Permissions (Supabase RLS)
-* **Admin ("God Mode"):**
-    * Can view all data.
-    * Identification: MUST be checked via `profiles.role = 'admin'` (NOT hardcoded emails).
-* **Therapist:**
-    * Can only see their own profile (`auth.uid()`).
-    * Can see patients assigned specifically to them.
-* **Patient:**
-    * Can only see their own profile.
-    * Can see details of their assigned therapist.
+**מטרה:** פורטל קהילתי לחיבור מטופלים עם מטפלים איכותיים שמציעים טיפול נפשי מסובסד/חינם.
 
-## 3. Architecture & File Structure
-* **Frontend:** Keep HTML files clean. Move complex logic to `/js` modules.
-    * `js/supabase-client.js`: The ONLY place for Supabase initialization.
-    * `js/auth-guard.js`: New file needed for role & legal checks.
-* **Database (Supabase):**
-    * Always use RLS (Row Level Security).
-    * New Table Required: `legal_consents` (user_id, ip_address, agreed_version, signed_at).
+**קהלי יעד:**
+- פוסט-טראומתיים, הלומי קרב, ניצולי נובה
+- כל מי שאין לו יכולת כלכלית לטיפול
 
-## 4. Coding Standards
-* **Secrets:** NEVER hardcode API keys (except Supabase Anon Key). Use `.env` or Supabase Secrets.
-* **Style:** Use descriptive variable names (`isTherapistApproved` vs `approved`).
-* **Language:** UI in Hebrew (RTL), Code/Comments in English.
-* **Error Handling:** Always wrap Supabase calls in `try/catch` and show user-friendly errors (alert/toast).
+**בידול:** לא רק ספרייה - קהילה מנוהלת עם סינון AI ובקרת איכות.
 
-## 5. Immediate Roadmap (Priority Order)
-1.  **Legal Gate:** Create `legal_consents` table & `legal-gate.html`. Implement redirection logic.
-2.  **Refactor Auth:** Move hardcoded admin emails to DB check.
-3.  **Patient Flow:** Build the missing Patient Onboarding form.
+---
+
+## 2. Architecture
+
+```
+מטפל-לכל-אחד-website/
+├── index.html              # דף הבית + קורסים
+├── landing-patient.html    # נחיתה למטופלים
+├── landing-therapist.html  # נחיתה למטפלים
+├── patient-onboarding.html # הרשמת מטופל
+├── therapist-onboarding.html # הרשמת מטפל
+├── patient-dashboard.html  # אזור אישי למטופל
+├── therapist-dashboard.html # אזור אישי למטפל
+├── admin-dashboard.html    # פאנל ניהול
+├── legal-gate.html         # שער משפטי
+├── thank-you.html          # דף תודה
+├── js/
+│   ├── supabase-client.js  # Supabase initialization (SINGLE SOURCE)
+│   ├── auth-guard.js       # Role & legal checks
+│   ├── patient-flow.js     # Patient logic
+│   └── admin-dashboard.js  # Admin logic
+├── supabase/
+│   └── migrations/         # Database schema
+├── images/
+├── docs/
+│   ├── אפיון-מערכת.txt     # System specification
+│   └── אפיון-מערכת.pdf
+└── DOCUMENTATION.md        # Technical docs (Hebrew)
+```
+
+---
+
+## 3. Core Policies
+
+### Lead Capture First
+- **Onboarding forms DO NOT require login**
+- Anyone can fill patient/therapist questionnaire
+- Data saved as "lead" to DB
+- Auth is NOT a blocker for lead capture
+
+### Legal Gate
+**Required for:**
+- Dashboard access
+- Matching phase
+- Viewing sensitive data
+
+**NOT required for:**
+- Filling forms
+- Leaving contact details
+- Browsing public pages
+
+---
+
+## 4. User Roles (Supabase RLS)
+
+| Role | Permissions |
+|------|-------------|
+| **Admin** | See all data. Check via `profiles.role = 'admin'` |
+| **Therapist** | Own profile + assigned patients only |
+| **Patient** | Own profile + assigned therapist only |
+
+---
+
+## 5. Database Schema
+
+### Main Tables
+- `profiles` - User profiles (auto-created on signup)
+- `therapists` - Therapist applications & data
+- `patients` - Patient intake forms
+- `appointments` - Sessions (max 10 per patient)
+- `legal_consents` - Legal signatures (timestamp + IP)
+- `contact_requests` - Lead capture
+- `course_progress` - Video course tracking
+
+### Supabase Connection
+```javascript
+const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+// Anon key in supabase-client.js
+```
+
+**Dashboard:** https://supabase.com/dashboard/project/eimcudmlfjlyxjyrdcgc
+
+---
+
+## 6. Coding Standards
+
+| Rule | Details |
+|------|---------|
+| **Secrets** | Never hardcode (except Supabase Anon Key) |
+| **Language** | UI in Hebrew (RTL), Code in English |
+| **Errors** | Always try/catch Supabase calls, show friendly errors |
+| **Style** | Descriptive names (`isTherapistApproved` not `approved`) |
+| **JS Location** | Complex logic goes to `/js` modules |
+
+---
+
+## 7. User Flows
+
+### Patient Flow
+1. Landing page -> Fill questionnaire (no login)
+2. Data saved to `patients` + `contact_requests`
+3. Admin reviews & assigns therapist
+4. Patient gets legal gate -> Dashboard access
+
+### Therapist Flow
+1. Landing page -> Fill application + upload certificates
+2. AI screening + Admin approval
+3. Receive email with password creation link
+4. Legal gate -> Access "המשרד" (personal dashboard)
+5. Receive patient assignments, initiate contact
+
+### Admin Flow
+1. Login -> Dashboard
+2. Review new applications (email alerts)
+3. Approve/reject therapists
+4. Match patients to therapists
+5. Handle alerts (red flag: therapist inactive 30 days)
+
+---
+
+## 8. Current Status
+
+### Done
+- [x] Landing pages (patient/therapist)
+- [x] Onboarding forms
+- [x] Legal gate page
+- [x] Admin dashboard UI
+- [x] Patient dashboard (basic)
+- [x] Therapist dashboard (basic)
+- [x] Supabase integration
+
+### In Progress
+- [ ] AI screening integration
+- [ ] Email notifications
+- [ ] Session counter (10 max)
+
+### Planned
+- [ ] WhatsApp/SMS reminders
+- [ ] Automatic matching algorithm
+- [ ] Video chat integration
+
+---
+
+## 9. Branding
+
+```css
+/* Colors */
+--deep-petrol: #003B46;
+--muted-teal: #00606B;
+--dusty-aqua: #2F8592;
+--frost-white: #E8F1F2;
+--gold: #D4AF37;
+
+/* Font */
+font-family: 'Heebo', sans-serif;
+```
+
+**Slogan:** "ריפוי הנפש לכל אדם"
+
+---
+
+## 10. Commands
+
+```bash
+# Local development
+# Just open HTML files in browser (static site)
+
+# Deploy
+git push origin master  # GitHub Pages auto-deploys
+```
+
+---
+
+## 11. Video Marketing (Remotion)
+
+### Location
+```
+videos-remotion/
+├── src/
+│   └── videos/
+│       ├── Video1-PlatformIntro.tsx  # Main promotional video
+│       ├── Video2-PatientJourney.tsx
+│       └── Video3-TherapistJourney.tsx
+├── public/
+│   └── narration/                     # Hebrew voice narration files
+│       └── scene1-8.mp3
+└── scripts/
+    └── generate-narration.py          # Narration generation system
+```
+
+### Video Specs
+- Format: Instagram Reel (1080x1920, 9:16 vertical)
+- Duration: 47 seconds
+- FPS: 30
+
+### Narration System
+**Generate Hebrew narration:**
+```bash
+cd videos-remotion
+py scripts/generate-narration.py
+```
+
+**Key rules:**
+- Text must be SHORT to fit scene duration
+- Validation checks audio length vs scene length
+- Uses edge-tts with `he-IL-HilaNeural` voice
+- Results saved to `public/narration/validation_results.json`
+
+### Scene Timing (Video1)
+| Scene | Duration | Content |
+|-------|----------|---------|
+| 1 | 3s | Hook - "40%" |
+| 2 | 5s | Problem |
+| 3 | 4s | Solution |
+| 4 | 5s | Features |
+| 5 | 7s | Research |
+| 6 | 7s | Benefits |
+| 7 | 6s | Impact |
+| 8 | 10s | CTA |
+
+### Commands
+```bash
+# Start Remotion Studio
+cd videos-remotion && npm start
+
+# Generate narration (validates automatically)
+py scripts/generate-narration.py
+
+# Render video (only when requested!)
+npx remotion render Video1-PlatformIntro output.mp4
+
+# Render single frame for preview
+npx remotion still Video1-PlatformIntro --frame=180 --output=preview.png
+```
+
+### Style Guidelines
+- Fonts: Bold (900) for headlines
+- No blur effects (causes "cloud" appearance)
+- Gold borders on cards
+- Background music at 15% volume (allow narration)
+- Professional SVG icons (no emojis)
+
+---
+
+## 12. Important Notes
+
+- Max 10 sessions per patient (business rule)
+- Therapist initiates first contact (not patient)
+- Inactive therapist > 30 days = red flag alert
+- Location is flexible (Zoom default, physical optional)

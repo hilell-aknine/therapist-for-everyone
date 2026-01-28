@@ -5,6 +5,44 @@
 (function() {
     'use strict';
 
+    // Email notification configuration
+    const SUPABASE_FUNCTIONS_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+    const ADMIN_DASHBOARD_URL = 'https://hilell-aknine.github.io/therapist-for-everyone/admin-dashboard.html';
+
+    // Send admin notification for new patient registration
+    async function sendAdminNotification(formData, userEmail = null) {
+        try {
+            const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/send-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                    type: 'new_patient_admin',
+                    to: 'admin@therapist-for-everyone.com', // Will be overridden by ADMIN_EMAIL env var
+                    data: {
+                        patientName: formData.full_name,
+                        patientEmail: userEmail,
+                        patientPhone: formData.phone,
+                        mainConcern: formData.main_concern,
+                        dashboardUrl: ADMIN_DASHBOARD_URL
+                    }
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                console.log('Admin notification sent for new patient');
+            } else {
+                console.error('Admin notification failed:', result.error);
+            }
+        } catch (error) {
+            console.error('Error sending admin notification:', error);
+        }
+    }
+
     // ============================================================================
     // Initialization
     // ============================================================================
@@ -165,6 +203,9 @@
                 await updateProfileRole(user.id, 'patient');
                 await updateProfileDetails(user.id, formData);
 
+                // Send admin notification (background)
+                sendAdminNotification(formData, user.email);
+
                 showToast('הבקשה נשלחה בהצלחה! מעביר אותך...', 'success');
                 setTimeout(() => {
                     window.location.href = 'patient-dashboard.html';
@@ -172,6 +213,9 @@
             } else {
                 // Anonymous user - save as lead to contact_requests
                 await insertContactRequest(formData);
+
+                // Send admin notification (background)
+                sendAdminNotification(formData);
 
                 showToast('הפרטים נשלחו בהצלחה! ניצור איתך קשר בהקדם', 'success');
                 setTimeout(() => {
@@ -245,61 +289,53 @@
     // Database Operations
     // ============================================================================
 
-    // Insert anonymous lead to contact_requests table
+    // Insert anonymous patient directly to patients table
     async function insertContactRequest(formData) {
-        const contactData = {
+        // For anonymous users - save directly to patients table
+        const patientData = {
             full_name: formData.full_name,
             phone: formData.phone,
             email: formData.email || null,
             city: formData.city,
-            request_type: 'patient',
-            therapy_preference: formData.therapy_preference,
-            therapist_gender: formData.therapist_gender,
-            message: formData.main_concern,
-            status: 'new',
-            source: 'patient-onboarding'
-        };
-
-        const { data, error } = await window.supabaseClient
-            .from('contact_requests')
-            .insert(contactData)
-            .select()
-            .single();
-
-        if (error) {
-            console.error('Error inserting contact request:', error);
-            throw new Error('שגיאה בשמירת הפרטים');
-        }
-
-        console.log('Contact request created:', data);
-        return data;
-    }
-
-    async function insertPatientRecord(userId, formData) {
-        const patientData = {
-            user_id: userId,
-            occupation: formData.city,  // Using occupation field for city
             main_concern: formData.main_concern,
-            preferred_therapist_gender: formData.therapist_gender,
-            availability: [formData.therapy_preference],  // Store preference in availability array
-            status: 'pending',
-            agreement_signed: true,  // They signed via legal-gate
-            intake_completed: true
+            status: 'new'
         };
 
-        const { data, error } = await window.supabaseClient
+        const { error } = await window.supabaseClient
             .from('patients')
-            .insert(patientData)
-            .select()
-            .single();
+            .insert(patientData);
 
         if (error) {
             console.error('Error inserting patient:', error);
             throw new Error('שגיאה בשמירת הפרטים');
         }
 
-        console.log('Patient record created:', data);
-        return data;
+        console.log('Anonymous patient created');
+        return { success: true };
+    }
+
+    async function insertPatientRecord(userId, formData) {
+        const patientData = {
+            user_id: userId,
+            full_name: formData.full_name,
+            phone: formData.phone,
+            email: null,
+            city: formData.city,
+            main_concern: formData.main_concern,
+            status: 'new'
+        };
+
+        const { error } = await window.supabaseClient
+            .from('patients')
+            .insert(patientData);
+
+        if (error) {
+            console.error('Error inserting patient:', error);
+            throw new Error('שגיאה בשמירת הפרטים');
+        }
+
+        console.log('Patient record created');
+        return { success: true };
     }
 
     async function updateProfileRole(userId, role) {

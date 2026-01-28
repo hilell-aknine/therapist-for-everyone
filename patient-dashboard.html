@@ -3,243 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>האזור האישי שלי - מטפל לכל אחד</title>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>אזור אישי מטופל - מטפל לכל אחד</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="js/supabase-client.js"></script>
     <script src="js/auth-guard.js"></script>
     <script>
-        // Auth & Legal Guard
-        document.addEventListener('DOMContentLoaded', async () => {
-            await new Promise(r => setTimeout(r, 100));
-            if (window.AuthGuard) {
-                const hasConsent = await AuthGuard.checkLegalConsent();
-                if (!hasConsent) return;
-            }
-        });
+        // Auth & Legal Guard - TEMPORARILY DISABLED FOR DEMO
+        // document.addEventListener('DOMContentLoaded', async () => {
+        //     await new Promise(r => setTimeout(r, 100));
+        //     if (window.AuthGuard) {
+        //         const hasConsent = await AuthGuard.checkLegalConsent();
+        //         if (!hasConsent) return;
+        //     }
+        // });
     </script>
-    <style>
-        :root {
-            --deep-petrol: #003B46;
-            --muted-teal: #00606B;
-            --dusty-aqua: #2F8592;
-            --frost-white: #E8F1F2;
-            --pure-white: #FFFFFF;
-            --gold: #D4AF37;
-            --gold-glow: rgba(212, 175, 55, 0.3);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Heebo', sans-serif;
-            background: linear-gradient(135deg, var(--dusty-aqua) 0%, var(--muted-teal) 50%, var(--deep-petrol) 100%);
-            min-height: 100vh;
-            color: var(--pure-white);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header */
-        .header {
-            padding: 1.2rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0, 59, 70, 0.8);
-            backdrop-filter: blur(10px);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            text-decoration: none;
-            color: var(--pure-white);
-        }
-
-        .logo i {
-            font-size: 1.8rem;
-            color: var(--gold);
-        }
-
-        .logo span {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--frost-white);
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            background: none;
-            border: 1px solid rgba(255,255,255,0.2);
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.95rem;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .placeholder-card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 3rem;
-            text-align: center;
-            max-width: 500px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .placeholder-icon {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-glow) 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-        }
-
-        .placeholder-icon i {
-            font-size: 3rem;
-            color: var(--deep-petrol);
-        }
-
-        .placeholder-card h1 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: var(--gold);
-        }
-
-        .placeholder-card p {
-            font-size: 1.1rem;
-            color: var(--frost-white);
-            margin-bottom: 1.5rem;
-            line-height: 1.8;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.8rem 1.5rem;
-            background: rgba(76, 175, 80, 0.2);
-            border: 1px solid rgba(76, 175, 80, 0.4);
-            border-radius: 50px;
-            color: #81C784;
-            font-weight: 600;
-            margin-bottom: 2rem;
-        }
-
-        .status-badge i {
-            font-size: 1rem;
-        }
-
-        .info-text {
-            font-size: 0.95rem;
-            color: var(--frost-white);
-            opacity: 0.7;
-        }
-
-        .home-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            padding: 0.8rem 1.5rem;
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            text-decoration: none;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-
-        .home-btn:hover {
-            background: var(--gold);
-            color: var(--deep-petrol);
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .placeholder-card {
-                padding: 2rem;
-                margin: 1rem;
-            }
-
-            .placeholder-card h1 {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
 </head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <a href="index.html" class="logo">
-            <i class="fa-solid fa-heart-pulse"></i>
-            <span>מטפל לכל אחד</span>
-        </a>
-        <button class="logout-btn" onclick="logout()">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            התנתקות
-        </button>
-    </header>
+<body class="bg-gray-50 font-sans text-gray-900">
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="placeholder-card">
-            <div class="placeholder-icon">
-                <i class="fa-solid fa-check"></i>
-            </div>
-            <h1>הבקשה התקבלה!</h1>
-            <div class="status-badge">
-                <i class="fa-solid fa-clock"></i>
-                סטטוס: ממתין להתאמת מטפל
-            </div>
-            <p>
-                תודה על פנייתך! הצוות שלנו בודק את הבקשה ויתאים לך מטפל מקצועי בהקדם.
-                <br><br>
-                ניצור איתך קשר בטלפון שהזנת תוך 48 שעות.
-            </p>
-            <p class="info-text">
-                <i class="fa-solid fa-bell"></i>
-                בקרוב: כאן תוכלו לראות את פרטי המטפל, לקבוע פגישות ועוד.
-            </p>
-            <a href="index.html" class="home-btn">
-                <i class="fa-solid fa-home"></i>
-                חזרה לדף הבית
+    <nav class="bg-white shadow-md p-4">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold text-indigo-700 flex items-center gap-2">
+                <i class="fa-solid fa-heart-pulse"></i>
+                מטפל לכל אחד
             </a>
+            <div class="flex items-center gap-4">
+                <span id="user-info" class="text-sm font-medium"></span>
+                <button onclick="logout()" class="text-sm text-gray-500 hover:text-red-500 transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    התנתקות
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-6">
+        <!-- Progress Stepper -->
+        <div class="bg-white rounded-xl shadow-sm p-8 mb-8">
+            <h2 class="text-lg font-bold mb-6 text-center">סטטוס הבקשה שלך</h2>
+            <div class="flex items-center justify-between relative">
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 z-0"></div>
+                <div id="line-progress" class="absolute top-1/2 left-0 h-1 bg-indigo-500 -translate-y-1/2 z-0 transition-all duration-500" style="width: 0%"></div>
+
+                <div class="relative z-10 flex flex-col items-center">
+                    <div class="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg">1</div>
+                    <span class="text-xs font-bold">בקשה התקבלה</span>
+                </div>
+                <div class="relative z-10 flex flex-col items-center">
+                    <div id="step-2" class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center mb-2">2</div>
+                    <span class="text-xs">בחינת התאמה</span>
+                </div>
+                <div class="relative z-10 flex flex-col items-center">
+                    <div id="step-3" class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center mb-2">3</div>
+                    <span class="text-xs">נמצא מטפל</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Searching View (shown when no therapist assigned) -->
+        <div id="searching-view" class="bg-indigo-50 border border-indigo-100 rounded-xl p-8 text-center">
+            <div class="animate-spin text-indigo-600 text-4xl mb-4 inline-block">
+                <i class="fas fa-circle-notch"></i>
+            </div>
+            <h3 class="text-xl font-bold text-indigo-900 mb-2">אנחנו מחפשים לך את המטפל המדויק...</h3>
+            <p class="text-indigo-700">הצוות המקצועי שלנו עובר על הפרטים כדי למצוא התאמה מושלמת. זה לוקח בדרך כלל בין 24 ל-48 שעות.</p>
+        </div>
+
+        <!-- Match View (shown when therapist is assigned) -->
+        <div id="match-view" class="hidden space-y-6">
+            <div class="bg-green-100 border border-green-200 p-4 rounded-lg flex items-center gap-3 text-green-800">
+                <i class="fas fa-check-circle text-2xl"></i>
+                <span class="font-bold text-lg">יש לנו התאמה! נמצא עבורך המטפל המתאים ביותר.</span>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="md:flex">
+                    <div class="md:w-1/3 bg-gray-200 h-64 md:h-auto flex items-center justify-center">
+                        <i class="fas fa-user-tie text-6xl text-gray-400"></i>
+                    </div>
+                    <div class="p-8 md:w-2/3">
+                        <h3 id="therapist-name" class="text-2xl font-bold text-gray-800 mb-1"></h3>
+                        <p id="therapist-specialty" class="text-indigo-600 font-medium mb-4"></p>
+                        <p id="therapist-bio" class="text-gray-600 mb-6"></p>
+                        <a id="whatsapp-btn" href="#" target="_blank" class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full font-bold transition shadow-md">
+                            <i class="fab fa-whatsapp text-xl"></i>
+                            פתיחת שיחה בוואטסאפ
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
     <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for supabase client to be ready
+            await new Promise(r => setTimeout(r, 150));
+
+            const supabase = window.supabaseClient;
+            if (!supabase) {
+                console.error('Supabase client not initialized');
+                // TEMP: Show demo mode without Supabase
+                document.getElementById('user-info').textContent = 'שלום, משתמש לדוגמה';
+                showDemoMode();
+                return;
+            }
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                // TEMP: Demo mode - remove this block in production
+                document.getElementById('user-info').textContent = 'שלום, משתמש לדוגמה';
+                showDemoMode();
+                return;
+                // window.location.href = 'index.html';
+            }
+
+            document.getElementById('user-info').textContent = `שלום, ${user.user_metadata.full_name || 'מטופל'}`;
+            loadPatientData(user.id);
+        });
+
+        // TEMP: Demo function to show UI without real data
+        function showDemoMode() {
+            // Show Match View (step 3) with sample therapist
+            const line = document.getElementById('line-progress');
+            const step2 = document.getElementById('step-2');
+            const step3 = document.getElementById('step-3');
+
+            line.style.width = '100%';
+            step2.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
+            step3.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
+
+            document.getElementById('searching-view').classList.add('hidden');
+            document.getElementById('match-view').classList.remove('hidden');
+
+            // Sample therapist data
+            document.getElementById('therapist-name').textContent = 'דנה כהן';
+            document.getElementById('therapist-specialty').textContent = 'מטפלת בטראומה ו-PTSD';
+            document.getElementById('therapist-bio').textContent = 'מטפלת מוסמכת עם 8 שנות ניסיון בליווי נפגעי טראומה, ניצולי פיגועים ואנשים המתמודדים עם חרדה ודיכאון. מתמחה בשיטות CBT ו-EMDR.';
+            document.getElementById('whatsapp-btn').href = 'https://wa.me/972501234567';
+        }
+
+        async function loadPatientData(userId) {
+            const supabase = window.supabaseClient;
+
+            try {
+                // Fetch patient with joined therapist data
+                const { data: patient, error } = await supabase
+                    .from('patients')
+                    .select('*, therapists(*)')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (error) {
+                    console.error('Error fetching patient data:', error);
+                    return;
+                }
+
+                if (!patient) {
+                    console.log('No patient record found');
+                    return;
+                }
+
+                updateUI(patient);
+            } catch (err) {
+                console.error('Error loading patient data:', err);
+            }
+        }
+
+        function updateUI(patient) {
+            const line = document.getElementById('line-progress');
+            const step2 = document.getElementById('step-2');
+            const step3 = document.getElementById('step-3');
+
+            if (patient.assigned_therapist_id && patient.therapists) {
+                // Step 3 - Therapist found
+                line.style.width = '100%';
+                step2.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
+                step3.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
+
+                document.getElementById('searching-view').classList.add('hidden');
+                document.getElementById('match-view').classList.remove('hidden');
+
+                const t = patient.therapists;
+                document.getElementById('therapist-name').textContent = t.full_name || 'המטפל שלך';
+                document.getElementById('therapist-specialty').textContent = t.specialty || 'מטפל מוסמך';
+                document.getElementById('therapist-bio').textContent = t.bio || 'מטפל מוסמך בעל ניסיון רב בליווי מטופלים.';
+
+                // Format phone for WhatsApp (remove non-digits, ensure country code)
+                let phone = t.phone ? t.phone.replace(/\D/g, '') : '';
+                if (phone.startsWith('0')) {
+                    phone = '972' + phone.substring(1);
+                }
+                document.getElementById('whatsapp-btn').href = `https://wa.me/${phone}`;
+            } else {
+                // Step 2 - Matching in progress
+                line.style.width = '50%';
+                step2.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
+            }
+        }
+
         async function logout() {
             if (window.supabaseClient) {
                 await window.supabaseClient.auth.signOut();

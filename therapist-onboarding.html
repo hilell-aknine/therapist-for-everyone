@@ -262,6 +262,71 @@
             cursor: pointer;
         }
 
+        /* File Upload */
+        .file-upload-group {
+            margin-top: 1rem;
+        }
+
+        .file-upload-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--frost-white);
+        }
+
+        .file-upload-label i {
+            margin-left: 0.5rem;
+            color: var(--gold);
+        }
+
+        .file-upload-box {
+            border: 2px dashed rgba(212, 175, 55, 0.4);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0, 59, 70, 0.3);
+        }
+
+        .file-upload-box:hover {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .file-upload-box.has-file {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.15);
+        }
+
+        .file-upload-box i {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-box p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--frost-white);
+        }
+
+        .file-upload-box .file-name {
+            margin-top: 0.5rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .file-upload-box input[type="file"] {
+            display: none;
+        }
+
+        .file-types {
+            font-size: 0.75rem;
+            color: rgba(232, 241, 242, 0.6);
+            margin-top: 0.3rem;
+        }
+
         .char-count {
             text-align: left;
             font-size: 0.8rem;
@@ -597,6 +662,21 @@
                         <textarea id="t-bio" placeholder="רקע מקצועי, גישה טיפולית, מה מניע אותך..." rows="3"></textarea>
                     </div>
 
+                    <!-- File Upload for Certificate/Resume -->
+                    <div class="file-upload-group">
+                        <label class="file-upload-label">
+                            <i class="fa-solid fa-file-certificate"></i>
+                            העלאת תעודה / קורות חיים (אופציונלי)
+                        </label>
+                        <div class="file-upload-box" id="file-upload-box" onclick="document.getElementById('t-resume').click()">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <p>לחץ להעלאת קובץ</p>
+                            <p class="file-types">PDF, DOC, DOCX (עד 5MB)</p>
+                            <p class="file-name" id="file-name-display" style="display: none;"></p>
+                            <input type="file" id="t-resume" accept=".pdf,.doc,.docx" onchange="handleFileSelect(this)">
+                        </div>
+                    </div>
+
                     <div class="checkbox-group">
                         <input type="checkbox" id="t-online">
                         <label for="t-online">
@@ -734,8 +814,10 @@
 
     <script>
         // Supabase Configuration
-        const SUPABASE_URL = 'https://vhzdrywvpgaqyivprbds.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoemRyeXd2cGdhcXlpdnByYmRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2NjkwMTksImV4cCI6MjA4NDI0NTAxOX0.h0fCrmenxcXFhtFO0UtqYVMqyl0EAjGt5g7OY1FZ9-I';
+        const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+        const SUPABASE_FUNCTIONS_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+        const ADMIN_DASHBOARD_URL = 'https://hilell-aknine.github.io/therapist-for-everyone/admin-dashboard.html';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -743,44 +825,144 @@
         let currentUser = null;
         let therapistData = {};
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Check if user is logged in (optional - for prefill and duplicate check)
-            const { data: { user } } = await supabaseClient.auth.getUser();
+        // File upload helper
+        let selectedFile = null;
 
-            if (user) {
-                currentUser = user;
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            const fileNameDisplay = document.getElementById('file-name-display');
+            const uploadBox = document.getElementById('file-upload-box');
 
-                // Check if user already registered as therapist
-                const { data: existingTherapist } = await supabaseClient
-                    .from('therapists')
-                    .select('id, status')
-                    .eq('user_id', user.id)
-                    .single();
-
-                if (existingTherapist) {
-                    if (existingTherapist.status === 'active') {
-                        showToast('אתה כבר רשום כמטפל פעיל במערכת!', 'info');
-                    } else {
-                        showToast('הבקשה שלך להצטרפות ממתינה לאישור', 'info');
-                    }
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 2000);
+            if (file) {
+                // Validate file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('הקובץ גדול מדי. מקסימום 5MB', 'error');
+                    input.value = '';
                     return;
                 }
 
-                // Pre-fill from profile
-                const { data: profile } = await supabaseClient
-                    .from('profiles')
-                    .select('full_name, phone')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profile) {
-                    if (profile.full_name) document.getElementById('t-name').value = profile.full_name;
-                    if (profile.phone) document.getElementById('t-phone').value = profile.phone;
+                // Validate file type
+                const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                if (!allowedTypes.includes(file.type)) {
+                    showToast('סוג קובץ לא נתמך. העלה PDF או DOC', 'error');
+                    input.value = '';
+                    return;
                 }
+
+                selectedFile = file;
+                fileNameDisplay.textContent = file.name;
+                fileNameDisplay.style.display = 'block';
+                uploadBox.classList.add('has-file');
+                uploadBox.querySelector('i').className = 'fa-solid fa-file-check';
+                uploadBox.querySelector('p:first-of-type').textContent = 'קובץ נבחר:';
+            } else {
+                selectedFile = null;
+                fileNameDisplay.style.display = 'none';
+                uploadBox.classList.remove('has-file');
+                uploadBox.querySelector('i').className = 'fa-solid fa-cloud-arrow-up';
+                uploadBox.querySelector('p:first-of-type').textContent = 'לחץ להעלאת קובץ';
+            }
+        }
+
+        async function uploadResumeFile(userId) {
+            if (!selectedFile) return null;
+
+            try {
+                const fileExt = selectedFile.name.split('.').pop();
+                const fileName = `${userId}/${Date.now()}.${fileExt}`;
+
+                const { data, error } = await supabaseClient.storage
+                    .from('therapist-documents')
+                    .upload(fileName, selectedFile);
+
+                if (error) {
+                    console.error('File upload error:', error);
+                    throw error;
+                }
+
+                // Get public URL
+                const { data: urlData } = supabaseClient.storage
+                    .from('therapist-documents')
+                    .getPublicUrl(fileName);
+
+                return urlData.publicUrl;
+            } catch (error) {
+                console.error('Error uploading resume:', error);
+                showToast('שגיאה בהעלאת הקובץ', 'error');
+                return null;
+            }
+        }
+
+        // Email helper function
+        async function sendAdminNotification(therapistData, aiScore = null) {
+            try {
+                const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/send-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        type: 'new_therapist_admin',
+                        to: 'admin@therapist-for-everyone.com', // Will be overridden by ADMIN_EMAIL env var
+                        data: {
+                            therapistName: therapistData.name,
+                            therapistEmail: currentUser?.email || 'לא צוין',
+                            therapistPhone: therapistData.phone,
+                            specialization: therapistData.specialization,
+                            aiScore: aiScore,
+                            dashboardUrl: ADMIN_DASHBOARD_URL
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    console.log('Admin notification sent successfully');
+                } else {
+                    console.error('Admin notification failed:', result.error);
+                }
+            } catch (error) {
+                console.error('Error sending admin notification:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Check if user is logged in (optional - for prefill and duplicate check)
+                const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+                if (user && !authError) {
+                    currentUser = user;
+
+                    // Check if user already registered as therapist
+                    try {
+                        const { data: existingTherapist } = await supabaseClient
+                            .from('therapists')
+                            .select('id, status')
+                            .eq('user_id', user.id)
+                            .maybeSingle();
+
+                        if (existingTherapist) {
+                            if (existingTherapist.status === 'active') {
+                                showToast('אתה כבר רשום כמטפל פעיל במערכת!', 'info');
+                            } else {
+                                showToast('הבקשה שלך להצטרפות ממתינה לאישור', 'info');
+                            }
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 2000);
+                            return;
+                        }
+                    } catch (e) {
+                        console.log('Could not check existing therapist:', e);
+                    }
+
+                    // Skip profile prefill - profiles table may not exist
+                }
+            } catch (e) {
+                console.log('Auth check skipped:', e);
             }
 
             // No login required - anyone can fill the form
@@ -945,6 +1127,13 @@
 
                 if (currentUser) {
                     // LOGGED IN USER - Full flow with therapists table
+
+                    // Upload resume file if selected
+                    let resumeUrl = null;
+                    if (selectedFile) {
+                        resumeUrl = await uploadResumeFile(currentUser.id);
+                    }
+
                     // Update profile
                     await supabaseClient
                         .from('profiles')
@@ -956,56 +1145,62 @@
                         .eq('id', currentUser.id);
 
                     // Upsert therapist record (insert or update if exists)
+                    const therapistPayload = {
+                        user_id: currentUser.id,
+                        email: currentUser.email,
+                        full_name: therapistData.name,
+                        phone: therapistData.phone,
+                        bio: therapistData.bio,
+                        specializations: [therapistData.specialization],
+                        experience_years: therapistData.experience,
+                        city: therapistData.city,
+                        location: therapistData.city,
+                        price_per_session: therapistData.price,
+                        works_online: therapistData.worksOnline,
+                        status: 'screening_submitted',
+                        questionnaire_data: therapistData.questionnaire,
+                        is_active: false,
+                        is_verified: false
+                    };
+
+                    // Add resume URL if uploaded
+                    if (resumeUrl) {
+                        therapistPayload.resume_url = resumeUrl;
+                    }
+
                     const { data, error } = await supabaseClient
                         .from('therapists')
-                        .upsert({
-                            user_id: currentUser.id,
-                            email: currentUser.email,
-                            full_name: therapistData.name,
-                            phone: therapistData.phone,
-                            bio: therapistData.bio,
-                            specializations: [therapistData.specialization],
-                            experience_years: therapistData.experience,
-                            city: therapistData.city,
-                            location: therapistData.city,
-                            price_per_session: therapistData.price,
-                            works_online: therapistData.worksOnline,
-                            status: 'screening_submitted',
-                            questionnaire_data: therapistData.questionnaire,
-                            is_active: false,
-                            is_verified: false
-                        }, { onConflict: 'user_id' })
+                        .upsert(therapistPayload, { onConflict: 'user_id' })
                         .select('id')
                         .single();
 
                     if (error) throw error;
                     therapistRecord = data;
 
-                    // Create contact request for notification
-                    await supabaseClient
-                        .from('contact_requests')
-                        .insert({
-                            name: therapistData.name,
-                            phone: therapistData.phone,
-                            email: currentUser.email,
-                            request_type: 'therapist',
-                            message: `התמחות: ${therapistData.specialization}\nעיר: ${therapistData.city}\nניסיון: ${therapistData.experience} שנים\nמחיר: ${therapistData.price || 'התנדבות'}\nזום: ${therapistData.worksOnline ? 'כן' : 'לא'}\n\n${therapistData.bio}`
-                        });
                 } else {
-                    // ANONYMOUS USER - Save as lead to contact_requests only
+                    // ANONYMOUS USER - Save directly to therapists table (no user_id)
+                    const therapistPayload = {
+                        full_name: therapistData.name,
+                        phone: therapistData.phone,
+                        bio: therapistData.bio,
+                        specializations: [therapistData.specialization],
+                        experience_years: therapistData.experience,
+                        city: therapistData.city,
+                        location: therapistData.city,
+                        price_per_session: therapistData.price,
+                        works_online: therapistData.worksOnline,
+                        status: 'pending',
+                        questionnaire_data: therapistData.questionnaire,
+                        is_active: false,
+                        is_verified: false
+                    };
+
                     const { error } = await supabaseClient
-                        .from('contact_requests')
-                        .insert({
-                            full_name: therapistData.name,
-                            phone: therapistData.phone,
-                            request_type: 'therapist',
-                            city: therapistData.city,
-                            status: 'new',
-                            source: 'therapist-onboarding',
-                            message: `התמחות: ${therapistData.specialization}\nעיר: ${therapistData.city}\nניסיון: ${therapistData.experience} שנים\nמחיר: ${therapistData.price || 'התנדבות'}\nזום: ${therapistData.worksOnline ? 'כן' : 'לא'}\n\nביו: ${therapistData.bio}\n\n--- שאלון מקצועי ---\nמקרה מורכב: ${therapistData.questionnaire?.case_study || ''}\nטכניקות טראומה: ${therapistData.questionnaire?.trauma_techniques || ''}\nהתנגדויות: ${therapistData.questionnaire?.handling_resistance || ''}\nמוטיבציה: ${therapistData.questionnaire?.why_therapist || ''}\nחזון: ${therapistData.questionnaire?.role_vision || ''}`
-                        });
+                        .from('therapists')
+                        .insert(therapistPayload);
 
                     if (error) throw error;
+                    // No therapistRecord for anonymous - AI analysis skipped
                 }
 
                 hideLoading();
@@ -1020,11 +1215,13 @@
                     step.classList.add('completed');
                 });
 
-                // ===== AUTOMATIC AI ANALYSIS (Background) =====
-                // Run in background - only for logged in users with therapist record
-                if (therapistRecord?.id) {
-                    runBackgroundAIAnalysis(therapistRecord.id, therapistData.name, therapistData.questionnaire);
-                }
+                // ===== SEND ADMIN NOTIFICATION EMAIL =====
+                // Notify admin about new therapist registration (runs in background)
+                // Note: Email function requires Edge Function setup
+                // sendAdminNotification(therapistData);
+
+                // AI Analysis disabled for now - admin will review manually
+                console.log('Therapist submitted successfully. Awaiting manual review.');
 
             } catch (error) {
                 console.error('Error submitting:', error);
@@ -1076,6 +1273,8 @@
                     console.error('Failed to save AI analysis:', updateError);
                 } else {
                     console.log('AI analysis saved successfully for therapist:', therapistId);
+                    // Send updated admin notification with AI score
+                    sendAdminNotification(therapistData, aiScore);
                 }
 
             } catch (err) {

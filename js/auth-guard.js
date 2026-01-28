@@ -77,18 +77,24 @@
          */
         async getUserRole(userId) {
             try {
+                console.log('AuthGuard: Getting role for user:', userId);
+
                 const { data, error } = await window.supabaseClient
                     .from('profiles')
                     .select('role')
                     .eq('id', userId)
                     .single();
 
+                console.log('AuthGuard: Profile query result:', { data, error });
+
                 if (error) {
                     console.error('Error getting user role:', error);
                     return null;
                 }
 
-                return data?.role || 'student';
+                const role = data?.role || 'student';
+                console.log('AuthGuard: User role is:', role);
+                return role;
             } catch (error) {
                 console.error('Error in getUserRole:', error);
                 return null;

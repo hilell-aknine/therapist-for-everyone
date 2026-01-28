@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>האזור האישי - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f1419;
+            --bg-card: #1a1f2e;
+            --bg-card-hover: #242b3d;
+            --border-color: #2d3548;
+            --text-primary: #ffffff;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.2);
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --info: #58a6ff;
+            --teal: #2F8592;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            color: var(--gold);
+        }
+
+        .logo span {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-dark);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--teal), var(--gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-subtitle {
+            color: var(--text-secondary);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.patients { background: rgba(88, 166, 255, 0.2); color: var(--info); }
+        .stat-icon.active { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .stat-icon.pending { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .stat-icon.rating { background: rgba(212, 175, 55, 0.2); color: var(--gold); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            color: var(--gold);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Patient List */
+        .patient-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .patient-item:hover {
+            border-color: var(--gold);
+        }
+
+        .patient-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .patient-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .patient-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--info), var(--teal));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .patient-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .patient-meta i {
+            color: var(--gold);
+            font-size: 0.75rem;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--success);
+        }
+
+        .status-badge.pending {
+            background: rgba(210, 153, 34, 0.2);
+            color: var(--warning);
+        }
+
+        .status-badge.new {
+            background: rgba(88, 166, 255, 0.2);
+            color: var(--info);
+        }
+
+        /* Profile Card */
+        .profile-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--teal), var(--gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 auto 1.5rem;
+            border: 3px solid var(--gold);
+        }
+
+        .profile-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--success);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-status.pending {
+            background: rgba(210, 153, 34, 0.2);
+            color: var(--warning);
+        }
+
+        .profile-status i {
+            font-size: 0.8rem;
+        }
+
+        .profile-details {
+            text-align: right;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .profile-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-detail:last-child {
+            border-bottom: none;
+        }
+
+        .profile-detail i {
+            width: 20px;
+            color: var(--gold);
+        }
+
+        .profile-detail-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            min-width: 80px;
+        }
+
+        .profile-detail-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.9rem 1.2rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--bg-dark);
+            border: none;
+        }
+
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--gold-glow);
+        }
+
+        .action-btn.secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .action-btn.secondary:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        /* Pending Status */
+        .pending-approval {
+            background: linear-gradient(135deg, rgba(210, 153, 34, 0.1), rgba(210, 153, 34, 0.05));
+            border: 2px dashed var(--warning);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .pending-approval i {
+            font-size: 4rem;
+            color: var(--warning);
+            margin-bottom: 1.5rem;
+        }
+
+        .pending-approval h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--warning);
+        }
+
+        .pending-approval p {
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.8;
+        }
+
+        .pending-steps {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .pending-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .step-number.completed {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .step-number.current {
+            background: var(--warning);
+            border-color: var(--warning);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Patient Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .modal-title i {
+            color: var(--gold);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .modal-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section-title {
+            font-size: 0.9rem;
+            color: var(--gold);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-section-content {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            line-height: 1.8;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            border: none;
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-light);
+        }
+
+        /* Loading */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 10000;
+        }
+
+        .toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: var(--success); color: white; }
+        .toast.error { background: var(--danger); color: white; }
+        .toast.info { background: var(--info); color: white; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .user-menu {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading State -->
+    <div class="loading-container" id="loading-screen">
+        <div class="spinner"></div>
+        <p>טוען...</p>
+    </div>
+
+    <!-- Main Content (hidden until auth) -->
+    <div id="main-content" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span>מטפל לכל אחד</span>
+            </a>
+            <div class="header-actions">
+                <div class="user-menu">
+                    <div class="user-avatar" id="user-avatar">מ</div>
+                    <div>
+                        <div class="user-name" id="user-name">מטפל</div>
+                        <div class="user-role">מטפל</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    התנתקות
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Container -->
+        <main class="main-container">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h1 class="welcome-title">שלום, <span id="welcome-name">מטפל</span></h1>
+                <p class="welcome-subtitle">ברוכים הבאים לאזור האישי שלך</p>
+            </div>
+
+            <!-- Pending Approval State (shown if not approved yet) -->
+            <div class="pending-approval" id="pending-state" style="display: none;">
+                <i class="fa-solid fa-hourglass-half"></i>
+                <h2>הבקשה שלך בבדיקה</h2>
+                <p>
+                    תודה שהצטרפת לקהילת המטפלים שלנו! הבקשה שלך התקבלה ונמצאת כעת בתהליך בדיקה.
+                    ניצור איתך קשר בהקדם לתיאום ראיון היכרות.
+                </p>
+                <div class="pending-steps">
+                    <div class="pending-step">
+                        <div class="step-number completed"><i class="fa-solid fa-check"></i></div>
+                        <span class="step-label">מילוי טופס</span>
+                    </div>
+                    <div class="pending-step">
+                        <div class="step-number current">2</div>
+                        <span class="step-label">בדיקה ראשונית</span>
+                    </div>
+                    <div class="pending-step">
+                        <div class="step-number">3</div>
+                        <span class="step-label">ראיון</span>
+                    </div>
+                    <div class="pending-step">
+                        <div class="step-number">4</div>
+                        <span class="step-label">אישור</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Dashboard (shown if approved) -->
+            <div id="active-dashboard" style="display: none;">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon patients">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="stat-value" id="stat-total-patients">0</div>
+                        <div class="stat-label">מטופלים משובצים</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon active">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </div>
+                        <div class="stat-value" id="stat-active-patients">0</div>
+                        <div class="stat-label">בטיפול פעיל</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pending">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div class="stat-value" id="stat-pending-patients">0</div>
+                        <div class="stat-label">ממתינים לפגישה ראשונה</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon rating">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <div class="stat-value" id="stat-rating">-</div>
+                        <div class="stat-label">דירוג ממוצע</div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Patients List -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fa-solid fa-users"></i>
+                                המטופלים שלי
+                            </h2>
+                        </div>
+                        <div class="card-body" id="patients-list">
+                            <!-- Patients will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Profile Sidebar -->
+                    <div class="card">
+                        <div class="profile-card">
+                            <div class="profile-avatar" id="profile-avatar">מ</div>
+                            <h2 class="profile-name" id="profile-name">מטפל</h2>
+                            <div class="profile-status" id="profile-status">
+                                <i class="fa-solid fa-check-circle"></i>
+                                מטפל מאושר
+                            </div>
+
+                            <div class="profile-details">
+                                <div class="profile-detail">
+                                    <i class="fa-solid fa-envelope"></i>
+                                    <span class="profile-detail-label">אימייל</span>
+                                    <span class="profile-detail-value" id="profile-email">-</span>
+                                </div>
+                                <div class="profile-detail">
+                                    <i class="fa-solid fa-phone"></i>
+                                    <span class="profile-detail-label">טלפון</span>
+                                    <span class="profile-detail-value" id="profile-phone">-</span>
+                                </div>
+                                <div class="profile-detail">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    <span class="profile-detail-label">עיר</span>
+                                    <span class="profile-detail-value" id="profile-city">-</span>
+                                </div>
+                                <div class="profile-detail">
+                                    <i class="fa-solid fa-calendar"></i>
+                                    <span class="profile-detail-label">הצטרפות</span>
+                                    <span class="profile-detail-value" id="profile-joined">-</span>
+                                </div>
+                            </div>
+
+                            <div class="quick-actions">
+                                <a href="therapist-onboarding.html" class="action-btn secondary">
+                                    <i class="fa-solid fa-pen"></i>
+                                    עריכת פרופיל
+                                </a>
+                                <a href="index.html" class="action-btn secondary">
+                                    <i class="fa-solid fa-home"></i>
+                                    חזרה לאתר
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Patient Details Modal -->
+    <div class="modal-overlay" id="patient-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fa-solid fa-user"></i>
+                    <span id="modal-patient-name">פרטי מטופל</span>
+                </h2>
+                <button class="modal-close" onclick="closePatientModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePatientModal()">
+                    <i class="fa-solid fa-times"></i>
+                    סגור
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================================================
+        // STATE
+        // ============================================================================
+        let currentUser = null;
+        let therapistProfile = null;
+        let myPatients = [];
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initDashboard();
+        });
+
+        async function initDashboard() {
+            // Wait for dependencies
+            await waitForDependencies();
+
+            // Check authentication
+            const user = await AuthGuard?.getCurrentUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Check legal consent
+            const hasConsent = await AuthGuard?.hasLegalConsent(user.id);
+            if (!hasConsent) {
+                window.location.href = 'legal-gate.html';
+                return;
+            }
+
+            currentUser = user;
+
+            // Load therapist profile
+            await loadTherapistProfile();
+
+            // Hide loading, show content
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+
+            // Update UI with user info
+            updateUserInfo();
+
+            // Check therapist status
+            if (therapistProfile && therapistProfile.status === 'active') {
+                document.getElementById('active-dashboard').style.display = 'block';
+                document.getElementById('pending-state').style.display = 'none';
+                await loadMyPatients();
+            } else {
+                document.getElementById('active-dashboard').style.display = 'none';
+                document.getElementById('pending-state').style.display = 'block';
+                updatePendingSteps();
+            }
+        }
+
+        function waitForDependencies() {
+            return new Promise((resolve) => {
+                const check = () => {
+                    if (window.supabaseClient && window.AuthGuard) {
+                        resolve();
+                    } else {
+                        setTimeout(check, 50);
+                    }
+                };
+                check();
+                setTimeout(resolve, 5000);
+            });
+        }
+
+        // ============================================================================
+        // DATA LOADING
+        // ============================================================================
+        async function loadTherapistProfile() {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('therapists')
+                    .select(`
+                        *,
+                        profiles:user_id (full_name, email, phone)
+                    `)
+                    .eq('user_id', currentUser.id)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                therapistProfile = data;
+                console.log('Therapist profile loaded:', therapistProfile);
+
+            } catch (error) {
+                console.error('Error loading therapist profile:', error);
+            }
+        }
+
+        async function loadMyPatients() {
+            try {
+                if (!therapistProfile) return;
+
+                const { data, error } = await window.supabaseClient
+                    .from('patients')
+                    .select(`
+                        *,
+                        profiles:user_id (full_name, email, phone)
+                    `)
+                    .eq('assigned_therapist_id', therapistProfile.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                myPatients = data || [];
+                console.log('My patients loaded:', myPatients.length);
+
+                renderPatients();
+                updateStats();
+
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                myPatients = [];
+                renderPatients();
+            }
+        }
+
+        // ============================================================================
+        // UI UPDATES
+        // ============================================================================
+        function updateUserInfo() {
+            const name = therapistProfile?.profiles?.full_name ||
+                         currentUser.user_metadata?.full_name ||
+                         currentUser.email?.split('@')[0] || 'מטפל';
+
+            document.getElementById('user-name').textContent = name;
+            document.getElementById('welcome-name').textContent = name;
+            document.getElementById('user-avatar').textContent = name.charAt(0);
+            document.getElementById('profile-avatar').textContent = name.charAt(0);
+            document.getElementById('profile-name').textContent = name;
+
+            // Profile details
+            document.getElementById('profile-email').textContent =
+                therapistProfile?.profiles?.email || currentUser.email || '-';
+            document.getElementById('profile-phone').textContent =
+                therapistProfile?.profiles?.phone || therapistProfile?.phone || '-';
+            document.getElementById('profile-city').textContent =
+                therapistProfile?.city || therapistProfile?.location || '-';
+
+            if (therapistProfile?.created_at) {
+                document.getElementById('profile-joined').textContent =
+                    new Date(therapistProfile.created_at).toLocaleDateString('he-IL');
+            }
+
+            // Status
+            const statusEl = document.getElementById('profile-status');
+            if (therapistProfile?.status === 'active') {
+                statusEl.innerHTML = '<i class="fa-solid fa-check-circle"></i> מטפל מאושר';
+                statusEl.classList.remove('pending');
+            } else {
+                statusEl.innerHTML = '<i class="fa-solid fa-clock"></i> ממתין לאישור';
+                statusEl.classList.add('pending');
+            }
+        }
+
+        function updatePendingSteps() {
+            if (!therapistProfile) return;
+
+            const status = therapistProfile.status;
+            const steps = document.querySelectorAll('.step-number');
+
+            // Reset all
+            steps.forEach((step, i) => {
+                step.classList.remove('completed', 'current');
+                step.innerHTML = i + 1;
+            });
+
+            // Update based on status
+            if (status === 'new') {
+                steps[0].classList.add('completed');
+                steps[0].innerHTML = '<i class="fa-solid fa-check"></i>';
+                steps[1].classList.add('current');
+            } else if (status === 'pending_interview') {
+                steps[0].classList.add('completed');
+                steps[0].innerHTML = '<i class="fa-solid fa-check"></i>';
+                steps[1].classList.add('completed');
+                steps[1].innerHTML = '<i class="fa-solid fa-check"></i>';
+                steps[2].classList.add('current');
+            } else if (status === 'active') {
+                steps.forEach(step => {
+                    step.classList.add('completed');
+                    step.innerHTML = '<i class="fa-solid fa-check"></i>';
+                });
+            }
+        }
+
+        function updateStats() {
+            const total = myPatients.length;
+            const active = myPatients.filter(p => p.status === 'matched' || p.status === 'in_treatment').length;
+            const pending = myPatients.filter(p => p.status === 'waiting_for_match').length;
+
+            document.getElementById('stat-total-patients').textContent = total;
+            document.getElementById('stat-active-patients').textContent = active;
+            document.getElementById('stat-pending-patients').textContent = pending;
+
+            // Rating (placeholder - would need reviews table)
+            const rating = therapistProfile?.rating;
+            document.getElementById('stat-rating').textContent = rating ? rating.toFixed(1) : '-';
+        }
+
+        function renderPatients() {
+            const container = document.getElementById('patients-list');
+
+            if (myPatients.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-users"></i>
+                        <h3>אין מטופלים עדיין</h3>
+                        <p>כשמטופלים ישובצו אליך, הם יופיעו כאן</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = myPatients.map(patient => {
+                const name = patient.profiles?.full_name || 'מטופל';
+                const status = patient.status || 'matched';
+                const createdAt = patient.created_at ?
+                    new Date(patient.created_at).toLocaleDateString('he-IL') : '-';
+
+                const statusLabels = {
+                    'waiting_for_match': 'ממתין',
+                    'matched': 'חדש',
+                    'in_treatment': 'בטיפול'
+                };
+
+                const statusClasses = {
+                    'waiting_for_match': 'pending',
+                    'matched': 'new',
+                    'in_treatment': 'active'
+                };
+
+                return `
+                    <div class="patient-item" onclick="viewPatient('${patient.id}')">
+                        <div class="patient-info">
+                            <div class="patient-avatar">${name.charAt(0)}</div>
+                            <div>
+                                <div class="patient-name">${name}</div>
+                                <div class="patient-meta">
+                                    <i class="fa-solid fa-calendar"></i>
+                                    שובץ ב-${createdAt}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="status-badge ${statusClasses[status] || 'new'}">
+                            ${statusLabels[status] || status}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================================================
+        // PATIENT MODAL
+        // ============================================================================
+        function viewPatient(patientId) {
+            const patient = myPatients.find(p => p.id === patientId);
+            if (!patient) return;
+
+            const name = patient.profiles?.full_name || 'מטופל';
+            const email = patient.profiles?.email || '-';
+            const phone = patient.profiles?.phone || '-';
+            const concern = patient.main_concern || patient.intake_summary || 'לא צוין';
+            const preference = patient.preferred_therapist_gender || 'לא צוין';
+
+            document.getElementById('modal-patient-name').textContent = name;
+
+            document.getElementById('modal-body').innerHTML = `
+                <div class="modal-section">
+                    <div class="modal-section-title">
+                        <i class="fa-solid fa-user"></i>
+                        פרטי התקשרות
+                    </div>
+                    <div class="modal-section-content">
+                        <strong>אימייל:</strong> ${email}<br>
+                        <strong>טלפון:</strong> ${phone}
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <div class="modal-section-title">
+                        <i class="fa-solid fa-comment-medical"></i>
+                        סיבת הפנייה
+                    </div>
+                    <div class="modal-section-content">
+                        ${concern}
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <div class="modal-section-title">
+                        <i class="fa-solid fa-sliders"></i>
+                        העדפות
+                    </div>
+                    <div class="modal-section-content">
+                        <strong>העדפת מגדר מטפל:</strong> ${
+                            preference === 'male' ? 'גבר' :
+                            preference === 'female' ? 'אישה' : 'לא משנה'
+                        }
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('patient-modal').classList.add('active');
+        }
+
+        function closePatientModal() {
+            document.getElementById('patient-modal').classList.remove('active');
+        }
+
+        // ============================================================================
+        // UTILITIES
+        // ============================================================================
+        async function logout() {
+            try {
+                await window.supabaseClient.auth.signOut();
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} active`;
+
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePatientModal();
+            }
+        });
+
+        // Close modal on overlay click
+        document.getElementById('patient-modal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closePatientModal();
+            }
+        });
+    </script>
+</body>
+</html>

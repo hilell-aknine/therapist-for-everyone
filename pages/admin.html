@@ -139,6 +139,9 @@
         .btn-success:hover { background: var(--success); color: white; }
         .btn-danger { background: rgba(248, 81, 73, 0.2); color: var(--danger); border: 1px solid var(--danger); }
         .btn-danger:hover { background: var(--danger); color: white; }
+        .btn-export { background: rgba(63, 185, 80, 0.15); color: var(--success); border: 1px solid var(--success); }
+        .btn-export:hover { background: var(--success); color: white; }
+        .btn-export i { margin-left: 0.4rem; }
 
         .modal-overlay {
             display: none;
@@ -450,7 +453,12 @@
                     </div>
                     <div class="table-container">
                         <div class="table-header">
-                            <h3>רשימת מטופלים</h3>
+                            <div style="display:flex;align-items:center;gap:1rem;">
+                                <h3>רשימת מטופלים</h3>
+                                <button class="btn btn-export" onclick="exportPatientsCSV()">
+                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
+                                </button>
+                            </div>
                             <div class="search-box">
                                 <i class="fa-solid fa-search"></i>
                                 <input type="text" placeholder="חיפוש..." id="patient-search" oninput="renderPatients()">
@@ -484,7 +492,12 @@
                     </div>
                     <div class="table-container">
                         <div class="table-header">
-                            <h3>רשימת מטפלים</h3>
+                            <div style="display:flex;align-items:center;gap:1rem;">
+                                <h3>רשימת מטפלים</h3>
+                                <button class="btn btn-export" onclick="exportTherapistsCSV()">
+                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
+                                </button>
+                            </div>
                             <div class="search-box">
                                 <i class="fa-solid fa-search"></i>
                                 <input type="text" placeholder="חיפוש..." id="therapist-search" oninput="renderTherapists()">
@@ -1048,6 +1061,152 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); }
         });
+
+        // ===================
+        // CSV EXPORT FUNCTIONS
+        // ===================
+
+        function getDateString() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        function escapeCSV(value) {
+            if (value === null || value === undefined) return '';
+            const str = String(value);
+            // If contains comma, newline, or quotes - wrap in quotes and escape quotes
+            if (str.includes(',') || str.includes('\n') || str.includes('"') || str.includes('\r')) {
+                return '"' + str.replace(/"/g, '""') + '"';
+            }
+            return str;
+        }
+
+        function downloadCSV(content, filename) {
+            // Add BOM for Hebrew support in Excel
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            showToast('הקובץ הורד בהצלחה!', 'success');
+        }
+
+        function exportTherapistsCSV() {
+            if (therapists.length === 0) {
+                showToast('אין מטפלים לייצוא', 'error');
+                return;
+            }
+
+            // Define headers
+            const headers = [
+                'שם מלא', 'טלפון', 'אימייל', 'עיר', 'מגדר', 'התמחות',
+                'שיטות טיפול', 'שנות ניסיון', 'מספר רישיון', 'השכלה',
+                'עבודה בזום', 'עבודה פרונטלית', 'שעות פנויות בשבוע', 'קישור חיצוני',
+                'מטופלים לאורך הקריירה', 'מטופלים פעילים',
+                'שעות בחודש', 'תקופת התחייבות', 'אופן טיפול מועדף',
+                'בעיות רפואיות', 'פירוט בעיות רפואיות', 'תרופות פסיכיאטריות', 'בטיפול אישי',
+                'למה בחרת במקצוע', 'למה הצטרפת לפרויקט', 'ניסיון מעשי', 'מקרה מורכב', 'אתגרים',
+                'מסמכים מאומתים', 'סטטוס', 'תאריך הרשמה'
+            ];
+
+            // Build rows
+            const rows = therapists.map(t => {
+                const q = t.questionnaire || {};
+                const health = q.health || {};
+                const commitment = q.commitment || {};
+                const practice = q.practice || {};
+
+                // Format therapy methods array
+                const methods = practice.treatment_methods || [];
+                const methodsStr = Array.isArray(methods) ? methods.join(', ') : '';
+
+                return [
+                    t.full_name || '',
+                    t.phone || '',
+                    t.email || '',
+                    t.city || '',
+                    genderDisplayLabel(t.gender),
+                    t.specialization || '',
+                    methodsStr,
+                    t.experience_years || 0,
+                    t.license_number || '',
+                    t.education || '',
+                    t.works_online ? 'כן' : 'לא',
+                    t.works_in_person ? 'כן' : 'לא',
+                    t.available_hours_per_week || '',
+                    t.social_link || '',
+                    practice.total_patients_estimate || 0,
+                    practice.current_active_patients || 0,
+                    commitment.monthly_hours || '',
+                    commitment.duration_months || '',
+                    commitment.therapy_mode || '',
+                    health.has_medical_issues ? 'כן' : 'לא',
+                    health.medical_issues_details || '',
+                    health.takes_psychiatric_meds ? 'כן' : 'לא',
+                    health.in_personal_therapy ? 'כן' : 'לא',
+                    q.why_profession || '',
+                    q.why_join || '',
+                    q.experience || '',
+                    q.case_study || '',
+                    q.challenges || '',
+                    t.documents_verified ? 'כן' : 'לא',
+                    statusLabel(t.status),
+                    formatDate(t.created_at)
+                ].map(escapeCSV);
+            });
+
+            // Build CSV content
+            const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            downloadCSV(csvContent, `therapists_data_${getDateString()}.csv`);
+        }
+
+        function exportPatientsCSV() {
+            if (patients.length === 0) {
+                showToast('אין מטופלים לייצוא', 'error');
+                return;
+            }
+
+            // Define headers
+            const headers = [
+                'שם מלא', 'טלפון', 'אימייל', 'עיר', 'העדפת טיפול', 'העדפת מגדר מטפל',
+                'איש קשר לחירום', 'סיבת פנייה', 'טיפול קודם', 'ציפיות',
+                'רקע משפחתי', 'רקע רפואי', 'תרופות', 'מידע נוסף',
+                'זהות מאומתת', 'סטטוס', 'תאריך הרשמה'
+            ];
+
+            // Build rows
+            const rows = patients.map(p => {
+                const q = p.questionnaire || {};
+
+                return [
+                    p.full_name || '',
+                    p.phone || '',
+                    p.email || '',
+                    p.city || '',
+                    therapyTypeLabel(p.therapy_type),
+                    genderLabel(p.therapist_gender_preference),
+                    q.emergency_contact || '',
+                    q.main_reason || '',
+                    q.previous_therapy || '',
+                    q.expectations || '',
+                    q.family_background || '',
+                    q.medical_history || '',
+                    q.medications || '',
+                    q.additional_info || '',
+                    p.id_verified ? 'כן' : 'לא',
+                    statusLabel(p.status),
+                    formatDate(p.created_at)
+                ].map(escapeCSV);
+            });
+
+            // Build CSV content
+            const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            downloadCSV(csvContent, `patients_data_${getDateString()}.csv`);
+        }
     </script>
 </body>
 </html>

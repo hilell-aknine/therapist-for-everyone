@@ -123,7 +123,7 @@ function initializeTracking() {
 }
 
 // ============================================================================
-// COOKIE CONSENT BANNER
+// COOKIE CONSENT BANNER - Minimalist Sticky Footer
 // ============================================================================
 
 function createConsentBanner() {
@@ -136,125 +136,89 @@ function createConsentBanner() {
     const banner = document.createElement('div');
     banner.id = 'cookie-consent-banner';
     banner.innerHTML = `
-        <div class="cookie-consent-content">
-            <div class="cookie-consent-text">
-                <i class="fa-solid fa-cookie-bite"></i>
-                <span>אנחנו משתמשים בעוגיות כדי לשפר את החוויה באתר.</span>
-            </div>
-            <div class="cookie-consent-buttons">
-                <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cookie-btn-link">קרא עוד</a>
-                <button id="cookie-accept-btn" class="cookie-btn-accept">אשר הכל</button>
-            </div>
-        </div>
+        <span class="cookie-text">אנחנו משתמשים בעוגיות כדי לשפר את החוויה שלך באתר.</span>
+        <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cookie-link">למידע נוסף</a>
+        <button id="cookie-accept-btn" class="cookie-btn">הבנתי, תודה</button>
     `;
 
     // Add styles
     const styles = document.createElement('style');
+    styles.id = 'cookie-consent-styles';
     styles.textContent = `
         #cookie-consent-banner {
             position: fixed;
             bottom: 0;
             left: 0;
-            right: 0;
+            width: 100%;
             background: #ffffff;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-            z-index: 99999;
-            padding: 1rem 1.5rem;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
             font-family: 'Heebo', sans-serif;
+            font-size: 13px;
             direction: rtl;
-            animation: slideUp 0.4s ease-out;
+            transform: translateY(0);
+            transition: transform 0.3s ease-out;
         }
 
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        #cookie-consent-banner.hiding {
+            transform: translateY(100%);
         }
 
-        .cookie-consent-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1.5rem;
-            flex-wrap: wrap;
+        .cookie-text {
+            color: #555;
         }
 
-        .cookie-consent-text {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            color: #333;
-            font-size: 0.95rem;
-        }
-
-        .cookie-consent-text i {
-            color: #D4AF37;
-            font-size: 1.3rem;
-        }
-
-        .cookie-consent-buttons {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .cookie-btn-link {
+        .cookie-link {
             color: #2F8592;
             text-decoration: none;
-            font-size: 0.9rem;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .cookie-link:hover {
+            text-decoration: underline;
+        }
+
+        .cookie-btn {
+            background: #2F8592;
+            color: #fff;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
             transition: background 0.2s;
         }
 
-        .cookie-btn-link:hover {
-            background: rgba(47, 133, 146, 0.1);
-        }
-
-        .cookie-btn-accept {
-            background: linear-gradient(135deg, #D4AF37, #c9a227);
-            color: #003B46;
-            border: none;
-            padding: 0.7rem 1.5rem;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .cookie-btn-accept:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+        .cookie-btn:hover {
+            background: #247580;
         }
 
         @media (max-width: 600px) {
             #cookie-consent-banner {
-                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 10px 15px;
+                max-height: 18vh;
             }
 
-            .cookie-consent-content {
-                flex-direction: column;
+            .cookie-text {
+                flex: 1 1 100%;
                 text-align: center;
-                gap: 1rem;
+                font-size: 12px;
             }
 
-            .cookie-consent-text {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .cookie-consent-buttons {
-                width: 100%;
-                justify-content: center;
+            .cookie-link,
+            .cookie-btn {
+                font-size: 11px;
             }
         }
     `;
@@ -265,10 +229,11 @@ function createConsentBanner() {
     // Handle accept button click
     document.getElementById('cookie-accept-btn').addEventListener('click', function() {
         setUserConsent();
-        banner.style.animation = 'slideUp 0.3s ease-out reverse';
+        banner.classList.add('hiding');
         setTimeout(() => {
             banner.remove();
-            // Now initialize tracking after consent
+            document.getElementById('cookie-consent-styles')?.remove();
+            // Initialize tracking after consent
             initializeTracking();
         }, 300);
     });

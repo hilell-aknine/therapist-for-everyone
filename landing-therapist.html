@@ -348,6 +348,111 @@
             to { opacity: 1; transform: translate(-50%, 0); }
         }
 
+        /* Steps Preview */
+        .steps-preview {
+            background: rgba(0, 59, 70, 0.5);
+            border: 1px solid rgba(47, 133, 146, 0.3);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .steps-title {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            color: var(--gold);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--deep-petrol);
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .step-content i {
+            font-size: 1rem;
+            color: var(--frost-white);
+            opacity: 0.8;
+        }
+
+        .step-content span {
+            font-size: 0.7rem;
+            color: var(--frost-white);
+            opacity: 0.9;
+            line-height: 1.3;
+        }
+
+        .steps-note {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--frost-white);
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .steps-note i {
+            color: var(--gold);
+        }
+
+        /* Form subtitle */
+        .form-subtitle {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--frost-white);
+            opacity: 0.8;
+            margin-bottom: 1.2rem;
+            margin-top: -0.8rem;
+        }
+
+        /* Privacy note */
+        .privacy-note {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--frost-white);
+            opacity: 0.7;
+            margin-top: 1rem;
+        }
+
+        .privacy-note i {
+            color: var(--gold);
+        }
+
         /* Responsive */
         @media (max-width: 600px) {
             .landing-container {
@@ -365,6 +470,19 @@
             .benefit-item {
                 font-size: 0.8rem;
                 padding: 0.5rem 0.8rem;
+            }
+
+            .steps-preview {
+                padding: 1.2rem;
+            }
+
+            .steps-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .step-content span {
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -403,10 +521,62 @@
             <div class="benefit-item"><i class="fa-solid fa-user-tie"></i> סופרוויז'ן מקצועי</div>
         </div>
 
-        <!-- Form Card -->
+        <!-- Main CTA Button -->
+        <div style="text-align: center; margin: 2rem 0;">
+            <a href="pages/therapist-step1.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.8rem; padding: 1.2rem 2.5rem; font-size: 1.2rem; text-decoration: none;">
+                <i class="fa-solid fa-user-plus"></i>
+                התחל תהליך הצטרפות
+            </a>
+        </div>
+
+        <!-- Steps Preview -->
+        <div class="steps-preview">
+            <h3 class="steps-title">תהליך הרשמה פשוט ב-4 שלבים</h3>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <i class="fa-solid fa-user"></i>
+                        <span>פרופיל מקצועי</span>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <i class="fa-solid fa-heart"></i>
+                        <span>עומק ומניע</span>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>בריאות והתחייבות</span>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <i class="fa-solid fa-signature"></i>
+                        <span>הסכם וחתימה</span>
+                    </div>
+                </div>
+            </div>
+            <p class="steps-note"><i class="fa-solid fa-clock"></i> כ-10 דקות למילוי מלא</p>
+        </div>
+
+        <!-- OR Divider -->
+        <div style="display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; max-width: 450px; width: 100%;">
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.2);"></div>
+            <span style="opacity: 0.6; font-size: 0.9rem;">או השאירו פרטים מהירים</span>
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.2);"></div>
+        </div>
+
+        <!-- Quick Contact Form Card -->
         <div class="form-card">
             <form id="therapist-form">
-                <h3 class="form-title">השאר פרטים ונחזור אליך</h3>
+                <h3 class="form-title">לא בטוחים? השאירו פרטים</h3>
+                <p class="form-subtitle">נחזור אליכם לשיחת היכרות קצרה</p>
 
                 <div class="form-group">
                     <label for="fullName">שם מלא *</label>
@@ -419,31 +589,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="email">אימייל *</label>
-                    <input type="email" id="email" name="email" required placeholder="example@email.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="experience">ניסיון בטיפול</label>
-                    <select id="experience" name="experience">
-                        <option value="">בחר...</option>
-                        <option value="none">אין ניסיון - רוצה ללמוד</option>
-                        <option value="student">סטודנט/בהכשרה</option>
-                        <option value="1-2">1-2 שנים</option>
-                        <option value="3-5">3-5 שנים</option>
-                        <option value="5+">5+ שנים</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="message">ספר לנו קצת על עצמך</label>
-                    <textarea id="message" name="message" placeholder="מה מניע אותך להצטרף? מה הרקע שלך?"></textarea>
+                    <label for="email">אימייל</label>
+                    <input type="email" id="email" name="email" placeholder="example@email.com">
                 </div>
 
                 <button type="submit" class="btn btn-primary" id="submit-btn">
                     <i class="fa-solid fa-paper-plane"></i>
-                    שלח בקשת הצטרפות
+                    שלח פרטים
                 </button>
+
+                <p class="privacy-note">
+                    <i class="fa-solid fa-lock"></i>
+                    הפרטים שלך נשמרים בסודיות מלאה
+                </p>
             </form>
 
             <div class="success-message" id="success-message">
@@ -502,11 +660,10 @@
                 const formData = {
                     full_name: document.getElementById('fullName').value,
                     phone: document.getElementById('phone').value,
-                    email: document.getElementById('email').value,
-                    experience: document.getElementById('experience').value,
-                    message: document.getElementById('message').value,
-                    type: 'new_therapist',
-                    source: 'instagram_landing'
+                    email: document.getElementById('email').value || '',
+                    type: 'therapist_quick_contact',
+                    source: 'landing_page',
+                    message: 'פנייה מהירה מדף הנחיתה - מבקש/ת שנחזור אליו/ה'
                 };
 
                 await ContactRequests.submit(formData);
@@ -518,7 +675,7 @@
                 console.error('Error:', error);
                 showToast('אירעה שגיאה, נסה שוב', 'error');
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שלח בקשת הצטרפות';
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שלח פרטים';
             }
         });
     </script>

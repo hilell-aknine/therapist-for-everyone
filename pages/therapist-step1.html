@@ -179,6 +179,40 @@
         textarea { min-height: 100px; resize: vertical; }
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
+        /* Checkbox Grid */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+            background: #fafafa;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 400;
+            cursor: pointer;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+            margin: 0;
+        }
+        .checkbox-item:hover {
+            background: rgba(47, 133, 146, 0.08);
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .checkbox-item .checkmark { display: none; }
+
         .section-divider {
             display: flex;
             align-items: center;
@@ -240,6 +274,7 @@
             .container { padding: 1rem; }
             .form-card { padding: 1.5rem; }
             .step-label { font-size: 0.65rem; }
+            .checkbox-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -369,8 +404,74 @@
                 </div>
 
                 <div class="form-group">
-                    <label>השכלה והכשרה</label>
-                    <textarea name="education" placeholder="תואר, מכון הכשרה, קורסים רלוונטיים..."></textarea>
+                    <label>השכלה והכשרה <span class="hint">(ניתן לבחור מספר)</span></label>
+                    <div class="checkbox-grid" id="education-checkboxes">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="psychology_ba">
+                            <span class="checkmark"></span>
+                            תואר ראשון בפסיכולוגיה
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="psychology_ma">
+                            <span class="checkmark"></span>
+                            תואר שני בפסיכולוגיה
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="social_work">
+                            <span class="checkmark"></span>
+                            עבודה סוציאלית
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="clinical_psychologist">
+                            <span class="checkmark"></span>
+                            פסיכולוג/ית קליני/ת
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="coaching_cert">
+                            <span class="checkmark"></span>
+                            הסמכת קואצ'ינג
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="nlp_cert">
+                            <span class="checkmark"></span>
+                            הסמכת NLP
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="cbt_training">
+                            <span class="checkmark"></span>
+                            הכשרת CBT
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="trauma_training">
+                            <span class="checkmark"></span>
+                            הכשרה בטראומה
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="emdr_training">
+                            <span class="checkmark"></span>
+                            הכשרת EMDR
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="art_therapy">
+                            <span class="checkmark"></span>
+                            טיפול באמנות
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="family_therapy">
+                            <span class="checkmark"></span>
+                            טיפול משפחתי/זוגי
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="education_types" value="other">
+                            <span class="checkmark"></span>
+                            אחר
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>פירוט נוסף על ההכשרה <span class="hint">(אופציונלי)</span></label>
+                    <textarea name="education_details" placeholder="מכון הכשרה, קורסים מיוחדים, התמחויות נוספות..."></textarea>
                 </div>
 
                 <div class="row">
@@ -403,6 +504,15 @@
             if (saved) {
                 const data = JSON.parse(saved);
                 Object.keys(data).forEach(key => {
+                    // Handle checkboxes (education_types)
+                    if (key === 'education_types' && Array.isArray(data[key])) {
+                        data[key].forEach(value => {
+                            const checkbox = document.querySelector(`input[name="education_types"][value="${value}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+                        return;
+                    }
+
                     const input = document.querySelector(`[name="${key}"]`);
                     if (input) {
                         if (input.type === 'select-multiple' && Array.isArray(data[key])) {
@@ -423,12 +533,18 @@
             const data = {};
 
             formData.forEach((value, key) => {
+                // Skip education_types - we'll handle it separately
+                if (key === 'education_types') return;
                 data[key] = value;
             });
 
-            // Handle multi-select
+            // Handle multi-select for treatment methods
             const methods = Array.from(document.getElementById('treatment_methods').selectedOptions).map(o => o.value);
             data.treatment_methods = methods;
+
+            // Handle checkboxes for education types
+            const educationTypes = Array.from(document.querySelectorAll('input[name="education_types"]:checked')).map(cb => cb.value);
+            data.education_types = educationTypes;
 
             // Merge with existing data
             const existing = JSON.parse(localStorage.getItem('therapist_form_data') || '{}');

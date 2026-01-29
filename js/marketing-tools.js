@@ -30,7 +30,7 @@ const MARKETING_CONFIG = {
     META_PIXEL_ID: '123456789',  // <-- Replace with your real Pixel ID
 
     // Privacy Policy URL
-    PRIVACY_POLICY_URL: '#',  // <-- Replace with your privacy policy page URL
+    PRIVACY_POLICY_URL: 'privacy-policy.html',  // Privacy policy page
 
     // Cookie consent key in localStorage
     CONSENT_KEY: 'cookie_consent_approved',

@@ -6,7 +6,6 @@
     <title>קבל מטפל בחינם | מטפל לכל אחד</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --deep-petrol: #003B46;
@@ -434,79 +433,6 @@
             <p style="margin-top: 1rem; opacity: 0.8; font-size: 0.95rem;">הרשמה מלאה לפורטל המטפלים שלנו</p>
         </div>
 
-        <!-- OR Divider -->
-        <div style="display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0;">
-            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.2);"></div>
-            <span style="opacity: 0.6; font-size: 0.9rem;">או השאירו פרטים מהירים</span>
-            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.2);"></div>
-        </div>
-
-        <!-- Form Card -->
-        <div class="form-card">
-            <form id="patient-form">
-                <h3 class="form-title">השאר פרטים ונחזור אליך</h3>
-                <p class="form-subtitle">לא בטוחים? השאירו פרטים ונתקשר</p>
-
-                <div class="form-group">
-                    <label for="fullName">שם מלא *</label>
-                    <input type="text" id="fullName" name="fullName" required placeholder="הכנס את שמך">
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">טלפון *</label>
-                    <input type="tel" id="phone" name="phone" required placeholder="050-0000000">
-                </div>
-
-                <div class="form-group">
-                    <label for="age">גיל</label>
-                    <select id="age" name="age">
-                        <option value="">בחר טווח גילאים...</option>
-                        <option value="18-25">18-25</option>
-                        <option value="26-35">26-35</option>
-                        <option value="36-45">36-45</option>
-                        <option value="46-55">46-55</option>
-                        <option value="55+">55+</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="area">אזור מגורים</label>
-                    <select id="area" name="area">
-                        <option value="">בחר אזור...</option>
-                        <option value="north">צפון</option>
-                        <option value="haifa">חיפה והקריות</option>
-                        <option value="center">מרכז</option>
-                        <option value="tel-aviv">תל אביב והסביבה</option>
-                        <option value="jerusalem">ירושלים</option>
-                        <option value="south">דרום</option>
-                        <option value="online">מעדיף/ה טיפול אונליין</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="message">במה נוכל לעזור? (לא חובה)</label>
-                    <textarea id="message" name="message" placeholder="ספר/י לנו בקצרה מה מביא אותך אלינו"></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary" id="submit-btn">
-                    <i class="fa-solid fa-heart"></i>
-                    אני רוצה מטפל
-                </button>
-
-                <p class="privacy-note">
-                    <i class="fa-solid fa-lock"></i>
-                    הפרטים שלך נשמרים בסודיות מלאה
-                </p>
-            </form>
-
-            <div class="success-message" id="success-message">
-                <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
-                <h2>קיבלנו את הפרטים!</h2>
-                <p>ניצור איתך קשר בהקדם להתאמת מטפל</p>
-                <p>הצעד הראשון כבר מאחוריך</p>
-            </div>
-        </div>
-
         <!-- Footer -->
         <div class="footer">
             <p>מטפל לכל אחד - ריפוי הנפש לכל אדם</p>
@@ -514,7 +440,6 @@
         </div>
     </div>
 
-    <script src="js/supabase-client.js?v=2"></script>
     <script>
         // Create floating particles
         function createParticles() {
@@ -531,51 +456,6 @@
         }
         createParticles();
 
-        // Toast notification
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'slideUp 0.3s ease-out reverse';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Form submission
-        document.getElementById('patient-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const submitBtn = document.getElementById('submit-btn');
-            const form = e.target;
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
-
-            try {
-                const formData = {
-                    full_name: document.getElementById('fullName').value,
-                    phone: document.getElementById('phone').value,
-                    age_range: document.getElementById('age').value,
-                    area: document.getElementById('area').value,
-                    message: document.getElementById('message').value,
-                    type: 'new_patient',
-                    source: 'instagram_landing'
-                };
-
-                await ContactRequests.submit(formData);
-
-                form.style.display = 'none';
-                document.getElementById('success-message').classList.add('show');
-
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('אירעה שגיאה, נסה שוב', 'error');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fa-solid fa-heart"></i> אני רוצה מטפל';
-            }
-        });
     </script>
     <!-- Marketing & Analytics -->
     <script src="js/marketing-tools.js"></script>

@@ -429,13 +429,16 @@
                     <label>האם את/ה בטיפול מקביל נוסף כרגע?</label>
                     <div class="radio-group" id="other-treatment-group">
                         <label class="radio-option" data-value="yes">
-                            <input type="radio" name="other_treatment" value="yes">
+                            <input type="radio" name="other_treatment" value="yes" onchange="toggleTreatmentDetails()">
                             <span>כן</span>
                         </label>
                         <label class="radio-option" data-value="no">
-                            <input type="radio" name="other_treatment" value="no">
+                            <input type="radio" name="other_treatment" value="no" onchange="toggleTreatmentDetails()">
                             <span>לא</span>
                         </label>
+                    </div>
+                    <div id="treatment-details-container" style="display: none; margin-top: 1rem;">
+                        <textarea name="other_treatment_details" id="other_treatment_details" placeholder="ספר/י לנו על הטיפול - איזה סוג טיפול, כמה זמן, תדירות..." style="min-height: 80px;"></textarea>
                     </div>
                 </div>
             </div>
@@ -526,6 +529,16 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        // Toggle treatment details visibility
+        function toggleTreatmentDetails() {
+            const yesSelected = document.querySelector('[name="other_treatment"][value="yes"]').checked;
+            const container = document.getElementById('treatment-details-container');
+            container.style.display = yesSelected ? 'block' : 'none';
+            if (!yesSelected) {
+                document.getElementById('other_treatment_details').value = '';
+            }
+        }
+
         // Check if previous steps were completed
         document.addEventListener('DOMContentLoaded', () => {
             const saved = JSON.parse(localStorage.getItem('patientForm') || '{}');
@@ -549,6 +562,15 @@
                     radio.checked = true;
                     radio.closest('.radio-option').classList.add('selected');
                 }
+                // Show details if "yes" was selected
+                if (saved.other_treatment === 'yes') {
+                    document.getElementById('treatment-details-container').style.display = 'block';
+                }
+            }
+
+            // Load other_treatment_details
+            if (saved.other_treatment_details) {
+                document.getElementById('other_treatment_details').value = saved.other_treatment_details;
             }
 
             // Load therapy type
@@ -614,7 +636,8 @@
             saved.expectations = document.getElementById('expectations').value.trim();
             saved.chronic_issues = document.getElementById('chronic_issues').value.trim();
             saved.medications = document.getElementById('medications').value.trim();
-            saved.other_treatment = otherTreatment ? otherTreatment.value === 'yes' : false;
+            saved.other_treatment = otherTreatment ? otherTreatment.value : '';
+            saved.other_treatment_details = document.getElementById('other_treatment_details').value.trim();
             saved.therapy_type = therapyType.value;
             saved.therapist_gender_preference = therapistGender ? therapistGender.value : 'any';
             localStorage.setItem('patientForm', JSON.stringify(saved));

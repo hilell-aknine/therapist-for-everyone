@@ -183,6 +183,36 @@
             background: rgba(212, 175, 55, 0.15);
         }
 
+        .agreement-checkbox.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .scroll-hint {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem;
+            background: rgba(255, 111, 97, 0.2);
+            border: 1px solid var(--coral);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            color: var(--coral);
+            font-size: 0.9rem;
+            animation: pulse 2s infinite;
+        }
+
+        .scroll-hint.hidden {
+            display: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
         .agreement-checkbox input[type="checkbox"] {
             width: 24px;
             height: 24px;
@@ -392,7 +422,12 @@
                 <p>Vestibulum id ligula porta felis euismod semper. Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
             </div>
 
-            <div class="agreement-checkbox" onclick="toggleCheckbox()">
+            <div class="scroll-hint" id="scroll-hint">
+                <i class="fa-solid fa-arrow-down"></i>
+                <span>יש לגלול עד סוף המסמך כדי להמשיך</span>
+            </div>
+
+            <div class="agreement-checkbox locked" id="agreement-box" onclick="toggleCheckbox()">
                 <input type="checkbox" id="agree-checkbox">
                 <label for="agree-checkbox">
                     אני מאשר/ת כי קראתי את <strong>תנאי השימוש והמדיניות</strong> במלואם,
@@ -476,8 +511,41 @@
             });
         }
 
+        // Track if user has scrolled to bottom
+        let hasScrolledToBottom = false;
+
+        // Check scroll position
+        function checkScrollPosition() {
+            const termsContent = document.querySelector('.terms-content');
+            const scrollTop = termsContent.scrollTop;
+            const scrollHeight = termsContent.scrollHeight;
+            const clientHeight = termsContent.clientHeight;
+
+            // Consider "bottom" when within 20px of the end
+            if (scrollTop + clientHeight >= scrollHeight - 20) {
+                if (!hasScrolledToBottom) {
+                    hasScrolledToBottom = true;
+                    unlockAgreement();
+                }
+            }
+        }
+
+        // Unlock the agreement checkbox
+        function unlockAgreement() {
+            const agreementBox = document.getElementById('agreement-box');
+            const scrollHint = document.getElementById('scroll-hint');
+
+            agreementBox.classList.remove('locked');
+            scrollHint.classList.add('hidden');
+        }
+
+        // Initialize scroll listener
+        document.querySelector('.terms-content').addEventListener('scroll', checkScrollPosition);
+
         // Toggle checkbox
         function toggleCheckbox() {
+            if (!hasScrolledToBottom) return; // Prevent toggle if not scrolled
+
             const checkbox = document.getElementById('agree-checkbox');
             checkbox.checked = !checkbox.checked;
             updateButtonState();

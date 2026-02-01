@@ -36,11 +36,13 @@ Repo: https://github.com/hilell-aknine/therapist-for-everyone
 ├── admin-dashboard.html    # פאנל ניהול
 ├── legal-gate.html         # שער משפטי
 ├── thank-you.html          # דף תודה
+├── privacy-policy.html     # מדיניות פרטיות
 ├── js/
 │   ├── supabase-client.js  # Supabase initialization (SINGLE SOURCE)
 │   ├── auth-guard.js       # Role & legal checks
 │   ├── patient-flow.js     # Patient logic
-│   └── admin-dashboard.js  # Admin logic
+│   ├── admin-dashboard.js  # Admin logic
+│   └── marketing-tools.js  # Cookie consent + Analytics
 ├── supabase/
 │   └── migrations/         # Database schema
 ├── images/
@@ -150,6 +152,9 @@ const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
 - [x] Patient dashboard (basic)
 - [x] Therapist dashboard (basic)
 - [x] Supabase integration
+- [x] Cookie consent banner
+- [x] Privacy policy page
+- [x] Legal documents in registration (PDF + scroll-lock)
 
 ### In Progress
 - [ ] AI screening integration
@@ -264,7 +269,41 @@ npx remotion still Video1-PlatformIntro --frame=180 --output=preview.png
 
 ---
 
-## 12. Important Notes
+## 12. Marketing & Legal Compliance
+
+### Cookie Consent (`js/marketing-tools.js`)
+- Minimalist sticky footer banner on all pages
+- Text: "אנחנו משתמשים בעוגיות כדי לשפר את החוויה שלך באתר"
+- Button: "הבנתי, תודה"
+- Link to privacy policy page
+- Saves consent to `localStorage` (key: `cookie_consent_approved`)
+- Tracking loads ONLY after user consent
+
+### Analytics (Placeholder IDs - Replace!)
+```javascript
+// In js/marketing-tools.js - UPDATE THESE:
+GA4_ID: 'G-XXXXXXXXXX',      // Google Analytics 4
+META_PIXEL_ID: '123456789',  // Meta (Facebook) Pixel
+```
+
+### Privacy Policy
+- Page: `privacy-policy.html`
+- Includes: data collection, cookies, user rights
+- Last updated: January 2026
+
+### Legal Documents in Registration
+- **Patient**: `docs/תקנון-שירות-למטופלים.pdf`
+- **Therapist**: `docs/תקנון-שירות-למטפלים.pdf`
+- Displayed at step 4 of registration (before submit)
+- Users must scroll to bottom to unlock checkboxes
+- 3 required checkboxes for patients:
+  - `terms_confirmed` - תנאי שימוש
+  - `age_confirmed` - מעל גיל 18
+  - `emergency_confirmed` - לא במצב חירום
+
+---
+
+## 13. Important Notes
 
 - Max 10 sessions per patient (business rule)
 - Therapist initiates first contact (not patient)

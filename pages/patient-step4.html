@@ -755,10 +755,11 @@
         document.getElementById('step4-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const termsConfirmed = document.getElementById('terms_confirmed').checked;
+            const emergencyConfirmed = document.getElementById('emergency_confirmed').checked;
             const ageConfirmed = document.getElementById('age_confirmed').checked;
-            const commitmentConfirmed = document.getElementById('commitment_confirmed').checked;
 
-            if (!ageConfirmed || !commitmentConfirmed) {
+            if (!termsConfirmed || !emergencyConfirmed || !ageConfirmed) {
                 showToast('יש לאשר את כל ההצהרות');
                 return;
             }

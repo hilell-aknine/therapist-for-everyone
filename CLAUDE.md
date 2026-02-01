@@ -309,3 +309,7 @@ META_PIXEL_ID: '123456789',  // Meta (Facebook) Pixel
 - Therapist initiates first contact (not patient)
 - Inactive therapist > 30 days = red flag alert
 - Location is flexible (Zoom default, physical optional)
+
+### NOT Currently Offered (Don't Add to Site!)
+- ❌ סופרוויז'ן (Supervision) - removed from all pages
+- ❌ מחירי מבחנים (Exam prices) - removed from courses section

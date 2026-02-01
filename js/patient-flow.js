@@ -282,6 +282,26 @@
             return false;
         }
 
+        // Validate legal checkboxes if they exist on the page
+        const termsCheckbox = document.getElementById('terms_confirmed');
+        const ageCheckbox = document.getElementById('age_confirmed');
+        const emergencyCheckbox = document.getElementById('emergency_confirmed');
+
+        if (termsCheckbox && !termsCheckbox.checked) {
+            showToast('יש לאשר את תנאי השימוש', 'error');
+            return false;
+        }
+
+        if (ageCheckbox && !ageCheckbox.checked) {
+            showToast('יש לאשר שאתה מעל גיל 18', 'error');
+            return false;
+        }
+
+        if (emergencyCheckbox && !emergencyCheckbox.checked) {
+            showToast('יש לאשר שאינך במצב חירום', 'error');
+            return false;
+        }
+
         return true;
     }
 

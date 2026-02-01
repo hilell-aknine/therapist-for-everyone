@@ -772,11 +772,64 @@
                         <div class="char-count"><span id="sq-role-count">0</span>/800</div>
                     </div>
 
+                    <!-- Legal Agreement Section -->
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <label style="font-size: 1.1rem; color: var(--gold);">
+                            <i class="fa-solid fa-file-signature"></i>
+                            הסכם הצטרפות ותנאי שימוש
+                        </label>
+
+                        <!-- PDF Download -->
+                        <div style="text-align: center; margin: 1rem 0;">
+                            <a href="docs/עדכון מסמך משפטי למטפל 1.2.pdf" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--gold); border-radius: 10px; color: var(--gold); text-decoration: none; font-weight: 500;">
+                                <i class="fa-solid fa-file-pdf" style="color: #ff6b6b;"></i>
+                                הורד את המסמך המשפטי המלא (PDF)
+                            </a>
+                        </div>
+
+                        <!-- Scrollable Legal Text -->
+                        <div id="legal-scroll-box" style="max-height: 250px; overflow-y: auto; padding: 1.5rem; background: rgba(0,59,70,0.8); border: 2px solid rgba(47,133,146,0.5); border-radius: 12px; font-size: 0.9rem; line-height: 1.8;">
+                            <h4 style="color: var(--gold); margin-bottom: 1rem;">הסכם הצטרפות, קוד אתי וכתב שיפוי – למטפל/ת</h4>
+
+                            <p><strong style="color: var(--gold);">1. מעמד המטפל: מתנדב עצמאי</strong></p>
+                            <p>אני מצהיר/ה כי פעילותי באתר הינה התנדבותית כספק שירות עצמאי. לא מתקיימים ביני לבין הנהלת האתר יחסי עובד-מעביד, שליחות או שותפות.</p>
+
+                            <p><strong style="color: var(--gold);">2. אחריות מקצועית, חוקית ופיזית</strong></p>
+                            <p>הפלטפורמה משמשת כלוח מודעות טכנולוגי בלבד. כל האחריות המקצועית, האתית והטיפולית חלה עלי בלבד. חובות דיווח על פי חוק חלות עלי אישית כמטפל.</p>
+
+                            <p><strong style="color: var(--gold);">3. שמירת רשומות ומחיקת מידע</strong></p>
+                            <p>נתוני המטופלים וההתקשרות נמחקים משרתי האתר באופן אוטומטי 90 יום לאחר סיום הטיפול. באחריותי הבלעדית לנהל ולאבטח את הרשומה הטיפולית.</p>
+
+                            <p><strong style="color: var(--gold);">4. ביטוח ושיפוי</strong></p>
+                            <p>אני מתחייב/ת להחזיק בביטוח אחריות מקצועית בתוקף. אני משחרר/ת את הפלטפורמה מכל אחריות לנזק שייגרם למטופל, ומתחייב/ת לשפות את מפעילת האתר בגין כל תביעה.</p>
+
+                            <p><strong style="color: var(--gold);">5. מדיניות השעיה</strong></p>
+                            <p>להנהלת האתר שמורה הזכות להפסיק את גישתי למערכת בכל עת וללא נימוק, במידה ויעלה חשש כי פעילותי פוגעת בשמו הטוב של המיזם או בבטיחות המשתמשים.</p>
+
+                            <hr style="border: none; border-top: 1px solid var(--gold); margin: 1.5rem 0;">
+                            <p style="text-align: center; color: var(--gold);"><strong>גלול/י עד הסוף כדי לאשר שקראת את ההסכם</strong></p>
+                        </div>
+
+                        <!-- Scroll Hint -->
+                        <div id="scroll-hint-therapist" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.6rem; background: rgba(255,111,97,0.2); border: 1px solid var(--coral); border-radius: 8px; margin: 1rem 0; color: var(--coral); font-size: 0.85rem; animation: pulse 2s infinite;">
+                            <i class="fa-solid fa-arrow-down"></i>
+                            <span>יש לגלול עד סוף ההסכם כדי להמשיך</span>
+                        </div>
+
+                        <!-- Agreement Checkbox -->
+                        <div class="checkbox-group" id="legal-checkbox-container" style="opacity: 0.5; pointer-events: none;">
+                            <input type="checkbox" id="legal_agreement" required>
+                            <label for="legal_agreement">
+                                אני מאשר/ת שקראתי והבנתי את הסכם ההצטרפות המלא ומסכים/ה לתנאיו <span style="color: var(--coral);">*</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="form-buttons">
                         <button type="button" class="btn btn-secondary" onclick="goToStep(2)">
                             <i class="fa-solid fa-arrow-right"></i> חזור
                         </button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="submit-btn-therapist" disabled>
                             <i class="fa-solid fa-paper-plane"></i> שלח בקשת הצטרפות
                         </button>
                     </div>
@@ -1008,6 +1061,44 @@
             document.getElementById('basic-info-form').addEventListener('submit', handleBasicInfoSubmit);
             document.getElementById('questionnaire-form-1').addEventListener('submit', handleQuestionnaire1Submit);
             document.getElementById('questionnaire-form-2').addEventListener('submit', handleFinalSubmit);
+
+            // Legal scroll detection
+            setupLegalScrollDetection();
+        }
+
+        // Legal Agreement Scroll Detection
+        function setupLegalScrollDetection() {
+            const legalBox = document.getElementById('legal-scroll-box');
+            const scrollHint = document.getElementById('scroll-hint-therapist');
+            const checkboxContainer = document.getElementById('legal-checkbox-container');
+            const checkbox = document.getElementById('legal_agreement');
+            const submitBtn = document.getElementById('submit-btn-therapist');
+            let hasScrolledToBottom = false;
+
+            legalBox.addEventListener('scroll', function() {
+                const scrolledToBottom = legalBox.scrollHeight - legalBox.scrollTop <= legalBox.clientHeight + 15;
+                if (scrolledToBottom && !hasScrolledToBottom) {
+                    hasScrolledToBottom = true;
+                    scrollHint.style.display = 'none';
+                    checkboxContainer.style.opacity = '1';
+                    checkboxContainer.style.pointerEvents = 'auto';
+                }
+            });
+
+            // Check if content doesn't need scrolling
+            setTimeout(() => {
+                if (legalBox.scrollHeight <= legalBox.clientHeight) {
+                    hasScrolledToBottom = true;
+                    scrollHint.style.display = 'none';
+                    checkboxContainer.style.opacity = '1';
+                    checkboxContainer.style.pointerEvents = 'auto';
+                }
+            }, 100);
+
+            // Checkbox change handler
+            checkbox.addEventListener('change', function() {
+                submitBtn.disabled = !this.checked;
+            });
         }
 
         function goToStep(step) {
@@ -1107,6 +1198,13 @@
 
             if (!isValid) {
                 showToast('אנא מלא את כל השדות (מינימום 50 תווים לכל שאלה)', 'error');
+                return;
+            }
+
+            // Validate legal agreement
+            const legalAgreement = document.getElementById('legal_agreement');
+            if (!legalAgreement.checked) {
+                showToast('יש לאשר את הסכם ההצטרפות לפני השליחה', 'error');
                 return;
             }
 

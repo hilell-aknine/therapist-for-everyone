@@ -185,18 +185,101 @@
         .verified-badge.yes { color: var(--success); }
         .verified-badge.no { color: var(--text-secondary); }
 
-        .btn { padding: 0.5rem 1rem; border: none; border-radius: 8px; font-family: inherit; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
-        .btn-gold { background: var(--gold); color: var(--bg); }
-        .btn-gold:hover { opacity: 0.9; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
-        .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
-        .btn-success { background: rgba(63, 185, 80, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .btn-success:hover { background: var(--success); color: white; }
-        .btn-danger { background: rgba(248, 81, 73, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
-        .btn-export { background: rgba(63, 185, 80, 0.15); color: var(--success); border: 1px solid var(--success); }
-        .btn-export:hover { background: var(--success); color: white; }
+        /* Premium Button System */
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--gold);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: var(--gold);
+        }
+        .btn:hover {
+            background: var(--gold);
+            color: var(--bg);
+        }
+        .btn-gold {
+            background: var(--gold);
+            color: var(--bg);
+            border: 1px solid var(--gold);
+        }
+        .btn-gold:hover {
+            background: transparent;
+            color: var(--gold);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+        }
+        .btn-outline:hover {
+            background: var(--gold);
+            color: var(--bg);
+        }
+        .btn-success {
+            background: transparent;
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        .btn-success:hover {
+            background: var(--success);
+            color: white;
+        }
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-export {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+        .btn-export:hover {
+            background: var(--gold);
+            color: var(--bg);
+        }
         .btn-export i { margin-left: 0.4rem; }
+
+        /* Table Action Buttons */
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--gold);
+            border-radius: 6px;
+            color: var(--gold);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-icon:hover {
+            background: var(--gold);
+            color: var(--bg);
+        }
+        .btn-icon.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        .btn-icon.danger:hover {
+            background: var(--danger);
+            color: white;
+        }
 
         .modal-overlay {
             display: none;
@@ -227,9 +310,33 @@
         }
         .modal-header h2 { display: flex; align-items: center; gap: 0.5rem; }
         .modal-header h2 i { color: var(--gold); }
-        .modal-close { background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; }
+        .modal-close {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
         .modal-body { padding: 1.5rem; overflow-y: auto; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; padding: 1.5rem; border-top: 1px solid var(--border); }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
 
         .detail-row { display: flex; padding: 0.8rem 0; border-bottom: 1px solid var(--border); }
         .detail-label { width: 140px; color: var(--text-secondary); flex-shrink: 0; }
@@ -595,7 +702,7 @@
             </div>
             <div class="modal-body" id="patient-modal-body"></div>
             <div class="modal-footer">
-                <button class="btn btn-gold" onclick="printSignedDocument('patient')" style="margin-left: auto;">
+                <button class="btn btn-gold" onclick="printSignedDocument('patient')">
                     <i class="fa-solid fa-file-pdf"></i> הפק מסמך חתום
                 </button>
                 <button class="btn btn-outline" onclick="closeModal('patient-modal')">סגור</button>
@@ -612,7 +719,7 @@
             </div>
             <div class="modal-body" id="therapist-modal-body"></div>
             <div class="modal-footer">
-                <button class="btn btn-gold" onclick="printSignedDocument('therapist')" style="margin-left: auto;">
+                <button class="btn btn-gold" onclick="printSignedDocument('therapist')">
                     <i class="fa-solid fa-file-pdf"></i> הפק מסמך חתום
                 </button>
                 <button class="btn btn-outline" onclick="closeModal('therapist-modal')">סגור</button>
@@ -850,7 +957,7 @@
                     </span></td>
                     <td><span class="status-badge status-${p.status}">${statusLabel(p.status)}</span></td>
                     <td>${formatDate(p.created_at)}</td>
-                    <td><button class="btn btn-outline" onclick="viewPatient('${p.id}')"><i class="fa-solid fa-eye"></i></button></td>
+                    <td class="action-btns"><button class="btn-icon" onclick="viewPatient('${p.id}')" title="צפייה"><i class="fa-solid fa-eye"></i></button></td>
                 </tr>
             `).join('');
         }
@@ -878,9 +985,9 @@
                     </span></td>
                     <td><span class="status-badge status-${t.status}">${statusLabel(t.status)}</span></td>
                     <td>${formatDate(t.created_at)}</td>
-                    <td>
-                        <button class="btn btn-outline" onclick="viewTherapist('${t.id}')"><i class="fa-solid fa-eye"></i></button>
-                        ${t.status === 'new' ? `<button class="btn btn-success" onclick="approveTherapist('${t.id}')" style="margin-right:0.3rem;"><i class="fa-solid fa-check"></i></button>` : ''}
+                    <td class="action-btns">
+                        <button class="btn-icon" onclick="viewTherapist('${t.id}')" title="צפייה"><i class="fa-solid fa-eye"></i></button>
+                        ${t.status === 'new' ? `<button class="btn-icon" style="border-color:var(--success);color:var(--success);" onclick="approveTherapist('${t.id}')" title="אשר"><i class="fa-solid fa-check"></i></button>` : ''}
                     </td>
                 </tr>
             `).join('');

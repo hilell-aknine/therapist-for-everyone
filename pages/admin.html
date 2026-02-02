@@ -569,6 +569,107 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="export-modal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-file-export"></i> <span id="export-modal-title">ייצוא לאקסל</span></h2>
+                <button class="modal-close" onclick="closeModal('export-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-filters">
+                    <!-- Status Filter -->
+                    <div class="filter-group">
+                        <label><i class="fa-solid fa-filter"></i> סינון לפי סטטוס</label>
+                        <div class="checkbox-filter-grid" id="export-status-filters"></div>
+                    </div>
+
+                    <!-- Date Range Filter -->
+                    <div class="filter-group">
+                        <label><i class="fa-solid fa-calendar"></i> טווח תאריכים</label>
+                        <div class="date-range-inputs">
+                            <div>
+                                <span>מתאריך:</span>
+                                <input type="date" id="export-date-from">
+                            </div>
+                            <div>
+                                <span>עד תאריך:</span>
+                                <input type="date" id="export-date-to">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verified Filter -->
+                    <div class="filter-group">
+                        <label><i class="fa-solid fa-check-circle"></i> סינון לפי אימות</label>
+                        <div class="radio-filter-group">
+                            <label class="radio-item">
+                                <input type="radio" name="export-verified" value="all" checked>
+                                <span>הכל</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="export-verified" value="yes">
+                                <span>מאומתים בלבד</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="export-verified" value="no">
+                                <span>לא מאומתים</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Preview Count -->
+                    <div class="export-preview">
+                        <i class="fa-solid fa-table"></i>
+                        <span id="export-count">0</span> רשומות יייוצאו
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('export-modal')">ביטול</button>
+                <button class="btn btn-gold" onclick="executeExport()">
+                    <i class="fa-solid fa-download"></i> הורד קובץ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .export-filters { display: flex; flex-direction: column; gap: 1.5rem; }
+        .filter-group label { display: block; margin-bottom: 0.6rem; font-weight: 600; color: var(--gold); font-size: 0.95rem; }
+        .filter-group label i { margin-left: 0.4rem; }
+        .checkbox-filter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+        .checkbox-filter-grid label {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 0.8rem; background: var(--bg); border-radius: 8px;
+            cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
+        }
+        .checkbox-filter-grid label:hover { background: var(--card-hover); }
+        .checkbox-filter-grid input[type="checkbox"] { accent-color: var(--gold); width: 16px; height: 16px; }
+        .date-range-inputs { display: flex; gap: 1rem; }
+        .date-range-inputs > div { flex: 1; }
+        .date-range-inputs span { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.3rem; }
+        .date-range-inputs input {
+            width: 100%; padding: 0.6rem; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text); font-family: inherit;
+        }
+        .date-range-inputs input:focus { border-color: var(--gold); outline: none; }
+        .radio-filter-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .radio-item {
+            display: flex; align-items: center; gap: 0.4rem;
+            padding: 0.5rem 1rem; background: var(--bg); border-radius: 20px;
+            cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
+        }
+        .radio-item:hover { background: var(--card-hover); }
+        .radio-item input[type="radio"] { accent-color: var(--gold); }
+        .export-preview {
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 1rem; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px; color: var(--gold); font-weight: 600;
+        }
+        .export-preview span { font-size: 1.3rem; }
+    </style>
+
     <script>
         // Supabase Configuration
         const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
@@ -1061,12 +1162,14 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); }
+            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); closeModal('export-modal'); }
         });
 
         // ===================
         // CSV EXPORT FUNCTIONS
         // ===================
+
+        let currentExportType = null; // 'therapists' or 'patients'
 
         function getDateString() {
             const now = new Date();
@@ -1076,7 +1179,6 @@
         function escapeCSV(value) {
             if (value === null || value === undefined) return '';
             const str = String(value);
-            // If contains comma, newline, or quotes - wrap in quotes and escape quotes
             if (str.includes(',') || str.includes('\n') || str.includes('"') || str.includes('\r')) {
                 return '"' + str.replace(/"/g, '""') + '"';
             }
@@ -1084,7 +1186,6 @@
         }
 
         function downloadCSV(content, filename) {
-            // Add BOM for Hebrew support in Excel
             const BOM = '\uFEFF';
             const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -1097,13 +1198,121 @@
             showToast('הקובץ הורד בהצלחה!', 'success');
         }
 
-        function exportTherapistsCSV() {
-            if (therapists.length === 0) {
-                showToast('אין מטפלים לייצוא', 'error');
+        // Open export modal with filters
+        function openExportModal(type) {
+            currentExportType = type;
+            const isTherapists = type === 'therapists';
+
+            document.getElementById('export-modal-title').textContent = isTherapists ? 'ייצוא מטפלים' : 'ייצוא מטופלים';
+
+            // Build status checkboxes based on type
+            const statusFilters = document.getElementById('export-status-filters');
+            const statuses = isTherapists
+                ? [
+                    { value: 'new', label: 'חדש' },
+                    { value: 'pending_review', label: 'בבדיקה' },
+                    { value: 'approved', label: 'מאושר' },
+                    { value: 'active', label: 'פעיל' },
+                    { value: 'inactive', label: 'לא פעיל' },
+                    { value: 'rejected', label: 'נדחה' }
+                ]
+                : [
+                    { value: 'new', label: 'חדש' },
+                    { value: 'waiting', label: 'ממתין' },
+                    { value: 'matched', label: 'שובץ' },
+                    { value: 'in_treatment', label: 'בטיפול' },
+                    { value: 'completed', label: 'הושלם' },
+                    { value: 'rejected', label: 'נדחה' }
+                ];
+
+            statusFilters.innerHTML = statuses.map(s => `
+                <label>
+                    <input type="checkbox" value="${s.value}" checked onchange="updateExportCount()">
+                    ${s.label}
+                </label>
+            `).join('');
+
+            // Reset date filters
+            document.getElementById('export-date-from').value = '';
+            document.getElementById('export-date-to').value = '';
+
+            // Reset verified filter
+            document.querySelector('input[name="export-verified"][value="all"]').checked = true;
+
+            // Update count
+            updateExportCount();
+
+            // Show modal
+            document.getElementById('export-modal').classList.add('active');
+        }
+
+        function exportTherapistsCSV() { openExportModal('therapists'); }
+        function exportPatientsCSV() { openExportModal('patients'); }
+
+        // Get filtered data based on export modal filters
+        function getFilteredExportData() {
+            const isTherapists = currentExportType === 'therapists';
+            let data = isTherapists ? [...therapists] : [...patients];
+
+            // Status filter
+            const selectedStatuses = Array.from(document.querySelectorAll('#export-status-filters input:checked')).map(cb => cb.value);
+            if (selectedStatuses.length > 0) {
+                data = data.filter(item => selectedStatuses.includes(item.status));
+            }
+
+            // Date range filter
+            const dateFrom = document.getElementById('export-date-from').value;
+            const dateTo = document.getElementById('export-date-to').value;
+
+            if (dateFrom) {
+                const fromDate = new Date(dateFrom);
+                data = data.filter(item => new Date(item.created_at) >= fromDate);
+            }
+            if (dateTo) {
+                const toDate = new Date(dateTo);
+                toDate.setHours(23, 59, 59); // Include the entire day
+                data = data.filter(item => new Date(item.created_at) <= toDate);
+            }
+
+            // Verified filter
+            const verifiedFilter = document.querySelector('input[name="export-verified"]:checked').value;
+            if (verifiedFilter === 'yes') {
+                data = data.filter(item => isTherapists ? item.documents_verified : item.id_verified);
+            } else if (verifiedFilter === 'no') {
+                data = data.filter(item => isTherapists ? !item.documents_verified : !item.id_verified);
+            }
+
+            return data;
+        }
+
+        function updateExportCount() {
+            const data = getFilteredExportData();
+            document.getElementById('export-count').textContent = data.length;
+        }
+
+        // Add event listeners for date inputs
+        document.getElementById('export-date-from')?.addEventListener('change', updateExportCount);
+        document.getElementById('export-date-to')?.addEventListener('change', updateExportCount);
+        document.querySelectorAll('input[name="export-verified"]').forEach(r => r.addEventListener('change', updateExportCount));
+
+        function executeExport() {
+            const data = getFilteredExportData();
+
+            if (data.length === 0) {
+                showToast('אין נתונים לייצוא עם הפילטרים הנבחרים', 'error');
                 return;
             }
 
-            // Define headers
+            if (currentExportType === 'therapists') {
+                exportTherapistsData(data);
+            } else {
+                exportPatientsData(data);
+            }
+
+            closeModal('export-modal');
+        }
+
+        function exportTherapistsData(filteredData) {
             const headers = [
                 'שם מלא', 'טלפון', 'אימייל', 'עיר', 'מגדר', 'התמחות',
                 'שיטות טיפול', 'שנות ניסיון', 'מספר רישיון', 'השכלה',
@@ -1115,64 +1324,34 @@
                 'מסמכים מאומתים', 'סטטוס', 'תאריך הרשמה'
             ];
 
-            // Build rows
-            const rows = therapists.map(t => {
+            const rows = filteredData.map(t => {
                 const q = t.questionnaire || {};
                 const health = q.health || {};
                 const commitment = q.commitment || {};
                 const practice = q.practice || {};
-
-                // Format therapy methods array
                 const methods = practice.treatment_methods || [];
                 const methodsStr = Array.isArray(methods) ? methods.join(', ') : '';
 
                 return [
-                    t.full_name || '',
-                    t.phone || '',
-                    t.email || '',
-                    t.city || '',
-                    genderDisplayLabel(t.gender),
-                    t.specialization || '',
-                    methodsStr,
-                    t.experience_years || 0,
-                    t.license_number || '',
-                    t.education || '',
-                    t.works_online ? 'כן' : 'לא',
-                    t.works_in_person ? 'כן' : 'לא',
-                    t.available_hours_per_week || '',
-                    t.social_link || '',
-                    practice.total_patients_estimate || 0,
-                    practice.current_active_patients || 0,
-                    commitment.monthly_hours || '',
-                    commitment.duration_months || '',
-                    commitment.therapy_mode || '',
-                    health.has_medical_issues ? 'כן' : 'לא',
-                    health.medical_issues_details || '',
-                    health.takes_psychiatric_meds ? 'כן' : 'לא',
-                    health.in_personal_therapy ? 'כן' : 'לא',
-                    q.why_profession || '',
-                    q.why_join || '',
-                    q.experience || '',
-                    q.case_study || '',
-                    q.challenges || '',
-                    t.documents_verified ? 'כן' : 'לא',
-                    statusLabel(t.status),
-                    formatDate(t.created_at)
+                    t.full_name || '', t.phone || '', t.email || '', t.city || '',
+                    genderDisplayLabel(t.gender), t.specialization || '', methodsStr,
+                    t.experience_years || 0, t.license_number || '', t.education || '',
+                    t.works_online ? 'כן' : 'לא', t.works_in_person ? 'כן' : 'לא',
+                    t.available_hours_per_week || '', t.social_link || '',
+                    practice.total_patients_estimate || 0, practice.current_active_patients || 0,
+                    commitment.monthly_hours || '', commitment.duration_months || '', commitment.therapy_mode || '',
+                    health.has_medical_issues ? 'כן' : 'לא', health.medical_issues_details || '',
+                    health.takes_psychiatric_meds ? 'כן' : 'לא', health.in_personal_therapy ? 'כן' : 'לא',
+                    q.why_profession || '', q.why_join || '', q.experience || '', q.case_study || '', q.challenges || '',
+                    t.documents_verified ? 'כן' : 'לא', statusLabel(t.status), formatDate(t.created_at)
                 ].map(escapeCSV);
             });
 
-            // Build CSV content
             const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-            downloadCSV(csvContent, `therapists_data_${getDateString()}.csv`);
+            downloadCSV(csvContent, `therapists_${getDateString()}_filtered.csv`);
         }
 
-        function exportPatientsCSV() {
-            if (patients.length === 0) {
-                showToast('אין מטופלים לייצוא', 'error');
-                return;
-            }
-
-            // Define headers
+        function exportPatientsData(filteredData) {
             const headers = [
                 'שם מלא', 'טלפון', 'אימייל', 'עיר', 'העדפת טיפול', 'העדפת מגדר מטפל',
                 'איש קשר לחירום', 'סיבת פנייה', 'טיפול קודם', 'ציפיות',
@@ -1180,34 +1359,19 @@
                 'זהות מאומתת', 'סטטוס', 'תאריך הרשמה'
             ];
 
-            // Build rows
-            const rows = patients.map(p => {
+            const rows = filteredData.map(p => {
                 const q = p.questionnaire || {};
-
                 return [
-                    p.full_name || '',
-                    p.phone || '',
-                    p.email || '',
-                    p.city || '',
-                    therapyTypeLabel(p.therapy_type),
-                    genderLabel(p.therapist_gender_preference),
-                    q.emergency_contact || '',
-                    q.main_reason || '',
-                    q.previous_therapy || '',
-                    q.expectations || '',
-                    q.family_background || '',
-                    q.medical_history || '',
-                    q.medications || '',
-                    q.additional_info || '',
-                    p.id_verified ? 'כן' : 'לא',
-                    statusLabel(p.status),
-                    formatDate(p.created_at)
+                    p.full_name || '', p.phone || '', p.email || '', p.city || '',
+                    therapyTypeLabel(p.therapy_type), genderLabel(p.therapist_gender_preference),
+                    q.emergency_contact || '', q.main_reason || '', q.previous_therapy || '', q.expectations || '',
+                    q.family_background || '', q.medical_history || '', q.medications || '', q.additional_info || '',
+                    p.id_verified ? 'כן' : 'לא', statusLabel(p.status), formatDate(p.created_at)
                 ].map(escapeCSV);
             });
 
-            // Build CSV content
             const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-            downloadCSV(csvContent, `patients_data_${getDateString()}.csv`);
+            downloadCSV(csvContent, `patients_${getDateString()}_filtered.csv`);
         }
     </script>
     <!-- Marketing & Analytics -->

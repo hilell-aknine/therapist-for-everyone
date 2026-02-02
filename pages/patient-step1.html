@@ -365,8 +365,26 @@
                 </div>
 
                 <div class="form-group">
-                    <label>קישור לרשת חברתית <span class="label-hint">(אופציונלי - לינקדאין, פייסבוק וכו')</span></label>
-                    <input type="url" name="social_link" id="social_link" placeholder="https://...">
+                    <label>תפקיד בצבא/שירות לאומי <span class="label-hint">(אופציונלי)</span></label>
+                    <input type="text" name="military_role" id="military_role" placeholder="לדוגמה: קצין חינוך, מדריכה, לוחם...">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>רשת חברתית <span class="label-hint">(אופציונלי)</span></label>
+                        <select name="social_network" id="social_network">
+                            <option value="">בחר/י רשת</option>
+                            <option value="instagram">אינסטגרם</option>
+                            <option value="facebook">פייסבוק</option>
+                            <option value="linkedin">לינקדאין</option>
+                            <option value="tiktok">טיקטוק</option>
+                            <option value="other">אחר</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>שם משתמש ברשת</label>
+                        <input type="text" name="social_username" id="social_username" placeholder="@username">
+                    </div>
                 </div>
 
                 <div class="info-box">
@@ -398,7 +416,8 @@
 
             // Populate all fields
             const fields = ['full_name', 'phone', 'email', 'birth_date', 'gender', 'city',
-                          'marital_status', 'occupation', 'military_service', 'social_link', 'main_reason'];
+                          'marital_status', 'occupation', 'military_service', 'military_role',
+                          'social_network', 'social_username', 'main_reason'];
             fields.forEach(field => {
                 const el = document.getElementById(field);
                 if (el && saved[field]) el.value = saved[field];
@@ -442,7 +461,9 @@
             saved.marital_status = document.getElementById('marital_status').value;
             saved.occupation = document.getElementById('occupation').value.trim();
             saved.military_service = document.getElementById('military_service').value;
-            saved.social_link = document.getElementById('social_link').value.trim();
+            saved.military_role = document.getElementById('military_role').value.trim();
+            saved.social_network = document.getElementById('social_network').value;
+            saved.social_username = document.getElementById('social_username').value.trim();
             saved.main_reason = mainReason;
             localStorage.setItem('patientForm', JSON.stringify(saved));
 

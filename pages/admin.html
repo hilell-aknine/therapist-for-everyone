@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
     <script>
         // AUTH GUARD - Redirect to login if not authenticated
         (async function() {
@@ -594,6 +595,9 @@
             </div>
             <div class="modal-body" id="patient-modal-body"></div>
             <div class="modal-footer">
+                <button class="btn btn-gold" onclick="printSignedDocument('patient')" style="margin-left: auto;">
+                    <i class="fa-solid fa-file-pdf"></i> הפק מסמך חתום
+                </button>
                 <button class="btn btn-outline" onclick="closeModal('patient-modal')">סגור</button>
             </div>
         </div>
@@ -608,6 +612,9 @@
             </div>
             <div class="modal-body" id="therapist-modal-body"></div>
             <div class="modal-footer">
+                <button class="btn btn-gold" onclick="printSignedDocument('therapist')" style="margin-left: auto;">
+                    <i class="fa-solid fa-file-pdf"></i> הפק מסמך חתום
+                </button>
                 <button class="btn btn-outline" onclick="closeModal('therapist-modal')">סגור</button>
             </div>
         </div>
@@ -751,6 +758,8 @@
         let matches = [];
         let currentPatientFilter = 'all';
         let currentTherapistFilter = 'all';
+        let currentViewedPatient = null;
+        let currentViewedTherapist = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await db.auth.getSession();
@@ -905,6 +914,7 @@
         function viewPatient(id) {
             const p = patients.find(x => x.id === id);
             if (!p) return;
+            currentViewedPatient = p;
             document.getElementById('modal-patient-name').textContent = p.full_name;
             const q = p.questionnaire || {};
 
@@ -979,6 +989,7 @@
         function viewTherapist(id) {
             const t = therapists.find(x => x.id === id);
             if (!t) return;
+            currentViewedTherapist = t;
             document.getElementById('modal-therapist-name').textContent = t.full_name;
             const q = t.questionnaire || {};
             const health = q.health || {};
@@ -1442,6 +1453,371 @@
 
             const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
             downloadCSV(csvContent, `patients_${getDateString()}_filtered.csv`);
+        }
+
+        // ===================
+        // PRINT SIGNED DOCUMENT
+        // ===================
+        function printSignedDocument(type) {
+            const isTherapist = type === 'therapist';
+            const data = isTherapist ? currentViewedTherapist : currentViewedPatient;
+
+            if (!data) {
+                showToast('לא נמצאו נתונים להדפסה', 'error');
+                return;
+            }
+
+            const today = new Date().toLocaleDateString('he-IL');
+            const signedDate = data.created_at ? formatDateTime(data.created_at) : today;
+
+            // Build details based on type
+            let detailsHTML = '';
+            let typeTitle = '';
+            let additionalInfo = '';
+
+            if (isTherapist) {
+                typeTitle = 'תיק מטפל/ת';
+                const q = data.questionnaire || {};
+                const commitment = q.commitment || {};
+
+                detailsHTML = `
+                    <tr><td class="label">שם מלא:</td><td class="value">${data.full_name || '-'}</td></tr>
+                    <tr><td class="label">טלפון:</td><td class="value">${data.phone || '-'}</td></tr>
+                    <tr><td class="label">אימייל:</td><td class="value">${data.email || '-'}</td></tr>
+                    <tr><td class="label">עיר מגורים:</td><td class="value">${data.city || '-'}</td></tr>
+                    <tr><td class="label">תחום התמחות:</td><td class="value">${data.specialization || '-'}</td></tr>
+                    <tr><td class="label">שנות ניסיון:</td><td class="value">${data.experience_years || 0}</td></tr>
+                    <tr><td class="label">מספר רישיון:</td><td class="value">${data.license_number || '-'}</td></tr>
+                    <tr><td class="label">אופן טיפול:</td><td class="value">${data.works_online ? 'זום' : ''} ${data.works_in_person ? 'פרונטלי' : ''}</td></tr>
+                    <tr><td class="label">שעות התחייבות בחודש:</td><td class="value">${commitment.monthly_hours || '-'}</td></tr>
+                    <tr><td class="label">תקופת התחייבות:</td><td class="value">${commitment.duration_months || '-'}</td></tr>
+                `;
+
+                additionalInfo = `
+                    <div class="section">
+                        <h3>הצהרות המטפל/ת</h3>
+                        <ul>
+                            <li>המטפל/ת מצהיר/ה כי יש ברשותו/ה ביטוח אחריות מקצועית בתוקף</li>
+                            <li>המטפל/ת מבין/ה שכל האחריות המקצועית, החוקית והתיעודית היא עליו/ה בלבד</li>
+                            <li>המטפל/ת משחרר/ת את הפלטפורמה מכל אחריות לטיפול או לתוצאותיו</li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                typeTitle = 'תיק מטופל/ת';
+                const q = data.questionnaire || {};
+
+                detailsHTML = `
+                    <tr><td class="label">שם מלא:</td><td class="value">${data.full_name || '-'}</td></tr>
+                    <tr><td class="label">טלפון:</td><td class="value">${data.phone || '-'}</td></tr>
+                    <tr><td class="label">אימייל:</td><td class="value">${data.email || '-'}</td></tr>
+                    <tr><td class="label">עיר מגורים:</td><td class="value">${data.city || '-'}</td></tr>
+                    <tr><td class="label">העדפת טיפול:</td><td class="value">${therapyTypeLabel(data.therapy_type)}</td></tr>
+                    <tr><td class="label">העדפת מטפל/ת:</td><td class="value">${genderLabel(data.therapist_gender_preference)}</td></tr>
+                    <tr><td class="label">איש קשר לחירום:</td><td class="value">${q.emergency_contact || '-'}</td></tr>
+                `;
+
+                if (q.main_reason) {
+                    additionalInfo = `
+                        <div class="section">
+                            <h3>סיבת הפנייה</h3>
+                            <p>${q.main_reason}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Create the print window
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>${typeTitle} - ${data.full_name}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=David+Libre:wght@400;500;700&family=Heebo:wght@400;500;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'David Libre', 'Heebo', serif;
+            background: white;
+            color: #1a1a1a;
+            padding: 40px;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .document {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid #003B46;
+            padding: 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 3px double #003B46;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #D4AF37, #c9a227);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #003B46;
+            font-size: 28px;
+        }
+
+        .logo-text h1 {
+            font-size: 22px;
+            color: #003B46;
+            font-weight: 700;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .date-section {
+            text-align: left;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title h2 {
+            font-size: 24px;
+            color: #003B46;
+            margin-bottom: 5px;
+        }
+
+        .title .subtitle {
+            font-size: 14px;
+            color: #D4AF37;
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #003B46;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .details-table tr {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .details-table td {
+            padding: 12px 10px;
+        }
+
+        .details-table .label {
+            font-weight: 700;
+            color: #003B46;
+            width: 180px;
+        }
+
+        .details-table .value {
+            color: #333;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-right: 4px solid #D4AF37;
+        }
+
+        .section h3 {
+            font-size: 16px;
+            color: #003B46;
+            margin-bottom: 10px;
+        }
+
+        .section p, .section ul {
+            color: #333;
+            font-size: 13px;
+        }
+
+        .section ul {
+            padding-right: 20px;
+        }
+
+        .section li {
+            margin-bottom: 5px;
+        }
+
+        .legal-notice {
+            background: linear-gradient(135deg, #003B46, #00606B);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .legal-notice h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legal-notice p {
+            font-size: 13px;
+            opacity: 0.95;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 20px;
+        }
+
+        .signature-section h3 {
+            font-size: 16px;
+            color: #003B46;
+            margin-bottom: 15px;
+        }
+
+        .signature-box {
+            background: white;
+            border: 2px solid #003B46;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .signature-box img {
+            max-width: 300px;
+            max-height: 120px;
+        }
+
+        .signature-date {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .no-signature {
+            color: #999;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        @media print {
+            body { padding: 0; }
+            .document { border: none; padding: 20px; }
+            @page { margin: 1cm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo-icon">❤</div>
+                <div class="logo-text">
+                    <h1>מטפל לכל אחד</h1>
+                    <p>ריפוי הנפש לכל אדם</p>
+                </div>
+            </div>
+            <div class="date-section">
+                <div>תאריך הפקת המסמך:</div>
+                <div><strong>${today}</strong></div>
+            </div>
+        </div>
+
+        <div class="title">
+            <h2>${typeTitle}</h2>
+            <div class="subtitle">מסמך רשמי</div>
+            <span class="badge">${isTherapist ? (data.documents_verified ? '✓ מסמכים מאומתים' : 'ממתין לאימות') : (data.id_verified ? '✓ זהות מאומתת' : 'ממתין לאימות')}</span>
+        </div>
+
+        <table class="details-table">
+            ${detailsHTML}
+            <tr><td class="label">תאריך הרשמה:</td><td class="value">${formatDate(data.created_at)}</td></tr>
+            <tr><td class="label">סטטוס:</td><td class="value">${statusLabel(data.status)}</td></tr>
+        </table>
+
+        ${additionalInfo}
+
+        <div class="legal-notice">
+            <h3>📋 הצהרה משפטית</h3>
+            <p>
+                ${isTherapist ? 'המטפל/ת' : 'המטופל/ת'} חתם/ה באופן דיגיטלי על תנאי השימוש והמסמך המשפטי של פלטפורמת "מטפל לכל אחד".
+                החתימה בוצעה בתאריך ${signedDate} ומהווה הסכמה מלאה לכל התנאים המפורטים במסמך.
+            </p>
+        </div>
+
+        <div class="signature-section">
+            <h3>חתימה דיגיטלית</h3>
+            <div class="signature-box">
+                ${data.signature_data
+                    ? `<img src="${data.signature_data}" alt="חתימה דיגיטלית">`
+                    : '<div class="no-signature">לא נמצאה חתימה דיגיטלית</div>'
+                }
+                <div class="signature-date">נחתם בתאריך: ${signedDate}</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>מסמך זה הופק אוטומטית ממערכת ה-CRM של "מטפל לכל אחד"</p>
+            <p>www.therapistforeveryone.com</p>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
+    </script>
+</body>
+</html>
+            `);
+            printWindow.document.close();
         }
     </script>
     <!-- Marketing & Analytics -->

@@ -542,10 +542,11 @@
         // Check if previous steps were completed
         document.addEventListener('DOMContentLoaded', () => {
             const saved = JSON.parse(localStorage.getItem('patientForm') || '{}');
-            if (!saved.full_name || !saved.mother_relationship) {
-                window.location.href = 'patient-step1.html';
-                return;
-            }
+            // DEBUG MODE - disabled validation
+            // if (!saved.full_name || !saved.mother_relationship) {
+            //     window.location.href = 'patient-step1.html';
+            //     return;
+            // }
 
             // Load saved data
             const fields = ['previous_therapy_history', 'why_now', 'fears', 'expectations',

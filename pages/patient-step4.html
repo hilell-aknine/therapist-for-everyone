@@ -530,6 +530,31 @@
                         </label>
                     </div>
 
+                    <!-- Marketing Consent -->
+                    <div style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05)); border: 2px solid var(--gold); border-radius: 12px; padding: 1.2rem; margin: 1.5rem 0;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem;">
+                            <i class="fa-solid fa-heart" style="color: var(--gold);"></i>
+                            <strong style="color: var(--primary-dark);">רוצה לעזור לנו להגיע לעוד אנשים?</strong>
+                        </div>
+                        <div class="checkbox-item" style="margin-bottom: 0.8rem; background: white;">
+                            <input type="checkbox" id="marketing_consent" name="marketing_consent" onchange="toggleMarketingOptions()">
+                            <label for="marketing_consent">
+                                אני מסכים/ה שתשתמשו בסיפור שלי כדי לעודד אחרים לפנות לעזרה
+                            </label>
+                        </div>
+                        <div id="marketing-options" style="display: none; padding-right: 1.5rem;">
+                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.8rem;">איך לשתף?</div>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="marketing_type" value="anonymous" checked style="accent-color: var(--gold);">
+                                <span>באופן אנונימי (ללא שם)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="marketing_type" value="with_name" style="accent-color: var(--gold);">
+                                <span>עם השם הפרטי שלי</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Signature -->
                     <div class="signature-section">
                         <div class="signature-label">
@@ -670,6 +695,13 @@
         canvas.addEventListener('touchstart', startDrawing);
         canvas.addEventListener('touchmove', draw);
         canvas.addEventListener('touchend', stopDrawing);
+
+        // ========== Marketing Consent Toggle ==========
+        function toggleMarketingOptions() {
+            const checkbox = document.getElementById('marketing_consent');
+            const options = document.getElementById('marketing-options');
+            options.style.display = checkbox.checked ? 'block' : 'none';
+        }
 
         // ========== Scroll Detection for Moral Box ==========
         let hasScrolledToBottom = false;
@@ -828,7 +860,11 @@
                     questionnaire: questionnaire,
                     signature_data: signatureData,
                     legal_consent_date: new Date().toISOString(),
-                    status: 'new'
+                    status: 'new',
+                    marketing_consent: document.getElementById('marketing_consent').checked,
+                    marketing_type: document.getElementById('marketing_consent').checked
+                        ? document.querySelector('input[name="marketing_type"]:checked')?.value || 'anonymous'
+                        : null
                 };
 
                 // Submit to Supabase

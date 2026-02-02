@@ -213,6 +213,26 @@
         }
         .checkbox-item .checkmark { display: none; }
 
+        /* NLP Level Select */
+        .nlp-container {
+            flex-wrap: wrap;
+        }
+        .nlp-level-select {
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        .nlp-level-select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
         .section-divider {
             display: flex;
             align-items: center;
@@ -547,17 +567,15 @@
                             <input type="checkbox" name="therapy_methods" value="coaching">
                             קואצ'ינג / אימון אישי
                         </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="therapy_methods" value="nlp_practitioner">
-                            NLP - פרקטישנר
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="therapy_methods" value="nlp_master">
-                            NLP - מאסטר פרקטישנר
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="therapy_methods" value="nlp_trainer">
-                            NLP - טריינר
+                        <label class="checkbox-item nlp-container">
+                            <input type="checkbox" name="therapy_methods" value="nlp" id="nlp-checkbox" onchange="toggleNlpLevel()">
+                            NLP
+                            <select name="nlp_level" id="nlp-level" class="nlp-level-select" style="display:none;">
+                                <option value="">בחר רמה</option>
+                                <option value="practitioner">פרקטישנר</option>
+                                <option value="master">מאסטר פרקטישנר</option>
+                                <option value="trainer">טריינר</option>
+                            </select>
                         </label>
                     </div>
                 </div>
@@ -624,6 +642,18 @@
         // Checkbox field names that need special handling
         const checkboxFields = ['target_population', 'specialization', 'academic_degree', 'therapy_methods'];
 
+        // Toggle NLP level dropdown visibility
+        function toggleNlpLevel() {
+            const checkbox = document.getElementById('nlp-checkbox');
+            const levelSelect = document.getElementById('nlp-level');
+            if (checkbox.checked) {
+                levelSelect.style.display = 'block';
+            } else {
+                levelSelect.style.display = 'none';
+                levelSelect.value = '';
+            }
+        }
+
         // Load saved data
         document.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('therapist_form_data');
@@ -645,6 +675,9 @@
                         input.value = data[key];
                     }
                 });
+
+                // Restore NLP level dropdown state
+                toggleNlpLevel();
             }
         });
 

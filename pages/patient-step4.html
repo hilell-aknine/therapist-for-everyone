@@ -459,10 +459,10 @@
                     <p><strong>פלטפורמת "מטפל לכל אחד"</strong></p>
                     <p><em>חשוב: השימוש במערכת וקבלת הסיוע מותנים בקריאה ואישור מלא של מסמך זה.</em></p>
 
-                    <div class="warning-box">
-                        <h4><i class="fa-solid fa-exclamation-triangle"></i> 1. הצהרת בטיחות וחירום</h4>
-                        <p><strong>אזהרה חמורה:</strong> פלטפורמת "מטפל לכל אחד" אינה מוקד חירום ואינה מספקת מענה למצבי מצוקה אקוטית, אובדנות או סכנת חיים.</p>
-                        <p>ידוע לי שבמקרה חירום עלי לפנות מיידית למוקד 100, לחדר מיון, או לער"ן (1201).</p>
+                    <div class="warning-box" style="background: rgba(212, 175, 55, 0.1); border-color: var(--gold);">
+                        <h4 style="color: var(--primary-dark);"><i class="fa-solid fa-info-circle"></i> 1. מידע חשוב על אופי השירות</h4>
+                        <p style="color: var(--text);"><strong>חשוב לדעת:</strong> פלטפורמת "מטפל לכל אחד" מציעה ליווי ותמיכה רגשית, ואינה מהווה תחליף לשירותי חירום רפואיים.</p>
+                        <p style="color: var(--text);">במקרה של מצוקה דחופה, ניתן לפנות למוקד 100, לחדר מיון, או לער"ן (1201) - אנחנו כאן בשבילך תמיד.</p>
                     </div>
 
                     <h4>2. הגבלת גיל - שירות לבגירים בלבד</h4>
@@ -511,13 +511,6 @@
                         </label>
                     </div>
 
-                    <!-- Checkbox 2: Emergency Declaration -->
-                    <div class="checkbox-item locked" id="emergency-checkbox">
-                        <input type="checkbox" id="emergency_confirmed" name="emergency_confirmed" required>
-                        <label for="emergency_confirmed">
-                            אני מצהיר/ה שאינני במצב חירום <span class="required">*</span>
-                        </label>
-                    </div>
 
                     <!-- Checkbox 3: Age Declaration -->
                     <div class="checkbox-item locked" id="age-checkbox">
@@ -565,10 +558,16 @@
                         אנו נעשה הכל בשביל לעזור לך.
                         <br>ברגע שנמצא את המטפל הכי מקצועי ומתאים עבורך, הוא ייצור איתך קשר בהקדם.
                     </p>
-                    <a href="../index.html" class="btn btn-home">
-                        <i class="fa-solid fa-home"></i>
-                        חזרה לדף הבית
-                    </a>
+                    <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+                        <a href="https://wa.me/972549116092?text=%D7%94%D7%99%D7%99%20%D7%94%D7%99%D7%9C%D7%9C%2C%20%D7%9E%D7%99%D7%9C%D7%90%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%98%D7%95%D7%A4%D7%A1%20%D7%95%D7%90%D7%A0%D7%99%20%D7%9E%D7%A6%D7%A4%D7%94%20%D7%9C%D7%A2%D7%91%D7%95%D7%93%20%D7%90%D7%99%D7%AA%D7%9B%D7%9D%20%F0%9F%92%9A" target="_blank" class="btn" style="background: #25D366; color: white; display: inline-flex; padding: 1rem 2rem;">
+                            <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i>
+                            שלח הודעה להילל בוואטסאפ
+                        </a>
+                        <a href="../index.html" class="btn btn-home">
+                            <i class="fa-solid fa-home"></i>
+                            חזרה לדף הבית
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -682,7 +681,6 @@
 
         function unlockCheckboxes() {
             document.getElementById('terms-checkbox').classList.remove('locked');
-            document.getElementById('emergency-checkbox').classList.remove('locked');
             document.getElementById('age-checkbox').classList.remove('locked');
             document.getElementById('scroll-hint').classList.add('hidden');
         }
@@ -709,9 +707,8 @@
 
         function updateSubmitButton() {
             const termsConfirmed = document.getElementById('terms_confirmed').checked;
-            const emergencyConfirmed = document.getElementById('emergency_confirmed').checked;
             const ageConfirmed = document.getElementById('age_confirmed').checked;
-            const canSubmit = termsConfirmed && emergencyConfirmed && ageConfirmed && hasSignature;
+            const canSubmit = termsConfirmed && ageConfirmed && hasSignature;
             document.getElementById('submit-btn').disabled = !canSubmit;
         }
 
@@ -756,10 +753,9 @@
             e.preventDefault();
 
             const termsConfirmed = document.getElementById('terms_confirmed').checked;
-            const emergencyConfirmed = document.getElementById('emergency_confirmed').checked;
             const ageConfirmed = document.getElementById('age_confirmed').checked;
 
-            if (!termsConfirmed || !emergencyConfirmed || !ageConfirmed) {
+            if (!termsConfirmed || !ageConfirmed) {
                 showToast('יש לאשר את כל ההצהרות');
                 return;
             }

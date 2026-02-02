@@ -790,6 +790,17 @@
                         <i class="fa-solid fa-check"></i> שבץ
                     </button>
                 </div>
+
+                <!-- DIGITAL SIGNATURE -->
+                ${p.signature_data ? `
+                <div class="modal-section-divider" style="margin-top: 1.5rem;"><i class="fa-solid fa-signature"></i> חתימה דיגיטלית</div>
+                <div style="background: #fff; padding: 15px; border-radius: 8px; text-align: center;">
+                    <img src="${p.signature_data}" alt="חתימה דיגיטלית" style="max-width: 100%; height: auto; max-height: 150px;">
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                    <i class="fa-solid fa-clock"></i> נחתם בתאריך: ${formatDateTime(p.created_at)}
+                </div>
+                ` : ''}
             `;
             document.getElementById('patient-modal').classList.add('active');
         }
@@ -920,6 +931,17 @@
                     <div class="detail-label">תאריך הרשמה</div>
                     <div class="detail-value">${formatDate(t.created_at)}</div>
                 </div>
+
+                <!-- DIGITAL SIGNATURE -->
+                ${t.signature_data ? `
+                <div class="modal-section-divider"><i class="fa-solid fa-signature"></i> חתימה דיגיטלית</div>
+                <div style="background: #fff; padding: 15px; border-radius: 8px; text-align: center;">
+                    <img src="${t.signature_data}" alt="חתימה דיגיטלית" style="max-width: 100%; height: auto; max-height: 150px;">
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                    <i class="fa-solid fa-clock"></i> נחתם בתאריך: ${formatDateTime(t.created_at)}
+                </div>
+                ` : ''}
             `;
             document.getElementById('therapist-modal').classList.add('active');
         }
@@ -1023,6 +1045,12 @@
         function formatDate(dateStr) {
             if (!dateStr) return '-';
             return new Date(dateStr).toLocaleDateString('he-IL');
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('he-IL') + ' בשעה ' + date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
         }
 
         function showToast(message, type) {

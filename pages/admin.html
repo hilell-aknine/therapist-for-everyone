@@ -20,6 +20,7 @@
         })();
     </script>
     <style>
+        /* Dark Mode (Default) */
         :root {
             --bg: #0f1419;
             --card: #1a1f2e;
@@ -33,8 +34,24 @@
             --danger: #f85149;
             --info: #58a6ff;
         }
+
+        /* Light Mode */
+        [data-theme="light"] {
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --card-hover: #f0f2f5;
+            --border: #e1e5eb;
+            --text: #1a1a2e;
+            --text-secondary: #6c757d;
+            --gold: #c9a227;
+            --success: #28a745;
+            --warning: #e6a817;
+            --danger: #dc3545;
+            --info: #0d6efd;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
 
         .header {
             background: var(--card);
@@ -57,6 +74,31 @@
             font-family: inherit;
         }
         .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            transform: rotate(15deg);
+        }
+        [data-theme="light"] .theme-toggle .fa-moon { display: none; }
+        [data-theme="light"] .theme-toggle .fa-sun { display: inline; }
+        :root .theme-toggle .fa-sun { display: none; }
+        :root .theme-toggle .fa-moon { display: inline; }
 
         .main { display: flex; min-height: calc(100vh - 60px); }
 
@@ -393,6 +435,10 @@
                 <span>מטפל לכל אחד - CRM</span>
             </div>
             <div class="user-info">
+                <button class="theme-toggle" onclick="toggleTheme()" title="החלף מצב תצוגה">
+                    <i class="fa-solid fa-sun"></i>
+                    <i class="fa-solid fa-moon"></i>
+                </button>
                 <span id="user-email"></span>
                 <button class="btn-logout" onclick="logout()">
                     <i class="fa-solid fa-sign-out-alt"></i> יציאה
@@ -671,6 +717,30 @@
     </style>
 
     <script>
+        // ===================
+        // THEME TOGGLE
+        // ===================
+        function initTheme() {
+            const savedTheme = localStorage.getItem('admin-theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        }
+        initTheme(); // Run immediately
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            if (newTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+
+            localStorage.setItem('admin-theme', newTheme);
+        }
+
         // Supabase Configuration
         const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';

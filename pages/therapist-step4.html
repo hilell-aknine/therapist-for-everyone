@@ -743,12 +743,10 @@
                         therapy_mode: formData.therapy_mode
                     },
 
-                    // Practice info
+                    // Practice info - NEW STRUCTURE
                     practice: {
                         total_patients_estimate: parseInt(formData.total_patients_estimate) || 0,
-                        current_active_patients: parseInt(formData.current_active_patients) || 0,
-                        treatment_methods: formData.treatment_methods || [],
-                        education_types: formData.education_types || []
+                        current_active_patients: parseInt(formData.current_active_patients) || 0
                     },
 
                     // Legal confirmations
@@ -773,10 +771,16 @@
                     city: formData.city || null,
                     birth_date: formData.birth_date || null,
                     gender: formData.gender || null,
-                    specialization: formData.specialization,
+
+                    // NEW: Arrays for specialization and populations
+                    specializations: formData.specialization || [],
+                    target_populations: formData.target_population || [],
+                    academic_degrees: formData.academic_degree || [],
+                    therapy_methods: formData.therapy_methods || [],
+
                     experience_years: experienceYears,
                     license_number: formData.license_number || null,
-                    education: formData.education_details || null,
+                    education_details: formData.education_details || null,
                     works_online: formData.therapy_mode === 'zoom' || formData.therapy_mode === 'hybrid',
                     works_in_person: formData.therapy_mode === 'clinic' || formData.therapy_mode === 'hybrid',
                     available_hours_per_week: Math.ceil(parseInt(formData.monthly_hours || 10) / 4),

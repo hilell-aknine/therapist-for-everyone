@@ -27,7 +27,7 @@ const MARKETING_CONFIG = {
     GA4_ID: 'G-XXXXXXXXXX',  // <-- Replace with your real GA4 ID
 
     // Meta (Facebook) Pixel ID
-    META_PIXEL_ID: '123456789',  // <-- Replace with your real Pixel ID
+    META_PIXEL_ID: '1039436226809281',  // <-- Replace with your real Pixel ID
 
     // Privacy Policy URL
     PRIVACY_POLICY_URL: 'privacy-policy.html',  // Privacy policy page

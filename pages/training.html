@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            /* Brand Colors - from CLAUDE.md */
             --deep-petrol: #003B46;
             --muted-teal: #00606B;
             --dusty-aqua: #2F8592;
@@ -110,24 +109,14 @@
             color: var(--pure-white);
         }
 
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(34, 197, 94, 0.15);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            color: var(--success);
-            margin-bottom: 1.5rem;
-        }
-
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 2.8rem;
             font-weight: 800;
-            margin-bottom: 1rem;
-            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero h1 span {
@@ -138,58 +127,63 @@
 
         .hero-subtitle {
             color: var(--frost-white);
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             max-width: 700px;
-            margin: 0 auto 2.5rem;
+            margin: 0 auto 3rem;
             opacity: 0.9;
         }
 
-        .hero-cta {
+        /* Video Placeholder */
+        .video-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .video-placeholder {
+            background: var(--deep-petrol);
+            border-radius: 20px;
+            aspect-ratio: 16/9;
             display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
+            flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s;
-            border: none;
+            justify-content: center;
+            border: 3px solid var(--gold);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
             cursor: pointer;
-            font-family: inherit;
+            transition: all 0.3s;
         }
 
-        .btn-primary {
+        .video-placeholder:hover {
+            transform: scale(1.02);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+        }
+
+        .play-button {
+            width: 100px;
+            height: 100px;
             background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 40px var(--gold-glow);
+        }
+
+        .play-button i {
+            font-size: 2.5rem;
             color: var(--deep-petrol);
-            box-shadow: 0 4px 20px var(--gold-glow);
+            margin-right: -5px;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 35px var(--gold-glow);
+        .video-placeholder p {
+            color: var(--frost-white);
+            font-size: 1.1rem;
         }
 
-        .btn-secondary {
-            background: transparent;
-            border: 2px solid var(--pure-white);
-            color: var(--pure-white);
-        }
-
-        .btn-secondary:hover {
-            background: var(--pure-white);
-            color: var(--deep-petrol);
-        }
-
-        /* ===== Program Overview ===== */
-        .program {
+        /* ===== What You Get ===== */
+        .what-you-get {
             padding: 5rem 2rem;
             background: var(--frost-white);
         }
@@ -224,92 +218,7 @@
             margin: 0 auto;
         }
 
-        .program-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .program-card {
-            background: var(--pure-white);
-            border: 1px solid rgba(47, 133, 146, 0.2);
-            border-radius: 20px;
-            padding: 2.5rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 59, 70, 0.08);
-        }
-
-        .program-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: var(--gradient-gold);
-        }
-
-        .program-level {
-            display: inline-block;
-            background: rgba(212, 175, 55, 0.15);
-            color: var(--gold);
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .program-card h3 {
-            font-size: 1.6rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .program-card .duration {
-            color: var(--muted-teal);
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .program-card ul {
-            list-style: none;
-            margin-bottom: 1.5rem;
-        }
-
-        .program-card li {
-            padding: 0.5rem 0;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.7rem;
-            color: var(--muted-teal);
-        }
-
-        .program-card li i {
-            color: var(--gold);
-            margin-top: 0.3rem;
-        }
-
-        /* ===== Why Us ===== */
-        .why-us {
-            padding: 5rem 2rem;
-            background: var(--deep-petrol);
-            color: var(--pure-white);
-        }
-
-        .why-us .section-title,
-        .why-us .section-label {
-            color: var(--pure-white);
-        }
-
-        .why-us .section-label {
-            color: var(--gold);
-        }
-
-        .benefits-grid {
+        .features-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
@@ -317,22 +226,25 @@
             margin: 0 auto;
         }
 
-        .benefit-card {
-            text-align: center;
+        .feature-card {
+            background: var(--pure-white);
+            border: 1px solid rgba(47, 133, 146, 0.2);
+            border-radius: 20px;
             padding: 2rem;
-            background: var(--muted-teal);
-            border: 1px solid rgba(47, 133, 146, 0.3);
-            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 59, 70, 0.08);
             transition: all 0.3s;
         }
 
-        .benefit-card:hover {
-            border-color: rgba(212, 175, 55, 0.5);
+        .feature-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 59, 70, 0.12);
+            border-color: var(--gold);
         }
 
-        .benefit-icon {
-            width: 70px; height: 70px;
+        .feature-icon {
+            width: 70px;
+            height: 70px;
             background: rgba(212, 175, 55, 0.15);
             border-radius: 16px;
             display: flex;
@@ -343,175 +255,259 @@
             margin: 0 auto 1rem;
         }
 
-        .benefit-card h4 {
+        .feature-card h3 {
+            font-size: 1.2rem;
             margin-bottom: 0.5rem;
-            font-size: 1.1rem;
+            color: var(--deep-petrol);
+        }
+
+        .feature-card p {
+            color: var(--muted-teal);
+            font-size: 0.95rem;
+        }
+
+        /* ===== Testimonials ===== */
+        .testimonials {
+            padding: 5rem 2rem;
+            background: var(--deep-petrol);
             color: var(--pure-white);
         }
 
-        .benefit-card p {
-            color: var(--frost-white);
-            font-size: 0.9rem;
+        .testimonials .section-title {
+            color: var(--pure-white);
         }
 
-        /* ===== Syllabus ===== */
-        .syllabus {
+        .testimonials .section-label {
+            color: var(--gold);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .testimonial-card {
+            background: var(--muted-teal);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(47, 133, 146, 0.3);
+        }
+
+        .testimonial-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--dusty-aqua);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--frost-white);
+            border: 3px solid var(--gold);
+        }
+
+        .testimonial-stars {
+            color: var(--gold);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-text {
+            color: var(--frost-white);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .testimonial-name {
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* ===== FAQ ===== */
+        .faq {
             padding: 5rem 2rem;
             background: var(--frost-white);
         }
 
-        .syllabus-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            max-width: 900px;
+        .faq-list {
+            max-width: 800px;
             margin: 0 auto;
         }
 
-        .syllabus-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1.5rem;
+        .faq-item {
             background: var(--pure-white);
-            border-radius: 12px;
             border: 1px solid rgba(47, 133, 146, 0.2);
-            box-shadow: 0 3px 10px rgba(0, 59, 70, 0.05);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: 0 3px 15px rgba(0, 59, 70, 0.05);
         }
 
-        .syllabus-num {
-            width: 40px; height: 40px;
-            background: var(--gradient-gold);
-            border-radius: 10px;
+        .faq-question {
+            padding: 1.5rem 2rem;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-weight: 700;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
             color: var(--deep-petrol);
-            flex-shrink: 0;
+            transition: background 0.3s;
         }
 
-        .syllabus-item h4 {
-            margin-bottom: 0.3rem;
-            color: var(--deep-petrol);
+        .faq-question:hover {
+            background: rgba(47, 133, 146, 0.05);
         }
 
-        .syllabus-item p {
+        .faq-question i {
+            color: var(--gold);
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 2rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 2rem 1.5rem;
+            max-height: 300px;
+        }
+
+        .faq-answer p {
             color: var(--muted-teal);
-            font-size: 0.9rem;
+            line-height: 1.8;
         }
 
-        /* ===== Pricing ===== */
-        .pricing {
+        /* ===== Registration Form ===== */
+        .registration {
             padding: 5rem 2rem;
             background: var(--muted-teal);
         }
 
-        .pricing .section-title,
-        .pricing .section-label {
+        .registration .section-title,
+        .registration .section-label {
             color: var(--pure-white);
         }
 
-        .pricing .section-label {
+        .registration .section-label {
             color: var(--gold);
         }
 
-        .pricing-box {
-            max-width: 600px;
+        .registration-box {
+            max-width: 500px;
             margin: 0 auto;
             background: var(--pure-white);
-            border: 2px solid var(--gold);
             border-radius: 24px;
             padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            border: 2px solid var(--gold);
+        }
+
+        .price-display {
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(47, 133, 146, 0.2);
         }
 
-        .pricing-box::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 5px;
-            background: var(--gradient-gold);
+        .price-label {
+            color: var(--muted-teal);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
         }
 
-        .pricing-badge {
-            display: inline-block;
-            background: var(--gradient-gold);
-            color: var(--deep-petrol);
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-
-        .pricing-box h3 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: var(--deep-petrol);
-        }
-
-        .price {
+        .price-amount {
             font-size: 3.5rem;
             font-weight: 800;
             color: var(--gold);
-            margin-bottom: 0.5rem;
         }
 
         .price-note {
             color: var(--muted-teal);
-            font-size: 0.95rem;
-            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
         }
 
-        .pricing-features {
-            text-align: right;
-            margin-bottom: 2rem;
-            list-style: none;
+        .form-group {
+            margin-bottom: 1.5rem;
         }
 
-        .pricing-features li {
-            display: flex;
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--deep-petrol);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid rgba(47, 133, 146, 0.3);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
             align-items: center;
-            gap: 0.7rem;
-            padding: 0.6rem 0;
-            color: var(--muted-teal);
+            gap: 0.5rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
         }
 
-        .pricing-features li i {
-            color: var(--success);
+        .btn-primary {
+            background: var(--gradient-gold);
+            color: var(--deep-petrol);
+            box-shadow: 0 4px 20px var(--gold-glow);
         }
 
-        .pricing-box .btn {
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 35px var(--gold-glow);
+        }
+
+        .submit-btn {
             width: 100%;
             justify-content: center;
-            padding: 1.1rem;
+            padding: 1.2rem;
             font-size: 1.1rem;
         }
 
-        /* ===== CTA ===== */
-        .cta {
-            padding: 5rem 2rem;
-            background: var(--deep-petrol);
+        .form-note {
             text-align: center;
-            color: var(--pure-white);
-        }
-
-        .cta h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: var(--pure-white);
-        }
-
-        .cta h2 span { color: var(--gold); }
-
-        .cta p {
-            color: var(--frost-white);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto 2rem;
+            margin-top: 1rem;
+            color: var(--muted-teal);
+            font-size: 0.85rem;
         }
 
         /* ===== Footer ===== */
@@ -563,6 +559,7 @@
             display: none;
         }
 
+        /* ===== Responsive ===== */
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -658,12 +655,23 @@
 
             .nav-cta { display: none; }
 
-            .hero h1 { font-size: 2.3rem; }
-            .hero-subtitle { font-size: 1.1rem; }
-            .program-grid { grid-template-columns: 1fr; }
-            .benefits-grid { grid-template-columns: 1fr; }
-            .syllabus-grid { grid-template-columns: 1fr; }
-            .section-title { font-size: 2rem; }
+            .hero { padding: 8rem 1.5rem 4rem; }
+            .hero h1 { font-size: 1.8rem; }
+            .hero-subtitle { font-size: 1rem; }
+
+            .play-button {
+                width: 70px;
+                height: 70px;
+            }
+
+            .play-button i { font-size: 1.8rem; }
+
+            .features-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .testimonials-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .section-title { font-size: 1.8rem; }
+
+            .registration-box { padding: 2rem 1.5rem; }
+            .price-amount { font-size: 2.5rem; }
         }
     </style>
 </head>
@@ -681,7 +689,7 @@
             <li><a href="training.html">הכשרת מטפלים</a></li>
             <li><a href="project-lobby.html">המיזם החברתי</a></li>
             <div class="mobile-cta-group">
-                <a href="#pricing" class="mobile-cta primary" onclick="closeMobileMenu()">
+                <a href="#registration" class="mobile-cta primary" onclick="closeMobileMenu()">
                     <i class="fa-solid fa-rocket"></i>
                     להרשמה עכשיו
                 </a>
@@ -691,7 +699,7 @@
                 </a>
             </div>
         </ul>
-        <a href="#pricing" class="nav-cta">להרשמה להכשרה</a>
+        <a href="#registration" class="nav-cta">להרשמה להכשרה</a>
         <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
             <i class="fa-solid fa-bars"></i>
         </button>
@@ -702,230 +710,215 @@
 
     <!-- Hero -->
     <section class="hero">
-        <div class="hero-badge">
-            <i class="fa-solid fa-certificate"></i>
-            הרשמה למחזור הקרוב פתוחה
-        </div>
-        <h1>הכשרת מטפלים מקצועית<br><span>NLP Practitioner & Master</span></h1>
+        <h1>רוצה להפוך ל<span>מטפל מוסמך</span><br>שמתפרנס מלעזור ולרפא אנשים אחרים?</h1>
         <p class="hero-subtitle">
-            תוכנית הכשרה שנתית מקיפה עם הסמכה בינלאומית, ליווי אישי והתנסות מעשית מודרכת
+            תוכנית הכשרה שנתית מקיפה עם הסמכה בינלאומית, ליווי אישי וכלים מעשיים להתחיל לטפל
         </p>
-        <div class="hero-cta">
-            <a href="#pricing" class="btn btn-primary">
-                <i class="fa-solid fa-rocket"></i>
-                להרשמה עכשיו
-            </a>
-            <a href="#program" class="btn btn-secondary">
-                <i class="fa-solid fa-info-circle"></i>
-                פרטי התוכנית
-            </a>
-        </div>
-    </section>
 
-    <!-- Program Overview -->
-    <section class="program" id="program">
-        <div class="section-header">
-            <div class="section-label">
-                <i class="fa-solid fa-graduation-cap"></i>
-                מבנה ההכשרה
-            </div>
-            <h2 class="section-title">שני שלבים להסמכה מלאה</h2>
-            <p class="section-subtitle">
-                תוכנית שנתית המשלבת לימוד תיאורטי עמוק עם התנסות מעשית מודרכת
-            </p>
-        </div>
-
-        <div class="program-grid">
-            <div class="program-card">
-                <span class="program-level">שלב ראשון</span>
-                <h3>NLP Practitioner</h3>
-                <p class="duration"><i class="fa-solid fa-clock"></i> 120 שעות | 6 חודשים</p>
-                <ul>
-                    <li><i class="fa-solid fa-check"></i> יסודות ה-NLP ומודל התקשורת</li>
-                    <li><i class="fa-solid fa-check"></i> טכניקות שינוי אמונות מגבילות</li>
-                    <li><i class="fa-solid fa-check"></i> עיגונים ומצבי משאבים</li>
-                    <li><i class="fa-solid fa-check"></i> ריפריימינג ושינוי פרספקטיבה</li>
-                    <li><i class="fa-solid fa-check"></i> עבודה עם תת-אישיויות</li>
-                    <li><i class="fa-solid fa-check"></i> התנסות מעשית מודרכת</li>
-                </ul>
-            </div>
-
-            <div class="program-card">
-                <span class="program-level">שלב שני</span>
-                <h3>Master Practitioner</h3>
-                <p class="duration"><i class="fa-solid fa-clock"></i> 180 שעות | 6 חודשים</p>
-                <ul>
-                    <li><i class="fa-solid fa-check"></i> טכניקות מתקדמות לטיפול בטראומה</li>
-                    <li><i class="fa-solid fa-check"></i> עבודה עם קו הזמן</li>
-                    <li><i class="fa-solid fa-check"></i> מטא-תוכניות והבנת דפוסים</li>
-                    <li><i class="fa-solid fa-check"></i> מודלינג והעתקת מיומנויות</li>
-                    <li><i class="fa-solid fa-check"></i> סופרוויז'ן ופיקוח מקצועי</li>
-                    <li><i class="fa-solid fa-check"></i> התמחות עם מטופלים אמיתיים</li>
-                </ul>
+        <!-- Video Placeholder -->
+        <div class="video-container">
+            <div class="video-placeholder" onclick="playVideo()">
+                <div class="play-button">
+                    <i class="fa-solid fa-play"></i>
+                </div>
+                <p>צפו בסרטון ההסבר</p>
             </div>
         </div>
     </section>
 
-    <!-- Why Us -->
-    <section class="why-us">
+    <!-- What You Get -->
+    <section class="what-you-get">
         <div class="section-header">
             <div class="section-label">
-                <i class="fa-solid fa-star"></i>
-                למה ללמוד אצלנו
+                <i class="fa-solid fa-gift"></i>
+                מה כלול בתוכנית
             </div>
-            <h2 class="section-title">מה מייחד אותנו?</h2>
+            <h2 class="section-title">מה אתה מקבל?</h2>
+            <p class="section-subtitle">תוכנית הכשרה מקיפה ל-12 חודשים שתהפוך אותך למטפל מקצועי</p>
         </div>
 
-        <div class="benefits-grid">
-            <div class="benefit-card">
-                <div class="benefit-icon"><i class="fa-solid fa-user-tie"></i></div>
-                <h4>מרצים מומחים</h4>
-                <p>צוות מדריכים עם ניסיון של שנים בהכשרה ובטיפול קליני</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-infinity"></i></div>
+                <h3>גישה לשנה לכל התכנים</h3>
+                <p>גישה מלאה לכל חומרי הלימוד, סרטונים והקלטות למשך שנה שלמה</p>
             </div>
-            <div class="benefit-card">
-                <div class="benefit-icon"><i class="fa-solid fa-users"></i></div>
-                <h4>קבוצות קטנות</h4>
-                <p>עד 15 משתתפים בקבוצה לתשומת לב אישית מקסימלית</p>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-brain"></i></div>
+                <h3>תכני NLP מקיפים</h3>
+                <p>כל הטכניקות והכלים שתצטרך כדי להתחיל לטפל באנשים</p>
             </div>
-            <div class="benefit-card">
-                <div class="benefit-icon"><i class="fa-solid fa-certificate"></i></div>
-                <h4>הסמכה בינלאומית</h4>
-                <p>תעודה מוכרת בינלאומית בסטנדרטים הגבוהים ביותר</p>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-video"></i></div>
+                <h3>2 מפגשי זום בחודש</h3>
+                <p>מפגשים חיים עם תרגול, שאלות ותשובות וליווי צמוד</p>
             </div>
-            <div class="benefit-card">
-                <div class="benefit-icon"><i class="fa-solid fa-hands-helping"></i></div>
-                <h4>ליווי אישי</h4>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-users"></i></div>
+                <h3>מפגש פרונטלי חודשי</h3>
+                <p>מפגש פיזי אחד בחודש לתרגול מעשי ויצירת קשרים</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-certificate"></i></div>
+                <h3>2 הסמכות בינלאומיות</h3>
+                <p>NLP Practitioner + Master Practitioner עם תעודות מוכרות</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-people-group"></i></div>
+                <h3>קהילת מטפלים תומכת</h3>
+                <p>גישה לקהילת בוגרים פעילה לנטוורקינג ותמיכה מקצועית</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
+                <h3>כלי AI לתרגול</h3>
+                <p>גישה לכלי בינה מלאכותית מתקדמים לתרגול ושיפור המיומנויות</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-hands-helping"></i></div>
+                <h3>ליווי אישי</h3>
                 <p>מנטורינג אישי לאורך כל ההכשרה ותמיכה בתחילת הקריירה</p>
             </div>
-            <div class="benefit-card">
-                <div class="benefit-icon"><i class="fa-solid fa-briefcase"></i></div>
-                <h4>התמחות מעשית</h4>
-                <p>עבודה עם מטופלים אמיתיים תחת סופרוויז'ן מקצועי</p>
-            </div>
-            <div class="benefit-card">
-                <div class="benefit-icon"><i class="fa-solid fa-heart"></i></div>
-                <h4>השפעה חברתית</h4>
-                <p>אפשרות להתנדב במיזם החברתי ולעזור לאנשים שזקוקים</p>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-heart"></i></div>
+                <h3>התנדבות במיזם החברתי</h3>
+                <p>אפשרות לצבור ניסיון מעשי דרך התנדבות במיזם שלנו</p>
             </div>
         </div>
     </section>
 
-    <!-- Syllabus Highlights -->
-    <section class="syllabus">
+    <!-- Testimonials -->
+    <section class="testimonials">
         <div class="section-header">
             <div class="section-label">
-                <i class="fa-solid fa-book-open"></i>
-                תכני הלימוד
+                <i class="fa-solid fa-quote-right"></i>
+                מה אומרים הבוגרים
             </div>
-            <h2 class="section-title">מה תלמדו?</h2>
+            <h2 class="section-title">סיפורי הצלחה</h2>
         </div>
 
-        <div class="syllabus-grid">
-            <div class="syllabus-item">
-                <div class="syllabus-num">1</div>
-                <div>
-                    <h4>יסודות NLP</h4>
-                    <p>מודל התקשורת, מערכות ייצוג, ראפור ובניית אמון</p>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="testimonial-stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <p class="testimonial-text">"ההכשרה שינתה לי את החיים. תוך כמה חודשים כבר התחלתי לקבל מטופלים והיום אני מתפרנס מזה בצורה מלאה."</p>
+                <div class="testimonial-name">יוסי כ.</div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="testimonial-stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <p class="testimonial-text">"הגישה המעשית של התוכנית מדהימה. לא רק למדתי תיאוריה, אלא יצאתי עם כלים אמיתיים שעובדים."</p>
+                <div class="testimonial-name">מיכל ש.</div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="testimonial-stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <p class="testimonial-text">"הליווי האישי והקהילה התומכת עשו את כל ההבדל. תמיד היה מישהו לענות על שאלות ולעזור."</p>
+                <div class="testimonial-name">דני ר.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+        <div class="section-header">
+            <div class="section-label">
+                <i class="fa-solid fa-circle-question"></i>
+                שאלות נפוצות
+            </div>
+            <h2 class="section-title">יש לך שאלות?</h2>
+        </div>
+
+        <div class="faq-list">
+            <div class="faq-item active">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    אין לי ניסיון קודם בטיפול - זה מתאים לי?
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>בהחלט! התוכנית מתחילה מהיסודות ומתאימה גם למי שאין לו רקע קודם. אנחנו מלווים אותך צעד אחר צעד, מהמושגים הבסיסיים ועד לטכניקות מתקדמות. רבים מהבוגרים המצליחים שלנו הגיעו ללא ניסיון קודם.</p>
                 </div>
             </div>
-            <div class="syllabus-item">
-                <div class="syllabus-num">2</div>
-                <div>
-                    <h4>שפת הגוף ומטא-מודל</h4>
-                    <p>קריאת שפת גוף, זיהוי דפוסי שפה, שאלות מעמיקות</p>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    האם אוכל לעבוד במקביל ללימודים?
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>כן, התוכנית תוכננה במיוחד לאנשים עובדים. כל התכנים זמינים להקלטה, המפגשים בזום בערבים, והמפגש הפרונטלי פעם בחודש. אתה יכול ללמוד בקצב שלך ובזמנים שנוחים לך.</p>
                 </div>
             </div>
-            <div class="syllabus-item">
-                <div class="syllabus-num">3</div>
-                <div>
-                    <h4>טכניקות שינוי</h4>
-                    <p>עיגונים, ריפריימינג, סוויש, טיפול בפוביות</p>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    מה קורה אם אני לא מרוצה מהתוכנית?
+                    <i class="fa-solid fa-chevron-down"></i>
                 </div>
-            </div>
-            <div class="syllabus-item">
-                <div class="syllabus-num">4</div>
-                <div>
-                    <h4>עבודה עם אמונות</h4>
-                    <p>זיהוי ושינוי אמונות מגבילות, יצירת אמונות מעצימות</p>
-                </div>
-            </div>
-            <div class="syllabus-item">
-                <div class="syllabus-num">5</div>
-                <div>
-                    <h4>טיפול בטראומה</h4>
-                    <p>טכניקות מתקדמות לעבודה עם טראומה ופוסט-טראומה</p>
-                </div>
-            </div>
-            <div class="syllabus-item">
-                <div class="syllabus-num">6</div>
-                <div>
-                    <h4>קו הזמן</h4>
-                    <p>עבודה עם העבר, ההווה והעתיד לשינוי עמוק</p>
-                </div>
-            </div>
-            <div class="syllabus-item">
-                <div class="syllabus-num">7</div>
-                <div>
-                    <h4>מטא-תוכניות</h4>
-                    <p>הבנת דפוסי חשיבה והתאמת הטיפול ללקוח</p>
-                </div>
-            </div>
-            <div class="syllabus-item">
-                <div class="syllabus-num">8</div>
-                <div>
-                    <h4>אתיקה והתמחות</h4>
-                    <p>קוד אתי, גבולות מקצועיים, סופרוויז'ן</p>
+                <div class="faq-answer">
+                    <p>אנחנו מאמינים בתוכנית שלנו ורוצים שתצליח. אם בחודש הראשון תרגיש שזה לא מתאים לך, נחזיר לך את הכסף במלואו. בנוסף, צוות התמיכה שלנו זמין לכל שאלה או בעיה לאורך כל הדרך.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Pricing -->
-    <section class="pricing" id="pricing">
+    <!-- Registration Form -->
+    <section class="registration" id="registration">
         <div class="section-header">
             <div class="section-label">
-                <i class="fa-solid fa-tag"></i>
-                מחיר והרשמה
-            </div>
-            <h2 class="section-title">השקעה בעתיד שלך</h2>
-        </div>
-
-        <div class="pricing-box">
-            <span class="pricing-badge">מסלול מלא - Practitioner + Master</span>
-            <h3>הכשרת מטפלים שנתית</h3>
-            <div class="price">₪18,000</div>
-            <p class="price-note">אפשרות לתשלומים | מלגות למתאימים</p>
-
-            <ul class="pricing-features">
-                <li><i class="fa-solid fa-check-circle"></i> 300 שעות הכשרה (Practitioner + Master)</li>
-                <li><i class="fa-solid fa-check-circle"></i> הסמכה בינלאומית מוכרת</li>
-                <li><i class="fa-solid fa-check-circle"></i> חומרי לימוד מלאים</li>
-                <li><i class="fa-solid fa-check-circle"></i> ליווי אישי ומנטורינג</li>
-                <li><i class="fa-solid fa-check-circle"></i> התמחות מעשית מודרכת</li>
-                <li><i class="fa-solid fa-check-circle"></i> גישה לקהילת הבוגרים</li>
-                <li><i class="fa-solid fa-check-circle"></i> אפשרות להתנדב במיזם החברתי</li>
-            </ul>
-
-            <a href="#" class="btn btn-primary">
                 <i class="fa-solid fa-rocket"></i>
-                להרשמה ופרטים נוספים
-            </a>
+                הרשמה להכשרה
+            </div>
+            <h2 class="section-title">מוכן להתחיל?</h2>
         </div>
-    </section>
 
-    <!-- CTA -->
-    <section class="cta">
-        <h2>יש לך <span>שאלות?</span></h2>
-        <p>נשמח לדבר איתך ולספר עוד על התוכנית. השאירו פרטים ונחזור אליכם.</p>
-        <div class="hero-cta">
-            <a href="#" class="btn btn-primary">
-                <i class="fa-solid fa-phone"></i>
-                לשיחת ייעוץ חינם
-            </a>
-            <a href="../index.html" class="btn btn-secondary">
-                <i class="fa-solid fa-home"></i>
-                חזרה לדף הבית
-            </a>
+        <div class="registration-box">
+            <div class="price-display">
+                <p class="price-label">מחיר התוכנית המלאה</p>
+                <div class="price-amount">₪8,500</div>
+                <p class="price-note">אפשרות לתשלומים נוחים</p>
+            </div>
+
+            <form id="registrationForm" onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <label for="name">שם מלא</label>
+                    <input type="text" id="name" name="name" placeholder="הכנס את שמך המלא" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">טלפון</label>
+                    <input type="tel" id="phone" name="phone" placeholder="050-0000000" required>
+                </div>
+                <button type="submit" class="btn btn-primary submit-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    שלח פרטים
+                </button>
+            </form>
+            <p class="form-note">נחזור אליך תוך 24 שעות עם כל הפרטים</p>
         </div>
     </section>
 
@@ -944,16 +937,6 @@
     <script src="../js/marketing-tools.js"></script>
 
     <script>
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 50) {
-                navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.5)';
-            } else {
-                navbar.style.boxShadow = 'none';
-            }
-        });
-
         // Mobile menu toggle
         function toggleMobileMenu() {
             const navLinks = document.getElementById('navLinks');
@@ -979,6 +962,45 @@
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeMobileMenu();
+        });
+
+        // FAQ toggle
+        function toggleFaq(element) {
+            const item = element.parentElement;
+            const allItems = document.querySelectorAll('.faq-item');
+
+            allItems.forEach(i => {
+                if (i !== item) i.classList.remove('active');
+            });
+
+            item.classList.toggle('active');
+        }
+
+        // Video placeholder
+        function playVideo() {
+            alert('הסרטון יעלה בקרוב!');
+        }
+
+        // Form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+
+            // Here you would typically send to your backend
+            console.log('Form submitted:', { name, phone });
+            alert('תודה! נחזור אליך בהקדם.');
+            event.target.reset();
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.5)';
+            } else {
+                navbar.style.boxShadow = 'none';
+            }
         });
     </script>
 </body>

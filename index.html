@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מטפל לכל אחד - בית הספר להכשרת מטפלים & מיזם חברתי</title>
-    <meta name="description" content="בית הספר להכשרת מטפלים מקצועיים, קורסי NLP בחינם, והמיזם החברתי 'מטפל לכל אחד'">
+    <meta name="description" content="המקום בו טיפול פוגש שליחות - בית הספר להכשרת מטפלים והמיזם החברתי להנגשת הטיפול בישראל">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            /* Brand Colors */
-            --deep-petrol: #003B46;
-            --muted-teal: #00606B;
-            --dusty-aqua: #2F8592;
-            --frost-white: #E8F1F2;
-            --pure-white: #FFFFFF;
+            --bg-dark: #0f1419;
+            --bg-card: #1a1f2e;
+            --bg-card-hover: #242b3d;
+            --border: #2d3548;
+            --text: #ffffff;
+            --text-secondary: #a0aab5;
             --gold: #D4AF37;
             --gold-light: #e6c65a;
             --gold-glow: rgba(212, 175, 55, 0.3);
-            --gradient-main: radial-gradient(ellipse at 30% 20%, #2F8592 0%, #00606B 40%, #003B46 100%);
+            --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,8 +26,8 @@
 
         body {
             font-family: 'Heebo', sans-serif;
-            background: var(--deep-petrol);
-            color: var(--pure-white);
+            background: var(--bg-dark);
+            color: var(--text);
             line-height: 1.7;
             overflow-x: hidden;
         }
@@ -41,15 +41,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 59, 70, 0.95);
+            background: rgba(15, 20, 25, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(47, 133, 146, 0.3);
+            border-bottom: 1px solid var(--border);
             transition: all 0.3s ease;
         }
 
         .navbar.scrolled {
             padding: 0.7rem 2rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
         }
 
         .logo {
@@ -57,18 +57,18 @@
             align-items: center;
             gap: 0.7rem;
             text-decoration: none;
-            color: var(--pure-white);
+            color: var(--text);
         }
 
         .logo-icon {
             width: 45px; height: 45px;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            background: var(--gradient-gold);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.3rem;
-            color: var(--deep-petrol);
+            color: var(--bg-dark);
             box-shadow: 0 4px 15px var(--gold-glow);
         }
 
@@ -77,15 +77,15 @@
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 1.8rem;
             list-style: none;
             align-items: center;
         }
 
         .nav-links a {
-            color: var(--frost-white);
+            color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
             transition: color 0.3s;
             position: relative;
@@ -105,26 +105,27 @@
         .nav-links a:hover::after { width: 100%; }
 
         .nav-cta {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            color: var(--deep-petrol);
+            background: var(--gradient-gold);
+            color: var(--bg-dark);
             padding: 0.6rem 1.4rem;
             border-radius: 25px;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.3s;
             box-shadow: 0 4px 15px var(--gold-glow);
+            font-size: 0.9rem;
         }
 
         .nav-cta:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--gold-glow);
+            box-shadow: 0 6px 25px var(--gold-glow);
         }
 
         .mobile-menu-btn {
             display: none;
             background: none;
             border: none;
-            color: var(--pure-white);
+            color: var(--text);
             font-size: 1.5rem;
             cursor: pointer;
         }
@@ -137,7 +138,10 @@
             justify-content: center;
             text-align: center;
             padding: 8rem 2rem 4rem;
-            background: var(--gradient-main);
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+                var(--bg-dark);
             position: relative;
             overflow: hidden;
         }
@@ -147,15 +151,15 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 800px; height: 800px;
+            width: 900px; height: 900px;
             background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
-            opacity: 0.4;
-            animation: pulse 8s ease-in-out infinite;
+            opacity: 0.25;
+            animation: pulse 10s ease-in-out infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
-            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.3; }
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.25; }
+            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.15; }
         }
 
         .hero-content {
@@ -168,9 +172,9 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(212, 175, 55, 0.2);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            padding: 0.5rem 1.2rem;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 0.6rem 1.4rem;
             border-radius: 50px;
             font-size: 0.9rem;
             color: var(--gold);
@@ -184,15 +188,18 @@
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 3.8rem;
             font-weight: 800;
-            line-height: 1.2;
+            line-height: 1.15;
             margin-bottom: 1.5rem;
             animation: fadeInUp 0.8s ease-out 0.2s both;
         }
 
-        .hero h1 span {
-            color: var(--gold);
+        .hero h1 .highlight {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         @keyframes fadeInUp {
@@ -201,11 +208,11 @@
         }
 
         .hero-subtitle {
-            font-size: 1.3rem;
-            color: var(--frost-white);
+            font-size: 1.35rem;
+            color: var(--text-secondary);
             margin-bottom: 3rem;
-            opacity: 0.9;
             animation: fadeInUp 0.8s ease-out 0.4s both;
+            line-height: 1.8;
         }
 
         .hero-cta {
@@ -232,32 +239,31 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            color: var(--deep-petrol);
+            background: var(--gradient-gold);
+            color: var(--bg-dark);
             box-shadow: 0 4px 20px var(--gold-glow);
         }
 
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 30px var(--gold-glow);
+            box-shadow: 0 8px 35px var(--gold-glow);
         }
 
         .btn-secondary {
             background: transparent;
-            border: 2px solid var(--pure-white);
-            color: var(--pure-white);
+            border: 2px solid var(--gold);
+            color: var(--gold);
         }
 
         .btn-secondary:hover {
-            background: var(--pure-white);
-            color: var(--deep-petrol);
+            background: var(--gold);
+            color: var(--bg-dark);
         }
 
         /* ===== Pillars Section ===== */
         .pillars {
-            padding: 6rem 2rem;
-            background: var(--frost-white);
-            color: var(--deep-petrol);
+            padding: 7rem 2rem;
+            background: var(--bg-card);
         }
 
         .section-header {
@@ -269,25 +275,24 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--dusty-aqua);
-            font-size: 0.9rem;
+            color: var(--gold);
+            font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 1rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
 
         .section-title {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            color: var(--deep-petrol);
         }
 
         .section-subtitle {
-            color: var(--muted-teal);
-            font-size: 1.1rem;
-            max-width: 600px;
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            max-width: 650px;
             margin: 0 auto;
         }
 
@@ -300,15 +305,14 @@
         }
 
         .pillar-card {
-            background: var(--pure-white);
-            border: 1px solid rgba(47, 133, 146, 0.2);
-            border-radius: 20px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             padding: 2.5rem;
             text-align: center;
             transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 59, 70, 0.08);
         }
 
         .pillar-card::before {
@@ -316,14 +320,15 @@
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--dusty-aqua) 0%, var(--gold) 100%);
+            background: var(--gradient-gold);
             transform: scaleX(0);
             transition: transform 0.4s ease;
         }
 
         .pillar-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 59, 70, 0.15);
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
         }
 
         .pillar-card:hover::before {
@@ -331,128 +336,131 @@
         }
 
         .pillar-icon {
-            width: 80px; height: 80px;
-            background: linear-gradient(135deg, var(--dusty-aqua) 0%, var(--muted-teal) 100%);
-            border-radius: 20px;
+            width: 90px; height: 90px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.25);
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            color: var(--pure-white);
+            font-size: 2.2rem;
+            color: var(--gold);
             margin: 0 auto 1.5rem;
-            transition: all 0.3s;
+            transition: all 0.4s;
         }
 
         .pillar-card:hover .pillar-icon {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            transform: scale(1.1);
+            background: var(--gradient-gold);
+            color: var(--bg-dark);
+            border-color: transparent;
+            transform: scale(1.1) rotate(5deg);
         }
 
         .pillar-card h3 {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            color: var(--deep-petrol);
         }
 
         .pillar-card p {
-            color: var(--muted-teal);
+            color: var(--text-secondary);
             font-size: 0.95rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             line-height: 1.8;
         }
 
         .pillar-card .btn {
             width: 100%;
             justify-content: center;
-            background: transparent;
-            border: 2px solid var(--dusty-aqua);
-            color: var(--dusty-aqua);
+            padding: 0.9rem 1.5rem;
+            font-size: 0.95rem;
         }
 
-        .pillar-card .btn:hover {
-            background: var(--dusty-aqua);
-            color: var(--pure-white);
+        /* ===== About Section ===== */
+        .about {
+            padding: 7rem 2rem;
+            background: var(--bg-dark);
         }
 
-        /* ===== Features Section ===== */
-        .features {
-            padding: 6rem 2rem;
-            background: var(--muted-teal);
-        }
-
-        .features .section-title { color: var(--pure-white); }
-        .features .section-label { color: var(--gold); }
-
-        .features-grid {
+        .about-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2rem;
-            max-width: 1200px;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 1100px;
             margin: 0 auto;
-        }
-
-        .feature-item {
-            text-align: center;
-            padding: 2rem 1rem;
-        }
-
-        .feature-icon {
-            width: 60px; height: 60px;
-            background: rgba(212, 175, 55, 0.2);
-            border-radius: 15px;
-            display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
+        }
+
+        .about-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-content h2 span { color: var(--gold); }
+
+        .about-content p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+            line-height: 1.9;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-item .number {
+            font-size: 2.5rem;
+            font-weight: 800;
             color: var(--gold);
-            margin: 0 auto 1rem;
         }
 
-        .feature-item h4 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: var(--pure-white);
-        }
-
-        .feature-item p {
-            color: var(--frost-white);
+        .stat-item .label {
+            color: var(--text-secondary);
             font-size: 0.9rem;
-            opacity: 0.85;
         }
 
         /* ===== CTA Section ===== */
         .cta-section {
-            padding: 6rem 2rem;
-            background: var(--gradient-main);
+            padding: 7rem 2rem;
+            background:
+                radial-gradient(ellipse at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 60%),
+                var(--bg-card);
             text-align: center;
         }
 
         .cta-box {
-            max-width: 700px;
+            max-width: 750px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 4rem 3rem;
         }
 
         .cta-box h2 {
-            font-size: 2rem;
+            font-size: 2.5rem;
             margin-bottom: 1rem;
         }
 
+        .cta-box h2 span { color: var(--gold); }
+
         .cta-box p {
-            color: var(--frost-white);
-            margin-bottom: 2rem;
-            opacity: 0.9;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
         }
 
         /* ===== Footer ===== */
         .footer {
-            background: var(--deep-petrol);
-            border-top: 1px solid rgba(47, 133, 146, 0.3);
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border);
             padding: 4rem 2rem 2rem;
         }
 
@@ -465,10 +473,9 @@
         }
 
         .footer-brand p {
-            color: var(--frost-white);
+            color: var(--text-secondary);
             margin-top: 1rem;
             font-size: 0.9rem;
-            opacity: 0.8;
         }
 
         .footer-links h4 {
@@ -480,35 +487,31 @@
         .footer-links ul { list-style: none; }
 
         .footer-links a {
-            color: var(--frost-white);
+            color: var(--text-secondary);
             text-decoration: none;
             font-size: 0.9rem;
             display: block;
             padding: 0.3rem 0;
-            opacity: 0.8;
-            transition: all 0.3s;
+            transition: color 0.3s;
         }
 
-        .footer-links a:hover {
-            color: var(--gold);
-            opacity: 1;
-        }
+        .footer-links a:hover { color: var(--gold); }
 
         .footer-bottom {
             max-width: 1200px;
             margin: 3rem auto 0;
             padding-top: 2rem;
-            border-top: 1px solid rgba(47, 133, 146, 0.3);
+            border-top: 1px solid var(--border);
             text-align: center;
-            color: var(--frost-white);
+            color: var(--text-secondary);
             font-size: 0.85rem;
-            opacity: 0.7;
         }
 
         /* ===== Mobile Responsive ===== */
         @media (max-width: 1024px) {
-            .pillars-grid { grid-template-columns: repeat(2, 1fr); }
-            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .pillars-grid { grid-template-columns: 1fr; max-width: 500px; }
+            .about-grid { grid-template-columns: 1fr; }
+            .about-stats { grid-template-columns: repeat(3, 1fr); }
             .footer-content { grid-template-columns: 1fr 1fr; }
         }
 
@@ -517,25 +520,24 @@
                 display: none;
                 position: absolute;
                 top: 100%; right: 0; left: 0;
-                background: rgba(0, 59, 70, 0.98);
+                background: rgba(15, 20, 25, 0.98);
                 flex-direction: column;
                 padding: 2rem;
                 gap: 1rem;
-                border-bottom: 1px solid rgba(47, 133, 146, 0.3);
+                border-bottom: 1px solid var(--border);
             }
 
             .nav-links.active { display: flex; }
             .mobile-menu-btn { display: block; }
+            .nav-cta { display: none; }
 
-            .hero h1 { font-size: 2.2rem; }
+            .hero { padding: 7rem 1.5rem 3rem; }
+            .hero h1 { font-size: 2.4rem; }
             .hero-subtitle { font-size: 1.1rem; }
 
-            .pillars-grid { grid-template-columns: 1fr; }
-            .features-grid { grid-template-columns: 1fr; }
+            .section-title { font-size: 2rem; }
+            .about-stats { grid-template-columns: 1fr; }
             .footer-content { grid-template-columns: 1fr; text-align: center; }
-
-            .section-title { font-size: 1.8rem; }
-            .cta-box { padding: 2rem 1.5rem; }
         }
     </style>
 </head>
@@ -543,22 +545,20 @@
     <!-- Navbar -->
     <nav class="navbar">
         <a href="index.html" class="logo">
-            <div class="logo-icon">
-                <i class="fa-solid fa-heart-pulse"></i>
-            </div>
+            <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
             <div class="logo-text">מטפל <span>לכל אחד</span></div>
         </a>
 
         <ul class="nav-links">
             <li><a href="index.html">דף הבית</a></li>
             <li><a href="pages/about.html">מי אנחנו</a></li>
-            <li><a href="pages/free-portal.html">קורסים בחינם</a></li>
+            <li><a href="pages/free-portal.html">קורס חינמי</a></li>
             <li><a href="pages/training.html">הכשרת מטפלים</a></li>
             <li><a href="pages/project-lobby.html">המיזם החברתי</a></li>
-            <li><a href="#contact">יצירת קשר</a></li>
+            <li><a href="#contact">צור קשר</a></li>
         </ul>
 
-        <a href="pages/project-lobby.html" class="nav-cta">אני רוצה מטפל</a>
+        <a href="pages/training.html" class="nav-cta">להרשמה להכשרה</a>
 
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
             <i class="fa-solid fa-bars"></i>
@@ -570,16 +570,16 @@
         <div class="hero-content">
             <div class="hero-badge">
                 <i class="fa-solid fa-sparkles"></i>
-                בית הספר להכשרת מטפלים
+                בית הספר להכשרת מטפלים & מיזם חברתי
             </div>
-            <h1>בית הספר להכשרת מטפלים<br><span>& מיזם חברתי</span></h1>
+            <h1>המקום בו טיפול<br><span class="highlight">פוגש שליחות</span></h1>
             <p class="hero-subtitle">
-                ידע מקצועי, הכשרות מוסמכות, והמיזם החברתי שמחבר בין מטפלים מתנדבים לאנשים שזקוקים לעזרה
+                בית הספר להכשרת מטפלים מקצועיים והמיזם החברתי<br>להנגשת הטיפול בישראל
             </p>
             <div class="hero-cta">
-                <a href="pages/free-portal.html" class="btn btn-primary">
-                    <i class="fa-solid fa-play"></i>
-                    התחילו ללמוד בחינם
+                <a href="pages/training.html" class="btn btn-primary">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    להכשרת מטפלים
                 </a>
                 <a href="pages/project-lobby.html" class="btn btn-secondary">
                     <i class="fa-solid fa-heart"></i>
@@ -593,95 +593,82 @@
     <section class="pillars">
         <div class="section-header">
             <div class="section-label">
-                <i class="fa-solid fa-layer-group"></i>
-                שלושת העמודים
+                <i class="fa-solid fa-compass"></i>
+                בחרו את המסלול שלכם
             </div>
-            <h2 class="section-title">מה תמצאו אצלנו?</h2>
+            <h2 class="section-title">איך נוכל לעזור לכם?</h2>
             <p class="section-subtitle">
-                שלוש דרכים להתפתח, ללמוד ולעשות טוב - בחרו את המסלול שמתאים לכם
+                שלוש דרכים להצטרף למשפחה שלנו - לימודים, התנדבות או קבלת עזרה
             </p>
         </div>
 
         <div class="pillars-grid">
-            <!-- Pillar 1: Free Knowledge -->
+            <!-- Pillar 1: Training -->
             <div class="pillar-card">
                 <div class="pillar-icon">
-                    <i class="fa-solid fa-graduation-cap"></i>
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h3>רוצה להיות מטפל?</h3>
+                <p>הכשרה מקצועית מלאה ל-NLP Practitioner ו-Master Practitioner עם הסמכה בינלאומית וליווי אישי לאורך כל הדרך</p>
+                <a href="pages/training.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    למידע על המסלול השנתי
+                </a>
+            </div>
+
+            <!-- Pillar 2: Social Project -->
+            <div class="pillar-card">
+                <div class="pillar-icon">
+                    <i class="fa-solid fa-hands-holding-heart"></i>
+                </div>
+                <h3>רוצה להתנדב או לקבל טיפול?</h3>
+                <p>המיזם החברתי שלנו מחבר בין מטפלים מתנדבים לאנשים שזקוקים לטיפול נפשי ואין להם יכולת כלכלית</p>
+                <a href="pages/project-lobby.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-heart"></i>
+                    כניסה למיזם החברתי
+                </a>
+            </div>
+
+            <!-- Pillar 3: Free Course -->
+            <div class="pillar-card">
+                <div class="pillar-icon">
+                    <i class="fa-solid fa-play-circle"></i>
                 </div>
                 <h3>ללמוד NLP בחינם</h3>
-                <p>גישה חופשית לקורס NLP מקיף ביוטיוב, חומרי לימוד להורדה, וטיפים מעשיים שתוכלו ליישם מיד</p>
-                <a href="pages/free-portal.html" class="btn">
-                    <i class="fa-solid fa-play-circle"></i>
-                    לפורטל החינמי
-                </a>
-            </div>
-
-            <!-- Pillar 2: Professional Training -->
-            <div class="pillar-card">
-                <div class="pillar-icon">
-                    <i class="fa-solid fa-certificate"></i>
-                </div>
-                <h3>הכשרת מטפלים מלאה</h3>
-                <p>תוכנית הסמכה מקצועית ל-NLP Practitioner ו-Master Practitioner עם ליווי אישי והתמחות מעשית</p>
-                <a href="pages/training.html" class="btn">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    לפרטים והרשמה
-                </a>
-            </div>
-
-            <!-- Pillar 3: Social Impact -->
-            <div class="pillar-card">
-                <div class="pillar-icon">
-                    <i class="fa-solid fa-hand-holding-heart"></i>
-                </div>
-                <h3>מיזם מטפל לכל אחד</h3>
-                <p>המיזם החברתי שמחבר בין מטפלים מתנדבים לאנשים שזקוקים לטיפול נפשי ואין להם יכולת כלכלית</p>
-                <a href="pages/project-lobby.html" class="btn">
-                    <i class="fa-solid fa-heart"></i>
-                    למיזם החברתי
+                <p>גישה חופשית לקורס NLP מקיף ביוטיוב, חומרי לימוד להורדה וטיפים מעשיים שתוכלו ליישם מיד</p>
+                <a href="pages/free-portal.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-play"></i>
+                    לצפייה בקורס
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features">
-        <div class="section-header">
-            <div class="section-label">
-                <i class="fa-solid fa-star"></i>
-                למה אנחנו
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="about-grid">
+            <div class="about-content">
+                <h2>למה <span>אנחנו?</span></h2>
+                <p>
+                    אנחנו מאמינים שכל אדם זכאי לגישה לטיפול נפשי איכותי. המשימה שלנו היא להכשיר מטפלים מקצועיים ולחבר אותם עם אנשים שזקוקים לעזרה.
+                </p>
+                <p>
+                    השילוב הייחודי שלנו בין הכשרה מקצועית ברמה הגבוהה ביותר לבין המיזם החברתי יוצר מערכת אקולוגית שלמה - מטפלים שמתפתחים מקצועית תוך כדי תרומה לקהילה.
+                </p>
             </div>
-            <h2 class="section-title">הייחודיות שלנו</h2>
-        </div>
-
-        <div class="features-grid">
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fa-solid fa-users"></i>
+            <div class="about-stats">
+                <div class="stat-item">
+                    <div class="number">500+</div>
+                    <div class="label">בוגרים</div>
                 </div>
-                <h4>קהילה תומכת</h4>
-                <p>קהילה של מטפלים ותלמידים שתומכים אחד בשני</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fa-solid fa-book-open"></i>
+                <div class="stat-item">
+                    <div class="number">12</div>
+                    <div class="label">שנות ניסיון</div>
                 </div>
-                <h4>תוכן איכותי</h4>
-                <p>חומרי לימוד מקצועיים מבוססי מחקר ונסיון</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fa-solid fa-hand-holding-heart"></i>
+                <div class="stat-item">
+                    <div class="number">98%</div>
+                    <div class="label">שביעות רצון</div>
                 </div>
-                <h4>השפעה חברתית</h4>
-                <p>כל לימוד תורם לעזרה לאנשים שזקוקים</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fa-solid fa-medal"></i>
-                </div>
-                <h4>הסמכה מוכרת</h4>
-                <p>תעודות הסמכה בינלאומיות ב-NLP</p>
             </div>
         </div>
     </section>
@@ -689,16 +676,16 @@
     <!-- CTA Section -->
     <section class="cta-section" id="contact">
         <div class="cta-box">
-            <h2>מוכנים להתחיל?</h2>
-            <p>בין אם אתם רוצים ללמוד, להתפתח מקצועית, או לעזור לאחרים - יש לנו מקום בשבילכם</p>
+            <h2>מוכנים <span>להתחיל?</span></h2>
+            <p>בין אם אתם רוצים ללמוד, להתפתח מקצועית, להתנדב או לקבל עזרה - יש לנו מקום בשבילכם</p>
             <div class="hero-cta">
-                <a href="pages/free-portal.html" class="btn btn-primary">
-                    <i class="fa-solid fa-play"></i>
-                    התחילו בחינם
+                <a href="pages/training.html" class="btn btn-primary">
+                    <i class="fa-solid fa-rocket"></i>
+                    להרשמה להכשרה
                 </a>
-                <a href="pages/training.html" class="btn btn-secondary">
-                    <i class="fa-solid fa-info-circle"></i>
-                    מידע על ההכשרות
+                <a href="pages/project-lobby.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-heart"></i>
+                    למיזם החברתי
                 </a>
             </div>
         </div>
@@ -709,21 +696,18 @@
         <div class="footer-content">
             <div class="footer-brand">
                 <a href="index.html" class="logo">
-                    <div class="logo-icon">
-                        <i class="fa-solid fa-heart-pulse"></i>
-                    </div>
+                    <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
                     <div class="logo-text">מטפל <span>לכל אחד</span></div>
                 </a>
                 <p>בית הספר להכשרת מטפלים והמיזם החברתי שמנגיש טיפול נפשי לכולם</p>
             </div>
 
             <div class="footer-links">
-                <h4>ניווט מהיר</h4>
+                <h4>לימודים</h4>
                 <ul>
-                    <li><a href="index.html">דף הבית</a></li>
-                    <li><a href="pages/about.html">מי אנחנו</a></li>
-                    <li><a href="pages/free-portal.html">קורסים בחינם</a></li>
                     <li><a href="pages/training.html">הכשרת מטפלים</a></li>
+                    <li><a href="pages/free-portal.html">קורס חינמי</a></li>
+                    <li><a href="pages/about.html">מי אנחנו</a></li>
                 </ul>
             </div>
 
@@ -732,7 +716,6 @@
                 <ul>
                     <li><a href="pages/project-lobby.html">אני רוצה מטפל</a></li>
                     <li><a href="pages/project-lobby.html">אני רוצה להתנדב</a></li>
-                    <li><a href="pages/about.html">על המיזם</a></li>
                 </ul>
             </div>
 

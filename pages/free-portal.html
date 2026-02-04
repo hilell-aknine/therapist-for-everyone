@@ -1724,21 +1724,22 @@
         let toastShown = false;
         let toastTimeout = null;
 
-        // ===== Supabase Client =====
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // ===== Supabase Client (with fallback) =====
+        let supabase = null;
+        try {
+            if (window.supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error('Supabase init error:', e);
+        }
 
         // ===== Initialization =====
         document.addEventListener('DOMContentLoaded', async () => {
+            // CRITICAL: Always render course content first
             renderSyllabus();
             updateProgress();
-
-            // Check for existing session
-            await checkAuthSession();
-
-            // Toast timer
-            if (!isAuthenticated) {
-                toastTimeout = setTimeout(showToast, 60000);
-            }
+            updateUI();
 
             // Open first module by default
             const firstModule = document.querySelector('.module');
@@ -1747,21 +1748,37 @@
             // Auto-select first lesson so video is ready to play
             selectLesson(0, 0);
 
-            // Listen for auth state changes (for OAuth redirect)
-            supabase.auth.onAuthStateChange(async (event, session) => {
-                console.log('Auth state changed:', event);
-                if (event === 'SIGNED_IN' && session) {
-                    await handleSuccessfulAuth(session.user);
-                } else if (event === 'SIGNED_OUT') {
-                    isAuthenticated = false;
-                    currentUser = null;
-                    updateUI();
+            // Auth setup (non-blocking)
+            if (supabase) {
+                try {
+                    // Check for existing session
+                    await checkAuthSession();
+
+                    // Listen for auth state changes (for OAuth redirect)
+                    supabase.auth.onAuthStateChange(async (event, session) => {
+                        console.log('Auth state changed:', event);
+                        if (event === 'SIGNED_IN' && session) {
+                            await handleSuccessfulAuth(session.user);
+                        } else if (event === 'SIGNED_OUT') {
+                            isAuthenticated = false;
+                            currentUser = null;
+                            updateUI();
+                        }
+                    });
+                } catch (authError) {
+                    console.error('Auth setup error:', authError);
                 }
-            });
+            }
+
+            // Toast timer
+            if (!isAuthenticated) {
+                toastTimeout = setTimeout(showToast, 60000);
+            }
         });
 
         // ===== Check Existing Auth Session =====
         async function checkAuthSession() {
+            if (!supabase) return;
             try {
                 const { data: { session }, error } = await supabase.auth.getSession();
                 if (session && session.user) {
@@ -1792,6 +1809,7 @@
 
         // ===== Ensure Profile Exists (Smart Profile Logic) =====
         async function ensureProfile(user) {
+            if (!supabase) return;
             try {
                 // Check if profile exists
                 const { data: existingProfile, error: fetchError } = await supabase
@@ -1854,6 +1872,10 @@
 
         // ===== Google OAuth =====
         async function signInWithGoogle() {
+            if (!supabase) {
+                showAuthError('שגיאה בטעינת המערכת. רענן את הדף.');
+                return;
+            }
             const googleBtn = document.getElementById('googleBtn');
             googleBtn.disabled = true;
             googleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> מתחבר...';
@@ -1880,6 +1902,10 @@
         // ===== Email Login =====
         async function handleEmailAuth(event) {
             event.preventDefault();
+            if (!supabase) {
+                showAuthError('שגיאה בטעינת המערכת. רענן את הדף.');
+                return;
+            }
             const loginBtn = document.getElementById('loginBtn');
             const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value;
@@ -1914,6 +1940,10 @@
 
         // ===== Email Signup =====
         async function handleSignup() {
+            if (!supabase) {
+                showAuthError('שגיאה בטעינת המערכת. רענן את הדף.');
+                return;
+            }
             const signupBtn = document.getElementById('signupBtn');
             const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value;

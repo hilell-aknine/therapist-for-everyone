@@ -1724,10 +1724,10 @@
         let toastTimeout = null;
 
         // ===== Supabase Client (with fallback) =====
-        let supabase = null;
+        let supabaseClient = null;
         try {
             if (window.supabase) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
         } catch (e) {
             console.error('Supabase init error:', e);
@@ -1748,13 +1748,13 @@
             selectLesson(0, 0);
 
             // Auth setup (non-blocking)
-            if (supabase) {
+            if (supabaseClient) {
                 try {
                     // Check for existing session
                     await checkAuthSession();
 
                     // Listen for auth state changes (for OAuth redirect)
-                    supabase.auth.onAuthStateChange(async (event, session) => {
+                    supabaseClient.auth.onAuthStateChange(async (event, session) => {
                         console.log('Auth state changed:', event);
                         if (event === 'SIGNED_IN' && session) {
                             await handleSuccessfulAuth(session.user);
@@ -1777,9 +1777,9 @@
 
         // ===== Check Existing Auth Session =====
         async function checkAuthSession() {
-            if (!supabase) return;
+            if (!supabaseClient) return;
             try {
-                const { data: { session }, error } = await supabase.auth.getSession();
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
                     currentUser = session.user;
                     isAuthenticated = true;
@@ -1808,10 +1808,10 @@
 
         // ===== Ensure Profile Exists (Smart Profile Logic) =====
         async function ensureProfile(user) {
-            if (!supabase) return;
+            if (!supabaseClient) return;
             try {
                 // Check if profile exists
-                const { data: existingProfile, error: fetchError } = await supabase
+                const { data: existingProfile, error: fetchError } = await supabaseClient
                     .from('profiles')
                     .select('*')
                     .eq('id', user.id)
@@ -1830,7 +1830,7 @@
                                     user.email?.split('@')[0] ||
                                     'משתמש חדש';
 
-                    const { error: insertError } = await supabase
+                    const { error: insertError } = await supabaseClient
                         .from('profiles')
                         .insert([{
                             id: user.id,
@@ -1849,7 +1849,7 @@
                 } else {
                     // Profile exists - ensure student_lead role
                     if (!existingProfile.roles?.includes('student_lead')) {
-                        const { error: updateError } = await supabase
+                        const { error: updateError } = await supabaseClient
                             .from('profiles')
                             .update({
                                 roles: [...(existingProfile.roles || []), 'student_lead'],
@@ -1871,7 +1871,7 @@
 
         // ===== Google OAuth =====
         async function signInWithGoogle() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showAuthError('שגיאה בטעינת המערכת. רענן את הדף.');
                 return;
             }
@@ -1881,7 +1881,7 @@
             hideAuthError();
 
             try {
-                const { data, error } = await supabase.auth.signInWithOAuth({
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
                         redirectTo: window.location.href
@@ -1901,7 +1901,7 @@
         // ===== Email Login =====
         async function handleEmailAuth(event) {
             event.preventDefault();
-            if (!supabase) {
+            if (!supabaseClient) {
                 showAuthError('שגיאה בטעינת המערכת. רענן את הדף.');
                 return;
             }
@@ -1914,7 +1914,7 @@
             hideAuthError();
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
@@ -1939,7 +1939,7 @@
 
         // ===== Email Signup =====
         async function handleSignup() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showAuthError('שגיאה בטעינת המערכת. רענן את הדף.');
                 return;
             }
@@ -1963,7 +1963,7 @@
             hideAuthError();
 
             try {
-                const { data, error } = await supabase.auth.signUp({
+                const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
                     options: {

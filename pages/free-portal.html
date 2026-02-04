@@ -826,17 +826,28 @@
 
         .modal-close {
             position: absolute;
-            top: 1rem;
-            left: 1rem;
-            background: none;
+            top: 0.8rem;
+            left: 0.8rem;
+            width: 40px;
+            height: 40px;
+            background: var(--light-gray);
             border: none;
+            border-radius: 50%;
             font-size: 1.5rem;
             color: var(--text-muted);
             cursor: pointer;
-            transition: color 0.3s;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
         }
 
-        .modal-close:hover { color: var(--text-dark); }
+        .modal-close:hover {
+            background: var(--border-light);
+            color: var(--text-dark);
+            transform: scale(1.1);
+        }
 
         .modal-icon {
             width: 80px; height: 80px;
@@ -1509,10 +1520,10 @@
     </button>
 
     <!-- Auth Modal -->
-    <div class="modal-overlay" id="registrationModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeModal()">
-                <i class="fa-solid fa-times"></i>
+    <div class="modal-overlay" id="registrationModal" onclick="handleOverlayClick(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()" aria-label="סגור">
+                ✕
             </button>
             <div class="modal-icon">
                 <i class="fa-solid fa-gift"></i>
@@ -2285,6 +2296,13 @@
             hideAuthError();
         }
 
+        // Close modal when clicking on overlay (outside the box)
+        function handleOverlayClick(event) {
+            if (event.target.id === 'registrationModal') {
+                closeModal();
+            }
+        }
+
         // ===== Toast =====
         function showToast() {
             if (!isAuthenticated && !toastShown) {
@@ -2330,6 +2348,7 @@
         window.handleLockedAction = handleLockedAction;
         window.openModal = openModal;
         window.closeModal = closeModal;
+        window.handleOverlayClick = handleOverlayClick;
         window.toggleSidebar = toggleSidebar;
         window.showToast = showToast;
         window.hideToast = hideToast;

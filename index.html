@@ -9,16 +9,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --bg-dark: #0f1419;
-            --bg-card: #1a1f2e;
-            --bg-card-hover: #242b3d;
-            --border: #2d3548;
-            --text: #ffffff;
-            --text-secondary: #a0aab5;
+            /* Brand Colors - from CLAUDE.md */
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --pure-white: #FFFFFF;
             --gold: #D4AF37;
             --gold-light: #e6c65a;
             --gold-glow: rgba(212, 175, 55, 0.3);
             --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            --gradient-main: radial-gradient(ellipse at 30% 20%, #2F8592 0%, #00606B 40%, #003B46 100%);
+
+            /* Mapped for consistency */
+            --bg-dark: var(--deep-petrol);
+            --bg-card: var(--muted-teal);
+            --bg-card-hover: var(--dusty-aqua);
+            --border: rgba(47, 133, 146, 0.3);
+            --text: var(--pure-white);
+            --text-secondary: var(--frost-white);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,7 +35,7 @@
 
         body {
             font-family: 'Heebo', sans-serif;
-            background: var(--bg-dark);
+            background: var(--deep-petrol);
             color: var(--text);
             line-height: 1.7;
             overflow-x: hidden;
@@ -41,7 +50,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(15, 20, 25, 0.95);
+            background: rgba(0, 59, 70, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             transition: all 0.3s ease;
@@ -49,7 +58,7 @@
 
         .navbar.scrolled {
             padding: 0.7rem 2rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .logo {
@@ -138,10 +147,7 @@
             justify-content: center;
             text-align: center;
             padding: 8rem 2rem 4rem;
-            background:
-                radial-gradient(ellipse at 30% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
-                var(--bg-dark);
+            background: var(--gradient-main);
             position: relative;
             overflow: hidden;
         }
@@ -263,7 +269,8 @@
         /* ===== Pillars Section ===== */
         .pillars {
             padding: 7rem 2rem;
-            background: var(--bg-card);
+            background: var(--frost-white);
+            color: var(--deep-petrol);
         }
 
         .section-header {
@@ -290,10 +297,14 @@
         }
 
         .section-subtitle {
-            color: var(--text-secondary);
+            color: var(--muted-teal);
             font-size: 1.15rem;
             max-width: 650px;
             margin: 0 auto;
+        }
+
+        .section-title {
+            color: var(--deep-petrol);
         }
 
         .pillars-grid {
@@ -305,14 +316,15 @@
         }
 
         .pillar-card {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
+            background: var(--pure-white);
+            border: 1px solid rgba(47, 133, 146, 0.2);
             border-radius: 24px;
             padding: 2.5rem;
             text-align: center;
             transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 59, 70, 0.08);
         }
 
         .pillar-card::before {
@@ -328,7 +340,7 @@
         .pillar-card:hover {
             transform: translateY(-10px);
             border-color: rgba(212, 175, 55, 0.4);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 25px 50px rgba(0, 59, 70, 0.15);
         }
 
         .pillar-card:hover::before {
@@ -337,21 +349,21 @@
 
         .pillar-icon {
             width: 90px; height: 90px;
-            background: rgba(212, 175, 55, 0.1);
-            border: 2px solid rgba(212, 175, 55, 0.25);
+            background: rgba(47, 133, 146, 0.1);
+            border: 2px solid rgba(47, 133, 146, 0.25);
             border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.2rem;
-            color: var(--gold);
+            color: var(--dusty-aqua);
             margin: 0 auto 1.5rem;
             transition: all 0.4s;
         }
 
         .pillar-card:hover .pillar-icon {
             background: var(--gradient-gold);
-            color: var(--bg-dark);
+            color: var(--deep-petrol);
             border-color: transparent;
             transform: scale(1.1) rotate(5deg);
         }
@@ -360,10 +372,11 @@
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
+            color: var(--deep-petrol);
         }
 
         .pillar-card p {
-            color: var(--text-secondary);
+            color: var(--muted-teal);
             font-size: 0.95rem;
             margin-bottom: 2rem;
             line-height: 1.8;
@@ -379,7 +392,7 @@
         /* ===== About Section ===== */
         .about {
             padding: 7rem 2rem;
-            background: var(--bg-dark);
+            background: var(--deep-petrol);
         }
 
         .about-grid {
@@ -414,9 +427,9 @@
         .stat-item {
             text-align: center;
             padding: 1.5rem;
-            background: var(--bg-card);
+            background: var(--muted-teal);
             border-radius: 16px;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(47, 133, 146, 0.3);
         }
 
         .stat-item .number {
@@ -433,9 +446,7 @@
         /* ===== CTA Section ===== */
         .cta-section {
             padding: 7rem 2rem;
-            background:
-                radial-gradient(ellipse at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 60%),
-                var(--bg-card);
+            background: var(--muted-teal);
             text-align: center;
         }
 
@@ -459,8 +470,8 @@
 
         /* ===== Footer ===== */
         .footer {
-            background: var(--bg-dark);
-            border-top: 1px solid var(--border);
+            background: var(--deep-petrol);
+            border-top: 1px solid rgba(47, 133, 146, 0.3);
             padding: 4rem 2rem 2rem;
         }
 
@@ -520,7 +531,7 @@
                 display: none;
                 position: absolute;
                 top: 100%; right: 0; left: 0;
-                background: rgba(15, 20, 25, 0.98);
+                background: rgba(0, 59, 70, 0.98);
                 flex-direction: column;
                 padding: 2rem;
                 gap: 1rem;

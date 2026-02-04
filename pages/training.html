@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הכשרת מטפלים - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f1419;
+            --bg-card: #1a1f2e;
+            --border: #2d3548;
+            --text: #ffffff;
+            --text-secondary: #8b949e;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0; right: 0; left: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-icon {
+            width: 45px; height: 45px;
+            background: var(--gradient-gold);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--bg-dark);
+        }
+
+        .logo-text { font-size: 1.2rem; font-weight: 700; }
+        .logo-text span { color: var(--gold); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--gold); }
+
+        .nav-cta {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-cta:hover {
+            background: var(--gold);
+            color: var(--bg-dark);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 10rem 2rem 4rem;
+            text-align: center;
+            background: radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.1) 0%, transparent 50%), var(--bg-dark);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 span {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Content */
+        .content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .programs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .program-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .program-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--gradient-gold);
+        }
+
+        .program-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .program-level {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .program-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .program-card .duration {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .program-card ul {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .program-card li {
+            padding: 0.4rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .program-card li i {
+            color: var(--gold);
+            font-size: 0.8rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--gradient-gold);
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 30px var(--gold-glow);
+        }
+
+        .benefits {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .benefits h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--gold);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .benefit-item {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .benefit-item i {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .benefit-item h4 {
+            margin-bottom: 0.3rem;
+        }
+
+        .benefit-item p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2rem; }
+            .programs { grid-template-columns: 1fr; }
+            .benefits-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="logo-text">מטפל <span>לכל אחד</span></div>
+        </a>
+        <ul class="nav-links">
+            <li><a href="../index.html">דף הבית</a></li>
+            <li><a href="about.html">מי אנחנו</a></li>
+            <li><a href="free-portal.html">קורסים בחינם</a></li>
+            <li><a href="training.html">הכשרת מטפלים</a></li>
+            <li><a href="project-lobby.html">המיזם החברתי</a></li>
+        </ul>
+        <a href="project-lobby.html" class="nav-cta">אני רוצה מטפל</a>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-badge">
+            <i class="fa-solid fa-certificate"></i>
+            הסמכה מקצועית
+        </div>
+        <h1>הכשרת <span>מטפלים מקצועיים</span></h1>
+        <p>תוכניות הסמכה ב-NLP ברמת Practitioner ו-Master Practitioner עם ליווי אישי, התנסות מעשית ותעודה בינלאומית</p>
+    </section>
+
+    <div class="content">
+        <div class="programs">
+            <div class="program-card">
+                <span class="program-level">שלב ראשון</span>
+                <h3>NLP Practitioner</h3>
+                <p class="duration"><i class="fa-solid fa-clock"></i> 120 שעות הכשרה</p>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i> יסודות ה-NLP והתקשורת</li>
+                    <li><i class="fa-solid fa-check"></i> טכניקות שינוי בסיסיות</li>
+                    <li><i class="fa-solid fa-check"></i> עבודה עם אמונות והרגלים</li>
+                    <li><i class="fa-solid fa-check"></i> תרגול מעשי וליווי</li>
+                    <li><i class="fa-solid fa-check"></i> תעודת Practitioner מוסמך</li>
+                </ul>
+                <a href="#" class="btn btn-primary">
+                    <i class="fa-solid fa-info-circle"></i>
+                    פרטים והרשמה
+                </a>
+            </div>
+
+            <div class="program-card">
+                <span class="program-level">שלב מתקדם</span>
+                <h3>NLP Master Practitioner</h3>
+                <p class="duration"><i class="fa-solid fa-clock"></i> 180 שעות הכשרה</p>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i> טכניקות מתקדמות לשינוי</li>
+                    <li><i class="fa-solid fa-check"></i> עבודה עם טראומה</li>
+                    <li><i class="fa-solid fa-check"></i> מודלים מתקדמים</li>
+                    <li><i class="fa-solid fa-check"></i> התמחות מעשית מודרכת</li>
+                    <li><i class="fa-solid fa-check"></i> תעודת Master Practitioner</li>
+                </ul>
+                <a href="#" class="btn btn-primary">
+                    <i class="fa-solid fa-info-circle"></i>
+                    פרטים והרשמה
+                </a>
+            </div>
+        </div>
+
+        <div class="benefits">
+            <h2><i class="fa-solid fa-star"></i> למה ללמוד אצלנו?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <h4>מרצים מומחים</h4>
+                    <p>צוות מנוסה עם שנות ניסיון בהכשרה וטיפול</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fa-solid fa-hands-helping"></i>
+                    <h4>ליווי אישי</h4>
+                    <p>מנטורינג ותמיכה לאורך כל ההכשרה</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fa-solid fa-certificate"></i>
+                    <h4>הסמכה מוכרת</h4>
+                    <p>תעודות בינלאומיות מוכרות בתחום</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <h4>קריירה</h4>
+                    <p>הכנה לעבודה מעשית כמטפל</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fa-solid fa-users"></i>
+                    <h4>קהילה</h4>
+                    <p>רשת מטפלים ובוגרים תומכת</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fa-solid fa-heart"></i>
+                    <h4>השפעה חברתית</h4>
+                    <p>אפשרות להתנדב במיזם החברתי</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 מטפל לכל אחד. כל הזכויות שמורות.</p>
+    </footer>
+
+    <script src="../js/marketing-tools.js"></script>
+</body>
+</html>

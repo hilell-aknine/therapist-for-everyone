@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>קורסים בחינם - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f1419;
+            --bg-card: #1a1f2e;
+            --border: #2d3548;
+            --text: #ffffff;
+            --text-secondary: #8b949e;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0; right: 0; left: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-icon {
+            width: 45px; height: 45px;
+            background: var(--gradient-gold);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--bg-dark);
+        }
+
+        .logo-text { font-size: 1.2rem; font-weight: 700; }
+        .logo-text span { color: var(--gold); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--gold); }
+
+        .nav-cta {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-cta:hover {
+            background: var(--gold);
+            color: var(--bg-dark);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 10rem 2rem 4rem;
+            text-align: center;
+            background: radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.1) 0%, transparent 50%), var(--bg-dark);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(63, 185, 80, 0.15);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: #3fb950;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 span {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Content */
+        .content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-5px);
+        }
+
+        .feature-card i {
+            font-size: 3rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .cta-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .cta-box h2 {
+            margin-bottom: 1rem;
+        }
+
+        .cta-box p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--gradient-gold);
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px var(--gold-glow);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            margin-right: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gold);
+            color: var(--bg-dark);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2rem; }
+            .feature-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="logo-text">מטפל <span>לכל אחד</span></div>
+        </a>
+        <ul class="nav-links">
+            <li><a href="../index.html">דף הבית</a></li>
+            <li><a href="about.html">מי אנחנו</a></li>
+            <li><a href="free-portal.html">קורסים בחינם</a></li>
+            <li><a href="training.html">הכשרת מטפלים</a></li>
+            <li><a href="project-lobby.html">המיזם החברתי</a></li>
+        </ul>
+        <a href="project-lobby.html" class="nav-cta">אני רוצה מטפל</a>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-badge">
+            <i class="fa-solid fa-gift"></i>
+            חינם לחלוטין
+        </div>
+        <h1>ללמוד <span>NLP בחינם</span></h1>
+        <p>גישה מלאה לקורס NLP מקיף, חומרי לימוד להורדה, וטיפים מעשיים שתוכלו ליישם מיד</p>
+    </section>
+
+    <div class="content">
+        <div class="feature-cards">
+            <div class="feature-card">
+                <i class="fa-brands fa-youtube"></i>
+                <h3>קורס וידאו מלא</h3>
+                <p>סדרת שיעורי וידאו מקיפה ביוטיוב שמלמדת את יסודות ה-NLP בצורה מעשית</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-file-pdf"></i>
+                <h3>חומרי לימוד PDF</h3>
+                <p>סיכומים, תרגילים וחומרי עזר להורדה שילוו אתכם לאורך הלמידה</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-lightbulb"></i>
+                <h3>טיפים מעשיים</h3>
+                <p>טכניקות שתוכלו ליישם מיד בחיי היומיום ובעבודה עם אנשים</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-users"></i>
+                <h3>קהילה תומכת</h3>
+                <p>הצטרפו לקבוצת הלומדים שלנו לשיתוף, שאלות ותמיכה הדדית</p>
+            </div>
+        </div>
+
+        <div class="cta-box">
+            <h2>מוכנים להתחיל?</h2>
+            <p>הירשמו עכשיו וקבלו גישה מיידית לכל התכנים החינמיים</p>
+            <a href="#" class="btn btn-secondary">
+                <i class="fa-brands fa-youtube"></i>
+                לערוץ היוטיוב
+            </a>
+            <a href="#" class="btn btn-primary">
+                <i class="fa-solid fa-download"></i>
+                להורדת החומרים
+            </a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 מטפל לכל אחד. כל הזכויות שמורות.</p>
+    </footer>
+
+    <script src="../js/marketing-tools.js"></script>
+</body>
+</html>

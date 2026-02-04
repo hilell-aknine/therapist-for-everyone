@@ -3,31 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מטפל לכל אחד - ריפוי הנפש לכל אדם</title>
+    <title>מטפל לכל אחד - בית הספר להכשרת מטפלים & מיזם חברתי</title>
+    <meta name="description" content="בית הספר להכשרת מטפלים מקצועיים, קורסי NLP בחינם, והמיזם החברתי 'מטפל לכל אחד'">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            /* Original branding colors */
-            --deep-petrol: #003B46;
-            --muted-teal: #00606B;
-            --dusty-aqua: #2F8592;
-            --frost-white: #E8F1F2;
-            --pure-white: #FFFFFF;
+            --bg-dark: #0f1419;
+            --bg-card: #1a1f2e;
+            --bg-card-hover: #242b3d;
+            --border: #2d3548;
+            --text: #ffffff;
+            --text-secondary: #8b949e;
             --gold: #D4AF37;
             --gold-light: #e6c65a;
             --gold-glow: rgba(212, 175, 55, 0.3);
-            --coral: #FF6F61;
-            --gradient-main: radial-gradient(ellipse at 30% 20%, #2F8592 0%, #00606B 40%, #003B46 100%);
-
-            /* Mobile-optimized color palette */
-            --bg-primary: #166672;
-            --color-accent: #EBC85E;
-            --btn-secondary-border: #3D8B95;
-            --text-main: #FFFFFF;
-            --text-subtitle: #E3B64F;
+            --success: #3fb950;
+            --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
         }
 
         * {
@@ -42,159 +34,124 @@
 
         body {
             font-family: 'Heebo', sans-serif;
-            background: var(--deep-petrol);
-            color: var(--pure-white);
+            background: var(--bg-dark);
+            color: var(--text);
             line-height: 1.7;
             overflow-x: hidden;
         }
 
-        /* ===== Floating Particles ===== */
-        .particles {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--gold);
-            border-radius: 50%;
-            opacity: 0;
-            animation: floatUp 15s infinite;
-            box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold-glow);
-        }
-
-        @keyframes floatUp {
-            0% {
-                opacity: 0;
-                transform: translateY(100vh) scale(0);
-            }
-            10% {
-                opacity: 0.8;
-            }
-            90% {
-                opacity: 0.6;
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-100vh) scale(1);
-            }
-        }
-
-        /* ===== Navigation ===== */
-        nav {
+        /* ===== Navbar ===== */
+        .navbar {
             position: fixed;
             top: 0;
             right: 0;
             left: 0;
             z-index: 1000;
-            padding: 1.2rem 4rem;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
 
-        nav.scrolled {
-            background: rgba(0, 59, 70, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 0.8rem 4rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        .navbar.scrolled {
+            padding: 0.7rem 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
         }
 
         .logo {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--pure-white);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.7rem;
+            text-decoration: none;
+            color: var(--text);
         }
 
         .logo-icon {
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            width: 45px;
+            height: 45px;
+            background: var(--gradient-gold);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--deep-petrol);
-            font-size: 1.1rem;
+            font-size: 1.3rem;
+            color: var(--bg-dark);
             box-shadow: 0 4px 15px var(--gold-glow);
+        }
+
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .logo-text span {
+            color: var(--gold);
         }
 
         .nav-links {
             display: flex;
-            gap: 2.5rem;
+            gap: 2rem;
             list-style: none;
+            align-items: center;
         }
 
         .nav-links a {
-            color: var(--frost-white);
+            color: var(--text-secondary);
             text-decoration: none;
             font-size: 0.95rem;
             font-weight: 500;
-            position: relative;
-            padding: 0.3rem 0;
             transition: color 0.3s;
-        }
-
-        .nav-links a::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--gold), var(--gold-light));
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
 
         .nav-links a:hover {
             color: var(--gold);
         }
 
-        .nav-links a:hover::before {
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
             width: 100%;
         }
 
-        .hamburger {
-            display: none;
-            flex-direction: column;
+        .nav-cta {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            font-family: inherit;
+            font-weight: 600;
             cursor: pointer;
-            gap: 6px;
-            padding: 0.75rem;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-
-        .hamburger:hover {
-            background: rgba(235, 200, 94, 0.1);
-        }
-
-        .hamburger span {
-            width: 28px;
-            height: 3px;
-            background: var(--color-accent);
-            border-radius: 3px;
             transition: all 0.3s;
+            text-decoration: none;
         }
 
-        .hamburger.active span:nth-child(1) {
-            transform: rotate(45deg) translate(6px, 6px);
+        .nav-cta:hover {
+            background: var(--gold);
+            color: var(--bg-dark);
         }
 
-        .hamburger.active span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .hamburger.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(6px, -6px);
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
         }
 
         /* ===== Hero Section ===== */
@@ -203,42 +160,38 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+                var(--bg-dark);
             position: relative;
             overflow: hidden;
-            background: var(--gradient-main);
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 20% 80%, rgba(47, 133, 146, 0.15) 0%, transparent 50%);
-        }
-
-        .hero::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 80%;
-            height: 80%;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.03) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+            opacity: 0.3;
             animation: pulse 8s ease-in-out infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.8; }
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.2; }
         }
 
-        .hero-container {
+        .hero-content {
             position: relative;
             z-index: 1;
             max-width: 900px;
-            padding: 0 2rem;
-            text-align: center;
         }
 
         .hero-badge {
@@ -247,13 +200,12 @@
             gap: 0.5rem;
             background: rgba(212, 175, 55, 0.15);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            padding: 0.6rem 1.5rem;
+            padding: 0.5rem 1.2rem;
             border-radius: 50px;
             font-size: 0.9rem;
             color: var(--gold);
             margin-bottom: 2rem;
-            backdrop-filter: blur(10px);
-            animation: fadeInDown 1s ease-out;
+            animation: fadeInDown 0.8s ease-out;
         }
 
         @keyframes fadeInDown {
@@ -261,12 +213,19 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .hero-icon {
-            font-size: 4.5rem;
-            color: var(--gold);
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
             margin-bottom: 1.5rem;
-            filter: drop-shadow(0 0 30px var(--gold-glow));
-            animation: fadeInUp 1s ease-out 0.2s both;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero h1 span {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         @keyframes fadeInUp {
@@ -274,85 +233,62 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .hero h1 {
-            font-size: clamp(2.8rem, 6vw, 4.5rem);
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--pure-white) 0%, var(--frost-white) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: fadeInUp 1s ease-out 0.3s both;
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
         }
 
-        .hero .tagline {
-            font-size: clamp(1.4rem, 3vw, 2rem);
-            font-weight: 600;
-            color: var(--gold);
-            margin-bottom: 1.5rem;
-            animation: fadeInUp 1s ease-out 0.4s both;
-        }
-
-        .hero-description {
-            font-size: 1.15rem;
-            color: var(--frost-white);
-            max-width: 600px;
-            margin: 0 auto 2.5rem;
-            line-height: 1.8;
-            animation: fadeInUp 1s ease-out 0.5s both;
-        }
-
-        .cta-buttons {
+        .hero-cta {
             display: flex;
             gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
-            animation: fadeInUp 1s ease-out 0.6s both;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
         }
 
         .btn {
-            padding: 1rem 2.2rem;
+            padding: 1rem 2rem;
             border-radius: 50px;
             font-size: 1rem;
             font-weight: 600;
             text-decoration: none;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            border: none;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            color: var(--deep-petrol);
-            box-shadow: 0 8px 30px var(--gold-glow);
+            background: var(--gradient-gold);
+            color: var(--bg-dark);
+            box-shadow: 0 4px 20px var(--gold-glow);
         }
 
         .btn-primary:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 40px var(--gold-glow);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px var(--gold-glow);
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--pure-white);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
         }
 
         .btn-secondary:hover {
-            background: var(--pure-white);
-            color: var(--deep-petrol);
-            transform: translateY(-4px);
+            background: var(--gold);
+            color: var(--bg-dark);
         }
 
-        /* ===== Sections Base ===== */
-        section {
-            position: relative;
-            padding: 7rem 2rem;
+        /* ===== Pillars Section ===== */
+        .pillars {
+            padding: 6rem 2rem;
+            background: var(--bg-dark);
         }
 
         .section-header {
@@ -367,3309 +303,527 @@
             color: var(--gold);
             font-size: 0.9rem;
             font-weight: 600;
+            margin-bottom: 1rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 1rem;
         }
 
         .section-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 800;
-            color: var(--pure-white);
+            font-size: 2.5rem;
+            font-weight: 700;
             margin-bottom: 1rem;
         }
 
         .section-subtitle {
+            color: var(--text-secondary);
             font-size: 1.1rem;
-            color: var(--frost-white);
             max-width: 600px;
             margin: 0 auto;
         }
 
-        /* ===== Vision Section ===== */
-        #vision {
-            background: var(--gradient-main);
-        }
-
-        .vision-grid {
-            max-width: 1100px;
-            margin: 0 auto;
+        .pillars-grid {
             display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
-        }
-
-        .vision-card {
-            background: linear-gradient(135deg, rgba(47, 133, 146, 0.2) 0%, rgba(0, 96, 107, 0.15) 100%);
-            border: 1px solid rgba(47, 133, 146, 0.3);
-            border-radius: 24px;
-            padding: 2.5rem;
-            backdrop-filter: blur(20px);
-            transition: all 0.4s;
-        }
-
-        .vision-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--gold);
-            box-shadow: 0 20px 50px rgba(0, 59, 70, 0.3);
-        }
-
-        .vision-card-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .vision-card-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--deep-petrol);
-            font-size: 1.4rem;
-            box-shadow: 0 8px 25px var(--gold-glow);
-        }
-
-        .vision-card h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--pure-white);
-        }
-
-        .vision-card p {
-            color: var(--frost-white);
-            font-size: 1.05rem;
-            line-height: 1.8;
-        }
-
-        /* Values Grid */
-        .values-section {
-            margin-top: 4rem;
-        }
-
-        .values-title {
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--gold);
-            margin-bottom: 2.5rem;
-        }
-
-        .values-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1.5rem;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .value-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(47, 133, 146, 0.2);
-            border-radius: 20px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            transition: all 0.4s;
-        }
-
-        .value-card:hover {
-            transform: translateY(-8px);
-            background: rgba(47, 133, 146, 0.15);
-            border-color: var(--gold);
-        }
-
-        .value-icon {
-            font-size: 2.5rem;
-            color: var(--gold);
-            margin-bottom: 1rem;
-        }
-
-        .value-card h4 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--pure-white);
-            margin-bottom: 0.5rem;
-        }
-
-        .value-card p {
-            font-size: 0.9rem;
-            color: var(--frost-white);
-        }
-
-        /* ===== Courses Section ===== */
-        #courses {
-            background: linear-gradient(180deg, var(--deep-petrol) 0%, var(--muted-teal) 50%, var(--deep-petrol) 100%);
-        }
-
-        .courses-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 3rem;
-        }
-
-        .tab-btn {
-            padding: 1rem 2rem;
-            border: 2px solid rgba(47, 133, 146, 0.5);
-            background: transparent;
-            color: var(--frost-white);
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            font-family: inherit;
-            transition: all 0.4s;
-        }
-
-        .tab-btn.active,
-        .tab-btn:hover {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            border-color: var(--gold);
-            color: var(--deep-petrol);
-            box-shadow: 0 8px 25px var(--gold-glow);
-        }
-
-        .course-content {
-            display: none;
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        .course-content.active {
-            display: block;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .course-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .course-header h3 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--gold);
-            margin-bottom: 0.5rem;
-        }
-
-        .course-header p {
-            color: var(--frost-white);
-        }
-
-        /* Lesson Accordion */
-        .lesson-accordion {
-            background: rgba(0, 59, 70, 0.5);
-            border: 1px solid rgba(47, 133, 146, 0.2);
-            border-radius: 16px;
-            margin-bottom: 1rem;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-
-        .lesson-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.3rem 1.8rem;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .lesson-header:hover {
-            background: rgba(47, 133, 146, 0.15);
-        }
-
-        .lesson-header h4 {
-            color: var(--pure-white);
-            font-size: 1.05rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .lesson-header h4 i {
-            color: var(--gold);
-            transition: transform 0.3s;
-            font-size: 0.85rem;
-        }
-
-        .lesson-accordion.open .lesson-header h4 i {
-            transform: rotate(180deg);
-        }
-
-        .lesson-count {
-            background: rgba(212, 175, 55, 0.2);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            padding: 0.4rem 1rem;
+        .pillar-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--gold);
-        }
-
-        .lesson-videos {
-            display: none;
-            padding: 1.5rem;
-            padding-top: 0;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 1rem;
-        }
-
-        .lesson-accordion.open .lesson-videos {
-            display: grid;
-        }
-
-        .video-card {
-            background: rgba(0, 59, 70, 0.6);
-            border: 1px solid rgba(47, 133, 146, 0.2);
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.4s;
-        }
-
-        .video-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--gold);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        }
-
-        .video-thumb {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.4s ease;
             position: relative;
+            overflow: hidden;
         }
 
-        .video-thumb::before {
+        .pillar-card::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0, 59, 70, 0.8) 0%, transparent 50%);
-        }
-
-        .video-thumb i {
-            font-size: 2.5rem;
-            color: var(--pure-white);
-            position: relative;
-            z-index: 1;
-            opacity: 0.9;
-            transition: all 0.3s;
-            filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.5));
-        }
-
-        .video-card:hover .video-thumb i {
-            transform: scale(1.2);
-            color: var(--gold);
-        }
-
-        .video-card h4 {
-            padding: 1rem;
-            color: var(--pure-white);
-            font-size: 0.95rem;
-            font-weight: 500;
-            line-height: 1.4;
-        }
-
-        .video-placeholder {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: linear-gradient(135deg, var(--muted-teal), var(--dusty-aqua));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .video-placeholder i {
-            font-size: 2.5rem;
-            color: var(--pure-white);
-            opacity: 0.7;
-        }
-
-        .videos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .course-price {
-            text-align: center;
-            margin-top: 2.5rem;
-            padding: 1.5rem;
-            background: rgba(212, 175, 55, 0.1);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 16px;
-            color: var(--gold);
-            font-weight: 600;
-        }
-
-        /* Video Modal */
-        .video-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .video-modal.active {
-            display: flex;
-        }
-
-        .video-modal-content {
-            position: relative;
-            width: 100%;
-            max-width: 1000px;
-            aspect-ratio: 16/9;
-        }
-
-        .video-modal-content iframe {
-            width: 100%;
-            height: 100%;
-            border-radius: 16px;
-        }
-
-        .close-video {
-            position: absolute;
-            top: -50px;
+            top: 0;
             left: 0;
-            font-size: 2.5rem;
-            color: var(--pure-white);
-            cursor: pointer;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-gold);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .pillar-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .pillar-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .pillar-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--gold);
+            margin: 0 auto 1.5rem;
             transition: all 0.3s;
         }
 
-        .close-video:hover {
-            color: var(--gold);
+        .pillar-card:hover .pillar-icon {
+            background: var(--gold);
+            color: var(--bg-dark);
             transform: scale(1.1);
         }
 
-        /* ===== Want Therapist Section ===== */
-        #want-therapist {
-            background: var(--gradient-main);
+        .pillar-card h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
         }
 
-        .therapist-content {
-            max-width: 900px;
+        .pillar-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .pillar-card .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ===== Features Section ===== */
+        .features {
+            padding: 6rem 2rem;
+            background: var(--bg-card);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        .steps-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            margin: 3rem 0;
+        .feature-item {
+            text-align: center;
+            padding: 2rem 1rem;
         }
 
-        .step {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(47, 133, 146, 0.2);
-            padding: 1.8rem;
-            border-radius: 20px;
-            transition: all 0.4s;
-        }
-
-        .step:hover {
-            background: rgba(47, 133, 146, 0.15);
-            border-color: var(--gold);
-            transform: translateX(-10px);
-        }
-
-        .step-number {
-            width: 56px;
-            height: 56px;
-            min-width: 56px;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            color: var(--deep-petrol);
-            border-radius: 16px;
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
-            font-weight: 800;
-            box-shadow: 0 8px 25px var(--gold-glow);
-        }
-
-        .step-content h4 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--pure-white);
-            margin-bottom: 0.3rem;
-        }
-
-        .step-content p {
-            color: var(--frost-white);
-            font-size: 1rem;
-        }
-
-        .benefits-section {
-            margin-top: 4rem;
-        }
-
-        .benefits-title {
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 700;
             color: var(--gold);
+            margin: 0 auto 1rem;
+        }
+
+        .feature-item h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* ===== CTA Section ===== */
+        .cta-section {
+            padding: 6rem 2rem;
+            background:
+                radial-gradient(ellipse at 50% 100%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                var(--bg-dark);
+            text-align: center;
+        }
+
+        .cta-box {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 4rem 3rem;
+        }
+
+        .cta-box h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-box p {
+            color: var(--text-secondary);
             margin-bottom: 2rem;
-        }
-
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .benefit-card {
-            background: linear-gradient(135deg, rgba(0, 96, 107, 0.4) 0%, rgba(0, 79, 88, 0.3) 100%);
-            border: 1px solid rgba(47, 133, 146, 0.3);
-            padding: 2rem;
-            border-radius: 20px;
-            text-align: center;
-            transition: all 0.4s;
-        }
-
-        .benefit-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--gold);
-        }
-
-        .benefit-icon {
-            font-size: 2.5rem;
-            color: var(--gold);
-            margin-bottom: 1rem;
-        }
-
-        .benefit-card h4 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--pure-white);
-            margin-bottom: 0.5rem;
-        }
-
-        .benefit-card p {
-            font-size: 0.9rem;
-            color: var(--frost-white);
-        }
-
-        .cta-center {
-            text-align: center;
-            margin-top: 3rem;
-        }
-
-        /* ===== Become Therapist Section ===== */
-        #become-therapist {
-            background: linear-gradient(180deg, var(--muted-teal) 0%, var(--deep-petrol) 100%);
-        }
-
-        .become-content {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .two-columns {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .info-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(47, 133, 146, 0.2);
-            border-radius: 24px;
-            padding: 2.5rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .info-card-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .info-card-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--deep-petrol);
-            font-size: 1.2rem;
-        }
-
-        .info-card h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--pure-white);
-        }
-
-        .info-card ul {
-            list-style: none;
-        }
-
-        .info-card li {
-            padding: 0.7rem 0;
-            color: var(--frost-white);
-            display: flex;
-            align-items: flex-start;
-            gap: 0.8rem;
-            font-size: 1rem;
-        }
-
-        .info-card li::before {
-            content: '✓';
-            color: var(--gold);
-            font-weight: bold;
-            min-width: 20px;
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, var(--dusty-aqua) 0%, var(--muted-teal) 100%);
-            border-radius: 24px;
-            padding: 3rem;
-            text-align: center;
-            margin-top: 3rem;
-            box-shadow: 0 20px 50px rgba(0, 59, 70, 0.4);
-        }
-
-        .highlight-box h3 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .highlight-box p {
-            font-size: 1.1rem;
-            color: var(--frost-white);
-            margin-bottom: 1.5rem;
-        }
-
-        .process-section {
-            margin-top: 4rem;
-            text-align: center;
-        }
-
-        .process-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--gold);
-            margin-bottom: 1.5rem;
-        }
-
-        .process-steps {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            color: var(--frost-white);
-            font-size: 1rem;
-        }
-
-        .process-steps span {
-            padding: 0.5rem 1rem;
-            background: rgba(47, 133, 146, 0.2);
-            border-radius: 20px;
-        }
-
-        .process-arrow {
-            color: var(--gold);
-        }
-
-        /* ===== Contact Section ===== */
-        #contact {
-            background: var(--gradient-main);
-            text-align: center;
-        }
-
-        .contact-cards {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-            margin-top: 3rem;
-        }
-
-        .contact-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(47, 133, 146, 0.2);
-            border-radius: 24px;
-            padding: 2.5rem 3rem;
-            text-align: center;
-            transition: all 0.4s;
-            min-width: 220px;
-        }
-
-        .contact-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--gold);
-        }
-
-        .contact-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            font-size: 1.8rem;
-            color: var(--deep-petrol);
-            box-shadow: 0 10px 30px var(--gold-glow);
-        }
-
-        .contact-card span {
-            display: block;
-            color: var(--frost-white);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .contact-card a {
-            color: var(--pure-white);
-            text-decoration: none;
-            font-size: 1.3rem;
-            font-weight: 600;
-            transition: color 0.3s;
-        }
-
-        .contact-card a:hover {
-            color: var(--gold);
-        }
-
-        .contact-cta {
-            margin-top: 3rem;
         }
 
         /* ===== Footer ===== */
-        footer {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 3rem 2rem;
-            text-align: center;
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 4rem 2rem 2rem;
         }
 
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
         }
 
-        .footer-logo .logo-icon {
-            width: 36px;
-            height: 36px;
-            font-size: 0.9rem;
-        }
-
-        .footer-logo span {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        footer p {
-            color: var(--frost-white);
-        }
-
-        .footer-tagline {
-            color: var(--gold);
-            font-weight: 500;
-            margin-bottom: 1rem;
-        }
-
-        .footer-copyright {
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-
-        /* ===== Auth Styles ===== */
-        .auth-buttons {
-            display: flex;
-            gap: 0.8rem;
-            align-items: center;
-        }
-
-        .btn-login {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: var(--frost-white);
-            padding: 0.6rem 1.2rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .btn-login:hover {
-            background: var(--pure-white);
-            color: var(--deep-petrol);
-        }
-
-        .btn-signup {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            border: none;
-            color: var(--deep-petrol);
-            padding: 0.6rem 1.2rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-signup:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px var(--gold-glow);
-        }
-
-        .user-menu {
-            display: none;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--deep-petrol);
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .user-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: rgba(0, 59, 70, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 12px;
-            padding: 0.5rem;
-            min-width: 180px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            display: none;
-            border: 1px solid rgba(47, 133, 146, 0.2);
-        }
-
-        .user-dropdown.active {
-            display: block;
-        }
-
-        .user-dropdown a {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem 1rem;
-            color: var(--frost-white);
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-
-        .user-dropdown a:hover {
-            background: rgba(47, 133, 146, 0.2);
-        }
-
-        .user-dropdown a i {
-            width: 20px;
-            color: var(--gold);
-        }
-
-        /* ===== Auth Modal ===== */
-        .auth-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 3000;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .auth-modal.active {
-            display: flex;
-        }
-
-        .auth-modal-content {
-            background: linear-gradient(135deg, var(--muted-teal) 0%, var(--deep-petrol) 100%);
-            border-radius: 24px;
-            padding: 2.5rem;
-            max-width: 420px;
-            width: 100%;
-            position: relative;
-            border: 1px solid rgba(47, 133, 146, 0.3);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-        }
-
-        .auth-modal-close {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            font-size: 1.5rem;
-            color: var(--frost-white);
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .auth-modal-close:hover {
-            color: var(--gold);
-        }
-
-        .auth-modal h2 {
-            text-align: center;
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .auth-modal-subtitle {
-            text-align: center;
-            color: var(--frost-white);
-            margin-bottom: 2rem;
-        }
-
-        /* Role Selector */
-        .role-selector {
-            display: flex;
-            gap: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        .role-option {
-            flex: 1;
-            cursor: pointer;
-        }
-
-        .role-option input[type="radio"] {
-            display: none;
-        }
-
-        .role-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem;
-            border-radius: 12px;
-            border: 2px solid rgba(47, 133, 146, 0.3);
-            background: rgba(0, 59, 70, 0.3);
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .role-card i {
-            font-size: 1.8rem;
-            color: var(--frost-white);
-            transition: all 0.3s;
-        }
-
-        .role-card span {
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--pure-white);
-        }
-
-        .role-card small {
-            font-size: 0.75rem;
-            color: rgba(232, 241, 242, 0.7);
-        }
-
-        .role-option input[type="radio"]:checked + .role-card {
-            border-color: var(--gold);
-            background: rgba(212, 175, 55, 0.15);
-            box-shadow: 0 0 15px var(--gold-glow);
-        }
-
-        .role-option input[type="radio"]:checked + .role-card i {
-            color: var(--gold);
-        }
-
-        .role-card:hover {
-            border-color: var(--dusty-aqua);
-            background: rgba(47, 133, 146, 0.2);
-        }
-
-        /* Large Role Selector (for OAuth modal) */
-        .role-selector-large {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .role-option-large {
-            cursor: pointer;
-        }
-
-        .role-card-large {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1.5rem;
-            border-radius: 16px;
-            border: 2px solid rgba(47, 133, 146, 0.3);
-            background: rgba(0, 59, 70, 0.3);
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .role-card-large i {
-            font-size: 2.5rem;
-            color: var(--gold);
-        }
-
-        .role-card-large h3 {
-            font-size: 1.2rem;
-            color: var(--pure-white);
-            margin: 0;
-        }
-
-        .role-card-large p {
-            font-size: 0.9rem;
-            color: rgba(232, 241, 242, 0.7);
-            margin: 0;
-        }
-
-        .role-card-large:hover {
-            border-color: var(--gold);
-            background: rgba(212, 175, 55, 0.15);
-            box-shadow: 0 0 20px var(--gold-glow);
-            transform: translateY(-3px);
-        }
-
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-group label {
-            font-size: 0.9rem;
-            color: var(--frost-white);
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            padding: 0.9rem 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(47, 133, 146, 0.3);
-            background: rgba(0, 59, 70, 0.5);
-            color: var(--pure-white);
-            font-family: inherit;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px var(--gold-glow);
-        }
-
-        .form-group input::placeholder {
-            color: rgba(232, 241, 242, 0.5);
-        }
-
-        .auth-form .btn-primary {
-            margin-top: 0.5rem;
-            width: 100%;
-            justify-content: center;
-        }
-
-        .auth-divider {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 1.5rem 0;
-            color: var(--frost-white);
-            font-size: 0.9rem;
-        }
-
-        .auth-divider::before, .auth-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: rgba(47, 133, 146, 0.3);
-        }
-
-        .btn-google {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.8rem;
-            width: 100%;
-            padding: 0.9rem;
-            border-radius: 12px;
-            border: 1px solid rgba(47, 133, 146, 0.3);
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--pure-white);
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .btn-google:hover {
-            background: var(--pure-white);
-            color: var(--deep-petrol);
-        }
-
-        .auth-switch {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--frost-white);
-        }
-
-        .auth-switch a {
-            color: var(--gold);
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .auth-switch a:hover {
-            text-decoration: underline;
-        }
-
-        /* ===== Dashboard Link ===== */
-        .dashboard-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(47, 133, 146, 0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            color: var(--gold);
-            font-size: 0.85rem;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .dashboard-btn:hover {
-            background: var(--gold);
-            color: var(--deep-petrol);
-        }
-
-        /* ===== Video Watched Indicator ===== */
-        .video-card.watched .video-thumb::after {
-            content: '\f00c';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--gold);
-            color: var(--deep-petrol);
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            z-index: 2;
-        }
-
-        /* ===== Progress Bar ===== */
-        .course-progress-bar {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            height: 8px;
+        .footer-brand p {
+            color: var(--text-secondary);
             margin-top: 1rem;
-            overflow: hidden;
-        }
-
-        .course-progress-fill {
-            background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.5s ease-out;
-        }
-
-        .course-progress-text {
-            text-align: center;
-            margin-top: 0.5rem;
-            color: var(--frost-white);
             font-size: 0.9rem;
         }
 
-        /* ===== Patient Questionnaire Modal ===== */
-        .questionnaire-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 3000;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            overflow-y: auto;
-        }
-
-        .questionnaire-modal.active {
-            display: flex;
-        }
-
-        .questionnaire-content {
-            background: linear-gradient(135deg, var(--muted-teal) 0%, var(--deep-petrol) 100%);
-            border-radius: 24px;
-            padding: 2.5rem;
-            max-width: 500px;
-            width: 100%;
-            position: relative;
-            border: 1px solid rgba(47, 133, 146, 0.3);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .questionnaire-close {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            font-size: 1.5rem;
-            color: var(--frost-white);
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .questionnaire-close:hover {
+        .footer-links h4 {
             color: var(--gold);
-        }
-
-        .questionnaire-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .questionnaire-header h2 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            color: var(--pure-white);
-        }
-
-        .questionnaire-header p {
-            color: var(--frost-white);
+            margin-bottom: 1rem;
             font-size: 1rem;
         }
 
-        .questionnaire-icon {
-            font-size: 3rem;
-            color: var(--gold);
-            margin-bottom: 1rem;
+        .footer-links ul {
+            list-style: none;
         }
 
-        .questionnaire-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        .questionnaire-form .form-group label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .questionnaire-form .form-group label i {
-            color: var(--gold);
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
             font-size: 0.9rem;
-        }
-
-        .questionnaire-form select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23D4AF37' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: left 1rem center;
-            background-size: 1.5rem;
-            padding-left: 2.5rem;
-        }
-
-        .questionnaire-form textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .required-note {
-            font-size: 0.85rem;
-            color: var(--frost-white);
-            opacity: 0.7;
-            text-align: center;
-            margin-top: 0.5rem;
-        }
-
-        .questionnaire-success {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .questionnaire-success.active {
             display: block;
+            padding: 0.3rem 0;
+            transition: color 0.3s;
         }
 
-        .questionnaire-success i {
-            font-size: 4rem;
+        .footer-links a:hover {
             color: var(--gold);
-            margin-bottom: 1rem;
         }
 
-        .questionnaire-success h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
         }
 
-        .questionnaire-success p {
-            color: var(--frost-white);
+        /* ===== Mobile Responsive ===== */
+        @media (max-width: 1024px) {
+            .pillars-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
-        /* ===== Responsive ===== */
-
-        /* Mobile/Tablet - 900px */
-        @media (max-width: 900px) {
-            nav {
-                padding: 1rem 1.5rem;
-            }
-
-            nav.scrolled {
-                padding: 0.8rem 1.5rem;
-            }
-
-            .hamburger {
-                display: flex;
-            }
-
+        @media (max-width: 768px) {
             .nav-links {
                 display: none;
                 position: absolute;
                 top: 100%;
                 right: 0;
                 left: 0;
-                background: rgba(0, 59, 70, 0.98);
-                backdrop-filter: blur(20px);
+                background: rgba(15, 20, 25, 0.98);
                 flex-direction: column;
-                padding: 1.5rem;
-                gap: 0;
-                border-top: 1px solid rgba(47, 133, 146, 0.2);
+                padding: 2rem;
+                gap: 1rem;
+                border-bottom: 1px solid var(--border);
             }
 
             .nav-links.active {
                 display: flex;
             }
 
-            .nav-links li {
-                padding: 0.8rem 0;
-                border-bottom: 1px solid rgba(47, 133, 146, 0.1);
-            }
-
-            /* Auth buttons במובייל - להעביר לתפריט */
-            .auth-buttons {
-                position: absolute;
-                top: 100%;
-                right: 0;
-                left: 0;
-                background: rgba(0, 59, 70, 0.98);
-                backdrop-filter: blur(20px);
-                padding: 1rem 1.5rem;
-                justify-content: center;
-                border-top: 1px solid rgba(47, 133, 146, 0.2);
-                display: none;
-            }
-
-            .nav-links.active ~ .auth-buttons,
-            .auth-buttons.mobile-show {
-                display: flex;
-            }
-
-            .user-menu {
-                order: -1;
-            }
-
-            section {
-                padding: 5rem 1.5rem;
-            }
-
-            .hero-container {
-                padding: 6rem 1rem 0;
-            }
-
-            .hero-icon {
-                font-size: 3.5rem;
-            }
-
-            .step {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .step:hover {
-                transform: translateY(-5px);
-            }
-
-            .process-steps {
-                flex-direction: column;
-            }
-
-            .process-arrow {
-                transform: rotate(90deg);
-            }
-
-            /* Video Modal - תיקון למובייל */
-            .video-modal {
-                padding: 1rem;
-            }
-
-            .close-video {
-                top: -40px;
-                font-size: 2rem;
-            }
-
-            /* Cards - רוחב גמיש יותר */
-            .lesson-videos {
-                grid-template-columns: 1fr;
-            }
-
-            .videos-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .info-card {
-                padding: 1.5rem;
-            }
-        }
-
-        /* Tablet - 768px - Mobile Responsive Design */
-        @media (max-width: 768px) {
-            /* Hero Section - Vertical Layout */
-            .hero {
-                min-height: 100svh;
-                padding-top: 80px;
-            }
-
-            .hero-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-                padding: 2rem 1.5rem;
-            }
-
-            .hero-badge {
-                margin-top: 1.5rem;
-                margin-bottom: 1.5rem;
+            .mobile-menu-btn {
+                display: block;
             }
 
             .hero h1 {
-                font-size: clamp(2rem, 8vw, 2.8rem);
-                word-break: keep-all;
-                hyphens: none;
-            }
-
-            .hero .tagline {
-                font-size: clamp(1.1rem, 4vw, 1.5rem);
-                color: var(--text-subtitle);
-            }
-
-            .hero-description {
-                font-size: 1rem;
-                padding: 0 0.5rem;
-            }
-
-            /* CTA Buttons - Full Width Stacked */
-            .cta-buttons {
-                flex-direction: column;
-                width: 100%;
-                gap: 1rem;
-                padding: 0 1rem;
-            }
-
-            .cta-buttons .btn {
-                width: 100%;
-                max-width: 100%;
-                padding: 1.1rem 1.5rem;
-                font-size: 1.05rem;
-                justify-content: center;
-            }
-
-            .btn-primary {
-                background: linear-gradient(135deg, var(--color-accent) 0%, var(--gold-light) 100%);
-            }
-
-            .btn-secondary {
-                border: 2px solid var(--btn-secondary-border);
-            }
-
-            /* Grid layouts */
-            .two-columns {
-                grid-template-columns: 1fr;
-            }
-
-            .benefits-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .values-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .contact-cards {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .contact-card {
-                width: 100%;
-                max-width: 320px;
-            }
-
-            .highlight-box {
-                padding: 2rem;
-            }
-
-            .highlight-box h3 {
-                font-size: 1.5rem;
-            }
-
-            /* Section typography */
-            .section-title {
-                font-size: clamp(1.6rem, 5vw, 2.2rem);
-            }
-
-            .section-subtitle {
-                font-size: 1rem;
-                padding: 0 1rem;
-            }
-
-            /* FIX 1: Register Button - Mustard background */
-            .btn-signup {
-                background: var(--color-accent) !important;
-                color: var(--bg-primary) !important;
-                font-weight: 700;
-            }
-
-            /* FIX 2: Vision Card Icons - Transparent background */
-            .vision-card-icon {
-                background: transparent !important;
-                box-shadow: none;
-            }
-
-            .vision-card-icon i {
-                color: var(--color-accent);
                 font-size: 2.2rem;
             }
 
-            /* FIX 3: Vision Card Border - Thicker mustard border */
-            .vision-card {
-                border: 1.5px solid var(--color-accent);
-                background: rgba(22, 102, 114, 0.3);
-            }
-
-            /* FIX 4: Header - Hamburger left, Logo right */
-            nav {
-                flex-direction: row-reverse;
-            }
-
-            .hamburger {
-                order: 1;
-            }
-
-            .logo {
-                order: 2;
-            }
-
-            .auth-buttons {
-                order: 3;
-            }
-        }
-
-        @media (max-width: 480px) {
-            /* Navigation adjustments */
-            nav {
-                padding: 0.8rem 1rem;
-            }
-
-            .logo {
+            .hero-subtitle {
                 font-size: 1.1rem;
             }
 
-            .logo-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 0.9rem;
-            }
-
-            /* Hero for small phones */
-            .hero h1 {
-                font-size: clamp(1.75rem, 7vw, 2.2rem);
-                line-height: 1.2;
-            }
-
-            .hero .tagline {
-                font-size: 1.1rem;
-                color: var(--text-subtitle);
-            }
-
-            .hero-icon {
-                font-size: 2.8rem;
-            }
-
-            .hero-badge {
-                font-size: 0.75rem;
-                padding: 0.5rem 1rem;
-            }
-
-            .hero-description {
-                font-size: 0.95rem;
-                line-height: 1.7;
-            }
-
-            /* CTA Buttons - extra padding for thumb */
-            .cta-buttons {
-                flex-direction: column;
-                padding: 0;
-                gap: 0.875rem;
-            }
-
-            .cta-buttons .btn {
-                width: 100%;
-                padding: 1rem 1.25rem;
-                font-size: 1rem;
-                min-height: 52px;
-            }
-
-            .courses-tabs {
-                flex-direction: column;
-            }
-
-            .tab-btn {
-                width: 100%;
-            }
-
-            /* Section headers */
-            .section-title {
-                font-size: 1.5rem;
-            }
-
-            .section-subtitle {
-                font-size: 0.95rem;
-            }
-
-            section {
-                padding: 4rem 1rem;
-            }
-
-            /* Cards - מסך קטן מאוד */
-            .vision-card {
-                padding: 1.5rem;
-            }
-
-            .vision-card h3 {
-                font-size: 1.2rem;
-            }
-
-            .value-card {
-                padding: 1.5rem 1rem;
-            }
-
-            .value-icon {
-                font-size: 2rem;
-            }
-
-            .benefit-card {
-                padding: 1.5rem;
-            }
-
-            .benefit-icon {
-                font-size: 2rem;
-            }
-
-            /* Steps */
-            .step {
-                padding: 1.5rem;
-            }
-
-            .step-number {
-                width: 48px;
-                height: 48px;
-                min-width: 48px;
-                font-size: 1.3rem;
-            }
-
-            .step-content h4 {
-                font-size: 1.1rem;
-            }
-
-            /* Contact */
-            .contact-card {
-                padding: 1.5rem;
-                min-width: auto;
-                width: 100%;
-            }
-
-            .contact-icon {
-                width: 56px;
-                height: 56px;
-                font-size: 1.5rem;
-            }
-
-            .contact-card a {
-                font-size: 1.1rem;
-            }
-
-            /* Values and Benefits */
-            .values-grid {
+            .pillars-grid {
                 grid-template-columns: 1fr;
             }
 
-            .benefits-grid {
+            .features-grid {
                 grid-template-columns: 1fr;
             }
 
-            /* Auth Modal */
-            .auth-modal-content {
-                padding: 1.5rem;
-                margin: 1rem;
-            }
-
-            .auth-modal h2 {
-                font-size: 1.5rem;
-            }
-
-            /* Role Selector Mobile */
-            .role-selector {
-                flex-direction: row;
-                gap: 0.75rem;
-            }
-
-            .role-card {
-                padding: 0.75rem 0.5rem;
-            }
-
-            .role-card i {
-                font-size: 1.5rem;
-            }
-
-            .role-card span {
-                font-size: 0.9rem;
-            }
-
-            .role-card small {
-                font-size: 0.65rem;
-            }
-
-            /* Footer */
-            footer {
-                padding: 2rem 1rem;
-            }
-
-            .footer-logo span {
-                font-size: 1rem;
-            }
-        }
-
-        /* מסכים קטנים מאוד - 360px ומטה */
-        @media (max-width: 360px) {
-            section {
-                padding: 4rem 1rem;
-            }
-
-            .hero h1 {
-                font-size: 1.9rem;
-            }
-
-            .hero .tagline {
-                font-size: 1.1rem;
-            }
-
-            .btn {
-                padding: 0.9rem 1.5rem;
-                font-size: 0.95rem;
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
             }
 
             .section-title {
-                font-size: 1.6rem;
+                font-size: 1.8rem;
             }
 
-            nav {
-                padding: 0.8rem 1rem;
-            }
-
-            .logo {
-                font-size: 1.1rem;
-            }
-
-            .logo-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 0.9rem;
+            .cta-box {
+                padding: 2rem 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Floating Particles -->
-    <div class="particles" id="particles"></div>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <div class="logo-icon">
+                <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <div class="logo-text">מטפל <span>לכל אחד</span></div>
+        </a>
 
-    <!-- Navigation -->
-    <nav>
-        <div class="logo">
-            <div class="logo-icon"><i class="fa-solid fa-hands-holding-heart"></i></div>
-            מטפל לכל אחד
-        </div>
         <ul class="nav-links">
-            <li><a href="#home">בית</a></li>
-            <li><a href="#vision">החזון שלנו</a></li>
-            <li><a href="#courses">קורסים</a></li>
-            <li><a href="#want-therapist">אני רוצה מטפל</a></li>
-            <li><a href="#become-therapist">להיות מטפל</a></li>
-            <li><a href="#contact">צור קשר</a></li>
+            <li><a href="index.html">דף הבית</a></li>
+            <li><a href="pages/about.html">מי אנחנו</a></li>
+            <li><a href="pages/free-portal.html">קורסים בחינם</a></li>
+            <li><a href="pages/training.html">הכשרת מטפלים</a></li>
+            <li><a href="pages/project-lobby.html">המיזם החברתי</a></li>
+            <li><a href="#articles">מאמרים</a></li>
+            <li><a href="#contact">יצירת קשר</a></li>
         </ul>
-        <div class="hamburger" onclick="toggleMenu()">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
+
+        <a href="pages/project-lobby.html" class="nav-cta">אני רוצה מטפל</a>
+
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
     </nav>
 
-    <!-- Patient Questionnaire Modal -->
-    <div class="questionnaire-modal" id="questionnaire-modal">
-        <div class="questionnaire-content">
-            <span class="questionnaire-close" onclick="closeQuestionnaire()">&times;</span>
-
-            <!-- Questionnaire Form -->
-            <div id="questionnaire-form-container">
-                <div class="questionnaire-header">
-                    <div class="questionnaire-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-                    <h2>שאלון התאמה</h2>
-                    <p>מלא את הפרטים ונתאים לך מטפל מתאים</p>
-                </div>
-
-                <form class="questionnaire-form" id="patient-questionnaire" onsubmit="submitQuestionnaire(event)">
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-user"></i> שם מלא *</label>
-                        <input type="text" id="q-name" placeholder="השם המלא שלך" required minlength="2">
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-city"></i> עיר מגורים</label>
-                        <select id="q-city" required>
-                            <option value="">בחר עיר...</option>
-                            <option value="תל אביב">תל אביב</option>
-                            <option value="ירושלים">ירושלים</option>
-                            <option value="חיפה">חיפה</option>
-                            <option value="באר שבע">באר שבע</option>
-                            <option value="ראשון לציון">ראשון לציון</option>
-                            <option value="פתח תקווה">פתח תקווה</option>
-                            <option value="אשדוד">אשדוד</option>
-                            <option value="נתניה">נתניה</option>
-                            <option value="חולון">חולון</option>
-                            <option value="בני ברק">בני ברק</option>
-                            <option value="רמת גן">רמת גן</option>
-                            <option value="אשקלון">אשקלון</option>
-                            <option value="רחובות">רחובות</option>
-                            <option value="בת ים">בת ים</option>
-                            <option value="הרצליה">הרצליה</option>
-                            <option value="כפר סבא">כפר סבא</option>
-                            <option value="רעננה">רעננה</option>
-                            <option value="מודיעין">מודיעין</option>
-                            <option value="לוד">לוד</option>
-                            <option value="רמלה">רמלה</option>
-                            <option value="אילת">אילת</option>
-                            <option value="other">אחר</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" id="other-city-group" style="display: none;">
-                        <label><i class="fa-solid fa-map-marker-alt"></i> שם העיר</label>
-                        <input type="text" id="q-other-city" placeholder="הזן את שם העיר">
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-phone"></i> מספר טלפון *</label>
-                        <input type="tel" id="q-phone" placeholder="050-0000000" required pattern="[0-9\-]{9,12}">
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-comment-medical"></i> סיבת הפנייה *</label>
-                        <textarea id="q-reason" placeholder="ספר לנו בקצרה מה מביא אותך אלינו..." required minlength="10"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-user-doctor"></i> העדפה למגדר המטפל</label>
-                        <select id="q-gender-preference">
-                            <option value="">אין העדפה</option>
-                            <option value="male">מטפל (גבר)</option>
-                            <option value="female">מטפלת (אישה)</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fa-solid fa-paper-plane"></i>
-                        שלח בקשה
-                    </button>
-
-                    <p class="required-note">* שדות חובה</p>
-                </form>
-            </div>
-
-            <!-- Success Message -->
-            <div class="questionnaire-success" id="questionnaire-success">
-                <i class="fa-solid fa-circle-check"></i>
-                <h3>הבקשה נשלחה בהצלחה!</h3>
-                <p>נציג יצור איתך קשר בהקדם להתאמת מטפל</p>
-                <button class="btn btn-primary" onclick="closeQuestionnaire()" style="margin-top: 1.5rem;">
-                    <i class="fa-solid fa-check"></i>
-                    סגור
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="hero-container">
+    <section class="hero">
+        <div class="hero-content">
             <div class="hero-badge">
-                <i class="fa-solid fa-heart"></i>
-                פרויקט חברתי להנגשת טיפול נפשי
-            </div>
-            <div class="hero-icon"><i class="fa-solid fa-hands-holding-heart"></i></div>
-            <h1>מטפל לכל אחד</h1>
-            <p class="tagline">ריפוי הנפש לכל אדם</p>
-            <p class="hero-description">פרויקט שהייעוד שלו לאפשר מטפל לכל אדם שצריך ואין לו את היכולת הכלכלית, המודעות והאמון - על מנת לרפא את נפשו ונשמתו.</p>
-            <div class="cta-buttons">
-                <button onclick="openQuestionnaire()" class="btn btn-primary">
-                    <i class="fa-solid fa-heart"></i>
-                    אני רוצה מטפל
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Vision Section -->
-    <section id="vision">
-        <div class="section-header">
-            <div class="section-label">
                 <i class="fa-solid fa-sparkles"></i>
-                מי אנחנו
+                בית הספר להכשרת מטפלים
             </div>
-            <h2 class="section-title">החזון שלנו</h2>
-            <p class="section-subtitle">להיות המרכז הגדול בישראל לטיפול וריפוי אנשים, כדי שכל אדם יוכל להפיץ את האור שבתוכו</p>
-        </div>
-
-        <div class="vision-grid">
-            <div class="vision-card">
-                <div class="vision-card-header">
-                    <div class="vision-card-icon"><i class="fa-solid fa-bullseye"></i></div>
-                    <h3>הייעוד</h3>
-                </div>
-                <p>לאפשר מטפל לכל אדם שצריך ואין לו את היכולת הכלכלית, המודעות והאמון ללכת למטפלים על מנת לרפא את נפשו ונשמתו. הפרויקט מיועד בעיקר לפוסט טראומתיים, אנשים שלחמו, הלומי קרב, ניצולי נובה ועוד.</p>
-            </div>
-
-            <div class="vision-card">
-                <div class="vision-card-header">
-                    <div class="vision-card-icon"><i class="fa-solid fa-eye"></i></div>
-                    <h3>החזון</h3>
-                </div>
-                <p>להיות המרכז הגדול בישראל לטיפול וריפוי אנשים, כדי שכל אדם יוכל להפיץ את האור האלוקי שקיבל מהשם יתברך. אנחנו מאמינים שכל אדם ראוי לקבל עזרה מקצועית, ושריפוי הנפש הוא הבסיס לחברה בריאה ומאירה.</p>
-            </div>
-        </div>
-
-        <div class="values-section">
-            <h3 class="values-title">הערכים שלנו</h3>
-            <div class="values-grid">
-                <div class="value-card">
-                    <div class="value-icon"><i class="fa-solid fa-universal-access"></i></div>
-                    <h4>נגישות</h4>
-                    <p>טיפול לכל אחד ללא תלות במצב כלכלי</p>
-                </div>
-                <div class="value-card">
-                    <div class="value-icon"><i class="fa-solid fa-award"></i></div>
-                    <h4>מקצועיות</h4>
-                    <p>מטפלים מוסמכים עם הכשרה מתמשכת</p>
-                </div>
-                <div class="value-card">
-                    <div class="value-icon"><i class="fa-solid fa-shield-heart"></i></div>
-                    <h4>אמון</h4>
-                    <p>מרחב בטוח ומכיל לכל אדם</p>
-                </div>
-                <div class="value-card">
-                    <div class="value-icon"><i class="fa-solid fa-seedling"></i></div>
-                    <h4>צמיחה</h4>
-                    <p>מאמינים ביכולת של כל אדם להחלים</p>
-                </div>
-                <div class="value-card">
-                    <div class="value-icon"><i class="fa-solid fa-sun"></i></div>
-                    <h4>תקווה</h4>
-                    <p>להפיץ את האור ולהאיר את הדרך</p>
-                </div>
+            <h1>בית הספר להכשרת מטפלים<br><span>& מיזם חברתי</span></h1>
+            <p class="hero-subtitle">
+                ידע מקצועי, הכשרות מוסמכות, והמיזם החברתי שמחבר בין מטפלים מתנדבים לאנשים שזקוקים לעזרה
+            </p>
+            <div class="hero-cta">
+                <a href="pages/free-portal.html" class="btn btn-primary">
+                    <i class="fa-solid fa-play"></i>
+                    התחילו ללמוד בחינם
+                </a>
+                <a href="pages/project-lobby.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-heart"></i>
+                    למיזם החברתי
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Courses Section -->
-    <section id="courses">
+    <!-- Pillars Section -->
+    <section class="pillars">
         <div class="section-header">
             <div class="section-label">
-                <i class="fa-solid fa-graduation-cap"></i>
-                למידה והכשרה
+                <i class="fa-solid fa-layer-group"></i>
+                שלושת העמודים
             </div>
-            <h2 class="section-title">הקורסים שלנו</h2>
-            <p class="section-subtitle">למד NLP וטכניקות טיפול מתקדמות - גישה חינמית לכל התכנים</p>
+            <h2 class="section-title">מה תמצאו אצלנו?</h2>
+            <p class="section-subtitle">
+                שלוש דרכים להתפתח, ללמוד ולעשות טוב - בחרו את המסלול שמתאים לכם
+            </p>
         </div>
 
-        <div class="courses-tabs">
-            <button class="tab-btn active" onclick="showCourse('practitioner')">NLP פרקטישנר</button>
-            <button class="tab-btn" onclick="showCourse('master')">NLP מאסטר</button>
-        </div>
-
-        <!-- Practitioner Course -->
-        <div class="course-content active" id="practitioner">
-            <div class="course-header">
-                <h3>קורס NLP פרקטישנר (מלא!!)</h3>
-                <p>51 סרטונים | 7 שיעורים מקיפים | גישה חינמית מלאה</p>
+        <div class="pillars-grid">
+            <!-- Pillar 1: Free Knowledge -->
+            <div class="pillar-card">
+                <div class="pillar-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h3>ללמוד NLP בחינם</h3>
+                <p>גישה חופשית לקורס NLP מקיף ביוטיוב, חומרי לימוד להורדה, וטיפים מעשיים שתוכלו ליישם מיד</p>
+                <a href="pages/free-portal.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-play-circle"></i>
+                    לפורטל החינמי
+                </a>
             </div>
 
-            <!-- Lesson 1 -->
-            <div class="lesson-accordion">
-                <div class="lesson-header" onclick="toggleLesson(this)">
-                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 1: מבוא ל-NLP ויסודות</h4>
-                    <span class="lesson-count">8 חלקים</span>
+            <!-- Pillar 2: Professional Training -->
+            <div class="pillar-card">
+                <div class="pillar-icon">
+                    <i class="fa-solid fa-certificate"></i>
                 </div>
-                <div class="lesson-videos">
-                    <div class="video-card" onclick="playVideo('HdJTrqV-8kw')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/HdJTrqV-8kw/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 1: איך NLP יכול לשנות את חייך?</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('I4r3oERlZpc')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/I4r3oERlZpc/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 2: מהן האמונות שמסתתרות בתת המודע?</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('zGuxyfbYdUY')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/zGuxyfbYdUY/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 3: מה זה (תכל'ס) NLP?</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('fo90wrXPJjQ')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/fo90wrXPJjQ/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 4: שלוש הנחות יסוד משנות חיים</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('kccllbuObhs')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/kccllbuObhs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 5: מודע, תת מודע ומודל התקשורת</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('ahN0Q2wGVa0')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ahN0Q2wGVa0/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 6: תקשורת לא מילולית וקליברציה</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('Nt8MK8CNvYo')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/Nt8MK8CNvYo/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 7: ראפור ויצירת כימיה</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('-PMCuz1jiMk')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/-PMCuz1jiMk/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 8: סיכום השיעור</h4>
-                    </div>
-                </div>
+                <h3>הכשרת מטפלים מלאה</h3>
+                <p>תוכנית הסמכה מקצועית ל-NLP Practitioner ו-Master Practitioner עם ליווי אישי והתמחות מעשית</p>
+                <a href="pages/training.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    לפרטים והרשמה
+                </a>
             </div>
 
-            <!-- Lesson 2 -->
-            <div class="lesson-accordion">
-                <div class="lesson-header" onclick="toggleLesson(this)">
-                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 2: עמדות תפיסה ומערכות יחסים</h4>
-                    <span class="lesson-count">6 חלקים</span>
+            <!-- Pillar 3: Social Impact -->
+            <div class="pillar-card">
+                <div class="pillar-icon">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
                 </div>
-                <div class="lesson-videos">
-                    <div class="video-card" onclick="playVideo('3u52ghUdM9E')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/3u52ghUdM9E/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 1: מודל "רמות לוגיות"</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('lfDEJFV3EO0')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/lfDEJFV3EO0/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 2: הנחות יסוד במערכות יחסים</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('ldz6Kb9hqW8')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ldz6Kb9hqW8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 3: עמדת תפיסה ראשונה</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('-qk4et9hKCc')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/-qk4et9hKCc/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 4: עמדת תפיסה שנייה</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('ZxpaiqBCN-A')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ZxpaiqBCN-A/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 5: עמדת תפיסה שלישית</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('NtzzbQKPfuQ')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/NtzzbQKPfuQ/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 6: טכניקת טיול בין עמדות</h4>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lesson 3 -->
-            <div class="lesson-accordion">
-                <div class="lesson-header" onclick="toggleLesson(this)">
-                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 3: שאלות עוצמתיות והצבת מטרות</h4>
-                    <span class="lesson-count">7 חלקים</span>
-                </div>
-                <div class="lesson-videos">
-                    <div class="video-card" onclick="playVideo('5EEb8n1rkk8')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/5EEb8n1rkk8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 1: כלי ההשפעה העוצמתי ביותר</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('JlRGFcHIlaY')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/JlRGFcHIlaY/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 2: שאלות של הכללות</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('9vOt4qMDErY')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/9vOt4qMDErY/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 3: שאלות של השמטות</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('M5WYHElp77Y')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/M5WYHElp77Y/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 4: שאלות של עיוותים</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('_8wvtMUInNg')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/_8wvtMUInNg/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 5: 5 עקרונות זהב להצבת מטרה</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('HfeTbx94Z_A')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/HfeTbx94Z_A/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 6: מודל SMART</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('wxswFMy0FFs')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/wxswFMy0FFs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 7: טכניקת וולט דיסני</h4>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lesson 4 -->
-            <div class="lesson-accordion">
-                <div class="lesson-header" onclick="toggleLesson(this)">
-                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 4: השפה של המוח ומערכות ייצוג</h4>
-                    <span class="lesson-count">7 חלקים</span>
-                </div>
-                <div class="lesson-videos">
-                    <div class="video-card" onclick="playVideo('bYgv5dLr5DU')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/bYgv5dLr5DU/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 1: השפה של המוח</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('rfeUPA9HcU4')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/rfeUPA9HcU4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 2: תפיסת ההתנהגויות</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('deckGQrRYd4')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/deckGQrRYd4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 3: מערכות הייצוג של המוח</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('cSGrhFYSDmE')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/cSGrhFYSDmE/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 4: שימוש במערכות ייצוג</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('gG-3I_TcHe4')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/gG-3I_TcHe4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 5: חושים ותתי חושים (סמ"דים)</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('b_b4hhclmR8')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/b_b4hhclmR8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 6: התניות ושינוי תפיסת המציאות</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('itbteM8UjBE')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/itbteM8UjBE/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 7: שינוי הרגלים והתניות חדשות</h4>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lesson 5 -->
-            <div class="lesson-accordion">
-                <div class="lesson-header" onclick="toggleLesson(this)">
-                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 5: צרכים אנושיים ומבנה האישיות</h4>
-                    <span class="lesson-count">7 חלקים</span>
-                </div>
-                <div class="lesson-videos">
-                    <div class="video-card" onclick="playVideo('BNBPxr-Qec0')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/BNBPxr-Qec0/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 1: סיכום השיעורים האחרונים</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('h7b8sX0z4nw')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/h7b8sX0z4nw/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 2: גמישות מחשבתית וכוונה חיובית</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('mphxQlNsGYM')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/mphxQlNsGYM/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 3: מודל הצרכים האנושיים</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('Y8ulYYg5XDk')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/Y8ulYYg5XDk/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 4: סיכום מודל הצרכים</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('dNKcCwvjVWk')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/dNKcCwvjVWk/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 5: מבנה האישיות בתת המודע</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('Gp7gT4TC1n8')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/Gp7gT4TC1n8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 6: הכוח של מחשבה נכונה</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('5SDIvzco0K4')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/5SDIvzco0K4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 7: טכניקה לשינוי הרגלים</h4>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lesson 6 -->
-            <div class="lesson-accordion">
-                <div class="lesson-header" onclick="toggleLesson(this)">
-                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 6: מסגור, שליטה ברגשות ועוגנים</h4>
-                    <span class="lesson-count">8 חלקים</span>
-                </div>
-                <div class="lesson-videos">
-                    <div class="video-card" onclick="playVideo('EeGfP30AiLs')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/EeGfP30AiLs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 1: איך פרשנות עובדת? (מסגור)</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('I_tnGW-RYmE')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/I_tnGW-RYmE/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 2: שינוי פרשנות (ריפריים)</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('akbG-4zxER4')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/akbG-4zxER4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 3: יצירת פרשנות והשפעה</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('AO6lf_seCqs')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/AO6lf_seCqs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 4: פוקוס ושחרור מחשבות</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('NcSAnR6WWD4')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/NcSAnR6WWD4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 5: שליטה ברגשות - משולש הסטייט</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('bceR1CAGv34')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/bceR1CAGv34/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 6: אסטרטגיה למצבים רגשיים</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('kndSAREj7qQ')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/kndSAREj7qQ/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 7: כניסה לפוקוס ושינוי רגשי</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('X9SUBv6maGs')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/X9SUBv6maGs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 8: התניות ועוגנים פסיכולוגיים</h4>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lesson 7 -->
-            <div class="lesson-accordion">
-                <div class="lesson-header" onclick="toggleLesson(this)">
-                    <h4><i class="fa-solid fa-chevron-down"></i> שיעור 7: אמונות וציר הזמן</h4>
-                    <span class="lesson-count">8 חלקים</span>
-                </div>
-                <div class="lesson-videos">
-                    <div class="video-card" onclick="playVideo('97cbIvdEz8Q')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/97cbIvdEz8Q/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 1: רמות לוגיות - שינוי צורת חשיבה</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('ieDGCAvev4w')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ieDGCAvev4w/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 2: לעשות הכי טוב ברגע נתון</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('ySTzDrBml10')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/ySTzDrBml10/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 3: אין כשלון, יש משוב</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('zWKwwChuEfs')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/zWKwwChuEfs/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 4: אמונות מגבילות בתת המודע</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('On9odKKss24')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/On9odKKss24/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 5: סוגי האמונות בתת המודע</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('BE5RLAj1Be4')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/BE5RLAj1Be4/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 6: איך נוצרות אמונות?</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('K_JGmX8Cq-I')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/K_JGmX8Cq-I/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 7: דפוסי שפה וזיהוי אמונות</h4>
-                    </div>
-                    <div class="video-card" onclick="playVideo('EeFCN9Tddh8')">
-                        <div class="video-thumb" style="background-image: url('https://img.youtube.com/vi/EeFCN9Tddh8/mqdefault.jpg')"><i class="fa-solid fa-play"></i></div>
-                        <h4>חלק 8: טכניקת ציר הזמן</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Video Modal -->
-        <div id="videoModal" class="video-modal" onclick="closeVideo()">
-            <div class="video-modal-content" onclick="event.stopPropagation()">
-                <span class="close-video" onclick="closeVideo()">&times;</span>
-                <iframe id="videoFrame" src="" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-            </div>
-        </div>
-
-        <!-- Master Course -->
-        <div class="course-content" id="master">
-            <div class="course-header">
-                <h3>קורס NLP מאסטר</h3>
-                <p>הרמה המתקדמת - טכניקות מעמיקות ומורכבות</p>
-            </div>
-            <div class="videos-grid">
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 1: עקרונות מתקדמים</h4>
-                </div>
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 2: קו זמן</h4>
-                </div>
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 3: מטא-תכניות</h4>
-                </div>
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 4: מודלינג</h4>
-                </div>
-                <div class="video-card">
-                    <div class="video-placeholder"><i class="fa-solid fa-play"></i></div>
-                    <h4>שיעור 5: אינטגרציה</h4>
-                </div>
+                <h3>מיזם מטפל לכל אחד</h3>
+                <p>המיזם החברתי שמחבר בין מטפלים מתנדבים לאנשים שזקוקים לטיפול נפשי ואין להם יכולת כלכלית</p>
+                <a href="pages/project-lobby.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-heart"></i>
+                    למיזם החברתי
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Want Therapist Section -->
-    <section id="want-therapist">
+    <!-- Features Section -->
+    <section class="features">
         <div class="section-header">
             <div class="section-label">
-                <i class="fa-solid fa-heart"></i>
-                בשבילך
+                <i class="fa-solid fa-star"></i>
+                למה אנחנו
             </div>
-            <h2 class="section-title">אני רוצה מטפל</h2>
-            <p class="section-subtitle">אנחנו כאן בשבילך - הצעד הראשון לריפוי מתחיל כאן</p>
+            <h2 class="section-title">הייחודיות שלנו</h2>
         </div>
 
-        <div class="therapist-content">
-            <div class="steps-container">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h4>מילוי שאלון היכרות</h4>
-                        <p>שאלון קצר שיעזור לנו להכיר אותך ולהבין את הצרכים שלך</p>
-                    </div>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-users"></i>
                 </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h4>התאמת מטפל</h4>
-                        <p>נתאים לך מטפל מתאים מצוות המטפלים המקצועי שלנו</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h4>פגישת היכרות</h4>
-                        <p>פגישה ראשונה להיכרות ויצירת קשר עם המטפל</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                        <h4>תהליך טיפולי</h4>
-                        <p>מסע משותף לריפוי וצמיחה בקצב שלך</p>
-                    </div>
-                </div>
+                <h4>קהילה תומכת</h4>
+                <p>קהילה של מטפלים ותלמידים שתומכים אחד בשני</p>
             </div>
-
-            <div class="benefits-section">
-                <h3 class="benefits-title">מה מקבלים?</h3>
-                <div class="benefits-grid">
-                    <div class="benefit-card">
-                        <div class="benefit-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
-                        <h4>טיפול ללא עלות</h4>
-                        <p>המטפלים שלנו מתנדבים</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon"><i class="fa-solid fa-building"></i></div>
-                        <h4>קליניקות בפריסה ארצית</h4>
-                        <p>מרחב פיזי נוח וזמין</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon"><i class="fa-solid fa-user-doctor"></i></div>
-                        <h4>מטפלים מקצועיים</h4>
-                        <p>עם הכשרה ופיקוח</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon"><i class="fa-solid fa-calendar-check"></i></div>
-                        <h4>אירועים וסדנאות</h4>
-                        <p>הרצאות וריטריטים בעלות סמלית</p>
-                    </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-book-open"></i>
                 </div>
+                <h4>תוכן איכותי</h4>
+                <p>חומרי לימוד מקצועיים מבוססי מחקר ונסיון</p>
             </div>
-
-            <div class="cta-center">
-                <button onclick="openQuestionnaire()" class="btn btn-primary">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                    מלא שאלון התאמה
-                </button>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                </div>
+                <h4>השפעה חברתית</h4>
+                <p>כל לימוד תורם לעזרה לאנשים שזקוקים</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-medal"></i>
+                </div>
+                <h4>הסמכה מוכרת</h4>
+                <p>תעודות הסמכה בינלאומיות ב-NLP</p>
             </div>
         </div>
     </section>
 
-    <!-- Become Therapist Section -->
-    <section id="become-therapist">
-        <div class="section-header">
-            <div class="section-label">
-                <i class="fa-solid fa-hand-holding-heart"></i>
-                הצטרף אלינו
+    <!-- CTA Section -->
+    <section class="cta-section" id="contact">
+        <div class="cta-box">
+            <h2>מוכנים להתחיל?</h2>
+            <p>בין אם אתם רוצים ללמוד, להתפתח מקצועית, או לעזור לאחרים - יש לנו מקום בשבילכם</p>
+            <div class="hero-cta">
+                <a href="pages/free-portal.html" class="btn btn-primary">
+                    <i class="fa-solid fa-play"></i>
+                    התחילו בחינם
+                </a>
+                <a href="pages/training.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-info-circle"></i>
+                    מידע על ההכשרות
+                </a>
             </div>
-            <h2 class="section-title">אני רוצה להיות מטפל</h2>
-            <p class="section-subtitle">הצטרף לצוות המטפלים שלנו ותן מעצמך לאחרים</p>
-        </div>
-
-        <div class="become-content">
-            <div class="two-columns">
-                <div class="info-card">
-                    <div class="info-card-header">
-                        <div class="info-card-icon"><i class="fa-solid fa-gift"></i></div>
-                        <h3>מה תקבל?</h3>
-                    </div>
-                    <ul>
-                        <li>ידע מקצועי והכשרות מתמשכות</li>
-                        <li>העשרות מאנשי מקצוע מובילים</li>
-                        <li>שעות קליניקה בפריסה ארצית</li>
-                        <li>ליווי מקצועי</li>
-                        <li>חלק מקהילה משמעותית</li>
-                        <li>תעודות הכשרה מוכרות</li>
-                    </ul>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-header">
-                        <div class="info-card-icon"><i class="fa-solid fa-handshake"></i></div>
-                        <h3>מה נבקש ממך?</h3>
-                    </div>
-                    <ul>
-                        <li>התחייבות לחצי שנה לפחות</li>
-                        <li>20 שעות טיפול בחודש</li>
-                        <li>השתתפות בהכשרות ומפגשים</li>
-                        <li>חתימה על הסכם התחייבות</li>
-                        <li>3 אנשי קשר להמלצה</li>
-                        <li>פתיחות למשוב ושיפור מתמיד</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="highlight-box">
-                <h3>למה להצטרף אלינו?</h3>
-                <p>להיות חלק ממשהו גדול מעצמך. לעזור לאנשים שבאמת צריכים. לצמוח מקצועית ואישית. להפיץ את האור.</p>
-                <button onclick="openTherapistForm()" class="btn btn-primary">
-                    <i class="fa-solid fa-user-plus"></i>
-                    הגש בקשת הצטרפות
-                </button>
-            </div>
-
-            <div class="process-section">
-                <h3 class="process-title">תהליך הקבלה</h3>
-                <div class="process-steps">
-                    <span>שליחת פרטים</span>
-                    <span class="process-arrow">←</span>
-                    <span>שיחת היכרות</span>
-                    <span class="process-arrow">←</span>
-                    <span>בדיקת המלצות</span>
-                    <span class="process-arrow">←</span>
-                    <span>הכשרה ראשונית</span>
-                    <span class="process-arrow">←</span>
-                    <span>הצטרפות לצוות</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact">
-        <div class="section-header">
-            <div class="section-label">
-                <i class="fa-solid fa-envelope"></i>
-                בואו נדבר
-            </div>
-            <h2 class="section-title">צור קשר</h2>
-            <p class="section-subtitle">אנחנו כאן בשבילך - בוא נדבר</p>
-        </div>
-
-        <div class="contact-cards">
-            <div class="contact-card">
-                <div class="contact-icon"><i class="fa-brands fa-whatsapp"></i></div>
-                <span>וואטסאפ</span>
-                <a href="https://wa.me/972549116092">054-911-6092</a>
-            </div>
-            <div class="contact-card">
-                <div class="contact-icon"><i class="fa-solid fa-globe"></i></div>
-                <span>אתר</span>
-                <a href="#">therapistforeveryone.com</a>
-            </div>
-        </div>
-
-        <div class="contact-cta">
-            <a href="https://wa.me/972549116092" class="btn btn-primary">
-                <i class="fa-brands fa-whatsapp"></i>
-                שלח לנו הודעה בוואטסאפ
-            </a>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer>
-        <div class="footer-logo">
-            <div class="logo-icon"><i class="fa-solid fa-hands-holding-heart"></i></div>
-            <span>מטפל לכל אחד</span>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <div class="logo-text">מטפל <span>לכל אחד</span></div>
+                </a>
+                <p>בית הספר להכשרת מטפלים והמיזם החברתי שמנגיש טיפול נפשי לכולם</p>
+            </div>
+
+            <div class="footer-links">
+                <h4>ניווט מהיר</h4>
+                <ul>
+                    <li><a href="index.html">דף הבית</a></li>
+                    <li><a href="pages/about.html">מי אנחנו</a></li>
+                    <li><a href="pages/free-portal.html">קורסים בחינם</a></li>
+                    <li><a href="pages/training.html">הכשרת מטפלים</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>המיזם החברתי</h4>
+                <ul>
+                    <li><a href="pages/project-lobby.html">אני רוצה מטפל</a></li>
+                    <li><a href="pages/project-lobby.html">אני רוצה להתנדב</a></li>
+                    <li><a href="pages/about.html">על המיזם</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>משפטי</h4>
+                <ul>
+                    <li><a href="privacy-policy.html">מדיניות פרטיות</a></li>
+                    <li><a href="legal-gate.html">תנאי שימוש</a></li>
+                </ul>
+            </div>
         </div>
-        <p class="footer-tagline">ריפוי הנפש לכל אדם</p>
-        <p class="footer-copyright">© 2026 כל הזכויות שמורות</p>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 מטפל לכל אחד. כל הזכויות שמורות.</p>
+        </div>
     </footer>
 
-    <script>
-        // Create floating particles
-        function createParticles() {
-            const container = document.getElementById('particles');
-            const particleCount = 25;
-
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-                container.appendChild(particle);
-            }
-        }
-        createParticles();
-
-        // Navigation scroll effect
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('nav');
-            if (window.scrollY > 50) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-        });
-
-        // Toggle mobile menu
-        function toggleMenu() {
-            const hamburger = document.querySelector('.hamburger');
-            const navLinks = document.querySelector('.nav-links');
-
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('active');
-
-            // הצג/הסתר כפתורי Auth במובייל
-            const authButtons = document.getElementById('auth-buttons');
-            if (authButtons && window.innerWidth <= 900) {
-                authButtons.classList.toggle('mobile-show');
-            }
-        }
-
-        // Course tabs
-        function showCourse(courseId) {
-            document.querySelectorAll('.course-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(courseId).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    document.querySelector('.nav-links').classList.remove('active');
-                }
-            });
-        });
-
-        // Toggle lesson accordion
-        function toggleLesson(header) {
-            const accordion = header.parentElement;
-            document.querySelectorAll('.lesson-accordion').forEach(a => {
-                if (a !== accordion) a.classList.remove('open');
-            });
-            accordion.classList.toggle('open');
-        }
-
-        // Play video in modal
-        function playVideo(videoId) {
-            const modal = document.getElementById('videoModal');
-            const iframe = document.getElementById('videoFrame');
-            iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Close video modal
-        function closeVideo() {
-            const modal = document.getElementById('videoModal');
-            const iframe = document.getElementById('videoFrame');
-            iframe.src = '';
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeVideo();
-        });
-
-        // Intersection Observer for reveal animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.vision-card, .value-card, .step, .benefit-card, .info-card').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-            observer.observe(el);
-        });
-
-        // ============================================================================
-        // Supabase Integration
-        // ============================================================================
-
-        const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
-
-        // ============================================================================
-        // Context Aware Signup - Pending Action State
-        // ============================================================================
-        let pendingAction = null; // 'patient' | 'therapist' | null
-
-        // Initialize Supabase
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // ============================================================================
-        // Auth Functions
-        // ============================================================================
-
-        // Open auth modal
-        function openAuthModal(type) {
-            document.getElementById('auth-modal').classList.add('active');
-            switchAuthForm(type);
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Close auth modal
-        function closeAuthModal() {
-            document.getElementById('auth-modal').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // Role selection modal functions
-        function openRoleModal() {
-            document.getElementById('role-modal').classList.add('active');
-        }
-
-        function closeRoleModal() {
-            document.getElementById('role-modal').classList.remove('active');
-        }
-
-        async function selectRoleAndContinue(role) {
-            try {
-                showLoading();
-                const { data: { user } } = await supabaseClient.auth.getUser();
-
-                if (user) {
-                    // Update profile with role
-                    await supabaseClient
-                        .from('profiles')
-                        .update({ role: role })
-                        .eq('id', user.id);
-                }
-
-                closeRoleModal();
-                showToast('מעולה! מעביר אותך להשלמת הפרטים...', 'success');
-
-                // Redirect based on role
-                setTimeout(() => {
-                    if (role === 'therapist') {
-                        window.location.href = 'pages/join-therapist.html';
-                    } else {
-                        window.location.href = 'pages/join-patient.html';
-                    }
-                }, 1000);
-
-            } catch (error) {
-                console.error('Error setting role:', error);
-                showToast('שגיאה בשמירת הבחירה', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Check if user needs role selection (for OAuth users)
-        async function checkUserNeedsRoleSelection(userId) {
-            try {
-                const { data: profile } = await supabaseClient
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', userId)
-                    .single();
-
-                // If role is null, 'student' (default), or empty - needs selection
-                if (!profile?.role || profile.role === 'student' || profile.role === '') {
-                    return true;
-                }
-
-                return false;
-            } catch (error) {
-                console.error('Error checking user role:', error);
-                return true; // Assume needs selection on error
-            }
-        }
-
-        // Switch between login and signup forms
-        function switchAuthForm(type) {
-            document.getElementById('login-form').style.display = type === 'login' ? 'block' : 'none';
-            document.getElementById('signup-form').style.display = type === 'signup' ? 'block' : 'none';
-        }
-
-        // Handle login
-        async function handleLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            try {
-                showLoading();
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email,
-                    password
-                });
-
-                if (error) throw error;
-
-                // If there's a pending action, let onAuthStateChange handle it
-                if (!pendingAction) {
-                    closeAuthModal();
-                    showToast('התחברת בהצלחה!', 'success');
-                }
-                // Otherwise onAuthStateChange will close modal and open the right form
-            } catch (error) {
-                console.error('Login error:', error);
-                showToast(error.message || 'שגיאה בהתחברות', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Handle signup
-        async function handleSignup(event) {
-            event.preventDefault();
-            const name = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const phone = document.getElementById('signup-phone').value;
-            const password = document.getElementById('signup-password').value;
-            const role = document.querySelector('input[name="signup-role"]:checked').value;
-
-            try {
-                showLoading();
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: {
-                            full_name: name,
-                            phone: phone,
-                            role: role
-                        }
-                    }
-                });
-
-                if (error) throw error;
-
-                // Update profile with role (in case trigger didn't set it)
-                if (data.user) {
-                    await supabaseClient
-                        .from('profiles')
-                        .update({
-                            role: role,
-                            full_name: name,
-                            phone: phone
-                        })
-                        .eq('id', data.user.id);
-                }
-
-                closeAuthModal();
-                showToast('נרשמת בהצלחה! מעביר אותך להשלמת הפרטים...', 'success');
-
-                // Redirect based on role
-                setTimeout(() => {
-                    if (role === 'therapist') {
-                        window.location.href = 'pages/join-therapist.html';
-                    } else {
-                        window.location.href = 'pages/join-patient.html';
-                    }
-                }, 1500);
-
-            } catch (error) {
-                console.error('Signup error:', error);
-                showToast(error.message || 'שגיאה בהרשמה', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Handle Google login
-        async function handleGoogleLogin() {
-            try {
-                // Save pending action to localStorage for OAuth redirect flow
-                if (pendingAction) {
-                    localStorage.setItem('pendingAction', pendingAction);
-                }
-
-                const { data, error } = await supabaseClient.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: window.location.origin
-                    }
-                });
-
-                if (error) throw error;
-            } catch (error) {
-                console.error('Google login error:', error);
-                showToast('שגיאה בהתחברות עם Google', 'error');
-            }
-        }
-
-        // Handle logout
-        async function handleLogout() {
-            try {
-                const { error } = await supabaseClient.auth.signOut();
-                if (error) throw error;
-                showToast('התנתקת בהצלחה', 'success');
-                document.getElementById('user-dropdown').classList.remove('active');
-            } catch (error) {
-                console.error('Logout error:', error);
-                showToast('שגיאה בהתנתקות', 'error');
-            }
-        }
-
-        // Toggle user dropdown
-        function toggleUserDropdown() {
-            document.getElementById('user-dropdown').classList.toggle('active');
-        }
-
-        // Open dashboard (placeholder)
-        function openDashboard() {
-            showToast('האזור האישי בפיתוח', 'info');
-        }
-
-        // Update UI based on auth state
-        function updateAuthUI(user) {
-            const authButtons = document.getElementById('auth-buttons');
-            const userMenu = document.getElementById('user-menu');
-            const userName = userMenu.querySelector('.user-name');
-
-            if (user) {
-                authButtons.style.display = 'none';
-                userMenu.style.display = 'flex';
-                userName.textContent = user.user_metadata?.full_name || user.email?.split('@')[0] || 'משתמש';
-            } else {
-                authButtons.style.display = 'flex';
-                userMenu.style.display = 'none';
-            }
-        }
-
-        // ============================================================================
-        // Course Progress Functions
-        // ============================================================================
-
-        // Mark video as watched
-        async function markVideoWatched(videoId, lessonNumber) {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
-
-            try {
-                await supabaseClient.from('course_progress').upsert({
-                    user_id: user.id,
-                    video_id: videoId,
-                    course_type: 'practitioner',
-                    lesson_number: lessonNumber,
-                    completed: true,
-                    completed_at: new Date().toISOString()
-                }, {
-                    onConflict: 'user_id,video_id'
-                });
-
-                // Update UI
-                const videoCard = document.querySelector(`[onclick="playVideo('${videoId}')"]`);
-                if (videoCard) {
-                    videoCard.classList.add('watched');
-                }
-
-                updateCourseProgress();
-            } catch (error) {
-                console.error('Error marking video watched:', error);
-            }
-        }
-
-        // Load watched videos
-        async function loadWatchedVideos() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('course_progress')
-                    .select('video_id')
-                    .eq('user_id', user.id)
-                    .eq('completed', true);
-
-                if (error) throw error;
-
-                data.forEach(item => {
-                    const videoCard = document.querySelector(`[onclick="playVideo('${item.video_id}')"]`);
-                    if (videoCard) {
-                        videoCard.classList.add('watched');
-                    }
-                });
-
-                updateCourseProgress();
-            } catch (error) {
-                console.error('Error loading watched videos:', error);
-            }
-        }
-
-        // Update course progress bar
-        async function updateCourseProgress() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
-
-            const totalVideos = 51; // Total videos in practitioner course
-            const watchedCards = document.querySelectorAll('.video-card.watched').length;
-            const percentage = Math.round((watchedCards / totalVideos) * 100);
-
-            // Create or update progress bar
-            let progressContainer = document.getElementById('course-progress-container');
-            if (!progressContainer) {
-                progressContainer = document.createElement('div');
-                progressContainer.id = 'course-progress-container';
-                progressContainer.innerHTML = `
-                    <div class="course-progress-bar">
-                        <div class="course-progress-fill" style="width: 0%"></div>
-                    </div>
-                    <p class="course-progress-text">התקדמות: <span>0</span>%</p>
-                `;
-                const courseHeader = document.querySelector('#practitioner .course-header');
-                if (courseHeader) {
-                    courseHeader.appendChild(progressContainer);
-                }
-            }
-
-            progressContainer.querySelector('.course-progress-fill').style.width = percentage + '%';
-            progressContainer.querySelector('.course-progress-text span').textContent = percentage;
-        }
-
-        // Override playVideo to track progress
-        const originalPlayVideo = playVideo;
-        playVideo = function(videoId) {
-            originalPlayVideo(videoId);
-
-            // Mark as watched after 10 seconds
-            setTimeout(() => {
-                const lessonAccordion = document.querySelector('.lesson-accordion.open');
-                const lessonNumber = lessonAccordion ?
-                    Array.from(document.querySelectorAll('.lesson-accordion')).indexOf(lessonAccordion) + 1 : 1;
-                markVideoWatched(videoId, lessonNumber);
-            }, 10000);
-        };
-
-        // ============================================================================
-        // Contact Form with Supabase
-        // ============================================================================
-
-        async function submitContactRequest(type, data) {
-            try {
-                const { error } = await supabaseClient.from('contact_requests').insert({
-                    request_type: type,
-                    name: data.name,
-                    phone: data.phone,
-                    email: data.email || null,
-                    message: data.message || null
-                });
-
-                if (error) throw error;
-                showToast('הבקשה נשלחה בהצלחה! נחזור אליך בהקדם.', 'success');
-                return true;
-            } catch (error) {
-                console.error('Error submitting contact:', error);
-                showToast('שגיאה בשליחת הבקשה', 'error');
-                return false;
-            }
-        }
-
-        // ============================================================================
-        // UI Helper Functions
-        // ============================================================================
-
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                padding: 1rem 2rem;
-                border-radius: 10px;
-                color: white;
-                font-weight: 500;
-                z-index: 9999;
-                animation: slideUp 0.3s ease-out;
-                background: ${type === 'success' ? '#2F8592' : type === 'error' ? '#FF6F61' : '#00606B'};
-            `;
-
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideUp {
-                    from { opacity: 0; transform: translate(-50%, 20px); }
-                    to { opacity: 1; transform: translate(-50%, 0); }
-                }
-            `;
-            document.head.appendChild(style);
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translate(-50%, 20px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        function showLoading() {
-            const loader = document.createElement('div');
-            loader.id = 'global-loader';
-            loader.innerHTML = `
-                <div style="
-                    position: fixed;
-                    inset: 0;
-                    background: rgba(0, 59, 70, 0.9);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 9999;
-                ">
-                    <div style="
-                        width: 50px;
-                        height: 50px;
-                        border: 3px solid rgba(212, 175, 55, 0.3);
-                        border-top-color: #D4AF37;
-                        border-radius: 50%;
-                        animation: spin 1s linear infinite;
-                    "></div>
-                </div>
-            `;
-            document.body.appendChild(loader);
-        }
-
-        function hideLoading() {
-            const loader = document.getElementById('global-loader');
-            if (loader) loader.remove();
-        }
-
-        // ============================================================================
-        // Initialize Auth Listener
-        // ============================================================================
-
-        supabaseClient.auth.onAuthStateChange(async (event, session) => {
-            console.log('Auth state changed:', event);
-            updateAuthUI(session?.user);
-
-            if (session?.user) {
-                loadWatchedVideos();
-
-                // Check if new user needs to select role (for OAuth users)
-                if (event === 'SIGNED_IN') {
-                    const needsRole = await checkUserNeedsRoleSelection(session.user.id);
-                    if (needsRole && !pendingAction) {
-                        // Small delay to ensure UI is ready
-                        setTimeout(() => {
-                            closeAuthModal();
-                            openRoleModal();
-                        }, 300);
-                        return; // Don't process pending action, let role modal handle it
-                    }
-                }
-
-                // Context Aware Signup: Handle pending action after login/signup
-                if (event === 'SIGNED_IN' && pendingAction) {
-                    // Small delay to ensure UI is ready
-                    setTimeout(() => {
-                        closeAuthModal();
-
-                        if (pendingAction === 'patient') {
-                            showToast('מעולה! עכשיו אפשר למלא את השאלון', 'success');
-                            openQuestionnaire();
-                        } else if (pendingAction === 'therapist') {
-                            showToast('מעולה! מעביר אותך לדף ההרשמה למטפלים...', 'success');
-                            // Redirect to therapist onboarding page
-                            window.location.href = 'pages/join-therapist.html';
-                        }
-
-                        // Clear pending action
-                        pendingAction = null;
-                    }, 500);
-                }
-            }
-        });
-
-        // Check initial auth state and handle OAuth redirect
-        supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
-            updateAuthUI(session?.user);
-            if (session?.user) {
-                loadWatchedVideos();
-
-                // Check for pending action from localStorage (OAuth redirect flow)
-                const storedPendingAction = localStorage.getItem('pendingAction');
-
-                // First check if user needs role selection (OAuth first-time users)
-                const needsRole = await checkUserNeedsRoleSelection(session.user.id);
-                if (needsRole && !storedPendingAction) {
-                    // Show role selection modal for new OAuth users
-                    setTimeout(() => {
-                        openRoleModal();
-                    }, 300);
-                    return;
-                }
-
-                if (storedPendingAction) {
-                    localStorage.removeItem('pendingAction');
-
-                    setTimeout(() => {
-                        if (storedPendingAction === 'patient') {
-                            showToast('מעולה! עכשיו אפשר למלא את השאלון', 'success');
-                            openQuestionnaire();
-                        } else if (storedPendingAction === 'therapist') {
-                            showToast('מעולה! מעביר אותך לדף ההרשמה למטפלים...', 'success');
-                            // Redirect to therapist onboarding page
-                            window.location.href = 'pages/join-therapist.html';
-                        }
-                    }, 500);
-                }
-            }
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.user-menu')) {
-                document.getElementById('user-dropdown').classList.remove('active');
-            }
-        });
-
-        // Close modals with Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAuthModal();
-                closeRoleModal();
-                closeQuestionnaire();
-            }
-        });
-
-        // ============================================================================
-        // Patient Questionnaire Functions
-        // ============================================================================
-
-        // Open questionnaire - works for everyone (no login required)
-        async function openQuestionnaire() {
-            // Redirect to patient registration flow (with intro page about trust)
-            window.location.href = 'pages/join-patient.html';
-        }
-
-        // Close questionnaire
-        function closeQuestionnaire() {
-            document.getElementById('questionnaire-modal').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // Handle city selection change
-        document.getElementById('q-city').addEventListener('change', function() {
-            const otherGroup = document.getElementById('other-city-group');
-            const otherInput = document.getElementById('q-other-city');
-
-            if (this.value === 'other') {
-                otherGroup.style.display = 'block';
-                otherInput.required = true;
-            } else {
-                otherGroup.style.display = 'none';
-                otherInput.required = false;
-            }
-        });
-
-        // Submit questionnaire to Supabase (works with or without login)
-        async function submitQuestionnaire(event) {
-            event.preventDefault();
-
-            // Get form values
-            const name = document.getElementById('q-name').value.trim();
-            let city = document.getElementById('q-city').value;
-            if (city === 'other') {
-                city = document.getElementById('q-other-city').value;
-            }
-            const phone = document.getElementById('q-phone').value.trim();
-            const reason = document.getElementById('q-reason').value.trim();
-            const genderPreference = document.getElementById('q-gender-preference').value || null;
-
-            // Validate
-            if (!name || name.length < 2) {
-                showToast('אנא הזינו שם מלא', 'error');
-                return;
-            }
-            if (!phone || phone.length < 9) {
-                showToast('אנא הזינו מספר טלפון תקין', 'error');
-                return;
-            }
-
-            try {
-                showLoading();
-
-                const { data: { user } } = await supabaseClient.auth.getUser();
-
-                if (user) {
-                    // LOGGED IN USER - Full flow with patients table
-                    await supabaseClient
-                        .from('profiles')
-                        .update({ phone: phone, full_name: name })
-                        .eq('id', user.id);
-
-                    const { error } = await supabaseClient
-                        .from('patients')
-                        .insert({
-                            user_id: user.id,
-                            occupation: city,
-                            main_concern: reason,
-                            preferred_therapist_gender: genderPreference,
-                            status: 'pending',
-                            intake_completed: true
-                        });
-
-                    if (error) throw error;
-
-                    // Also create contact request for notification
-                    await supabaseClient
-                        .from('contact_requests')
-                        .insert({
-                            full_name: name,
-                            phone: phone,
-                            email: user.email,
-                            request_type: 'patient',
-                            city: city,
-                            status: 'new',
-                            source: 'index-questionnaire',
-                            message: `סיבת פנייה: ${reason}\nהעדפת מגדר: ${genderPreference || 'אין'}`
-                        });
-                } else {
-                    // ANONYMOUS USER - Save as lead to contact_requests only
-                    const { error } = await supabaseClient
-                        .from('contact_requests')
-                        .insert({
-                            full_name: name,
-                            phone: phone,
-                            request_type: 'patient',
-                            city: city,
-                            status: 'new',
-                            source: 'index-questionnaire',
-                            message: `סיבת פנייה: ${reason}\nהעדפת מגדר: ${genderPreference || 'אין'}`
-                        });
-
-                    if (error) throw error;
-                }
-
-                // Show success
-                document.getElementById('questionnaire-form-container').style.display = 'none';
-                document.getElementById('questionnaire-success').classList.add('active');
-
-                showToast('הבקשה נשלחה בהצלחה!', 'success');
-
-            } catch (error) {
-                console.error('Error submitting questionnaire:', error);
-                showToast('שגיאה בשליחת הבקשה. נסה שוב.', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // ============================================================================
-        // Therapist Registration Functions
-        // ============================================================================
-
-        // Open therapist registration form - no login required
-        function openTherapistForm() {
-            // Redirect to therapist onboarding page (works without login)
-            window.location.href = 'pages/join-therapist.html';
-        }
-
-        // Close modals with Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAuthModal();
-                closeQuestionnaire();
-            }
-        });
-    </script>
-    <!-- Marketing & Analytics -->
+    <!-- Marketing Tools -->
     <script src="js/marketing-tools.js"></script>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>

@@ -408,6 +408,83 @@
             opacity: 0.9;
         }
 
+        /* Thumbnail Preview (Fast Load) */
+        .video-thumbnail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: none;
+        }
+
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-thumbnail .play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--sidebar-dark);
+            box-shadow: 0 8px 30px var(--gold-glow);
+            transition: all 0.3s;
+        }
+
+        .video-thumbnail:hover .play-btn {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 12px 40px var(--gold-glow);
+        }
+
+        .video-thumbnail .play-btn i {
+            margin-right: -4px;
+        }
+
+        /* Loading Spinner */
+        .video-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--sidebar-dark) 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: var(--pure-white);
+        }
+
+        .video-loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(212, 175, 55, 0.2);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Tabs Section */
         .tabs-section {
             background: var(--pure-white);
@@ -927,6 +1004,16 @@
                         <i class="fa-solid fa-play-circle"></i>
                         <p>בחרו שיעור מהתפריט כדי להתחיל</p>
                     </div>
+                    <div class="video-thumbnail" id="videoThumbnail" onclick="playVideo()">
+                        <img id="thumbnailImg" src="" alt="Video thumbnail">
+                        <div class="play-btn">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="video-loading" id="videoLoading">
+                        <div class="spinner"></div>
+                        <p>טוען את הסרטון...</p>
+                    </div>
                     <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="display: none;"></iframe>
                 </div>
 
@@ -1183,6 +1270,7 @@
         // ===== State =====
         let currentModuleIndex = 0;
         let currentLessonIndex = 0;
+        let currentVideoId = null;
         let completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
         let isRegistered = localStorage.getItem('isStudentRegistered') === 'true';
         let toastShown = false;
@@ -1252,13 +1340,27 @@
             currentLessonIndex = lessonIndex;
 
             const lesson = modules[moduleIndex].lessons[lessonIndex];
+            currentVideoId = lesson.id;
 
-            // Update video
+            // Show thumbnail (fast loading)
             const player = document.getElementById('videoPlayer');
             const placeholder = document.getElementById('videoPlaceholder');
-            player.src = `https://www.youtube.com/embed/${lesson.id}?autoplay=1&rel=0`;
-            player.style.display = 'block';
+            const thumbnail = document.getElementById('videoThumbnail');
+            const thumbnailImg = document.getElementById('thumbnailImg');
+            const loading = document.getElementById('videoLoading');
+
+            // Hide everything, show thumbnail
+            player.style.display = 'none';
+            player.src = '';
             placeholder.style.display = 'none';
+            loading.classList.remove('active');
+
+            // Load thumbnail (maxresdefault or hqdefault as fallback)
+            thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/maxresdefault.jpg`;
+            thumbnailImg.onerror = () => {
+                thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/hqdefault.jpg`;
+            };
+            thumbnail.style.display = 'block';
 
             // Update UI
             document.getElementById('currentLessonTitle').textContent = lesson.title;
@@ -1269,9 +1371,6 @@
             document.querySelectorAll('.lesson-item').forEach(item => item.classList.remove('active'));
             document.querySelector(`.lesson-item[data-module="${moduleIndex}"][data-lesson="${lessonIndex}"]`).classList.add('active');
 
-            // Mark as completed after some time
-            setTimeout(() => markLessonCompleted(moduleIndex, lessonIndex), 30000);
-
             // Update nav buttons
             updateNavButtons();
 
@@ -1279,6 +1378,31 @@
             if (window.innerWidth <= 1024) {
                 document.getElementById('sidebar').classList.remove('open');
             }
+        }
+
+        // ===== Play Video (on thumbnail click) =====
+        function playVideo() {
+            if (!currentVideoId) return;
+
+            const player = document.getElementById('videoPlayer');
+            const thumbnail = document.getElementById('videoThumbnail');
+            const loading = document.getElementById('videoLoading');
+
+            // Show loading
+            thumbnail.style.display = 'none';
+            loading.classList.add('active');
+
+            // Load iframe
+            player.src = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0`;
+
+            // When iframe loads, hide loading and show player
+            player.onload = () => {
+                loading.classList.remove('active');
+                player.style.display = 'block';
+
+                // Mark as completed after watching
+                setTimeout(() => markLessonCompleted(currentModuleIndex, currentLessonIndex), 30000);
+            };
         }
 
         // ===== Mark Lesson Completed =====

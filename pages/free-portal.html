@@ -940,6 +940,233 @@
             color: white;
         }
 
+        /* ===== Auth Component Styles ===== */
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.8rem;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .auth-tab:hover {
+            color: var(--dusty-aqua);
+        }
+
+        .auth-tab.active {
+            color: var(--deep-petrol);
+        }
+
+        .auth-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-gold);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .auth-panel {
+            display: none;
+        }
+
+        .auth-panel.active {
+            display: block;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--pure-white);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .google-btn:hover {
+            border-color: var(--dusty-aqua);
+            background: var(--light-gray);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .google-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .google-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-light);
+        }
+
+        .auth-divider span {
+            padding: 0 1rem;
+        }
+
+        .email-toggle-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: none;
+            border: 2px solid var(--dusty-aqua);
+            border-radius: 12px;
+            color: var(--dusty-aqua);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .email-toggle-btn:hover {
+            background: var(--dusty-aqua);
+            color: var(--pure-white);
+        }
+
+        .auth-form-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .auth-form-actions button {
+            flex: 1;
+            padding: 0.9rem;
+            border-radius: 50px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-btn-primary {
+            background: var(--gradient-gold);
+            border: none;
+            color: var(--sidebar-dark);
+        }
+
+        .auth-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--gold-glow);
+        }
+
+        .auth-btn-secondary {
+            background: none;
+            border: 2px solid var(--dusty-aqua);
+            color: var(--dusty-aqua);
+        }
+
+        .auth-btn-secondary:hover {
+            background: var(--dusty-aqua);
+            color: var(--pure-white);
+        }
+
+        .auth-btn-primary:disabled,
+        .auth-btn-secondary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-error {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+            text-align: right;
+        }
+
+        .auth-error.show {
+            display: block;
+        }
+
+        .back-to-social {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .back-to-social button {
+            background: none;
+            border: none;
+            color: var(--dusty-aqua);
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .back-to-social button:hover {
+            color: var(--deep-petrol);
+        }
+
+        .user-badge {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--gold);
+        }
+
+        .user-badge.show {
+            display: flex;
+        }
+
+        .user-badge i {
+            font-size: 0.9rem;
+        }
+
         /* Toast */
         .toast {
             position: fixed;
@@ -1275,7 +1502,7 @@
         <i class="fa-solid fa-list"></i>
     </button>
 
-    <!-- Registration Modal -->
+    <!-- Auth Modal -->
     <div class="modal-overlay" id="registrationModal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeModal()">
@@ -1285,35 +1512,84 @@
                 <i class="fa-solid fa-gift"></i>
             </div>
             <h2>קבלו גישה מלאה בחינם!</h2>
-            <p class="subtitle">השאירו פרטים וקבלו גישה לכל התכנים הבונוס</p>
+            <p class="subtitle">התחברו כדי לקבל גישה לכל התכנים הבונוס</p>
 
             <ul class="benefits-list">
                 <li><i class="fa-solid fa-check-circle"></i> חוברת עבודה PDF להורדה</li>
                 <li><i class="fa-solid fa-check-circle"></i> מורה AI אישי לתרגול</li>
-                <li><i class="fa-solid fa-check-circle"></i> עדכונים על תכנים חדשים</li>
+                <li><i class="fa-solid fa-check-circle"></i> שמירת התקדמות אוטומטית</li>
             </ul>
 
-            <form id="registrationForm" onsubmit="handleRegistration(event)">
-                <div class="form-group">
-                    <input type="text" id="regName" placeholder="שם מלא" required>
-                </div>
-                <div class="form-group">
-                    <input type="tel" id="regPhone" placeholder="טלפון" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" id="regEmail" placeholder="אימייל" required>
-                </div>
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <i class="fa-solid fa-unlock"></i>
-                    קבלו גישה עכשיו
+            <!-- Auth Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('social')" id="socialTab">
+                    <i class="fa-solid fa-bolt"></i> התחברות מהירה
                 </button>
-            </form>
+                <button class="auth-tab" onclick="switchAuthTab('email')" id="emailTab">
+                    <i class="fa-solid fa-envelope"></i> אימייל וסיסמה
+                </button>
+            </div>
 
+            <!-- Error Message -->
+            <div class="auth-error" id="authError"></div>
+
+            <!-- Social Login Panel -->
+            <div class="auth-panel active" id="socialPanel">
+                <button class="google-btn" onclick="signInWithGoogle()" id="googleBtn">
+                    <svg viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    המשך באמצעות Google
+                </button>
+
+                <div class="auth-divider">
+                    <span>או</span>
+                </div>
+
+                <button class="email-toggle-btn" onclick="switchAuthTab('email')">
+                    <i class="fa-solid fa-envelope"></i>
+                    המשך באמצעות אימייל
+                </button>
+            </div>
+
+            <!-- Email Login Panel -->
+            <div class="auth-panel" id="emailPanel">
+                <form id="emailAuthForm" onsubmit="handleEmailAuth(event)">
+                    <div class="form-group">
+                        <input type="text" id="authName" placeholder="שם מלא (להרשמה)" autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="authEmail" placeholder="אימייל" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="authPassword" placeholder="סיסמה (מינימום 6 תווים)" required minlength="6" autocomplete="current-password">
+                    </div>
+                    <div class="auth-form-actions">
+                        <button type="submit" class="auth-btn-primary" id="loginBtn" data-action="login">
+                            <i class="fa-solid fa-sign-in-alt"></i> התחבר
+                        </button>
+                        <button type="button" class="auth-btn-secondary" id="signupBtn" onclick="handleSignup()">
+                            <i class="fa-solid fa-user-plus"></i> הירשם
+                        </button>
+                    </div>
+                </form>
+
+                <div class="back-to-social">
+                    <button onclick="switchAuthTab('social')">
+                        <i class="fa-solid fa-arrow-right"></i> חזרה להתחברות מהירה
+                    </button>
+                </div>
+            </div>
+
+            <!-- Success Message -->
             <div class="success-message" id="successMessage">
                 <div class="check-icon">
                     <i class="fa-solid fa-check"></i>
                 </div>
-                <h3>נרשמתם בהצלחה!</h3>
+                <h3>התחברתם בהצלחה!</h3>
                 <p>כעת יש לכם גישה מלאה לכל התכנים</p>
             </div>
         </div>
@@ -1443,18 +1719,24 @@
         let currentLessonIndex = 0;
         let currentVideoId = null;
         let completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-        let isRegistered = localStorage.getItem('isStudentRegistered') === 'true';
+        let isAuthenticated = false;
+        let currentUser = null;
         let toastShown = false;
         let toastTimeout = null;
 
+        // ===== Supabase Client =====
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // ===== Initialization =====
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             renderSyllabus();
-            updateUI();
             updateProgress();
 
+            // Check for existing session
+            await checkAuthSession();
+
             // Toast timer
-            if (!isRegistered) {
+            if (!isAuthenticated) {
                 toastTimeout = setTimeout(showToast, 60000);
             }
 
@@ -1464,7 +1746,273 @@
 
             // Auto-select first lesson so video is ready to play
             selectLesson(0, 0);
+
+            // Listen for auth state changes (for OAuth redirect)
+            supabase.auth.onAuthStateChange(async (event, session) => {
+                console.log('Auth state changed:', event);
+                if (event === 'SIGNED_IN' && session) {
+                    await handleSuccessfulAuth(session.user);
+                } else if (event === 'SIGNED_OUT') {
+                    isAuthenticated = false;
+                    currentUser = null;
+                    updateUI();
+                }
+            });
         });
+
+        // ===== Check Existing Auth Session =====
+        async function checkAuthSession() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (session && session.user) {
+                    currentUser = session.user;
+                    isAuthenticated = true;
+                    await ensureProfile(session.user);
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Session check error:', error);
+            }
+        }
+
+        // ===== Handle Successful Authentication =====
+        async function handleSuccessfulAuth(user) {
+            currentUser = user;
+            isAuthenticated = true;
+
+            // Ensure profile exists in profiles table
+            await ensureProfile(user);
+
+            // Update UI
+            updateUI();
+
+            // Show success and close modal
+            showAuthSuccess();
+        }
+
+        // ===== Ensure Profile Exists (Smart Profile Logic) =====
+        async function ensureProfile(user) {
+            try {
+                // Check if profile exists
+                const { data: existingProfile, error: fetchError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (fetchError && fetchError.code !== 'PGRST116') {
+                    // PGRST116 = not found, which is expected for new users
+                    console.error('Error fetching profile:', fetchError);
+                }
+
+                if (!existingProfile) {
+                    // Create new profile
+                    const fullName = user.user_metadata?.full_name ||
+                                    user.user_metadata?.name ||
+                                    document.getElementById('authName')?.value?.trim() ||
+                                    user.email?.split('@')[0] ||
+                                    'משתמש חדש';
+
+                    const { error: insertError } = await supabase
+                        .from('profiles')
+                        .insert([{
+                            id: user.id,
+                            email: user.email,
+                            full_name: fullName,
+                            roles: ['student_lead'],
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        }]);
+
+                    if (insertError) {
+                        console.error('Error creating profile:', insertError);
+                    } else {
+                        console.log('Profile created successfully for:', user.email);
+                    }
+                } else {
+                    // Profile exists - ensure student_lead role
+                    if (!existingProfile.roles?.includes('student_lead')) {
+                        const { error: updateError } = await supabase
+                            .from('profiles')
+                            .update({
+                                roles: [...(existingProfile.roles || []), 'student_lead'],
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', user.id);
+
+                        if (updateError) {
+                            console.error('Error updating profile roles:', updateError);
+                        } else {
+                            console.log('Added student_lead role to existing profile');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Profile management error:', error);
+            }
+        }
+
+        // ===== Google OAuth =====
+        async function signInWithGoogle() {
+            const googleBtn = document.getElementById('googleBtn');
+            googleBtn.disabled = true;
+            googleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> מתחבר...';
+            hideAuthError();
+
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.href
+                    }
+                });
+
+                if (error) throw error;
+                // Redirect will happen automatically
+            } catch (error) {
+                console.error('Google sign-in error:', error);
+                showAuthError('שגיאה בהתחברות עם Google. נסה שוב.');
+                googleBtn.disabled = false;
+                googleBtn.innerHTML = `<svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> המשך באמצעות Google`;
+            }
+        }
+
+        // ===== Email Login =====
+        async function handleEmailAuth(event) {
+            event.preventDefault();
+            const loginBtn = document.getElementById('loginBtn');
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            hideAuthError();
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    if (error.message.includes('Invalid login credentials')) {
+                        showAuthError('אימייל או סיסמה שגויים. נסה שוב או הירשם.');
+                    } else {
+                        showAuthError(error.message);
+                    }
+                } else if (data.user) {
+                    await handleSuccessfulAuth(data.user);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAuthError('שגיאה בהתחברות. נסה שוב.');
+            }
+
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fa-solid fa-sign-in-alt"></i> התחבר';
+        }
+
+        // ===== Email Signup =====
+        async function handleSignup() {
+            const signupBtn = document.getElementById('signupBtn');
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const name = document.getElementById('authName').value.trim();
+
+            if (!email || !password) {
+                showAuthError('נא למלא אימייל וסיסמה');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('הסיסמה חייבת להכיל לפחות 6 תווים');
+                return;
+            }
+
+            signupBtn.disabled = true;
+            signupBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            hideAuthError();
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name || email.split('@')[0]
+                        }
+                    }
+                });
+
+                if (error) {
+                    if (error.message.includes('already registered')) {
+                        showAuthError('אימייל זה כבר רשום. נסה להתחבר.');
+                    } else {
+                        showAuthError(error.message);
+                    }
+                } else if (data.user) {
+                    // Check if email confirmation is required
+                    if (data.user.identities?.length === 0) {
+                        showAuthError('אימייל זה כבר רשום. נסה להתחבר.');
+                    } else if (data.session) {
+                        // Auto-confirmed (no email verification required)
+                        await handleSuccessfulAuth(data.user);
+                    } else {
+                        // Email confirmation required
+                        showAuthError('נשלח אליך אימייל לאימות. בדוק את תיבת הדואר שלך.');
+                    }
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showAuthError('שגיאה בהרשמה. נסה שוב.');
+            }
+
+            signupBtn.disabled = false;
+            signupBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> הירשם';
+        }
+
+        // ===== Auth Tab Switching =====
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+            hideAuthError();
+
+            if (tab === 'social') {
+                document.getElementById('socialTab').classList.add('active');
+                document.getElementById('socialPanel').classList.add('active');
+            } else {
+                document.getElementById('emailTab').classList.add('active');
+                document.getElementById('emailPanel').classList.add('active');
+            }
+        }
+
+        // ===== Auth Error Handling =====
+        function showAuthError(message) {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function hideAuthError() {
+            document.getElementById('authError').classList.remove('show');
+        }
+
+        // ===== Auth Success =====
+        function showAuthSuccess() {
+            const panels = document.querySelectorAll('.auth-panel, .auth-tabs, .benefits-list, .modal-box .subtitle');
+            panels.forEach(p => p.style.display = 'none');
+
+            document.getElementById('successMessage').classList.add('show');
+
+            setTimeout(() => {
+                closeModal();
+                // Reset modal state
+                panels.forEach(p => p.style.display = '');
+                document.getElementById('successMessage').classList.remove('show');
+                switchAuthTab('social');
+                document.getElementById('emailAuthForm')?.reset();
+            }, 2000);
+        }
 
         // ===== Render Syllabus =====
         function renderSyllabus() {
@@ -1637,7 +2185,7 @@
             document.getElementById('progressFill').style.width = `${percent}%`;
         }
 
-        // ===== Update UI based on registration =====
+        // ===== Update UI based on authentication =====
         function updateUI() {
             const resourcesLock = document.getElementById('resourcesLock');
             const aiLock = document.getElementById('aiLock');
@@ -1645,15 +2193,21 @@
             const summaryCard = document.getElementById('summaryCard');
             const unlockAiBtn = document.getElementById('unlockAiBtn');
 
-            if (isRegistered) {
+            if (isAuthenticated) {
                 resourcesLock.style.display = 'none';
                 aiLock.style.display = 'none';
                 workbookCard.classList.remove('locked');
                 summaryCard.classList.remove('locked');
                 unlockAiBtn.innerHTML = '<i class="fa-solid fa-comments"></i> התחל שיחה';
+
+                // Hide toast if authenticated
+                hideToast();
             } else {
                 workbookCard.classList.add('locked');
                 summaryCard.classList.add('locked');
+                resourcesLock.style.display = '';
+                aiLock.style.display = '';
+                unlockAiBtn.innerHTML = '<i class="fa-solid fa-unlock"></i> פתח גישה חינם';
             }
         }
 
@@ -1668,7 +2222,7 @@
 
         // ===== Handle Resource Click =====
         function handleResource(type) {
-            if (!isRegistered) {
+            if (!isAuthenticated) {
                 openModal();
             } else {
                 alert('הורדה תתחיל בקרוב...');
@@ -1677,7 +2231,7 @@
 
         // ===== Handle Locked Action =====
         function handleLockedAction(type) {
-            if (!isRegistered) {
+            if (!isAuthenticated) {
                 openModal();
             } else {
                 alert('פיצ\'ר זה יפעל בקרוב...');
@@ -1692,71 +2246,12 @@
 
         function closeModal() {
             document.getElementById('registrationModal').classList.remove('active');
-        }
-
-        // ===== Registration =====
-        async function handleRegistration(event) {
-            event.preventDefault();
-
-            const submitBtn = document.getElementById('submitBtn');
-            const form = document.getElementById('registrationForm');
-            const successMsg = document.getElementById('successMessage');
-
-            const name = document.getElementById('regName').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
-
-            try {
-                const supabase = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-                await supabase.from('therapists').insert([{
-                    full_name: name,
-                    phone: phone,
-                    email: email,
-                    status: 'student_lead',
-                    created_at: new Date().toISOString()
-                }]);
-
-                localStorage.setItem('isStudentRegistered', 'true');
-                isRegistered = true;
-
-                form.style.display = 'none';
-                successMsg.classList.add('show');
-                updateUI();
-
-                setTimeout(() => {
-                    closeModal();
-                    form.style.display = 'block';
-                    successMsg.classList.remove('show');
-                    form.reset();
-                }, 2500);
-
-            } catch (error) {
-                console.error('Registration error:', error);
-                localStorage.setItem('isStudentRegistered', 'true');
-                isRegistered = true;
-                form.style.display = 'none';
-                successMsg.classList.add('show');
-                updateUI();
-
-                setTimeout(() => {
-                    closeModal();
-                    form.style.display = 'block';
-                    successMsg.classList.remove('show');
-                    form.reset();
-                }, 2500);
-            }
-
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fa-solid fa-unlock"></i> קבלו גישה עכשיו';
+            hideAuthError();
         }
 
         // ===== Toast =====
         function showToast() {
-            if (!isRegistered && !toastShown) {
+            if (!isAuthenticated && !toastShown) {
                 document.getElementById('toast').classList.add('show');
                 toastShown = true;
             }

@@ -39,10 +39,115 @@
             overflow-x: hidden;
         }
 
+        /* ===== Top Navigation Bar ===== */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 380px;
+            height: 60px;
+            background: var(--deep-petrol);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            z-index: 150;
+            border-bottom: 1px solid rgba(47, 133, 146, 0.3);
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-to-site {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--frost-white);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .back-to-site:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--gold);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--frost-white);
+            font-size: 0.85rem;
+        }
+
+        .breadcrumb a {
+            color: var(--frost-white);
+            text-decoration: none;
+            opacity: 0.7;
+            transition: all 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 1;
+            color: var(--gold);
+        }
+
+        .breadcrumb .separator {
+            opacity: 0.5;
+        }
+
+        .breadcrumb .current {
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .quick-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--frost-white);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+            opacity: 0.8;
+        }
+
+        .quick-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+
+        .quick-link i {
+            font-size: 0.8rem;
+        }
+
         /* ===== LMS Layout ===== */
         .lms-container {
             display: flex;
             min-height: 100vh;
+            padding-top: 60px;
         }
 
         /* ===== Sidebar ===== */
@@ -54,7 +159,7 @@
             flex-direction: column;
             position: fixed;
             right: 0;
-            top: 0;
+            top: 60px;
             bottom: 0;
             z-index: 100;
             transition: transform 0.3s ease;
@@ -904,21 +1009,36 @@
             position: fixed;
             bottom: 1.5rem;
             right: 1.5rem;
-            width: 60px; height: 60px;
+            width: 56px; height: 56px;
             background: var(--gradient-gold);
             border-radius: 50%;
             border: none;
             color: var(--sidebar-dark);
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             cursor: pointer;
             z-index: 200;
             box-shadow: 0 4px 20px var(--gold-glow);
+            transition: all 0.3s;
+        }
+
+        .mobile-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .mobile-toggle.active {
+            background: var(--sidebar-dark);
+            color: var(--gold);
         }
 
         /* Responsive */
         @media (max-width: 1024px) {
+            .top-nav {
+                right: 0;
+            }
+
             .sidebar {
                 transform: translateX(100%);
+                top: 60px;
             }
 
             .sidebar.open {
@@ -934,10 +1054,34 @@
                 align-items: center;
                 justify-content: center;
             }
+
+            .quick-links {
+                display: none;
+            }
         }
 
         @media (max-width: 768px) {
-            .sidebar { width: 100%; }
+            .top-nav {
+                padding: 0 1rem;
+                height: 50px;
+            }
+
+            .back-to-site span {
+                display: none;
+            }
+
+            .breadcrumb {
+                font-size: 0.8rem;
+            }
+
+            .lms-container {
+                padding-top: 50px;
+            }
+
+            .sidebar {
+                width: 100%;
+                top: 50px;
+            }
             .top-bar { padding: 1rem; flex-wrap: wrap; gap: 1rem; }
             .current-lesson-info h2 { font-size: 1rem; }
             .video-section { padding: 1rem; }
@@ -949,6 +1093,33 @@
     </style>
 </head>
 <body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="top-nav-right">
+            <a href="../index.html" class="back-to-site">
+                <i class="fa-solid fa-arrow-right"></i>
+                חזרה לאתר
+            </a>
+            <div class="breadcrumb">
+                <a href="../index.html">דף הבית</a>
+                <span class="separator">/</span>
+                <span class="current">קורס NLP חינמי</span>
+            </div>
+        </div>
+        <div class="top-nav-left">
+            <div class="quick-links">
+                <a href="training.html" class="quick-link">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    הכשרה מקצועית
+                </a>
+                <a href="project-lobby.html" class="quick-link">
+                    <i class="fa-solid fa-heart"></i>
+                    מיזם חברתי
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <div class="lms-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -1595,7 +1766,18 @@
 
         // ===== Mobile Sidebar =====
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.querySelector('.mobile-toggle');
+            sidebar.classList.toggle('open');
+            toggleBtn.classList.toggle('active');
+
+            // Update icon
+            const icon = toggleBtn.querySelector('i');
+            if (sidebar.classList.contains('open')) {
+                icon.className = 'fa-solid fa-times';
+            } else {
+                icon.className = 'fa-solid fa-list';
+            }
         }
 
         // Close modal on Escape

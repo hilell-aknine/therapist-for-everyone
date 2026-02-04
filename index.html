@@ -139,6 +139,14 @@
             cursor: pointer;
         }
 
+        .mobile-cta-group {
+            display: none;
+        }
+
+        .mobile-overlay {
+            display: none;
+        }
+
         /* ===== Hero Section ===== */
         .hero {
             min-height: 100vh;
@@ -529,17 +537,107 @@
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
-                position: absolute;
-                top: 100%; right: 0; left: 0;
-                background: rgba(0, 59, 70, 0.98);
+                position: fixed;
+                top: 0; right: 0; bottom: 0;
+                width: 280px;
+                background: var(--deep-petrol);
                 flex-direction: column;
-                padding: 2rem;
-                gap: 1rem;
-                border-bottom: 1px solid var(--border);
+                padding: 5rem 2rem 2rem;
+                gap: 0;
+                border-left: 1px solid var(--border);
+                box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 1001;
             }
 
-            .nav-links.active { display: flex; }
-            .mobile-menu-btn { display: block; }
+            .nav-links.active {
+                display: flex;
+                transform: translateX(0);
+            }
+
+            .nav-links li {
+                border-bottom: 1px solid rgba(47, 133, 146, 0.2);
+            }
+
+            .nav-links a {
+                display: block;
+                padding: 1rem 0;
+                font-size: 1.1rem;
+            }
+
+            .nav-links a::after {
+                display: none;
+            }
+
+            /* Mobile menu overlay */
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 43, 51, 0.8);
+                z-index: 1000;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+
+            .mobile-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            /* Mobile CTA buttons in menu */
+            .mobile-cta-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+                margin-top: 2rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid var(--border);
+            }
+
+            .mobile-cta {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 0.9rem 1.5rem;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 0.95rem;
+                text-decoration: none;
+                transition: all 0.3s;
+            }
+
+            .mobile-cta.primary {
+                background: var(--gradient-gold);
+                color: var(--deep-petrol);
+            }
+
+            .mobile-cta.secondary {
+                background: transparent;
+                border: 2px solid var(--gold);
+                color: var(--gold);
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                border-radius: 10px;
+                z-index: 1002;
+            }
+
+            .mobile-menu-btn.active {
+                background: rgba(212, 175, 55, 0.2);
+            }
+
+            .mobile-menu-btn.active i::before {
+                content: "\f00d";
+            }
+
             .nav-cta { display: none; }
 
             .hero { padding: 7rem 1.5rem 3rem; }
@@ -560,21 +658,33 @@
             <div class="logo-text">מטפל <span>לכל אחד</span></div>
         </a>
 
-        <ul class="nav-links">
+        <ul class="nav-links" id="navLinks">
             <li><a href="index.html">דף הבית</a></li>
             <li><a href="pages/about.html">מי אנחנו</a></li>
             <li><a href="pages/free-portal.html">קורס חינמי</a></li>
             <li><a href="pages/training.html">הכשרת מטפלים</a></li>
             <li><a href="pages/project-lobby.html">המיזם החברתי</a></li>
-            <li><a href="#contact">צור קשר</a></li>
+            <div class="mobile-cta-group">
+                <a href="pages/project-lobby.html" class="mobile-cta primary">
+                    <i class="fa-solid fa-heart"></i>
+                    אני צריך/ה עזרה
+                </a>
+                <a href="pages/training.html" class="mobile-cta secondary">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    להכשרה מקצועית
+                </a>
+            </div>
         </ul>
 
         <a href="pages/training.html" class="nav-cta">להרשמה להכשרה</a>
 
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
             <i class="fa-solid fa-bars"></i>
         </button>
     </nav>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -760,9 +870,42 @@
 
         // Mobile menu toggle
         function toggleMobileMenu() {
-            const navLinks = document.querySelector('.nav-links');
+            const navLinks = document.getElementById('navLinks');
+            const overlay = document.getElementById('mobileOverlay');
+            const btn = document.getElementById('mobileMenuBtn');
+
             navLinks.classList.toggle('active');
+            overlay.classList.toggle('active');
+            btn.classList.toggle('active');
+
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
         }
+
+        function closeMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const overlay = document.getElementById('mobileOverlay');
+            const btn = document.getElementById('mobileMenuBtn');
+
+            navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            btn.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMobileMenu();
+        });
+
+        // Close menu when clicking a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    closeMobileMenu();
+                }
+            });
+        });
     </script>
 </body>
 </html>

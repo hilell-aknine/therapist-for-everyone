@@ -7,7 +7,6 @@
     <meta name="description" content="טיפול נפשי הוא זכות בסיסית, לא מותרות. מיזם חברתי המחבר בין מטפלים מוסמכים לאנשים הזקוקים לסיוע.">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --deep-petrol: #003B46;
@@ -336,248 +335,45 @@
             font-size: 0.95rem;
         }
 
-        /* ===== Form Section ===== */
-        .form-section {
+        /* ===== CTA Section ===== */
+        .cta-section {
             padding: 6rem 2rem;
             background: var(--frost-white);
         }
 
-        .form-container {
-            max-width: 700px;
+        .cta-container {
+            max-width: 600px;
             margin: 0 auto;
             background: var(--pure-white);
             border-radius: 24px;
             box-shadow: 0 10px 50px rgba(0, 59, 70, 0.1);
-            overflow: hidden;
-        }
-
-        .form-header {
-            background: var(--gradient-main);
-            color: var(--pure-white);
-            padding: 2.5rem;
+            padding: 4rem 3rem;
             text-align: center;
         }
 
-        .form-header h2 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-header p {
-            opacity: 0.9;
-        }
-
-        /* Progress Steps */
-        .progress-steps {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 1.5rem 2rem;
-            background: rgba(0, 59, 70, 0.05);
-            border-bottom: 1px solid rgba(47, 133, 146, 0.1);
-        }
-
-        .progress-step {
+        .cta-icon {
+            width: 100px; height: 100px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(47, 133, 146, 0.1);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--muted-teal);
-            transition: all 0.3s;
-        }
-
-        .progress-step.active {
-            background: var(--gradient-gold);
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 2.5rem;
             color: var(--deep-petrol);
-            font-weight: 600;
+            box-shadow: 0 10px 40px var(--gold-glow);
         }
 
-        .progress-step.completed {
-            background: var(--success);
-            color: white;
-        }
-
-        .progress-step i {
-            font-size: 0.8rem;
-        }
-
-        /* Form Content */
-        .form-body {
-            padding: 2.5rem;
-        }
-
-        .form-step {
-            display: none;
-        }
-
-        .form-step.active {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-step h3 {
-            font-size: 1.4rem;
-            margin-bottom: 0.5rem;
+        .cta-container h2 {
+            font-size: 2rem;
             color: var(--deep-petrol);
+            margin-bottom: 1rem;
         }
 
-        .form-step .step-desc {
+        .cta-container p {
+            font-size: 1.15rem;
             color: var(--muted-teal);
             margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--deep-petrol);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 1rem 1.2rem;
-            border: 2px solid rgba(47, 133, 146, 0.2);
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: all 0.3s;
-            background: var(--pure-white);
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--dusty-aqua);
-            box-shadow: 0 0 0 4px rgba(47, 133, 146, 0.1);
-        }
-
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        /* Radio Options */
-        .radio-group {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        .radio-option {
-            position: relative;
-        }
-
-        .radio-option input {
-            position: absolute;
-            opacity: 0;
-        }
-
-        .radio-option label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 1.5rem 1rem;
-            border: 2px solid rgba(47, 133, 146, 0.2);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .radio-option label i {
-            font-size: 1.5rem;
-            color: var(--dusty-aqua);
-            margin-bottom: 0.5rem;
-        }
-
-        .radio-option input:checked + label {
-            border-color: var(--gold);
-            background: rgba(212, 175, 55, 0.1);
-        }
-
-        .radio-option input:checked + label i {
-            color: var(--gold);
-        }
-
-        /* Checkbox Group */
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.8rem;
-        }
-
-        .checkbox-option {
-            position: relative;
-        }
-
-        .checkbox-option input {
-            position: absolute;
-            opacity: 0;
-        }
-
-        .checkbox-option label {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            padding: 1rem;
-            border: 2px solid rgba(47, 133, 146, 0.2);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-        }
-
-        .checkbox-option label::before {
-            content: '';
-            width: 22px; height: 22px;
-            border: 2px solid rgba(47, 133, 146, 0.3);
-            border-radius: 6px;
-            flex-shrink: 0;
-            transition: all 0.3s;
-        }
-
-        .checkbox-option input:checked + label {
-            border-color: var(--dusty-aqua);
-            background: rgba(47, 133, 146, 0.05);
-        }
-
-        .checkbox-option input:checked + label::before {
-            background: var(--dusty-aqua);
-            border-color: var(--dusty-aqua);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
-            background-size: 14px;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-
-        /* Form Navigation */
-        .form-nav {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(47, 133, 146, 0.1);
         }
 
         .btn {
@@ -592,16 +388,7 @@
             transition: all 0.3s;
             border: none;
             font-family: inherit;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--muted-teal);
-            border: 2px solid rgba(47, 133, 146, 0.3);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(47, 133, 146, 0.1);
+            text-decoration: none;
         }
 
         .btn-primary {
@@ -615,46 +402,23 @@
             box-shadow: 0 8px 25px var(--gold-glow);
         }
 
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .btn-large {
+            padding: 1.2rem 3rem;
+            font-size: 1.2rem;
         }
 
-        /* Success State */
-        .form-success {
-            display: none;
-            text-align: center;
-            padding: 3rem;
-        }
-
-        .form-success.active {
-            display: block;
-        }
-
-        .success-icon {
-            width: 100px; height: 100px;
-            background: linear-gradient(135deg, var(--success) 0%, #00cec9 100%);
-            border-radius: 50%;
+        .cta-note {
+            margin-top: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 2rem;
-            font-size: 3rem;
-            color: white;
-        }
-
-        .form-success h3 {
-            font-size: 1.8rem;
-            color: var(--deep-petrol);
-            margin-bottom: 1rem;
-        }
-
-        .form-success p {
+            gap: 0.5rem;
             color: var(--muted-teal);
-            font-size: 1.1rem;
-            max-width: 400px;
-            margin: 0 auto;
+            font-size: 0.9rem;
+        }
+
+        .cta-note i {
+            color: var(--gold);
         }
 
         /* ===== Footer ===== */
@@ -694,15 +458,126 @@
             font-size: 0.9rem;
         }
 
+        /* ===== Mobile Menu ===== */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--pure-white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-cta-group, .mobile-overlay {
+            display: none;
+        }
+
         /* ===== Responsive ===== */
         @media (max-width: 768px) {
-            .nav-links { display: none; }
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 0; right: 0; bottom: 0;
+                width: 280px;
+                background: var(--deep-petrol);
+                flex-direction: column;
+                padding: 5rem 2rem 2rem;
+                gap: 0;
+                border-left: 1px solid rgba(47, 133, 146, 0.3);
+                box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 1001;
+            }
+
+            .nav-links.active {
+                display: flex;
+                transform: translateX(0);
+            }
+
+            .nav-links li {
+                border-bottom: 1px solid rgba(47, 133, 146, 0.2);
+                list-style: none;
+            }
+
+            .nav-links a {
+                display: block;
+                padding: 1rem 0;
+                font-size: 1.1rem;
+            }
+
+            .mobile-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 43, 51, 0.8);
+                z-index: 1000;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+
+            .mobile-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-cta-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+                margin-top: 2rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid rgba(47, 133, 146, 0.3);
+            }
+
+            .mobile-cta {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 0.9rem 1.5rem;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 0.95rem;
+                text-decoration: none;
+                transition: all 0.3s;
+            }
+
+            .mobile-cta.primary {
+                background: var(--gradient-gold);
+                color: var(--deep-petrol);
+            }
+
+            .mobile-cta.secondary {
+                background: transparent;
+                border: 2px solid var(--gold);
+                color: var(--gold);
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+                z-index: 1002;
+            }
+
+            .mobile-menu-btn.active {
+                background: rgba(212, 175, 55, 0.2);
+            }
+
+            .mobile-menu-btn.active i::before {
+                content: "\f00d";
+            }
+
+            .nav-cta { display: none; }
+
             .hero h1 { font-size: 2rem; }
             .steps-grid { grid-template-columns: 1fr; }
-            .form-row { grid-template-columns: 1fr; }
-            .radio-group { grid-template-columns: 1fr; }
-            .checkbox-group { grid-template-columns: 1fr; }
             .hero-trust { flex-direction: column; gap: 1rem; }
+            .cta-container { padding: 3rem 2rem; }
+            .cta-container h2 { font-size: 1.6rem; }
         }
     </style>
 </head>
@@ -713,14 +588,31 @@
             <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
             <div class="logo-text">מטפל <span>לכל אחד</span></div>
         </a>
-        <ul class="nav-links">
+        <ul class="nav-links" id="navLinks">
             <li><a href="../index.html">דף הבית</a></li>
             <li><a href="about.html">מי אנחנו</a></li>
             <li><a href="free-portal.html">קורס חינמי</a></li>
             <li><a href="training.html">הכשרת מטפלים</a></li>
+            <li><a href="project-lobby.html">המיזם החברתי</a></li>
+            <div class="mobile-cta-group">
+                <a href="patient-intro.html" class="mobile-cta primary">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    בדיקת זכאות
+                </a>
+                <a href="training.html" class="mobile-cta secondary">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    רוצה ללמוד?
+                </a>
+            </div>
         </ul>
-        <a href="#form" class="nav-cta">בדיקת זכאות</a>
+        <a href="training.html" class="nav-cta">להרשמה להכשרה</a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
     </nav>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -733,7 +625,7 @@
                 מיזם חברתי המחבר בין מטפלים מוסמכים לאנשים הזקוקים לסיוע -
                 <strong>ב-100% מימון מלא שלנו.</strong>
             </p>
-            <a href="#form" class="hero-cta">
+            <a href="patient-intro.html" class="hero-cta">
                 <i class="fa-solid fa-clipboard-check"></i>
                 לבדיקת זכאות והתאמת מטפל
             </a>
@@ -802,252 +694,21 @@
         </div>
     </section>
 
-    <!-- Form Section -->
-    <section class="form-section" id="form">
-        <div class="section-header">
-            <div class="section-badge">
-                <i class="fa-solid fa-pen"></i>
-                הרשמה
+    <!-- CTA Section -->
+    <section class="cta-section" id="form">
+        <div class="cta-container">
+            <div class="cta-icon">
+                <i class="fa-solid fa-hand-holding-heart"></i>
             </div>
-            <h2 class="section-title">בואו נתחיל</h2>
-            <p class="section-subtitle">ספרו לנו קצת על עצמכם כדי שנוכל לעזור</p>
-        </div>
-
-        <div class="form-container">
-            <div class="form-header">
-                <h2>שאלון התאמה</h2>
-                <p>כל המידע נשמר בסודיות מוחלטת</p>
-            </div>
-
-            <div class="progress-steps">
-                <div class="progress-step active" data-step="1">
-                    <i class="fa-solid fa-user"></i>
-                    פרטים אישיים
-                </div>
-                <div class="progress-step" data-step="2">
-                    <i class="fa-solid fa-heart"></i>
-                    על הפנייה
-                </div>
-                <div class="progress-step" data-step="3">
-                    <i class="fa-solid fa-sliders"></i>
-                    העדפות
-                </div>
-            </div>
-
-            <form id="patientForm" class="form-body">
-                <!-- Step 1: Personal Info -->
-                <div class="form-step active" data-step="1">
-                    <h3>פרטים אישיים</h3>
-                    <p class="step-desc">מידע בסיסי ליצירת קשר</p>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="fullName">שם מלא *</label>
-                            <input type="text" id="fullName" name="fullName" required placeholder="השם שלך">
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">טלפון *</label>
-                            <input type="tel" id="phone" name="phone" required placeholder="050-0000000">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="email">אימייל</label>
-                            <input type="email" id="email" name="email" placeholder="email@example.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="age">גיל *</label>
-                            <select id="age" name="age" required>
-                                <option value="">בחר/י</option>
-                                <option value="18-25">18-25</option>
-                                <option value="26-35">26-35</option>
-                                <option value="36-45">36-45</option>
-                                <option value="46-55">46-55</option>
-                                <option value="56+">56+</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="city">עיר מגורים *</label>
-                        <select id="city" name="city" required>
-                            <option value="">בחר/י עיר</option>
-                            <option value="תל אביב">תל אביב</option>
-                            <option value="ירושלים">ירושלים</option>
-                            <option value="חיפה">חיפה</option>
-                            <option value="באר שבע">באר שבע</option>
-                            <option value="ראשון לציון">ראשון לציון</option>
-                            <option value="פתח תקווה">פתח תקווה</option>
-                            <option value="נתניה">נתניה</option>
-                            <option value="אשדוד">אשדוד</option>
-                            <option value="other">אחר</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="otherCityGroup" style="display: none;">
-                        <input type="text" id="otherCity" placeholder="הזן את שם העיר">
-                    </div>
-
-                    <div class="form-nav">
-                        <div></div>
-                        <button type="button" class="btn btn-primary" onclick="nextStep()">
-                            המשך
-                            <i class="fa-solid fa-arrow-left"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 2: About the Request -->
-                <div class="form-step" data-step="2">
-                    <h3>ספרו לנו על הפנייה</h3>
-                    <p class="step-desc">מה הביא אתכם אלינו?</p>
-
-                    <div class="form-group">
-                        <label>מה הנושאים העיקריים שהייתם רוצים לטפל בהם? *</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-option">
-                                <input type="checkbox" id="topic1" name="topics" value="חרדה">
-                                <label for="topic1">חרדה / לחץ</label>
-                            </div>
-                            <div class="checkbox-option">
-                                <input type="checkbox" id="topic2" name="topics" value="דיכאון">
-                                <label for="topic2">דיכאון / עצב</label>
-                            </div>
-                            <div class="checkbox-option">
-                                <input type="checkbox" id="topic3" name="topics" value="טראומה">
-                                <label for="topic3">טראומה / פוסט-טראומה</label>
-                            </div>
-                            <div class="checkbox-option">
-                                <input type="checkbox" id="topic4" name="topics" value="יחסים">
-                                <label for="topic4">קשיים בזוגיות / יחסים</label>
-                            </div>
-                            <div class="checkbox-option">
-                                <input type="checkbox" id="topic5" name="topics" value="משבר">
-                                <label for="topic5">משבר אישי / מעבר</label>
-                            </div>
-                            <div class="checkbox-option">
-                                <input type="checkbox" id="topic6" name="topics" value="other">
-                                <label for="topic6">אחר</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">ספרו קצת על מה שאתם עוברים (לא חובה)</label>
-                        <textarea id="description" name="description" placeholder="כל מה שתרגישו נוח לשתף יעזור לנו להתאים לכם את המטפל הנכון..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="urgency">רמת הדחיפות</label>
-                        <select id="urgency" name="urgency">
-                            <option value="normal">רגיל - אפשר להמתין</option>
-                            <option value="soon">מעדיף/ה בהקדם</option>
-                            <option value="urgent">דחוף מאוד</option>
-                        </select>
-                    </div>
-
-                    <div class="form-nav">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep()">
-                            <i class="fa-solid fa-arrow-right"></i>
-                            חזרה
-                        </button>
-                        <button type="button" class="btn btn-primary" onclick="nextStep()">
-                            המשך
-                            <i class="fa-solid fa-arrow-left"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 3: Preferences -->
-                <div class="form-step" data-step="3">
-                    <h3>העדפות</h3>
-                    <p class="step-desc">איזה סוג טיפול מתאים לכם?</p>
-
-                    <div class="form-group">
-                        <label>העדפת מגדר המטפל/ת</label>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" id="genderMale" name="therapistGender" value="male">
-                                <label for="genderMale">
-                                    <i class="fa-solid fa-mars"></i>
-                                    מטפל
-                                </label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" id="genderFemale" name="therapistGender" value="female">
-                                <label for="genderFemale">
-                                    <i class="fa-solid fa-venus"></i>
-                                    מטפלת
-                                </label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" id="genderAny" name="therapistGender" value="any" checked>
-                                <label for="genderAny">
-                                    <i class="fa-solid fa-equals"></i>
-                                    לא משנה
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>צורת הטיפול המועדפת</label>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" id="formatOnline" name="format" value="online">
-                                <label for="formatOnline">
-                                    <i class="fa-solid fa-video"></i>
-                                    אונליין (זום)
-                                </label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" id="formatInPerson" name="format" value="in-person">
-                                <label for="formatInPerson">
-                                    <i class="fa-solid fa-building"></i>
-                                    פרונטלי
-                                </label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" id="formatBoth" name="format" value="both" checked>
-                                <label for="formatBoth">
-                                    <i class="fa-solid fa-arrows-left-right"></i>
-                                    גמיש
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="availability">מתי נוח לכם להיפגש?</label>
-                        <select id="availability" name="availability">
-                            <option value="">בחר/י</option>
-                            <option value="morning">בוקר (8:00-12:00)</option>
-                            <option value="afternoon">צהריים (12:00-17:00)</option>
-                            <option value="evening">ערב (17:00-21:00)</option>
-                            <option value="flexible">גמיש</option>
-                        </select>
-                    </div>
-
-                    <div class="form-nav">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep()">
-                            <i class="fa-solid fa-arrow-right"></i>
-                            חזרה
-                        </button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="fa-solid fa-paper-plane"></i>
-                            שלחו בקשה
-                        </button>
-                    </div>
-                </div>
-            </form>
-
-            <!-- Success State -->
-            <div class="form-success" id="formSuccess">
-                <div class="success-icon">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <h3>הבקשה נשלחה בהצלחה!</h3>
-                <p>ניצור איתך קשר תוך 48 שעות להתאמת מטפל. תודה על האמון.</p>
+            <h2>מוכנים להתחיל?</h2>
+            <p>התהליך פשוט, מהיר ודיסקרטי. אנחנו כאן בשבילכם.</p>
+            <a href="patient-intro.html" class="btn btn-primary btn-large">
+                <i class="fa-solid fa-clipboard-check"></i>
+                התחל תהליך הרשמה
+            </a>
+            <div class="cta-note">
+                <i class="fa-solid fa-lock"></i>
+                כל המידע נשמר בסודיות מוחלטת
             </div>
         </div>
     </section>
@@ -1062,158 +723,7 @@
     </footer>
 
     <script src="../js/marketing-tools.js"></script>
-    <script src="../js/supabase-client.js"></script>
     <script>
-        // ===== Configuration =====
-        const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
-
-        // ===== State =====
-        let currentStep = 1;
-        const totalSteps = 3;
-
-        // ===== City Selection =====
-        document.getElementById('city').addEventListener('change', function() {
-            const otherGroup = document.getElementById('otherCityGroup');
-            if (this.value === 'other') {
-                otherGroup.style.display = 'block';
-            } else {
-                otherGroup.style.display = 'none';
-            }
-        });
-
-        // ===== Step Navigation =====
-        function nextStep() {
-            if (!validateStep(currentStep)) return;
-
-            if (currentStep < totalSteps) {
-                currentStep++;
-                updateFormUI();
-            }
-        }
-
-        function prevStep() {
-            if (currentStep > 1) {
-                currentStep--;
-                updateFormUI();
-            }
-        }
-
-        function updateFormUI() {
-            // Update step visibility
-            document.querySelectorAll('.form-step').forEach(step => {
-                step.classList.remove('active');
-            });
-            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
-
-            // Update progress indicators
-            document.querySelectorAll('.progress-step').forEach(step => {
-                const stepNum = parseInt(step.dataset.step);
-                step.classList.remove('active', 'completed');
-                if (stepNum === currentStep) {
-                    step.classList.add('active');
-                } else if (stepNum < currentStep) {
-                    step.classList.add('completed');
-                }
-            });
-
-            // Scroll to form
-            document.getElementById('form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function validateStep(step) {
-            const currentStepEl = document.querySelector(`.form-step[data-step="${step}"]`);
-            const requiredFields = currentStepEl.querySelectorAll('[required]');
-
-            for (let field of requiredFields) {
-                if (!field.value.trim()) {
-                    field.focus();
-                    field.style.borderColor = '#e74c3c';
-                    setTimeout(() => field.style.borderColor = '', 2000);
-                    return false;
-                }
-            }
-
-            // Validate at least one topic selected in step 2
-            if (step === 2) {
-                const topics = document.querySelectorAll('input[name="topics"]:checked');
-                if (topics.length === 0) {
-                    alert('אנא בחרו לפחות נושא אחד');
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        // ===== Form Submission =====
-        document.getElementById('patientForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (!validateStep(currentStep)) return;
-
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
-
-            // Gather form data
-            const formData = {
-                full_name: document.getElementById('fullName').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                email: document.getElementById('email').value.trim() || null,
-                age_range: document.getElementById('age').value,
-                city: document.getElementById('city').value === 'other'
-                    ? document.getElementById('otherCity').value
-                    : document.getElementById('city').value,
-                topics: Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(cb => cb.value),
-                description: document.getElementById('description').value.trim() || null,
-                urgency: document.getElementById('urgency').value,
-                therapist_gender: document.querySelector('input[name="therapistGender"]:checked')?.value || 'any',
-                format: document.querySelector('input[name="format"]:checked')?.value || 'both',
-                availability: document.getElementById('availability').value || null
-            };
-
-            try {
-                const supabase = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-                // Save to contact_requests (works for anonymous users)
-                const { error } = await supabase
-                    .from('contact_requests')
-                    .insert({
-                        full_name: formData.full_name,
-                        phone: formData.phone,
-                        email: formData.email,
-                        request_type: 'patient',
-                        city: formData.city,
-                        status: 'new',
-                        source: 'project-lobby-wizard',
-                        message: JSON.stringify({
-                            age_range: formData.age_range,
-                            topics: formData.topics,
-                            description: formData.description,
-                            urgency: formData.urgency,
-                            therapist_gender: formData.therapist_gender,
-                            format: formData.format,
-                            availability: formData.availability
-                        })
-                    });
-
-                if (error) throw error;
-
-                // Show success
-                document.getElementById('patientForm').style.display = 'none';
-                document.querySelector('.progress-steps').style.display = 'none';
-                document.getElementById('formSuccess').classList.add('active');
-
-            } catch (error) {
-                console.error('Error submitting form:', error);
-                alert('אירעה שגיאה בשליחה. אנא נסו שוב.');
-
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שלחו בקשה';
-            }
-        });
-
         // Navbar scroll effect
         window.addEventListener('scroll', () => {
             const navbar = document.querySelector('.navbar');
@@ -1222,6 +732,33 @@
             } else {
                 navbar.style.boxShadow = 'none';
             }
+        });
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const overlay = document.getElementById('mobileOverlay');
+            const btn = document.getElementById('mobileMenuBtn');
+
+            navLinks.classList.toggle('active');
+            overlay.classList.toggle('active');
+            btn.classList.toggle('active');
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+        }
+
+        function closeMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const overlay = document.getElementById('mobileOverlay');
+            const btn = document.getElementById('mobileMenuBtn');
+
+            navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            btn.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMobileMenu();
         });
     </script>
 </body>

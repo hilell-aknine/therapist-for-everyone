@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מסמך אפיון מקיף - מטפל לכל אחד</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --deep-petrol: #003B46;
+      --muted-teal: #00606B;
+      --dusty-aqua: #2F8592;
+      --frost-white: #E8F1F2;
+      --gold: #D4AF37;
+      --bg: #fafbfc;
+      --text: #1a1a2e;
+      --border: #e1e4e8;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+
+    /* Header */
+    .doc-header {
+      background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+      color: white;
+      padding: 60px 40px;
+      margin: -40px -40px 40px -40px;
+      border-radius: 0 0 30px 30px;
+    }
+
+    .doc-header h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .doc-header .subtitle {
+      font-size: 20px;
+      opacity: 0.9;
+      color: var(--gold);
+    }
+
+    .doc-header .meta {
+      margin-top: 20px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    /* TOC */
+    .toc {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .toc h2 {
+      color: var(--deep-petrol);
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .toc a {
+      color: var(--muted-teal);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .toc a:hover {
+      background: var(--frost-white);
+      color: var(--deep-petrol);
+    }
+
+    .toc-num {
+      background: var(--deep-petrol);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Sections */
+    .section {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .section h2 {
+      color: var(--deep-petrol);
+      font-size: 24px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section h3 {
+      color: var(--muted-teal);
+      font-size: 18px;
+      margin: 25px 0 15px 0;
+    }
+
+    .section h4 {
+      color: var(--dusty-aqua);
+      font-size: 16px;
+      margin: 20px 0 10px 0;
+    }
+
+    p {
+      margin-bottom: 15px;
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .card {
+      background: var(--frost-white);
+      border-radius: 10px;
+      padding: 20px;
+      border-right: 4px solid var(--gold);
+    }
+
+    .card-title {
+      font-weight: 600;
+      color: var(--deep-petrol);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-content {
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--deep-petrol);
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: var(--frost-white);
+    }
+
+    /* Code */
+    code {
+      background: #f1f3f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+      color: var(--muted-teal);
+    }
+
+    pre {
+      background: #1a1a2e;
+      color: #e1e4e8;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 15px 0;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin: 15px 0;
+      padding-right: 25px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    /* Flow Diagram */
+    .flow-diagram {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 25px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .flow-steps {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .flow-step {
+      background: white;
+      border: 2px solid var(--dusty-aqua);
+      border-radius: 10px;
+      padding: 15px 20px;
+      min-width: 140px;
+      position: relative;
+    }
+
+    .flow-step.active {
+      background: var(--deep-petrol);
+      color: white;
+      border-color: var(--deep-petrol);
+    }
+
+    .flow-step-num {
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      background: var(--gold);
+      color: var(--deep-petrol);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .flow-arrow {
+      color: var(--gold);
+      font-size: 24px;
+    }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin: 2px;
+    }
+
+    .tag-blue { background: #dbeafe; color: #1e40af; }
+    .tag-green { background: #dcfce7; color: #166534; }
+    .tag-orange { background: #ffedd5; color: #c2410c; }
+    .tag-purple { background: #f3e8ff; color: #7c3aed; }
+    .tag-pink { background: #fce7f3; color: #be185d; }
+
+    /* Status badges */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-active { background: #dcfce7; color: #166534; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-new { background: #dbeafe; color: #1e40af; }
+    .status-rejected { background: #fee2e2; color: #dc2626; }
+
+    /* Highlights */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(0, 59, 70, 0.1));
+      border-right: 4px solid var(--gold);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .warning-box {
+      background: #fef3c7;
+      border-right: 4px solid #f59e0b;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+
+    .info-box {
+      background: #dbeafe;
+      border-right: 4px solid #3b82f6;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+
+    /* Journey Timeline */
+    .timeline {
+      position: relative;
+      padding-right: 30px;
+      margin: 20px 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      right: 10px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--dusty-aqua);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding: 15px 25px 15px 0;
+      margin-bottom: 10px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      right: 4px;
+      top: 20px;
+      width: 15px;
+      height: 15px;
+      background: var(--gold);
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px var(--dusty-aqua);
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      color: var(--deep-petrol);
+      margin-bottom: 5px;
+    }
+
+    .timeline-desc {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Print styles */
+    @media print {
+      .container { max-width: 100%; padding: 20px; }
+      .section { break-inside: avoid; }
+      .doc-header { margin: -20px -20px 20px -20px; }
+    }
+
+    @media (max-width: 768px) {
+      .toc-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .flow-steps { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="doc-header">
+      <h1>📋 מסמך אפיון מקיף</h1>
+      <div class="subtitle">פלטפורמת "מטפל לכל אחד" - Therapist For Everyone</div>
+      <div class="meta">
+        <strong>גרסה:</strong> 1.0 &nbsp;|&nbsp;
+        <strong>תאריך:</strong> פברואר 2026 &nbsp;|&nbsp;
+        <strong>סטטוס:</strong> פיתוח פעיל
+      </div>
+    </header>
+
+    <!-- תוכן עניינים -->
+    <nav class="toc">
+      <h2>📑 תוכן עניינים</h2>
+      <div class="toc-grid">
+        <a href="#overview"><span class="toc-num">1</span>סקירה כללית</a>
+        <a href="#architecture"><span class="toc-num">2</span>ארכיטקטורה טכנית</a>
+        <a href="#patient-journey"><span class="toc-num">3</span>מסע המטופל</a>
+        <a href="#therapist-journey"><span class="toc-num">4</span>מסע המטפל</a>
+        <a href="#admin-journey"><span class="toc-num">5</span>מסע המנהל</a>
+        <a href="#dashboards"><span class="toc-num">6</span>דאשבורדים</a>
+        <a href="#database"><span class="toc-num">7</span>מסד נתונים</a>
+        <a href="#api"><span class="toc-num">8</span>ממשקי API</a>
+        <a href="#auth"><span class="toc-num">9</span>אבטחה והרשאות</a>
+        <a href="#integrations"><span class="toc-num">10</span>אינטגרציות</a>
+        <a href="#features"><span class="toc-num">11</span>פיצ'רים מלאים</a>
+        <a href="#roadmap"><span class="toc-num">12</span>תוכנית פיתוח</a>
+      </div>
+    </nav>
+
+    <!-- 1. סקירה כללית -->
+    <section class="section" id="overview">
+      <h2>🎯 1. סקירה כללית</h2>
+
+      <div class="highlight-box">
+        <strong>המשימה:</strong> יצירת פלטפורמה חברתית המחברת בין מטופלים הזקוקים לתמיכה נפשית לבין מטפלים מוסמכים המציעים טיפול חינמי או מסובסד.
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">5</div>
+          <div class="stat-label">שלבי Pipeline</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">3</div>
+          <div class="stat-label">סוגי משתמשים</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">9</div>
+          <div class="stat-label">טבלאות DB</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">15+</div>
+          <div class="stat-label">דפי אתר</div>
+        </div>
+      </div>
+
+      <h3>🔧 טכנולוגיות</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">🎨 Frontend</div>
+          <div class="card-content">
+            <span class="tag tag-blue">HTML5</span>
+            <span class="tag tag-blue">CSS3</span>
+            <span class="tag tag-blue">Vanilla JS</span>
+            <span class="tag tag-purple">RTL Support</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🗄️ Backend</div>
+          <div class="card-content">
+            <span class="tag tag-green">Supabase</span>
+            <span class="tag tag-green">PostgreSQL</span>
+            <span class="tag tag-green">Edge Functions</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🔐 Authentication</div>
+          <div class="card-content">
+            <span class="tag tag-orange">Supabase Auth</span>
+            <span class="tag tag-orange">Google OAuth</span>
+            <span class="tag tag-orange">JWT Tokens</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🤖 AI</div>
+          <div class="card-content">
+            <span class="tag tag-pink">Gemini 1.5 Flash</span>
+            <span class="tag tag-pink">סינון מטפלים</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>👥 סוגי משתמשים</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>תפקיד</th>
+            <th>תיאור</th>
+            <th>גישה לדאשבורד</th>
+            <th>יכולות עיקריות</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="status status-active">מטופל</span></td>
+            <td>אדם המחפש טיפול נפשי</td>
+            <td>patient-dashboard.html</td>
+            <td>מילוי טופס קליטה, צפייה במטפל משובץ, יצירת קשר</td>
+          </tr>
+          <tr>
+            <td><span class="status status-pending">מטפל</span></td>
+            <td>איש מקצוע בתחום בריאות הנפש</td>
+            <td>therapist-dashboard.html</td>
+            <td>צפייה במטופלים, ניהול פגישות, קורסים</td>
+          </tr>
+          <tr>
+            <td><span class="status status-new">מנהל</span></td>
+            <td>מנהל הפלטפורמה</td>
+            <td>admin-dashboard.html</td>
+            <td>אישור מטפלים, שיבוץ מטופלים, ניטור מערכת</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>🌐 כתובות</h3>
+      <ul>
+        <li><strong>אתר חי:</strong> <code>https://hilell-aknine.github.io/therapist-for-everyone/</code></li>
+        <li><strong>Supabase Dashboard:</strong> <code>https://supabase.com/dashboard/project/eimcudmlfjlyxjyrdcgc</code></li>
+        <li><strong>GitHub Repo:</strong> <code>https://github.com/hilell-aknine/therapist-for-everyone</code></li>
+      </ul>
+    </section>
+
+    <!-- 2. ארכיטקטורה -->
+    <section class="section" id="architecture">
+      <h2>🏗️ 2. ארכיטקטורה טכנית</h2>
+
+      <h3>📁 מבנה הפרויקט</h3>
+      <pre>
+therapist-for-everyone/
+├── index.html                      # דף נחיתה ראשי
+├── landing-patient.html            # דף נחיתה למטופלים
+├── landing-therapist.html          # דף נחיתה למטפלים
+├── patient-onboarding.html         # טופס קליטת מטופל
+├── patient-dashboard.html          # אזור אישי - מטופל
+├── therapist-onboarding.html       # טופס הרשמת מטפל (3 שלבים)
+├── therapist-dashboard.html        # אזור אישי - מטפל ("המשרד")
+├── admin-dashboard.html            # פאנל ניהול
+├── legal-gate.html                 # שער תנאים משפטיים
+├── privacy-policy.html             # מדיניות פרטיות
+├── thank-you.html                  # דף אישור
+├── js/
+│   ├── supabase-client.js          # API Wrapper לSupabase
+│   ├── auth-guard.js               # אכיפת הרשאות והסכמה משפטית
+│   ├── admin-dashboard.js          # לוגיקת פאנל ניהול
+│   ├── patient-flow.js             # זרימת רישום מטופל
+│   └── marketing-tools.js          # כלי אנליטיקה
+└── docs/
+    └── system-spec.md              # מפרט מערכת</pre>
+
+      <h3>🔄 תרשים ארכיטקטורה</h3>
+      <div class="flow-diagram">
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="flow-step-num">1</span>
+            <strong>Frontend</strong><br>
+            <small>HTML/CSS/JS</small>
+          </div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step active">
+            <span class="flow-step-num">2</span>
+            <strong>Supabase</strong><br>
+            <small>Auth + DB + Storage</small>
+          </div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step">
+            <span class="flow-step-num">3</span>
+            <strong>PostgreSQL</strong><br>
+            <small>מסד נתונים</small>
+          </div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step">
+            <span class="flow-step-num">4</span>
+            <strong>Edge Functions</strong><br>
+            <small>אימיילים + AI</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>💡 ללא שרת Backend:</strong> הפלטפורמה משתמשת ב-Supabase כ-Backend-as-a-Service. כל הלוגיקה העסקית רצה בצד הלקוח (JavaScript) עם קריאות ישירות ל-Supabase API.
+      </div>
+    </section>
+
+    <!-- 3. מסע המטופל -->
+    <section class="section" id="patient-journey">
+      <h2>🧑‍⚕️ 3. מסע המטופל (Patient Journey)</h2>
+
+      <div class="flow-diagram">
+        <div class="flow-steps">
+          <div class="flow-step"><span class="flow-step-num">1</span>גילוי</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step"><span class="flow-step-num">2</span>טופס קליטה</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step"><span class="flow-step-num">3</span>שיבוץ</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step"><span class="flow-step-num">4</span>טיפול</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step active"><span class="flow-step-num">5</span>משוב</div>
+        </div>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 1: גילוי ונחיתה</div>
+          <div class="timeline-desc">
+            המטופל מגיע לדף <code>landing-patient.html</code>, קורא על היתרונות והתהליך, ולוחץ על "התחל כעת".
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 2: טופס קליטה (ללא התחברות)</div>
+          <div class="timeline-desc">
+            מילוי טופס ב-<code>patient-onboarding.html</code>:
+            <ul>
+              <li>שם מלא (חובה)</li>
+              <li>טלפון (חובה, 9+ ספרות)</li>
+              <li>עיר מגורים</li>
+              <li>סיבת הפנייה (חובה, מינימום 10 תווים)</li>
+              <li>העדפת סוג טיפול</li>
+              <li>העדפת מגדר מטפל</li>
+              <li>ניסיון קודם בטיפול</li>
+            </ul>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 3: סקירת מנהל ושיבוץ</div>
+          <div class="timeline-desc">
+            המנהל רואה את הבקשה בדאשבורד, מעריך את הצרכים, ומשבץ מטפל מתאים על פי:
+            <ul>
+              <li>התמחות רלוונטית</li>
+              <li>מיקום גיאוגרפי או זמינות לזום</li>
+              <li>העדפת מגדר</li>
+              <li>קיבולת פנויה (פחות מ-10 מפגשים)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 4: שער משפטי וגישה לדאשבורד</div>
+          <div class="timeline-desc">
+            לפני גישה לדאשבורד, המטופל חייב לחתום על תנאי השימוש ב-<code>legal-gate.html</code>. לאחר מכן מקבל גישה ל-<code>patient-dashboard.html</code>.
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 5: טיפול ומשוב</div>
+          <div class="timeline-desc">
+            <ul>
+              <li>צפייה בפרטי המטפל המשובץ</li>
+              <li>יצירת קשר דרך WhatsApp</li>
+              <li>עד 10 מפגשים עם אותו מטפל</li>
+              <li>דירוג (1-5 כוכבים) לאחר כל מפגש</li>
+              <li>אפשרות למשוב אנונימי</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h3>📊 סטטוסים של מטופל</h3>
+      <table>
+        <thead>
+          <tr><th>סטטוס</th><th>משמעות</th><th>פעולה נדרשת</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="status status-new">waiting_for_match</span></td>
+            <td>ממתין לשיבוץ מטפל</td>
+            <td>מנהל צריך לשבץ</td>
+          </tr>
+          <tr>
+            <td><span class="status status-pending">matched</span></td>
+            <td>שובץ מטפל</td>
+            <td>ממתין ליצירת קשר</td>
+          </tr>
+          <tr>
+            <td><span class="status status-active">in_treatment</span></td>
+            <td>בטיפול פעיל</td>
+            <td>מפגשים מתקיימים</td>
+          </tr>
+          <tr>
+            <td><span class="status status-active">completed</span></td>
+            <td>סיים טיפול</td>
+            <td>ארכיון</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 4. מסע המטפל -->
+    <section class="section" id="therapist-journey">
+      <h2>👨‍⚕️ 4. מסע המטפל (Therapist Journey)</h2>
+
+      <div class="flow-diagram">
+        <div class="flow-steps">
+          <div class="flow-step"><span class="flow-step-num">1</span>הרשמה</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step"><span class="flow-step-num">2</span>סינון AI</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step"><span class="flow-step-num">3</span>אישור</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step"><span class="flow-step-num">4</span>פעילות</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step active"><span class="flow-step-num">5</span>קורסים</div>
+        </div>
+      </div>
+
+      <h3>📝 טופס הרשמה (3 שלבים)</h3>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">שלב 1: פרטים בסיסיים</div>
+          <div class="card-content">
+            <ul>
+              <li>שם מלא</li>
+              <li>התמחות (NLP, CBT, טראומה...)</li>
+              <li>עיר מגורים</li>
+              <li>שנות ניסיון</li>
+              <li>מחיר למפגש (0 = התנדבות)</li>
+              <li>טלפון</li>
+              <li>ביוגרפיה</li>
+              <li>העלאת תעודה/קורות חיים</li>
+              <li>זמינות לזום</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">שלב 2: שאלון מקצועי</div>
+          <div class="card-content">
+            <ul>
+              <li>רקע והכשרה מקצועית</li>
+              <li>גישה טיפולית</li>
+              <li>התמחות באוכלוסיות</li>
+              <li>פירוט ניסיון קליני</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">שלב 3: חזון ומוטיבציה</div>
+          <div class="card-content">
+            <ul>
+              <li>למה להצטרף לפלטפורמה</li>
+              <li>הצהרת חזון</li>
+              <li>יעדי השפעה</li>
+              <li>התחייבות לזמינות</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h3>🤖 תהליך סינון AI</h3>
+      <div class="info-box">
+        <strong>Gemini 1.5 Flash</strong> מנתח את השאלון המקצועי ומייצר:
+        <ul>
+          <li><span class="status status-active">HIGH</span> - מומלץ לאישור אוטומטי</li>
+          <li><span class="status status-pending">MEDIUM</span> - נדרשת סקירה ידנית</li>
+          <li><span class="status status-rejected">LOW</span> - סביר להיות נדחה</li>
+          <li><span class="status status-new">PENDING</span> - בתהליך ניתוח</li>
+        </ul>
+      </div>
+
+      <h3>📊 סטטוסים של מטפל</h3>
+      <table>
+        <thead>
+          <tr><th>סטטוס</th><th>משמעות</th><th>יכולות</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="status status-new">new / pending</span></td>
+            <td>ממתין לסינון</td>
+            <td>אין גישה לדאשבורד</td>
+          </tr>
+          <tr>
+            <td><span class="status status-pending">pending_interview</span></td>
+            <td>נדרש ראיון</td>
+            <td>ממתין לתיאום</td>
+          </tr>
+          <tr>
+            <td><span class="status status-active">active</span></td>
+            <td>מאושר ופעיל</td>
+            <td>גישה מלאה לדאשבורד</td>
+          </tr>
+          <tr>
+            <td><span class="status status-rejected">rejected</span></td>
+            <td>נדחה</td>
+            <td>ללא גישה</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>🎓 קורסים למטפלים</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">🏅 NLP Practitioner</div>
+          <div class="card-content">
+            <ul>
+              <li>51 סרטונים</li>
+              <li>10 שיעורים</li>
+              <li>חינם למטפלים רשומים</li>
+              <li>תעודה: 1,000 ₪</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🎖️ NLP Master</div>
+          <div class="card-content">
+            <ul>
+              <li>בקרוב</li>
+              <li>הסמכה מתקדמת</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. מסע המנהל -->
+    <section class="section" id="admin-journey">
+      <h2>🔧 5. מסע המנהל (Admin Journey)</h2>
+
+      <h3>📋 תחומי אחריות</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">👨‍⚕️ ניהול מטפלים</div>
+          <div class="card-content">
+            <ul>
+              <li>סקירת בקשות הצטרפות</li>
+              <li>צפייה בניתוח AI</li>
+              <li>אישור/דחייה/זימון לראיון</li>
+              <li>שליחת אימיילים</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🧑‍⚕️ ניהול מטופלים</div>
+          <div class="card-content">
+            <ul>
+              <li>צפייה בטפסי קליטה</li>
+              <li>שיבוץ למטפל מתאים</li>
+              <li>מעקב סטטוס</li>
+              <li>טיפול בלידים</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 ניטור מערכת</div>
+          <div class="card-content">
+            <ul>
+              <li>סטטיסטיקות בזמן אמת</li>
+              <li>דוחות ייצוא (Excel)</li>
+              <li>התראות על חריגים</li>
+              <li>מעקב המרות</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h3>🔄 זרימת אישור מטפל</h3>
+      <pre>
+בקשה חדשה (status='new')
+    ↓
+ניתוח AI (Gemini 1.5 Flash)
+    ↓
+ציון AI מוצג (HIGH/MEDIUM/LOW)
+    ↓
+מנהל סוקר:
+├── מסמכים מצורפים
+├── שאלון מקצועי
+├── ציון וסיכום AI
+    ↓
+החלטה:
+├── ✅ אישור → status='active' → אימייל קבלה
+├── 📞 ראיון → status='pending_interview' → זימון
+└── ❌ דחייה → status='rejected' → אימייל דחייה</pre>
+
+      <h3>🔄 זרימת שיבוץ מטופל</h3>
+      <pre>
+מטופל חדש (status='waiting_for_match')
+    ↓
+מנהל סוקר:
+├── סיבת הפנייה
+├── העדפת טיפול
+├── העדפת מגדר
+├── מיקום
+    ↓
+סינון מטפלים:
+├── סטטוס פעיל
+├── התמחות מתאימה
+├── מיקום/זום
+├── קיבולת פנויה
+    ↓
+בחירה ושיבוץ:
+├── עדכון assigned_therapist_id
+├── עדכון status='matched'
+└── שליחת אימייל למטופל</pre>
+    </section>
+
+    <!-- 6. דאשבורדים -->
+    <section class="section" id="dashboards">
+      <h2>📊 6. דאשבורדים</h2>
+
+      <h3>🧑‍⚕️ דאשבורד מטופל</h3>
+      <div class="card">
+        <div class="card-content">
+          <strong>מיקום:</strong> <code>patient-dashboard.html</code><br><br>
+          <strong>רכיבים:</strong>
+          <ul>
+            <li><strong>Progress Stepper:</strong> 3 שלבים (בקשה התקבלה → בחינת התאמה → נמצא מטפל)</li>
+            <li><strong>תצוגת חיפוש:</strong> אנימציה + הודעה "אנחנו מחפשים לך מטפל מתאים..."</li>
+            <li><strong>כרטיס מטפל:</strong> תמונה, שם, התמחות, ביוגרפיה, כפתור WhatsApp</li>
+            <li><strong>היסטוריית מפגשים:</strong> (מתוכנן)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>👨‍⚕️ דאשבורד מטפל ("המשרד")</h3>
+      <div class="card">
+        <div class="card-content">
+          <strong>מיקום:</strong> <code>therapist-dashboard.html</code><br><br>
+          <strong>רכיבים:</strong>
+          <ul>
+            <li><strong>כרטיסי סטטיסטיקה:</strong> מטופלים, מפגשים פעילים, ממתינים, דירוג</li>
+            <li><strong>באנר אישור:</strong> אם הסטטוס אינו 'active'</li>
+            <li><strong>רשימת מטופלים:</strong> כרטיסים עם פרטים, סטטוס, פעולות</li>
+            <li><strong>כרטיס פרופיל:</strong> פרטים אישיים, התמחויות, זמינות</li>
+            <li><strong>פעולות מהירות:</strong> עריכת פרופיל, לוח שנה, הורדת תעודה</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>🔧 דאשבורד מנהל</h3>
+      <div class="card">
+        <div class="card-content">
+          <strong>מיקום:</strong> <code>admin-dashboard.html</code><br><br>
+          <strong>רכיבים:</strong>
+          <ul>
+            <li><strong>סרגל צד:</strong> ניווט (Dashboard, מטפלים, מטופלים, לידים, הגדרות)</li>
+            <li><strong>כרטיסי סטטיסטיקה:</strong> סה"כ מטופלים, מטפלים פעילים, ממתינים לשיבוץ, לידים</li>
+            <li><strong>תצוגת מטפלים:</strong> סינון לפי סטטוס, חיפוש, כרטיסים עם ציון AI ופעולות</li>
+            <li><strong>תצוגת מטופלים:</strong> סינון, חיפוש, שיבוץ מטפל</li>
+            <li><strong>תצוגת לידים:</strong> בקשות מאנשים לא רשומים</li>
+            <li><strong>מודלים:</strong> פרטי מטפל, פרטי מטופל, תזמון ראיון</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>🎨 רכיבי UI משותפים</h3>
+      <table>
+        <thead>
+          <tr><th>רכיב</th><th>תיאור</th><th>שימוש</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Navigation Bar</td><td>לוגו + קישורים + המבורגר</td><td>כל הדפים</td></tr>
+          <tr><td>Status Badge</td><td>תגית צבעונית לסטטוס</td><td>כרטיסי משתמשים</td></tr>
+          <tr><td>Card Component</td><td>כרטיס עם כותרת ותוכן</td><td>סטטיסטיקות, פרופילים</td></tr>
+          <tr><td>Modal Window</td><td>חלון צף לפעולות</td><td>התחברות, פרטים, אישורים</td></tr>
+          <tr><td>Progress Stepper</td><td>מחוון התקדמות</td><td>דאשבורד מטופל</td></tr>
+          <tr><td>Accordion</td><td>רכיב מתקפל</td><td>שיעורים, FAQ</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 7. מסד נתונים -->
+    <section class="section" id="database">
+      <h2>🗄️ 7. מסד נתונים</h2>
+
+      <div class="info-box">
+        <strong>ספק:</strong> Supabase (PostgreSQL)<br>
+        <strong>URL:</strong> <code>https://eimcudmlfjlyxjyrdcgc.supabase.co</code>
+      </div>
+
+      <h3>📋 טבלאות</h3>
+
+      <h4>1. profiles</h4>
+      <table>
+        <thead><tr><th>עמודה</th><th>סוג</th><th>תיאור</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>UUID</td><td>מזהה ייחודי (מ-auth.users)</td></tr>
+          <tr><td>email</td><td>TEXT</td><td>כתובת אימייל (ייחודי)</td></tr>
+          <tr><td>full_name</td><td>TEXT</td><td>שם מלא</td></tr>
+          <tr><td>phone</td><td>TEXT</td><td>טלפון</td></tr>
+          <tr><td>role</td><td>TEXT</td><td>admin | therapist | patient | student</td></tr>
+          <tr><td>avatar_url</td><td>TEXT</td><td>קישור לתמונת פרופיל</td></tr>
+        </tbody>
+      </table>
+
+      <h4>2. therapists</h4>
+      <table>
+        <thead><tr><th>עמודה</th><th>סוג</th><th>תיאור</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>UUID</td><td>מזהה ייחודי</td></tr>
+          <tr><td>user_id</td><td>UUID</td><td>FK → profiles.id</td></tr>
+          <tr><td>full_name</td><td>TEXT</td><td>שם מלא</td></tr>
+          <tr><td>specializations</td><td>TEXT[]</td><td>מערך התמחויות</td></tr>
+          <tr><td>experience_years</td><td>INTEGER</td><td>שנות ניסיון</td></tr>
+          <tr><td>bio</td><td>TEXT</td><td>ביוגרפיה</td></tr>
+          <tr><td>phone</td><td>TEXT</td><td>טלפון</td></tr>
+          <tr><td>city</td><td>TEXT</td><td>עיר</td></tr>
+          <tr><td>price_per_session</td><td>INTEGER</td><td>מחיר (0 = התנדבות)</td></tr>
+          <tr><td>is_online_available</td><td>BOOLEAN</td><td>זמינות לזום</td></tr>
+          <tr><td>status</td><td>TEXT</td><td>pending | pending_interview | active | rejected</td></tr>
+          <tr><td>ai_score</td><td>TEXT</td><td>high | medium | low | pending</td></tr>
+          <tr><td>ai_summary</td><td>TEXT</td><td>סיכום ניתוח AI</td></tr>
+          <tr><td>rating</td><td>DECIMAL</td><td>דירוג ממוצע</td></tr>
+          <tr><td>total_reviews</td><td>INTEGER</td><td>מספר ביקורות</td></tr>
+        </tbody>
+      </table>
+
+      <h4>3. patients</h4>
+      <table>
+        <thead><tr><th>עמודה</th><th>סוג</th><th>תיאור</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>UUID</td><td>מזהה ייחודי</td></tr>
+          <tr><td>user_id</td><td>UUID</td><td>FK → profiles.id (nullable)</td></tr>
+          <tr><td>full_name</td><td>TEXT</td><td>שם מלא</td></tr>
+          <tr><td>phone</td><td>TEXT</td><td>טלפון (חובה)</td></tr>
+          <tr><td>city</td><td>TEXT</td><td>עיר</td></tr>
+          <tr><td>main_concern</td><td>TEXT</td><td>סיבת הפנייה</td></tr>
+          <tr><td>therapy_preference</td><td>TEXT</td><td>העדפת סוג טיפול</td></tr>
+          <tr><td>preferred_therapist_gender</td><td>TEXT</td><td>any | M | F</td></tr>
+          <tr><td>status</td><td>TEXT</td><td>waiting_for_match | matched | in_treatment | completed</td></tr>
+          <tr><td>assigned_therapist_id</td><td>UUID</td><td>FK → therapists.id</td></tr>
+        </tbody>
+      </table>
+
+      <h4>4. appointments</h4>
+      <table>
+        <thead><tr><th>עמודה</th><th>סוג</th><th>תיאור</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>UUID</td><td>מזהה ייחודי</td></tr>
+          <tr><td>therapist_id</td><td>UUID</td><td>FK → therapists.id</td></tr>
+          <tr><td>patient_id</td><td>UUID</td><td>FK → patients.id</td></tr>
+          <tr><td>session_number</td><td>INTEGER</td><td>מספר מפגש (1-10)</td></tr>
+          <tr><td>scheduled_at</td><td>TIMESTAMP</td><td>תאריך ושעה</td></tr>
+          <tr><td>duration_minutes</td><td>INTEGER</td><td>משך (ברירת מחדל: 50)</td></tr>
+          <tr><td>status</td><td>TEXT</td><td>scheduled | completed | cancelled | no_show</td></tr>
+          <tr><td>location</td><td>TEXT</td><td>מיקום (Zoom/פיזי)</td></tr>
+          <tr><td>notes</td><td>TEXT</td><td>הערות</td></tr>
+        </tbody>
+      </table>
+
+      <h4>5. reviews</h4>
+      <table>
+        <thead><tr><th>עמודה</th><th>סוג</th><th>תיאור</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>UUID</td><td>מזהה ייחודי</td></tr>
+          <tr><td>therapist_id</td><td>UUID</td><td>FK → therapists.id</td></tr>
+          <tr><td>patient_id</td><td>UUID</td><td>FK → patients.id</td></tr>
+          <tr><td>appointment_id</td><td>UUID</td><td>FK → appointments.id</td></tr>
+          <tr><td>rating</td><td>INTEGER</td><td>דירוג 1-5</td></tr>
+          <tr><td>feedback</td><td>TEXT</td><td>טקסט משוב</td></tr>
+          <tr><td>is_anonymous</td><td>BOOLEAN</td><td>האם אנונימי</td></tr>
+        </tbody>
+      </table>
+
+      <h4>6. legal_consents</h4>
+      <table>
+        <thead><tr><th>עמודה</th><th>סוג</th><th>תיאור</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>UUID</td><td>מזהה ייחודי</td></tr>
+          <tr><td>user_id</td><td>UUID</td><td>FK → profiles.id</td></tr>
+          <tr><td>agreed_version</td><td>TEXT</td><td>גרסת תנאים (למשל: '1.0')</td></tr>
+          <tr><td>ip_address</td><td>TEXT</td><td>כתובת IP</td></tr>
+          <tr><td>user_agent</td><td>TEXT</td><td>מידע דפדפן</td></tr>
+          <tr><td>created_at</td><td>TIMESTAMP</td><td>זמן חתימה</td></tr>
+        </tbody>
+      </table>
+
+      <h4>7. course_progress</h4>
+      <table>
+        <thead><tr><th>עמודה</th><th>סוג</th><th>תיאור</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>UUID</td><td>מזהה ייחודי</td></tr>
+          <tr><td>user_id</td><td>UUID</td><td>FK → profiles.id</td></tr>
+          <tr><td>course_type</td><td>TEXT</td><td>practitioner | master</td></tr>
+          <tr><td>video_id</td><td>TEXT</td><td>מזהה YouTube</td></tr>
+          <tr><td>lesson_number</td><td>INTEGER</td><td>מספר שיעור</td></tr>
+          <tr><td>completed</td><td>BOOLEAN</td><td>האם הושלם</td></tr>
+          <tr><td>watched_seconds</td><td>INTEGER</td><td>שניות צפייה</td></tr>
+        </tbody>
+      </table>
+
+      <h4>8. contact_requests (לידים)</h4>
+      <table>
+        <thead><tr><th>עמודה</th><th>סוג</th><th>תיאור</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>UUID</td><td>מזהה ייחודי</td></tr>
+          <tr><td>name</td><td>TEXT</td><td>שם</td></tr>
+          <tr><td>email</td><td>TEXT</td><td>אימייל</td></tr>
+          <tr><td>phone</td><td>TEXT</td><td>טלפון</td></tr>
+          <tr><td>request_type</td><td>TEXT</td><td>patient | therapist | general</td></tr>
+          <tr><td>message</td><td>TEXT</td><td>הודעה</td></tr>
+          <tr><td>status</td><td>TEXT</td><td>new | contacted | resolved</td></tr>
+        </tbody>
+      </table>
+
+      <h3>🔗 תרשים יחסים</h3>
+      <pre>
+auth.users (Supabase)
+    │
+    └──→ profiles (1:1)
+            │
+            ├──→ therapists (1:1)
+            │       ├──→ appointments (1:N)
+            │       └──→ reviews (1:N)
+            │
+            ├──→ patients (1:1)
+            │       ├──→ appointments (1:N)
+            │       └──→ reviews (1:N)
+            │
+            ├──→ course_progress (1:N)
+            │
+            └──→ legal_consents (1:N)
+
+contact_requests (עצמאי)</pre>
+    </section>
+
+    <!-- 8. ממשקי API -->
+    <section class="section" id="api">
+      <h2>🔌 8. ממשקי API</h2>
+
+      <div class="info-box">
+        כל הפעולות מתבצעות דרך <strong>Supabase JavaScript Client</strong>. אין שרת Backend נפרד - הלוגיקה רצה בצד הלקוח.
+      </div>
+
+      <h3>🔐 Authentication</h3>
+      <pre>
+Auth.signUp(email, password, fullName)   // הרשמה
+Auth.signIn(email, password)             // התחברות
+Auth.signInWithGoogle()                   // Google OAuth
+Auth.signOut()                           // יציאה
+Auth.getCurrentUser()                     // משתמש נוכחי
+Auth.resetPassword(email)                 // איפוס סיסמה</pre>
+
+      <h3>👥 Profiles</h3>
+      <pre>
+Profiles.get(userId)                     // קבלת פרופיל לפי ID
+Profiles.getCurrent()                    // פרופיל משתמש נוכחי
+Profiles.update(userId, updates)         // עדכון פרופיל
+Profiles.uploadAvatar(userId, file)      // העלאת תמונה</pre>
+
+      <h3>👨‍⚕️ Therapists</h3>
+      <pre>
+Therapists.getAll()                      // כל המטפלים הפעילים
+Therapists.getById(id)                   // מטפל לפי ID
+Therapists.getCurrent()                  // מטפל מחובר
+Therapists.register(data)                // יצירת רשומה
+Therapists.update(id, updates)           // עדכון
+Therapists.getReviews(therapistId)       // ביקורות
+Therapists.getAppointments(id, status?)  // פגישות</pre>
+
+      <h3>🧑‍⚕️ Patients</h3>
+      <pre>
+Patients.getCurrent()                    // מטופל מחובר
+Patients.register(data)                  // יצירת רשומה
+Patients.update(id, updates)             // עדכון
+Patients.getAppointments(patientId)      // פגישות
+Patients.submitReview(reviewData)        // שליחת ביקורת</pre>
+
+      <h3>📅 Appointments</h3>
+      <pre>
+Appointments.create(appointmentData)     // יצירת פגישה
+Appointments.update(id, updates)         // עדכון
+Appointments.cancel(id)                  // ביטול
+Appointments.complete(id)                // סיום</pre>
+
+      <h3>🎓 Course Progress</h3>
+      <pre>
+CourseProgress.getAll(courseType?)       // כל הסרטונים
+CourseProgress.isVideoWatched(videoId)   // האם נצפה
+CourseProgress.markVideoWatched(...)     // סימון כנצפה
+CourseProgress.getCourseProgress()       // התקדמות כללית</pre>
+
+      <h3>📧 Edge Functions - שליחת אימיילים</h3>
+      <pre>
+Endpoint: {SUPABASE_FUNCTIONS_URL}/send-email
+Method: POST
+Auth: Bearer token
+
+Payload:
+{
+  "type": "email_type",      // therapist_approved, patient_matched, etc.
+  "to": "recipient@email.com",
+  "data": { ... }            // נתונים דינמיים
+}</pre>
+    </section>
+
+    <!-- 9. אבטחה והרשאות -->
+    <section class="section" id="auth">
+      <h2>🔐 9. אבטחה והרשאות</h2>
+
+      <h3>🔑 זרימת Authentication</h3>
+      <div class="flow-diagram">
+        <div class="flow-steps">
+          <div class="flow-step">משתמש מזין פרטים</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step">Supabase Auth</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step">JWT Token</div>
+          <span class="flow-arrow">←</span>
+          <div class="flow-step active">Session</div>
+        </div>
+      </div>
+
+      <h3>👥 מערכת תפקידים</h3>
+      <table>
+        <thead>
+          <tr><th>תפקיד</th><th>גישה</th><th>הרשאות</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>admin</code></td>
+            <td>admin-dashboard.html</td>
+            <td>צפייה בכל המשתמשים, אישור מטפלים, שיבוץ מטופלים</td>
+          </tr>
+          <tr>
+            <td><code>therapist</code></td>
+            <td>therapist-dashboard.html</td>
+            <td>צפייה בפרופיל עצמי, מטופלים משובצים, פגישות</td>
+          </tr>
+          <tr>
+            <td><code>patient</code></td>
+            <td>patient-dashboard.html</td>
+            <td>צפייה בפרופיל עצמי, מטפל משובץ, שליחת ביקורות</td>
+          </tr>
+          <tr>
+            <td><code>student</code></td>
+            <td>דפי קורסים</td>
+            <td>צפייה בקורסים (מוגבלת)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>⚖️ שער משפטי (Legal Gate)</h3>
+      <div class="warning-box">
+        <strong>חובה:</strong> כל משתמש חייב לחתום על תנאי השימוש לפני גישה לדאשבורד מוגן.
+      </div>
+
+      <pre>
+זרימת בדיקה:
+1. האם דף ציבורי? → כן: אפשר גישה
+2. האם מחובר? → לא: הפניה לindex.html
+3. האם חתם על תנאים? → לא: הפניה ל-legal-gate.html
+4. האם יש לו תפקיד מתאים? → לא: הפניה לדאשבורד המתאים
+5. → כן: אפשר גישה
+
+דפים ציבוריים (ללא חתימה):
+- index.html
+- landing-patient.html
+- landing-therapist.html
+- patient-onboarding.html
+- therapist-onboarding.html
+- thank-you.html
+- privacy-policy.html</pre>
+
+      <h3>🔒 Row Level Security (RLS)</h3>
+      <div class="info-box">
+        <strong>מומלץ להגדרה:</strong>
+        <ul>
+          <li>משתמשים יכולים לצפות רק בנתונים שלהם</li>
+          <li>מטפלים רואים רק מטופלים משובצים אליהם</li>
+          <li>מנהלים יכולים לצפות בכל</li>
+          <li>ביקורות אנונימיות מסתירות פרטי מטופל</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 10. אינטגרציות -->
+    <section class="section" id="integrations">
+      <h2>🔗 10. אינטגרציות</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">☁️ Supabase</div>
+          <div class="card-content">
+            <span class="status status-active">פעיל</span><br><br>
+            <ul>
+              <li>מסד נתונים PostgreSQL</li>
+              <li>Authentication</li>
+              <li>Storage לקבצים</li>
+              <li>Edge Functions</li>
+              <li>Real-time subscriptions</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🤖 Gemini AI</div>
+          <div class="card-content">
+            <span class="status status-pending">בפיתוח</span><br><br>
+            <ul>
+              <li>Gemini 1.5 Flash</li>
+              <li>סינון בקשות מטפלים</li>
+              <li>ניתוח שאלונים מקצועיים</li>
+              <li>ציון + סיכום אוטומטי</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📧 Email Service</div>
+          <div class="card-content">
+            <span class="status status-active">פעיל</span><br><br>
+            <ul>
+              <li>Supabase Edge Functions</li>
+              <li>התראות מנהל</li>
+              <li>אימיילי קבלה/דחייה</li>
+              <li>הודעות שיבוץ</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🔐 Google OAuth</div>
+          <div class="card-content">
+            <span class="status status-new">מוכן להפעלה</span><br><br>
+            <ul>
+              <li>Google Sign-In</li>
+              <li>צריך הגדרה ב-Google Console</li>
+              <li>הוספת Client ID ל-Supabase</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">💬 WhatsApp</div>
+          <div class="card-content">
+            <span class="status status-active">Deeplink בלבד</span><br><br>
+            <ul>
+              <li>קישורי wa.me</li>
+              <li>פתיחת שיחה עם מטפל</li>
+              <li>לא API מלא</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">💳 תשלומים</div>
+          <div class="card-content">
+            <span class="status status-new">מתוכנן</span><br><br>
+            <ul>
+              <li>Stripe / PayPal</li>
+              <li>עמלות תעודות</li>
+              <li>1,000 ₪ לתעודת NLP</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. פיצ'רים מלאים -->
+    <section class="section" id="features">
+      <h2>✨ 11. פיצ'רים מלאים</h2>
+
+      <h3>🎯 פיצ'רים פעילים</h3>
+      <table>
+        <thead><tr><th>פיצ'ר</th><th>תיאור</th><th>סטטוס</th></tr></thead>
+        <tbody>
+          <tr><td>טופס קליטת מטופל</td><td>רישום ללא התחברות, ולידציה, שמירה ל-DB</td><td><span class="status status-active">✅ פעיל</span></td></tr>
+          <tr><td>טופס הרשמת מטפל</td><td>3 שלבים, העלאת קבצים, שאלון מקצועי</td><td><span class="status status-active">✅ פעיל</span></td></tr>
+          <tr><td>דאשבורד מטופל</td><td>Progress stepper, כרטיס מטפל, WhatsApp</td><td><span class="status status-active">✅ פעיל</span></td></tr>
+          <tr><td>דאשבורד מטפל</td><td>סטטיסטיקות, רשימת מטופלים, פרופיל</td><td><span class="status status-active">✅ פעיל</span></td></tr>
+          <tr><td>דאשבורד מנהל</td><td>ניהול מטפלים/מטופלים, סינון, פעולות</td><td><span class="status status-active">✅ פעיל</span></td></tr>
+          <tr><td>מערכת הרשאות</td><td>תפקידים, שער משפטי, הגנת דפים</td><td><span class="status status-active">✅ פעיל</span></td></tr>
+          <tr><td>קורס NLP Practitioner</td><td>51 סרטונים, מעקב התקדמות</td><td><span class="status status-active">✅ פעיל</span></td></tr>
+          <tr><td>שליחת אימיילים</td><td>התראות מנהל, קבלה/דחייה</td><td><span class="status status-active">✅ פעיל</span></td></tr>
+          <tr><td>סינון AI</td><td>Gemini 1.5 Flash לניתוח מועמדים</td><td><span class="status status-pending">⏳ בפיתוח</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3>🚀 פיצ'רים מתוכננים</h3>
+      <table>
+        <thead><tr><th>פיצ'ר</th><th>תיאור</th><th>עדיפות</th></tr></thead>
+        <tbody>
+          <tr><td>אלגוריתם שיבוץ אוטומטי</td><td>התאמה חכמה בין מטופל למטפל</td><td><span class="tag tag-orange">גבוהה</span></td></tr>
+          <tr><td>לוח שנה + תזמון</td><td>ניהול פגישות, תזכורות</td><td><span class="tag tag-orange">גבוהה</span></td></tr>
+          <tr><td>אינטגרציית Zoom</td><td>יצירת פגישות וידאו אוטומטית</td><td><span class="tag tag-purple">בינונית</span></td></tr>
+          <tr><td>מערכת תשלומים</td><td>תעודות, שירותים פרימיום</td><td><span class="tag tag-purple">בינונית</span></td></tr>
+          <tr><td>דוחות ואנליטיקה</td><td>גרפים, מעקב KPIs</td><td><span class="tag tag-purple">בינונית</span></td></tr>
+          <tr><td>אפליקציה מובייל</td><td>React Native / PWA</td><td><span class="tag tag-blue">נמוכה</span></td></tr>
+          <tr><td>צ'אט בתוך הפלטפורמה</td><td>תקשורת מטפל-מטופל</td><td><span class="tag tag-blue">נמוכה</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 12. תוכנית פיתוח -->
+    <section class="section" id="roadmap">
+      <h2>🗺️ 12. תוכנית פיתוח (Roadmap)</h2>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 1: MVP (הושלם) ✅</div>
+          <div class="timeline-desc">
+            <ul>
+              <li>דפי נחיתה</li>
+              <li>טפסי רישום</li>
+              <li>דאשבורדים בסיסיים</li>
+              <li>מערכת Authentication</li>
+              <li>שער משפטי</li>
+            </ul>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 2: שיפורים (בתהליך) ⏳</div>
+          <div class="timeline-desc">
+            <ul>
+              <li>סינון AI למטפלים</li>
+              <li>שיפור UX דאשבורדים</li>
+              <li>מערכת ביקורות מלאה</li>
+              <li>ייצוא נתונים Excel</li>
+            </ul>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 3: אוטומציה 🔮</div>
+          <div class="timeline-desc">
+            <ul>
+              <li>אלגוריתם שיבוץ אוטומטי</li>
+              <li>לוח שנה ותזמון</li>
+              <li>אינטגרציית Zoom</li>
+              <li>התראות push</li>
+            </ul>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 4: מונטיזציה 💰</div>
+          <div class="timeline-desc">
+            <ul>
+              <li>מערכת תשלומים</li>
+              <li>תעודות דיגיטליות</li>
+              <li>שירותים פרימיום למטפלים</li>
+              <li>קורסים נוספים</li>
+            </ul>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">שלב 5: הרחבה 🌍</div>
+          <div class="timeline-desc">
+            <ul>
+              <li>אפליקציית מובייל</li>
+              <li>תמיכה בשפות נוספות</li>
+              <li>הרחבה גיאוגרפית</li>
+              <li>שותפויות עם ארגונים</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <h4>📌 סיכום</h4>
+        <p>
+          פלטפורמת "מטפל לכל אחד" היא מערכת מקיפה לחיבור בין מטופלים למטפלים בתחום בריאות הנפש.
+          הארכיטקטורה הקלה (Static + Supabase) מאפשרת פריסה מהירה ועלויות נמוכות,
+          בעוד שמודולריות הקוד מאפשרת הרחבה עתידית.
+        </p>
+        <p>
+          <strong>טכנולוגיות מפתח:</strong> HTML5, JavaScript, Supabase, PostgreSQL, Gemini AI<br>
+          <strong>משתמשים:</strong> מטופלים, מטפלים, מנהלים<br>
+          <strong>מיקוד:</strong> נגישות, פשטות, תמיכה בעברית (RTL)
+        </p>
+      </div>
+    </section>
+
+    <footer style="text-align: center; padding: 40px; color: #666; font-size: 13px;">
+      <p>מסמך זה נוצר באופן אוטומטי | פברואר 2026</p>
+      <p>© מטפל לכל אחד - Therapist For Everyone</p>
+    </footer>
+  </div>
+</body>
+</html>

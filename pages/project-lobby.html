@@ -477,18 +477,6 @@
             display: none !important;
         }
 
-        .mobile-overlay {
-            display: none !important;
-        }
-
-        .mobile-overlay.active {
-            display: block !important;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 20, 26, 0.6);
-            z-index: 1000;
-        }
-
         /* ===== Responsive ===== */
         @media (max-width: 768px) {
             .nav-links {
@@ -595,7 +583,7 @@
             <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
             <div class="logo-text">מטפל <span>לכל אחד</span></div>
         </a>
-        <ul class="nav-links" id="navLinks">
+        <ul class="nav-links" id="navLinks" style="display:none">
             <li><a href="../index.html">דף הבית</a></li>
             <li><a href="about.html">מי אנחנו</a></li>
             <li><a href="free-portal.html">קורס חינמי</a></li>
@@ -613,9 +601,6 @@
             <i class="fa-solid fa-bars"></i>
         </button>
     </nav>
-
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -743,17 +728,16 @@
         function toggleMobileMenu() {
             menuOpen = !menuOpen;
             const navLinks = document.getElementById('navLinks');
-            const overlay = document.getElementById('mobileOverlay');
             const btn = document.getElementById('mobileMenuBtn');
 
             if (menuOpen) {
+                navLinks.style.display = 'flex';
                 navLinks.classList.add('active');
-                overlay.classList.add('active');
                 btn.classList.add('active');
                 document.body.style.overflow = 'hidden';
             } else {
                 navLinks.classList.remove('active');
-                overlay.classList.remove('active');
+                navLinks.style.display = 'none';
                 btn.classList.remove('active');
                 document.body.style.overflow = '';
             }
@@ -762,11 +746,10 @@
         function closeMobileMenu() {
             menuOpen = false;
             const navLinks = document.getElementById('navLinks');
-            const overlay = document.getElementById('mobileOverlay');
             const btn = document.getElementById('mobileMenuBtn');
 
             navLinks.classList.remove('active');
-            overlay.classList.remove('active');
+            navLinks.style.display = (window.innerWidth > 768) ? 'flex' : 'none';
             btn.classList.remove('active');
             document.body.style.overflow = '';
         }
@@ -780,7 +763,13 @@
         });
 
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 768 && menuOpen) closeMobileMenu();
+            const navLinks = document.getElementById('navLinks');
+            if (window.innerWidth > 768) {
+                navLinks.style.display = 'flex';
+                menuOpen = false;
+            } else if (!menuOpen) {
+                navLinks.style.display = 'none';
+            }
         });
     </script>
 </body>

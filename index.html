@@ -144,18 +144,6 @@
             display: none !important;
         }
 
-        /* MOBILE OVERLAY - hidden by default, no exceptions */
-        .mobile-overlay {
-            display: none !important;
-        }
-
-        .mobile-overlay.active {
-            display: block !important;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 20, 26, 0.6);
-            z-index: 1000;
-        }
 
         /* ===== Hero Section ===== */
         .hero {
@@ -668,7 +656,7 @@
             <div class="logo-text">מטפל <span>לכל אחד</span></div>
         </a>
 
-        <ul class="nav-links" id="navLinks">
+        <ul class="nav-links" id="navLinks" style="display:none">
             <li><a href="index.html">דף הבית</a></li>
             <li><a href="pages/about.html">מי אנחנו</a></li>
             <li><a href="pages/free-portal.html">קורס חינמי</a></li>
@@ -688,9 +676,6 @@
             <i class="fa-solid fa-bars"></i>
         </button>
     </nav>
-
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -831,196 +816,6 @@
         </div>
     </footer>
 
-    <!-- Registration Popup -->
-    <div class="signup-popup-overlay" id="signupPopupOverlay">
-        <div class="signup-popup">
-            <button class="popup-close" onclick="closeSignupPopup()" aria-label="סגור">
-                <i class="fa-solid fa-times"></i>
-            </button>
-            <div class="popup-icon">
-                <i class="fa-solid fa-gift"></i>
-            </div>
-            <h3>רוצים לקבל עדכונים?</h3>
-            <p>הירשמו וקבלו גישה לחומרי לימוד מתקדמים, טיפים בלעדיים ועדכונים על קורסים חדשים</p>
-            <form class="popup-form" id="signupPopupForm">
-                <input type="text" name="name" placeholder="השם שלך" required>
-                <input type="email" name="email" placeholder="כתובת אימייל" required>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    הרשמה לעדכונים
-                </button>
-            </form>
-            <button class="popup-dismiss" onclick="dismissSignupPopup()">לא עכשיו, תודה</button>
-        </div>
-    </div>
-
-    <style>
-        /* Signup Popup Styles - DISABLED: was causing ghost overlay on mobile */
-        .signup-popup-overlay {
-            display: none !important;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 43, 51, 0.85);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Uncomment below to re-enable popup */
-        /*
-        .signup-popup-overlay.active {
-            display: flex !important;
-        }
-        */
-
-        .signup-popup {
-            background: var(--pure-white);
-            border-radius: 24px;
-            padding: 2.5rem;
-            max-width: 420px;
-            width: 90%;
-            text-align: center;
-            position: relative;
-            animation: slideUp 0.4s ease;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .popup-close {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            color: var(--muted-teal);
-            cursor: pointer;
-            transition: color 0.3s;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        .popup-close:hover {
-            color: var(--deep-petrol);
-            background: var(--frost-white);
-        }
-
-        .popup-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--gradient-gold);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            font-size: 2rem;
-            color: var(--deep-petrol);
-        }
-
-        .signup-popup h3 {
-            font-size: 1.6rem;
-            color: var(--deep-petrol);
-            margin-bottom: 0.8rem;
-        }
-
-        .signup-popup p {
-            color: var(--muted-teal);
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.7;
-        }
-
-        .popup-form {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .popup-form input {
-            padding: 0.9rem 1rem;
-            border: 2px solid rgba(47, 133, 146, 0.2);
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.3s;
-            text-align: right;
-        }
-
-        .popup-form input:focus {
-            outline: none;
-            border-color: var(--gold);
-        }
-
-        .popup-form .btn {
-            margin-top: 0.5rem;
-            justify-content: center;
-        }
-
-        .popup-dismiss {
-            background: none;
-            border: none;
-            color: var(--muted-teal);
-            font-size: 0.85rem;
-            margin-top: 1rem;
-            cursor: pointer;
-            font-family: inherit;
-            transition: color 0.3s;
-        }
-
-        .popup-dismiss:hover {
-            color: var(--deep-petrol);
-            text-decoration: underline;
-        }
-
-        /* Popup Mobile */
-        @media (max-width: 768px) {
-            .signup-popup {
-                padding: 2rem 1.5rem;
-                border-radius: 20px;
-                width: 92%;
-                max-width: 360px;
-            }
-
-            .popup-icon {
-                width: 60px;
-                height: 60px;
-                font-size: 1.5rem;
-                margin-bottom: 1rem;
-            }
-
-            .signup-popup h3 {
-                font-size: 1.3rem;
-            }
-
-            .signup-popup p {
-                font-size: 0.85rem;
-                margin-bottom: 1rem;
-            }
-
-            .popup-form input {
-                padding: 0.75rem 0.9rem;
-                font-size: 0.9rem;
-            }
-
-            .popup-close {
-                top: 0.7rem;
-                left: 0.7rem;
-                width: 40px;
-                height: 40px;
-                font-size: 1.4rem;
-            }
-        }
-    </style>
-
     <!-- Marketing Tools -->
     <script src="js/marketing-tools.js"></script>
 
@@ -1041,17 +836,16 @@
         function toggleMobileMenu() {
             menuOpen = !menuOpen;
             const navLinks = document.getElementById('navLinks');
-            const overlay = document.getElementById('mobileOverlay');
             const btn = document.getElementById('mobileMenuBtn');
 
             if (menuOpen) {
+                navLinks.style.display = 'flex';
                 navLinks.classList.add('active');
-                overlay.classList.add('active');
                 btn.classList.add('active');
                 document.body.style.overflow = 'hidden';
             } else {
                 navLinks.classList.remove('active');
-                overlay.classList.remove('active');
+                navLinks.style.display = 'none';
                 btn.classList.remove('active');
                 document.body.style.overflow = '';
             }
@@ -1060,11 +854,10 @@
         function closeMobileMenu() {
             menuOpen = false;
             const navLinks = document.getElementById('navLinks');
-            const overlay = document.getElementById('mobileOverlay');
             const btn = document.getElementById('mobileMenuBtn');
 
             navLinks.classList.remove('active');
-            overlay.classList.remove('active');
+            navLinks.style.display = (window.innerWidth > 768) ? 'flex' : 'none';
             btn.classList.remove('active');
             document.body.style.overflow = '';
         }
@@ -1079,33 +872,17 @@
             link.addEventListener('click', closeMobileMenu);
         });
 
-        // Close menu on window resize to desktop
+        // Fix display on resize
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 768 && menuOpen) closeMobileMenu();
+            const navLinks = document.getElementById('navLinks');
+            if (window.innerWidth > 768) {
+                navLinks.style.display = 'flex';
+                menuOpen = false;
+            } else if (!menuOpen) {
+                navLinks.style.display = 'none';
+            }
         });
 
-        // ===== Signup Popup (DISABLED - was causing dark overlay on mobile) =====
-        // Popup auto-show is disabled. To re-enable later, uncomment initSignupPopup() at bottom.
-        function showSignupPopup() {
-            const overlay = document.getElementById('signupPopupOverlay');
-            if (overlay) {
-                overlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeSignupPopup() {
-            const overlay = document.getElementById('signupPopupOverlay');
-            if (overlay) {
-                overlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        }
-
-        function dismissSignupPopup() {
-            localStorage.setItem('signup_popup_dismissed', 'true');
-            closeSignupPopup();
-        }
     </script>
 </body>
 </html>

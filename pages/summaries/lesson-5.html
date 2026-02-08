@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיעור 5 - סטייט, עוגנים והרגלים | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 50px 20px 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0; right: 0;
+            height: 60px;
+            background: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+
+        .lesson-badge {
+            display: inline-block; background: var(--gold); color: var(--deep-petrol);
+            font-weight: 900; font-size: 28px; width: 64px; height: 64px;
+            line-height: 64px; border-radius: 50%; margin-bottom: 16px;
+        }
+
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+
+        .section-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .section-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
+        }
+
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+
+        .topic {
+            background: var(--frost-white); border-radius: 12px;
+            padding: 20px 24px; margin-bottom: 16px;
+            border-right: 4px solid var(--dusty-aqua);
+        }
+
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before {
+            content: ''; position: absolute; right: 0; top: 12px;
+            width: 8px; height: 8px; background: var(--gold); border-radius: 50%;
+        }
+        .topic p { margin: 8px 0; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white; border-radius: 12px;
+            padding: 24px; margin-bottom: 16px;
+        }
+
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before {
+            content: ''; position: absolute; right: 0; top: 14px;
+            width: 10px; height: 2px; background: var(--gold);
+        }
+
+        /* State model */
+        .state-model {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .state-card {
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .state-card.physical { background: rgba(212, 175, 55, 0.08); border: 2px solid var(--gold); }
+        .state-card.focus { background: rgba(47, 133, 146, 0.08); border: 2px solid var(--dusty-aqua); }
+        .state-card.language { background: rgba(0, 96, 107, 0.08); border: 2px solid var(--muted-teal); }
+        .state-card.full { grid-column: 1 / -1; background: rgba(0, 59, 70, 0.05); border: 2px solid var(--deep-petrol); }
+
+        .state-card h4 { font-size: 16px; font-weight: 700; color: var(--deep-petrol); margin-bottom: 6px; }
+        .state-card p { font-size: 14px; color: var(--dusty-aqua); }
+
+        /* Habit loop */
+        .habit-loop {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: var(--frost-white);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .habit-step {
+            background: white;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            border: 2px solid var(--dusty-aqua);
+        }
+
+        .habit-arrow { color: var(--gold); font-size: 20px; font-weight: 700; }
+
+        /* Breaking habits cards */
+        .break-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .break-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            border-top: 4px solid var(--gold);
+            box-shadow: 0 2px 10px rgba(0, 59, 70, 0.08);
+        }
+
+        .break-card h4 { font-size: 15px; font-weight: 700; color: var(--deep-petrol); margin-bottom: 6px; }
+        .break-card p { font-size: 14px; color: var(--dusty-aqua); }
+
+        .principle {
+            display: flex; gap: 12px; align-items: flex-start;
+            background: white; border: 2px solid var(--gold);
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 10px;
+        }
+
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+
+        .homework {
+            background: var(--frost-white); border-radius: 16px;
+            padding: 24px; border: 2px dashed var(--dusty-aqua);
+        }
+
+        .homework-item {
+            padding: 10px 0; padding-right: 32px; position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+
+        .ref-bar {
+            display: flex; gap: 20px;
+            background: var(--deep-petrol); color: white;
+            border-radius: 12px; padding: 16px 24px; margin-top: 32px;
+        }
+
+        .ref-bar span { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .ref-bar .ref-icon { color: var(--gold); }
+
+        .bottom-nav {
+            display: flex; justify-content: space-between;
+            max-width: 800px; margin: 30px auto; padding: 0 24px;
+        }
+
+        .bottom-nav a {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--frost-white); color: var(--deep-petrol);
+            text-decoration: none; padding: 12px 24px;
+            border-radius: 10px; font-weight: 600; transition: background 0.3s;
+        }
+
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+
+        @media print {
+            .hero { padding: 30px 20px 40px; }
+            .hero::after { display: none; }
+            .bottom-nav, .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .section-title { font-size: 19px; }
+            .state-model { grid-template-columns: 1fr; }
+            .break-grid { grid-template-columns: 1fr; }
+            .ref-bar { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="lesson-4.html">&#8592; שיעור 4</a>
+            <a href="lesson-6.html">שיעור 6 &#8594;</a>
+        </div>
+        <div class="lesson-badge">05</div>
+        <h1>סטייט, עוגנים והרגלים</h1>
+        <div class="hero-sub">NLP Practitioner - שיעור חמישי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- State -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9889;</div>
+                <div class="section-title">סטייט - מצב רגשי</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מהו סטייט?</div>
+                <ul>
+                    <li>סטייט = תחושה פיזיולוגית + תיוג מילולי</li>
+                    <li>לפי הסטייט שאני נמצא בו, אני יותר או פחות מחובר למשאבים שלי</li>
+                    <li>התרגשות ולחץ = אותה תגובה פיזיולוגית, רק התיוג שונה</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="box-title">Five to Thrive - 5 מרכיבים לשליטה ברגשות</div>
+            </div>
+
+            <div class="state-model">
+                <div class="state-card physical">
+                    <h4>1. פיזיולוגיה</h4>
+                    <p>שפת גוף, תנוחה, תנועה - תנוחת סופרמן מעלה טסטוסטרון ודופמין</p>
+                </div>
+                <div class="state-card focus">
+                    <h4>2. פוקוס</h4>
+                    <p>על מה אני שם את תשומת הלב - לשם הולכת האנרגיה</p>
+                </div>
+                <div class="state-card language">
+                    <h4>3. שפה / מילים</h4>
+                    <p>המילים שאנו משתמשים בהן מתויגות לרגשות</p>
+                </div>
+                <div class="state-card full">
+                    <h4>4. מציאת הסיבה + 5. זהות</h4>
+                    <p>"אנחנו לא עושים את מה שאנחנו יכולים, אלא את מה שאנחנו מאמינים שאנחנו"</p>
+                </div>
+            </div>
+
+            <div class="topic">
+                <div class="topic-title">כלים מרכזיים לכניסה לסטייט</div>
+                <ul>
+                    <li>מערכות ייצוג וסאב-מודליטיז</li>
+                    <li>שינוי פיזיולוגיה</li>
+                    <li>נשימה והרפיה</li>
+                    <li>דמיון מודרך</li>
+                    <li>מוזיקה</li>
+                    <li>סיפור סיפורים (Storytelling)</li>
+                    <li>שאילת שאלות מכוונות (הסטת פוקוס)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Anchors -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9875;</div>
+                <div class="section-title">עוגנים</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מהו עוגן?</div>
+                <ul>
+                    <li>מקור: ניסוי הכלבים של פבלוב - גירוי + תגובה = התניה</li>
+                    <li>עוגנים נוצרים כל הזמן גם בלי שליטה</li>
+                </ul>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">5 סוגי עוגנים</div>
+                <ul>
+                    <li><strong>ויזואלי</strong> - תמונה/מראה שמעוררים תגובה</li>
+                    <li><strong>אודיטורי</strong> - צלילים/מילים (העוגן החזק ביותר: השם שלנו)</li>
+                    <li><strong>קינסתטי</strong> - תחושה בגוף, מגע, תנועה</li>
+                    <li><strong>טעם</strong> - טעם שמזכיר חוויה מהעבר</li>
+                    <li><strong>ריח</strong> - ריח שמחזיר לזיכרון</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Habits -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128260;</div>
+                <div class="section-title">הרגלים</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li>מהם הרגלים ולמה הם כל כך חשובים לנו</li>
+                </ul>
+            </div>
+
+            <div class="habit-loop">
+                <div class="habit-step">גירוי (טריגר)</div>
+                <div class="habit-arrow">&#10229;</div>
+                <div class="habit-step">חשק</div>
+                <div class="habit-arrow">&#10229;</div>
+                <div class="habit-step">תגובה (פעולה)</div>
+                <div class="habit-arrow">&#10229;</div>
+                <div class="habit-step" style="border-color: var(--gold); font-weight: 800;">גמול (כוונה חיובית)</div>
+            </div>
+
+            <div class="break-grid">
+                <div class="break-card">
+                    <h4>1. המנעות מהטריגר</h4>
+                    <p>זיהוי וניטרול הגירוי שמפעיל את ההרגל</p>
+                </div>
+                <div class="break-card">
+                    <h4>2. שינוי פעולה רוטינית</h4>
+                    <p>החלפת ההתנהגות תוך שמירה על אותו גמול</p>
+                </div>
+                <div class="break-card">
+                    <h4>3. הצמדת הרגלים</h4>
+                    <p>חיבור הרגל חדש להרגל קיים שכבר מבוסס</p>
+                </div>
+                <div class="break-card">
+                    <h4>4. שימוש בדמיון</h4>
+                    <p>טכניקת מחולל התנהגות - המוח לא מבדיל בין דמיון למציאות</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Techniques -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128171;</div>
+                <div class="section-title">טכניקות ותרגולים</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li><strong>יצירת עוגן קינסתטי</strong> - בחירת זיכרון נקי, כניסה לחוויה מלאה, עיגון בפיק הרגשי</li>
+                    <li><strong>הערמת עוגנים</strong> - חיזוק עוגן קיים עם חוויות נוספות</li>
+                    <li><strong>מיטוט עוגנים</strong> - קריסת עוגן שלילי באמצעות עוגן חיובי חזק יותר</li>
+                    <li><strong>מחולל התנהגות</strong> - שימוש בדמיון ליצירת דפוסי התנהגות חדשים</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"כל בעיה היא תוצר של תהליך חשיבתי"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"המחשבות שלי הן לא אני"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"לכל אדם יש את כל המשאבים להצלחה"</div>
+            </div>
+        </div>
+
+        <!-- Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>צרו לכם עוגן חדש והשתמשו בו</strong>
+                </div>
+                <div class="homework-item">
+                    <strong>בחרו הרגל ושברו אותו באחת מהדרכים שלמדנו</strong>
+                </div>
+                <div class="homework-item">
+                    <strong>תרגלו אחת מהטכניקות על בן/בת זוג</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Bar -->
+        <div class="ref-bar">
+            <span><span class="ref-icon">&#128218;</span> חוברת: מודול 6 - עוגנים וסטייט</span>
+            <span><span class="ref-icon">&#128214;</span> ספר: מסגור ועוגנים</span>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="lesson-4.html">&#8592; שיעור 4</a>
+        <a href="lesson-6.html">שיעור 6 &#8594;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

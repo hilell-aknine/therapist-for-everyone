@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיעור 6 - פריימינג ועבודה עם חלקים | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 50px 20px 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0; right: 0;
+            height: 60px;
+            background: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+
+        .lesson-badge {
+            display: inline-block; background: var(--gold); color: var(--deep-petrol);
+            font-weight: 900; font-size: 28px; width: 64px; height: 64px;
+            line-height: 64px; border-radius: 50%; margin-bottom: 16px;
+        }
+
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+
+        .section-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .section-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
+        }
+
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+
+        .topic {
+            background: var(--frost-white); border-radius: 12px;
+            padding: 20px 24px; margin-bottom: 16px;
+            border-right: 4px solid var(--dusty-aqua);
+        }
+
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before {
+            content: ''; position: absolute; right: 0; top: 12px;
+            width: 8px; height: 8px; background: var(--gold); border-radius: 50%;
+        }
+        .topic p { margin: 8px 0; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white; border-radius: 12px;
+            padding: 24px; margin-bottom: 16px;
+        }
+
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before {
+            content: ''; position: absolute; right: 0; top: 14px;
+            width: 10px; height: 2px; background: var(--gold);
+        }
+
+        /* Framing types */
+        .frame-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .frame-card {
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid;
+        }
+
+        .frame-card.pre { border-color: var(--gold); background: rgba(212, 175, 55, 0.06); }
+        .frame-card.re { border-color: var(--dusty-aqua); background: rgba(47, 133, 146, 0.06); }
+        .frame-card.frame { border-color: var(--muted-teal); background: rgba(0, 96, 107, 0.06); }
+
+        .frame-card h4 { font-size: 16px; font-weight: 700; color: var(--deep-petrol); margin-bottom: 4px; }
+        .frame-card .frame-eng { font-size: 13px; color: var(--dusty-aqua); font-weight: 600; margin-bottom: 6px; }
+        .frame-card p { font-size: 14px; color: var(--dusty-aqua); }
+
+        /* Reframing types */
+        .reframe-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .reframe-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border-top: 4px solid var(--gold);
+            box-shadow: 0 2px 10px rgba(0, 59, 70, 0.08);
+        }
+
+        .reframe-card h4 { font-size: 15px; font-weight: 700; color: var(--deep-petrol); margin-bottom: 8px; }
+        .reframe-card p { font-size: 14px; color: var(--dusty-aqua); }
+        .reframe-card .example { font-style: italic; color: var(--muted-teal); margin-top: 6px; font-size: 13px; }
+
+        /* Parts cards */
+        .parts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .part-card {
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            background: var(--frost-white);
+            border-bottom: 3px solid;
+        }
+
+        .part-card.exile { border-bottom-color: var(--dusty-aqua); }
+        .part-card.manager { border-bottom-color: var(--gold); }
+        .part-card.firefighter { border-bottom-color: #c0392b; }
+
+        .part-card h4 { font-size: 15px; font-weight: 700; color: var(--deep-petrol); margin-bottom: 6px; }
+        .part-card p { font-size: 13px; color: var(--dusty-aqua); }
+
+        /* 6 Steps */
+        .steps-list {
+            counter-reset: step;
+            list-style: none;
+            padding: 0;
+        }
+
+        .steps-list li {
+            counter-increment: step;
+            padding: 14px 0 14px 0;
+            padding-right: 50px;
+            position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .steps-list li::before {
+            content: counter(step);
+            position: absolute;
+            right: 0;
+            top: 14px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: var(--gold);
+            border-radius: 50%;
+            font-weight: 800;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .steps-list li:last-child { border-bottom: none; }
+
+        .note-box {
+            background: #fff3e0;
+            border: 1px solid var(--gold);
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 14px;
+            color: var(--deep-petrol);
+            margin-bottom: 16px;
+        }
+
+        .principle {
+            display: flex; gap: 12px; align-items: flex-start;
+            background: white; border: 2px solid var(--gold);
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 10px;
+        }
+
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+
+        .homework {
+            background: var(--frost-white); border-radius: 16px;
+            padding: 24px; border: 2px dashed var(--dusty-aqua);
+        }
+
+        .homework-item {
+            padding: 10px 0; padding-right: 32px; position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+
+        .ref-bar {
+            display: flex; gap: 20px;
+            background: var(--deep-petrol); color: white;
+            border-radius: 12px; padding: 16px 24px; margin-top: 32px;
+        }
+
+        .ref-bar span { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .ref-bar .ref-icon { color: var(--gold); }
+
+        .bottom-nav {
+            display: flex; justify-content: space-between;
+            max-width: 800px; margin: 30px auto; padding: 0 24px;
+        }
+
+        .bottom-nav a {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--frost-white); color: var(--deep-petrol);
+            text-decoration: none; padding: 12px 24px;
+            border-radius: 10px; font-weight: 600; transition: background 0.3s;
+        }
+
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+
+        @media print {
+            .hero { padding: 30px 20px 40px; }
+            .hero::after { display: none; }
+            .bottom-nav, .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .section-title { font-size: 19px; }
+            .frame-grid { grid-template-columns: 1fr; }
+            .reframe-grid { grid-template-columns: 1fr; }
+            .parts-grid { grid-template-columns: 1fr; }
+            .ref-bar { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="lesson-5.html">&#8592; שיעור 5</a>
+            <a href="index.html">כל הסיכומים &#8594;</a>
+        </div>
+        <div class="lesson-badge">06</div>
+        <h1>פריימינג ועבודה עם חלקים</h1>
+        <div class="hero-sub">NLP Practitioner - שיעור שישי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Framing -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128444;</div>
+                <div class="section-title">פריימינג - כוח המסגור</div>
+            </div>
+
+            <div class="frame-grid">
+                <div class="frame-card pre">
+                    <h4>פריפריים</h4>
+                    <div class="frame-eng">Pre-frame</div>
+                    <p>מסגור מראש, לפני האירוע</p>
+                </div>
+                <div class="frame-card frame">
+                    <h4>פריים</h4>
+                    <div class="frame-eng">Frame</div>
+                    <p>מסגרת ההתייחסות והמשמעות</p>
+                </div>
+                <div class="frame-card re">
+                    <h4>ריפריים</h4>
+                    <div class="frame-eng">Reframe</div>
+                    <p>מסגור מחדש, שינוי המסגרת</p>
+                </div>
+            </div>
+
+            <div class="note-box">
+                <strong>כלל זהב:</strong> "תמיד עדיף לפריפריים מאשר לריפריים" - עדיף ליצור מסגרת לפני האירוע מאשר לשנות אותה אחרי
+            </div>
+        </div>
+
+        <!-- Reframing Types -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128257;</div>
+                <div class="section-title">סוגי ריפריימינג</div>
+            </div>
+            <div class="reframe-grid">
+                <div class="reframe-card">
+                    <h4>ריפריימינג של משמעות</h4>
+                    <p>שינוי המשמעות של ההתנהגות או האירוע</p>
+                    <div class="example">"הוא לא קמצן, הוא חסכן" | "אתה לא בכיין, אתה רגיש"</div>
+                </div>
+                <div class="reframe-card">
+                    <h4>ריפריימינג של הקשר</h4>
+                    <p>מציאת הקשר שבו ההתנהגות חיובית</p>
+                    <div class="example">"ילד שמשחק 14 שעות במחשב? זה מוסר העבודה הכי גבוה!"</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parts Theory -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#129513;</div>
+                <div class="section-title">עבודה עם חלקים</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">תורת החלקים (Parts Theory)</div>
+                <ul>
+                    <li>"האדם הוא סך חלקיו" - מאומצת מתורת הגשטלט</li>
+                    <li>לכל אדם יש חלקים: חלק כועס, חלק עצוב, חלק יצירתי, חלק דחיין...</li>
+                    <li><strong>דיסוציאציה מהזהות:</strong> "יש בי חלק דחיין" במקום "אני דחיין"</li>
+                </ul>
+            </div>
+
+            <div class="parts-grid">
+                <div class="part-card exile">
+                    <h4>חלקים בגלות</h4>
+                    <p>מאחסנים חוויות שליליות בלא-מודע</p>
+                </div>
+                <div class="part-card manager">
+                    <h4>חלקים מנהלים</h4>
+                    <p>אסטרטגיית הימנעות - מגנים מחוויות שליליות</p>
+                </div>
+                <div class="part-card firefighter">
+                    <h4>מכבי שריפות</h4>
+                    <p>הסחות דעת כשחוויה שלילית כבר הגיעה למודע</p>
+                </div>
+            </div>
+
+            <div class="topic">
+                <div class="topic-title">שתי שאלות מפתח לזיהוי כוונה חיובית</div>
+                <ul>
+                    <li><strong>"מה טוב בהתנהגות הזאת?"</strong> - מה הרווחים?</li>
+                    <li><strong>"מה יכול לקרות אם לא תעשה את זה?"</strong></li>
+                </ul>
+                <p style="margin-top: 10px; font-style: italic; color: var(--muted-teal);">"אם לא היה בזה שום דבר טוב - לא היית עושה את זה"</p>
+            </div>
+        </div>
+
+        <!-- Six Step Reframing -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9881;</div>
+                <div class="section-title">מסגור מחדש ב-6 שלבים</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">Six Step Reframing - אחת הטכניקות החזקות ביותר ב-NLP</div>
+            </div>
+            <div class="topic">
+                <ol class="steps-list">
+                    <li><strong>הגדרת התנהגות/תחושה לא רצויה</strong></li>
+                    <li><strong>זיהוי ומתן שם לחלק האחראי</strong> - למשל "דחי"</li>
+                    <li><strong>שיח עם החלק</strong> - הבנת הכוונה החיובית שלו (שתי השאלות)</li>
+                    <li><strong>תודה לחלק</strong> - הכרה בתפקידו והערכתו</li>
+                    <li><strong>הבאת החלק היצירתי ("יצי")</strong> - מציאת לפחות 3 פתרונות חלופיים</li>
+                    <li><strong>חזרה לחלק הבעייתי</strong> - וידוא שהפתרונות מתאימים + הכללה לעתיד</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"תמיד יש עוד אפשרויות"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"גמישות היא העוצמה העילאית"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"לכל התנהגות יש כוונה חיובית עליונה עבור האדם"</div>
+            </div>
+        </div>
+
+        <!-- Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>תרגלו ריפריימינג על סיטואציות יומיומיות</strong>
+                    <div class="homework-note">שנו משמעויות והקשרים לאירועים שקורים לכם</div>
+                </div>
+                <div class="homework-item">
+                    <strong>זהו חלק שמפריע לכם ושאלו אותו את שתי השאלות</strong>
+                    <div class="homework-note">מה טוב בהתנהגות? מה יקרה אם לא תעשה את זה?</div>
+                </div>
+                <div class="homework-item">
+                    <strong>תרגלו מסגור מחדש ב-6 שלבים עם בן/בת זוג</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Bar -->
+        <div class="ref-bar">
+            <span><span class="ref-icon">&#128218;</span> חוברת: מודול 5-6</span>
+            <span><span class="ref-icon">&#128214;</span> ספר: חלקים ומסגור</span>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="lesson-5.html">&#8592; שיעור 5</a>
+        <a href="index.html">כל הסיכומים &#8594;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

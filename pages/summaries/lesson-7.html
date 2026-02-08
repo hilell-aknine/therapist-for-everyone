@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיעור 7 - אמונות ושינוי אמונות | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 50px 20px 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0; right: 0;
+            height: 60px;
+            background: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+
+        .lesson-badge {
+            display: inline-block; background: var(--gold); color: var(--deep-petrol);
+            font-weight: 900; font-size: 28px; width: 64px; height: 64px;
+            line-height: 64px; border-radius: 50%; margin-bottom: 16px;
+        }
+
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+
+        .section-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .section-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
+        }
+
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+
+        .topic {
+            background: var(--frost-white); border-radius: 12px;
+            padding: 20px 24px; margin-bottom: 16px;
+            border-right: 4px solid var(--dusty-aqua);
+        }
+
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before {
+            content: ''; position: absolute; right: 0; top: 12px;
+            width: 8px; height: 8px; background: var(--gold); border-radius: 50%;
+        }
+        .topic p { margin: 8px 0; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white; border-radius: 12px;
+            padding: 24px; margin-bottom: 16px;
+        }
+
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before {
+            content: ''; position: absolute; right: 0; top: 14px;
+            width: 10px; height: 2px; background: var(--gold);
+        }
+        .highlight-box p { color: var(--frost-white); }
+
+        /* Table metaphor */
+        .table-metaphor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 24px;
+            background: var(--frost-white);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .table-top {
+            background: var(--deep-petrol);
+            color: var(--gold);
+            font-weight: 800;
+            font-size: 18px;
+            padding: 14px 60px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .table-legs {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .table-leg {
+            width: 4px;
+            height: 40px;
+            background: var(--dusty-aqua);
+            border-radius: 2px;
+        }
+
+        .table-label {
+            font-size: 13px;
+            color: var(--dusty-aqua);
+            text-align: center;
+        }
+
+        /* Logical levels pyramid */
+        .pyramid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .pyramid-level {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .pyramid-level:nth-child(1) { background: var(--gold); color: var(--deep-petrol); width: 40%; }
+        .pyramid-level:nth-child(2) { background: #b8941e; color: white; width: 50%; }
+        .pyramid-level:nth-child(3) { background: var(--deep-petrol); width: 60%; }
+        .pyramid-level:nth-child(4) { background: var(--muted-teal); width: 70%; }
+        .pyramid-level:nth-child(5) { background: var(--dusty-aqua); width: 80%; }
+        .pyramid-level:nth-child(6) { background: #8ab4bc; color: var(--deep-petrol); width: 90%; }
+
+        /* Two approaches comparison */
+        .approach-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .approach-card {
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid;
+        }
+
+        .approach-card.bad { border-color: #c0392b; background: rgba(192, 57, 43, 0.04); }
+        .approach-card.good { border-color: #27ae60; background: rgba(39, 174, 96, 0.04); }
+
+        .approach-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+        .approach-card.bad h4 { color: #c0392b; }
+        .approach-card.good h4 { color: #27ae60; }
+        .approach-card p { font-size: 14px; color: var(--dusty-aqua); }
+        .approach-card .quote { font-style: italic; margin-top: 8px; color: var(--deep-petrol); font-size: 13px; }
+
+        .note-box {
+            background: #fff3e0;
+            border: 1px solid var(--gold);
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 14px;
+            color: var(--deep-petrol);
+            margin-bottom: 16px;
+        }
+
+        .principle {
+            display: flex; gap: 12px; align-items: flex-start;
+            background: white; border: 2px solid var(--gold);
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 10px;
+        }
+
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+
+        .homework {
+            background: var(--frost-white); border-radius: 16px;
+            padding: 24px; border: 2px dashed var(--dusty-aqua);
+        }
+
+        .homework-item {
+            padding: 10px 0; padding-right: 32px; position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+
+        .ref-bar {
+            display: flex; gap: 20px;
+            background: var(--deep-petrol); color: white;
+            border-radius: 12px; padding: 16px 24px; margin-top: 32px;
+        }
+
+        .ref-bar span { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .ref-bar .ref-icon { color: var(--gold); }
+
+        .bottom-nav {
+            display: flex; justify-content: space-between;
+            max-width: 800px; margin: 30px auto; padding: 0 24px;
+        }
+
+        .bottom-nav a {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--frost-white); color: var(--deep-petrol);
+            text-decoration: none; padding: 12px 24px;
+            border-radius: 10px; font-weight: 600; transition: background 0.3s;
+        }
+
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+
+        @media print {
+            .hero { padding: 30px 20px 40px; }
+            .hero::after { display: none; }
+            .bottom-nav, .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .section-title { font-size: 19px; }
+            .approach-grid { grid-template-columns: 1fr; }
+            .pyramid-level { width: 100% !important; }
+            .ref-bar { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="lesson-6.html">&#8592; שיעור 6</a>
+            <a href="lesson-8.html">שיעור 8 &#8594;</a>
+        </div>
+        <div class="lesson-badge">07</div>
+        <h1>אמונות ושינוי אמונות</h1>
+        <div class="hero-sub">NLP Practitioner - שיעור שביעי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Logical Levels -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9650;</div>
+                <div class="section-title">מודל הרמות הלוגיות</div>
+            </div>
+            <div class="pyramid">
+                <div class="pyramid-level">ייעוד / חזון</div>
+                <div class="pyramid-level">זהות</div>
+                <div class="pyramid-level">אמונות</div>
+                <div class="pyramid-level">מיומנויות</div>
+                <div class="pyramid-level">התנהגויות</div>
+                <div class="pyramid-level">סביבה</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li>כשאנחנו ברמה גבוהה (זהות), היא <strong>משפיעה על כל הרמות שמתחתיה</strong></li>
+                    <li>הכי קשה לשנות את <strong>הזהות</strong> - את מי שאנחנו מאמינים שאנחנו</li>
+                    <li>הגדרת "אני עצלן" vs "אני ספורטאי" - משנה את כל הרמות</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Power of Beliefs -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128170;</div>
+                <div class="section-title">כוחן של אמונות</div>
+            </div>
+
+            <div class="table-metaphor">
+                <div class="table-top">האמונה</div>
+                <div class="table-legs">
+                    <div class="table-leg"></div>
+                    <div class="table-leg"></div>
+                    <div class="table-leg"></div>
+                    <div class="table-leg"></div>
+                    <div class="table-leg"></div>
+                </div>
+                <div class="table-label">הרגליים = הוכחות וחוויות שתומכות באמונה</div>
+            </div>
+
+            <div class="topic">
+                <div class="topic-title">מטפורת השולחן</div>
+                <ul>
+                    <li>לוח השולחן = האמונה עצמה</li>
+                    <li>הרגליים = ההוכחות והחוויות שתומכות בה</li>
+                    <li>ככל שיש יותר "רגליים" (הוכחות), האמונה חזקה יותר</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Environment -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127758;</div>
+                <div class="section-title">הסביבה ושינוי אמונות</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">עיקרון מפתח</div>
+                <p>"אמונה מגבילה לא יכולה להתקיים בסביבה שלא מאפשרת את קיומה"</p>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li>הסביבה היא אחד הגורמים הקריטיים ביותר לשינוי אמונות</li>
+                    <li>כשאנשים מבלים זמן יחד, הקשרים הנוירולוגיים במוח מתחילים <strong>להידמות</strong></li>
+                    <li>סביבה כוללת: אנשים, ספרים, פודקאסטים, קורסים, סרטוני YouTube, סדנאות</li>
+                    <li>מחקר: אדם עם פחד גבהים שהה עם אנשים שעושים סנפלינג - הפחד נעלם בלי שעשה דבר</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Identifying Limiting Beliefs -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128269;</div>
+                <div class="section-title">זיהוי אמונות מגבילות</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li><strong>הפרדה בין מעשים לזהות:</strong> "הפעולות שלי לא מגדירות את מי שאני"</li>
+                    <li>טעויות מהעבר לא אמורות להגדיר את הזהות שלנו</li>
+                    <li>חשיבה עצמית שלילית כמנגנון עונש - ברמה לא-מודעת מחפשים דרכים לפגוע בעצמנו</li>
+                </ul>
+            </div>
+            <div class="note-box">
+                <strong>תורת הרמזורים:</strong> אם תחילת היום מתחילה ב"אדום" (כישלון קטן), כל שאר היום נצבע באדום - כמו דומינו. כל רגע נתון הוא נפרד!
+            </div>
+        </div>
+
+        <!-- Changing Beliefs -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128260;</div>
+                <div class="section-title">שינוי אמונות</div>
+            </div>
+            <div class="approach-grid">
+                <div class="approach-card bad">
+                    <h4>גישה מגבילה</h4>
+                    <p>"אני גרוע, זה לא בשבילי, זה לא עובד"</p>
+                    <div class="quote">הפנמה שלילית לזהות</div>
+                </div>
+                <div class="approach-card good">
+                    <h4>גישת "עבד / לא עבד"</h4>
+                    <p>"מה עבד? מה לא עבד? למה? יאללה, בוא נתקן ונתקדם"</p>
+                    <div class="quote">למידה ושיפור</div>
+                </div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li><strong>"אירועים לא מגדירים את מי שאני"</strong> - הפרדה בין תוצאות לבין זהות</li>
+                    <li><strong>הגדרת כישלון:</strong> "כישלון זה שפשוט הפסקתי לנסות" - כל עוד ממשיכים, לא נכשלנו</li>
+                    <li>להיות "קורט שבילים" (בר אמון) - לדעת לתת ולקבל ביקורת</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"אדם עושה את הטוב ביותר בכל רגע נתון"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"אמונה מגבילה לא יכולה להתקיים בסביבה שלא מאפשרת את קיומה"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"הכוח הכי חזק שלנו כבני אדם - להישאר עקביים עם הזהות שלנו"</div>
+            </div>
+        </div>
+
+        <!-- Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>זהו 3 אמונות מגבילות שיש לכם</strong>
+                    <div class="homework-note">שאלו: מה ההוכחות שתומכות בהן? האם הן באמת נכונות?</div>
+                </div>
+                <div class="homework-item">
+                    <strong>בחנו את הסביבה שלכם</strong>
+                    <div class="homework-note">האם הסביבה תומכת באמונות שאתם רוצים לאמץ?</div>
+                </div>
+                <div class="homework-item">
+                    <strong>תרגלו גישת "עבד / לא עבד"</strong>
+                    <div class="homework-note">במקום לשפוט - למדו ושפרו</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Bar -->
+        <div class="ref-bar">
+            <span><span class="ref-icon">&#128218;</span> חוברת: מודול 7 - אמונות</span>
+            <span><span class="ref-icon">&#128214;</span> ספר: רמות לוגיות ואמונות</span>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="lesson-6.html">&#8592; שיעור 6</a>
+        <a href="lesson-8.html">שיעור 8 &#8594;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

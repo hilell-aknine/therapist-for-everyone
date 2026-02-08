@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיעור 8 - ציר הזמן ואינטגרציה | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 50px 20px 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0; right: 0;
+            height: 60px;
+            background: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+
+        .lesson-badge {
+            display: inline-block; background: var(--gold); color: var(--deep-petrol);
+            font-weight: 900; font-size: 28px; width: 64px; height: 64px;
+            line-height: 64px; border-radius: 50%; margin-bottom: 16px;
+        }
+
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+
+        .section-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .section-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
+        }
+
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+
+        .topic {
+            background: var(--frost-white); border-radius: 12px;
+            padding: 20px 24px; margin-bottom: 16px;
+            border-right: 4px solid var(--dusty-aqua);
+        }
+
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before {
+            content: ''; position: absolute; right: 0; top: 12px;
+            width: 8px; height: 8px; background: var(--gold); border-radius: 50%;
+        }
+        .topic p { margin: 8px 0; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white; border-radius: 12px;
+            padding: 24px; margin-bottom: 16px;
+        }
+
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before {
+            content: ''; position: absolute; right: 0; top: 14px;
+            width: 10px; height: 2px; background: var(--gold);
+        }
+        .highlight-box p { color: var(--frost-white); }
+
+        /* Timeline visual */
+        .timeline-visual {
+            position: relative;
+            padding: 30px 20px;
+            margin-bottom: 16px;
+            background: var(--frost-white);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 4px;
+            background: linear-gradient(to left, var(--gold), var(--dusty-aqua), var(--muted-teal));
+            border-radius: 2px;
+        }
+
+        .timeline-points {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+            padding: 0 5%;
+        }
+
+        .timeline-point {
+            text-align: center;
+        }
+
+        .timeline-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            margin: 0 auto 8px;
+        }
+
+        .timeline-point:nth-child(1) .timeline-dot { background: var(--muted-teal); color: white; }
+        .timeline-point:nth-child(2) .timeline-dot { background: var(--deep-petrol); color: var(--gold); border: 3px solid var(--gold); }
+        .timeline-point:nth-child(3) .timeline-dot { background: var(--gold); color: var(--deep-petrol); }
+
+        .timeline-label { font-size: 14px; font-weight: 700; color: var(--deep-petrol); }
+        .timeline-sub { font-size: 12px; color: var(--dusty-aqua); }
+
+        /* Three columns for past/present/future */
+        .time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .time-card {
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid;
+        }
+
+        .time-card.past { border-color: var(--muted-teal); background: rgba(0, 96, 107, 0.05); }
+        .time-card.present { border-color: var(--deep-petrol); background: rgba(0, 59, 70, 0.05); }
+        .time-card.future { border-color: var(--gold); background: rgba(212, 175, 55, 0.05); }
+
+        .time-card h4 { font-size: 16px; font-weight: 700; color: var(--deep-petrol); margin-bottom: 6px; }
+        .time-card p { font-size: 14px; color: var(--dusty-aqua); }
+
+        /* Integration tools */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .tool-item {
+            background: white;
+            border-radius: 10px;
+            padding: 14px 18px;
+            border-right: 3px solid var(--gold);
+            box-shadow: 0 2px 8px rgba(0, 59, 70, 0.06);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--deep-petrol);
+        }
+
+        .tool-item span {
+            display: block;
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--dusty-aqua);
+            margin-top: 4px;
+        }
+
+        .principle {
+            display: flex; gap: 12px; align-items: flex-start;
+            background: white; border: 2px solid var(--gold);
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 10px;
+        }
+
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+
+        .homework {
+            background: var(--frost-white); border-radius: 16px;
+            padding: 24px; border: 2px dashed var(--dusty-aqua);
+        }
+
+        .homework-item {
+            padding: 10px 0; padding-right: 32px; position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+
+        /* Completion badge */
+        .completion {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 16px;
+            margin-top: 32px;
+        }
+
+        .completion-icon { font-size: 48px; margin-bottom: 12px; }
+        .completion h3 { color: var(--gold); font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .completion p { color: var(--frost-white); font-size: 15px; }
+
+        .ref-bar {
+            display: flex; gap: 20px;
+            background: var(--deep-petrol); color: white;
+            border-radius: 12px; padding: 16px 24px; margin-top: 32px;
+        }
+
+        .ref-bar span { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .ref-bar .ref-icon { color: var(--gold); }
+
+        .bottom-nav {
+            display: flex; justify-content: space-between;
+            max-width: 800px; margin: 30px auto; padding: 0 24px;
+        }
+
+        .bottom-nav a {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--frost-white); color: var(--deep-petrol);
+            text-decoration: none; padding: 12px 24px;
+            border-radius: 10px; font-weight: 600; transition: background 0.3s;
+        }
+
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+
+        @media print {
+            .hero { padding: 30px 20px 40px; }
+            .hero::after { display: none; }
+            .bottom-nav, .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .section-title { font-size: 19px; }
+            .time-grid { grid-template-columns: 1fr; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .ref-bar { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="lesson-7.html">&#8592; שיעור 7</a>
+            <a href="index.html">כל הסיכומים &#8594;</a>
+        </div>
+        <div class="lesson-badge">08</div>
+        <h1>ציר הזמן ואינטגרציה</h1>
+        <div class="hero-sub">NLP Practitioner - שיעור שמיני ואחרון</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Timeline Intro -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9200;</div>
+                <div class="section-title">מבוא לציר הזמן</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">ציר הזמן - "התותח הכבד של ה-NLP"</div>
+                <p>אחת הטכניקות העמוקות והחזקות ביותר ב-NLP לטיפול בעבר ובניית עתיד</p>
+            </div>
+
+            <div class="timeline-visual">
+                <div class="timeline-line"></div>
+                <div class="timeline-points">
+                    <div class="timeline-point">
+                        <div class="timeline-dot">&#9668;</div>
+                        <div class="timeline-label">עבר</div>
+                        <div class="timeline-sub">זיכרונות וחוויות</div>
+                    </div>
+                    <div class="timeline-point">
+                        <div class="timeline-dot">&#9679;</div>
+                        <div class="timeline-label">הווה</div>
+                        <div class="timeline-sub">הרגע הנוכחי</div>
+                    </div>
+                    <div class="timeline-point">
+                        <div class="timeline-dot">&#9658;</div>
+                        <div class="timeline-label">עתיד</div>
+                        <div class="timeline-sub">מטרות וחזון</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="topic">
+                <ul>
+                    <li>כל אחד מאחסן את הזמן בדרך שונה - ויזואלית, תחושתית, או מרחבית</li>
+                    <li>המוח מאחסן זיכרונות לאורך "קו" פנימי - ציר הזמן</li>
+                    <li>ניתן לגשת לנקודות בציר הזמן ולשנות את החוויה הרגשית שלהן</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Past Work -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128268;</div>
+                <div class="section-title">טיפול בעבר</div>
+            </div>
+            <div class="time-grid">
+                <div class="time-card past">
+                    <h4>עיבוד אירועים</h4>
+                    <p>גישה לזיכרונות טעונים ושחרור המטען הרגשי</p>
+                </div>
+                <div class="time-card present">
+                    <h4>שינוי פרשנות</h4>
+                    <p>הסתכלות מחדש על אירועי עבר מנקודת מבט בוגרת</p>
+                </div>
+                <div class="time-card future">
+                    <h4>יצירת משאבים</h4>
+                    <p>הזנת משאבים חדשים לנקודות בעבר שהיו חסרות</p>
+                </div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li>המוח צורב חוויות רגשיות חזקות ויוצר "דגלי אזהרה"</li>
+                    <li>ככל שהרגש בחוויה חזק יותר, המוח צורב אותה חזק יותר</li>
+                    <li>ניתן "לטוס" מעל ציר הזמן ולראות את האירוע מגובה - <strong>דיסוציאציה</strong></li>
+                    <li>סליחה עצמית כבסיס: "באותו רגע, עם המשאבים שהיו לי - עשיתי את הכי טוב שיכולתי"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Future Building -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127775;</div>
+                <div class="section-title">בניית עתיד</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">Future Pacing - התוויית עתיד</div>
+                <ul>
+                    <li>"טיסה" קדימה על ציר הזמן לעתיד הרצוי</li>
+                    <li>יצירת חוויה חושית מלאה של המטרה שהושגה (ראייה, שמיעה, תחושה)</li>
+                    <li>חיזוק הקשר בין ההווה לעתיד הרצוי</li>
+                    <li>המוח לא מבדיל בין דמיון למציאות - חוויית העתיד נשמרת כ"זיכרון"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Integration -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128736;</div>
+                <div class="section-title">אינטגרציה - כל הכלים ביחד</div>
+            </div>
+
+            <div class="tools-grid">
+                <div class="tool-item">ראפור וקליברציה <span>שיעור 1</span></div>
+                <div class="tool-item">עמדות תפיסה <span>שיעור 2</span></div>
+                <div class="tool-item">מטה מודל ומטרות <span>שיעור 3</span></div>
+                <div class="tool-item">מערכות ייצוג וסמ"דים <span>שיעור 4</span></div>
+                <div class="tool-item">סטייט ועוגנים <span>שיעור 5</span></div>
+                <div class="tool-item">פריימינג וחלקים <span>שיעור 6</span></div>
+                <div class="tool-item">אמונות ושינוי <span>שיעור 7</span></div>
+                <div class="tool-item">ציר הזמן <span>שיעור 8</span></div>
+            </div>
+
+            <div class="topic">
+                <div class="topic-title">שילוב הכלים בתהליך טיפולי</div>
+                <ul>
+                    <li>בניית ראפור כבסיס לכל אינטראקציה</li>
+                    <li>שימוש במטה מודל לזיהוי הבעיה האמיתית</li>
+                    <li>קליברציה ומעקב אחר מערכות ייצוג</li>
+                    <li>עבודה עם סטייט ועוגנים לשינוי מצב רגשי</li>
+                    <li>ריפריימינג ועבודה עם חלקים להבנת כוונה חיובית</li>
+                    <li>שינוי אמונות וציר הזמן לשינוי עמוק</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד מסכמות</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"המפה אינה השטח" - לכל אחד יש מציאות סובייקטיבית</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"לכל התנהגות יש כוונה חיובית עליונה"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"אדם עושה את הטוב ביותר בכל רגע נתון"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"לכל אדם יש את כל המשאבים להצלחה"</div>
+            </div>
+        </div>
+
+        <!-- Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>צרו Future Pace לעצמכם</strong>
+                    <div class="homework-note">דמיינו את עצמכם מגיעים למטרה - מה אתם רואים, שומעים, מרגישים?</div>
+                </div>
+                <div class="homework-item">
+                    <strong>חזרו על כל הטכניקות שלמדנו</strong>
+                    <div class="homework-note">תרגלו ראפור, מטה מודל, עוגנים, ריפריימינג, 6 Step Reframing</div>
+                </div>
+                <div class="homework-item">
+                    <strong>בחרו טכניקה אחת ויישמו אותה השבוע</strong>
+                    <div class="homework-note">העמקה בטכניקה שהכי דיברה אליכם</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Bar -->
+        <div class="ref-bar">
+            <span><span class="ref-icon">&#128218;</span> חוברת: מודול 7 - ציר הזמן</span>
+            <span><span class="ref-icon">&#128214;</span> ספר: אינטגרציה וסיכום</span>
+        </div>
+
+        <!-- Completion -->
+        <div class="completion">
+            <div class="completion-icon">&#127942;</div>
+            <h3>סיימתם את קורס ה-Practitioner!</h3>
+            <p>8 שיעורים, עשרות טכניקות, ומסע שינוי אמיתי. המשיכו לתרגל!</p>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="lesson-7.html">&#8592; שיעור 7</a>
+        <a href="index.html">כל הסיכומים &#8594;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

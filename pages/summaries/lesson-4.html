@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיעור 4 - סמ״דים ומערכות ייצוג | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 50px 20px 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0; right: 0;
+            height: 60px;
+            background: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+
+        .lesson-badge {
+            display: inline-block; background: var(--gold); color: var(--deep-petrol);
+            font-weight: 900; font-size: 28px; width: 64px; height: 64px;
+            line-height: 64px; border-radius: 50%; margin-bottom: 16px;
+        }
+
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+
+        .section { margin-bottom: 32px; }
+
+        .section-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .section-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
+        }
+
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+
+        .topic {
+            background: var(--frost-white); border-radius: 12px;
+            padding: 20px 24px; margin-bottom: 16px;
+            border-right: 4px solid var(--dusty-aqua);
+        }
+
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before {
+            content: ''; position: absolute; right: 0; top: 12px;
+            width: 8px; height: 8px; background: var(--gold); border-radius: 50%;
+        }
+
+        .topic p { margin: 8px 0; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white; border-radius: 12px;
+            padding: 24px; margin-bottom: 16px;
+        }
+
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before {
+            content: ''; position: absolute; right: 0; top: 14px;
+            width: 10px; height: 2px; background: var(--gold);
+        }
+
+        /* VAKOG cards */
+        .vakog-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .vakog-card {
+            border-radius: 12px;
+            padding: 24px 20px;
+            text-align: center;
+            border: 2px solid;
+        }
+
+        .vakog-card.visual { border-color: var(--gold); background: rgba(212, 175, 55, 0.06); }
+        .vakog-card.auditory { border-color: var(--dusty-aqua); background: rgba(47, 133, 146, 0.06); }
+        .vakog-card.kinesthetic { border-color: var(--muted-teal); background: rgba(0, 96, 107, 0.06); }
+
+        .vakog-icon { font-size: 32px; margin-bottom: 8px; display: block; }
+        .vakog-letter { font-size: 24px; font-weight: 900; color: var(--deep-petrol); }
+        .vakog-name { font-size: 15px; font-weight: 600; color: var(--muted-teal); margin-top: 4px; }
+        .vakog-heb { font-size: 14px; color: var(--dusty-aqua); }
+
+        .principle {
+            display: flex; gap: 12px; align-items: flex-start;
+            background: white; border: 2px solid var(--gold);
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 10px;
+        }
+
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+
+        .homework {
+            background: var(--frost-white); border-radius: 16px;
+            padding: 24px; border: 2px dashed var(--dusty-aqua);
+        }
+
+        .homework-item {
+            padding: 10px 0; padding-right: 32px; position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+
+        .ref-bar {
+            display: flex; gap: 20px;
+            background: var(--deep-petrol); color: white;
+            border-radius: 12px; padding: 16px 24px; margin-top: 32px;
+        }
+
+        .ref-bar span { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .ref-bar .ref-icon { color: var(--gold); }
+
+        .bottom-nav {
+            display: flex; justify-content: space-between;
+            max-width: 800px; margin: 30px auto; padding: 0 24px;
+        }
+
+        .bottom-nav a {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--frost-white); color: var(--deep-petrol);
+            text-decoration: none; padding: 12px 24px;
+            border-radius: 10px; font-weight: 600; transition: background 0.3s;
+        }
+
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+
+        @media print {
+            .hero { padding: 30px 20px 40px; }
+            .hero::after { display: none; }
+            .content { padding-top: 20px; }
+            .bottom-nav, .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .section-title { font-size: 19px; }
+            .vakog-grid { grid-template-columns: 1fr; }
+            .ref-bar { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="lesson-3.html">&#8592; שיעור 3</a>
+            <a href="index.html">כל הסיכומים &#8594;</a>
+        </div>
+        <div class="lesson-badge">04</div>
+        <h1>סמ״דים ומערכות ייצוג</h1>
+        <div class="hero-sub">NLP Practitioner - שיעור רביעי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Strategies -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9881;</div>
+                <div class="section-title">אסטרטגיות</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">הנחת יסוד</div>
+                <p>"כל בעיה היא תוצאה של תהליך חשיבתי"</p>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li>להבין מתי האסטרטגיה מתחילה - מה הטריגר שמפעיל את המתכון המושלם הזה</li>
+                    <li><strong>"להרוג את המפלצת כשהיא קטנה"</strong> - לזהות ולעצור מוקדם</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- VAKOG -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128065;</div>
+                <div class="section-title">מייצג פנימי - VAKOG</div>
+            </div>
+
+            <div class="vakog-grid">
+                <div class="vakog-card visual">
+                    <span class="vakog-icon">&#128065;</span>
+                    <span class="vakog-letter">V</span>
+                    <div class="vakog-name">Visual</div>
+                    <div class="vakog-heb">ויזואלי - ראייה</div>
+                </div>
+                <div class="vakog-card auditory">
+                    <span class="vakog-icon">&#128066;</span>
+                    <span class="vakog-letter">A</span>
+                    <div class="vakog-name">Auditory</div>
+                    <div class="vakog-heb">אודיטורי - שמיעה</div>
+                </div>
+                <div class="vakog-card kinesthetic">
+                    <span class="vakog-icon">&#9995;</span>
+                    <span class="vakog-letter">K</span>
+                    <div class="vakog-name">Kinesthetic</div>
+                    <div class="vakog-heb">קינסתטי - רגשות ותחושות</div>
+                </div>
+            </div>
+
+            <div class="topic">
+                <div class="topic-title">מערכות ייצוג עיקריות</div>
+                <ul>
+                    <li>מה ייתן לנו לזהות את מערכת הייצוג הדומיננטית</li>
+                    <li>איך מזהים אנשים ויזואליים / אודיטוריים / קינסתטיים</li>
+                    <li><strong>זיהוי מערכת ייצוג לפי תנועות עיניים</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sub-modalities -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128300;</div>
+                <div class="section-title">סמ״דים - תתי חושים</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li>מהם הסמ"דים שמשויכים לכל מערכת ייצוג</li>
+                    <li>איך סמ"דים מתקשרים לחוויות בחיינו ולמשמעות שלהן</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Techniques -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9889;</div>
+                <div class="section-title">טכניקות ותרגולים</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li><strong>טכניקת מאפ-אקרוס</strong> - שינוי חוויה פנימית על ידי שינוי סמ"דים</li>
+                    <li><strong>סוויש (Swish)</strong> - טכניקה להחלפת דפוסים לא רצויים</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"אנשים לא מקולקלים, הם עובדים טוב מאוד"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"כל התנהגות יעילה בהקשר מסוים"</div>
+            </div>
+        </div>
+
+        <!-- Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>זהו את מערכות הייצוג של מי שסביבכם</strong>
+                    <div class="homework-note">בנוסף, שימו לב לתנועת עיניים</div>
+                </div>
+                <div class="homework-item">
+                    <strong>תרגלו, תרגלו, תרגלו!</strong>
+                    <div class="homework-note">ראפור, קליברציה, מטה מודל</div>
+                </div>
+                <div class="homework-item">
+                    <strong>צפו בשיעור המוקלט</strong>
+                </div>
+                <div class="homework-item">
+                    <strong>צפו בטכניקות</strong>
+                    <div class="homework-note">מסע בין יועצים, וולט דיסני, מאפ אקרוס, סוויש</div>
+                </div>
+                <div class="homework-item">
+                    <strong>בחרו משהו אחד שלקחתם מהשיעור ויישמו אותו בשבוע הקרוב</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Bar -->
+        <div class="ref-bar">
+            <span><span class="ref-icon">&#128218;</span> חוברת: עמ׳ 50-65</span>
+            <span><span class="ref-icon">&#128214;</span> ספר: עמ׳ 12-17</span>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="lesson-3.html">&#8592; שיעור 3</a>
+        <a href="index.html">כל הסיכומים &#8594;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיעור 2 - עמדות תפיסה ומסע בין עמדות | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 50px 20px 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0; right: 0;
+            height: 60px;
+            background: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        .nav-links a {
+            color: var(--frost-white);
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover { opacity: 1; }
+
+        .lesson-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            font-weight: 900;
+            font-size: 28px;
+            width: 64px;
+            height: 64px;
+            line-height: 64px;
+            border-radius: 50%;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+
+        .section { margin-bottom: 32px; }
+
+        .section-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .section-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
+        }
+
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+
+        .topic {
+            background: var(--frost-white); border-radius: 12px;
+            padding: 20px 24px; margin-bottom: 16px;
+            border-right: 4px solid var(--dusty-aqua);
+        }
+
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+
+        .topic ul { list-style: none; padding: 0; }
+
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+
+        .topic li::before {
+            content: '';
+            position: absolute; right: 0; top: 12px;
+            width: 8px; height: 8px;
+            background: var(--gold); border-radius: 50%;
+        }
+
+        /* Position cards */
+        .position-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .position-card {
+            border-radius: 12px;
+            padding: 24px;
+            border: 2px solid;
+        }
+
+        .position-card.first { border-color: var(--gold); background: rgba(212, 175, 55, 0.05); }
+        .position-card.second { border-color: var(--dusty-aqua); background: rgba(47, 133, 146, 0.05); }
+        .position-card.third { border-color: var(--muted-teal); background: rgba(0, 96, 107, 0.05); }
+
+        .position-number {
+            display: inline-block;
+            width: 36px; height: 36px; line-height: 36px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: 900; font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .position-card.first .position-number { background: var(--gold); color: var(--deep-petrol); }
+        .position-card.second .position-number { background: var(--dusty-aqua); color: white; }
+        .position-card.third .position-number { background: var(--muted-teal); color: white; }
+
+        .position-name { font-size: 18px; font-weight: 700; color: var(--deep-petrol); margin-bottom: 4px; }
+        .position-desc { font-size: 14px; color: var(--dusty-aqua); margin-bottom: 12px; }
+
+        .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .pros-cons h5 { font-size: 14px; margin-bottom: 6px; }
+        .pros h5 { color: #27ae60; }
+        .cons h5 { color: #c0392b; }
+        .pros-cons ul { list-style: none; padding: 0; font-size: 14px; }
+        .pros-cons li { padding: 3px 0; padding-right: 16px; position: relative; }
+        .pros li::before { content: '+'; position: absolute; right: 0; color: #27ae60; font-weight: 700; }
+        .cons li::before { content: '-'; position: absolute; right: 0; color: #c0392b; font-weight: 700; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white; border-radius: 12px;
+            padding: 24px; margin-bottom: 16px;
+        }
+
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+
+        .highlight-box ul { list-style: none; padding: 0; }
+
+        .highlight-box li {
+            padding: 6px 0; padding-right: 24px;
+            position: relative; color: var(--frost-white);
+        }
+
+        .highlight-box li::before {
+            content: '';
+            position: absolute; right: 0; top: 14px;
+            width: 10px; height: 2px; background: var(--gold);
+        }
+
+        .principle {
+            display: flex; gap: 12px; align-items: flex-start;
+            background: white; border: 2px solid var(--gold);
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 10px;
+        }
+
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+
+        .homework {
+            background: var(--frost-white); border-radius: 16px;
+            padding: 24px; border: 2px dashed var(--dusty-aqua);
+        }
+
+        .homework-item {
+            padding: 10px 0; padding-right: 32px;
+            position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+
+        /* Flow diagram */
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            background: var(--frost-white);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .flow-item {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid var(--dusty-aqua);
+        }
+
+        .flow-arrow { color: var(--gold); font-size: 20px; font-weight: 700; }
+
+        .ref-bar {
+            display: flex; gap: 20px;
+            background: var(--deep-petrol); color: white;
+            border-radius: 12px; padding: 16px 24px; margin-top: 32px;
+        }
+
+        .ref-bar span { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .ref-bar .ref-icon { color: var(--gold); }
+
+        .bottom-nav {
+            display: flex; justify-content: space-between;
+            max-width: 800px; margin: 30px auto; padding: 0 24px;
+        }
+
+        .bottom-nav a {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--frost-white); color: var(--deep-petrol);
+            text-decoration: none; padding: 12px 24px;
+            border-radius: 10px; font-weight: 600; transition: background 0.3s;
+        }
+
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+
+        @media print {
+            .hero { padding: 30px 20px 40px; }
+            .hero::after { display: none; }
+            .content { padding-top: 20px; }
+            .bottom-nav, .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .section-title { font-size: 19px; }
+            .pros-cons { grid-template-columns: 1fr; }
+            .ref-bar { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="lesson-1.html">&#8592; שיעור 1</a>
+            <a href="lesson-3.html">שיעור 3 &#8594;</a>
+        </div>
+        <div class="lesson-badge">02</div>
+        <h1>עמדות תפיסה ומסע בין עמדות</h1>
+        <div class="hero-sub">NLP Practitioner - שיעור שני</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Logical Levels -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9650;</div>
+                <div class="section-title">מודל רמות לוגיות של שינוי</div>
+            </div>
+            <div class="flow">
+                <div class="flow-item">סביבה</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-item">התנהגות</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-item">מיומנויות</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-item">אמונות</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-item">זהות</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-item" style="border-color: var(--gold); font-weight: 800;">חזון</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li>הכי קשה לנו לשנות את <strong>הזהות</strong> שלנו - את מי שאנחנו מאמינים שאנחנו</li>
+                    <li>מי מחליט מי אני? <strong>אני</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Visualization -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128065;</div>
+                <div class="section-title">השפה של המוח - ויזואליזציה ודמיון</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li>פיתוח מיומנויות הדמיון שלנו יכולה לעזור לנו לשלוט במצב הרגשי הרגעי שלנו (סטייט)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Perception Positions -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128064;</div>
+                <div class="section-title">עמדות תפיסה</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מבוא</div>
+                <ul>
+                    <li>מהן עמדות תפיסה ואיזה עמדות תפיסה קיימות</li>
+                    <li>מה עושים עם עמדות התפיסה</li>
+                    <li>איך עמדות התפיסה נוצרו</li>
+                </ul>
+            </div>
+
+            <div class="position-grid">
+                <div class="position-card first">
+                    <div class="position-number">1</div>
+                    <div class="position-name">עמדה ראשונה: "אני"</div>
+                    <div class="position-desc">נקודת המבט שלי</div>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>יתרונות</h5>
+                            <ul>
+                                <li>חיבור לעצמי ולרצונות שלי</li>
+                                <li>עמדה הכרחית להתקדמות בחיים</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>חסרונות</h5>
+                            <ul>
+                                <li>חוסר הבנה של אחרים</li>
+                                <li>דרך הסתכלות מאוד צרה</li>
+                                <li>דריכה ורמיסה של הסביבה</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="position-card second">
+                    <div class="position-number">2</div>
+                    <div class="position-name">עמדה שנייה: "האחר"</div>
+                    <div class="position-desc">מנקודת המבט שלו, לפי תפיסות העולם שלו</div>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>יתרונות</h5>
+                            <ul>
+                                <li>אמפתיה, הבנה, ראפור והשפעה</li>
+                                <li>נקודת מבט שונה על המצב</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>חסרונות</h5>
+                            <ul>
+                                <li>ניתוק וביטול עצמי</li>
+                                <li>ריצוי</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="position-card third">
+                    <div class="position-number">3</div>
+                    <div class="position-name">עמדה שלישית: "זבוב על הקיר"</div>
+                    <div class="position-desc">עמדת תפיסה נטרלית ככל האפשר - השטח / המציאות</div>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>יתרונות</h5>
+                            <ul>
+                                <li>הסתכלות רחבה-אובייקטיבית</li>
+                                <li>ויסות רגשי</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>חסרונות</h5>
+                            <ul>
+                                <li>ניתוק רגשי</li>
+                                <li>חוסר חיבור</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Tips -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9888;</div>
+                <div class="section-title">דגשים לטכניקות והדגמות</div>
+            </div>
+            <div class="highlight-box">
+                <ul>
+                    <li>דממה</li>
+                    <li>הדעה של מנחה התהליך אינה נחשבת</li>
+                    <li>לא להתפרץ למפה של האחר / של המונחה</li>
+                    <li>טלפונים על שקט בלי רטט</li>
+                    <li>שימו לב ל<strong>מבנה</strong> ולא ל<strong>תוכן</strong></li>
+                    <li><strong>שאילת שאלות</strong> היא הדרך הכי טובה להעביר בן אדם תהליך</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Techniques -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9889;</div>
+                <div class="section-title">טכניקות ותרגולים</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li><strong>מסע בין עמדות תפיסה</strong> - תרגול מעשי במעבר בין 3 העמדות</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"משמעות התקשורת בתגובה שמתקבלת"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"כל תקשורת היא או הבעה של אהבה או קריאה לעזרה"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128161;</div>
+                <div class="principle-text">"גאונות בתקשורת היא היכולת לעבור בין העמדות באופן תמידי"</div>
+            </div>
+        </div>
+
+        <!-- Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>תרגלו מסע בין עמדות עם עצמכם</strong>
+                    <div class="homework-note">כנסו כל פעם לעמדה אחרת ותראו מה מתחדש לכם מאותה עמדה</div>
+                </div>
+                <div class="homework-item">
+                    <strong>תרגלו עם בן/בת זוג מסע בין עמדות</strong>
+                    <div class="homework-note">על קונפליקט שיש לכם עם מישהו</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Bar -->
+        <div class="ref-bar">
+            <span><span class="ref-icon">&#128218;</span> חוברת: עמ׳ 26-33</span>
+            <span><span class="ref-icon">&#128214;</span> ספר: עמ׳ 2-6</span>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="lesson-1.html">&#8592; שיעור 1</a>
+        <a href="lesson-3.html">שיעור 3 &#8594;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

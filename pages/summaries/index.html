@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סיכומי שיעורים - NLP Practitioner | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--frost-white);
+            color: var(--deep-petrol);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 60px 20px 80px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--frost-white);
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            font-weight: 800;
+            font-size: 14px;
+            padding: 6px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--frost-white);
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* Back link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--frost-white);
+            text-decoration: none;
+            font-size: 14px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .back-link:hover { opacity: 1; }
+
+        /* Cards Grid */
+        .container {
+            max-width: 900px;
+            margin: -10px auto 60px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cards {
+            display: grid;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 59, 70, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: grid;
+            grid-template-columns: 100px 1fr;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 59, 70, 0.15);
+        }
+
+        .card-number {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .card-number span {
+            font-size: 42px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .card-number small {
+            font-size: 12px;
+            color: var(--gold);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--deep-petrol);
+            margin-bottom: 8px;
+        }
+
+        .card-topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .card-topic {
+            background: var(--frost-white);
+            color: var(--dusty-aqua);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--dusty-aqua);
+        }
+
+        .card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--dusty-aqua);
+            font-size: 14px;
+            border-top: 1px solid rgba(0, 59, 70, 0.1);
+        }
+
+        .footer a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 28px; }
+            .card { grid-template-columns: 80px 1fr; }
+            .card-number span { font-size: 32px; }
+            .card-body { padding: 16px; }
+            .card-title { font-size: 17px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <a href="../../index.html" class="back-link">&#8592; חזרה לאתר</a>
+        <div class="hero-badge">NLP PRACTITIONER</div>
+        <h1>סיכומי שיעורים</h1>
+        <p>כל מה שלמדנו, מסודר ומעוצב - שיעור אחר שיעור</p>
+    </div>
+
+    <div class="container">
+        <div class="cards">
+
+            <a href="lesson-1.html" class="card">
+                <div class="card-number">
+                    <span>01</span>
+                    <small>שיעור</small>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">מבוא ל-NLP וראפור</div>
+                    <div class="card-topics">
+                        <span class="card-topic">מהו NLP</span>
+                        <span class="card-topic">3 חוקי המוח</span>
+                        <span class="card-topic">מודל התקשורת</span>
+                        <span class="card-topic">ראפור</span>
+                    </div>
+                    <div class="card-meta">
+                        <span>&#128218; חוברת: עמ׳ 3-25</span>
+                        <span>&#128214; ספר: עמ׳ 2-3</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="lesson-2.html" class="card">
+                <div class="card-number">
+                    <span>02</span>
+                    <small>שיעור</small>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">עמדות תפיסה ומסע בין עמדות</div>
+                    <div class="card-topics">
+                        <span class="card-topic">רמות לוגיות</span>
+                        <span class="card-topic">ויזואליזציה</span>
+                        <span class="card-topic">3 עמדות תפיסה</span>
+                        <span class="card-topic">מסע בין עמדות</span>
+                    </div>
+                    <div class="card-meta">
+                        <span>&#128218; חוברת: עמ׳ 26-33</span>
+                        <span>&#128214; ספר: עמ׳ 2-6</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="lesson-3.html" class="card">
+                <div class="card-number">
+                    <span>03</span>
+                    <small>שיעור</small>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">מטה מודל והצבת מטרות</div>
+                    <div class="card-topics">
+                        <span class="card-topic">מסננים ראשוניים</span>
+                        <span class="card-topic">מטה מודל</span>
+                        <span class="card-topic">Outcome</span>
+                        <span class="card-topic">וולט דיסני</span>
+                    </div>
+                    <div class="card-meta">
+                        <span>&#128218; חוברת: עמ׳ 36-48</span>
+                        <span>&#128214; ספר: עמ׳ 9-11</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="lesson-4.html" class="card">
+                <div class="card-number">
+                    <span>04</span>
+                    <small>שיעור</small>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">סמ״דים ומערכות ייצוג</div>
+                    <div class="card-topics">
+                        <span class="card-topic">אסטרטגיות</span>
+                        <span class="card-topic">VAKOG</span>
+                        <span class="card-topic">סמ״דים</span>
+                        <span class="card-topic">מאפ-אקרוס</span>
+                    </div>
+                    <div class="card-meta">
+                        <span>&#128218; חוברת: עמ׳ 50-65</span>
+                        <span>&#128214; ספר: עמ׳ 12-17</span>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</p>
+        <p><a href="../../docs/nlp-booklet-branded.html">&#128218; לחוברת הקורס המלאה</a></p>
+    </div>
+</body>
+</html>

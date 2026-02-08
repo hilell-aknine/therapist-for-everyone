@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיעור 3 - מטה מודל והצבת מטרות | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 50px 20px 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0; right: 0;
+            height: 60px;
+            background: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+
+        .lesson-badge {
+            display: inline-block; background: var(--gold); color: var(--deep-petrol);
+            font-weight: 900; font-size: 28px; width: 64px; height: 64px;
+            line-height: 64px; border-radius: 50%; margin-bottom: 16px;
+        }
+
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+
+        .section { margin-bottom: 32px; }
+
+        .section-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .section-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px; flex-shrink: 0;
+        }
+
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+
+        .topic {
+            background: var(--frost-white); border-radius: 12px;
+            padding: 20px 24px; margin-bottom: 16px;
+            border-right: 4px solid var(--dusty-aqua);
+        }
+
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before {
+            content: ''; position: absolute; right: 0; top: 12px;
+            width: 8px; height: 8px; background: var(--gold); border-radius: 50%;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white; border-radius: 12px;
+            padding: 24px; margin-bottom: 16px;
+        }
+
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before {
+            content: ''; position: absolute; right: 0; top: 14px;
+            width: 10px; height: 2px; background: var(--gold);
+        }
+
+        /* Meta Model categories */
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .meta-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border-top: 4px solid;
+            box-shadow: 0 2px 10px rgba(0, 59, 70, 0.08);
+        }
+
+        .meta-card.generalizations { border-top-color: var(--gold); }
+        .meta-card.deletions { border-top-color: var(--dusty-aqua); }
+        .meta-card.distortions { border-top-color: var(--muted-teal); }
+
+        .meta-card h4 {
+            font-size: 16px; font-weight: 700;
+            margin-bottom: 10px; color: var(--deep-petrol);
+        }
+
+        .meta-card ul { list-style: none; padding: 0; font-size: 14px; }
+        .meta-card li { padding: 4px 0; padding-right: 16px; position: relative; }
+        .meta-card li::before {
+            content: ''; position: absolute; right: 0; top: 10px;
+            width: 6px; height: 6px; background: var(--dusty-aqua); border-radius: 50%;
+        }
+
+        /* SMART model */
+        .smart-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .smart-item {
+            text-align: center;
+            background: var(--frost-white);
+            border-radius: 10px;
+            padding: 16px 8px;
+        }
+
+        .smart-letter {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--gold);
+            display: block;
+        }
+
+        .smart-heb { font-size: 13px; font-weight: 600; color: var(--deep-petrol); margin-top: 4px; }
+        .smart-eng { font-size: 11px; color: var(--dusty-aqua); }
+
+        /* Disney technique */
+        .disney-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .disney-card {
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .disney-card.dreamer { background: rgba(212, 175, 55, 0.1); border: 2px solid var(--gold); }
+        .disney-card.planner { background: rgba(47, 133, 146, 0.1); border: 2px solid var(--dusty-aqua); }
+        .disney-card.critic { background: rgba(0, 96, 107, 0.1); border: 2px solid var(--muted-teal); }
+
+        .disney-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--deep-petrol); }
+        .disney-card p { font-size: 14px; color: var(--dusty-aqua); }
+
+        .principle {
+            display: flex; gap: 12px; align-items: flex-start;
+            background: white; border: 2px solid var(--gold);
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 10px;
+        }
+
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+
+        .homework {
+            background: var(--frost-white); border-radius: 16px;
+            padding: 24px; border: 2px dashed var(--dusty-aqua);
+        }
+
+        .homework-item {
+            padding: 10px 0; padding-right: 32px; position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+
+        .ref-bar {
+            display: flex; gap: 20px;
+            background: var(--deep-petrol); color: white;
+            border-radius: 12px; padding: 16px 24px; margin-top: 32px;
+        }
+
+        .ref-bar span { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .ref-bar .ref-icon { color: var(--gold); }
+
+        .bottom-nav {
+            display: flex; justify-content: space-between;
+            max-width: 800px; margin: 30px auto; padding: 0 24px;
+        }
+
+        .bottom-nav a {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--frost-white); color: var(--deep-petrol);
+            text-decoration: none; padding: 12px 24px;
+            border-radius: 10px; font-weight: 600; transition: background 0.3s;
+        }
+
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+
+        .note-box {
+            background: #fff3e0;
+            border: 1px solid var(--gold);
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 14px;
+            color: var(--deep-petrol);
+            margin-bottom: 16px;
+        }
+
+        @media print {
+            .hero { padding: 30px 20px 40px; }
+            .hero::after { display: none; }
+            .content { padding-top: 20px; }
+            .bottom-nav, .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .section-title { font-size: 19px; }
+            .meta-grid { grid-template-columns: 1fr; }
+            .smart-grid { grid-template-columns: repeat(3, 1fr); }
+            .disney-grid { grid-template-columns: 1fr; }
+            .ref-bar { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="lesson-2.html">&#8592; שיעור 2</a>
+            <a href="lesson-4.html">שיעור 4 &#8594;</a>
+        </div>
+        <div class="lesson-badge">03</div>
+        <h1>מטה מודל והצבת מטרות</h1>
+        <div class="hero-sub">NLP Practitioner - שיעור שלישי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Primary Filters -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128270;</div>
+                <div class="section-title">מסננים ראשוניים</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li><strong>השמטות, הכללות ועיוותים</strong> - מה התפקיד שלהם ואיך הם עוזרים למוח</li>
+                    <li><strong>השטח</strong> - הסיפור שנשאר במודעות אחרי שעבר מסננים</li>
+                    <li><strong>מבנה עומק</strong> - החוויה החושית הטהורה</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Meta Model -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128161;</div>
+                <div class="section-title">מטה מודל</div>
+            </div>
+            <div class="topic">
+                <p>מצמצם את הפער בין השטח לעומק על ידי פירוק המסננים</p>
+            </div>
+
+            <div class="meta-grid">
+                <div class="meta-card generalizations">
+                    <h4>הכללות</h4>
+                    <ul>
+                        <li>כימותים אוניברסליים</li>
+                        <li>מודלים של הכרח - חמ"צ (חייב, מוכרח, צריך)</li>
+                    </ul>
+                </div>
+                <div class="meta-card deletions">
+                    <h4>השמטות</h4>
+                    <ul>
+                        <li>מחיקות פשוטות</li>
+                        <li>נומינליזציה</li>
+                        <li>מחיקת השוואתיות</li>
+                    </ul>
+                </div>
+                <div class="meta-card distortions">
+                    <h4>עיוותים</h4>
+                    <ul>
+                        <li>קפיצה למסקנות</li>
+                        <li>סיבה ותוצאה / השוואה מורכבת</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note-box">
+                <strong>שימו לב:</strong> שאלות מטה מודל שוברות ראפור - לכן נרצה לעשות להן הכנה ונמנע מלשאול אותן סתם ככה בלי מטרה.
+            </div>
+        </div>
+
+        <!-- Outcome -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127919;</div>
+                <div class="section-title">Outcome - הצבת מטרות</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מהו Outcome?</div>
+                <p>ב-NLP האאוטקם הוא גם המטרה וגם התוצאה</p>
+            </div>
+            <div class="topic">
+                <div class="topic-title">4 קווים מנחים למטרה מוגדרת היטב</div>
+                <ul>
+                    <li><strong>ניסוח חיובי וספציפי</strong></li>
+                    <li><strong>ירידה לפרטים</strong></li>
+                    <li><strong>תוצאה מדידה</strong></li>
+                    <li><strong>מיקוד שליטה פנימי</strong></li>
+                </ul>
+                <p style="margin-top: 10px;"><strong>תוצאה אקולוגית</strong> - מטרה שמיטיבה עם שאר תחומי החיים</p>
+            </div>
+
+            <div class="smart-grid">
+                <div class="smart-item">
+                    <span class="smart-letter">S</span>
+                    <div class="smart-heb">ספציפית</div>
+                    <div class="smart-eng">Specific</div>
+                </div>
+                <div class="smart-item">
+                    <span class="smart-letter">M</span>
+                    <div class="smart-heb">מדידה</div>
+                    <div class="smart-eng">Measurable</div>
+                </div>
+                <div class="smart-item">
+                    <span class="smart-letter">A</span>
+                    <div class="smart-heb">ברת השגה</div>
+                    <div class="smart-eng">Achievable</div>
+                </div>
+                <div class="smart-item">
+                    <span class="smart-letter">R</span>
+                    <div class="smart-heb">באחריותי</div>
+                    <div class="smart-eng">Responsible</div>
+                </div>
+                <div class="smart-item">
+                    <span class="smart-letter">T</span>
+                    <div class="smart-heb">תחומה בזמן</div>
+                    <div class="smart-eng">Time</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Walt Disney -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#10024;</div>
+                <div class="section-title">טכניקת וולט דיסני</div>
+            </div>
+
+            <div class="disney-grid">
+                <div class="disney-card dreamer">
+                    <h4>החולם</h4>
+                    <p>הכל אפשרי!</p>
+                </div>
+                <div class="disney-card planner">
+                    <h4>המתכנן</h4>
+                    <p>בניית תוכנית פרקטית</p>
+                </div>
+                <div class="disney-card critic">
+                    <h4>הביקורתי</h4>
+                    <p>ביקורת על התוכנית (לא על החולם או המתכנן)</p>
+                </div>
+            </div>
+
+            <div class="topic">
+                <ul>
+                    <li>למה הביקורת חשובה</li>
+                    <li>סוגרים את הטכניקה בחלק של <strong>המתכנן</strong> - כי בו יש את המוטיבציה החזקה ביותר כדי שהאדם יצא לפעולה</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Techniques -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9889;</div>
+                <div class="section-title">טכניקות ותרגולים</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li><strong>מטה מודל</strong> - שאילת שאלות נכונה</li>
+                    <li><strong>Outcome</strong> - הצבת מטרות בדרכים שונות</li>
+                    <li><strong>טכניקת וולט דיסני</strong> - הדגמה (תעלה לפורטל)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"אם אתה יכול לחלום על זה, אתה יכול לעשות את זה"</div>
+            </div>
+        </div>
+
+        <!-- Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>זהו משפטים הכוללים את המסננים הראשוניים</strong>
+                </div>
+                <div class="homework-item">
+                    <strong>תרגלו אחד על השני מטה מודל</strong>
+                </div>
+                <div class="homework-item">
+                    <strong>נסו לדייק את הבעיות הקיימות לכם בחיים</strong>
+                    <div class="homework-note">בעזרת תשאול עצמי של מטה מודל</div>
+                </div>
+                <div class="homework-item">
+                    <strong>צפו בטכניקת הדגמה וולט דיסני בפורטל</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Bar -->
+        <div class="ref-bar">
+            <span><span class="ref-icon">&#128218;</span> חוברת: עמ׳ 36-48</span>
+            <span><span class="ref-icon">&#128214;</span> ספר: עמ׳ 9-11</span>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="lesson-2.html">&#8592; שיעור 2</a>
+        <a href="lesson-4.html">שיעור 4 &#8594;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

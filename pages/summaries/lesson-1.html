@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיעור 1 - מבוא ל-NLP וראפור | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        /* Hero Header */
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 50px 20px 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        .nav-links a {
+            color: var(--frost-white);
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover { opacity: 1; }
+
+        .lesson-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            font-weight: 900;
+            font-size: 28px;
+            width: 64px;
+            height: 64px;
+            line-height: 64px;
+            border-radius: 50%;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .hero-sub {
+            font-size: 16px;
+            color: var(--gold);
+            font-weight: 300;
+        }
+
+        /* Content */
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px 24px 60px;
+        }
+
+        /* Section Card */
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--deep-petrol);
+        }
+
+        /* Topic blocks */
+        .topic {
+            background: var(--frost-white);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            border-right: 4px solid var(--dusty-aqua);
+        }
+
+        .topic-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--muted-teal);
+            margin-bottom: 10px;
+        }
+
+        .topic ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .topic li {
+            padding: 4px 0;
+            padding-right: 20px;
+            position: relative;
+        }
+
+        .topic li::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 12px;
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+
+        .topic p {
+            margin: 8px 0;
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .highlight-box .box-title {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 17px;
+            margin-bottom: 12px;
+        }
+
+        .highlight-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .highlight-box li {
+            padding: 6px 0;
+            padding-right: 24px;
+            position: relative;
+            color: var(--frost-white);
+        }
+
+        .highlight-box li::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 14px;
+            width: 10px;
+            height: 2px;
+            background: var(--gold);
+        }
+
+        /* Numbered list */
+        .numbered-list {
+            counter-reset: item;
+            list-style: none;
+            padding: 0;
+        }
+
+        .numbered-list li {
+            counter-increment: item;
+            padding: 10px 0 10px 0;
+            padding-right: 40px;
+            position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .numbered-list li::before {
+            content: counter(item);
+            position: absolute;
+            right: 0;
+            top: 10px;
+            width: 28px;
+            height: 28px;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .numbered-list li:last-child { border-bottom: none; }
+
+        /* Key principle box */
+        .principle {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            background: white;
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+        }
+
+        .principle-icon {
+            color: var(--gold);
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .principle-text {
+            font-weight: 600;
+            color: var(--deep-petrol);
+        }
+
+        /* Homework box */
+        .homework {
+            background: var(--frost-white);
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px dashed var(--dusty-aqua);
+        }
+
+        .homework-item {
+            padding: 10px 0;
+            padding-right: 32px;
+            position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .homework-item:last-child { border-bottom: none; }
+
+        .homework-item::before {
+            content: '\1F381';
+            position: absolute;
+            right: 0;
+            top: 10px;
+            font-size: 18px;
+        }
+
+        .homework-note {
+            font-size: 14px;
+            color: var(--dusty-aqua);
+            margin-top: 4px;
+        }
+
+        /* Reference bar */
+        .ref-bar {
+            display: flex;
+            gap: 20px;
+            background: var(--deep-petrol);
+            color: white;
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-top: 32px;
+        }
+
+        .ref-bar span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .ref-bar .ref-icon {
+            color: var(--gold);
+        }
+
+        /* Navigation bottom */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 24px;
+        }
+
+        .bottom-nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--frost-white);
+            color: var(--deep-petrol);
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--dusty-aqua);
+            font-size: 14px;
+        }
+
+        /* Print */
+        @media print {
+            .hero { padding: 30px 20px 40px; }
+            .hero::after { display: none; }
+            .content { padding-top: 20px; }
+            .bottom-nav, .nav-links { display: none; }
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .section-title { font-size: 19px; }
+            .ref-bar { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="index.html">&#8592; כל הסיכומים</a>
+            <a href="lesson-2.html">שיעור 2 &#8594;</a>
+        </div>
+        <div class="lesson-badge">01</div>
+        <h1>מבוא ל-NLP וראפור</h1>
+        <div class="hero-sub">NLP Practitioner - שיעור ראשון</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Section: Course Intro -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9733;</div>
+                <div class="section-title">מבוא לקורס</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מטרת הקורס וההבטחות</div>
+                <ul>
+                    <li>פרטים טכניים על הקורס</li>
+                    <li>החוקים הכלליים לקורס</li>
+                    <li>זמנים, טלפונים על שקט (במיוחד במהלך הדגמות)</li>
+                    <li>כבוד כלפי המפה של האחר</li>
+                    <li>מה שקורה בכיתה נשאר בכיתה!</li>
+                    <li>קבוצת הוואטסאפ, הפורטל וצוות הקורס כאן עבורכם</li>
+                    <li>דרישות ההסמכה</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Intro to NLP -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9881;</div>
+                <div class="section-title">מבוא לעולם ה-NLP</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מהו NLP?</div>
+                <ul>
+                    <li>מהו NLP ומה ראשי התיבות שלו</li>
+                    <li>החלוקה של תת המודע והמודע (מודע 5%, תת מודע 95%)</li>
+                </ul>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">עוגת התקשורת</div>
+                <ul>
+                    <li><strong>מילים</strong> - 7% מהתקשורת שלנו</li>
+                    <li><strong>טונציה</strong> - 38% מהתקשורת שלנו</li>
+                    <li><strong>שפת גוף</strong> - 55% מהתקשורת שלנו</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: 3 Laws of the Brain -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#129504;</div>
+                <div class="section-title">3 חוקי המוח</div>
+            </div>
+            <div class="topic">
+                <ol class="numbered-list">
+                    <li><strong>המוח לא מבדיל בין דמיון, זיכרון ומציאות</strong></li>
+                    <li><strong>המוח לא מבין שלילה</strong> - המוח לא מבין את המילה "לא"</li>
+                    <li><strong>חוק ההגשמה</strong> - בהירות, דיוק המטרה ופירוט הדרך למטרה</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Section: Communication Model -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128172;</div>
+                <div class="section-title">מודל התקשורת</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">השרשרת:</div>
+                <p style="text-align: center; font-size: 15px; line-height: 2.2;">
+                    <strong>המציאות</strong> &#10229;
+                    מסננים ראשוניים: הכללה, השמטה ועיוות &#10229;
+                    מסננים שניוניים: אמונות, ערכים, זכרונות ותוכנות על &#10229;
+                    <strong>מייצג פנימי</strong> &#10229;
+                    <strong>רגשות</strong> &#10229;
+                    <strong>התנהגות</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Section: Rapport -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#129309;</div>
+                <div class="section-title">ראפור</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">עקרונות הראפור</div>
+                <ul>
+                    <li>חדות חושים</li>
+                    <li>מהי קליברציה ואיך עובדים איתה</li>
+                    <li>מהו ראפור</li>
+                    <li><strong>שלבים ליצירת ראפור:</strong> הצטרפות (שיקוף/התאמה) + הובלה</li>
+                </ul>
+            </div>
+            <div class="topic" style="border-right-color: #c0392b;">
+                <div class="topic-title" style="color: #c0392b;">טעויות נפוצות בראפור</div>
+                <ol class="numbered-list">
+                    <li>ראפור טכני ומזויף</li>
+                    <li>ניסיון לפתור בעיות</li>
+                    <li>תגובה לסיפור בסיפור</li>
+                    <li>חוסר נוכחות בשיחה</li>
+                    <li>התעלמות מהאמונות והערכים של האדם שמולנו</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Section: Techniques -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9889;</div>
+                <div class="section-title">טכניקות ותרגולים</div>
+            </div>
+            <div class="topic">
+                <ul>
+                    <li><strong>מיומנות הראפור</strong> - תרגול מעשי ביצירת ושבירת ראפור</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"המפה אינה השטח"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"המוח לא מבדיל בין דמיון, מציאות וזיכרון"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"חזרתיות היא אם כל המיומנויות"</div>
+            </div>
+        </div>
+
+        <!-- Section: Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>התבוננו בשפת גוף של אנשים</strong>
+                    <div class="homework-note">תבחינו בדברים שלא שמתם לב אליהם לפני</div>
+                </div>
+                <div class="homework-item">
+                    <strong>צרו ראפור עם אנשים!</strong>
+                    <div class="homework-note">גם עם אנשים שלא מודעים לזה - רוב האנשים לא יודעים את זה, אין להם מושג ממה שתעשו</div>
+                </div>
+                <div class="homework-item">
+                    <strong>שברו ראפור עם אנשים!</strong>
+                    <div class="homework-note">מיומנות חשובה לא פחות מיצירת ראפור. אפשר למנוע אי-נעימות בסיום פגישה או בסיטואציה לא נעימה</div>
+                </div>
+                <div class="homework-item">
+                    <strong>שימו לב לתובנות, לאסימונים ולמסקנות!</strong>
+                    <div class="homework-note">פשוט תהיו ערים לעצמכם ולמה שאתם חווים. דברים שיצופו במהלך השבוע - כתבו לעצמכם ושתפו</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Bar -->
+        <div class="ref-bar">
+            <span><span class="ref-icon">&#128218;</span> חוברת: עמ׳ 3-22 + 23-25 (הנחות יסוד)</span>
+            <span><span class="ref-icon">&#128214;</span> ספר: עמ׳ 2-3 (הנחות יסוד)</span>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html">&#8592; כל הסיכומים</a>
+        <a href="lesson-2.html">שיעור 2 &#8594;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

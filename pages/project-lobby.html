@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#003B46">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="../assets/icon-192.svg">
     <title>מטפל לכל אחד - המיזם החברתי</title>
     <meta name="description" content="טיפול נפשי הוא זכות בסיסית, לא מותרות. מיזם חברתי המחבר בין מטפלים מוסמכים לאנשים הזקוקים לסיוע.">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -583,7 +588,7 @@
             <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
             <div class="logo-text">מטפל <span>לכל אחד</span></div>
         </a>
-        <ul class="nav-links" id="navLinks" style="display:none">
+        <ul class="nav-links" id="navLinks">
             <li><a href="../index.html">דף הבית</a></li>
             <li><a href="about.html">מי אנחנו</a></li>
             <li><a href="free-portal.html">קורס חינמי</a></li>
@@ -731,13 +736,11 @@
             const btn = document.getElementById('mobileMenuBtn');
 
             if (menuOpen) {
-                navLinks.style.display = 'flex';
                 navLinks.classList.add('active');
                 btn.classList.add('active');
                 document.body.style.overflow = 'hidden';
             } else {
                 navLinks.classList.remove('active');
-                navLinks.style.display = 'none';
                 btn.classList.remove('active');
                 document.body.style.overflow = '';
             }
@@ -749,7 +752,6 @@
             const btn = document.getElementById('mobileMenuBtn');
 
             navLinks.classList.remove('active');
-            navLinks.style.display = (window.innerWidth > 768) ? 'flex' : 'none';
             btn.classList.remove('active');
             document.body.style.overflow = '';
         }
@@ -763,12 +765,8 @@
         });
 
         window.addEventListener('resize', () => {
-            const navLinks = document.getElementById('navLinks');
-            if (window.innerWidth > 768) {
-                navLinks.style.display = 'flex';
-                menuOpen = false;
-            } else if (!menuOpen) {
-                navLinks.style.display = 'none';
+            if (window.innerWidth > 768 && menuOpen) {
+                closeMobileMenu();
             }
         });
     </script>

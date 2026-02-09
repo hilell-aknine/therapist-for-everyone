@@ -530,15 +530,16 @@
         .card-btn.btn-gold::after {
             content: '';
             position: absolute;
-            top: 0; left: -100%; right: 0; bottom: 0;
+            top: 0; bottom: 0;
+            right: -100%;
             width: 60%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-            transform: skewX(-20deg);
-            transition: left 0.6s ease;
+            background: linear-gradient(270deg, transparent, rgba(255,255,255,0.25), transparent);
+            transform: skewX(20deg);
+            transition: right 0.6s ease;
         }
 
         .card-btn.btn-gold:hover::after {
-            left: 130%;
+            right: 130%;
         }
 
         .card-btn.btn-gold:hover {
@@ -629,15 +630,16 @@
         .cta-btn::after {
             content: '';
             position: absolute;
-            top: 0; left: -100%; right: 0; bottom: 0;
+            top: 0; bottom: 0;
+            right: -100%;
             width: 60%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transform: skewX(-20deg);
-            transition: left 0.6s ease;
+            background: linear-gradient(270deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: skewX(20deg);
+            transition: right 0.6s ease;
         }
 
         .cta-btn:hover::after {
-            left: 130%;
+            right: 130%;
         }
 
         .cta-btn:hover {
@@ -650,7 +652,7 @@
         }
 
         .cta-btn:hover i {
-            transform: translateX(-3px);
+            transform: translateX(3px);
         }
 
         /* ===== Footer ===== */
@@ -687,7 +689,7 @@
             text-decoration: none;
             font-size: 0.9rem;
             display: block;
-            padding: 0.3rem 0;
+            padding: 0.5rem 0;
             transition: color 0.3s;
         }
 
@@ -744,12 +746,12 @@
                 display: none !important;
                 position: fixed;
                 top: 0; right: 0; bottom: 0;
-                width: 280px;
+                width: min(280px, 75vw);
                 background: #003B46 !important;
                 flex-direction: column;
                 padding: 5rem 2rem 2rem;
                 gap: 0;
-                border-left: 2px solid var(--gold);
+                border-inline-start: 2px solid var(--gold);
                 box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
                 z-index: 1001;
                 overflow-y: auto;
@@ -766,8 +768,9 @@
 
             .nav-links a {
                 display: block;
-                padding: 1rem 0.5rem;
+                padding: 1.2rem 0.5rem;
                 font-size: 1.1rem;
+                min-height: 44px;
                 color: #FFFFFF !important;
                 -webkit-text-fill-color: #FFFFFF !important;
             }
@@ -830,25 +833,45 @@
             .nav-cta { display: none; }
 
             /* Layout */
+            .navbar { padding: 0.8rem 1.2rem; }
+            .navbar.scrolled { padding: 0.6rem 1.2rem; }
             .hero { padding: 7rem 1.5rem 3rem; }
-            .hero h1 { font-size: 2.2rem; }
-            .hero-subtitle { font-size: 1rem; }
+            .hero h1 { font-size: clamp(1.8rem, 6vw, 2.2rem); }
+            .hero-subtitle { font-size: clamp(0.9rem, 3vw, 1rem); }
+            .hero-badge { font-size: 0.85rem; padding: 0.5rem 1.2rem; }
             .courses-grid { grid-template-columns: 1fr; max-width: 450px; margin: 0 auto; }
             .courses-section { padding: 3rem 1.5rem; }
             .course-card { padding: 2rem 1.5rem; }
             .card-icon { width: 70px; height: 70px; font-size: 1.7rem; }
-            .card-title { font-size: 1.25rem; }
-            .card-btn { padding: 0.75rem 1.8rem; font-size: 0.9rem; }
+            .card-title { font-size: clamp(1.1rem, 4vw, 1.25rem); }
+            .card-btn { padding: 0.85rem 2rem; font-size: 0.9rem; min-height: 44px; }
+            .card-btn.btn-disabled { pointer-events: auto; }
             .cta-section { padding: 3rem 1.5rem; }
             .cta-section h2 { font-size: 1.6rem; }
-            .cta-btn { padding: 0.9rem 2rem; font-size: 1rem; }
-            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .cta-btn { padding: 0.9rem 2rem; font-size: 1rem; min-height: 48px; }
+            .footer { padding: 3rem 1.5rem 2rem; }
+            .footer-content { grid-template-columns: repeat(2, 1fr); gap: 2rem; text-align: center; }
 
             /* Reduce heavy animations on mobile for performance */
             .hero::after { display: none; }
             .particle { display: none; }
             .course-card:hover { transform: translateY(-4px); }
             .course-card[data-status="locked"]:hover { transform: none; }
+        }
+
+        /* ===== Small phones ===== */
+        @media (max-width: 480px) {
+            .navbar { padding: 0.7rem 1rem; }
+            .logo-icon { width: 38px; height: 38px; font-size: 1.1rem; }
+            .logo-text { font-size: 1.05rem; }
+            .hero { padding: 6rem 1rem 2.5rem; }
+            .courses-section { padding: 2rem 1rem; }
+            .courses-grid { max-width: 100%; }
+            .course-card { padding: 1.8rem 1.2rem; }
+            .cta-section { padding: 2.5rem 1rem; }
+            .cta-section h2 { font-size: 1.4rem; }
+            .cta-section p { font-size: 0.95rem; }
+            .footer-content { grid-template-columns: 1fr; gap: 1.5rem; }
         }
     </style>
 </head>

@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#003B46">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="../assets/icon-192.svg">
+    <title>הכשרות — מטפל לכל אחד</title>
+    <meta name="description" content="כל ההכשרות והקורסים של מטפל לכל אחד — NLP Practitioner, Master ועוד">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --pure-white: #FFFFFF;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            --gradient-main: radial-gradient(ellipse at 30% 20%, #2F8592 0%, #00606B 40%, #003B46 100%);
+
+            --bg-dark: var(--deep-petrol);
+            --bg-card: var(--muted-teal);
+            --bg-card-hover: var(--dusty-aqua);
+            --border: rgba(47, 133, 146, 0.3);
+            --text: var(--pure-white);
+            --text-secondary: var(--frost-white);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--deep-petrol);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ===== Navbar ===== */
+        .navbar {
+            position: fixed;
+            top: 0; right: 0; left: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 59, 70, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 0.7rem 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-icon {
+            width: 45px; height: 45px;
+            background: var(--gradient-gold);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--bg-dark);
+            box-shadow: 0 4px 15px var(--gold-glow);
+        }
+
+        .logo-text { font-size: 1.2rem; font-weight: 700; }
+        .logo-text span { color: var(--gold); }
+
+        .nav-links {
+            display: flex;
+            gap: 1.8rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover { color: var(--gold); }
+        .nav-links a.active { color: var(--gold); }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; right: 0;
+            width: 0; height: 2px;
+            background: var(--gold);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after { width: 100%; }
+
+        .nav-cta {
+            background: var(--gradient-gold);
+            color: var(--bg-dark);
+            padding: 0.6rem 1.4rem;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--gold-glow);
+            font-size: 0.9rem;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--gold-glow);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .mobile-cta-group {
+            display: none !important;
+        }
+
+        /* ===== Hero ===== */
+        .hero {
+            padding: 9rem 2rem 4rem;
+            text-align: center;
+            background: var(--gradient-main);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+            opacity: 0.2;
+            animation: pulse 10s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
+            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.1; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero h1 .highlight {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+            line-height: 1.8;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== Courses Grid ===== */
+        .courses-section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        /* ===== Course Card ===== */
+        .course-card {
+            background: rgba(0, 96, 107, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--border);
+            transition: background 0.3s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--dusty-aqua);
+        }
+
+        /* Status variations */
+        .course-card[data-status="open"]::before {
+            background: var(--gradient-gold);
+        }
+
+        .course-card[data-status="open"]:hover {
+            border-color: var(--gold);
+        }
+
+        .course-card[data-status="coming_soon"] {
+            opacity: 0.85;
+        }
+
+        .course-card[data-status="locked"] {
+            opacity: 0.5;
+            filter: grayscale(0.3);
+        }
+
+        .course-card[data-status="locked"]:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Card icon */
+        .card-icon {
+            width: 80px; height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .course-card:hover .card-icon {
+            transform: scale(1.1);
+        }
+
+        .course-card[data-status="open"] .card-icon {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            box-shadow: 0 4px 20px var(--gold-glow);
+        }
+
+        .course-card[data-status="coming_soon"] .card-icon {
+            background: rgba(47, 133, 146, 0.2);
+            color: var(--dusty-aqua);
+        }
+
+        .course-card[data-status="locked"] .card-icon {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+        }
+
+        .status-badge.open {
+            background: rgba(76, 175, 80, 0.15);
+            color: #81C784;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-badge.coming_soon {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .status-badge.locked {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .card-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+            line-height: 1.7;
+            flex-grow: 1;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--dusty-aqua);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-meta i {
+            font-size: 0.8rem;
+        }
+
+        /* Card button */
+        .card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .card-btn.btn-gold {
+            background: var(--gradient-gold);
+            color: var(--bg-dark);
+            box-shadow: 0 4px 15px var(--gold-glow);
+        }
+
+        .card-btn.btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--gold-glow);
+        }
+
+        .card-btn.btn-disabled {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* ===== CTA Section ===== */
+        .cta-section {
+            padding: 5rem 2rem;
+            text-align: center;
+            background: rgba(0, 96, 107, 0.2);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cta-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section h2 .highlight {
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-section p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-decoration: none;
+            background: var(--gradient-gold);
+            color: var(--bg-dark);
+            box-shadow: 0 4px 20px var(--gold-glow);
+            transition: all 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 35px var(--gold-glow);
+        }
+
+        /* ===== Footer ===== */
+        .footer {
+            background: var(--deep-petrol);
+            border-top: 1px solid var(--border);
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .footer-links h4 {
+            color: var(--gold);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .footer-links ul { list-style: none; }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.3rem 0;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover { color: var(--gold); }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* ===== Loading state ===== */
+        .courses-loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .courses-loading .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(212, 175, 55, 0.2);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 1024px) {
+            .courses-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-content { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            /* Mobile Menu Drawer */
+            .nav-links {
+                display: none !important;
+                position: fixed;
+                top: 0; right: 0; bottom: 0;
+                width: 280px;
+                background: #003B46 !important;
+                flex-direction: column;
+                padding: 5rem 2rem 2rem;
+                gap: 0;
+                border-left: 2px solid var(--gold);
+                box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+                z-index: 1001;
+                overflow-y: auto;
+            }
+
+            .nav-links.active {
+                display: flex !important;
+            }
+
+            .nav-links li {
+                border-bottom: 1px solid rgba(47, 133, 146, 0.2);
+                list-style: none;
+            }
+
+            .nav-links a {
+                display: block;
+                padding: 1rem 0.5rem;
+                font-size: 1.1rem;
+                color: #FFFFFF !important;
+                -webkit-text-fill-color: #FFFFFF !important;
+            }
+
+            .nav-links a::after { display: none; }
+
+            .nav-links a:hover,
+            .nav-links a:active {
+                color: var(--gold) !important;
+                -webkit-text-fill-color: var(--gold) !important;
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .nav-links.active .mobile-cta-group {
+                display: flex !important;
+                flex-direction: column;
+                gap: 0.8rem;
+                margin-top: 2rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid rgba(212, 175, 55, 0.2);
+            }
+
+            .mobile-cta {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 0.9rem 1.5rem;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 0.95rem;
+                text-decoration: none;
+                transition: all 0.3s;
+            }
+
+            .mobile-cta.primary {
+                background: var(--gradient-gold);
+                color: var(--deep-petrol);
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                border-radius: 10px;
+                z-index: 1002;
+                position: relative;
+            }
+
+            .mobile-menu-btn.active {
+                background: rgba(212, 175, 55, 0.2);
+            }
+
+            .mobile-menu-btn.active i::before {
+                content: "\f00d";
+            }
+
+            .nav-cta { display: none; }
+
+            /* Layout */
+            .hero { padding: 7rem 1.5rem 3rem; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .courses-grid { grid-template-columns: 1fr; max-width: 450px; margin: 0 auto; }
+            .courses-section { padding: 3rem 1.5rem; }
+            .cta-section { padding: 3rem 1.5rem; }
+            .cta-section h2 { font-size: 1.6rem; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="../index.html" class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="logo-text">מטפל <span>לכל אחד</span></div>
+        </a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="../index.html">דף הבית</a></li>
+            <li><a href="about.html">מי אנחנו</a></li>
+            <li><a href="courses.html" class="active">הכשרות</a></li>
+            <li><a href="training.html">הכשרת מטפלים</a></li>
+            <li><a href="project-lobby.html">המיזם החברתי</a></li>
+            <div class="mobile-cta-group">
+                <a href="training.html" class="mobile-cta primary">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    להרשמה להכשרה
+                </a>
+            </div>
+        </ul>
+        <a href="training.html" class="nav-cta">להרשמה להכשרה</a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fa-solid fa-graduation-cap"></i>
+                בית הספר להכשרת מטפלים
+            </div>
+            <h1>ה<span class="highlight">הכשרות</span> שלנו</h1>
+            <p class="hero-subtitle">
+                קורסים מקצועיים עם הסמכה בינלאומית — בחרו את המסלול שמתאים לכם והתחילו ללמוד
+            </p>
+        </div>
+    </section>
+
+    <!-- Courses Grid -->
+    <section class="courses-section">
+        <div id="coursesGrid" class="courses-grid">
+            <!-- Loading state -->
+            <div class="courses-loading" id="coursesLoading" style="grid-column: 1 / -1;">
+                <div class="spinner"></div>
+                <p>טוען הכשרות...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>רוצים להפוך ל<span class="highlight">מטפלים מוסמכים</span>?</h2>
+        <p>הצטרפו לתוכנית ההכשרה המקיפה שלנו וקבלו הסמכה בינלאומית, ליווי אישי וכלים מעשיים</p>
+        <a href="training.html" class="cta-btn">
+            <i class="fa-solid fa-rocket"></i>
+            למידע על ההכשרה
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="../index.html" class="logo">
+                    <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                    <div class="logo-text">מטפל <span>לכל אחד</span></div>
+                </a>
+                <p>בית הספר להכשרת מטפלים מקצועיים עם הסמכה בינלאומית</p>
+            </div>
+
+            <div class="footer-links">
+                <h4>לימודים</h4>
+                <ul>
+                    <li><a href="training.html">הכשרת מטפלים</a></li>
+                    <li><a href="courses.html">הכשרות</a></li>
+                    <li><a href="about.html">מי אנחנו</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>משפטי</h4>
+                <ul>
+                    <li><a href="../privacy-policy.html">מדיניות פרטיות</a></li>
+                    <li><a href="../legal-gate.html">תנאי שימוש</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 מטפל לכל אחד. כל הזכויות שמורות.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/marketing-tools.js"></script>
+
+    <script>
+        // ===== Fallback Data =====
+        const FALLBACK_COURSES = [
+            {
+                slug: 'nlp-practitioner',
+                title: 'NLP Practitioner — פרקטישנר',
+                description: 'קורס מקיף ב-NLP עם הסמכה בינלאומית. למדו את כל הטכניקות והכלים המעשיים של ה-NLP בקורס חינמי ומלא.',
+                icon: 'fa-brain',
+                status: 'open',
+                link: 'free-portal.html',
+                lesson_count: 51,
+                duration_text: '7 מודולים · 51 שיעורים',
+                display_order: 1
+            },
+            {
+                slug: 'nlp-master',
+                title: 'NLP Master Practitioner — מאסטר',
+                description: 'הכשרת מאסטר NLP מתקדמת. העמקה בטכניקות מתקדמות, עבודה עם טראומה, ושליטה מלאה בשפת הגוף.',
+                icon: 'fa-crown',
+                status: 'coming_soon',
+                link: null,
+                lesson_count: 0,
+                duration_text: 'בקרוב...',
+                display_order: 2
+            },
+            {
+                slug: 'emotional-messaging',
+                title: 'סדנת מסרים מרגשות',
+                description: 'סדנה מעשית ליצירת מסרים שמניעים לפעולה. שיווק רגשי, כתיבה שיווקית, ו-NLP בתקשורת.',
+                icon: 'fa-comments',
+                status: 'coming_soon',
+                link: null,
+                lesson_count: 0,
+                duration_text: 'בקרוב...',
+                display_order: 3
+            }
+        ];
+
+        // ===== Status labels & icons =====
+        const STATUS_CONFIG = {
+            open: { label: 'פתוח להרשמה', icon: 'fa-circle-check', btnText: 'להתחיל ללמוד', btnClass: 'btn-gold' },
+            coming_soon: { label: 'בקרוב', icon: 'fa-clock', btnText: 'בקרוב...', btnClass: 'btn-disabled' },
+            locked: { label: 'נעול', icon: 'fa-lock', btnText: 'נעול', btnClass: 'btn-disabled' }
+        };
+
+        // ===== Render a single course card =====
+        function renderCourseCard(course) {
+            const config = STATUS_CONFIG[course.status] || STATUS_CONFIG.coming_soon;
+            const linkAttr = course.status === 'open' && course.link
+                ? `href="${course.link}"`
+                : '';
+
+            return `
+                <div class="course-card" data-status="${course.status}">
+                    <div class="card-icon">
+                        <i class="fa-solid ${course.icon}"></i>
+                    </div>
+                    <div class="status-badge ${course.status}">
+                        <i class="fa-solid ${config.icon}"></i>
+                        ${config.label}
+                    </div>
+                    <h3 class="card-title">${course.title}</h3>
+                    <p class="card-description">${course.description}</p>
+                    ${course.duration_text ? `
+                        <div class="card-meta">
+                            <i class="fa-solid fa-book-open"></i>
+                            ${course.duration_text}
+                        </div>
+                    ` : ''}
+                    <a class="card-btn ${config.btnClass}" ${linkAttr}>
+                        <i class="fa-solid ${course.status === 'open' ? 'fa-play' : config.icon}"></i>
+                        ${config.btnText}
+                    </a>
+                </div>
+            `;
+        }
+
+        // ===== Load courses from Supabase, fallback to static =====
+        async function loadCourses() {
+            const grid = document.getElementById('coursesGrid');
+            let courses = null;
+
+            try {
+                if (window.supabaseClient) {
+                    const { data, error } = await window.supabaseClient
+                        .from('courses')
+                        .select('*')
+                        .order('display_order', { ascending: true });
+
+                    if (!error && data && data.length > 0) {
+                        courses = data;
+                    }
+                }
+            } catch (e) {
+                console.warn('Supabase unavailable, using fallback:', e.message);
+            }
+
+            if (!courses) {
+                courses = FALLBACK_COURSES;
+            }
+
+            grid.innerHTML = courses.map(renderCourseCard).join('');
+        }
+
+        // ===== Init =====
+        document.addEventListener('DOMContentLoaded', loadCourses);
+
+        // ===== Navbar scroll =====
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // ===== Mobile Menu =====
+        let menuOpen = false;
+
+        function toggleMobileMenu() {
+            menuOpen = !menuOpen;
+            const navLinks = document.getElementById('navLinks');
+            const btn = document.getElementById('mobileMenuBtn');
+
+            if (menuOpen) {
+                navLinks.classList.add('active');
+                btn.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } else {
+                navLinks.classList.remove('active');
+                btn.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeMobileMenu() {
+            menuOpen = false;
+            const navLinks = document.getElementById('navLinks');
+            const btn = document.getElementById('mobileMenuBtn');
+            navLinks.classList.remove('active');
+            btn.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMobileMenu();
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && menuOpen) {
+                closeMobileMenu();
+            }
+        });
+    </script>
+</body>
+</html>

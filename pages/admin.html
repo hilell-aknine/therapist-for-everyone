@@ -576,6 +576,11 @@
                     <span>שידוכים</span>
                     <span class="badge" id="matches-count">0</span>
                 </div>
+                <div class="nav-item" onclick="switchView('leads')">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>נרשמים</span>
+                    <span class="badge" id="leads-count">0</span>
+                </div>
             </nav>
 
             <main class="content">
@@ -691,6 +696,50 @@
                                 </tr>
                             </thead>
                             <tbody id="matches-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Leads (Registered Users) View -->
+                <div id="leads-view" class="hidden">
+                    <h1 class="page-title">נרשמים לאתר</h1>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-total-leads">0</div>
+                            <div class="stat-label">סה"כ נרשמים</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-google-leads">0</div>
+                            <div class="stat-label">Google</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-email-leads">0</div>
+                            <div class="stat-label">Email</div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div style="display:flex;align-items:center;gap:1rem;">
+                                <h3>כל המשתמשים הרשומים</h3>
+                                <button class="btn btn-export" onclick="exportLeadsCSV()">
+                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
+                                </button>
+                            </div>
+                            <div class="search-box">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" placeholder="חיפוש..." id="leads-search" oninput="renderLeads()">
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>שם</th>
+                                    <th>אימייל</th>
+                                    <th>תפקידים</th>
+                                    <th>תאריך הרשמה</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leads-table"></tbody>
                         </table>
                     </div>
                 </div>
@@ -868,6 +917,7 @@
         let patients = [];
         let therapists = [];
         let matches = [];
+        let leads = [];
         let currentPatientFilter = 'all';
         let currentTherapistFilter = 'all';
         let currentViewedPatient = null;
@@ -887,7 +937,7 @@
         }
 
         async function loadAllData() {
-            await Promise.all([loadPatients(), loadTherapists(), loadMatches()]);
+            await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads()]);
             updateCounts();
         }
 
@@ -909,13 +959,23 @@
             renderMatches();
         }
 
+        async function loadLeads() {
+            const { data } = await db.from('profiles').select('*').order('created_at', { ascending: false });
+            leads = data || [];
+            renderLeads();
+        }
+
         function updateCounts() {
             document.getElementById('patients-count').textContent = patients.length;
             document.getElementById('therapists-count').textContent = therapists.length;
             document.getElementById('matches-count').textContent = matches.length;
+            document.getElementById('leads-count').textContent = leads.length;
             document.getElementById('stat-new').textContent = patients.filter(p => p.status === 'new').length;
             document.getElementById('stat-waiting').textContent = patients.filter(p => p.status === 'waiting').length;
             document.getElementById('stat-in-treatment').textContent = patients.filter(p => p.status === 'in_treatment').length;
+            document.getElementById('stat-total-leads').textContent = leads.length;
+            document.getElementById('stat-google-leads').textContent = leads.filter(l => !l.email || l.full_name !== l.email?.split('@')[0]).length;
+            document.getElementById('stat-email-leads').textContent = leads.filter(l => l.full_name === l.email?.split('@')[0]).length;
         }
 
         function switchView(view) {
@@ -924,6 +984,7 @@
             document.getElementById('patients-view').classList.toggle('hidden', view !== 'patients');
             document.getElementById('therapists-view').classList.toggle('hidden', view !== 'therapists');
             document.getElementById('matches-view').classList.toggle('hidden', view !== 'matches');
+            document.getElementById('leads-view').classList.toggle('hidden', view !== 'leads');
         }
 
         function filterPatients(status) {
@@ -1021,6 +1082,45 @@
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function renderLeads() {
+            const search = document.getElementById('leads-search')?.value?.toLowerCase() || '';
+            let filtered = leads;
+            if (search) filtered = filtered.filter(l => l.full_name?.toLowerCase().includes(search) || l.email?.toLowerCase().includes(search));
+
+            const tbody = document.getElementById('leads-table');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="fa-solid fa-user-plus"></i><br>אין נרשמים</td></tr>';
+                return;
+            }
+            tbody.innerHTML = filtered.map(l => `
+                <tr>
+                    <td><strong>${l.full_name || '-'}</strong></td>
+                    <td>${l.email || '-'}</td>
+                    <td>${(l.roles || []).map(r => `<span class="status-badge status-active">${r}</span>`).join(' ')}</td>
+                    <td>${formatDate(l.created_at)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function exportLeadsCSV() {
+            if (leads.length === 0) { showToast('אין נתונים לייצוא', 'warning'); return; }
+            const headers = ['שם', 'אימייל', 'תפקידים', 'תאריך הרשמה'];
+            const rows = leads.map(l => [
+                l.full_name || '',
+                l.email || '',
+                (l.roles || []).join(', '),
+                formatDate(l.created_at)
+            ]);
+            const bom = '\uFEFF';
+            const csv = bom + [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `leads_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            showToast('הקובץ הורד בהצלחה!', 'success');
         }
 
         function viewPatient(id) {

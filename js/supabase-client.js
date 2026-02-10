@@ -559,16 +559,67 @@
     `;
     document.head.appendChild(style);
 
+    // ============================================================================
+    // Ensure Profile Exists (CRM fallback — runs on every page)
+    // ============================================================================
+
+    async function ensureProfile(user) {
+        if (!user) return;
+        try {
+            const { data: existing, error: fetchError } = await supabaseClient
+                .from('profiles')
+                .select('id, roles')
+                .eq('id', user.id)
+                .single();
+
+            if (fetchError && fetchError.code !== 'PGRST116') {
+                console.error('Profile fetch error:', fetchError);
+                return;
+            }
+
+            if (!existing) {
+                const fullName = user.user_metadata?.full_name ||
+                                user.user_metadata?.name ||
+                                user.email?.split('@')[0] ||
+                                'משתמש חדש';
+
+                const { error: insertError } = await supabaseClient
+                    .from('profiles')
+                    .insert([{
+                        id: user.id,
+                        email: user.email,
+                        full_name: fullName,
+                        roles: ['student_lead'],
+                        created_at: new Date().toISOString()
+                    }]);
+
+                if (insertError) {
+                    console.error('Profile create error:', insertError);
+                } else {
+                    console.log('Profile created for:', user.email);
+                }
+            }
+        } catch (err) {
+            console.error('ensureProfile error:', err);
+        }
+    }
+
     // Auth state change listener
-    Auth.onAuthStateChange((event, session) => {
+    Auth.onAuthStateChange(async (event, session) => {
         console.log('Auth state changed:', event);
         UI.updateAuthUI(session?.user);
+        if (event === 'SIGNED_IN' && session?.user) {
+            await ensureProfile(session.user);
+        }
     });
 
     // Initialize on DOM ready
     document.addEventListener('DOMContentLoaded', async () => {
         const session = await Auth.getSession();
         UI.updateAuthUI(session?.user);
+        if (session?.user) {
+            await ensureProfile(session.user);
+        }
     });
 
     // ============================================================================

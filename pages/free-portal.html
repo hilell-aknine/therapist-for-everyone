@@ -1995,7 +1995,7 @@
                 if (session && session.user) {
                     currentUser = session.user;
                     isAuthenticated = true;
-                    await ensureProfile(session.user);
+                    await ensureProfileWithFormName(session.user);
                     updateUI();
                 }
             } catch (error) {
@@ -2008,8 +2008,8 @@
             currentUser = user;
             isAuthenticated = true;
 
-            // Ensure profile exists in profiles table
-            await ensureProfile(user);
+            // Update profile name from form (profile creation handled by supabase-client.js)
+            await ensureProfileWithFormName(user);
 
             // Update UI
             updateUI();
@@ -2018,66 +2018,21 @@
             showAuthSuccess();
         }
 
-        // ===== Ensure Profile Exists (Smart Profile Logic) =====
-        async function ensureProfile(user) {
+        // ===== Ensure Profile Exists (delegates to shared supabase-client.js) =====
+        // Profile creation is handled globally by supabase-client.js ensureProfile().
+        // Here we only update the name if the user typed it in the auth form.
+        async function ensureProfileWithFormName(user) {
             if (!supabaseClient) return;
             try {
-                // Check if profile exists
-                const { data: existingProfile, error: fetchError } = await supabaseClient
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
-
-                if (fetchError && fetchError.code !== 'PGRST116') {
-                    // PGRST116 = not found, which is expected for new users
-                    console.error('Error fetching profile:', fetchError);
-                }
-
-                if (!existingProfile) {
-                    // Create new profile
-                    const fullName = user.user_metadata?.full_name ||
-                                    user.user_metadata?.name ||
-                                    document.getElementById('authName')?.value?.trim() ||
-                                    user.email?.split('@')[0] ||
-                                    'משתמש חדש';
-
-                    const { error: insertError } = await supabaseClient
+                const formName = document.getElementById('authName')?.value?.trim();
+                if (formName && !user.user_metadata?.full_name && !user.user_metadata?.name) {
+                    await supabaseClient
                         .from('profiles')
-                        .insert([{
-                            id: user.id,
-                            email: user.email,
-                            full_name: fullName,
-                            roles: ['student_lead'],
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                        }]);
-
-                    if (insertError) {
-                        console.error('Error creating profile:', insertError);
-                    } else {
-                        console.log('Profile created successfully for:', user.email);
-                    }
-                } else {
-                    // Profile exists - ensure student_lead role
-                    if (!existingProfile.roles?.includes('student_lead')) {
-                        const { error: updateError } = await supabaseClient
-                            .from('profiles')
-                            .update({
-                                roles: [...(existingProfile.roles || []), 'student_lead'],
-                                updated_at: new Date().toISOString()
-                            })
-                            .eq('id', user.id);
-
-                        if (updateError) {
-                            console.error('Error updating profile roles:', updateError);
-                        } else {
-                            console.log('Added student_lead role to existing profile');
-                        }
-                    }
+                        .update({ full_name: formName })
+                        .eq('id', user.id);
                 }
             } catch (error) {
-                console.error('Profile management error:', error);
+                console.error('Profile name update error:', error);
             }
         }
 

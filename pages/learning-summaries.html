@@ -6,10 +6,10 @@
     <meta name="theme-color" content="#003B46">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
-    <title>סיכומי שיעורים | אזור לימוד</title>
+    <title>סיכומי שיעורים | קורסים מקצועים בחינם</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- No auth needed - public page -->
     <style>
         :root {
             --bg-dark: #0f1419; --bg-card: #1a1f2e; --bg-card-hover: #242b3d;
@@ -93,13 +93,9 @@
             </nav>
         </div>
         <div class="header-left">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">?</div>
-                <span id="userName">טוען...</span>
-            </div>
-            <button class="btn-header" onclick="handleLogout()">
-                <i class="fa-solid fa-right-from-bracket"></i> התנתקות
-            </button>
+            <a href="../index.html" class="btn-header">
+                <i class="fa-solid fa-arrow-right"></i> לאתר הראשי
+            </a>
         </div>
     </header>
 
@@ -118,8 +114,6 @@
         <div class="cards-grid" id="cardsGrid"></div>
     </main>
 
-    <script src="../js/supabase-client.js"></script>
-    <script src="../js/auth-guard.js"></script>
     <script>
         const items = [
             { title: 'סיכום שיעור 1', description: 'סיכום מפורט של השיעור הראשון בקורס NLP פרקטישנר.', fileName: 'סיכום שיעור 1.docx', path: '../docs/summaries/סיכום שיעור 1.docx' },
@@ -128,37 +122,26 @@
             { title: 'סיכום שיעור 4', description: 'סיכום מפורט של השיעור הרביעי בקורס NLP פרקטישנר.', fileName: 'סיכום שיעור 4.docx', path: '../docs/summaries/סיכום שיעור 4.docx' }
         ];
 
-        (async function initPage() {
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) { window.location.href = 'login.html'; return; }
-                if (window.AuthGuard) { const ok = await AuthGuard.hasLegalConsent(session.user.id); if (!ok) { window.location.href = '../legal-gate.html'; return; } }
-
-                const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'משתמש';
-                document.getElementById('userName').textContent = name;
-                document.getElementById('userAvatar').textContent = name.charAt(0);
-
-                const grid = document.getElementById('cardsGrid');
-                grid.innerHTML = items.map(item => `
-                    <div class="content-card">
-                        <div class="card-top">
-                            <div class="card-icon"><i class="fa-solid fa-file-word"></i></div>
-                            <span class="card-badge">DOCX</span>
-                        </div>
-                        <div class="card-title">${esc(item.title)}</div>
-                        <div class="card-description">${esc(item.description)}</div>
-                        <a class="btn-download" href="${item.path}" download="${item.fileName}">
-                            <i class="fa-solid fa-download"></i> הורדה
-                        </a>
+        (function initPage() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = items.map(item => `
+                <div class="content-card">
+                    <div class="card-top">
+                        <div class="card-icon"><i class="fa-solid fa-file-word"></i></div>
+                        <span class="card-badge">DOCX</span>
                     </div>
-                `).join('');
+                    <div class="card-title">${esc(item.title)}</div>
+                    <div class="card-description">${esc(item.description)}</div>
+                    <a class="btn-download" href="${item.path}" download="${item.fileName}">
+                        <i class="fa-solid fa-download"></i> הורדה
+                    </a>
+                </div>
+            `).join('');
 
-                document.getElementById('loadingScreen').classList.add('hide');
-            } catch (err) { window.location.href = 'login.html'; }
+            document.getElementById('loadingScreen').classList.add('hide');
         })();
 
         function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-        async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = '../index.html'; }
     </script>
     <script src="../js/marketing-tools.js"></script>
 </body>

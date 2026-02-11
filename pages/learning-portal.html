@@ -8,10 +8,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
-    <title>אזור לימוד | מטפל לכל אחד</title>
+    <title>קורסים מקצועים בחינם | מטפל לכל אחד</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- No auth needed - public page -->
     <style>
         :root {
             --bg-dark: #0f1419;
@@ -99,26 +99,6 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .user-avatar {
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--teal), var(--gold));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            color: white;
-            font-weight: 600;
         }
 
         .btn-header {
@@ -347,28 +327,20 @@
                 <div class="header-logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
                 <div class="header-logo-text">מטפל <span>לכל אחד</span></div>
             </a>
-            <div class="header-title">אזור לימוד</div>
+            <div class="header-title">קורסים מקצועים בחינם</div>
         </div>
         <div class="header-left">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">?</div>
-                <span id="userName">טוען...</span>
-            </div>
             <a href="../index.html" class="btn-header">
                 <i class="fa-solid fa-arrow-right"></i>
                 לאתר הראשי
             </a>
-            <button class="btn-header" onclick="handleLogout()">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                התנתקות
-            </button>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="portal-content">
         <div class="welcome-banner">
-            <h2>ברוכים הבאים ל<span>אזור הלימוד</span></h2>
+            <h2>ברוכים הבאים ל<span>קורסים המקצועים בחינם</span></h2>
             <p>כאן תמצאו את כל חומרי הקורס. בחרו קטגוריה כדי לצפות ולהוריד חומרים.</p>
         </div>
 
@@ -399,36 +371,8 @@
         </div>
     </main>
 
-    <script src="../js/supabase-client.js"></script>
-    <script src="../js/auth-guard.js"></script>
     <script>
-        (async function initPage() {
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) { window.location.href = 'login.html'; return; }
-
-                if (window.AuthGuard) {
-                    const hasConsent = await AuthGuard.hasLegalConsent(session.user.id);
-                    if (!hasConsent) { window.location.href = '../legal-gate.html'; return; }
-                }
-
-                const fullName = session.user.user_metadata?.full_name ||
-                                 session.user.user_metadata?.name ||
-                                 session.user.email?.split('@')[0] || 'משתמש';
-                document.getElementById('userName').textContent = fullName;
-                document.getElementById('userAvatar').textContent = fullName.charAt(0);
-
-                document.getElementById('loadingScreen').classList.add('hide');
-            } catch (err) {
-                console.error('Init error:', err);
-                window.location.href = 'login.html';
-            }
-        })();
-
-        async function handleLogout() {
-            await supabaseClient.auth.signOut();
-            window.location.href = '../index.html';
-        }
+        document.getElementById('loadingScreen').classList.add('hide');
     </script>
     <script src="../js/marketing-tools.js"></script>
 </body>

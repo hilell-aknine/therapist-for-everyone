@@ -22,6 +22,7 @@
             --gold: #D4AF37;
             --gold-light: #e6c65a;
             --danger: #f85149;
+            --success: #3fb950;
         }
 
         * {
@@ -42,7 +43,7 @@
 
         .login-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 440px;
             padding: 1rem;
         }
 
@@ -55,7 +56,7 @@
 
         .login-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .login-icon {
@@ -83,6 +84,48 @@
         .login-header p {
             color: var(--text-secondary);
             font-size: 0.9rem;
+        }
+
+        /* Tab Switcher */
+        .tab-switcher {
+            display: flex;
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--bg);
+            font-weight: 600;
+        }
+
+        .tab-btn:not(.active):hover {
+            color: var(--text);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .form-group {
@@ -133,6 +176,21 @@
             display: block;
         }
 
+        .success-message {
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
         .btn-login {
             width: 100%;
             padding: 1rem;
@@ -162,6 +220,57 @@
             transform: none;
         }
 
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        /* Google Button */
+        .btn-google {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+        }
+
+        .btn-google:hover {
+            border-color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-google svg {
+            width: 20px;
+            height: 20px;
+        }
+
         .back-link {
             display: block;
             text-align: center;
@@ -188,6 +297,12 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .password-hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
     </style>
 </head>
 <body>
@@ -197,31 +312,93 @@
                 <div class="login-icon">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
-                <h1>כניסת מנהלים</h1>
-                <p>מערכת CRM - מטפל לכל אחד</p>
+                <h1>ברוכים הבאים</h1>
+                <p>מערכת הלמידה - מטפל לכל אחד</p>
             </div>
 
+            <!-- Tab Switcher -->
+            <div class="tab-switcher">
+                <button class="tab-btn active" data-tab="login" onclick="switchTab('login')">כניסה</button>
+                <button class="tab-btn" data-tab="signup" onclick="switchTab('signup')">הרשמה</button>
+            </div>
+
+            <!-- Error/Success Messages -->
             <div class="error-message" id="error-message">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 <span id="error-text">פרטי התחברות שגויים</span>
             </div>
 
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="email">אימייל</label>
-                    <input type="email" id="email" name="email" required placeholder="admin@example.com" autocomplete="email">
-                </div>
+            <div class="success-message" id="success-message">
+                <i class="fa-solid fa-circle-check"></i>
+                <span id="success-text"></span>
+            </div>
 
-                <div class="form-group">
-                    <label for="password">סיסמה</label>
-                    <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password">
-                </div>
+            <!-- LOGIN TAB -->
+            <div class="tab-content active" id="tab-login">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">אימייל</label>
+                        <input type="email" id="login-email" name="email" required placeholder="example@email.com" autocomplete="email">
+                    </div>
 
-                <button type="submit" class="btn-login" id="login-btn">
-                    <span class="btn-text">התחברות</span>
-                    <div class="spinner" id="spinner"></div>
-                </button>
-            </form>
+                    <div class="form-group">
+                        <label for="login-password">סיסמה</label>
+                        <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="btn-login" id="login-btn">
+                        <span class="btn-text">התחברות</span>
+                        <div class="spinner" id="login-spinner"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- SIGNUP TAB -->
+            <div class="tab-content" id="tab-signup">
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-name">שם מלא</label>
+                        <input type="text" id="signup-name" name="fullName" required placeholder="ישראל ישראלי" autocomplete="name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-email">אימייל</label>
+                        <input type="email" id="signup-email" name="email" required placeholder="example@email.com" autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-password">סיסמה</label>
+                        <input type="password" id="signup-password" name="password" required placeholder="••••••••" autocomplete="new-password" minlength="6">
+                        <div class="password-hint">לפחות 6 תווים</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-password-confirm">אימות סיסמה</label>
+                        <input type="password" id="signup-password-confirm" name="passwordConfirm" required placeholder="••••••••" autocomplete="new-password">
+                    </div>
+
+                    <button type="submit" class="btn-login" id="signup-btn">
+                        <span class="btn-text">הרשמה</span>
+                        <div class="spinner" id="signup-spinner"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Divider -->
+            <div class="divider">
+                <span>או</span>
+            </div>
+
+            <!-- Google OAuth -->
+            <button class="btn-google" id="google-btn" onclick="signInWithGoogle()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                כניסה עם Google
+            </button>
 
             <a href="../index.html" class="back-link">
                 <i class="fa-solid fa-arrow-right"></i>
@@ -236,29 +413,95 @@
         (async function() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                window.location.href = 'admin.html';
+                redirectLoggedInUser(session.user);
             }
         })();
 
-        // Handle login form
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            // Clear messages
+            document.getElementById('error-message').classList.remove('show');
+            document.getElementById('success-message').classList.remove('show');
+        }
+
+        // Show error
+        function showError(text) {
+            const el = document.getElementById('error-message');
+            document.getElementById('error-text').textContent = text;
+            el.classList.add('show');
+            document.getElementById('success-message').classList.remove('show');
+        }
+
+        // Show success
+        function showSuccess(text) {
+            const el = document.getElementById('success-message');
+            document.getElementById('success-text').textContent = text;
+            el.classList.add('show');
+            document.getElementById('error-message').classList.remove('show');
+        }
+
+        // Set loading state
+        function setLoading(btnId, spinnerId, loading) {
+            const btn = document.getElementById(btnId);
+            const spinner = document.getElementById(spinnerId);
+            const btnText = btn.querySelector('.btn-text');
+
+            btn.disabled = loading;
+            spinner.style.display = loading ? 'block' : 'none';
+
+            if (btnId === 'login-btn') {
+                btnText.textContent = loading ? 'מתחבר...' : 'התחברות';
+            } else {
+                btnText.textContent = loading ? 'נרשם...' : 'הרשמה';
+            }
+        }
+
+        // Redirect based on role
+        async function redirectLoggedInUser(user) {
+            try {
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                const role = profile?.role || 'student_lead';
+
+                switch (role) {
+                    case 'admin':
+                        window.location.href = 'admin.html';
+                        break;
+                    case 'therapist':
+                        window.location.href = '../therapist-dashboard.html';
+                        break;
+                    case 'patient':
+                        window.location.href = '../patient-dashboard.html';
+                        break;
+                    case 'student_lead':
+                    default:
+                        window.location.href = '../legal-gate.html';
+                        break;
+                }
+            } catch (err) {
+                window.location.href = '../legal-gate.html';
+            }
+        }
+
+        // Handle LOGIN form
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const loginBtn = document.getElementById('login-btn');
-            const spinner = document.getElementById('spinner');
-            const btnText = loginBtn.querySelector('.btn-text');
-            const errorMessage = document.getElementById('error-message');
-            const errorText = document.getElementById('error-text');
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
 
-            // Reset error
-            errorMessage.classList.remove('show');
-
-            // Show loading state
-            loginBtn.disabled = true;
-            btnText.textContent = 'מתחבר...';
-            spinner.style.display = 'block';
+            document.getElementById('error-message').classList.remove('show');
+            setLoading('login-btn', 'login-spinner', true);
 
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -268,28 +511,109 @@
 
                 if (error) throw error;
 
-                // Success - redirect to admin
-                window.location.href = 'admin.html';
+                await redirectLoggedInUser(data.user);
 
             } catch (error) {
                 console.error('Login error:', error);
 
-                // Show error message
                 if (error.message.includes('Invalid login credentials')) {
-                    errorText.textContent = 'פרטי התחברות שגויים';
+                    showError('פרטי התחברות שגויים');
                 } else if (error.message.includes('Email not confirmed')) {
-                    errorText.textContent = 'האימייל לא אומת';
+                    showError('האימייל לא אומת - בדקו את תיבת הדואר');
                 } else {
-                    errorText.textContent = 'שגיאה בהתחברות - נסה שוב';
+                    showError('שגיאה בהתחברות - נסו שוב');
                 }
-                errorMessage.classList.add('show');
 
-                // Reset button
-                loginBtn.disabled = false;
-                btnText.textContent = 'התחברות';
-                spinner.style.display = 'none';
+                setLoading('login-btn', 'login-spinner', false);
             }
         });
+
+        // Handle SIGNUP form
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-password-confirm').value;
+
+            document.getElementById('error-message').classList.remove('show');
+
+            // Validate
+            if (!fullName) {
+                showError('נא להזין שם מלא');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('הסיסמה חייבת להכיל לפחות 6 תווים');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('הסיסמאות אינן תואמות');
+                return;
+            }
+
+            setLoading('signup-btn', 'signup-spinner', true);
+
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: fullName }
+                    }
+                });
+
+                if (error) throw error;
+
+                // Check if email confirmation is required
+                if (data.user && !data.session) {
+                    showSuccess('נרשמת בהצלחה! בדקו את תיבת הדואר לאימות החשבון');
+                    setLoading('signup-btn', 'signup-spinner', false);
+                } else if (data.session) {
+                    // Auto-confirmed - redirect
+                    showSuccess('נרשמת בהצלחה! מעביר...');
+                    setTimeout(() => {
+                        window.location.href = '../legal-gate.html';
+                    }, 1000);
+                }
+
+            } catch (error) {
+                console.error('Signup error:', error);
+
+                if (error.message.includes('already registered')) {
+                    showError('כתובת האימייל כבר רשומה במערכת');
+                } else if (error.message.includes('valid email')) {
+                    showError('כתובת אימייל לא תקינה');
+                } else if (error.message.includes('password')) {
+                    showError('הסיסמה חלשה מדי - נסו סיסמה חזקה יותר');
+                } else {
+                    showError('שגיאה בהרשמה - נסו שוב');
+                }
+
+                setLoading('signup-btn', 'signup-spinner', false);
+            }
+        });
+
+        // Handle Google OAuth
+        async function signInWithGoogle() {
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + '/legal-gate.html'
+                    }
+                });
+
+                if (error) throw error;
+
+            } catch (error) {
+                console.error('Google auth error:', error);
+                showError('שגיאה בהתחברות עם Google - נסו שוב');
+            }
+        }
     </script>
 
     <!-- Marketing & Analytics -->

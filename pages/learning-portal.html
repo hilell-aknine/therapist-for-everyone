@@ -121,24 +121,7 @@
             font-weight: 600;
         }
 
-        .btn-logout {
-            padding: 0.5rem 1rem;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-logout:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
-        .btn-back {
+        .btn-header {
             padding: 0.5rem 1rem;
             background: transparent;
             border: 1px solid var(--border-color);
@@ -151,16 +134,16 @@
             transition: all 0.2s;
         }
 
-        .btn-back:hover {
-            border-color: var(--text-secondary);
-            color: var(--text-primary);
+        .btn-header:hover {
+            border-color: var(--gold);
+            color: var(--gold);
         }
 
         /* Main content */
         .portal-content {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 2.5rem 2rem;
         }
 
         /* Welcome Banner */
@@ -168,10 +151,11 @@
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(47, 133, 146, 0.1));
             border: 1px solid rgba(212, 175, 55, 0.2);
             border-radius: 16px;
-            padding: 2rem 2.5rem;
-            margin-bottom: 2.5rem;
+            padding: 2.5rem 3rem;
+            margin-bottom: 3rem;
             position: relative;
             overflow: hidden;
+            text-align: center;
         }
 
         .welcome-banner::before {
@@ -184,7 +168,7 @@
 
         .welcome-banner h2 {
             font-family: var(--font-display);
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
@@ -193,565 +177,110 @@
 
         .welcome-banner p {
             color: var(--text-secondary);
-            font-size: 1rem;
+            font-size: 1.05rem;
             line-height: 1.7;
         }
 
-        /* Section */
-        .section {
-            margin-bottom: 3rem;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .section-icon {
-            width: 40px; height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
-
-        .section-icon.booklet {
-            background: rgba(212, 175, 55, 0.15);
-            color: var(--gold);
-        }
-
-        .section-icon.summary {
-            background: rgba(47, 133, 146, 0.15);
-            color: var(--teal);
-        }
-
-        .section-icon.master {
-            background: rgba(63, 185, 80, 0.15);
-            color: var(--success);
-        }
-
-        .section-header h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .section-header .count {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 0.2rem 0.7rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        /* Content Cards Grid */
-        .cards-grid {
+        /* Nav Cards Grid */
+        .nav-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.2rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
         }
 
-        .content-card {
+        .nav-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            cursor: pointer;
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
+            overflow: hidden;
         }
 
-        .content-card::before {
+        .nav-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 2px;
-            border-radius: 12px 12px 0 0;
+            height: 3px;
             opacity: 0;
             transition: opacity 0.3s;
         }
 
-        .content-card.pdf-card::before { background: var(--gold); }
-        .content-card.docx-card::before { background: var(--teal); }
-        .content-card.txt-card::before { background: var(--success); }
+        .nav-card.booklet::before { background: var(--gold); }
+        .nav-card.summary::before { background: var(--teal); }
+        .nav-card.master::before { background: var(--success); }
 
-        .content-card:hover {
-            transform: translateY(-4px);
+        .nav-card:hover {
+            transform: translateY(-6px);
             border-color: var(--gold);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
         }
 
-        .content-card:hover::before {
-            opacity: 1;
-        }
+        .nav-card:hover::before { opacity: 1; }
 
-        .card-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        .card-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
+        .nav-card-icon {
+            width: 64px; height: 64px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.6rem;
+            margin: 0 auto 1.2rem;
         }
 
-        .card-icon.pdf {
-            background: rgba(212, 175, 55, 0.12);
-            color: var(--gold);
-        }
-
-        .card-icon.docx {
-            background: rgba(47, 133, 146, 0.12);
-            color: var(--teal);
-        }
-
-        .card-icon.txt {
-            background: rgba(63, 185, 80, 0.12);
-            color: var(--success);
-        }
-
-        .card-badge {
-            padding: 0.25rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .card-badge.pdf {
+        .nav-card.booklet .nav-card-icon {
             background: rgba(212, 175, 55, 0.15);
             color: var(--gold);
         }
 
-        .card-badge.docx {
+        .nav-card.summary .nav-card-icon {
             background: rgba(47, 133, 146, 0.15);
             color: var(--teal);
         }
 
-        .card-badge.txt {
+        .nav-card.master .nav-card-icon {
             background: rgba(63, 185, 80, 0.15);
             color: var(--success);
         }
 
-        .card-title {
-            font-size: 1.05rem;
+        .nav-card h3 {
+            font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 0.4rem;
-            line-height: 1.4;
+            margin-bottom: 0.5rem;
         }
 
-        .card-description {
+        .nav-card p {
             color: var(--text-secondary);
-            font-size: 0.88rem;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 0.6rem;
-        }
-
-        .btn-view {
-            flex: 1;
-            padding: 0.6rem 1rem;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            border: none;
-            border-radius: 8px;
-            color: var(--bg-dark);
-            font-family: inherit;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-        }
-
-        .btn-view:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px var(--gold-glow);
-        }
-
-        .btn-download {
-            padding: 0.6rem 0.9rem;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .btn-download:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
-        /* Modals */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-content {
-            width: 100%;
-            max-width: 900px;
-            height: 85vh;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            animation: modalIn 0.3s ease-out;
-        }
-
-        @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.95) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0;
-        }
-
-        .modal-header h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .modal-header-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn-modal-action {
-            padding: 0.5rem 0.9rem;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .btn-modal-action:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
-        .btn-close-modal {
-            width: 36px; height: 36px;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .btn-close-modal:hover {
-            background: rgba(248, 81, 73, 0.1);
-            border-color: #f85149;
-            color: #f85149;
-        }
-
-        .modal-body {
-            flex: 1;
-            overflow: auto;
-        }
-
-        .modal-body iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .text-viewer {
-            padding: 2rem;
-            font-size: 1rem;
-            line-height: 2;
-            white-space: pre-wrap;
-            color: var(--text-primary);
-            direction: rtl;
-            font-family: var(--font-body);
-        }
-
-        .text-viewer-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            color: var(--text-secondary);
-        }
-
-        /* AI Chat FAB + Panel */
-        .chat-fab {
-            position: fixed;
-            bottom: 2rem;
-            left: 2rem;
-            width: 56px; height: 56px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            border: none;
-            border-radius: 50%;
-            color: var(--bg-dark);
-            font-size: 1.4rem;
-            cursor: pointer;
-            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.35);
-            transition: all 0.3s;
-            z-index: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .chat-fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 35px rgba(212, 175, 55, 0.5);
-        }
-
-        .chat-fab.hidden { display: none; }
-
-        .chat-panel {
-            position: fixed;
-            bottom: 2rem;
-            left: 2rem;
-            width: 380px;
-            height: 520px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            z-index: 500;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            animation: chatIn 0.3s ease-out;
-        }
-
-        .chat-panel.active {
-            display: flex;
-        }
-
-        @keyframes chatIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .chat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem 1.2rem;
-            border-bottom: 1px solid var(--border-color);
-            background: rgba(212, 175, 55, 0.05);
-        }
-
-        .chat-header-info {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .chat-avatar {
-            width: 36px; height: 36px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            color: var(--bg-dark);
-        }
-
-        .chat-header-text h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
-
-        .chat-header-text p {
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-        }
-
-        .btn-close-chat {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            cursor: pointer;
-            padding: 0.3rem;
-            transition: color 0.2s;
-        }
-
-        .btn-close-chat:hover { color: var(--text-primary); }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .chat-message {
-            max-width: 85%;
-            padding: 0.7rem 1rem;
-            border-radius: 12px;
             font-size: 0.9rem;
             line-height: 1.6;
+            margin-bottom: 1.2rem;
         }
 
-        .chat-message.user {
-            align-self: flex-end;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            color: var(--bg-dark);
-            border-bottom-left: 4px;
-        }
-
-        .chat-message.assistant {
-            align-self: flex-start;
+        .nav-card .count-badge {
+            display: inline-block;
             background: var(--bg-dark);
             border: 1px solid var(--border-color);
-            color: var(--text-primary);
+            border-radius: 20px;
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
-        .chat-message.system {
-            align-self: center;
-            background: rgba(47, 133, 146, 0.1);
-            border: 1px solid rgba(47, 133, 146, 0.2);
-            color: var(--teal);
-            text-align: center;
-            font-size: 0.85rem;
-            max-width: 95%;
-        }
-
-        .typing-indicator {
-            display: none;
-            align-self: flex-start;
-            padding: 0.7rem 1rem;
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-        }
-
-        .typing-indicator.active { display: flex; }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-
-        .typing-dots span {
-            width: 7px; height: 7px;
-            background: var(--text-secondary);
-            border-radius: 50%;
-            animation: typingBounce 1.4s infinite ease-in-out;
-        }
-
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typingBounce {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
-        }
-
-        .chat-input-area {
-            padding: 0.8rem 1rem;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 0.7rem 1rem;
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.9rem;
-            resize: none;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .chat-input:focus { border-color: var(--gold); }
-
-        .chat-input::placeholder {
+        .nav-card .arrow {
+            display: block;
+            margin-top: 1rem;
             color: var(--text-muted);
+            font-size: 1.2rem;
+            transition: all 0.3s;
         }
 
-        .btn-send {
-            width: 40px; height: 40px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            border: none;
-            border-radius: 10px;
-            color: var(--bg-dark);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-send:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px var(--gold-glow);
-        }
-
-        .btn-send:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        .nav-card:hover .arrow {
+            color: var(--gold);
+            transform: translateX(-4px);
         }
 
         /* Loading screen */
@@ -794,36 +323,13 @@
                 justify-content: center;
             }
 
-            .portal-content {
-                padding: 1.2rem;
-            }
+            .portal-content { padding: 1.5rem 1rem; }
 
-            .welcome-banner {
-                padding: 1.5rem;
-            }
+            .welcome-banner { padding: 1.5rem; }
+            .welcome-banner h2 { font-size: 1.4rem; }
 
-            .welcome-banner h2 { font-size: 1.3rem; }
-
-            .cards-grid {
+            .nav-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .chat-panel {
-                left: 0.5rem;
-                right: 0.5rem;
-                bottom: 0.5rem;
-                width: auto;
-                height: 70vh;
-            }
-
-            .chat-fab {
-                bottom: 1rem;
-                left: 1rem;
-            }
-
-            .modal-content {
-                height: 95vh;
-                border-radius: 12px;
             }
         }
     </style>
@@ -848,11 +354,11 @@
                 <div class="user-avatar" id="userAvatar">?</div>
                 <span id="userName">טוען...</span>
             </div>
-            <a href="../index.html" class="btn-back">
+            <a href="../index.html" class="btn-header">
                 <i class="fa-solid fa-arrow-right"></i>
                 לאתר הראשי
             </a>
-            <button class="btn-logout" onclick="handleLogout()">
+            <button class="btn-header" onclick="handleLogout()">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 התנתקות
             </button>
@@ -861,525 +367,69 @@
 
     <!-- Main Content -->
     <main class="portal-content">
-        <!-- Welcome Banner -->
         <div class="welcome-banner">
             <h2>ברוכים הבאים ל<span>אזור הלימוד</span></h2>
-            <p>כאן תמצאו את כל חומרי הקורס: חוברות, סיכומי שיעורים ותמלולי קורס מאסטר. לחצו על כרטיסייה כדי לצפות או להוריד.</p>
+            <p>כאן תמצאו את כל חומרי הקורס. בחרו קטגוריה כדי לצפות ולהוריד חומרים.</p>
         </div>
 
-        <!-- Section 1: Booklets -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-icon booklet"><i class="fa-solid fa-book"></i></div>
+        <div class="nav-grid">
+            <a href="learning-booklets.html" class="nav-card booklet">
+                <div class="nav-card-icon"><i class="fa-solid fa-book"></i></div>
                 <h3>חוברות הקורס</h3>
-                <span class="count">5 חוברות</span>
-            </div>
-            <div class="cards-grid" id="booklets-grid">
-                <!-- Populated by JS -->
-            </div>
-        </div>
+                <p>חוברות NLP בגרסאות שונות — נקייה, מאורגנת, ממותגת ועם אינפוגרפיקות</p>
+                <span class="count-badge">5 חוברות PDF</span>
+                <span class="arrow"><i class="fa-solid fa-arrow-left"></i></span>
+            </a>
 
-        <!-- Section 2: Lesson Summaries -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-icon summary"><i class="fa-solid fa-file-lines"></i></div>
+            <a href="learning-summaries.html" class="nav-card summary">
+                <div class="nav-card-icon"><i class="fa-solid fa-file-lines"></i></div>
                 <h3>סיכומי שיעורים</h3>
-                <span class="count">4 סיכומים</span>
-            </div>
-            <div class="cards-grid" id="summaries-grid">
-                <!-- Populated by JS -->
-            </div>
-        </div>
+                <p>סיכומים מפורטים של שיעורי קורס NLP פרקטישנר להורדה</p>
+                <span class="count-badge">4 סיכומים DOCX</span>
+                <span class="arrow"><i class="fa-solid fa-arrow-left"></i></span>
+            </a>
 
-        <!-- Section 3: Master Course Transcripts -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-icon master"><i class="fa-solid fa-scroll"></i></div>
+            <a href="learning-master.html" class="nav-card master">
+                <div class="nav-card-icon"><i class="fa-solid fa-scroll"></i></div>
                 <h3>תמלולי קורס מאסטר</h3>
-                <span class="count">7 שיעורים</span>
-            </div>
-            <div class="cards-grid" id="master-grid">
-                <!-- Populated by JS -->
-            </div>
+                <p>תמלולים מלאים של שיעורי קורס מאסטר פרקטישנר לצפייה והורדה</p>
+                <span class="count-badge">7 שיעורים TXT</span>
+                <span class="arrow"><i class="fa-solid fa-arrow-left"></i></span>
+            </a>
         </div>
     </main>
-
-    <!-- PDF Viewer Modal -->
-    <div class="modal-overlay" id="pdfModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="pdfModalTitle">צופה במסמך</h3>
-                <div class="modal-header-actions">
-                    <a class="btn-modal-action" id="pdfDownloadLink" href="#" download>
-                        <i class="fa-solid fa-download"></i> הורדה
-                    </a>
-                    <button class="btn-close-modal" onclick="closeModal('pdfModal')">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="modal-body">
-                <iframe id="pdfIframe" src=""></iframe>
-            </div>
-        </div>
-    </div>
-
-    <!-- Text Viewer Modal -->
-    <div class="modal-overlay" id="textModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="textModalTitle">צופה במסמך</h3>
-                <div class="modal-header-actions">
-                    <a class="btn-modal-action" id="textDownloadLink" href="#" download>
-                        <i class="fa-solid fa-download"></i> הורדה
-                    </a>
-                    <button class="btn-close-modal" onclick="closeModal('textModal')">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="modal-body">
-                <div class="text-viewer" id="textViewer">
-                    <div class="text-viewer-loading">
-                        <div class="loading-spinner"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI Chat FAB -->
-    <button class="chat-fab" id="chatFab" onclick="toggleChat()">
-        <i class="fa-solid fa-comment-dots"></i>
-    </button>
-
-    <!-- AI Chat Panel -->
-    <div class="chat-panel" id="chatPanel">
-        <div class="chat-header">
-            <div class="chat-header-info">
-                <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
-                <div class="chat-header-text">
-                    <h4>עוזר הלימוד</h4>
-                    <p>שאלו אותי על חומרי הקורס</p>
-                </div>
-            </div>
-            <button class="btn-close-chat" onclick="toggleChat()">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="chat-message system">
-                שלום! אני העוזר הלימודי של קורס NLP. אפשר לשאול אותי על חומרי הקורס, טכניקות NLP, ונושאים שנלמדו.
-            </div>
-        </div>
-        <div class="typing-indicator" id="typingIndicator">
-            <div class="typing-dots">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-        <div class="chat-input-area">
-            <input type="text" class="chat-input" id="chatInput" placeholder="שאלו שאלה..." onkeydown="if(event.key==='Enter')sendMessage()">
-            <button class="btn-send" id="sendBtn" onclick="sendMessage()">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
 
     <script src="../js/supabase-client.js"></script>
     <script src="../js/auth-guard.js"></script>
     <script>
-        // ============================================================================
-        // Content Data Registry
-        // ============================================================================
-
-        const learningContent = {
-            booklets: [
-                {
-                    id: 'booklet-clean',
-                    title: 'חוברת NLP – גרסה נקייה',
-                    description: 'החוברת המקורית של הקורס, 22 פרקים עם כל הטכניקות והתרגולים.',
-                    type: 'pdf',
-                    fileName: 'nlp-booklet-clean.pdf',
-                    path: '../docs/booklets/nlp-booklet-clean.pdf'
-                },
-                {
-                    id: 'booklet-organized',
-                    title: 'חוברת NLP – מאורגנת',
-                    description: 'גרסה מאורגנת עם חלוקה לפרקים ותוכן עניינים מסודר.',
-                    type: 'pdf',
-                    fileName: 'nlp-booklet-organized.pdf',
-                    path: '../docs/booklets/nlp-booklet-organized.pdf'
-                },
-                {
-                    id: 'booklet-branded',
-                    title: 'חוברת NLP – ממותגת',
-                    description: 'גרסה ממותגת עם עיצוב מקצועי ולוגו בית הספר.',
-                    type: 'pdf',
-                    fileName: 'חוברת-NLP-ממותגת.pdf',
-                    path: '../docs/booklets/חוברת-NLP-ממותגת.pdf'
-                },
-                {
-                    id: 'booklet-infographics',
-                    title: 'חוברת NLP – עם אינפוגרפיקות',
-                    description: 'גרסה מועשרת עם אינפוגרפיקות לכל פרק — ויזואלי וקל להבנה.',
-                    type: 'pdf',
-                    fileName: 'חוברת-NLP-עם-אינפוגרפיקות.pdf',
-                    path: '../docs/booklets/חוברת-NLP-עם-אינפוגרפיקות.pdf'
-                },
-                {
-                    id: 'booklet-infographic-test',
-                    title: 'חוברת NLP – דוגמת אינפוגרפיקה',
-                    description: 'דוגמת אינפוגרפיקה לבדיקה ולתצוגה מקדימה.',
-                    type: 'pdf',
-                    fileName: 'nlp-infographic-test.pdf',
-                    path: '../docs/booklets/nlp-infographic-test.pdf'
-                }
-            ],
-            summaries: [
-                {
-                    id: 'summary-1',
-                    title: 'סיכום שיעור 1',
-                    description: 'סיכום מפורט של השיעור הראשון בקורס NLP פרקטישנר.',
-                    type: 'docx',
-                    fileName: 'סיכום שיעור 1.docx',
-                    path: '../docs/summaries/סיכום שיעור 1.docx'
-                },
-                {
-                    id: 'summary-2',
-                    title: 'סיכום שיעור 2',
-                    description: 'סיכום מפורט של השיעור השני בקורס NLP פרקטישנר.',
-                    type: 'docx',
-                    fileName: 'סיכום שיעור 2.docx',
-                    path: '../docs/summaries/סיכום שיעור 2.docx'
-                },
-                {
-                    id: 'summary-3',
-                    title: 'סיכום שיעור 3',
-                    description: 'סיכום מפורט של השיעור השלישי בקורס NLP פרקטישנר.',
-                    type: 'docx',
-                    fileName: 'סיכום שיעור 3.docx',
-                    path: '../docs/summaries/סיכום שיעור 3.docx'
-                },
-                {
-                    id: 'summary-4',
-                    title: 'סיכום שיעור 4',
-                    description: 'סיכום מפורט של השיעור הרביעי בקורס NLP פרקטישנר.',
-                    type: 'docx',
-                    fileName: 'סיכום שיעור 4.docx',
-                    path: '../docs/summaries/סיכום שיעור 4.docx'
-                }
-            ],
-            masterCourse: [
-                {
-                    id: 'master-1',
-                    title: 'קורס מאסטר – שיעור 1',
-                    description: 'תמלול מלא של השיעור הראשון בקורס מאסטר פרקטישנר.',
-                    type: 'txt',
-                    fileName: 'קורס מאסטר שיעור 1.txt',
-                    path: '../docs/master-course/קורס מאסטר שיעור 1.txt'
-                },
-                {
-                    id: 'master-2',
-                    title: 'קורס מאסטר – שיעור 2',
-                    description: 'תמלול מלא של השיעור השני בקורס מאסטר פרקטישנר.',
-                    type: 'txt',
-                    fileName: 'קורס מאסטר שיעור 2.txt',
-                    path: '../docs/master-course/קורס מאסטר שיעור 2.txt'
-                },
-                {
-                    id: 'master-3',
-                    title: 'קורס מאסטר – שיעור 3',
-                    description: 'תמלול מלא של השיעור השלישי בקורס מאסטר פרקטישנר.',
-                    type: 'txt',
-                    fileName: 'קורס מאסטר שיעור 3.txt',
-                    path: '../docs/master-course/קורס מאסטר שיעור 3.txt'
-                },
-                {
-                    id: 'master-4',
-                    title: 'קורס מאסטר – שיעור 4',
-                    description: 'תמלול מלא של השיעור הרביעי בקורס מאסטר פרקטישנר.',
-                    type: 'txt',
-                    fileName: 'קורס מאסטר שיעור 4.txt',
-                    path: '../docs/master-course/קורס מאסטר שיעור 4.txt'
-                },
-                {
-                    id: 'master-5',
-                    title: 'קורס מאסטר – שיעור 5',
-                    description: 'תמלול מלא של השיעור החמישי בקורס מאסטר פרקטישנר.',
-                    type: 'txt',
-                    fileName: 'קורס מאסטר שיעור 5.txt',
-                    path: '../docs/master-course/קורס מאסטר שיעור 5.txt'
-                },
-                {
-                    id: 'master-6',
-                    title: 'קורס מאסטר – שיעור 6',
-                    description: 'תמלול מלא של השיעור השישי בקורס מאסטר פרקטישנר.',
-                    type: 'txt',
-                    fileName: 'קורס מאסטר שיעור 6.txt',
-                    path: '../docs/master-course/קורס מאסטר שיעור 6.txt'
-                },
-                {
-                    id: 'master-7',
-                    title: 'קורס מאסטר – שיעור 7',
-                    description: 'תמלול מלא של השיעור השביעי בקורס מאסטר פרקטישנר.',
-                    type: 'txt',
-                    fileName: 'קרוס מאסטר שיעור 7.txt',
-                    path: '../docs/master-course/קרוס מאסטר שיעור 7.txt'
-                }
-            ]
-        };
-
-        // ============================================================================
-        // Auth Check + Page Init
-        // ============================================================================
-
-        let currentUser = null;
-
         (async function initPage() {
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
 
-                if (!session) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                currentUser = session.user;
-
-                // Check legal consent
                 if (window.AuthGuard) {
-                    const hasConsent = await AuthGuard.hasLegalConsent(currentUser.id);
-                    if (!hasConsent) {
-                        window.location.href = '../legal-gate.html';
-                        return;
-                    }
+                    const hasConsent = await AuthGuard.hasLegalConsent(session.user.id);
+                    if (!hasConsent) { window.location.href = '../legal-gate.html'; return; }
                 }
 
-                // Load user info
-                const fullName = currentUser.user_metadata?.full_name ||
-                                 currentUser.user_metadata?.name ||
-                                 currentUser.email?.split('@')[0] || 'משתמש';
-
+                const fullName = session.user.user_metadata?.full_name ||
+                                 session.user.user_metadata?.name ||
+                                 session.user.email?.split('@')[0] || 'משתמש';
                 document.getElementById('userName').textContent = fullName;
                 document.getElementById('userAvatar').textContent = fullName.charAt(0);
 
-                // Render content cards
-                renderCards('booklets-grid', learningContent.booklets);
-                renderCards('summaries-grid', learningContent.summaries);
-                renderCards('master-grid', learningContent.masterCourse);
-
-                // Hide loading
                 document.getElementById('loadingScreen').classList.add('hide');
-
             } catch (err) {
                 console.error('Init error:', err);
                 window.location.href = 'login.html';
             }
         })();
 
-        // ============================================================================
-        // Render Content Cards
-        // ============================================================================
-
-        function renderCards(gridId, items) {
-            const grid = document.getElementById(gridId);
-            grid.innerHTML = items.map(item => {
-                const iconClass = item.type === 'pdf' ? 'fa-file-pdf' :
-                                  item.type === 'docx' ? 'fa-file-word' :
-                                  'fa-file-alt';
-
-                const canView = item.type === 'pdf' || item.type === 'txt';
-                const viewAction = item.type === 'pdf'
-                    ? `openPdfViewer('${encodeURIComponent(item.path)}', '${escapeHtml(item.title)}')`
-                    : item.type === 'txt'
-                    ? `openTextViewer('${encodeURIComponent(item.path)}', '${escapeHtml(item.title)}')`
-                    : '';
-
-                return `
-                    <div class="content-card ${item.type}-card" ${canView ? `onclick="${viewAction}"` : ''}>
-                        <div class="card-top">
-                            <div class="card-icon ${item.type}">
-                                <i class="fa-solid ${iconClass}"></i>
-                            </div>
-                            <span class="card-badge ${item.type}">${item.type.toUpperCase()}</span>
-                        </div>
-                        <div class="card-title">${escapeHtml(item.title)}</div>
-                        <div class="card-description">${escapeHtml(item.description)}</div>
-                        <div class="card-actions" onclick="event.stopPropagation()">
-                            ${canView ? `
-                                <button class="btn-view" onclick="${viewAction}">
-                                    <i class="fa-solid fa-eye"></i> צפייה
-                                </button>
-                            ` : ''}
-                            <a class="btn-download" href="${item.path}" download="${item.fileName}">
-                                <i class="fa-solid fa-download"></i> הורדה
-                            </a>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ============================================================================
-        // PDF Viewer Modal
-        // ============================================================================
-
-        function openPdfViewer(encodedPath, title) {
-            const path = decodeURIComponent(encodedPath);
-            document.getElementById('pdfModalTitle').textContent = title;
-            document.getElementById('pdfIframe').src = path;
-            document.getElementById('pdfDownloadLink').href = path;
-            document.getElementById('pdfModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // ============================================================================
-        // Text Viewer Modal
-        // ============================================================================
-
-        async function openTextViewer(encodedPath, title) {
-            const path = decodeURIComponent(encodedPath);
-            document.getElementById('textModalTitle').textContent = title;
-            document.getElementById('textDownloadLink').href = path;
-            document.getElementById('textModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-
-            const viewer = document.getElementById('textViewer');
-            viewer.innerHTML = '<div class="text-viewer-loading"><div class="loading-spinner"></div></div>';
-
-            try {
-                const response = await fetch(path);
-                if (!response.ok) throw new Error('Failed to load');
-                const text = await response.text();
-                viewer.textContent = text;
-            } catch (err) {
-                viewer.innerHTML = '<div class="text-viewer-loading" style="color: #f85149;">שגיאה בטעינת הקובץ</div>';
-            }
-        }
-
-        // ============================================================================
-        // Close Modal
-        // ============================================================================
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-            document.body.style.overflow = '';
-
-            if (modalId === 'pdfModal') {
-                document.getElementById('pdfIframe').src = '';
-            }
-        }
-
-        // Close modal on overlay click
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) {
-                    closeModal(overlay.id);
-                }
-            });
-        });
-
-        // Close modal on Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeModal('pdfModal');
-                closeModal('textModal');
-            }
-        });
-
-        // ============================================================================
-        // AI Chat
-        // ============================================================================
-
-        let chatHistory = [];
-        let chatOpen = false;
-
-        function toggleChat() {
-            chatOpen = !chatOpen;
-            document.getElementById('chatPanel').classList.toggle('active', chatOpen);
-            document.getElementById('chatFab').classList.toggle('hidden', chatOpen);
-
-            if (chatOpen) {
-                document.getElementById('chatInput').focus();
-            }
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            if (!message) return;
-
-            // Add user message
-            addChatMessage('user', message);
-            input.value = '';
-            chatHistory.push({ role: 'user', content: message });
-
-            // Show typing
-            document.getElementById('typingIndicator').classList.add('active');
-            document.getElementById('sendBtn').disabled = true;
-
-            try {
-                const response = await fetch('https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1/ai-chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${(await supabaseClient.auth.getSession()).data.session.access_token}`
-                    },
-                    body: JSON.stringify({
-                        message,
-                        history: chatHistory.slice(-10)
-                    })
-                });
-
-                if (!response.ok) throw new Error('API error');
-
-                const data = await response.json();
-                const reply = data.reply || data.content || 'לא הצלחתי לענות. נסו שוב.';
-
-                addChatMessage('assistant', reply);
-                chatHistory.push({ role: 'assistant', content: reply });
-
-            } catch (err) {
-                console.error('Chat error:', err);
-                addChatMessage('assistant',
-                    'העוזר הלימודי עדיין בהקמה. בינתיים, אפשר לפנות אלינו ב-WhatsApp לכל שאלה על הקורס.\n\nנשמח לעזור! 💬'
-                );
-            }
-
-            document.getElementById('typingIndicator').classList.remove('active');
-            document.getElementById('sendBtn').disabled = false;
-        }
-
-        function addChatMessage(role, text) {
-            const messagesDiv = document.getElementById('chatMessages');
-            const msg = document.createElement('div');
-            msg.className = `chat-message ${role}`;
-            msg.textContent = text;
-            messagesDiv.appendChild(msg);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        // ============================================================================
-        // Logout
-        // ============================================================================
-
         async function handleLogout() {
-            try {
-                await supabaseClient.auth.signOut();
-                window.location.href = '../index.html';
-            } catch (err) {
-                console.error('Logout error:', err);
-            }
+            await supabaseClient.auth.signOut();
+            window.location.href = '../index.html';
         }
     </script>
-
-    <!-- Marketing & Analytics -->
     <script src="../js/marketing-tools.js"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
-    <title>קורס NLP בחינם - מטפל לכל אחד</title>
+    <title>קורס NLP בחינם - בית המטפלים</title>
     <!-- Preconnect for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,21 +21,21 @@
     <style>
         :root {
             /* Brand Colors */
-            --sidebar-dark: #002b33;
-            --sidebar-hover: #003d47;
-            --sidebar-active: #00454f;
-            --deep-petrol: #003B46;
-            --muted-teal: #00606B;
-            --dusty-aqua: #2F8592;
+            --sidebar-dark: #0a3a42;
+            --sidebar-hover: #0d4a54;
+            --sidebar-active: #0f5560;
+            --deep-petrol: #0E5660;
+            --muted-teal: #005C66;
+            --dusty-aqua: #2A727C;
             --frost-white: #E8F1F2;
             --pure-white: #FFFFFF;
             --light-gray: #f8f9fa;
             --border-light: #e9ecef;
             --text-dark: #2d3436;
             --text-muted: #636e72;
-            --gold: #D4AF37;
-            --gold-light: #e6c65a;
-            --gold-glow: rgba(212, 175, 55, 0.3);
+            --gold: #D8AF47;
+            --gold-light: #E1B13F;
+            --gold-glow: rgba(216, 175, 71, 0.3);
             --success: #00b894;
             --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
         }
@@ -599,6 +599,114 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        /* ===== Bottom Video Navigation ===== */
+        .video-nav-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--pure-white);
+            border-radius: 12px;
+            margin-top: 1rem;
+            padding: 0.8rem 1.2rem;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+            gap: 0.8rem;
+        }
+
+        .video-nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1.4rem;
+            border-radius: 10px;
+            border: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+
+        .video-nav-btn.prev {
+            background: var(--frost-white);
+            color: var(--deep-petrol);
+        }
+
+        .video-nav-btn.prev:hover:not(:disabled) {
+            background: var(--dusty-aqua);
+            color: white;
+        }
+
+        .video-nav-btn.next {
+            background: var(--gradient-gold);
+            color: var(--sidebar-dark);
+        }
+
+        .video-nav-btn.next:hover:not(:disabled) {
+            box-shadow: 0 4px 18px var(--gold-glow);
+            transform: translateY(-1px);
+        }
+
+        .video-nav-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .video-nav-btn .btn-label {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .video-nav-btn .btn-sublabel {
+            font-size: 0.75rem;
+            font-weight: 400;
+            opacity: 0.7;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .video-nav-counter {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .video-nav-counter strong {
+            color: var(--deep-petrol);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .video-nav-bar {
+                padding: 0.6rem;
+                gap: 0.4rem;
+                border-radius: 10px;
+                margin-top: 0.5rem;
+            }
+
+            .video-nav-btn {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.85rem;
+                gap: 0.4rem;
+            }
+
+            .video-nav-btn .btn-sublabel {
+                display: none;
+            }
+
+            .video-nav-counter {
+                font-size: 0.75rem;
+            }
+
+            .video-nav-counter strong {
+                font-size: 0.95rem;
+            }
         }
 
         /* Tabs Section */
@@ -1561,7 +1669,7 @@
             <div class="sidebar-header">
                 <a href="../index.html" class="sidebar-logo">
                     <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
-                    <div class="logo-text">מטפל <span>לכל אחד</span></div>
+                    <div class="logo-text">בית <span>המטפלים</span></div>
                 </a>
                 <h1 class="course-title">קורס NLP - יסודות ומעשה</h1>
                 <div class="course-meta">
@@ -1595,10 +1703,10 @@
                 <div class="top-bar-actions">
                     <button class="nav-btn" id="prevLessonBtn" onclick="navigateLesson(-1)" disabled>
                         <i class="fa-solid fa-arrow-right"></i>
-                        הקודם
+                        <span>הקודם</span>
                     </button>
                     <button class="nav-btn primary" id="nextLessonBtn" onclick="navigateLesson(1)">
-                        הבא
+                        <span>הבא</span>
                         <i class="fa-solid fa-arrow-left"></i>
                     </button>
                 </div>
@@ -1621,6 +1729,27 @@
                         <p>טוען את הסרטון...</p>
                     </div>
                     <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="display: none;"></iframe>
+                </div>
+
+                <!-- Bottom Video Navigation -->
+                <div class="video-nav-bar" id="videoNavBar">
+                    <button class="video-nav-btn next" id="bottomNextBtn" onclick="navigateLesson(1)">
+                        <span class="btn-label">
+                            <span>השיעור הבא</span>
+                            <span class="btn-sublabel" id="nextLessonName"></span>
+                        </span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div class="video-nav-counter">
+                        שיעור <strong id="lessonCounter">1</strong> מתוך <strong id="lessonTotal">51</strong>
+                    </div>
+                    <button class="video-nav-btn prev" id="bottomPrevBtn" onclick="navigateLesson(-1)">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span class="btn-label">
+                            <span>הקודם</span>
+                            <span class="btn-sublabel" id="prevLessonName"></span>
+                        </span>
+                    </button>
                 </div>
 
                 <div class="tabs-section">
@@ -2266,7 +2395,7 @@
                             return `
                                 <div class="lesson-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}"
                                      data-module="${mIndex}" data-lesson="${lIndex}"
-                                     onclick="selectLesson(${mIndex}, ${lIndex})">
+                                     onclick="selectLesson(${mIndex}, ${lIndex}, true)">
                                     <div class="lesson-status">
                                         ${isCompleted ? '<i class="fa-solid fa-check"></i>' :
                                           isActive ? '<i class="fa-solid fa-play"></i>' :
@@ -2289,43 +2418,47 @@
         }
 
         // ===== Select Lesson =====
-        function selectLesson(moduleIndex, lessonIndex) {
+        function selectLesson(moduleIndex, lessonIndex, autoplay = false) {
             currentModuleIndex = moduleIndex;
             currentLessonIndex = lessonIndex;
 
             const lesson = modules[moduleIndex].lessons[lessonIndex];
             currentVideoId = lesson.id;
 
-            // Show thumbnail (fast loading)
             const player = document.getElementById('videoPlayer');
             const placeholder = document.getElementById('videoPlaceholder');
             const thumbnail = document.getElementById('videoThumbnail');
             const thumbnailImg = document.getElementById('thumbnailImg');
             const loading = document.getElementById('videoLoading');
 
-            // Hide everything, show thumbnail
+            // Hide everything first
             player.style.display = 'none';
             player.src = '';
             placeholder.style.display = 'none';
             loading.classList.remove('active');
+            thumbnail.style.display = 'none';
 
-            // Load thumbnail (maxresdefault or hqdefault as fallback)
-            thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/maxresdefault.jpg`;
-            thumbnailImg.onerror = () => {
-                thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/hqdefault.jpg`;
-            };
-            thumbnail.style.display = 'block';
-
-            // Update UI
+            // Update UI text
             document.getElementById('currentLessonTitle').textContent = lesson.title;
             document.getElementById('currentLessonMeta').textContent = `מודול ${moduleIndex + 1} • ${lesson.title}`;
             document.getElementById('lessonDescTitle').textContent = lesson.title;
 
             // Update syllabus highlighting
             document.querySelectorAll('.lesson-item').forEach(item => item.classList.remove('active'));
-            document.querySelector(`.lesson-item[data-module="${moduleIndex}"][data-lesson="${lessonIndex}"]`).classList.add('active');
+            const activeItem = document.querySelector(`.lesson-item[data-module="${moduleIndex}"][data-lesson="${lessonIndex}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+                // Scroll the active lesson into view in the sidebar
+                activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
 
-            // Update nav buttons
+            // Open the module containing this lesson
+            const moduleEl = document.querySelector(`.module[data-module="${moduleIndex}"]`);
+            if (moduleEl && !moduleEl.classList.contains('open')) {
+                moduleEl.classList.add('open');
+            }
+
+            // Update nav buttons (top + bottom)
             updateNavButtons();
 
             // Close sidebar on mobile
@@ -2338,6 +2471,25 @@
                     toggleBtn.querySelector('i').className = 'fa-solid fa-list';
                 }
                 document.body.style.overflow = '';
+            }
+
+            if (autoplay) {
+                // Auto-play: load iframe directly
+                playVideo();
+            } else {
+                // Show thumbnail with play button (initial load)
+                thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/maxresdefault.jpg`;
+                thumbnailImg.onerror = () => {
+                    thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/hqdefault.jpg`;
+                };
+                thumbnail.style.display = 'block';
+            }
+
+            // Scroll to video on mobile
+            if (autoplay && window.innerWidth <= 1024) {
+                setTimeout(() => {
+                    document.querySelector('.video-wrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
             }
         }
 
@@ -2354,7 +2506,7 @@
             loading.classList.add('active');
 
             // Load iframe
-            player.src = `https://www.youtube-nocookie.com/embed/${currentVideoId}?autoplay=1&rel=0&origin=${location.origin}`;
+            player.src = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1`;
 
             // When iframe loads, hide loading and show player
             player.onload = () => {
@@ -2398,13 +2550,15 @@
                 }
             }
 
-            selectLesson(newModule, newLesson);
+            selectLesson(newModule, newLesson, true);
         }
 
         // ===== Update Nav Buttons =====
         function updateNavButtons() {
             const prevBtn = document.getElementById('prevLessonBtn');
             const nextBtn = document.getElementById('nextLessonBtn');
+            const bottomPrevBtn = document.getElementById('bottomPrevBtn');
+            const bottomNextBtn = document.getElementById('bottomNextBtn');
 
             const isFirst = currentModuleIndex === 0 && currentLessonIndex === 0;
             const isLast = currentModuleIndex === modules.length - 1 &&
@@ -2412,6 +2566,39 @@
 
             prevBtn.disabled = isFirst;
             nextBtn.disabled = isLast;
+            bottomPrevBtn.disabled = isFirst;
+            bottomNextBtn.disabled = isLast;
+
+            // Calculate global lesson number
+            let globalIndex = 0;
+            for (let m = 0; m < currentModuleIndex; m++) {
+                globalIndex += modules[m].lessons.length;
+            }
+            globalIndex += currentLessonIndex + 1;
+            const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+
+            document.getElementById('lessonCounter').textContent = globalIndex;
+            document.getElementById('lessonTotal').textContent = totalLessons;
+
+            // Show next/prev lesson names
+            const nextName = document.getElementById('nextLessonName');
+            const prevName = document.getElementById('prevLessonName');
+
+            if (!isLast) {
+                let nm = currentModuleIndex, nl = currentLessonIndex + 1;
+                if (nl >= modules[nm].lessons.length) { nm++; nl = 0; }
+                nextName.textContent = modules[nm].lessons[nl].title;
+            } else {
+                nextName.textContent = '';
+            }
+
+            if (!isFirst) {
+                let pm = currentModuleIndex, pl = currentLessonIndex - 1;
+                if (pl < 0) { pm--; pl = modules[pm].lessons.length - 1; }
+                prevName.textContent = modules[pm].lessons[pl].title;
+            } else {
+                prevName.textContent = '';
+            }
         }
 
         // ===== Update Progress =====
@@ -2532,9 +2719,14 @@
             }
         }
 
-        // Close modal on Escape
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeModal();
+            // Arrow keys for navigation (only when not focused on an input)
+            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                if (e.key === 'ArrowLeft') navigateLesson(1);  // Next (RTL: left = forward)
+                if (e.key === 'ArrowRight') navigateLesson(-1); // Prev (RTL: right = backward)
+            }
         });
 
         // ===== Expose functions to global scope for onclick handlers =====

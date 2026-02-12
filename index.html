@@ -8,27 +8,29 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icon-192.svg">
-    <title>מטפל לכל אחד - בית הספר להכשרת מטפלים</title>
-    <meta name="description" content="בית הספר להכשרת מטפלים מקצועיים עם הסמכה בינלאומית - NLP Practitioner ו-Master Practitioner">
+    <title>בית המטפלים - הבית של המטפלים בישראל</title>
+    <meta name="description" content="בית המטפלים - קורסים בחינם, הכשרת מטפלים מוסמכים ומיזם חברתי לטיפול נפשי נגיש לכל אחד בישראל">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --deep-petrol: #003B46;
-            --muted-teal: #00606B;
-            --dusty-aqua: #2F8592;
+            --deep-petrol: #0E5660;
+            --muted-teal: #005C66;
+            --dusty-aqua: #2A727C;
             --frost-white: #E8F1F2;
             --cream: #FAF8F4;
             --pure-white: #FFFFFF;
-            --gold: #D4AF37;
-            --gold-light: #E6C65A;
-            --gold-glow: rgba(212, 175, 55, 0.25);
+            --gold: #D8AF47;
+            --gold-light: #E1B13F;
+            --gold-glow: rgba(216, 175, 71, 0.25);
             --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
             --text-dark: #1A2D33;
-            --border-light: rgba(47, 133, 146, 0.12);
-            --border-dark: rgba(47, 133, 146, 0.3);
+            --border-light: rgba(42, 114, 124, 0.12);
+            --border-dark: rgba(42, 114, 124, 0.3);
+            --purple-soft: #9B72CF;
+            --purple-glow: rgba(155, 114, 207, 0.15);
 
             --font-display: 'Frank Ruhl Libre', 'Noto Serif Hebrew', serif;
             --font-body: 'Heebo', sans-serif;
@@ -207,7 +209,6 @@
             overflow: hidden;
         }
 
-        /* Hero background layers */
         .hero-bg {
             position: absolute;
             inset: 0;
@@ -231,7 +232,7 @@
         .hero-bg-layer:nth-child(2) {
             width: 500px; height: 500px;
             bottom: 5%; left: -5%;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(155, 114, 207, 0.12) 0%, transparent 70%);
             animation: gentleFloat 20s ease-in-out infinite reverse;
         }
 
@@ -239,7 +240,7 @@
             width: 400px; height: 400px;
             top: 40%; left: 50%;
             transform: translateX(-50%);
-            background: radial-gradient(circle, rgba(0, 96, 107, 0.25) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
             animation: gentleFloat 30s ease-in-out infinite;
         }
 
@@ -255,31 +256,25 @@
             max-width: 850px;
         }
 
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(212, 175, 55, 0.08);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            padding: 0.5rem 1.3rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--gold);
-            margin-bottom: 2.5rem;
-            letter-spacing: 0.02em;
+        .hero-welcome {
+            font-family: var(--font-body);
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 300;
+            color: var(--frost-white);
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
             opacity: 0;
             animation: heroFadeIn 0.8s ease-out 0.2s forwards;
         }
 
         .hero h1 {
             font-family: var(--font-display);
-            font-size: clamp(2.8rem, 5.5vw, 4.2rem);
-            font-weight: 800;
-            line-height: 1.15;
-            margin-bottom: 1.8rem;
+            font-size: clamp(3.2rem, 7vw, 5.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
             color: var(--pure-white);
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
             opacity: 0;
             animation: heroFadeIn 0.8s ease-out 0.4s forwards;
         }
@@ -299,15 +294,28 @@
         }
 
         .hero-subtitle {
-            font-size: clamp(1.05rem, 2vw, 1.25rem);
+            font-size: clamp(1.15rem, 2.2vw, 1.45rem);
             color: var(--frost-white);
             margin-bottom: 3rem;
-            line-height: 1.9;
-            max-width: 650px;
+            line-height: 1.8;
+            max-width: 600px;
             margin-left: auto;
             margin-right: auto;
             opacity: 0;
             animation: heroFadeIn 0.8s ease-out 0.6s forwards;
+        }
+
+        .hero-subtitle .purple-heart {
+            display: inline-block;
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            15% { transform: scale(1.15); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.1); }
+            60% { transform: scale(1); }
         }
 
         .hero-cta-group {
@@ -362,7 +370,17 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        /* Scroll indicator */
+        .btn-teal {
+            background: var(--muted-teal);
+            color: var(--pure-white);
+        }
+
+        .btn-teal:hover {
+            background: var(--dusty-aqua);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(47, 133, 146, 0.3);
+        }
+
         .scroll-hint {
             position: absolute;
             bottom: 2.5rem;
@@ -442,15 +460,17 @@
             font-weight: 500;
         }
 
-        /* ===== Paths Section ===== */
-        .paths-section {
+        /* ===== About Section ===== */
+        .about-section {
             padding: 7rem 2rem;
             background: var(--cream);
+            position: relative;
         }
 
-        .section-header {
+        .about-inner {
+            max-width: 800px;
+            margin: 0 auto;
             text-align: center;
-            margin-bottom: 4rem;
         }
 
         .section-eyebrow {
@@ -483,195 +503,344 @@
             letter-spacing: -0.02em;
         }
 
-        .section-subtitle {
-            font-size: 1.1rem;
-            color: var(--muted-teal);
-            max-width: 550px;
-            margin: 0 auto;
-            line-height: 1.8;
+        .about-text {
+            font-size: 1.15rem;
+            color: var(--text-dark);
+            line-height: 2;
+            margin-bottom: 1rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .paths-grid {
+        .about-text .gold { color: var(--gold); font-weight: 600; }
+
+        .about-lead-in {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--deep-petrol);
+            margin-top: 2rem;
+        }
+
+        /* ===== Pillars Section ===== */
+        .pillars-section {
+            padding: 5rem 2rem 7rem;
+            background: var(--cream);
+        }
+
+        .pillars-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
-            max-width: 950px;
+            max-width: 1150px;
             margin: 0 auto;
         }
 
-        .paths-grid.three-col {
-            grid-template-columns: repeat(3, 1fr);
-            max-width: 1100px;
-        }
-
-        .paths-cta {
-            text-align: center;
-            margin-top: 3rem;
-        }
-
-        .path-card {
+        .pillar-card {
             background: var(--pure-white);
             border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 3rem 2.5rem;
-            text-align: center;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
             position: relative;
             overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
         }
 
-        .path-card::before {
+        .pillar-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 3px;
+            height: 4px;
             transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .path-card:hover::before {
-            height: 4px;
-        }
-
-        .path-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 60px rgba(0, 59, 70, 0.1);
+        .pillar-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 60px rgba(0, 59, 70, 0.12);
             border-color: transparent;
         }
 
-        .path-card.warm::before {
+        .pillar-card:hover::before {
+            height: 5px;
+        }
+
+        .pillar-card.pillar-free::before {
+            background: linear-gradient(135deg, var(--dusty-aqua), var(--muted-teal));
+        }
+
+        .pillar-card.pillar-training::before {
             background: var(--gradient-gold);
         }
 
-        /* cool variant removed — single training focus */
+        .pillar-card.pillar-social::before {
+            background: linear-gradient(135deg, var(--purple-soft), #7B5EA7);
+        }
 
-        .path-icon {
-            width: 80px; height: 80px;
-            border-radius: 20px;
+        .pillar-number {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .pillar-card.pillar-free .pillar-number { color: var(--dusty-aqua); }
+        .pillar-card.pillar-training .pillar-number { color: var(--gold); }
+        .pillar-card.pillar-social .pillar-number { color: var(--purple-soft); }
+
+        .pillar-icon {
+            width: 70px; height: 70px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 1.8rem;
+            font-size: 1.7rem;
+            margin-bottom: 1.5rem;
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .path-card:hover .path-icon {
+        .pillar-card:hover .pillar-icon {
             transform: scale(1.08) rotate(-3deg);
         }
 
-        .path-card.warm .path-icon {
+        .pillar-card.pillar-free .pillar-icon {
+            background: rgba(47, 133, 146, 0.1);
+            color: var(--dusty-aqua);
+        }
+
+        .pillar-card.pillar-training .pillar-icon {
             background: rgba(212, 175, 55, 0.1);
             color: var(--gold);
         }
 
-        /* cool icon variant removed */
+        .pillar-card.pillar-social .pillar-icon {
+            background: var(--purple-glow);
+            color: var(--purple-soft);
+        }
 
-        .path-card h3 {
+        .pillar-card h3 {
             font-family: var(--font-display);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--deep-petrol);
             margin-bottom: 1rem;
             letter-spacing: -0.01em;
+            line-height: 1.4;
         }
 
-        .path-card p {
+        .pillar-card p {
             color: var(--muted-teal);
             font-size: 0.95rem;
-            margin-bottom: 2rem;
             line-height: 1.85;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
         }
 
-        .path-link {
+        .pillar-courses {
+            background: rgba(47, 133, 146, 0.05);
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.88rem;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+        }
+
+        .pillar-courses strong {
+            color: var(--dusty-aqua);
+        }
+
+        .pillar-link {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             font-weight: 600;
             font-size: 0.95rem;
             text-decoration: none;
+            padding: 0.8rem 1.6rem;
+            border-radius: 10px;
             transition: all 0.3s;
-            padding: 0.8rem 1.8rem;
-            border-radius: 8px;
+            align-self: flex-start;
         }
 
-        .path-link i {
+        .pillar-link i {
             transition: transform 0.3s;
             font-size: 0.85rem;
         }
 
-        .path-card.warm .path-link {
+        .pillar-card.pillar-free .pillar-link {
+            color: var(--pure-white);
+            background: var(--dusty-aqua);
+        }
+
+        .pillar-card.pillar-free .pillar-link:hover {
+            background: var(--muted-teal);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(47, 133, 146, 0.3);
+        }
+
+        .pillar-card.pillar-training .pillar-link {
             color: var(--deep-petrol);
-            background: rgba(212, 175, 55, 0.1);
+            background: var(--gradient-gold);
         }
 
-        .path-card.warm .path-link:hover {
-            background: rgba(212, 175, 55, 0.2);
+        .pillar-card.pillar-training .pillar-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--gold-glow);
         }
 
-        .path-card.warm .path-link:hover i { transform: translateX(-4px); }
+        .pillar-card.pillar-social .pillar-link {
+            color: var(--pure-white);
+            background: var(--purple-soft);
+        }
 
-        /* cool link variants removed */
+        .pillar-card.pillar-social .pillar-link:hover {
+            background: #7B5EA7;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(155, 114, 207, 0.3);
+        }
 
-        /* ===== Mission Section ===== */
-        .mission {
+        .pillar-link:hover i { transform: translateX(-4px); }
+
+        /* ===== Testimonials ===== */
+        .testimonials-section {
             padding: 7rem 2rem;
             background: var(--deep-petrol);
             position: relative;
             overflow: hidden;
         }
 
-        .mission-bg {
+        .testimonials-section .section-eyebrow {
+            color: var(--gold);
+        }
+
+        .testimonials-section .section-eyebrow::before,
+        .testimonials-section .section-eyebrow::after {
+            background: var(--gold);
+        }
+
+        .testimonials-section .section-title {
+            color: var(--pure-white);
+        }
+
+        .testimonials-bg {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: radial-gradient(ellipse at 70% 50%, rgba(47, 133, 146, 0.15) 0%, transparent 60%);
+            background: radial-gradient(ellipse at 30% 50%, rgba(155, 114, 207, 0.08) 0%, transparent 60%),
+                        radial-gradient(ellipse at 70% 50%, rgba(47, 133, 146, 0.1) 0%, transparent 60%);
             pointer-events: none;
         }
 
-        .mission-content {
-            max-width: 800px;
+        .testimonials-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1100px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
         }
 
-        .mission-quote-mark {
-            font-family: var(--font-display);
-            font-size: 8rem;
-            color: var(--gold);
-            opacity: 0.15;
-            line-height: 1;
-            position: absolute;
-            top: -3rem;
-            right: -1rem;
-            user-select: none;
-        }
-
-        .mission-text {
-            font-family: var(--font-display);
-            font-size: clamp(1.4rem, 3vw, 1.9rem);
-            font-weight: 500;
-            color: var(--pure-white);
-            line-height: 1.7;
-            margin-bottom: 2rem;
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
         }
 
-        .mission-text .gold { color: var(--gold); }
-
-        .mission-detail {
-            font-size: 1.05rem;
-            color: var(--frost-white);
-            line-height: 1.9;
-            opacity: 0.85;
-            max-width: 650px;
+        .testimonial-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-4px);
         }
 
-        .mission-divider {
-            width: 50px; height: 2px;
-            background: var(--gold);
-            margin: 2rem 0;
-            opacity: 0.5;
+        .testimonial-quote-mark {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            color: var(--gold);
+            opacity: 0.3;
+            line-height: 1;
+            margin-bottom: -0.5rem;
+            user-select: none;
+        }
+
+        .testimonial-text {
+            font-size: 1rem;
+            color: var(--frost-white);
+            line-height: 1.9;
+            margin-bottom: 1.8rem;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 1.2rem;
+        }
+
+        .testimonial-avatar {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .testimonial-card:nth-child(1) .testimonial-avatar {
+            background: rgba(47, 133, 146, 0.2);
+            color: var(--dusty-aqua);
+        }
+
+        .testimonial-card:nth-child(2) .testimonial-avatar {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+        }
+
+        .testimonial-card:nth-child(3) .testimonial-avatar {
+            background: var(--purple-glow);
+            color: var(--purple-soft);
+        }
+
+        .testimonial-name {
+            font-weight: 600;
+            color: var(--pure-white);
+            font-size: 0.95rem;
+        }
+
+        .testimonial-role {
+            font-size: 0.82rem;
+            color: var(--frost-white);
+            opacity: 0.6;
+        }
+
+        .testimonial-stars {
+            color: var(--gold);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            margin-top: 2px;
         }
 
         /* ===== CTA Section ===== */
@@ -719,6 +888,13 @@
             line-height: 1.8;
         }
 
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         /* ===== Footer ===== */
         .footer {
             background: var(--deep-petrol);
@@ -730,7 +906,7 @@
             max-width: 1100px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
             gap: 3rem;
         }
 
@@ -777,13 +953,12 @@
 
         /* ===== Responsive ===== */
         @media (max-width: 1024px) {
-            .paths-grid { max-width: 700px; }
-            .paths-grid.three-col { grid-template-columns: repeat(2, 1fr); max-width: 700px; }
+            .pillars-grid { max-width: 750px; grid-template-columns: 1fr; }
+            .testimonials-grid { max-width: 750px; grid-template-columns: 1fr; }
             .footer-content { grid-template-columns: 1fr 1fr; }
         }
 
         @media (max-width: 768px) {
-            /* Mobile Menu Drawer */
             .nav-links {
                 display: none !important;
                 position: fixed;
@@ -868,30 +1043,21 @@
 
             .nav-cta { display: none; }
 
-            /* Hero */
             .hero { padding: 7rem 1.5rem 4rem; min-height: auto; }
-            .hero-badge { margin-bottom: 2rem; }
-            .hero-subtitle { margin-bottom: 2.5rem; }
             .scroll-hint { display: none; }
 
-            /* Stats */
             .stats-strip { padding: 2.5rem 1.5rem; }
             .stats-grid { gap: 1rem; }
             .stat-item:not(:last-child)::after { display: none; }
 
-            /* Paths */
-            .paths-section { padding: 5rem 1.5rem; }
-            .paths-grid, .paths-grid.three-col { grid-template-columns: 1fr; max-width: 450px; }
-            .path-card { padding: 2.5rem 2rem; }
+            .about-section { padding: 5rem 1.5rem; }
+            .pillars-section { padding: 3rem 1.5rem 5rem; }
+            .pillar-card { padding: 2.5rem 2rem; }
 
-            /* Mission */
-            .mission { padding: 5rem 1.5rem; }
-            .mission-quote-mark { font-size: 5rem; top: -2rem; right: 0; }
+            .testimonials-section { padding: 5rem 1.5rem; }
 
-            /* CTA */
             .cta-section { padding: 4rem 1.5rem; }
 
-            /* Footer */
             .footer-content { grid-template-columns: 1fr; text-align: center; }
         }
 
@@ -902,10 +1068,10 @@
             .stats-grid { grid-template-columns: 1fr; gap: 1.5rem; }
             .hero-cta-group { flex-direction: column; align-items: center; }
             .btn { width: 100%; justify-content: center; }
-            .path-card { padding: 2rem 1.5rem; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+            .cta-buttons .btn { width: 100%; }
         }
 
-        /* ===== Reduced motion ===== */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -922,13 +1088,13 @@
     <nav class="navbar" id="navbar">
         <a href="index.html" class="logo">
             <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
-            <div class="logo-text">מטפל <span>לכל אחד</span></div>
+            <div class="logo-text">בית <span>המטפלים</span></div>
         </a>
 
         <ul class="nav-links" id="navLinks">
             <li><a href="index.html">דף הבית</a></li>
             <li><a href="pages/about.html">עלינו</a></li>
-            <li><a href="pages/learning-portal.html">קורסים מקצועים בחינם</a></li>
+            <li><a href="pages/learning-portal.html">קורסים בחינם</a></li>
             <li><a href="pages/training.html">הכשרת מטפלים</a></li>
             <li><a href="pages/project-lobby.html">מיזם חברתי</a></li>
             <div class="mobile-cta-group">
@@ -955,19 +1121,19 @@
         </div>
 
         <div class="hero-content">
-            <div class="hero-badge">
-                <i class="fa-solid fa-heart-pulse"></i>
-                בית הספר להכשרת מטפלים
-            </div>
-            <h1>המקום בו טיפול<br>פוגש <span class="highlight">שליחות</span></h1>
+            <p class="hero-welcome">ברוכים הבאים ל</p>
+            <h1><span class="highlight">בית המטפלים</span></h1>
             <p class="hero-subtitle">
-                הכשרה מקצועית ל-NLP Practitioner ו-Master Practitioner<br>
-                עם הסמכה בינלאומית, ליווי אישי וכלים מעשיים
+                הבית של המטפלים בישראל <span class="purple-heart">💜</span>
             </p>
             <div class="hero-cta-group">
-                <a href="pages/training.html" class="btn btn-primary">
+                <a href="pages/learning-portal.html" class="btn btn-primary">
+                    <i class="fa-solid fa-play"></i>
+                    לקורסים בחינם
+                </a>
+                <a href="pages/training.html" class="btn btn-ghost">
                     <i class="fa-solid fa-graduation-cap"></i>
-                    להרשמה להכשרה
+                    להכשרת מטפלים
                 </a>
             </div>
         </div>
@@ -982,91 +1148,203 @@
         <div class="stats-grid">
             <div class="stat-item">
                 <div class="stat-number">
-                    <span data-count="500">0</span><span class="stat-suffix">+</span>
+                    <span data-count="25000">0</span><span class="stat-suffix">+</span>
                 </div>
-                <div class="stat-label">בוגרים</div>
+                <div class="stat-label">צפיות בקורסים שלנו</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">
-                    <span data-count="12">0</span>
+                    <span data-count="70">0</span><span class="stat-suffix">+</span>
                 </div>
-                <div class="stat-label">שנות ניסיון</div>
+                <div class="stat-label">שעות תוכן לצפייה בחינם</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">
-                    <span data-count="98">0</span><span class="stat-suffix">%</span>
+                    <span data-count="350">0</span><span class="stat-suffix">+</span>
                 </div>
-                <div class="stat-label">שביעות רצון</div>
+                <div class="stat-label">מטפלים שהכשרנו</div>
             </div>
         </div>
     </section>
 
-    <!-- Training Highlights -->
-    <section class="paths-section">
-        <div class="section-header" data-reveal>
-            <div class="section-eyebrow">למה ללמוד אצלנו</div>
-            <h2 class="section-title">ההכשרה שתשנה לכם את הקריירה</h2>
-            <p class="section-subtitle">תוכנית מקצועית שנבנתה כדי להפוך אתכם למטפלים מוסמכים ובטוחים בעצמכם</p>
-        </div>
-
-        <div class="paths-grid three-col">
-            <div class="path-card warm" data-reveal data-reveal-delay="1">
-                <div class="path-icon">
-                    <i class="fa-solid fa-certificate"></i>
-                </div>
-                <h3>הסמכה בינלאומית</h3>
-                <p>תעודת NLP Practitioner ו-Master Practitioner מוכרת בינלאומית שפותחת דלתות בארץ ובעולם</p>
-            </div>
-
-            <div class="path-card warm" data-reveal data-reveal-delay="2">
-                <div class="path-icon">
-                    <i class="fa-solid fa-hands-holding-child"></i>
-                </div>
-                <h3>ליווי אישי צמוד</h3>
-                <p>מנטורינג אחד-על-אחד, סופרוויז'ן מקצועי ותמיכה רציפה לאורך כל תקופת ההכשרה</p>
-            </div>
-
-            <div class="path-card warm" data-reveal data-reveal-delay="3">
-                <div class="path-icon">
-                    <i class="fa-solid fa-briefcase"></i>
-                </div>
-                <h3>כלים מעשיים לעבודה</h3>
-                <p>לא רק תיאוריה — תרגול מעשי, כלים ישימים ושיטות שתוכלו ליישם כבר מהיום הראשון</p>
-            </div>
-        </div>
-
-        <div class="paths-cta" data-reveal>
-            <a href="pages/training.html" class="btn btn-primary">
-                <i class="fa-solid fa-arrow-left"></i>
-                לכל הפרטים על ההכשרה
-            </a>
+    <!-- About -->
+    <section class="about-section">
+        <div class="about-inner" data-reveal>
+            <div class="section-eyebrow">קצת עלינו</div>
+            <h2 class="section-title">על בית המטפלים בקצרה</h2>
+            <p class="about-text">
+                בית המטפלים קם מתוך רצון להיות גוף משמעותי שלוקח חלק גדול בהפצת טיפול וריפוי בקרב עם ישראל.
+                המטרה שלנו היא להגיע לכמה שיותר אנשים כדי שניצור לנו ולילדים שלנו <span class="gold">״גן עדן עלי אדמות״</span>.
+            </p>
+            <p class="about-text">
+                אנחנו מאמינים שככל שיותר אנשים יעברו תהליכי ריפוי, העולם יהיה עולם טוב יותר.
+            </p>
+            <p class="about-lead-in">בשביל שנצליח להפיץ את הריפוי הזה, אנחנו עובדים ב-3 מישורים:</p>
         </div>
     </section>
 
-    <!-- Mission -->
-    <section class="mission">
-        <div class="mission-bg" aria-hidden="true"></div>
-        <div class="mission-content" data-reveal>
-            <div class="mission-quote-mark" aria-hidden="true">״</div>
-            <p class="mission-text">
-                אנחנו מכשירים את <span class="gold">הדור הבא של המטפלים</span> — עם כלים מעשיים, ליווי אישי והסמכה בינלאומית.
-            </p>
-            <div class="mission-divider"></div>
-            <p class="mission-detail">
-                ההכשרה שלנו משלבת ידע תיאורטי עמוק עם תרגול מעשי אינטנסיבי, כך שתסיימו מוכנים לעבוד עם לקוחות ביום שאחרי הלימודים.
-            </p>
+    <!-- Three Pillars -->
+    <section class="pillars-section">
+        <div class="pillars-grid">
+            <!-- Pillar 1: Free Courses -->
+            <div class="pillar-card pillar-free" data-reveal data-reveal-delay="1">
+                <div class="pillar-number">
+                    <i class="fa-solid fa-circle" style="font-size: 6px;"></i>
+                    מישור 1
+                </div>
+                <div class="pillar-icon">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h3>קורסים ותכנים בחינם לקהל הרחב</h3>
+                <p>
+                    אנחנו לא מאמינים בלמכור ידע, יש באינטרנט הכל בחינם היום.
+                    אנחנו מאמינים בלמכור תהליכי שינוי ולכן הידע שלנו פתוח לצפייה לכל אחד.
+                </p>
+                <div class="pillar-courses">
+                    <strong>יש לכם פה לצפייה ישירה:</strong><br>
+                    <i class="fa-solid fa-check" style="color: var(--dusty-aqua); font-size: 0.8rem;"></i> קורס NLP Practitioner מלא (ללא הסמכה)<br>
+                    <i class="fa-solid fa-check" style="color: var(--dusty-aqua); font-size: 0.8rem;"></i> קורס NLP Master Practitioner מלא (ללא הסמכה)
+                </div>
+                <a href="pages/learning-portal.html" class="pillar-link">
+                    לפורטל הלמידה
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </div>
+
+            <!-- Pillar 2: Training Program -->
+            <div class="pillar-card pillar-training" data-reveal data-reveal-delay="2">
+                <div class="pillar-number">
+                    <i class="fa-solid fa-circle" style="font-size: 6px;"></i>
+                    מישור 2
+                </div>
+                <div class="pillar-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h3>תוכנית ההכשרה של ״בית המטפלים״</h3>
+                <p>
+                    אם אתם לא מסתפקים רק בידע, ורוצים להיות מטפלים מוסמכים
+                    או שאתם כבר מטפלים ואתם רוצים עוד כלים, הכוונה וקהילה מדהימה &mdash;
+                    אולי תוכנית ההכשרה השנתית שלנו תוכל להתאים לכם!
+                </p>
+                <a href="pages/training.html" class="pillar-link">
+                    לעוד פרטים
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </div>
+
+            <!-- Pillar 3: Social Initiative -->
+            <div class="pillar-card pillar-social" data-reveal data-reveal-delay="3">
+                <div class="pillar-number">
+                    <i class="fa-solid fa-circle" style="font-size: 6px;"></i>
+                    מישור 3
+                </div>
+                <div class="pillar-icon">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                </div>
+                <h3>המיזם החברתי שלנו &mdash; ״מטפל לכל אחד״</h3>
+                <p>
+                    מיזם חברתי שנוצר מהמעשר של רם (מייסד הפרויקט).
+                    המטרה: לתת ללוחמי חרבות ברזל, פוסט טראומתיים, נפגעי נובה ועוד&hellip;
+                    תהליך טיפולי מלא בן 10 מפגשים בחינם, כדי לעזור להם
+                    להשתקם ולקחת שליטה מחדש על החיים שאחרי.
+                </p>
+                <a href="pages/project-lobby.html" class="pillar-link">
+                    לעוד פרטים
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials-section">
+        <div class="testimonials-bg" aria-hidden="true"></div>
+        <div class="testimonials-header" data-reveal>
+            <div class="section-eyebrow">עדויות</div>
+            <h2 class="section-title">מה אנשים מספרים עלינו?</h2>
+        </div>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card" data-reveal data-reveal-delay="1">
+                <div class="testimonial-quote-mark" aria-hidden="true">״</div>
+                <p class="testimonial-text">
+                    ההכשרה שינתה לי את החיים. קיבלתי כלים מעשיים שאני משתמשת בהם כל יום &mdash; גם בקליניקה וגם בחיים האישיים. הליווי האישי היה מדהים.
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">מ.כ</div>
+                    <div>
+                        <div class="testimonial-name">מיכל כ.</div>
+                        <div class="testimonial-role">בוגרת הכשרת NLP Practitioner</div>
+                        <div class="testimonial-stars">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card" data-reveal data-reveal-delay="2">
+                <div class="testimonial-quote-mark" aria-hidden="true">״</div>
+                <p class="testimonial-text">
+                    הקורסים בחינם הם ברמה גבוהה שלא ראיתי במקום אחר. רם מלמד בצורה פשוטה ונגישה, ומרגיש שהוא באמת רוצה שתצליח. ממליץ בחום.
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">א.ד</div>
+                    <div>
+                        <div class="testimonial-name">אלון ד.</div>
+                        <div class="testimonial-role">צופה בקורסים החינמיים</div>
+                        <div class="testimonial-stars">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card" data-reveal data-reveal-delay="3">
+                <div class="testimonial-quote-mark" aria-hidden="true">״</div>
+                <p class="testimonial-text">
+                    אחרי 10 מפגשים במיזם החברתי חזרתי לתפקד. מה שהצבא והביטוח הלאומי לא הצליחו לעשות בשנה, המטפלת שלי עשתה בחודשיים. תודה מכל הלב.
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">י.ש</div>
+                    <div>
+                        <div class="testimonial-name">יוסי ש.</div>
+                        <div class="testimonial-role">מטופל במיזם ״מטפל לכל אחד״</div>
+                        <div class="testimonial-stars">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- CTA -->
     <section class="cta-section">
         <div class="cta-box" data-reveal>
-            <h2>מוכנים <span>להתחיל?</span></h2>
-            <p>הצטרפו להכשרה המקצועית שלנו והפכו למטפלים מוסמכים עם כלים אמיתיים לעזור לאנשים</p>
-            <a href="pages/training.html" class="btn btn-primary">
-                <i class="fa-solid fa-rocket"></i>
-                להרשמה להכשרה
-            </a>
+            <h2>רוצים להיות חלק <span>מהשינוי?</span></h2>
+            <p>בין אם אתם רוצים ללמוד, להתמקצע או לעזור &mdash; יש לכם מקום בבית המטפלים</p>
+            <div class="cta-buttons">
+                <a href="pages/learning-portal.html" class="btn btn-primary">
+                    <i class="fa-solid fa-play"></i>
+                    לקורסים בחינם
+                </a>
+                <a href="pages/training.html" class="btn btn-ghost">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    להכשרת מטפלים
+                </a>
+            </div>
         </div>
     </section>
 
@@ -1076,17 +1354,26 @@
             <div class="footer-brand">
                 <a href="index.html" class="logo">
                     <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
-                    <div class="logo-text">מטפל <span>לכל אחד</span></div>
+                    <div class="logo-text">בית <span>המטפלים</span></div>
                 </a>
-                <p>בית הספר להכשרת מטפלים מקצועיים<br>עם הסמכה בינלאומית</p>
+                <p>הבית של המטפלים בישראל<br>קורסים, הכשרות ומיזם חברתי לטיפול נגיש</p>
             </div>
 
             <div class="footer-links">
-                <h4>לימודים</h4>
+                <h4>תוכן חינמי</h4>
                 <ul>
-                    <li><a href="pages/training.html">הכשרת מטפלים</a></li>
-                    <li><a href="pages/courses.html">הכשרות</a></li>
+                    <li><a href="pages/learning-portal.html">פורטל למידה</a></li>
+                    <li><a href="pages/learning-booklets.html">חוברות NLP</a></li>
+                    <li><a href="pages/learning-summaries.html">סיכומי שיעורים</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>הכשרות</h4>
+                <ul>
+                    <li><a href="pages/training.html">תוכנית ההכשרה</a></li>
                     <li><a href="pages/about.html">מי אנחנו</a></li>
+                    <li><a href="pages/project-lobby.html">מיזם חברתי</a></li>
                 </ul>
             </div>
 
@@ -1100,7 +1387,7 @@
         </div>
 
         <div class="footer-bottom">
-            <p>&copy; 2024 מטפל לכל אחד. כל הזכויות שמורות.</p>
+            <p>&copy; 2025 בית המטפלים. כל הזכויות שמורות.</p>
         </div>
     </footer>
 
@@ -1183,10 +1470,11 @@
 
                 function update(now) {
                     const progress = Math.min((now - start) / duration, 1);
-                    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-                    counter.textContent = Math.floor(target * eased);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const current = Math.floor(target * eased);
+                    counter.textContent = current.toLocaleString('he-IL');
                     if (progress < 1) requestAnimationFrame(update);
-                    else counter.textContent = target;
+                    else counter.textContent = target.toLocaleString('he-IL');
                 }
 
                 requestAnimationFrame(update);

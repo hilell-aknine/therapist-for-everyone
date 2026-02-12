@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0E5660">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="../assets/icon-192.svg">
+    <title>קורס NLP Practitioner בחינם | בית המטפלים</title>
+    <meta name="description" content="קורס NLP Practitioner מלא בחינם - 51 שיעורים, 7 מודולים. הירשמו לחוויית למידה משודרגת עם משחק, חוברת תרגול וסיכומים">
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --deep-petrol: #0E5660;
+            --muted-teal: #005C66;
+            --dusty-aqua: #2A727C;
+            --frost-white: #E8F1F2;
+            --cream: #FAF8F4;
+            --pure-white: #FFFFFF;
+            --gold: #D8AF47;
+            --gold-light: #E1B13F;
+            --gold-glow: rgba(216, 175, 71, 0.25);
+            --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            --text-dark: #1A2D33;
+            --border-light: rgba(42, 114, 124, 0.12);
+            --border-dark: rgba(42, 114, 124, 0.3);
+            --green-soft: #4CAF50;
+            --font-display: 'Frank Ruhl Libre', serif;
+            --font-body: 'Heebo', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--cream);
+            color: var(--text-dark);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .grain {
+            position: fixed; inset: 0; pointer-events: none; z-index: 10000; opacity: 0.028;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat; background-size: 256px 256px;
+        }
+
+        [data-reveal] {
+            opacity: 0; transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        [data-reveal].revealed { opacity: 1; transform: translateY(0); }
+        [data-reveal-delay="1"] { transition-delay: 0.1s; }
+        [data-reveal-delay="2"] { transition-delay: 0.2s; }
+        [data-reveal-delay="3"] { transition-delay: 0.3s; }
+
+        /* ===== Navbar ===== */
+        .navbar {
+            position: fixed; top: 0; right: 0; left: 0; z-index: 1000;
+            padding: 1.1rem 2.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(14, 86, 96, 0.97);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.4s;
+        }
+        .navbar.scrolled { padding: 0.7rem 2.5rem; }
+
+        .logo { display: flex; align-items: center; gap: 0.8rem; text-decoration: none; color: var(--pure-white); }
+        .logo-icon {
+            width: 42px; height: 42px; background: var(--gradient-gold); border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.15rem; color: var(--deep-petrol); transition: transform 0.3s;
+        }
+        .logo:hover .logo-icon { transform: rotate(-5deg) scale(1.05); }
+        .logo-text { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+        .logo-text span { color: var(--gold); }
+
+        .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+        .nav-links a {
+            color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem;
+            font-weight: 500; transition: color 0.3s; position: relative;
+        }
+        .nav-links a:hover { color: var(--pure-white); }
+        .nav-links a.active { color: var(--gold); }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -4px; right: 0;
+            width: 0; height: 1.5px; background: var(--gold);
+            transition: width 0.3s;
+        }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+        .nav-cta {
+            background: var(--gradient-gold); color: var(--deep-petrol);
+            padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600;
+            text-decoration: none; transition: all 0.3s; font-size: 0.88rem;
+        }
+        .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 25px var(--gold-glow); }
+
+        .mobile-menu-btn {
+            display: none; background: none; border: none; color: var(--pure-white);
+            font-size: 1.4rem; cursor: pointer; width: 44px; height: 44px;
+            border-radius: 10px; align-items: center; justify-content: center;
+        }
+        .mobile-cta-group { display: none !important; }
+
+        /* ===== Hero ===== */
+        .hero {
+            padding: 9rem 2rem 5rem;
+            background: var(--deep-petrol);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg { position: absolute; inset: 0; overflow: hidden; }
+        .hero-bg-layer { position: absolute; border-radius: 50%; filter: blur(80px); }
+        .hero-bg-layer:nth-child(1) {
+            width: 600px; height: 600px; top: -10%; right: -15%;
+            background: radial-gradient(circle, rgba(42,114,124,0.3) 0%, transparent 70%);
+            animation: gentleFloat 25s ease-in-out infinite;
+        }
+        .hero-bg-layer:nth-child(2) {
+            width: 400px; height: 400px; bottom: -10%; left: 10%;
+            background: radial-gradient(circle, rgba(216,175,71,0.12) 0%, transparent 70%);
+            animation: gentleFloat 20s ease-in-out infinite reverse;
+        }
+        @keyframes gentleFloat {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-20px, 30px); }
+            66% { transform: translate(15px, -20px); }
+        }
+
+        .hero-content { position: relative; z-index: 2; max-width: 750px; margin: 0 auto; }
+
+        /* Lock icon */
+        .hero-lock {
+            width: 110px; height: 110px;
+            border-radius: 50%;
+            background: rgba(216, 175, 71, 0.08);
+            border: 2px solid rgba(216, 175, 71, 0.2);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 2rem;
+            position: relative;
+            opacity: 0; animation: lockReveal 1s ease-out 0.2s forwards;
+        }
+
+        .hero-lock i {
+            font-size: 2.8rem;
+            color: var(--gold);
+        }
+
+        .hero-lock::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px solid rgba(216, 175, 71, 0.1);
+            animation: lockPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes lockReveal {
+            from { opacity: 0; transform: scale(0.7); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes lockPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.12); opacity: 0; }
+        }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.2);
+            padding: 0.4rem 1.2rem; border-radius: 20px;
+            font-size: 0.82rem; font-weight: 600; color: var(--green-soft);
+            margin-bottom: 1.5rem;
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.4s forwards;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 800; line-height: 1.15; color: var(--pure-white);
+            margin-bottom: 1rem; letter-spacing: -0.02em;
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.5s forwards;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; animation: shimmer 4s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 200% center; }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.15rem);
+            color: var(--frost-white); line-height: 1.9; opacity: 0.9;
+            margin-bottom: 2.5rem;
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.6s forwards;
+        }
+
+        .hero-cta {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 1.1rem 2.5rem; border-radius: 12px;
+            font-size: 1.05rem; font-weight: 700; text-decoration: none;
+            background: var(--gradient-gold); color: var(--deep-petrol);
+            box-shadow: 0 4px 20px var(--gold-glow);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: var(--font-body);
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.7s forwards;
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(216, 175, 71, 0.4);
+        }
+
+        .hero-stats {
+            display: flex; justify-content: center; gap: 2.5rem;
+            margin-top: 3rem;
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.9s forwards;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-number {
+            font-family: var(--font-display);
+            font-size: 1.6rem; font-weight: 800;
+            color: var(--gold);
+        }
+
+        .hero-stat-label {
+            font-size: 0.82rem;
+            color: var(--frost-white);
+            opacity: 0.7;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== What You Get Free ===== */
+        .free-section {
+            padding: 5rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-eyebrow {
+            font-size: 0.8rem; font-weight: 600; color: var(--gold);
+            text-transform: uppercase; letter-spacing: 0.15em;
+            margin-bottom: 0.8rem;
+            display: flex; align-items: center; justify-content: center; gap: 0.7rem;
+        }
+
+        .section-eyebrow::before,
+        .section-eyebrow::after {
+            content: ''; width: 30px; height: 1px; background: var(--gold); opacity: 0.4;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+            font-weight: 700; color: var(--deep-petrol);
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.05rem; color: var(--muted-teal);
+            max-width: 600px; margin: 0 auto 3rem; line-height: 1.8;
+        }
+
+        .free-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .free-item {
+            background: var(--pure-white);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .free-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(14, 86, 96, 0.08);
+        }
+
+        .free-item-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin: 0 auto 1rem;
+            background: rgba(42, 114, 124, 0.08);
+            color: var(--dusty-aqua);
+        }
+
+        .free-item h4 {
+            font-size: 1rem; font-weight: 600; color: var(--deep-petrol);
+            margin-bottom: 0.3rem;
+        }
+
+        .free-item p {
+            font-size: 0.85rem; color: var(--muted-teal); line-height: 1.6;
+        }
+
+        /* ===== Signup CTA Section ===== */
+        .signup-section {
+            padding: 5rem 2rem;
+            background: var(--deep-petrol);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 50% 50%, rgba(42, 114, 124, 0.15) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .signup-inner {
+            max-width: 700px; margin: 0 auto; text-align: center;
+            position: relative; z-index: 1;
+        }
+
+        .signup-lock {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(216, 175, 71, 0.1);
+            border: 1px solid rgba(216, 175, 71, 0.2);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 2rem;
+        }
+
+        .signup-lock i {
+            font-size: 2rem; color: var(--gold);
+        }
+
+        .signup-section .section-title {
+            color: var(--pure-white);
+            margin-bottom: 0.8rem;
+        }
+
+        .signup-subtitle {
+            font-size: 1.05rem; color: var(--frost-white);
+            opacity: 0.85; margin-bottom: 2.5rem; line-height: 1.8;
+        }
+
+        .signup-perks {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .signup-perk {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .signup-perk:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .signup-perk-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin: 0 auto 1rem;
+        }
+
+        .signup-perk:nth-child(1) .signup-perk-icon {
+            background: rgba(216, 175, 71, 0.1); color: var(--gold);
+        }
+        .signup-perk:nth-child(2) .signup-perk-icon {
+            background: rgba(42, 114, 124, 0.15); color: var(--dusty-aqua);
+        }
+        .signup-perk:nth-child(3) .signup-perk-icon {
+            background: rgba(76, 175, 80, 0.1); color: var(--green-soft);
+        }
+
+        .signup-perk h4 {
+            font-size: 1rem; font-weight: 600; color: var(--pure-white);
+            margin-bottom: 0.3rem;
+        }
+
+        .signup-perk p {
+            font-size: 0.85rem; color: var(--frost-white); opacity: 0.7; line-height: 1.6;
+        }
+
+        .signup-perk .lock-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.72rem; font-weight: 600;
+            color: var(--gold); margin-top: 0.6rem;
+            padding: 0.2rem 0.7rem; border-radius: 10px;
+            background: rgba(216, 175, 71, 0.08);
+            border: 1px solid rgba(216, 175, 71, 0.15);
+        }
+
+        .signup-buttons {
+            display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
+        }
+
+        .btn-signup {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 1rem 2rem; border-radius: 10px;
+            font-size: 1rem; font-weight: 600; text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: var(--font-body); cursor: pointer; border: none;
+        }
+
+        .btn-signup.btn-gold {
+            background: var(--gradient-gold); color: var(--deep-petrol);
+            box-shadow: 0 4px 20px var(--gold-glow);
+        }
+
+        .btn-signup.btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(216, 175, 71, 0.35);
+        }
+
+        .btn-signup.btn-google {
+            background: var(--pure-white); color: var(--text-dark);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-signup.btn-google:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .btn-signup.btn-google img {
+            width: 20px; height: 20px;
+        }
+
+        .signup-skip {
+            margin-top: 1.5rem;
+        }
+
+        .signup-skip a {
+            color: var(--frost-white);
+            opacity: 0.5;
+            font-size: 0.88rem;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .signup-skip a:hover { opacity: 0.8; }
+
+        /* ===== Footer ===== */
+        .footer {
+            background: var(--deep-petrol);
+            border-top: 1px solid rgba(255,255,255,0.04);
+            padding: 2.5rem 2rem 1.5rem;
+        }
+
+        .footer-inner {
+            max-width: 800px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .footer-brand { display: flex; align-items: center; gap: 0.8rem; }
+        .footer-brand .f-logo-icon {
+            width: 34px; height: 34px; background: var(--gradient-gold);
+            border-radius: 9px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; color: var(--deep-petrol);
+        }
+        .footer-brand .f-logo-text {
+            font-family: var(--font-display); font-size: 1rem;
+            font-weight: 700; color: var(--pure-white);
+        }
+        .footer-brand .f-logo-text span { color: var(--gold); }
+
+        .footer-links { display: flex; gap: 1.5rem; }
+        .footer-links a {
+            color: var(--frost-white); opacity: 0.5; text-decoration: none;
+            font-size: 0.85rem; transition: opacity 0.3s;
+        }
+        .footer-links a:hover { opacity: 0.9; }
+
+        .footer-bottom {
+            max-width: 800px; margin: 1.5rem auto 0; padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            text-align: center; color: var(--frost-white); font-size: 0.78rem; opacity: 0.35;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none !important; position: fixed;
+                top: 0; right: 0; bottom: 0; width: min(280px, 80vw);
+                background: var(--deep-petrol) !important; flex-direction: column;
+                padding: 5rem 2rem 2rem; gap: 0;
+                border-inline-start: 1px solid var(--border-dark);
+                box-shadow: -10px 0 40px rgba(0,0,0,0.5); z-index: 1001; overflow-y: auto;
+            }
+            .nav-links.active { display: flex !important; }
+            .nav-links li { border-bottom: 1px solid rgba(255,255,255,0.06); list-style: none; }
+            .nav-links a {
+                display: block; padding: 1.1rem 0.5rem; font-size: 1.05rem;
+                color: var(--pure-white) !important; -webkit-text-fill-color: var(--pure-white) !important;
+            }
+            .nav-links a::after { display: none; }
+            .nav-links a:hover { color: var(--gold) !important; -webkit-text-fill-color: var(--gold) !important; }
+            .nav-links.active .mobile-cta-group {
+                display: flex !important; flex-direction: column; gap: 0.8rem;
+                margin-top: 2rem; padding-top: 1.5rem;
+                border-top: 1px solid rgba(255,255,255,0.08);
+            }
+            .mobile-cta {
+                display: flex; align-items: center; justify-content: center;
+                gap: 0.5rem; padding: 0.9rem 1.5rem; border-radius: 8px;
+                font-weight: 600; font-size: 0.95rem; text-decoration: none;
+            }
+            .mobile-cta.primary { background: var(--gradient-gold); color: var(--deep-petrol); }
+            .mobile-menu-btn { display: flex; z-index: 1002; position: relative; }
+            .mobile-menu-btn.active { background: rgba(216,175,71,0.15); }
+            .mobile-menu-btn.active i::before { content: "\f00d"; }
+            .nav-cta { display: none; }
+
+            .hero { padding: 7rem 1.5rem 4rem; }
+            .hero-lock { width: 90px; height: 90px; }
+            .hero-lock i { font-size: 2.2rem; }
+            .hero-stats { gap: 1.5rem; }
+
+            .free-section { padding: 3.5rem 1.5rem; }
+            .free-items { grid-template-columns: 1fr; max-width: 350px; margin: 0 auto 2rem; }
+
+            .signup-section { padding: 4rem 1.5rem; }
+            .signup-perks { grid-template-columns: 1fr; max-width: 350px; margin: 0 auto 2.5rem; }
+            .signup-buttons { flex-direction: column; align-items: center; }
+            .btn-signup { width: 100%; max-width: 320px; justify-content: center; }
+
+            .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+            .footer-links { flex-direction: column; gap: 0.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar { padding: 0.8rem 1rem; }
+            .logo-icon { width: 36px; height: 36px; font-size: 1rem; }
+            .logo-text { font-size: 1.1rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.15s !important; }
+            [data-reveal] { opacity: 1; transform: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grain" aria-hidden="true"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="../index.html" class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="logo-text">בית <span>המטפלים</span></div>
+        </a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="../index.html">דף הבית</a></li>
+            <li><a href="about.html">עלינו</a></li>
+            <li><a href="learning-portal.html" class="active">קורסים בחינם</a></li>
+            <li><a href="training.html">הכשרת מטפלים</a></li>
+            <li><a href="project-lobby.html">מיזם חברתי</a></li>
+            <div class="mobile-cta-group">
+                <a href="training.html" class="mobile-cta primary">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    להרשמה להכשרה
+                </a>
+            </div>
+        </ul>
+        <a href="training.html" class="nav-cta">להרשמה להכשרה</a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Hero with Lock Icon -->
+    <section class="hero">
+        <div class="hero-bg" aria-hidden="true">
+            <div class="hero-bg-layer"></div>
+            <div class="hero-bg-layer"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-lock">
+                <i class="fa-solid fa-lock-open"></i>
+            </div>
+            <div class="hero-badge">
+                <i class="fa-solid fa-circle-check"></i>
+                חינמי ופתוח לכולם
+            </div>
+            <h1>קורס <span class="highlight">NLP Practitioner</span></h1>
+            <p class="hero-subtitle">
+                קורס מלא ומקיף ביסודות ה-NLP &mdash; פתוח לצפייה חופשית, בלי תשלום, בלי התחייבות.
+                <br>למדו בקצב שלכם, מתי שנוח לכם.
+            </p>
+            <a href="free-portal.html" class="hero-cta">
+                <i class="fa-solid fa-play"></i>
+                התחילו ללמוד עכשיו
+            </a>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-number">51</div>
+                    <div class="hero-stat-label">שיעורים</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number">7</div>
+                    <div class="hero-stat-label">מודולים</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number">70+</div>
+                    <div class="hero-stat-label">שעות תוכן</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What You Get Free -->
+    <section class="free-section">
+        <div data-reveal>
+            <div class="section-eyebrow">מה כלול בקורס</div>
+            <h2 class="section-title">מה מחכה לכם בפנים?</h2>
+            <p class="section-subtitle">
+                הקורס כולל את כל מה שצריך כדי להבין את עולם ה-NLP מהיסוד
+            </p>
+        </div>
+        <div class="free-items">
+            <div class="free-item" data-reveal data-reveal-delay="1">
+                <div class="free-item-icon">
+                    <i class="fa-solid fa-video"></i>
+                </div>
+                <h4>51 שיעורי וידאו</h4>
+                <p>שיעורים מצולמים באיכות גבוהה, מחולקים ל-7 מודולים</p>
+            </div>
+            <div class="free-item" data-reveal data-reveal-delay="2">
+                <div class="free-item-icon">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h4>תוכן מקצועי</h4>
+                <p>מהבסיס ועד טכניקות מתקדמות &mdash; NLP Practitioner מלא</p>
+            </div>
+            <div class="free-item" data-reveal data-reveal-delay="3">
+                <div class="free-item-icon">
+                    <i class="fa-solid fa-infinity"></i>
+                </div>
+                <h4>גישה ללא הגבלה</h4>
+                <p>צפו כמה שרוצים, חזרו לשיעורים, בכל זמן ובכל מקום</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Signup CTA -->
+    <section class="signup-section">
+        <div class="signup-bg" aria-hidden="true"></div>
+        <div class="signup-inner" data-reveal>
+            <div class="signup-lock">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <h2 class="section-title">רוצים חוויית למידה משודרגת?</h2>
+            <p class="signup-subtitle">
+                הירשמו בחינם עם מייל או חשבון גוגל וקבלו גישה לכלים נוספים שישפרו את חוויית הלמידה שלכם
+            </p>
+
+            <div class="signup-perks">
+                <div class="signup-perk" data-reveal data-reveal-delay="1">
+                    <div class="signup-perk-icon">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <h4>משחק לימודי</h4>
+                    <p>תרגלו את החומר בצורה מהנה עם משחק אינטראקטיבי</p>
+                    <div class="lock-badge">
+                        <i class="fa-solid fa-lock-open" style="font-size: 0.65rem;"></i>
+                        נפתח עם הרשמה
+                    </div>
+                </div>
+                <div class="signup-perk" data-reveal data-reveal-delay="2">
+                    <div class="signup-perk-icon">
+                        <i class="fa-solid fa-book"></i>
+                    </div>
+                    <h4>חוברת תרגול</h4>
+                    <p>חוברת PDF מלווה עם תרגילים ותרגולים לכל שיעור</p>
+                    <div class="lock-badge">
+                        <i class="fa-solid fa-lock-open" style="font-size: 0.65rem;"></i>
+                        נפתח עם הרשמה
+                    </div>
+                </div>
+                <div class="signup-perk" data-reveal data-reveal-delay="3">
+                    <div class="signup-perk-icon">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <h4>סיכומי שיעורים</h4>
+                    <p>סיכומים מפורטים של כל שיעור להורדה ולמידה</p>
+                    <div class="lock-badge">
+                        <i class="fa-solid fa-lock-open" style="font-size: 0.65rem;"></i>
+                        נפתח עם הרשמה
+                    </div>
+                </div>
+            </div>
+
+            <div class="signup-buttons">
+                <a href="login.html?redirect=free-portal.html" class="btn-signup btn-gold">
+                    <i class="fa-solid fa-envelope"></i>
+                    הרשמה עם מייל
+                </a>
+                <a href="login.html?provider=google&redirect=free-portal.html" class="btn-signup btn-google">
+                    <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    הרשמה עם Google
+                </a>
+            </div>
+
+            <div class="signup-skip">
+                <a href="free-portal.html">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    אני רוצה רק לצפות בשיעורים, בלי הרשמה
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div class="f-logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <div class="f-logo-text">בית <span>המטפלים</span></div>
+            </div>
+            <div class="footer-links">
+                <a href="../index.html">דף הבית</a>
+                <a href="learning-portal.html">כל הקורסים</a>
+                <a href="training.html">הכשרת מטפלים</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 בית המטפלים. כל הזכויות שמורות.</p>
+        </div>
+    </footer>
+
+    <script src="../js/marketing-tools.js"></script>
+    <script>
+        // Navbar scroll
+        window.addEventListener('scroll', () => {
+            document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 50);
+        }, { passive: true });
+
+        // Scroll reveal
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('[data-reveal]').forEach(el => revealObserver.observe(el));
+
+        // Mobile menu
+        let menuOpen = false;
+        function toggleMobileMenu() {
+            menuOpen = !menuOpen;
+            document.getElementById('navLinks').classList.toggle('active', menuOpen);
+            document.getElementById('mobileMenuBtn').classList.toggle('active', menuOpen);
+            document.body.style.overflow = menuOpen ? 'hidden' : '';
+        }
+        function closeMobileMenu() {
+            menuOpen = false;
+            document.getElementById('navLinks').classList.remove('active');
+            document.getElementById('mobileMenuBtn').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileMenu(); });
+        document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', closeMobileMenu));
+        window.addEventListener('resize', () => { if (window.innerWidth > 768 && menuOpen) closeMobileMenu(); });
+    </script>
+</body>
+</html>

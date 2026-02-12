@@ -3,377 +3,571 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#003B46">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0E5660">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
-    <title>קורסים מקצועים בחינם | מטפל לכל אחד</title>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>קורסים בחינם | בית המטפלים</title>
+    <meta name="description" content="קורסי NLP מקצועיים בחינם - Practitioner מלא לצפייה חופשית, Master Practitioner בקרוב">
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- No auth needed - public page -->
     <style>
         :root {
-            --bg-dark: #0f1419;
-            --bg-card: #1a1f2e;
-            --bg-card-hover: #242b3d;
-            --border-color: #2d3548;
-            --text-primary: #ffffff;
-            --text-secondary: #8b949e;
-            --text-muted: #6e7681;
-            --gold: #D4AF37;
-            --gold-light: #e6c65a;
-            --gold-glow: rgba(212, 175, 55, 0.2);
-            --success: #3fb950;
-            --teal: #2F8592;
-            --deep-petrol: #003B46;
+            --deep-petrol: #0E5660;
+            --muted-teal: #005C66;
+            --dusty-aqua: #2A727C;
+            --frost-white: #E8F1F2;
+            --cream: #FAF8F4;
+            --pure-white: #FFFFFF;
+            --gold: #D8AF47;
+            --gold-light: #E1B13F;
+            --gold-glow: rgba(216, 175, 71, 0.25);
+            --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            --text-dark: #1A2D33;
+            --border-light: rgba(42, 114, 124, 0.12);
+            --border-dark: rgba(42, 114, 124, 0.3);
             --font-display: 'Frank Ruhl Libre', serif;
             --font-body: 'Heebo', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: var(--font-body);
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
+            background: var(--cream);
+            color: var(--text-dark);
+            line-height: 1.7;
+            overflow-x: hidden;
         }
 
-        /* Header */
-        .portal-header {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        .grain {
+            position: fixed; inset: 0; pointer-events: none; z-index: 10000; opacity: 0.028;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat; background-size: 256px 256px;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        [data-reveal] {
+            opacity: 0; transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        [data-reveal].revealed { opacity: 1; transform: translateY(0); }
+        [data-reveal-delay="1"] { transition-delay: 0.15s; }
+        [data-reveal-delay="2"] { transition-delay: 0.3s; }
 
-        .header-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            text-decoration: none;
-            color: var(--text-primary);
+        /* ===== Navbar ===== */
+        .navbar {
+            position: fixed; top: 0; right: 0; left: 0; z-index: 1000;
+            padding: 1.1rem 2.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(14, 86, 96, 0.97);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .navbar.scrolled { padding: 0.7rem 2.5rem; box-shadow: 0 1px 0 var(--border-dark); }
 
-        .header-logo-icon {
-            width: 38px; height: 38px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            color: var(--deep-petrol);
+        .logo { display: flex; align-items: center; gap: 0.8rem; text-decoration: none; color: var(--pure-white); }
+        .logo-icon {
+            width: 42px; height: 42px; background: var(--gradient-gold); border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.15rem; color: var(--deep-petrol); transition: transform 0.3s;
         }
+        .logo:hover .logo-icon { transform: rotate(-5deg) scale(1.05); }
+        .logo-text { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+        .logo-text span { color: var(--gold); }
 
-        .header-logo-text {
-            font-family: var(--font-display);
-            font-size: 1.1rem;
-            font-weight: 700;
+        .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+        .nav-links a {
+            color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem;
+            font-weight: 500; transition: color 0.3s; position: relative;
         }
-
-        .header-logo-text span { color: var(--gold); }
-
-        .header-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--gold);
-            padding-right: 1rem;
-            border-right: 1px solid var(--border-color);
+        .nav-links a:hover { color: var(--pure-white); }
+        .nav-links a.active { color: var(--gold); }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -4px; right: 0;
+            width: 0; height: 1.5px; background: var(--gold);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        .nav-cta {
+            background: var(--gradient-gold); color: var(--deep-petrol);
+            padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600;
+            text-decoration: none; transition: all 0.3s; font-size: 0.88rem;
         }
+        .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 25px var(--gold-glow); }
 
-        .btn-header {
-            padding: 0.5rem 1rem;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.85rem;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
+        .mobile-menu-btn {
+            display: none; background: none; border: none; color: var(--pure-white);
+            font-size: 1.4rem; cursor: pointer; width: 44px; height: 44px;
+            border-radius: 10px; align-items: center; justify-content: center;
         }
+        .mobile-cta-group { display: none !important; }
 
-        .btn-header:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
-        /* Main content */
-        .portal-content {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 2.5rem 2rem;
-        }
-
-        /* Welcome Banner */
-        .welcome-banner {
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(47, 133, 146, 0.1));
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 16px;
-            padding: 2.5rem 3rem;
-            margin-bottom: 3rem;
+        /* ===== Hero ===== */
+        .hero {
+            padding: 9rem 2rem 5rem;
+            background: var(--deep-petrol);
+            text-align: center;
             position: relative;
             overflow: hidden;
-            text-align: center;
         }
 
-        .welcome-banner::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+        .hero-bg { position: absolute; inset: 0; overflow: hidden; }
+        .hero-bg-layer { position: absolute; border-radius: 50%; filter: blur(80px); }
+        .hero-bg-layer:nth-child(1) {
+            width: 600px; height: 600px; top: 0; right: -15%;
+            background: radial-gradient(circle, rgba(42,114,124,0.25) 0%, transparent 70%);
+            animation: gentleFloat 25s ease-in-out infinite;
+        }
+        .hero-bg-layer:nth-child(2) {
+            width: 400px; height: 400px; bottom: -10%; left: 10%;
+            background: radial-gradient(circle, rgba(216,175,71,0.1) 0%, transparent 70%);
+            animation: gentleFloat 20s ease-in-out infinite reverse;
+        }
+        @keyframes gentleFloat {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-20px, 30px); }
+            66% { transform: translate(15px, -20px); }
         }
 
-        .welcome-banner h2 {
+        .hero-content { position: relative; z-index: 2; max-width: 700px; margin: 0 auto; }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(216,175,71,0.08); border: 1px solid rgba(216,175,71,0.2);
+            padding: 0.5rem 1.3rem; border-radius: 6px;
+            font-size: 0.85rem; font-weight: 500; color: var(--gold);
+            margin-bottom: 2rem;
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.2s forwards;
+        }
+
+        .hero h1 {
             font-family: var(--font-display);
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800; line-height: 1.15; color: var(--pure-white);
+            margin-bottom: 1rem; letter-spacing: -0.02em;
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.4s forwards;
         }
 
-        .welcome-banner h2 span { color: var(--gold); }
-
-        .welcome-banner p {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            line-height: 1.7;
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; animation: shimmer 4s ease-in-out infinite;
         }
 
-        /* Nav Cards Grid */
-        .nav-grid {
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 200% center; }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.15rem);
+            color: var(--frost-white); line-height: 1.8; opacity: 0.9;
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.6s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== Course Cards ===== */
+        .courses-section {
+            padding: 5rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .courses-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
         }
 
-        .nav-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 2.5rem 2rem;
+        .course-card {
+            background: var(--pure-white);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
             text-align: center;
-            text-decoration: none;
-            color: var(--text-primary);
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .nav-card::before {
+        .course-card::before {
             content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            opacity: 0;
-            transition: opacity 0.3s;
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 4px;
+            transition: height 0.4s;
         }
 
-        .nav-card.booklet::before { background: var(--gold); }
-        .nav-card.summary::before { background: var(--teal); }
-        .nav-card.master::before { background: var(--success); }
-
-        .nav-card:hover {
-            transform: translateY(-6px);
-            border-color: var(--gold);
-            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+        .course-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 60px rgba(14, 86, 96, 0.12);
+            border-color: transparent;
         }
 
-        .nav-card:hover::before { opacity: 1; }
+        .course-card:hover::before { height: 5px; }
 
-        .nav-card-icon {
-            width: 64px; height: 64px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            margin: 0 auto 1.2rem;
+        /* Active course */
+        .course-card.active::before {
+            background: var(--gradient-gold);
         }
 
-        .nav-card.booklet .nav-card-icon {
-            background: rgba(212, 175, 55, 0.15);
+        .course-card.active .card-icon {
+            background: rgba(216, 175, 71, 0.1);
             color: var(--gold);
         }
 
-        .nav-card.summary .nav-card-icon {
-            background: rgba(47, 133, 146, 0.15);
-            color: var(--teal);
+        /* Coming soon course */
+        .course-card.coming-soon {
+            opacity: 0.7;
         }
 
-        .nav-card.master .nav-card-icon {
-            background: rgba(63, 185, 80, 0.15);
-            color: var(--success);
+        .course-card.coming-soon::before {
+            background: var(--dusty-aqua);
         }
 
-        .nav-card h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+        .course-card.coming-soon .card-icon {
+            background: rgba(42, 114, 124, 0.1);
+            color: var(--dusty-aqua);
         }
 
-        .nav-card p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 1.2rem;
+        .course-card.coming-soon:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(14, 86, 96, 0.08);
         }
 
-        .nav-card .count-badge {
-            display: inline-block;
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 0.3rem 1rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+        .card-icon {
+            width: 80px; height: 80px; border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; margin-bottom: 1.5rem;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .nav-card .arrow {
-            display: block;
-            margin-top: 1rem;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            transition: all 0.3s;
+        .course-card:hover .card-icon { transform: scale(1.08) rotate(-3deg); }
+
+        .card-status {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.35rem 1rem; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 600; margin-bottom: 1.2rem;
         }
 
-        .nav-card:hover .arrow {
-            color: var(--gold);
-            transform: translateX(-4px);
+        .card-status.open {
+            background: rgba(76, 175, 80, 0.08);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.15);
         }
 
-        /* Loading screen */
-        .loading-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-dark);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.4s;
+        .card-status.soon {
+            background: rgba(42, 114, 124, 0.08);
+            color: var(--dusty-aqua);
+            border: 1px solid rgba(42, 114, 124, 0.15);
         }
 
-        .loading-screen.hide {
-            opacity: 0;
-            pointer-events: none;
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.6rem; font-weight: 700;
+            color: var(--deep-petrol);
+            margin-bottom: 0.8rem; line-height: 1.3;
         }
 
-        .loading-spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(212, 175, 55, 0.2);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .card-description {
+            font-size: 0.95rem; color: var(--muted-teal);
+            margin-bottom: 1.5rem; line-height: 1.85;
+            flex-grow: 1;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .card-meta {
+            display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+            font-size: 0.85rem; color: var(--dusty-aqua);
+            margin-bottom: 1.8rem;
+            padding: 0.8rem 0;
+            border-top: 1px solid var(--border-light);
+            width: 100%;
+        }
 
-        /* Responsive */
+        .card-meta span {
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+
+        .card-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.9rem 2rem; border-radius: 10px;
+            font-size: 1rem; font-weight: 600; text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: var(--font-body);
+        }
+
+        .card-btn.btn-gold {
+            background: var(--gradient-gold); color: var(--deep-petrol);
+            box-shadow: 0 4px 15px var(--gold-glow);
+        }
+
+        .card-btn.btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(216, 175, 71, 0.4);
+        }
+
+        .card-btn.btn-soon {
+            background: rgba(42, 114, 124, 0.08);
+            color: var(--dusty-aqua);
+            border: 1px solid rgba(42, 114, 124, 0.15);
+            cursor: default;
+        }
+
+        /* ===== Footer ===== */
+        .footer {
+            background: var(--deep-petrol);
+            border-top: 1px solid var(--border-dark);
+            padding: 3rem 2rem 1.5rem;
+        }
+
+        .footer-inner {
+            max-width: 900px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .footer-brand { display: flex; align-items: center; gap: 0.8rem; }
+        .footer-brand .logo-icon {
+            width: 36px; height: 36px; background: var(--gradient-gold);
+            border-radius: 9px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; color: var(--deep-petrol);
+        }
+        .footer-brand .logo-text {
+            font-family: var(--font-display); font-size: 1.1rem;
+            font-weight: 700; color: var(--pure-white);
+        }
+        .footer-brand .logo-text span { color: var(--gold); }
+
+        .footer-links { display: flex; gap: 2rem; }
+        .footer-links a {
+            color: var(--frost-white); opacity: 0.6; text-decoration: none;
+            font-size: 0.88rem; transition: opacity 0.3s;
+        }
+        .footer-links a:hover { opacity: 1; }
+
+        .footer-bottom {
+            max-width: 900px; margin: 1.5rem auto 0; padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            text-align: center; color: var(--frost-white);
+            font-size: 0.8rem; opacity: 0.4;
+        }
+
+        /* ===== Responsive ===== */
         @media (max-width: 768px) {
-            .portal-header {
-                flex-direction: column;
-                gap: 0.8rem;
-                padding: 1rem;
+            .nav-links {
+                display: none !important; position: fixed;
+                top: 0; right: 0; bottom: 0; width: min(280px, 80vw);
+                background: var(--deep-petrol) !important; flex-direction: column;
+                padding: 5rem 2rem 2rem; gap: 0;
+                border-inline-start: 1px solid var(--border-dark);
+                box-shadow: -10px 0 40px rgba(0,0,0,0.5); z-index: 1001; overflow-y: auto;
             }
-
-            .header-right, .header-left {
-                width: 100%;
-                justify-content: center;
+            .nav-links.active { display: flex !important; }
+            .nav-links li { border-bottom: 1px solid rgba(255,255,255,0.06); list-style: none; }
+            .nav-links a {
+                display: block; padding: 1.1rem 0.5rem; font-size: 1.05rem;
+                color: var(--pure-white) !important; -webkit-text-fill-color: var(--pure-white) !important;
             }
-
-            .portal-content { padding: 1.5rem 1rem; }
-
-            .welcome-banner { padding: 1.5rem; }
-            .welcome-banner h2 { font-size: 1.4rem; }
-
-            .nav-grid {
-                grid-template-columns: 1fr;
+            .nav-links a::after { display: none; }
+            .nav-links a:hover { color: var(--gold) !important; -webkit-text-fill-color: var(--gold) !important; }
+            .nav-links.active .mobile-cta-group {
+                display: flex !important; flex-direction: column; gap: 0.8rem;
+                margin-top: 2rem; padding-top: 1.5rem;
+                border-top: 1px solid rgba(255,255,255,0.08);
             }
+            .mobile-cta {
+                display: flex; align-items: center; justify-content: center;
+                gap: 0.5rem; padding: 0.9rem 1.5rem; border-radius: 8px;
+                font-weight: 600; font-size: 0.95rem; text-decoration: none;
+            }
+            .mobile-cta.primary { background: var(--gradient-gold); color: var(--deep-petrol); }
+            .mobile-menu-btn { display: flex; z-index: 1002; position: relative; }
+            .mobile-menu-btn.active { background: rgba(216,175,71,0.15); }
+            .mobile-menu-btn.active i::before { content: "\f00d"; }
+            .nav-cta { display: none; }
+
+            .hero { padding: 7rem 1.5rem 3.5rem; }
+            .courses-section { padding: 3rem 1.5rem; }
+            .courses-grid { grid-template-columns: 1fr; max-width: 450px; margin: 0 auto; }
+            .footer-inner { flex-direction: column; gap: 1.5rem; text-align: center; }
+            .footer-links { flex-direction: column; gap: 0.8rem; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar { padding: 0.8rem 1rem; }
+            .logo-icon { width: 36px; height: 36px; font-size: 1rem; }
+            .logo-text { font-size: 1.1rem; }
+            .course-card { padding: 2.5rem 1.8rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.15s !important; }
+            [data-reveal] { opacity: 1; transform: none; }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-spinner"></div>
-    </div>
+    <div class="grain" aria-hidden="true"></div>
 
-    <!-- Header -->
-    <header class="portal-header">
-        <div class="header-right">
-            <a href="../index.html" class="header-logo">
-                <div class="header-logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
-                <div class="header-logo-text">מטפל <span>לכל אחד</span></div>
-            </a>
-            <div class="header-title">קורסים מקצועים בחינם</div>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="../index.html" class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="logo-text">בית <span>המטפלים</span></div>
+        </a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="../index.html">דף הבית</a></li>
+            <li><a href="about.html">עלינו</a></li>
+            <li><a href="learning-portal.html" class="active">קורסים בחינם</a></li>
+            <li><a href="training.html">הכשרת מטפלים</a></li>
+            <li><a href="project-lobby.html">מיזם חברתי</a></li>
+            <div class="mobile-cta-group">
+                <a href="training.html" class="mobile-cta primary">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    להרשמה להכשרה
+                </a>
+            </div>
+        </ul>
+        <a href="training.html" class="nav-cta">להרשמה להכשרה</a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-bg" aria-hidden="true">
+            <div class="hero-bg-layer"></div>
+            <div class="hero-bg-layer"></div>
         </div>
-        <div class="header-left">
-            <a href="../index.html" class="btn-header">
-                <i class="fa-solid fa-arrow-right"></i>
-                לאתר הראשי
-            </a>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fa-solid fa-play-circle"></i>
+                למידה חינמית ופתוחה לכולם
+            </div>
+            <h1>ה<span class="highlight">קורסים</span> שלנו</h1>
+            <p class="hero-subtitle">
+                אנחנו מאמינים שידע צריך להיות נגיש לכולם.<br>
+                כל הקורסים כאן פתוחים לצפייה חופשית, ללא תשלום.
+            </p>
         </div>
-    </header>
+    </section>
 
-    <!-- Main Content -->
-    <main class="portal-content">
-        <div class="welcome-banner">
-            <h2>ברוכים הבאים ל<span>קורסים המקצועים בחינם</span></h2>
-            <p>כאן תמצאו את כל חומרי הקורס. בחרו קטגוריה כדי לצפות ולהוריד חומרים.</p>
+    <!-- Course Cards -->
+    <section class="courses-section">
+        <div class="courses-grid">
+            <!-- NLP Practitioner -->
+            <a href="nlp-practitioner-intro.html" class="course-card active" data-reveal data-reveal-delay="1" style="text-decoration: none; color: inherit;">
+                <div class="card-icon">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div class="card-status open">
+                    <i class="fa-solid fa-circle-check"></i>
+                    חינמי ופתוח
+                </div>
+                <h3 class="card-title">קורס NLP Practitioner</h3>
+                <p class="card-description">
+                    קורס מלא ומקיף ביסודות ה-NLP &mdash; מהי תכנות עצבי-לשוני, איך המוח עובד, ואיך אפשר להשתמש בזה בחיים.
+                    פתוח לצפייה לכל אחד.
+                </p>
+                <div class="card-meta">
+                    <span><i class="fa-solid fa-video"></i> 51 שיעורים</span>
+                    <span><i class="fa-solid fa-clock"></i> 7 מודולים</span>
+                    <span><i class="fa-solid fa-book-open"></i> + חוברת</span>
+                </div>
+                <div class="card-btn btn-gold">
+                    <i class="fa-solid fa-play"></i>
+                    להיכנס לקורס
+                </div>
+            </a>
+
+            <!-- NLP Master - Coming Soon -->
+            <div class="course-card coming-soon" data-reveal data-reveal-delay="2">
+                <div class="card-icon">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <div class="card-status soon">
+                    <i class="fa-solid fa-clock"></i>
+                    יעלה בקרוב
+                </div>
+                <h3 class="card-title">קורס NLP Master Practitioner</h3>
+                <p class="card-description">
+                    העמקה ברמה אחרת: עבודה עם טראומה, שינוי אמונות מגבילות ודפוסים עמוקים.
+                    הקורס בהכנה ויעלה לצפייה בקרוב.
+                </p>
+                <div class="card-meta">
+                    <span><i class="fa-solid fa-video"></i> בהכנה</span>
+                    <span><i class="fa-solid fa-bell"></i> עדכנו אותי</span>
+                </div>
+                <div class="card-btn btn-soon">
+                    <i class="fa-solid fa-clock"></i>
+                    בקרוב...
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div class="nav-grid">
-            <a href="learning-booklets.html" class="nav-card booklet">
-                <div class="nav-card-icon"><i class="fa-solid fa-book"></i></div>
-                <h3>חוברות הקורס</h3>
-                <p>חוברות NLP בגרסאות שונות — נקייה, מאורגנת, ממותגת ועם אינפוגרפיקות</p>
-                <span class="count-badge">5 חוברות PDF</span>
-                <span class="arrow"><i class="fa-solid fa-arrow-left"></i></span>
-            </a>
-
-            <a href="learning-summaries.html" class="nav-card summary">
-                <div class="nav-card-icon"><i class="fa-solid fa-file-lines"></i></div>
-                <h3>סיכומי שיעורים</h3>
-                <p>סיכומים מפורטים של שיעורי קורס NLP פרקטישנר להורדה</p>
-                <span class="count-badge">4 סיכומים DOCX</span>
-                <span class="arrow"><i class="fa-solid fa-arrow-left"></i></span>
-            </a>
-
-            <a href="learning-master.html" class="nav-card master">
-                <div class="nav-card-icon"><i class="fa-solid fa-scroll"></i></div>
-                <h3>תמלולי קורס מאסטר</h3>
-                <p>תמלולים מלאים של שיעורי קורס מאסטר פרקטישנר לצפייה והורדה</p>
-                <span class="count-badge">7 שיעורים TXT</span>
-                <span class="arrow"><i class="fa-solid fa-arrow-left"></i></span>
-            </a>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <div class="logo-text">בית <span>המטפלים</span></div>
+            </div>
+            <div class="footer-links">
+                <a href="../index.html">דף הבית</a>
+                <a href="training.html">הכשרת מטפלים</a>
+                <a href="../privacy-policy.html">מדיניות פרטיות</a>
+            </div>
         </div>
-    </main>
+        <div class="footer-bottom">
+            <p>&copy; 2025 בית המטפלים. כל הזכויות שמורות.</p>
+        </div>
+    </footer>
 
-    <script>
-        document.getElementById('loadingScreen').classList.add('hide');
-    </script>
     <script src="../js/marketing-tools.js"></script>
+    <script>
+        // Navbar scroll
+        window.addEventListener('scroll', () => {
+            document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 50);
+        }, { passive: true });
+
+        // Scroll reveal
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('[data-reveal]').forEach(el => revealObserver.observe(el));
+
+        // Mobile menu
+        let menuOpen = false;
+        function toggleMobileMenu() {
+            menuOpen = !menuOpen;
+            document.getElementById('navLinks').classList.toggle('active', menuOpen);
+            document.getElementById('mobileMenuBtn').classList.toggle('active', menuOpen);
+            document.body.style.overflow = menuOpen ? 'hidden' : '';
+        }
+        function closeMobileMenu() {
+            menuOpen = false;
+            document.getElementById('navLinks').classList.remove('active');
+            document.getElementById('mobileMenuBtn').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileMenu(); });
+        document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', closeMobileMenu));
+        window.addEventListener('resize', () => { if (window.innerWidth > 768 && menuOpen) closeMobileMenu(); });
+    </script>
 </body>
 </html>

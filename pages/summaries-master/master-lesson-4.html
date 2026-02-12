@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מפגש 4 - מסגרת קלינית, דיקנס וציר זמן | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --deep-petrol: #003B46; --muted-teal: #00606B; --dusty-aqua: #2F8592; --frost-white: #E8F1F2; --gold: #D4AF37; }
+        body { font-family: 'Heebo', sans-serif; background: #fff; color: var(--deep-petrol); line-height: 1.7; font-size: 16px; }
+        .hero { background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%); padding: 50px 20px 70px; text-align: center; position: relative; }
+        .hero::after { content: ''; position: absolute; bottom: -30px; left: 0; right: 0; height: 60px; background: #fff; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+        .lesson-badge { display: inline-block; background: var(--gold); color: var(--deep-petrol); font-weight: 900; font-size: 28px; width: 64px; height: 64px; line-height: 64px; border-radius: 50%; margin-bottom: 16px; }
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--gold); }
+        .section-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; flex-shrink: 0; }
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+        .topic { background: var(--frost-white); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; border-right: 4px solid var(--dusty-aqua); }
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before { content: ''; position: absolute; right: 0; top: 12px; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
+        .topic p { margin: 8px 0; }
+        .highlight-box { background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); color: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before { content: ''; position: absolute; right: 0; top: 14px; width: 10px; height: 2px; background: var(--gold); }
+        .numbered-list { counter-reset: item; list-style: none; padding: 0; }
+        .numbered-list li { counter-increment: item; padding: 10px 0 10px 0; padding-right: 40px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .numbered-list li::before { content: counter(item); position: absolute; right: 0; top: 10px; width: 28px; height: 28px; background: var(--gold); color: var(--deep-petrol); border-radius: 50%; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .numbered-list li:last-child { border-bottom: none; }
+        .principle { display: flex; gap: 12px; align-items: flex-start; background: white; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; }
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+        .homework { background: var(--frost-white); border-radius: 16px; padding: 24px; border: 2px dashed var(--dusty-aqua); }
+        .homework-item { padding: 10px 0; padding-right: 32px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+        .flow-diagram { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin: 16px 0; padding: 16px; background: var(--frost-white); border-radius: 12px; }
+        .flow-step { background: white; border: 2px solid var(--dusty-aqua); border-radius: 10px; padding: 10px 16px; font-weight: 600; font-size: 14px; text-align: center; }
+        .flow-arrow { color: var(--gold); font-size: 20px; font-weight: 700; }
+        .bottom-nav { display: flex; justify-content: space-between; max-width: 800px; margin: 30px auto; padding: 0 24px; }
+        .bottom-nav a { display: inline-flex; align-items: center; gap: 8px; background: var(--frost-white); color: var(--deep-petrol); text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; transition: background 0.3s; }
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+        @media print { .hero { padding: 30px 20px 40px; } .hero::after { display: none; } .content { padding-top: 20px; } .bottom-nav, .nav-links { display: none; } }
+        @media (max-width: 600px) { .hero h1 { font-size: 26px; } .section-title { font-size: 19px; } .flow-diagram { flex-direction: column; } .flow-arrow { transform: rotate(90deg); } }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="master-lesson-3.html">&#8594; מפגש 3</a>
+            <a href="master-lesson-5.html">מפגש 5 &#8592;</a>
+        </div>
+        <div class="lesson-badge">04</div>
+        <h1>מסגרת קלינית, דיקנס וציר זמן</h1>
+        <div class="hero-sub">NLP Master - מפגש רביעי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Section: Review Logical Levels -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128200;</div>
+                <div class="section-title">חזרה על רמות לוגיות וערכים</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שאלות לכל רמה לוגית</div>
+                <ul>
+                    <li><strong>סביבה:</strong> איפה? מתי? כמה?</li>
+                    <li><strong>התנהגות:</strong> מה? איך?</li>
+                    <li><strong>מיומנויות:</strong> באיזה אופן? כיצד?</li>
+                    <li><strong>אמונות וערכים:</strong> למה? במה אני מאמין?</li>
+                    <li><strong>זהות:</strong> מי אני? איזה בן אדם?</li>
+                    <li><strong>חזון:</strong> בשביל מה? בשביל מי?</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">ההבדל בין ערכים לאמונות</div>
+                <ul>
+                    <li><strong>אמונה:</strong> משהו שאני חושב שהוא נכון (בין אם הוא נכון ובין אם לא)</li>
+                    <li><strong>ערך:</strong> אמונה בצורה של השוואה מורכבת - X שווה לטוב או רע מוחלט</li>
+                    <li>ערכים משקפים את המוטיבציות שלנו: כאב ועונג</li>
+                    <li>שינוי ערכים = מחיר גבוה יותר כי זה שינוי ברמת הזהות</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Modeling -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128065;</div>
+                <div class="section-title">מידול מיומנויות</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">העיקרון: תסתכלו על המבנה, לא רק על התוכן</div>
+                <ul>
+                    <li>כשאתם בהרצאה / כנס / מכירה - שאלו "איך הוא עושה את זה?"</li>
+                    <li>רשמו מיומנויות שאתם רואים: מתי הוא יורד מהבמה? מתי שואל שאלות?</li>
+                    <li>גם כשהתוכן "לא מעניין" - המבנה שווה מיליונים</li>
+                    <li>דוגמה: מרצה שיורד למטה כשמדבר על כסף - גובה עיניים עם הקהל</li>
+                </ul>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"זה לא השיעור - זה מי אתה בזמן השיעור"</div>
+            </div>
+        </div>
+
+        <!-- Section: Trance Practice -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127756;</div>
+                <div class="section-title">תרגול טראנס - אינדוקציית דייב אלמן</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלבי האינדוקציה המלאה</div>
+                <ul>
+                    <li><strong>הכנה:</strong> מיקוד בנקודה בכף היד, נשימה עמוקה, עצימת עיניים</li>
+                    <li><strong>קטלפסיית עיניים:</strong> הרפיית שרירים קטנים מסביב לעיניים עד שלא עובדים</li>
+                    <li><strong>שליחת הרגיעה:</strong> מקצה הראש עד קצות הרגליים - כמו גל נעים</li>
+                    <li><strong>שבירת תבנית:</strong> ספירה 1-2-3, פתיחת עיניים, סגירה → הכפלת רגיעה x2</li>
+                    <li><strong>הרפיה פיזיולוגית:</strong> בדיקת יד - צריכה להרגיש כמו "סמרטוט רטוב"</li>
+                    <li><strong>הרפיה מנטלית:</strong> ספירה מ-100 לאחור עם "רגיעה עמוקה" - המספרים נעלמים</li>
+                    <li><strong>העמקה:</strong> ספירה 1-10, כל ספרה מכפילה רגיעה x2</li>
+                    <li><strong>שתילת סוגסטיות:</strong> חיזוקים חיוביים בזמן שתת המודע פתוח</li>
+                    <li><strong>הוצאה:</strong> ספירה מ-10 לאחור, חזרה לכאן ועכשיו</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">משולש הטראנס</div>
+                <ul>
+                    <li><strong>סמכות:</strong> הבן אדם סומך עליי, יש אמון מקצועי</li>
+                    <li><strong>ציפיה:</strong> "בעוד רגע..." - תת המודע מצפה שמשהו יקרה ונוטה לממש</li>
+                    <li><strong>הקשר:</strong> הסטינג - טיפולי, אימוני, חברי - משפיע על הווייב</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">קומה סטייט</div>
+                <ul>
+                    <li>מצב נדיר של טראנס עמוק מאוד - כמעט אף פעם לא קורה</li>
+                    <li>הוצאה: סוגסטיה חזקה - "אם לא תצא עכשיו, לא תוכל להיכנס לטראנס שוב"</li>
+                    <li>אם מפעילים אזעקה - הבן אדם יתעורר (תגובת שרידה)</li>
+                    <li>זהירות: לא לעבוד עם אנשים שלוקחים תרופות פסיכיאטריות</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Clinical Framework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128203;</div>
+                <div class="section-title">מסגרת קלינית - תבנית לכל תהליך</div>
+            </div>
+            <div class="flow-diagram">
+                <div class="flow-step">רפורט / כימיה</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">מצב בעיה<br><small>(מטה מודל)</small></div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">מצב רצוי<br><small>(SMART)</small></div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">זיהוי חסמים</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">הרפיה / טראנס</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">טכניקה</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">הכללות והובלות<br>+ משימות</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">עקרונות חשובים</div>
+                <ul>
+                    <li>לעולם לא להגיד לבן אדם מה לעשות - לגרום לו להגיע לתובנה בעצמו</li>
+                    <li>תובנה שלי > תובנה שמישהו אמר לי - נפילת האסימון אחרת לחלוטין</li>
+                    <li>ההבדל בין יועץ (אומר מה לעשות) לבין מטפל/מנחה (שואל שאלות)</li>
+                    <li>לא להשליך מהמפה שלנו - התשובות נמצאות אצל המטופל</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">כמה הבן אדם רוצה להשתנות? (1-10)</div>
+                <ul>
+                    <li>מתחת ל-8 = לא מספיק כואב, לא מספיק רוצה להשתנות</li>
+                    <li>לשאול: "מה המחירים שאתה משלם היום?" + "מה יקרה עוד 5-10 שנים?"</li>
+                    <li>אם הבן אדם אומר 6/10 - להשתמש בטכניקת דיקנס להעלות מוטיבציה</li>
+                    <li>אם יש חלק שלא רוצה להשתנות - אפשר לדבר עם החלק הזה (סיקס סטפ)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Logical Levels and Techniques -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128161;</div>
+                <div class="section-title">רמות לוגיות ובחירת טכניקה</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">מלמעלה למטה או מלמטה למעלה - שניהם עובדים!</div>
+                <ul>
+                    <li><strong>מלמעלה:</strong> שינוי בזהות/אמונות → ישפיע על התנהגות, מיומנויות, סביבה</li>
+                    <li><strong>מלמטה:</strong> שינוי בהתנהגות/סביבה → ישפיע על מיומנויות, אמונות, זהות</li>
+                    <li>לא תמיד חייבים ללכת ל"תותח הכבד" - לפעמים סוויש פשוט מספיק</li>
+                    <li><strong>סביבה = הכרחית:</strong> בן אדם מכור לסמים שחוזר לאותה חברה - אין איך לעזור</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">איך מזהים את הרמה הלוגית של הבעיה?</div>
+                <ul>
+                    <li><strong>התנהגות:</strong> משהו ספציפי שלא חוזר על עצמו - פתרון מהיר</li>
+                    <li><strong>אמונה:</strong> משהו שחוזר על עצמו בהרבה תחומים - עבודה עמוקה יותר</li>
+                    <li>לתת משימה פשוטה: אם לא עושה = חוסר משמעת. אם מנסה ולא מצליח = חסם פנימי</li>
+                    <li>עם הזמן מפתחים אינטואיציה להבדיל בין "מבלבל את השכל" לבין חסם אמיתי</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Dickens Technique -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128293;</div>
+                <div class="section-title">טכניקת דיקנס - כאב ועונג</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שתי מוטיבציות יסוד</div>
+                <ul>
+                    <li><strong>כאב:</strong> מוטיבציה חזקה מאוד, אבל לא מחזיקה לאורך זמן</li>
+                    <li><strong>עונג:</strong> מוטיבציה שמחזיקה יותר זמן, אבל פחות חזקה</li>
+                    <li>הבעיה: המוח מעדיף עונג רגעי על פני כאב עתידי</li>
+                    <li>לכן אנחנו לא עושים דברים שאנחנו יודעים שצריך - כי "עכשיו" מנצח את "מחר"</li>
+                </ul>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">איך דיקנס עובד?</div>
+                <ul>
+                    <li><strong>שלב 1 - כאב עתידי:</strong> "דמיין עוד שנה / 5 שנים / 10 שנים עם ההתנהגות הזאת"</li>
+                    <li>ציור תמונה שלילית חזקה - הילדים רואים, הבריאות מידרדרת, הזוגיות סובלת</li>
+                    <li><strong>שלב 2 - עונג עתידי:</strong> "עכשיו דמיין שפתרת את הבעיה - עוד שנה / 5 / 10 שנים"</li>
+                    <li>ציור תמונה חיובית - בריאות, אנרגיה, משפחה, הצלחה</li>
+                    <li><strong>התוצאה:</strong> "אני רוצה" הופך ל"אני חייב" - מ-6 ל-10 על הסקאלה</li>
+                </ul>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"המוח לא יודע להבדיל בין דמיון לזיכרון למציאות - לכן כשמדמיינים כאב עתידי, הגוף חווה אותו עכשיו"</div>
+            </div>
+        </div>
+
+        <!-- Section: Timeline Technique -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9201;</div>
+                <div class="section-title">טכניקת ציר זמן - הטכניקה המרכזית</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלב 1: מציאת הרגש הבעייתי</div>
+                <ul>
+                    <li>ציר זמן עובד על <strong>רגשות</strong> - לא על סיפורים או תוכן</li>
+                    <li>מחפשים את הרגש שעולה <strong>חצי שנייה לפני</strong> הפעולה הבעייתית</li>
+                    <li>דוגמה: רגע לפני שפותחים את המקרר / לוחצים נודניק / מבטלים פגישה</li>
+                    <li>שואלים: "מה אתה מרגיש באותו רגע?" - בדידות, תסכול, כעס, עצב, ריקנות</li>
+                    <li>הולכים על הרגש הכי <strong>טעון</strong> והכי <strong>קרוב לפעולה</strong></li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלב 2: הרפיה והעלאת הרגש</div>
+                <ul>
+                    <li>מכניסים להרפיה / טראנס</li>
+                    <li>מבקשים מתת המודע להעלות את הרגש - להרגיש אותו בכל הגוף</li>
+                    <li>מעצימים את הרגש - "תעצים עוד ועוד ועוד"</li>
+                    <li>למה? כי תת המודע הוא אסוציאטיבי - הזיכרונות מאורגנים לפי רגשות, לא לפי שנים</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלב 3: מציאת האירוע המוקדם</div>
+                <ul>
+                    <li>דמיון מודרך: בית פנימי → מסדרון רגשות → דלת עם הרגש הבעייתי</li>
+                    <li>ספירה מ-10 לאחור → "תת המודע שלך יחזיר אותך לאירוע המוקדם ביותר"</li>
+                    <li><strong>3 שאלות:</strong> יום או לילה? בפנים או בחוץ? לבד או עם אנשים?</li>
+                    <li><strong>שאלה רביעית:</strong> "הרגש הזה מוכר לך או חדש?" - אם מוכר, יש אירוע קודם יותר</li>
+                    <li>המטפל לא חייב לדעת את האירוע - הבן אדם נשאר עם עצמו</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלב 4: ריפוי הילד הפנימי</div>
+                <ul>
+                    <li>"הוצא שלט מהכיס" - חזרה 15 דקות לפני האירוע</li>
+                    <li>פגישה עם עצמך הקטן/ה - חיבוק, אהבה, ביטחון</li>
+                    <li>נתינת משאבים: "אתה הולך לעבור אירוע, אבל תצא ממנו בשלום"</li>
+                    <li>חווית האירוע מחדש - אבל הפעם עם המשאבים, הכל נראה אחרת</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלב 5: ניקוי והכללה</div>
+                <ul>
+                    <li>כל האירועים שקרו אחרי האירוע המקורי - מתנקים ומשתנים</li>
+                    <li>תת המודע מכליל את השינוי על כל האירועים הקשורים</li>
+                    <li>הובלה לעתיד: "דמיין אירוע עתידי שבו אתה פועל אחרת"</li>
+                    <li>הסוגסטיה: "השינוי הזה הולך לבוא לידי ביטוי במקומות הכי פחות צפויים"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Real Example -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127793;</div>
+                <div class="section-title">דוגמה אמיתית - אכילה רגשית</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">הסיפור של שחר - ירידה של 50 קילו</div>
+                <ul>
+                    <li>הרגש הבעייתי: רגע לפני שלוקחת ביס - עולה תחושת בדידות</li>
+                    <li>ציר זמן → אירוע מגיל שנתיים: ההורים רבים, היא הצביעה על קורנפלקס</li>
+                    <li>האמונה שנוצרה: "אוכל = חיבור בין אנשים" - כשבודדה, אוכל = נחמה</li>
+                    <li>אחרי הטכניקה: "זה מוזר, אין לי את החשק לשוקולד - בלי כוח רצון"</li>
+                    <li>עם הימים החשק נעלם - היא נשארה בשליטה בלי מאמץ</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">עקרונות מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"דיוק הבעיה זה ה-20% שאחראי על 80% מהתוצאה - אם לא מדייקים, זה כמו לירות ברוגטקה מושלמת למטרה לא נכונה"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"יש הבדל עצום בין להגיע לתובנה בזכות עצמי לבין שמישהו אמר לי משהו - זה נפילת אסימון אחרת לחלוטין"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"אם בן אדם צועק - חסר לו. לא חסר לו - לא צועק"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"כל האישיות שלנו מתעצבת מהעבר - ברגע שמנקים את השורש, הדפוסים משתנים מעצמם"</div>
+            </div>
+        </div>
+
+        <!-- Section: Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>תרגלו הכנסה לטראנס והוצאה ממנו</strong>
+                    <div class="homework-note">לפי הסקריפט של אינדוקציית דייב אלמן (עמוד 1005 בחוברת) - ביטחון הוא המפתח</div>
+                </div>
+                <div class="homework-item">
+                    <strong>מצאו את הרגש הבעייתי שלכם</strong>
+                    <div class="homework-note">חצי שנייה לפני פעולה חוזרת - מה הרגש שעולה? כתבו אותו</div>
+                </div>
+                <div class="homework-item">
+                    <strong>האזינו להקלטת ציר הזמן הכיתתי</strong>
+                    <div class="homework-note">עברו את התהליך שוב לבד עם אוזניות - דווקא לבד זה יכול לעבוד חזק יותר</div>
+                </div>
+                <div class="homework-item">
+                    <strong>תרגלו מידול מיומנויות</strong>
+                    <div class="homework-note">בפגישה / הרצאה / שיחה - רשמו איך הבן אדם עושה מה שהוא עושה, לא מה הוא אומר</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="master-lesson-3.html">&#8594; מפגש 3</a>
+        <a href="master-lesson-5.html">מפגש 5 &#8592;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

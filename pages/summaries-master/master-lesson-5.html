@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מפגש 5 - רגשות, פרשנויות והתמודדות עם פחד | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --deep-petrol: #003B46; --muted-teal: #00606B; --dusty-aqua: #2F8592; --frost-white: #E8F1F2; --gold: #D4AF37; }
+        body { font-family: 'Heebo', sans-serif; background: #fff; color: var(--deep-petrol); line-height: 1.7; font-size: 16px; }
+        .hero { background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%); padding: 50px 20px 70px; text-align: center; position: relative; }
+        .hero::after { content: ''; position: absolute; bottom: -30px; left: 0; right: 0; height: 60px; background: #fff; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+        .lesson-badge { display: inline-block; background: var(--gold); color: var(--deep-petrol); font-weight: 900; font-size: 28px; width: 64px; height: 64px; line-height: 64px; border-radius: 50%; margin-bottom: 16px; }
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--gold); }
+        .section-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; flex-shrink: 0; }
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+        .topic { background: var(--frost-white); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; border-right: 4px solid var(--dusty-aqua); }
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before { content: ''; position: absolute; right: 0; top: 12px; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
+        .topic p { margin: 8px 0; }
+        .highlight-box { background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); color: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before { content: ''; position: absolute; right: 0; top: 14px; width: 10px; height: 2px; background: var(--gold); }
+        .numbered-list { counter-reset: item; list-style: none; padding: 0; }
+        .numbered-list li { counter-increment: item; padding: 10px 0 10px 0; padding-right: 40px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .numbered-list li::before { content: counter(item); position: absolute; right: 0; top: 10px; width: 28px; height: 28px; background: var(--gold); color: var(--deep-petrol); border-radius: 50%; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .numbered-list li:last-child { border-bottom: none; }
+        .principle { display: flex; gap: 12px; align-items: flex-start; background: white; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; }
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+        .homework { background: var(--frost-white); border-radius: 16px; padding: 24px; border: 2px dashed var(--dusty-aqua); }
+        .homework-item { padding: 10px 0; padding-right: 32px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+        .flow-diagram { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin: 16px 0; padding: 16px; background: var(--frost-white); border-radius: 12px; }
+        .flow-step { background: white; border: 2px solid var(--dusty-aqua); border-radius: 10px; padding: 10px 16px; font-weight: 600; font-size: 14px; text-align: center; }
+        .flow-arrow { color: var(--gold); font-size: 20px; font-weight: 700; }
+        .bottom-nav { display: flex; justify-content: space-between; max-width: 800px; margin: 30px auto; padding: 0 24px; }
+        .bottom-nav a { display: inline-flex; align-items: center; gap: 8px; background: var(--frost-white); color: var(--deep-petrol); text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; transition: background 0.3s; }
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+        @media print { .hero { padding: 30px 20px 40px; } .hero::after { display: none; } .content { padding-top: 20px; } .bottom-nav, .nav-links { display: none; } }
+        @media (max-width: 600px) { .hero h1 { font-size: 26px; } .section-title { font-size: 19px; } .flow-diagram { flex-direction: column; } .flow-arrow { transform: rotate(90deg); } }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="master-lesson-4.html">&#8594; מפגש 4</a>
+            <a href="master-lesson-6.html">מפגש 6 &#8592;</a>
+        </div>
+        <div class="lesson-badge">05</div>
+        <h1>רגשות, פרשנויות והתמודדות עם פחד</h1>
+        <div class="hero-sub">NLP Master - מפגש חמישי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Section: Emotions as Interpretations -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128161;</div>
+                <div class="section-title">רגשות כתוצאה של פרשנות</div>
+            </div>
+            <div class="flow-diagram">
+                <div class="flow-step">אירוע</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">פרשנות</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">רגש</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">תגובה</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">תוצאה</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">איך זה עובד?</div>
+                <ul>
+                    <li>האירוע עצמו לא גורם לרגש - <strong>הפרשנות שלנו</strong> היא שיוצרת את הרגש</li>
+                    <li>אותו אירוע בדיוק יכול לגרום לרגשות שונים לחלוטין - תלוי במשמעות שניתן לו</li>
+                    <li>שינוי הפרשנות = שינוי הרגש = שינוי התגובה = שינוי התוצאה</li>
+                    <li>זו נקודת המנוף המרכזית: לא לשנות את המציאות, אלא את <strong>המשמעות</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: 80/20 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128200;</div>
+                <div class="section-title">80/20 — פסיכולוגיה ואסטרטגיה</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">80% פסיכולוגיה / 20% אסטרטגיה</div>
+                <ul>
+                    <li>המצב הרגשי שלנו קובע 80% מההצלחה - האסטרטגיה רק 20%</li>
+                    <li>אפשר לדעת בדיוק מה לעשות - אבל אם המצב הרגשי לא נכון, לא נעשה את זה</li>
+                    <li>לכן עבודה על הפסיכולוגיה קודמת לעבודה על האסטרטגיה</li>
+                    <li>כשאנחנו במצב רגשי נכון - האסטרטגיה הנכונה מגיעה מאליה</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Personal Story -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127793;</div>
+                <div class="section-title">סיפור אישי — מות הסבתא</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">בחירה קשה ושינוי משמעות</div>
+                <ul>
+                    <li>סיפור על בחירה קשה - מצב שדורש שינוי פרשנות כדי להמשיך</li>
+                    <li>כשהמשמעות שניתנו לאירוע השתנתה - הרגש השתנה איתה</li>
+                    <li>לא האירוע עצמו שלט ברגש - אלא <strong>הסיפור</strong> שסיפרנו לעצמנו עליו</li>
+                    <li>המסקנה: אנחנו תמיד יכולים לבחור את המשמעות שאנחנו נותנים לאירועים</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: 5 Questions for Fear -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128293;</div>
+                <div class="section-title">5 שאלות להתמודדות עם פחד</div>
+            </div>
+            <ol class="numbered-list">
+                <li><strong>ממה בדיוק אני מפחד?</strong> — לדייק את הפחד. ברגע שמגדירים אותו, הוא מאבד מכוחו</li>
+                <li><strong>מה ההסתברות שזה באמת יקרה?</strong> — רוב הפחדים שלנו לעולם לא מתממשים</li>
+                <li><strong>מה הידע שחסר לי?</strong> — פחד נובע מחוסר ידע. ברגע שלומדים - הפחד קטן</li>
+                <li><strong>מה הפעולה שאני יכול לעשות עכשיו?</strong> — פעולה מנטרלת פחד. חוסר פעולה מגביר אותו</li>
+                <li><strong>מה המסר שהפחד מנסה להעביר לי?</strong> — לפחד יש כוונה חיובית - מה הוא מנסה להגן עליי ממנו?</li>
+            </ol>
+        </div>
+
+        <!-- Section: Guided Imagination -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127756;</div>
+                <div class="section-title">תהליך דמיון מודרך</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלבי התהליך</div>
+                <ul>
+                    <li><strong>שלב 1 — הרפיה:</strong> הכנסה למצב רגוע ונינוח, נשימות עמוקות</li>
+                    <li><strong>שלב 2 — חקירת שורש הפחד:</strong> תת המודע מוביל לאירוע או לתחושה שמזינה את הפחד</li>
+                    <li><strong>שלב 3 — דיאלוג עם הפחד:</strong> שואלים את הפחד מה הוא רוצה, מה הכוונה החיובית שלו</li>
+                    <li><strong>שלב 4 — כתיבה אינטואיטיבית:</strong> מיד אחרי התהליך - לכתוב את כל מה שעולה, בלי צנזורה</li>
+                    <li>הכתיבה מאפשרת לתובנות מתת המודע לעלות לפני השטח</li>
+                    <li>לפעמים מגיעות תשובות מפתיעות שהמודע לא היה מגיע אליהן</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Commitments -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128640;</div>
+                <div class="section-title">התחייבויות מעשיות</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">דוגמאות מהמשתתפים</div>
+                <ul>
+                    <li>חלוקת עלונים והפצת תוכן לקהל חדש</li>
+                    <li>הקמת פודקאסט או ערוץ תוכן</li>
+                    <li>פתיחת עסק או הרחבת פעילות קיימת</li>
+                    <li>הנחיית סדנה ראשונה</li>
+                    <li>כל משתתף לקח על עצמו פעולה קונקרטית שמפחידה אותו</li>
+                    <li>העיקרון: <strong>לעשות בדיוק את הדבר שמפחיד</strong> — שם נמצאת הצמיחה</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">עקרונות מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"האירוע לא קובע את הרגש - הפרשנות שלנו קובעת. שנה את המשמעות ותשנה את החוויה"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"80% מההצלחה זה פסיכולוגיה - אם המצב הרגשי לא נכון, אף אסטרטגיה לא תעזור"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"פחד הוא לא האויב - הוא מצפן. ברגע שמדייקים אותו ופועלים - הוא נעלם"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"הצמיחה הגדולה ביותר נמצאת בדיוק במקום שהכי מפחיד אותנו"</div>
+            </div>
+        </div>
+
+        <!-- Section: Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>תרגלו את 5 השאלות להתמודדות עם פחד</strong>
+                    <div class="homework-note">קחו פחד אחד שמלווה אתכם וענו על כל 5 השאלות בכתב</div>
+                </div>
+                <div class="homework-item">
+                    <strong>עשו תהליך כתיבה אינטואיטיבית</strong>
+                    <div class="homework-note">5 דקות של כתיבה חופשית אחרי הרפיה קצרה - בלי צנזורה, בלי עריכה</div>
+                </div>
+                <div class="homework-item">
+                    <strong>תזהו את השרשרת: אירוע → פרשנות → רגש</strong>
+                    <div class="homework-note">במשך שבוע, בכל פעם שעולה רגש חזק - עצרו ושאלו "מה הפרשנות שלי?"</div>
+                </div>
+                <div class="homework-item">
+                    <strong>קחו התחייבות מעשית אחת</strong>
+                    <div class="homework-note">פעולה אחת שמפחידה אתכם — עשו אותה השבוע. הפחד הוא המצפן</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="master-lesson-4.html">&#8594; מפגש 4</a>
+        <a href="master-lesson-6.html">מפגש 6 &#8592;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

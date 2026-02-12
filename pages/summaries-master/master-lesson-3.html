@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מפגש 3 - טראנס, סוגסטיות וריפוי הילד הפנימי | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --deep-petrol: #003B46; --muted-teal: #00606B; --dusty-aqua: #2F8592; --frost-white: #E8F1F2; --gold: #D4AF37; }
+        body { font-family: 'Heebo', sans-serif; background: #fff; color: var(--deep-petrol); line-height: 1.7; font-size: 16px; }
+        .hero { background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%); padding: 50px 20px 70px; text-align: center; position: relative; }
+        .hero::after { content: ''; position: absolute; bottom: -30px; left: 0; right: 0; height: 60px; background: #fff; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+        .lesson-badge { display: inline-block; background: var(--gold); color: var(--deep-petrol); font-weight: 900; font-size: 28px; width: 64px; height: 64px; line-height: 64px; border-radius: 50%; margin-bottom: 16px; }
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--gold); }
+        .section-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; flex-shrink: 0; }
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+        .topic { background: var(--frost-white); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; border-right: 4px solid var(--dusty-aqua); }
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before { content: ''; position: absolute; right: 0; top: 12px; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
+        .topic p { margin: 8px 0; }
+        .highlight-box { background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); color: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before { content: ''; position: absolute; right: 0; top: 14px; width: 10px; height: 2px; background: var(--gold); }
+        .numbered-list { counter-reset: item; list-style: none; padding: 0; }
+        .numbered-list li { counter-increment: item; padding: 10px 0 10px 0; padding-right: 40px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .numbered-list li::before { content: counter(item); position: absolute; right: 0; top: 10px; width: 28px; height: 28px; background: var(--gold); color: var(--deep-petrol); border-radius: 50%; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .numbered-list li:last-child { border-bottom: none; }
+        .principle { display: flex; gap: 12px; align-items: flex-start; background: white; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; }
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+        .homework { background: var(--frost-white); border-radius: 16px; padding: 24px; border: 2px dashed var(--dusty-aqua); }
+        .homework-item { padding: 10px 0; padding-right: 32px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+        .flow-diagram { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin: 16px 0; padding: 16px; background: var(--frost-white); border-radius: 12px; }
+        .flow-step { background: white; border: 2px solid var(--dusty-aqua); border-radius: 10px; padding: 10px 16px; font-weight: 600; font-size: 14px; text-align: center; }
+        .flow-arrow { color: var(--gold); font-size: 20px; font-weight: 700; }
+        .bottom-nav { display: flex; justify-content: space-between; max-width: 800px; margin: 30px auto; padding: 0 24px; }
+        .bottom-nav a { display: inline-flex; align-items: center; gap: 8px; background: var(--frost-white); color: var(--deep-petrol); text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; transition: background 0.3s; }
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+        @media print { .hero { padding: 30px 20px 40px; } .hero::after { display: none; } .content { padding-top: 20px; } .bottom-nav, .nav-links { display: none; } }
+        @media (max-width: 600px) { .hero h1 { font-size: 26px; } .section-title { font-size: 19px; } .flow-diagram { flex-direction: column; } .flow-arrow { transform: rotate(90deg); } }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="master-lesson-2.html">&#8594; מפגש 2</a>
+            <a href="master-lesson-4.html">מפגש 4 &#8592;</a>
+        </div>
+        <div class="lesson-badge">03</div>
+        <h1>טראנס, סוגסטיות וריפוי הילד הפנימי</h1>
+        <div class="hero-sub">NLP Master - מפגש שלישי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Section: Trance -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127756;</div>
+                <div class="section-title">מצבי טראנס</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מהו טראנס?</div>
+                <ul>
+                    <li>מצב שבו המודע "יורד" והגורם הביקורתי בצד</li>
+                    <li>תת המודע פתוח לשינוי ולקליטת מידע</li>
+                    <li>טראנס ≠ שינה - זה מצב של ריכוז עמוק ומיקוד פנימי</li>
+                    <li>אנחנו נכנסים למצבי טראנס טבעיים כל יום (נהיגה, קריאה, גלישה בטלפון)</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">הכנסה לטראנס - הרפיית קבוצות שרירים</div>
+                <ul>
+                    <li><strong>נשימות עמוקות:</strong> הורדת קצב הלב והנשימה</li>
+                    <li><strong>שחרור הגוף:</strong> הרפיית ידיים, רגליים, פנים, מצח</li>
+                    <li><strong>הגורם הביקורתי:</strong> החלק שאומר "נו, מה זה השטויות" - רוצים להוריד אותו</li>
+                    <li>עובדים בשיטת הרפייה פרוגרסיבית - קבוצת שרירים אחרי קבוצת שרירים</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Suggestibility -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128172;</div>
+                <div class="section-title">סוגסטיות</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מהי סוגסטיה?</div>
+                <ul>
+                    <li>הצעה / רמז שתת המודע קולט במצב טראנס</li>
+                    <li>ככל שהטראנס עמוק יותר → הסוגסטיה נקלטת חזק יותר</li>
+                    <li>סוגסטיות חיוביות = הכלי שלנו לשינוי עמוק</li>
+                    <li>עובדים עם סוגסטיות גם בטכניקות כמו הצבת מטרה ודמיון מודרך</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Trauma -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128148;</div>
+                <div class="section-title">טראומות וצרכים רגשיים</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">איך טראומות נוצרות?</div>
+                <ul>
+                    <li>כילדים - חסרים לנו משאבים להתמודד עם העולם</li>
+                    <li>אירוע שנראה "קטן" למבוגר יכול להיות טראומטי לילד</li>
+                    <li>גם פרשנות לאירוע חשובה - לא רק האירוע עצמו</li>
+                    <li>טראומות מילדות משפיעות על ההתנהגות שלנו כמבוגרים - גם אם לא זוכרים אותן</li>
+                </ul>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">שתי התנהגויות שנוצרות מצרכים רגשיים שלא מומשו:</div>
+                <ul>
+                    <li><strong>ריצוי אנשים אחרים</strong> - מרצה אנשים כדי לקבל אהבה, הכלה ואמפתיה. מבטל את עצמי כדי לקבל אישור</li>
+                    <li><strong>פיצוי רגשי / נחמה גשמית</strong> - ממלא חסכים רגשיים באוכל, קניות, כסף, מין. שום נחמה גשמית לא יודעת לתת אהבה אמיתית</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">השריון שבנינו</div>
+                <ul>
+                    <li>כילדים גיבשנו אסטרטגיות כדי להתמודד עם העולם</li>
+                    <li>הילד הפנימי לא מקבל את הצרכים הרגשיים שהוא זקוק להם</li>
+                    <li>הרבה אנשים מוקפים באנשים אבל מרגישים שאין מי שבאמת מבין אותם</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Regression -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128260;</div>
+                <div class="section-title">רגרסיה</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מהי רגרסיה?</div>
+                <ul>
+                    <li>חזרה לאירוע מוקדם מהעבר דרך טראנס</li>
+                    <li>המודע מונע מאיתנו לחזור לאירועים כואבים - הגנה טבעית</li>
+                    <li>בטראנס - תת המודע פתוח וניתן לחזור לאירועים שורשיים</li>
+                    <li>לחוות אירוע מהעבר = כמו עקירת שן - כאב קצר שמוביל לריפוי</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">למה המודע חוסם זיכרונות?</div>
+                <ul>
+                    <li>הגנה: הגורם הביקורתי לא רוצה שנחווה כאב</li>
+                    <li>"אני בסדר, אני לא צריך את זה" - קולות הכחשה</li>
+                    <li>אנשים יכולים לשכוח תקופות שלמות מהילדות</li>
+                    <li>מה שמתחת לשטיח - כל פעם שעוברים שם נופלים</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Inner Child Healing -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128118;</div>
+                <div class="section-title">ריפוי הילד הפנימי</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מה זה ריפוי הילד הפנימי?</div>
+                <ul>
+                    <li>מדיטציה / טכניקה שבה "אני של היום" פוגש "אותי כילד"</li>
+                    <li>נעשית במצב רגיעה / הרפיה</li>
+                    <li>הדמיון: הולכים בגינת פרחים, פוגשים את עצמנו כילדים</li>
+                    <li>נותנים לילד הפנימי אהבה, אמפתיה, הכלה ומשאבים שחסרו לו</li>
+                    <li>מדיטציה מנקה רגשית - אפשר לעשות לבד</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Timeline vs Inner Child -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9201;</div>
+                <div class="section-title">ציר זמן vs ריפוי ילד פנימי</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">ההבדל המרכזי:</div>
+                <ul>
+                    <li><strong>ריפוי ילד פנימי:</strong> פוגש את עצמי כילד - בלי אירוע ספציפי. נותן משאבים כלליים</li>
+                    <li><strong>ציר זמן:</strong> שילוב של רגרסיה + ריפוי ילד פנימי. עובדים על אירוע ספציפי מהעבר</li>
+                    <li><strong>ציר זמן חזק יותר</strong> ברוב המקרים - כי עוקרים טראומה ספציפית מהשורש</li>
+                </ul>
+            </div>
+            <div class="flow-diagram">
+                <div class="flow-step">טראנס / הרפיה</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">רגרסיה לאירוע</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">חווית האירוע</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">ריפוי הילד הפנימי</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">ניקוי + שחרור</div>
+            </div>
+        </div>
+
+        <!-- Section: Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"בטראנס אני רוצה לעבוד עם תת המודע - לא רוצה את ההתנגדויות, לא רוצה את הביקורת"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"שום נחמה גשמית לא יודעת לתת אהבה ואמפתיה"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"לחוות אירוע מהעבר זה כמו עקירת שן - כאב קצר שמוביל לריפוי"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"לא משנה מה היה בעבר - משנה לי מה מקודד בלא מודע"</div>
+            </div>
+        </div>
+
+        <!-- Section: Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>תרגלו הכנסה לטראנס עם בן/בת זוג</strong>
+                    <div class="homework-note">הרפיית קבוצות שרירים בינונית - בזום או פרונטלי</div>
+                </div>
+                <div class="homework-item">
+                    <strong>צפו בסרט "אפקט הפרפר"</strong>
+                    <div class="homework-note">סרט שמתקשר לכל מה שדיברנו - איך אירוע אחד קטן משנה הכל</div>
+                </div>
+                <div class="homework-item">
+                    <strong>עשו מדיטציית ריפוי הילד הפנימי</strong>
+                    <div class="homework-note">שחר כהן ביוטיוב - מדיטציה מנקה רגשית. חוו את זה!</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="master-lesson-2.html">&#8594; מפגש 2</a>
+        <a href="master-lesson-4.html">מפגש 4 &#8592;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מפגש 1 - מבוא למאסטר ורמות לוגיות | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: var(--deep-petrol);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            padding: 50px 20px 70px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #fff;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        .nav-links a {
+            color: var(--frost-white);
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover { opacity: 1; }
+
+        .lesson-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            font-weight: 900;
+            font-size: 28px;
+            width: 64px;
+            height: 64px;
+            line-height: 64px;
+            border-radius: 50%;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .hero-sub {
+            font-size: 16px;
+            color: var(--gold);
+            font-weight: 300;
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px 24px 60px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--deep-petrol);
+        }
+
+        .topic {
+            background: var(--frost-white);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            border-right: 4px solid var(--dusty-aqua);
+        }
+
+        .topic-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--muted-teal);
+            margin-bottom: 10px;
+        }
+
+        .topic ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .topic li {
+            padding: 4px 0;
+            padding-right: 20px;
+            position: relative;
+        }
+
+        .topic li::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 12px;
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+
+        .topic p {
+            margin: 8px 0;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .highlight-box .box-title {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 17px;
+            margin-bottom: 12px;
+        }
+
+        .highlight-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .highlight-box li {
+            padding: 6px 0;
+            padding-right: 24px;
+            position: relative;
+            color: var(--frost-white);
+        }
+
+        .highlight-box li::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 14px;
+            width: 10px;
+            height: 2px;
+            background: var(--gold);
+        }
+
+        .numbered-list {
+            counter-reset: item;
+            list-style: none;
+            padding: 0;
+        }
+
+        .numbered-list li {
+            counter-increment: item;
+            padding: 10px 0 10px 0;
+            padding-right: 40px;
+            position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .numbered-list li::before {
+            content: counter(item);
+            position: absolute;
+            right: 0;
+            top: 10px;
+            width: 28px;
+            height: 28px;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .numbered-list li:last-child { border-bottom: none; }
+
+        .principle {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            background: white;
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+        }
+
+        .principle-icon {
+            color: var(--gold);
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .principle-text {
+            font-weight: 600;
+            color: var(--deep-petrol);
+        }
+
+        .homework {
+            background: var(--frost-white);
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px dashed var(--dusty-aqua);
+        }
+
+        .homework-item {
+            padding: 10px 0;
+            padding-right: 32px;
+            position: relative;
+            border-bottom: 1px solid rgba(0, 59, 70, 0.08);
+        }
+
+        .homework-item:last-child { border-bottom: none; }
+
+        .homework-item::before {
+            content: '\1F381';
+            position: absolute;
+            right: 0;
+            top: 10px;
+            font-size: 18px;
+        }
+
+        .homework-note {
+            font-size: 14px;
+            color: var(--dusty-aqua);
+            margin-top: 4px;
+        }
+
+        /* Levels flow */
+        .levels-flow {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 16px 0;
+            align-items: center;
+        }
+
+        .level-item {
+            background: var(--frost-white);
+            border: 2px solid var(--dusty-aqua);
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .level-arrow {
+            color: var(--gold);
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 24px;
+        }
+
+        .bottom-nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--frost-white);
+            color: var(--deep-petrol);
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--dusty-aqua);
+            font-size: 14px;
+        }
+
+        @media print {
+            .hero { padding: 30px 20px 40px; }
+            .hero::after { display: none; }
+            .content { padding-top: 20px; }
+            .bottom-nav, .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 26px; }
+            .section-title { font-size: 19px; }
+            .levels-flow { flex-direction: column; }
+            .level-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="index.html">&#8592; כל הסיכומים</a>
+            <a href="master-lesson-2.html">מפגש 2 &#8594;</a>
+        </div>
+        <div class="lesson-badge">01</div>
+        <h1>מבוא למאסטר ורמות לוגיות</h1>
+        <div class="hero-sub">NLP Master - מפגש ראשון</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Section: Course Intro -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9733;</div>
+                <div class="section-title">מבוא לקורס מאסטר</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מה מחכה לנו בקורס?</div>
+                <ul>
+                    <li>8 מפגשים של העמקה ברמות הגבוהות של NLP</li>
+                    <li>מעבר מפרקטישנר (סביבה, התנהגות, מיומנויות) לרמות העומק: <strong>אמונות, ערכים, זהות וחזון</strong></li>
+                    <li>עבודה על שינוי אמיתי ומתמשך - שינוי שנצרב לטווח הארוך</li>
+                    <li>שילוב הכלים גם לפיתוח אישי וגם לעבודה מקצועית עם אחרים</li>
+                    <li>המטרה: שכל אחד יהיה ברמת זהות של מאסטר NLP</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">חזרה על הפרקטישנר</div>
+                <ul>
+                    <li>ראפור, קליברציה, מטה מודל, סמ"דים, עוגנים</li>
+                    <li>מודל התקשורת: מציאות &#10229; מסננים &#10229; מייצג פנימי &#10229; רגשות &#10229; התנהגות</li>
+                    <li>בפרקטישנר נגענו בעיקר ברמות התחתונות + קצת אמונות</li>
+                    <li>במאסטר נצלול לאמונות, ערכים, זהות וחזון</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Logical Levels -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#129504;</div>
+                <div class="section-title">מודל הרמות הלוגיות</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">הרמות מלמטה למעלה:</div>
+                <ul>
+                    <li><strong>סביבה</strong> - כל מה שחיצוני אלינו: אנשים, מקומות, חפצים, בגדים, טריגרים</li>
+                    <li><strong>התנהגות</strong> - הפעולות שאנחנו עושים בפועל, יום יום</li>
+                    <li><strong>מיומנויות</strong> - יכולות שפיתחנו כתוצאה מחזרה על פעולות</li>
+                    <li><strong>אמונות וערכים</strong> - תפיסת העולם שלנו, תחושות ודאות, מה טוב/רע</li>
+                    <li><strong>זהות</strong> - מי אני? התפיסה שלי לגבי עצמי</li>
+                    <li><strong>חזון</strong> - הרמה הרוחנית, המשמעות הגדולה, למה אני כאן</li>
+                </ul>
+            </div>
+            <div class="levels-flow">
+                <div class="level-item">סביבה</div>
+                <div class="level-arrow">&#8592;</div>
+                <div class="level-item">התנהגות</div>
+                <div class="level-arrow">&#8592;</div>
+                <div class="level-item">מיומנויות</div>
+                <div class="level-arrow">&#8592;</div>
+                <div class="level-item">אמונות</div>
+                <div class="level-arrow">&#8592;</div>
+                <div class="level-item">זהות</div>
+                <div class="level-arrow">&#8592;</div>
+                <div class="level-item">חזון</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">העיקרון המרכזי</div>
+                <ul>
+                    <li>שינוי ברמה גבוהה משפיע על כל הרמות שמתחתיה</li>
+                    <li>שינוי ברמת הזהות → משנה אמונות → משנה מיומנויות → משנה התנהגות → משנה סביבה</li>
+                    <li>שינוי מלמטה (סביבה) הוא אפשרי אבל איטי ופחות מתמשך</li>
+                    <li>שינוי אמיתי ועמוק חייב לעבור ברמת הזהות והאמונות</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Identity -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128100;</div>
+                <div class="section-title">שינוי ברמת הזהות</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">הסיפור על הזהות הדתית בצבא</div>
+                <ul>
+                    <li>דוגמה חיה: הגדרה עצמית כ"בן אדם דתי" שינתה את כל שאר הרמות</li>
+                    <li>ברגע שהזהות "נצרבה" - האמונות, ההתנהגות, המיומנויות והסביבה השתנו בהתאם</li>
+                    <li>הסביבה (אנשים שהאמינו בזהות החדשה) חיזקה את השינוי</li>
+                    <li>כשהסביבה לא תומכת בזהות החדשה - הזהות הישנה חוזרת</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">הרחבת זהויות - Expanding Identity</div>
+                <ul>
+                    <li>המלצה ליצור כמה שיותר זהויות חיוביות: יזם, מרצה, סופר, ספורטאי, משקיע</li>
+                    <li>מספיק פעולה אחת כדי להתחיל לבנות זהות חדשה</li>
+                    <li>ככל שיש יותר זהויות → טועמים יותר מהחיים</li>
+                    <li>להכיר באיזו זהות אני נמצא בכל רגע (עסק, זוגיות, חברות)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Vision -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128302;</div>
+                <div class="section-title">רמת החזון</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">ויקטור פרנקל - "אדם מחפש משמעות"</div>
+                <ul>
+                    <li>אנשים ששרדו את השואה - מה נתן להם כוח להמשיך?</li>
+                    <li>חזון ומשמעות הם הדלק שמניע אותנו גם ברגעים הקשים ביותר</li>
+                    <li>חזון לא <strong>מוצאים</strong> - חזון <strong>יוצרים</strong></li>
+                    <li>חזון חזק מספיק ישנה את כל הרמות מתחתיו</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Goal Setting -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127919;</div>
+                <div class="section-title">הצבת מטרה בנוירונים</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">הטכניקה - דמיון מודרך לפי רמות לוגיות</div>
+                <ul>
+                    <li><strong>הכנסה להרפיה:</strong> נשימות עמוקות, שחרור גוף, הורדת הגורם הביקורתי</li>
+                    <li><strong>חיבור לחזון:</strong> מה אתה רואה? מה אתה שומע? מה אתה מרגיש? (שימוש בסמ"דים)</li>
+                    <li><strong>מעבר על כל רמה:</strong> לאיזה אדם הפכת? איזו זהות חדשה? אמונות? מיומנויות?</li>
+                    <li><strong>סביבה:</strong> איך נראית הסביבה כשהמטרה מוגשמת?</li>
+                    <li><strong>החלטה + פעולה:</strong> איזו החלטה אני מקבל? ונועל עם פעולה קונקרטית</li>
+                    <li><strong>הכללות והובלות לעתיד:</strong> שתילת סוגסטיות לעתיד</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Beliefs -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128161;</div>
+                <div class="section-title">אמונות - חזרה והעמקה</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שני מבנים של אמונות</div>
+                <ul>
+                    <li><strong>סיבה ותוצאה:</strong> A מוביל ל-B ("אם אפתח עסק → אקרוס כלכלית")</li>
+                    <li><strong>השוואה מורכבת:</strong> A שווה ל-B ("כסף = אושר", "סיכון = רע")</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">איך אמונות נוצרות?</div>
+                <ul>
+                    <li><strong>תהליך הטבעה:</strong> תקשורת עם דמויות סמכות בגילאי 0-7</li>
+                    <li>ילדים תופסים את מה שההורים אומרים ועושים כאמת מוחלטת</li>
+                    <li>ילדים לומדים ממה שהורים <strong>עושים</strong> (לא רק ממה שהם אומרים)</li>
+                    <li>גם מי שהולך "נגד" ההורים - עדיין מושפע מהם</li>
+                    <li>אמונות שורש נמצאות ברמת הזהות ומשפיעות על כל שאר הרמות</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">5 דרכים לזיהוי אמונות</div>
+                <ol class="numbered-list">
+                    <li><strong>השלמת משפטים מהירה</strong> - "אני מאמין ש..."</li>
+                    <li><strong>מטפורות</strong> - הסיפורים שאני מספר על עצמי</li>
+                    <li><strong>הפעולות שלי</strong> - התנהגות משקפת אמונות</li>
+                    <li><strong>הסיפור שאני נוהג לספר</strong> - הנרטיב שחוזר על עצמו</li>
+                    <li><strong>תשאול סיבובי</strong> - 3 שאלות מפתח</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Section: Circular Questioning -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128269;</div>
+                <div class="section-title">תשאול סיבובי</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">3 שאלות מפתח למציאת אמונות:</div>
+                <ul>
+                    <li><strong>למה?</strong> - מזהה סיבה ותוצאה</li>
+                    <li><strong>איך אתה יודע?</strong> - מזהה הוכחות ומסננים</li>
+                    <li><strong>מה המשמעות של זה?</strong> - מוביל לאמונות שורש ולרמת הזהות</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">עקרונות חשובים</div>
+                <ul>
+                    <li>לא חייבים לשאול בסדר קבוע - משחקים עם השאלות</li>
+                    <li>המשמעות של אמונה אחת → יכולה להיות הסיבה של אמונה אחרת</li>
+                    <li>ככל שהאמונה שורשית יותר → קשה יותר לבן אדם לענות (קליברציה!)</li>
+                    <li>שימוש בדיסוציאציה ("יוסי חבר שלך...") כשקשה לבן אדם לדבר על עצמו</li>
+                    <li>50% משבירת אמונה = פשוט להיות מודע לה</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"שינוי עומק אמיתי חייב לעבור ברמת הזהות והאמונות"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"ברגע שמרחיבים את כמות הזהויות - טועמים יותר מהחיים"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"חזון לא מוצאים - חזון יוצרים"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"50% משבירת אמונה זה פשוט להיות מודע אליה"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"תהפכו את היום הגרוע בחייכם ליום הטוב בחייכם"</div>
+            </div>
+        </div>
+
+        <!-- Section: Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>תרגלו תשאול סיבובי עם חבר/ה</strong>
+                    <div class="homework-note">היפגשו עם חבר או חברה - חצי שעה שאלות על אמונות (4 דקות לכל צד). הכלי הזה הוא מפתח לזיהוי אמונות מגבילות</div>
+                </div>
+                <div class="homework-item">
+                    <strong>רשמו את הרמות הלוגיות לפי החזון שלכם</strong>
+                    <div class="homework-note">מלאו את הדף של רמות לוגיות - מהחזון עד הסביבה. איזה אדם אתם צריכים להיות כדי להגשים את המטרה?</div>
+                </div>
+                <div class="homework-item">
+                    <strong>צפו בסמינר של טוני רובינס</strong>
+                    <div class="homework-note">הקישור בקבוצת הוואטסאפ - סמינר מלא על סטייט, אמונות וזהות</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html">&#8592; כל הסיכומים</a>
+        <a href="master-lesson-2.html">מפגש 2 &#8594;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

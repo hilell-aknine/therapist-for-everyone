@@ -1,0 +1,2852 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חוברת קורס NLP Practitioner | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            font-family: 'Heebo', sans-serif;
+            direction: rtl;
+            font-size: 11pt;
+            line-height: 1.8;
+            color: #1a1a1a;
+            background: #fff;
+        }
+
+        /* Branding Colors */
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+            --light-gold: #f5e6b8;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            page-break-after: always;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(160deg, var(--deep-petrol) 0%, var(--muted-teal) 50%, var(--dusty-aqua) 100%);
+            color: white;
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .cover-logo {
+            width: 140px;
+            height: 140px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 50px;
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--deep-petrol);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .cover-title {
+            font-size: 48pt;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .cover-subtitle {
+            font-size: 22pt;
+            font-weight: 300;
+            color: var(--gold);
+            margin-bottom: 30px;
+        }
+
+        .cover-instructor {
+            font-size: 16pt;
+            color: rgba(255,255,255,0.9);
+            margin-top: 30px;
+        }
+
+        .cover-brand {
+            margin-top: 80px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .cover-slogan {
+            font-size: 14pt;
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .cover-org {
+            font-size: 12pt;
+            color: rgba(255,255,255,0.7);
+            margin-top: 10px;
+        }
+
+        /* Table of Contents */
+        .toc-page {
+            page-break-after: always;
+            padding: 50px 30px;
+        }
+
+        .toc-title {
+            font-size: 26pt;
+            font-weight: 700;
+            color: var(--deep-petrol);
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--gold);
+        }
+
+        .toc-list {
+            list-style: none;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .toc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 10px 5px;
+            border-bottom: 1px dotted #ccc;
+            font-size: 12pt;
+        }
+
+        .toc-item:hover {
+            background: var(--frost-white);
+        }
+
+        .toc-item-title {
+            font-weight: 500;
+            color: var(--deep-petrol);
+        }
+
+        .toc-item-page {
+            color: var(--gold);
+            font-weight: 700;
+            min-width: 30px;
+            text-align: left;
+        }
+
+        /* Content Pages */
+        .content {
+            padding: 20px 10px;
+        }
+
+        /* Chapter */
+        .chapter {
+            page-break-before: always;
+            margin-bottom: 40px;
+        }
+
+        .chapter:first-child {
+            page-break-before: avoid;
+        }
+
+        .chapter-header {
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
+            color: white;
+            padding: 25px 30px;
+            margin: 0 -30px 30px -30px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .chapter-number {
+            font-size: 12pt;
+            font-weight: 400;
+            color: var(--gold);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .chapter-title {
+            font-size: 24pt;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 22pt;
+            font-weight: 700;
+            color: var(--deep-petrol);
+            margin: 35px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        h2 {
+            font-size: 16pt;
+            font-weight: 600;
+            color: var(--muted-teal);
+            margin: 30px 0 15px 0;
+        }
+
+        h3 {
+            font-size: 13pt;
+            font-weight: 600;
+            color: var(--dusty-aqua);
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin: 0 0 15px 0;
+            text-align: justify;
+            line-height: 1.9;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 15px 0 20px 0;
+            padding-right: 25px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        li::marker {
+            color: var(--gold);
+        }
+
+        /* Highlight Box */
+        .highlight {
+            background: linear-gradient(to left, var(--frost-white), white);
+            border-right: 4px solid var(--gold);
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .highlight-title {
+            font-weight: 700;
+            color: var(--deep-petrol);
+            margin-bottom: 10px;
+            font-size: 13pt;
+        }
+
+        /* Definition Box */
+        .definition {
+            background: var(--deep-petrol);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+
+        .definition strong {
+            color: var(--gold);
+        }
+
+        .definition-term {
+            font-size: 14pt;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        /* Exercise Box */
+        .exercise {
+            background: white;
+            border: 2px solid var(--dusty-aqua);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            page-break-inside: avoid;
+        }
+
+        .exercise-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14pt;
+            font-weight: 700;
+            color: var(--muted-teal);
+            margin-bottom: 15px;
+        }
+
+        .exercise-title::before {
+            content: "✏️";
+            font-size: 18pt;
+        }
+
+        /* Tip Box */
+        .tip {
+            background: var(--light-gold);
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-right: 4px solid var(--gold);
+        }
+
+        .tip-title {
+            font-weight: 700;
+            color: var(--deep-petrol);
+            margin-bottom: 8px;
+        }
+
+        /* Quote */
+        .quote {
+            font-size: 14pt;
+            font-style: italic;
+            color: var(--muted-teal);
+            border-right: 3px solid var(--gold);
+            padding: 15px 25px;
+            margin: 25px 0;
+            background: var(--frost-white);
+        }
+
+        /* Two Columns */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .column {
+            background: var(--frost-white);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .column-title {
+            font-weight: 700;
+            color: var(--deep-petrol);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th {
+            background: var(--deep-petrol);
+            color: white;
+            padding: 12px 15px;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:nth-child(even) {
+            background: var(--frost-white);
+        }
+
+        /* Separator */
+        .separator {
+            text-align: center;
+            margin: 40px 0;
+            color: var(--gold);
+        }
+
+        .separator::before {
+            content: "◆ ◆ ◆";
+            letter-spacing: 10px;
+        }
+
+        /* ========== PAGE BREAK CONTROLS ========== */
+
+        /* Elements that should NEVER break across pages */
+        .definition,
+        .highlight,
+        .exercise,
+        .tip,
+        .quote,
+        .two-columns,
+        .column,
+        .infographic,
+        .write-area,
+        table {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        /* Headings should stay with following content */
+        h1, h2, h3 {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+        }
+
+        /* Sections that can start new page if needed */
+        .section-block {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Force new page before major sections */
+        .page-break-before {
+            page-break-before: always !important;
+            break-before: page !important;
+        }
+
+        /* Orphan/Widow control - minimum lines at page break */
+        p {
+            orphans: 3;
+            widows: 3;
+        }
+
+        li {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Lists should try to stay together */
+        ul, ol {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Table rows should not break */
+        tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        @media print {
+            .chapter {
+                page-break-before: always;
+            }
+
+            .chapter:first-child {
+                page-break-before: avoid;
+            }
+
+            /* Ensure boxes don't break */
+            .definition,
+            .highlight,
+            .exercise,
+            .tip,
+            .quote {
+                page-break-inside: avoid !important;
+            }
+        }
+
+        /* Numbered Steps */
+        .steps {
+            counter-reset: step;
+            list-style: none;
+            padding: 0;
+        }
+
+        .steps li {
+            counter-increment: step;
+            position: relative;
+            padding-right: 50px;
+            margin-bottom: 20px;
+        }
+
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 35px;
+            height: 35px;
+            background: var(--gold);
+            color: var(--deep-petrol);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* Write Area */
+        .write-area {
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 80px;
+            background: #fafafa;
+        }
+
+        .write-label {
+            font-size: 10pt;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        /* Infographic Styles */
+        .infographic {
+            margin: 30px auto;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+
+        .infographic-title {
+            font-size: 14pt;
+            font-weight: 700;
+            color: var(--deep-petrol);
+            margin-bottom: 20px;
+        }
+
+        .infographic svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Pyramid Infographic */
+        .pyramid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pyramid-level {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 11pt;
+            transition: transform 0.2s;
+        }
+
+        /* Needs Wheel */
+        .needs-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .need-card {
+            padding: 20px 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 11pt;
+        }
+
+        .need-card.black {
+            background: #1A1A1A;
+            color: white;
+        }
+
+        .need-card.orange {
+            background: #FF6B35;
+            color: white;
+        }
+
+        .need-card .need-icon {
+            font-size: 24pt;
+            margin-bottom: 8px;
+        }
+
+        /* VAKOG Cards */
+        .vakog-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .vakog-card {
+            background: #1A1A1A;
+            border: 2px solid #FF6B35;
+            border-radius: 12px;
+            padding: 15px 20px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .vakog-card .letter {
+            font-size: 24pt;
+            font-weight: 800;
+            color: #FF6B35;
+        }
+
+        .vakog-card .label {
+            font-size: 9pt;
+            color: white;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover-page">
+    <div class="cover-logo">NLP</div>
+    <h1 class="cover-title">NLP Practitioner</h1>
+    <p class="cover-subtitle">חוברת הקורס המלאה</p>
+    <p class="cover-instructor">מרצה: רם אלוס</p>
+    <div class="cover-brand">
+        <p class="cover-slogan">ריפוי הנפש לכל אדם</p>
+        <p class="cover-org">מטפל לכל אחד</p>
+    </div>
+</div>
+
+<!-- ==================== TABLE OF CONTENTS ==================== -->
+<div class="toc-page">
+    <h1 class="toc-title">תוכן עניינים</h1>
+    <ul class="toc-list">
+        <li class="toc-item"><span class="toc-item-title">הקדמה - מה זה NLP?</span><span class="toc-item-page">3</span></li>
+        <li class="toc-item"><span class="toc-item-title">3 הרמות ב-NLP</span><span class="toc-item-page">7</span></li>
+        <li class="toc-item"><span class="toc-item-title">מודל התקשורת</span><span class="toc-item-page">12</span></li>
+        <li class="toc-item"><span class="toc-item-title">תקשורת לא מילולית</span><span class="toc-item-page">18</span></li>
+        <li class="toc-item"><span class="toc-item-title">ראפור</span><span class="toc-item-page">21</span></li>
+        <li class="toc-item"><span class="toc-item-title">הנחות יסוד</span><span class="toc-item-page">24</span></li>
+        <li class="toc-item"><span class="toc-item-title">ויזואליזציה ודמיון</span><span class="toc-item-page">27</span></li>
+        <li class="toc-item"><span class="toc-item-title">עמדות תפיסה</span><span class="toc-item-page">29</span></li>
+        <li class="toc-item"><span class="toc-item-title">מסע בין יועצים</span><span class="toc-item-page">35</span></li>
+        <li class="toc-item"><span class="toc-item-title">מטה מודל</span><span class="toc-item-page">37</span></li>
+        <li class="toc-item"><span class="toc-item-title">דיוק מטרות (OUTCOME)</span><span class="toc-item-page">45</span></li>
+        <li class="toc-item"><span class="toc-item-title">סדר פעולות לכל תהליך</span><span class="toc-item-page">49</span></li>
+        <li class="toc-item"><span class="toc-item-title">מערכות ייצוג</span><span class="toc-item-page">50</span></li>
+        <li class="toc-item"><span class="toc-item-title">תתי חושים (Sub-Modalities)</span><span class="toc-item-page">56</span></li>
+        <li class="toc-item"><span class="toc-item-title">אקולוגיה</span><span class="toc-item-page">69</span></li>
+        <li class="toc-item"><span class="toc-item-title">מסגור ורי-פריים</span><span class="toc-item-page">71</span></li>
+        <li class="toc-item"><span class="toc-item-title">מודל הצרכים של טוני רובינס</span><span class="toc-item-page">78</span></li>
+        <li class="toc-item"><span class="toc-item-title">עוגנים</span><span class="toc-item-page">81</span></li>
+        <li class="toc-item"><span class="toc-item-title">סטייט (מצב רגשי)</span><span class="toc-item-page">89</span></li>
+        <li class="toc-item"><span class="toc-item-title">הרגלים</span><span class="toc-item-page">91</span></li>
+        <li class="toc-item"><span class="toc-item-title">אמונות</span><span class="toc-item-page">98</span></li>
+        <li class="toc-item"><span class="toc-item-title">מודל רמות לוגיות</span><span class="toc-item-page">107</span></li>
+        <li class="toc-item"><span class="toc-item-title">סיכום</span><span class="toc-item-page">112</span></li>
+    </ul>
+</div>
+
+<!-- ==================== CHAPTER 1: INTRODUCTION ==================== -->
+<div class="content">
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 1</div>
+            <h1 class="chapter-title">מה זה NLP?</h1>
+        </div>
+
+        <div class="definition">
+            <div class="definition-term">Neuro Linguistic Programming</div>
+            <p><strong>Neuro</strong> - ניורון, תא עצב. תא שנמצא במערכת העצבים ומשמש כיחידת התפקוד הבסיסית של המוח, משפיע על החוויה הסובייקטיבית.</p>
+            <p><strong>Linguistic</strong> - שפה, דרך התקשורת שדרכה השינוי נעשה.</p>
+            <p><strong>Programming</strong> - תכנות, היכולת לנצל את הגמישות של המוח לטובת שינוי, בין אם זה מחשבות, רגשות, פעולות והרגלים אוטומטיים.</p>
+        </div>
+
+        <h2>ובשפה פשוטה</h2>
+        <p>NLP זו מיומנות שנותנת לנו את היכולת לשנות דפוסים שליליים באמצעות שפה.</p>
+
+        <p>התוצאות שלנו הן סך כל הפעולות שלנו, ובהרבה מקרים בחיים אנחנו פועלים על "אוטומט". בשביל לשנות את התוצאות בחיינו, נצטרך לשנות את הפעולות שלנו.</p>
+
+        <p>הבעיה היא שהרבה מהפעולות שתוקעות אותנו מתבצעות על אוטומט ויש כל מיני גורמים שאנחנו לא מודעים להם שגורמים לנו לפעול ככה, כמו:</p>
+
+        <ul>
+            <li>מחשבות שליליות</li>
+            <li>רגשות מסוימים</li>
+            <li>דפוסי התנהגות אוטומטיים</li>
+            <li>הרגלים מזיקים</li>
+            <li>אמונות ותפיסות על עצמנו ועל העולם</li>
+        </ul>
+
+        <div class="highlight">
+            <div class="highlight-title">המסקנה</div>
+            <p>באמצעות NLP אפשר להבין בדיוק מה הגורם המעכב, לעקור אותו מהשורש ולתכנת את המוח בדרך שבה אנחנו בוחרים שתיהיה אפקטיבית עבורנו.</p>
+        </div>
+
+        <h2>עוד הגדרות ל-NLP</h2>
+        <ul>
+            <li>ניתוב לשוני פיזיולוגי</li>
+            <li>חקר החוויה הסובייקטיבית</li>
+            <li>שינוי מחשבות, רגשות, פעולות והרגלים אוטומטיים דרך שפה</li>
+            <li>תכנות המוח</li>
+            <li>דיגום הצלחות</li>
+            <li>הטמעת שינויים מהירים דרך תת המודע</li>
+        </ul>
+
+        <h2>מה מיוחד כל כך ב-NLP?</h2>
+        <p>הייחודיות שיש לשיטת ה-NLP ביחס לשיטות אחרות זה <strong>המהירות</strong>.</p>
+
+        <p>המוח שלנו יודע ליצור דפוסים ולהטמיע אותם בכמה רגעים - זה יכול להיות לחיוב וזה יכול להיות לשלילה.</p>
+
+        <div class="quote">
+            איך נוצר מצב שאנשים שנוסעים ברכב 20 שנה ונקלעו לתאונת דרכים לא מוכנים לעלות יותר על ההגה? או אדם שנתקע במעלית ולאחר המקרה מפתח "קלסטרופוביה"?
+        </div>
+
+        <p>האירועים הללו קרו מספר דקות בודדות, ובכל זאת, נוצר בתת המודע דפוס שישאר עד שיעקרו אותו מהשורש.</p>
+
+        <p>כמו שיכולים להיווצר דפוסים שליליים בתת המודע, ככה גם אפשר ליצור דפוסים חיוביים בתת המודע.</p>
+
+        <div class="tip">
+            <div class="tip-title">למה NLP עובד מהר?</div>
+            <p>הסיבה ש-NLP עובד בצורה מהירה כל כך היא בזכות היכולת שלו לעשות את העבודה "בחדר הבקרה" של המוח שנקרא <strong>תת המודע</strong>.</p>
+        </div>
+
+        <h2>איך NLP בכלל נוצר?</h2>
+        <p>ה-NLP פותח בארצות הברית בשנות ה-70 של המאה ה-20 על ידי <strong>ריצ'רד בנדלר</strong> ופרופסור <strong>ג'ון גרינדר</strong> שניסו לפצח את חידת המצוינות האנושית, ולבחון מדוע מטפלים אשר נחשבו מומחים בתחומם ואשפי תקשורת מסוימים מצטיינים בתחומם.</p>
+
+        <p>בנדלר וגרינדר ניסו להבין מה סודם של המטפלים המצליחים ביותר באותה תקופה. למעשה, אף אחד לא הבין מה סודם של אותם מטפלים, וזו הסיבה שהם זכו לכינוי <strong>"קוסמים"</strong>. בעיני אנשים רבים זה היה כמו קסם להיכנס עם בעיה למטפל, לדבר קצת, ולצאת בלי הבעיה.</p>
+
+        <p>הם הניחו שאם יצליחו לבודד את מרכיבי התקשורת של אותם מצטיינים, יהיה בידיהם המפתח לשיפור התקשורת.</p>
+
+        <h3>המטפלים שנחקרו:</h3>
+        <ul>
+            <li><strong>ד"ר מילטון אריקסון</strong> – אבי ההיפנותרפיה המודרנית והטיפול קצר המועד</li>
+            <li><strong>וירג'יניה סאטיר</strong> – עובדת סוציאלית ומטפלת משפחתית מבריקה</li>
+            <li><strong>ד"ר פריץ פרלס</strong> – אבי תורת הגשטלט</li>
+            <li><strong>ד"ר גרגורי בייטסון</strong> – אנתרופולוג וביולוג מפורסם</li>
+        </ul>
+
+        <p>בנדלר וגרינדר צילמו טיפולים, צפו בהם דרך מראה חד כיוונית, ראיינו מטופלים ושאלו את המטפלים עצמם שאלות רבות כדי להבין מדוע הגיבו כפי שהגיבו. לאחר צפייה ממושכת בדרכי הטיפול והתקשורת שלהם, היה בידיהם "התמצית" של הכללים הראשונים של ה-NLP.</p>
+
+        <h2>למה המציאו את ה-NLP?</h2>
+        <p>שיטת ה-NLP פותחה מתוך ההבנה שתחום הפסיכולוגיה הקלאסית אינו מצליח להתמודד בעקביות עם הרצונות והבעיות של אנשים, ולמעשה לא יכול באופן סיסטמטי וקבוע לייצר את התוצאה הרצויה אצל אנשים.</p>
+
+        <div class="quote">
+            ריצ'רד בנדלר, אחד ממייסדי השיטה, ציין בספרו "הכוח הטמון במוח" שכל ספרות הפסיכולוגיה הקלאסית עסוקה בשימת דגש על למידת ואפיון הבעיות שיש לאנשים בחיים, במקום בשימת דגש על מציאת פתרונות לאותן בעיות.
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 2: 3 LEVELS ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 2</div>
+            <h1 class="chapter-title">3 הרמות ב-NLP</h1>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">רמה 1: NLP PRACTITIONER</div>
+            <p>ההסמכה הבסיסית בתחום. ניתן לעסוק בו לאחר ההסמכה הזו. בעל יכולת ליצור שינויים מהירים במחשבות, רגשות והתנהגויות אוטומטיות לעצמו ולאחרים.</p>
+        </div>
+
+        <h3>הבעיות שנלמד לפתור בקורס הסמכת PRACTITIONER:</h3>
+        <ul>
+            <li>איך לשלוט ברגשות ובמחשבות</li>
+            <li>איך ליצור מוטיבציה בצורה פשוטה</li>
+            <li>איך לשנות דפוסי אכילה</li>
+            <li>איך להתגבר על חרדות</li>
+            <li>איך לשבור אמונות מגבילות</li>
+            <li>איך להתגבר על פחדים</li>
+            <li>איך לפתור "פוביות" מהר</li>
+            <li>איך לפתח בטחון עצמי</li>
+            <li>איך לקום ולהתגבר על משבר</li>
+            <li>איך להטמיע הרגלים מעצימים ולקטוע הרגלים גרועים</li>
+        </ul>
+
+        <div class="highlight">
+            <div class="highlight-title">רמה 2: NLP MASTER PRACTITIONER</div>
+            <p>הרמה המקצועית הבכירה בתחום. בעל יכולת ומיומנות ליצור תהליכים בעצמו.</p>
+        </div>
+
+        <h3>הבעיות שנלמד לפתור בקורס הסמכת MASTER PRACTITIONER:</h3>
+        <ul>
+            <li>איך לדגום אנשים מצליחים בצורה מדויקת</li>
+            <li>להבין אסטרטגיות חשיבה לעומק</li>
+            <li>הבנת סוגי הרגשות והמסרים שלהם</li>
+            <li>איך להתגבר על דיכאון</li>
+            <li>להכיר את עצמי ברמה העמוקה ביותר</li>
+            <li>שינוי ויצירת זהות חדשה</li>
+            <li>זריזות לשון, שינוי אמונות דרך דפוסי שפה</li>
+        </ul>
+
+        <div class="highlight">
+            <div class="highlight-title">רמה 3: NLP TRAINER</div>
+            <p>מורה NLP מוסמך בעל יכולת להכשיר ולהסמיך אחרים בתחום.</p>
+        </div>
+
+        <h3>הבעיות שנלמד לפתור בקורס הסמכת TRAINER:</h3>
+        <ul>
+            <li>לפתור פחד במה ולדבר בבטחון מול אנשים</li>
+            <li>איך לדבר בצורה סוחפת וכריזמטית מול קהל</li>
+            <li>איך ליצור הרצאה טובה</li>
+            <li>איך למכור על במה בכמויות</li>
+            <li>איך לבנות סדנה לקבוצות</li>
+            <li>איך לתמחר כל מוצר במכירה</li>
+            <li>איך להפוך עמידה מול קהל למקצוע</li>
+        </ul>
+
+        <p>עם הזמן פותחו עוד תחומים שסובבים סביב ה-NLP, ביניהם: דמיון מודרך, היפנותרפיה, Timeline Therapy ועוד.</p>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 3: ABOUT THE COURSE ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 3</div>
+            <h1 class="chapter-title">איך הקורס הולך להתנהל</h1>
+        </div>
+
+        <p>הלמידה בקורס מתקיימת בשני מישורים:</p>
+        <ol>
+            <li><strong>הלמידה בכיתה</strong> - שיעורים פרונטליים עם תרגול מעשי</li>
+            <li><strong>הלמידה העצמאית</strong> - תרגול מחוץ לשעות הקורס</li>
+        </ol>
+
+        <h2>מה יצא לך מהקורס הקרוב?</h2>
+        <ul>
+            <li>הכשרה מלאה של 54 שעות בת 9 ימים בסגנון הלימוד של מייסד השיטה</li>
+            <li>מנטורים צמודים לצורך מענה מקצועי ממישהו שלמד את השיטה</li>
+            <li>חוברת של כל הקורס ללמידה ותרגול הכוללת את כל הטכניקות והשלבים שלהן (החוברת הזו)</li>
+            <li>קהילה חזקה של נלפיסטים ליצירת קשרים ותרגולים אחד על השני</li>
+            <li>מפגשי תרגול בזום (למי שרוצה)</li>
+            <li>תעודת הסמכה מארגון ה-NLP העולמי</li>
+            <li>פורטל דיגיטלי להטמעה וחזרה על החומר</li>
+        </ul>
+
+        <div class="two-columns">
+            <div class="column">
+                <div class="column-title">התחייבות מנחה הקורס</div>
+                <ul>
+                    <li>להעביר את התוכן בצורה הכי עניינית, פרקטית ויישימה</li>
+                    <li>לתת מענה מקצועי ואישי לשאלות</li>
+                    <li>להקפיד על זמנים ולהיות ממוקד</li>
+                    <li>לכבד את המפה שלך ולא לשפוט שום צורת חשיבה</li>
+                </ul>
+            </div>
+            <div class="column">
+                <div class="column-title">התחייבות תלמיד הקורס</div>
+                <ul>
+                    <li>ללמוד בצורה אקטיבית</li>
+                    <li>לבוא בראש פתוח לתכנים</li>
+                    <li>להגיע בזמן ולקחת ברצינות</li>
+                    <li>לשאול כשלא מבין</li>
+                    <li>לקחת אחריות מלאה על הלמידה</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">פירמידת הלמידה</div>
+            <p>מחקרים מוכיחים שלמידה אקטיבית מוטמעת בצורה טובה פי כמה במוח. לכן האקטיביות שלך במהלך הקורס היא חלק בלתי נפרד - ככל שהיא תיהיה גדולה יותר, ככה החומר יוטמע עמוק יותר ורמת הביטחון שלך תעלה.</p>
+        </div>
+
+        <h2>הצבת מטרות - מודל SMART</h2>
+        <ul>
+            <li><strong>S - ספציפית:</strong> עלינו לדעת בדיוק מה אנחנו רוצים</li>
+            <li><strong>M - מדיד:</strong> עלינו ליצור מטרה שאפשר למדוד אותה</li>
+            <li><strong>A - ברת השגה:</strong> עלינו ליצור מטרה שהיא ברת השגה עבורנו</li>
+            <li><strong>R - רלוונטי:</strong> עלינו ליצור מטרה שהיא רלוונטית לחיים שלנו</li>
+            <li><strong>T - תחומה בזמן:</strong> עלינו להגדיר את משך הזמן להשגת המטרה</li>
+        </ul>
+
+        <p><strong>דוגמא:</strong> בתאריך X אני שוקל Y קילו</p>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגיל: הגדרת מטרות אישיות</div>
+            <p class="write-label">הסיבה שנרשמתי לקורס:</p>
+            <div class="write-area"></div>
+            <p class="write-label">עם מה אני רוצה לצאת מהקורס?</p>
+            <div class="write-area"></div>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 4: COMMUNICATION MODEL ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 4</div>
+            <h1 class="chapter-title">מודל התקשורת של ה-NLP</h1>
+        </div>
+
+        <p>המודל מחלק את התהליך הפנימי שגורם לאנשים ליצור התנהגויות מסוימות לחמישה שלבים:</p>
+
+        <ol class="steps">
+            <li><strong>קליטת המציאות</strong> באמצעות חמשת החושים</li>
+            <li><strong>העברת האינפורמציה</strong> דרך מסננים במוח</li>
+            <li><strong>יצירה של מיצג פנימי</strong> בראש</li>
+            <li><strong>יצירה של מצב רגשי רגעי</strong> (סטייט)</li>
+            <li><strong>בחירה של התנהגות</strong></li>
+        </ol>
+
+        <!-- INFOGRAPHIC: Communication Model -->
+        <div class="infographic">
+            <svg width="500" height="140" viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
+                <!-- Box 1: External Event -->
+                <rect x="5" y="45" width="80" height="50" rx="8" fill="#003B46"/>
+                <text x="45" y="67" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="9" font-weight="600">אירוע</text>
+                <text x="45" y="82" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="8">חיצוני</text>
+
+                <!-- Arrow 1 -->
+                <path d="M90 70 L110 70" stroke="#D4AF37" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                <!-- Box 2: Filters -->
+                <rect x="115" y="30" width="90" height="80" rx="8" fill="#00606B"/>
+                <text x="160" y="52" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="9" font-weight="600">מסננים</text>
+                <text x="160" y="68" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="7">הכללות</text>
+                <text x="160" y="82" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="7">השמטות</text>
+                <text x="160" y="96" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="7">עיוותים</text>
+
+                <!-- Arrow 2 -->
+                <path d="M210 70 L230 70" stroke="#D4AF37" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                <!-- Box 3: Internal Rep -->
+                <rect x="235" y="45" width="80" height="50" rx="8" fill="#2F8592"/>
+                <text x="275" y="67" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="9" font-weight="600">מיצג</text>
+                <text x="275" y="82" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="8">פנימי</text>
+
+                <!-- Arrow 3 -->
+                <path d="M320 70 L340 70" stroke="#D4AF37" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                <!-- Box 4: State -->
+                <rect x="345" y="45" width="60" height="50" rx="8" fill="#D4AF37"/>
+                <text x="375" y="67" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="9" font-weight="700">מצב</text>
+                <text x="375" y="82" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="8">רגשי</text>
+
+                <!-- Arrow 4 -->
+                <path d="M410 70 L430 70" stroke="#D4AF37" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                <!-- Box 5: Behavior -->
+                <rect x="435" y="45" width="60" height="50" rx="8" fill="#003B46"/>
+                <text x="465" y="72" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="9" font-weight="600">התנהגות</text>
+
+                <!-- Arrow marker definition -->
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#D4AF37"/>
+                    </marker>
+                </defs>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 10px;">מודל התקשורת של NLP - מאירוע חיצוני להתנהגות</p>
+        </div>
+
+        <h2>קליטת המציאות</h2>
+        <p>את המציאות אנחנו קולטים דרך חמשת החושים שלנו: ראייה, שמיעה, תחושה, טעם, ריח.</p>
+        <p>באמצעות חמשת החושים שלנו אנחנו קולטים בממוצע <strong>2 מיליון ביטים של מידע בשנייה</strong>.</p>
+        <p>מכיוון שהמודע לא יכול להכיל את כמות המידע הזו, יש לו 3 מסננים ראשיים שדרכם עובר המידע.</p>
+
+        <h2>המסננים במוח (פרשנות)</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">מסנן 1: הכללות</div>
+            <p>הכללה זה תהליך במוח שגורם לו לחסוך באנרגיה. דרך התהליך הזה המוח משליך מידע שקיבל לעוד תחומים ודברים דומים.</p>
+            <ul>
+                <li>ברגע שפתחנו דלת, אנחנו לא צריכים ללמוד איך לפתוח שוב דלתות</li>
+                <li>ברגע שלמדנו מה זה כיסא, גם אם נראה כיסא שלא ראינו בחיים, נבין שזה כיסא</li>
+            </ul>
+            <p><strong>הבעיה:</strong> הכללות שיכולות לפגוע בנו או למנוע מאיתנו להיפתח לדברים חדשים.</p>
+            <p><em>דוגמאות להכללה שלילית:</em> "אף פעם לא הולך לי עם גברים", "אני תמיד מוותר לעצמי כשמתחילים לצוץ אתגרים"</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">מסנן 2: השמטות</div>
+            <p>המוח מקבל 2 מיליון ביטים של מידע בשנייה. במאגרי המידע של הלא מודע יש כמות גדולה מאוד של מידע שאנחנו לא חשופים אליה לאורך היום.</p>
+            <p>מטרת המנגנון הזה היא למקד אותנו בדברים שחשובים ולמנוע מאיתנו לקבל מידע לא רלוונטי.</p>
+            <p><em>דוגמא:</em> 2 רכבים שכמעט עשו תאונה - כל אחד מהנהגים יתאר את הסיטואציה בצורה אחרת לחלוטין מהאחר.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">מסנן 3: עיוותים</div>
+            <p>באמצעות המסנן הזה המוח משנה דברים בשביל להתאים אותם לתפיסת המציאות שלו. זה יכול לבוא לידי ביטוי בשינוי זכרונות מאירועים שקרו לנו בעבר.</p>
+            <p><em>דוגמא:</em> אני מדמיין שאני נמצא בחופשה בתאילנד, על חוף הים, מזג אוויר נעים, עם קוקוס ביד.</p>
+        </div>
+
+        <h2>מיצג פנימי</h2>
+        <p>לאחר תהליך הסינון, המידע שנקלט עובר ליצירת <strong>מיצג פנימי</strong> - התפיסה שלנו בנוגע לחוויה בצורה סובייקטיבית.</p>
+        <p>מיצג פנימי יכול להיות סרט/תמונה בראש או שיח פנימי שיש לי עם עצמי.</p>
+
+        <div class="definition">
+            <div class="definition-term">סטייט (State)</div>
+            <p>כל פעולה אשר אנחנו מבצעים נגרמת כתוצאה מ"סטייט" שאנחנו נמצאים בו באותו הרגע.</p>
+            <p><strong>סטייט = מצב רגשי רגעי</strong></p>
+            <p>סטייט זה דבר שמשתנה מרגע לרגע בהתאם לשני דברים:</p>
+            <ul>
+                <li><strong>הפיזיולוגיה שלנו:</strong> תנוחה, ביוכימיה, נשימה, מתח או רפיון שרירים</li>
+                <li><strong>התצוגה הפנימית שלנו בראש:</strong> מה ואיך אנחנו מדמים במוחנו, מה ואיך אנו אומרים ושומעים במוחנו</li>
+            </ul>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">אין התנהגות טובה או לא טובה</div>
+            <p>יש התנהגות שהיא <strong>אפקטיבית</strong> (מקדמת אותי למטרות שלי) ויש התנהגות <strong>דפקטיבית</strong> (מונעת ממני להתקדם לעבר המטרות שלי).</p>
+        </div>
+
+        <h2>מודע vs תת מודע</h2>
+
+        <div class="two-columns">
+            <div class="column">
+                <div class="column-title">המודע - החלק הרציונלי</div>
+                <ul>
+                    <li>זיכרון לטווח קצר</li>
+                    <li>רציונליזציה</li>
+                    <li>חשיבה לוגית ומתמטית</li>
+                    <li>ביקורתיות</li>
+                    <li>מחשבות מודעות</li>
+                </ul>
+            </div>
+            <div class="column">
+                <div class="column-title">תת המודע - החלק הרגשי</div>
+                <ul>
+                    <li>זיכרון לטווח ארוך</li>
+                    <li>החלטות</li>
+                    <li>רגשות</li>
+                    <li>אינסטינקטים</li>
+                    <li>אוטומטיים</li>
+                    <li>אמונות וערכים</li>
+                    <li>דמיון</li>
+                    <li>הכללות, השמטות ועיוותים</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 5: NON-VERBAL COMMUNICATION ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 5</div>
+            <h1 class="chapter-title">תקשורת לא מילולית</h1>
+        </div>
+
+        <div class="quote">
+            "זה לא מה אתה אומר, זה איך אתה אומר"
+        </div>
+
+        <p>בכל תקשורת שלנו עם אנשים, יש הרבה מאוד מסרים שעוברים. רובם לא ורבליים.</p>
+        <p>מעבר למילים שיוצאות לאדם מהפה, יש גם תקשורת שקורית בצורה לא מילולית.</p>
+
+        <div class="definition">
+            <p><strong>נלפיסט מקצוען</strong> יודע לזהות את המסרים הלא מילוליים ולהגיב לכך בהתאם.</p>
+            <p>המסרים הלא מילוליים יודעים לספר לנו הרבה מעבר למילים של אותו אדם.</p>
+            <p><strong>הגוף לא יודע לשקר.</strong></p>
+        </div>
+
+        <h2>חלוקת התקשורת</h2>
+        <table>
+            <tr>
+                <th>ערוץ</th>
+                <th>אחוז</th>
+            </tr>
+            <tr>
+                <td>מילים</td>
+                <td>7%</td>
+            </tr>
+            <tr>
+                <td>טונציה</td>
+                <td>38%</td>
+            </tr>
+            <tr>
+                <td>שפת גוף</td>
+                <td>55%</td>
+            </tr>
+        </table>
+
+        <h2>קליברציה (כיול)</h2>
+        <p><strong>קליברציה</strong> היא היכולת שלי לזהות שינוי בתקשורת הלא מילולית של הצד השני.</p>
+
+        <h3>שינויים שאפשר לזהות:</h3>
+        <ul>
+            <li><strong>טונציה:</strong> ווליום, קצב, סגנון דיבור, סוג קול, שינויים, רציפות</li>
+            <li><strong>שפת גוף:</strong> תנועות, גירודים, טונוס שרירים, נשימה, הזעה, כיוון עיניים, סגור/פתוח, תנוחת גוף</li>
+        </ul>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגילים לחידוד הקליברציה</div>
+            <p><strong>תרגיל א:</strong></p>
+            <ol>
+                <li>אדם א' מסתכל ומקשיב לאדם ב'</li>
+                <li>אדם ב' מספר אירוע לא נעים שקרה לו לאחרונה</li>
+                <li>אדם א' רושם את איך הייתה הטונציה והשפת גוף שלו</li>
+                <li>לאחר מכן, אדם ב' מספר אירוע נעים וכיף שהיה לו</li>
+                <li>אדם א' רושם את ההבדלים</li>
+            </ol>
+        </div>
+
+        <h2>הלימה vs חוסר הלימה</h2>
+        <p><strong>הלימה</strong> = התאמה בין הרגשות, המחשבות וההתנהגות של האדם. קוהרנטיות בין הגוף לנפש.</p>
+
+        <p>כשאין הלימה נראה את זה על ידי דיסוננס בתקשורת של הצד השני:</p>
+        <ul>
+            <li>"אני אנסה..."</li>
+            <li>"אני חייב לעשות..."</li>
+            <li>ציניות</li>
+        </ul>
+
+        <div class="tip">
+            <div class="tip-title">טיפ חשוב</div>
+            <p>חוסר הלימה יכול לצייר חוסר אמינות בצד השני. אנשים וסרטים מצחיקים יוצרים חוסר הלימה כדי להצחיק אותנו.</p>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 6: RAPPORT ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 6</div>
+            <h1 class="chapter-title">ראפור</h1>
+        </div>
+
+        <p>המילה ראפור לקוחה מהשפה הצרפתית.</p>
+
+        <div class="definition">
+            <div class="definition-term">ראפור = כימיה, קירבה, אמון</div>
+            <p><strong>הנחת היסוד:</strong> דומה מושך דומה</p>
+        </div>
+
+        <p>עוד מימי קדם היה לנו צורך להיות בקבוצה של אנשים שדומים לנו. כשחיינו בשבטים, הרגשנו תחושת ביטחון להיות בשבט שלנו בגלל הקרבה והדמיון שהיה לנו.</p>
+
+        <p>באופן לא מודע, אנשים נוטים להתחבר לאנשים שדומים להם.</p>
+
+        <div class="highlight">
+            <div class="highlight-title">מה זה ראפור?</div>
+            <p>ראפור זו היכולת שלנו ליצור באופן לא מודע לצד השני, תחושת קרבה ואמון. זו מיומנות טבעית שיש לרובנו, ורוב האנשים באופן טבעי יוצרים ראפור עם האנשים הקרובים להם.</p>
+        </div>
+
+        <h2>למה זה חשוב?</h2>
+        <p>ראפור מאפשר לנו ליצור ולהוביל תקשורת איכותית בכל סוג של מערכת יחסים:</p>
+        <ul>
+            <li>יחסים אישיים, דייטים, זוגיות</li>
+            <li>עסקים, שיתופי פעולה</li>
+            <li>חברים, אנשים קרובים</li>
+            <li>שיווק, מכירות</li>
+            <li>ניהול עובדים ומשא ומתן</li>
+        </ul>
+
+        <h2>איך זה עובד?</h2>
+        <p>בשביל לייצר ראפור עם הצד השני, נרצה "לחקות" ולשקף לו בצורה טבעית את התקשורת המודעת והלא מודעת שלו:</p>
+
+        <table>
+            <tr>
+                <th>ערוץ</th>
+                <th>דוגמאות לשיקוף</th>
+            </tr>
+            <tr>
+                <td>מילים</td>
+                <td>שימוש במילים ספציפיות שהצד השני משתמש</td>
+            </tr>
+            <tr>
+                <td>טונציה</td>
+                <td>התאמת קצב דיבור, עוצמת הקול</td>
+            </tr>
+            <tr>
+                <td>שפת גוף</td>
+                <td>חיקוי צורת הישיבה, תנועות ידיים, נשימות</td>
+            </tr>
+        </table>
+
+        <div class="tip">
+            <div class="tip-title">טעות נפוצה</div>
+            <p>יצירת ראפור טכני/מזויף. בשביל שראפור יצור חיבור אמיתי, נצטרך לגרום לצד השני להרגיש בהתאמה ולא בכך שאנחנו "מחקים" אותו.</p>
+        </div>
+
+        <h3>הובלה</h3>
+        <p>ברגע שיצרנו שיקוף למשך זמן עם הצד השני, נוכל לבדוק אם נוצר ראפור דרך שינוי קטן בתקשורת שלנו. במידה והאדם השני חזר אחרינו, נראה שיש התאמה.</p>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגול ליצירת ראפור</div>
+            <ol>
+                <li>אדם א' מספר על יום בחיים האידיאלים שלו</li>
+                <li>אדם ב' מקשיב לו במטרה ליצור ראפור</li>
+                <li>אדם א' מספר על קושי שחווה לאחרונה</li>
+                <li>אדם ב' "שובר" איתו ראפור בכוונה</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 7: PRESUPPOSITIONS ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 7</div>
+            <h1 class="chapter-title">הנחות היסוד של ה-NLP</h1>
+        </div>
+
+        <p>הנחות היסוד של ה-NLP הן תפיסות למציאות, אמונות, שבעזרתן נוכל לייצר תוצאות טובות יותר בחיים שלנו. הן לא אמת מוחלטת - הן גישה לחיים. לכן אנחנו ממליצים לך להאמין במה שעושה לך טוב.</p>
+
+        <div class="highlight">
+            <div class="highlight-title">1. המפה היא לא השטח</div>
+            <p>לכל אדם יש את "התפיסה" שלו. לפי מה שהוא חונך וגדל, אין זה אומר שזו המציאות (השטח), אלא רק איך שהוא רואה את העולם.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">2. אין כישלון, יש משוב ולמידה</div>
+            <p>אין הצלחה אמיתית בלי ניסוי וטעייה בדרך. זה או שאנחנו מתקדמים לעבר המטרה שלנו, או שאנחנו מקבלים שיעור שילמד אותנו.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">3. כל בעיה היא תוצאה של תהליך חשיבתי</div>
+            <p>התוצאות שלנו הן הנגזרת של הפעולות שלנו והפעולות שלנו הן הנגזרת של הרגשות והמחשבות שלנו. לכן אם יש לנו בעיה שאנחנו לא מצליחים לפתור, נשנה את תהליך החשיבה ונקבל תוצאה חדשה.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">4. משמעות התקשורת בתגובה שמתקבלת</div>
+            <p>אנחנו לוקחים אחריות מלאה על התקשורת שלנו. הדבר שמשנה לנו זה מה הצד השני לקח ואיך הוא הגיב לנו.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">5. לכל התנהגות יש כוונה חיובית עבור האדם</div>
+            <p>אין דבר כזה "הרס עצמי". גם להתנהגויות "הפוגעות" שלנו יש אינטרס (מודע או לא מודע) שמטרתו זה לעשות לנו טוב.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">6. אנשים לא מקולקלים, הם עובדים טוב מאוד</div>
+            <p>אין דבר כזה בן אדם מקולקל. יש אדם שצריך הנחייה. אף אחד לא צריך שמישהו יתקן אותו.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">7. האנרגיה זורמת לכיוון תשומת הלב</div>
+            <p>מה שמתמקדים בו גדל. ככל שאתמקד בדבר אחד ככה אשים לב אליו יותר לאורך היום, לטוב ולשלילה.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">8. המחשבות שלי הן לא באמת אני</div>
+            <p>לא כל המחשבות שיש לנו בראש הן באמת שלנו. יש מחשבות שקיבלנו ממישהו אחר שיכולות לפגוע בנו ולעכב אותנו.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">9. כל הצלחה אפשר למדל</div>
+            <p>אם אדם אחד הצליח לעשות את זה, משמע שגם אני יכול לעשות את זה במידה ואבין מהן סדר הפעולות והדרכי חשיבה שגרמו לו להגיע לתוצאה הזו.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">10. תמיד יש אפשרויות בחירה</div>
+            <p>לפעמים אנחנו יכולים להיות מקובעים למספר מצומצם של אופציות. ההנחה שתמיד יש עוד אופציות יכולה לפתוח לנו עוד כיווני חשיבה.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">11. המוח לא יודע להבדיל בין דמיון, זכרון ומציאות</div>
+            <p>יש לשלושת היכולות האלה את אותם המעגלים העצביים במוח ולכן תת המודע לא יכול באמת להבדיל ביניהם.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">12. לכל אדם יש את כל המשאבים להצלחה</div>
+            <p>יש בתוכנו את כל המשאבים שאנחנו זקוקים בשביל להתגבר על מכשולים ולהשיג את המטרות שלנו, רק צריך לדעת איך להוציא אותם ואיך להשתמש בהם.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">13. חזרתיות היא אם כל המיומנויות</div>
+            <p>ככל שנעשה משהו יותר פעמים, כך הוא יהפוך למיומנות שנעשה אותה באופן לא מודע.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">14. גמישות היא העוצמה העילאית</div>
+            <p>גמישות מאפשרת לנו להיות פתוחים לעוד אפשרויות ונותנת לנו את האופציה לחולל שינויים בצורה מהירה ואפקטיבית יותר.</p>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגיל: יישום הנחות יסוד</div>
+            <ol>
+                <li>בחר הנחת יסוד שאתה מתחבר אליה</li>
+                <li>דמיין סיטואציה שמהווה קושי למשהו שאתה מתמודד איתו היום</li>
+                <li>שבירת מצב - בריק סטייט</li>
+                <li>דמיין את אותה הסיטואציה רק שהפעם, אתה מסתכל על המצב מתוך הנחת היסוד</li>
+                <li>מה חדש? מה מתאפשר לך? איך זה מרגיש?</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- Additional chapters would continue here with similar structure -->
+    <!-- For brevity, I'll add a closing section -->
+
+    <!-- ==================== CHAPTER 8: VISUALIZATION ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 8</div>
+            <h1 class="chapter-title">ויזואליזציה ודמיון</h1>
+        </div>
+
+        <p>רוב היום אנחנו נמצאים במצב של "דמיון". דמיון יכול להיות בכל החושים (VAKOG):</p>
+
+        <ul>
+            <li>אנחנו יכולים לדמיין <strong>תמונות וסיטואציות</strong></li>
+            <li>אנחנו יכולים לדמיין <strong>קולות</strong></li>
+            <li>אנחנו יכולים לדמיין <strong>מגע</strong></li>
+            <li>אנחנו יכולים לדמיין <strong>ריח</strong></li>
+            <li>אנחנו יכולים לדמיין <strong>טעם</strong></li>
+        </ul>
+
+        <div class="highlight">
+            <div class="highlight-title">למה דמיון חשוב?</div>
+            <p>פיתוח מיומנויות הדמיון שלנו יכולה לעזור לנו לשלוט במצב הרגשי הרגעי שלנו (סטייט) ולעזור לנו לשלוט בחוויות וברגשות שעולים לנו - אפילו באוטומט.</p>
+        </div>
+
+        <div class="definition">
+            <div class="definition-term">הנחת יסוד חשובה</div>
+            <p>המוח שלנו <strong>לא מבדיל בין דמיון, זכרון ומציאות</strong> - ולכן אנחנו יכולים לנצל את זה לטובתנו. כמו כל שריר, ככל שנאמן אותו יותר, כך הוא יהיה חזק יותר.</p>
+        </div>
+
+        <h2>תרגילים לפיתוח הדמיון</h2>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגיל לפיתוח דמיון ויזואלי</div>
+            <ol>
+                <li>עצום עיניים ודמיין ריבוע</li>
+                <li>צבע את הריבוע בצבע כתום</li>
+                <li>שנה את הריבוע לצורה אחרת שעולה לך</li>
+                <li>שנה את הצבע לצבע אחר שתבחר</li>
+                <li>שחק בגדלים של הצורה - הקטן והגדל</li>
+                <li>הרחק אותה ממך וקרב אותה אליך</li>
+                <li>החזר את הצבע לשחור לבן</li>
+                <li>שנה צורות וצבעים בדמיונך 5 פעמים לפחות</li>
+            </ol>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגיל לפיתוח דמיון שמיעתי</div>
+            <ol>
+                <li>עצום עיניים ודמיין שאתה שומע שיר שאתה אוהב</li>
+                <li>הגבר את הווליום והנמך אותו</li>
+                <li>שחק עם המהירות - כפול 2, מהירות 0.5, וחזור ל-1</li>
+                <li>דמיין שעכשיו בובספוג שר את השיר הזה</li>
+                <li>הוסף מוסיקת רקע של קרקס</li>
+            </ol>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגיל לפיתוח דמיון תחושתי</div>
+            <ol>
+                <li>דמיין שאתה הולך על הרצפה בבית שלך</li>
+                <li>דמיין עכשיו שהרצפה עשויה מלגו</li>
+                <li>דמיין שהלגו הזה מתחיל להיות חם כמו גחלים</li>
+                <li>ועכשיו הפוך את הרצפה לקרה</li>
+                <li>ובמקום לגו, דמיין שאתה הולך על ענבים</li>
+            </ol>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגיל לפיתוח דמיון טעם וריח</div>
+            <p><strong>טעם:</strong> דמיין שאתה במטבח, פותח את המקרר ומוציא לימון. שם אותו על קרש חיתוך, לוקח סכין וחותך אותו באמצע. לוקח חצי אחד, מרים אותו ונותן עליו ליקוק עם כל הלשון שלך. ועכשיו הפוך את הטעם לטעם של תפוז.</p>
+            <p><strong>ריח:</strong> דמיין שאתה נמצא במטבח, ובתנור מחכה לך עוגת שוקולד חמה. אתה פותח את התנור ומהתנור יוצא ריח של עוגת שוקולד חמה. שנה עכשיו את הריח הזה לריח של טונה.</p>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 9: PERCEPTUAL POSITIONS ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 9</div>
+            <h1 class="chapter-title">עמדות תפיסה</h1>
+        </div>
+
+        <p>באופן אינטואיטיבי אנחנו נוטים להסתכל על דברים מנקודת המבט האישית שלנו. הנקודת מבט שלנו מורכבת מהתפיסות, אמונות וערכים שלנו.</p>
+
+        <div class="quote">
+            "המפה אינה השטח"
+        </div>
+
+        <p>במצבים מסויימים התפיסה האישית שלנו לא תמיד אפקטיבית, והחיסרון בזה הוא הצמצום של אפשרויות ואופציות הפתוחות בפנינו.</p>
+
+        <div class="highlight">
+            <div class="highlight-title">שלוש נקודות מבט</div>
+            <p>לכולנו יש את היכולת לראות, לשמוע ולהרגיש את הדברים מנקודות מבט שונות:</p>
+            <ul>
+                <li><strong>נקודת המבט שלנו</strong> (גוף ראשון)</li>
+                <li><strong>נקודת המבט של האדם שמולנו</strong> (גוף שני)</li>
+                <li><strong>נקודת המבט של הצופה מהצד</strong> (גוף שלישי)</li>
+            </ul>
+        </div>
+
+        <!-- INFOGRAPHIC: Perceptual Positions -->
+        <div class="infographic">
+            <svg width="350" height="200" viewBox="0 0 350 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Position 1 - Self (Bottom Left) -->
+                <circle cx="80" cy="150" r="40" fill="#003B46"/>
+                <text x="80" y="145" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="24">👤</text>
+                <text x="80" y="170" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="10" font-weight="600">עמדה 1</text>
+                <text x="80" y="205" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="10" font-weight="600">אני</text>
+
+                <!-- Position 2 - Other (Bottom Right) -->
+                <circle cx="270" cy="150" r="40" fill="#00606B"/>
+                <text x="270" y="145" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="24">👤</text>
+                <text x="270" y="170" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="10" font-weight="600">עמדה 2</text>
+                <text x="270" y="205" text-anchor="middle" fill="#00606B" font-family="Heebo, sans-serif" font-size="10" font-weight="600">האחר</text>
+
+                <!-- Position 3 - Observer (Top Center) -->
+                <circle cx="175" cy="50" r="40" fill="#D4AF37"/>
+                <text x="175" y="45" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="24">👁️</text>
+                <text x="175" y="70" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="10" font-weight="700">עמדה 3</text>
+                <text x="175" y="5" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="10" font-weight="600">הצופה</text>
+
+                <!-- Connecting Lines -->
+                <line x1="115" y1="125" x2="140" y2="80" stroke="#2F8592" stroke-width="2" stroke-dasharray="4,4"/>
+                <line x1="235" y1="125" x2="210" y2="80" stroke="#2F8592" stroke-width="2" stroke-dasharray="4,4"/>
+                <line x1="125" y1="150" x2="225" y2="150" stroke="#2F8592" stroke-width="2" stroke-dasharray="4,4"/>
+
+                <!-- Arrows on lines -->
+                <polygon points="137,85 145,78 148,88" fill="#2F8592"/>
+                <polygon points="213,85 205,78 202,88" fill="#2F8592"/>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 5px;">שלוש עמדות התפיסה</p>
+        </div>
+
+        <h2>מושגים חשובים</h2>
+        <div class="two-columns">
+            <div class="column">
+                <div class="column-title">אסוציאציה (מאוחד)</div>
+                <p>חווה את העולם דרך החושים האישיים שלי. חוויה שמתרחשת עכשיו מתוך העיניים, האוזניים והתחושות שלי.</p>
+            </div>
+            <div class="column">
+                <div class="column-title">דיסוציאציה (מופרד)</div>
+                <p>רואה את עצמי מהצד. ניתוק שלי מהחוויה, רואה אותה מהצד. יוצרת ניתוק רגשי של האדם מהחוויה.</p>
+            </div>
+        </div>
+
+        <h2>נקודת מבט 1 - גוף ראשון</h2>
+        <p>הנקודת מבט הטבעית ביותר עבור רוב האנשים. כאשר אני רואה, שומע ומרגיש דרך החושים שלי - אני בגוף ראשון. אני מסתכל על דברים מתוך המפה שלי, מתוך האמונות, ערכים, זכרונות ותפיסות עולם שאני מכיר.</p>
+
+        <h2>נקודת מבט 2 - גוף שני</h2>
+        <p>נקודת המבט של האדם האחר בסיטואציה. כשאני בעמדה שנייה אני רואה את העולם לפי נקודת המבט של הצד השני - אני מאמץ את התפיסות, האמונות, הערכים וכל מה שאני יודע לגביו ורואה את העולם דרך "המפה" שלו.</p>
+
+        <h2>נקודת מבט 3 - גוף שלישי</h2>
+        <p>נקודת מבט שלא מעורבת בסיטואציה - אנחנו ניהיה "הצופים מהצד". אנחנו מנותקים מהרגש שלנו ומהרגש של האדם ממולנו ותופסים את הסיטואציה בצורה כמה שיותר אובייקטיבית ולוגית.</p>
+
+        <div class="tip">
+            <div class="tip-title">טיפ חשוב</div>
+            <p>המיומנות להכנס לעמדה שלישית היא קריטית לנלפיסטים. לא מעט מהטכניקות שנלמד יכללו כניסה לגוף 3 - כמו טיפול בטראומות, פתירת פוביות ועוד.</p>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגול נקודות מבט</div>
+            <p><strong>תרגיל 1:</strong></p>
+            <ol>
+                <li>דמיין בגוף 1 שאתה נמצא בארוחה משפחתית ביחד עם משפחתך</li>
+                <li>עכשיו עבור לגוף 2 - לזה שיושב מימינך - היכנס לתוך החוויה שלו</li>
+                <li>עבור לבן אדם הבא שיושב איתך בשולחן</li>
+                <li>המשך כך עד שתגיע בחזרה אליך</li>
+            </ol>
+            <p><strong>תרגיל 2:</strong></p>
+            <ol>
+                <li>דמיין שאתה רואה את הארוחה המשפחתית מנקודת המבט של זבוב על הקיר</li>
+                <li>היכנס לעמדה של הזבוב על הקיר ושים לב לשינוי שמתרחש</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 10: JOURNEY BETWEEN ADVISORS ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 10</div>
+            <h1 class="chapter-title">מסע בין יועצים</h1>
+        </div>
+
+        <p>בטכניקה זו, המונחה בוחר נושא כלשהו שהוא היה רוצה לקבל עליו עוד תובנות ולמידות מאנשים שהוא מעריך והיה רוצה לקבל את עצתם.</p>
+
+        <div class="highlight">
+            <div class="highlight-title">מתי נשתמש בטכניקה זו?</div>
+            <ul>
+                <li>הסתכלות על סיטואציות מעוד זוויות</li>
+                <li>קבלת עזרה מאנשים שאנחנו מעריכים אותם</li>
+                <li>פתירת בעיות ואתגרים שיש לנו בכל נושא בחיים</li>
+                <li>כשיש לנו התלבטות ואנחנו לא יודעים איזו החלטה לקבל</li>
+            </ul>
+        </div>
+
+        <h2>שלבי הטכניקה</h2>
+        <ol class="steps">
+            <li>בסס ראפור</li>
+            <li>מה הנושא/בעיה שהיית רוצה לקבל עליו יותר תובנות?</li>
+            <li><strong>בחירת אנשים</strong> - מי האנשים שהיית רוצה לקבל מהם את התובנות האלו?</li>
+            <li><strong>פיזור דפים</strong> - קח 4 דפים, על דף 1 רשום "גוף ראשון" ועל שלושת האחרים רשום את שמות היועצים</li>
+            <li><strong>שיתוף הנושא</strong> - המונחה עומד על דף "גוף ראשון" ומספר על הנושא/בעיה</li>
+            <li><strong>יציאה לגוף שלישי ובחירת יועץ</strong></li>
+            <li><strong>כניסה לסטייט של היועץ הנבחר</strong> - "בעוד רגע תיכנס ל(שם היועץ), אתה הולך לאמץ את כל התפיסות, האמונות והערכים שלו"</li>
+            <li><strong>כתיבת העצות</strong> - שאל את היועץ "איזה עצה תוכל לתת לו?"</li>
+            <li><strong>ברייק סטייט</strong> - "איך עושה פרה?"</li>
+            <li>חזרה על שלבים 7-9 עבור כל שלושת היועצים</li>
+            <li><strong>הסקת מסקנות</strong> - המונחה חוזר לגוף ראשון לקחת את המסקנות מהטכניקה</li>
+            <li><strong>הכללות לעתיד</strong></li>
+        </ol>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 11: META MODEL ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 11</div>
+            <h1 class="chapter-title">מטה מודל</h1>
+        </div>
+
+        <p>המטה מודל מתבסס על כך שאנחנו כבני אדם תמיד מתייחסים רק לאספקטים מסויימים של דברים ולא רואים את התמונה המלאה. בעקבות שלושת המסננים שיש לנו במוח - הכללות, השמטות ועיוותים - אנחנו רואים את המציאות לא כפי שהיא ונוטים לפתח דפוסי חשיבה דפקטיביים.</p>
+
+        <div class="definition">
+            <div class="definition-term">מבנה שטח vs מבנה עומק</div>
+            <p><strong>מבנה שטח</strong> - הביטוי המילולי והשטחי של האדם לחוויה המורכבת של המציאות. הסיפור שנותר לו במודעות לאחר שעבר דרך כל המסננים.</p>
+            <p><strong>מבנה עומק</strong> - הנתונים הגולמיים שהאדם חווה דרך החושים. הדבר הכי קרוב לאובייקטיבי.</p>
+        </div>
+
+        <!-- INFOGRAPHIC: Meta Model -->
+        <div class="infographic">
+            <svg width="450" height="130" viewBox="0 0 450 130" xmlns="http://www.w3.org/2000/svg">
+                <!-- Deep Structure -->
+                <rect x="10" y="20" width="120" height="90" rx="10" fill="#003B46"/>
+                <text x="70" y="50" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="11" font-weight="700">מבנה עומק</text>
+                <text x="70" y="70" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="9">החוויה המלאה</text>
+                <text x="70" y="85" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="9">והגולמית</text>
+                <text x="70" y="100" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="18">🌍</text>
+
+                <!-- Arrow to Filters -->
+                <path d="M135 65 L155 65" stroke="#D4AF37" stroke-width="2"/>
+                <polygon points="155,60 170,65 155,70" fill="#D4AF37"/>
+
+                <!-- Filters Section -->
+                <rect x="175" y="10" width="100" height="110" rx="8" fill="#E8F1F2" stroke="#00606B" stroke-width="2"/>
+                <text x="225" y="32" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="10" font-weight="700">3 מסננים</text>
+
+                <rect x="185" y="40" width="80" height="22" rx="4" fill="#003B46"/>
+                <text x="225" y="55" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="9">הכללות</text>
+
+                <rect x="185" y="67" width="80" height="22" rx="4" fill="#00606B"/>
+                <text x="225" y="82" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="9">השמטות</text>
+
+                <rect x="185" y="94" width="80" height="22" rx="4" fill="#2F8592"/>
+                <text x="225" y="109" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="9">עיוותים</text>
+
+                <!-- Arrow to Surface -->
+                <path d="M280 65 L300 65" stroke="#D4AF37" stroke-width="2"/>
+                <polygon points="300,60 315,65 300,70" fill="#D4AF37"/>
+
+                <!-- Surface Structure -->
+                <rect x="320" y="20" width="120" height="90" rx="10" fill="#D4AF37"/>
+                <text x="380" y="50" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="11" font-weight="700">מבנה שטח</text>
+                <text x="380" y="70" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="9">הסיפור שנשאר</text>
+                <text x="380" y="85" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="9">במודעות</text>
+                <text x="380" y="100" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="18">💬</text>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 10px;">מבנה עומק → מסננים → מבנה שטח</p>
+        </div>
+
+        <h2>דפוסי שפה של הכללות</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">הכללה #1: פעלי הכרח (חמ"צ)</div>
+            <p><strong>הגדרה:</strong> התייחסות לדבר כחובה או כאילו אין אפשרויות בחירה נוספות.</p>
+            <p><strong>מילים מסגירות:</strong> חייב / מוכרח / צריך</p>
+            <p><strong>דוגמא:</strong> "חייב להיות מניאק בשביל לפתוח עסק ולהצליח"</p>
+            <p><strong>שאלות מטה:</strong> "מה יקרה אם לא תיהיה מניאק כשתפתח עסק?"</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">הכללה #2: כימותים אוניברסליים</div>
+            <p><strong>הגדרה:</strong> הכללות מוחלטות שמתעלמות מיוצאי הדופן.</p>
+            <p><strong>מילים מסגירות:</strong> כולם, תמיד, מעולם, אף אחד, אף פעם</p>
+            <p><strong>דוגמא:</strong> "תמיד אני נכשל בדברים חשובים"</p>
+            <p><strong>שאלות מטה:</strong> "הייתה פעם אחת בחייך שלא נכשלת במשהו חשוב?"</p>
+        </div>
+
+        <h2>דפוסי שפה של השמטות</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">השמטה #1: פעלים לא ספציפיים</div>
+            <p><strong>דוגמא:</strong> "אני לא יכול לאהוב"</p>
+            <p><strong>שאלות מטה:</strong> "את מה בדיוק אתה לא יכול לאהוב? את מי?"</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">השמטה #2: נומינליזציות</div>
+            <p><strong>הגדרה:</strong> כשפועל הופך לשם עצם</p>
+            <p><strong>דוגמא:</strong> "חסרה לי תשוקה"</p>
+            <p><strong>שאלות מטה:</strong> "במה בדיוק חסרה לך תשוקה? מול מי? כמה זמן?"</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">השמטה #3: מחיקות השוואתיות</div>
+            <p><strong>דוגמא:</strong> "זה יעשה אותי יותר מאושר"</p>
+            <p><strong>שאלות מטה:</strong> "יותר מאושר בהשוואה למה? למי? מאשר מתי?"</p>
+        </div>
+
+        <h2>דפוסי שפה של עיוותים</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">עיוות #1: קריאת מחשבות</div>
+            <p><strong>דוגמא:</strong> "אם אגיד לה שאני אוהב אותה היא תצחק עליי"</p>
+            <p><strong>שאלות מטה:</strong> "איך אתה יודע שאם תגיד לה שאתה אוהב אותה היא תצחק עליך?"</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">עיוות #2: סיבה ותוצאה</div>
+            <p><strong>הגדרה:</strong> כשסיבה מביאה לתוצאה (אם... אז...)</p>
+            <p><strong>דוגמא:</strong> "אם אמכור אני אצא שקרן"</p>
+            <p><strong>שאלות מטה:</strong> "איך זה שתמכור יוציא אותך שקרן?"</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">עיוות #3: השוואה מורכבת</div>
+            <p><strong>הגדרה:</strong> כשאדם חושב שדבר אחד שווה לדבר אחר (X = Y)</p>
+            <p><strong>דוגמא:</strong> "אנשי מכירות הם שקרנים"</p>
+            <p><strong>שאלות מטה:</strong> "איך זה שמישהו איש מכירות אומר שהוא שקרן?"</p>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">המטה מודל בפעולה</div>
+            <p>המטה מודל מאפשר לנו לקבל מפה רחבה ועשירה יותר שתתן לנו מגוון אפשרויות בחירה גדול יותר. השאלון עוצמתי כל כך, שהרבה פעמים רק שאילת השאלות, ללא טיפול נוסף, יכולה לעזור לפתור את הבעיה לחלוטין.</p>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 12: OUTCOME ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 12</div>
+            <h1 class="chapter-title">דיוק מטרות (OUTCOME)</h1>
+        </div>
+
+        <div class="quote">
+            "איכות חיינו תיקבע לפי איכות השאלות שנשאל"
+        </div>
+
+        <p>רוב האנשים יודעים מה הם <strong>לא</strong> רוצים ולא מה הם <strong>כן</strong> רוצים. וגם ברגע שהם רוצים להשיג מטרה מסויימת, הם לא יודעים להגדיר אותה באופן מדויק שיגרום להם להשיג אותה.</p>
+
+        <h2>5 עקרונות להצבת מטרה</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">1. הגדרה חיובית</div>
+            <p>עלינו לנסח את המטרות שלנו בצורה חיובית ולדעת מה אנחנו <strong>כן</strong> רוצים, ולא מה אנחנו לא רוצים.</p>
+            <ul>
+                <li><strong>מוטיבציה שלילית:</strong> "אני לא רוצה להיות שמן" - חזקה אך לא מחזיקה לאורך זמן</li>
+                <li><strong>מוטיבציה חיובית:</strong> "אני רוצה להיות רזה" - מחזיקה לאורך זמן</li>
+            </ul>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">2. אחריותי (מוקד שליטה פנימי)</div>
+            <p>המטרה שלי צריכה להיות מוגדרת באופן שבו <strong>אני האחראי המלא</strong> להגשמתה ולא נותן לגורמים חיצוניים את האחריות.</p>
+            <p><strong>שאלות:</strong> במי זה תלוי? במה זה תלוי?</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">3. ספציפית (ירידה לפרטים)</div>
+            <p>חשוב שנדע בדיוק מה אנחנו רוצים להשיג, איך זה הולך להיראות/להרגיש, עם מי זה יהיה, באיזה הקשרים?</p>
+            <p><strong>שאלות:</strong> איך אני אדע שהשגתי את המטרה? מה אני אשמע? אראה? ארגיש?</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">4. אקולוגית</div>
+            <p>למטרה צריכה להיות השפעה חיובית על שאר תחומי החיים שלי.</p>
+            <p><strong>שאלות:</strong> מה יקרה אם אשיג את המטרה? מה טוב/רע בלהשיג אותה? איך זה ישפיע עליי בעוד תחומים?</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">5. מדידה</div>
+            <p>על המטרה להיות מדידה כדי שנוכל לדעת אם אנחנו מתקדמים לכיוונה או מתרחקים ממנה.</p>
+        </div>
+
+        <h2>מודל SMART</h2>
+        <table>
+            <tr>
+                <th>אות</th>
+                <th>משמעות</th>
+            </tr>
+            <tr>
+                <td>S</td>
+                <td>ספציפית - Specific</td>
+            </tr>
+            <tr>
+                <td>M</td>
+                <td>מדידה - Measurable</td>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td>ברת השגה - Achievable</td>
+            </tr>
+            <tr>
+                <td>R</td>
+                <td>באחריותי - Responsible</td>
+            </tr>
+            <tr>
+                <td>T</td>
+                <td>תחומה בזמן - Time</td>
+            </tr>
+        </table>
+
+        <div class="tip">
+            <div class="tip-title">חשוב לדעת!</div>
+            <p>בכל תהליך NLP תמיד יהיה זיהוי הבעיה הספציפית והבנת המטרה הספציפית.</p>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגיל: הגדרת מטרה</div>
+            <p class="write-label">מה אתה רוצה ספציפית?</p>
+            <div class="write-area"></div>
+            <p class="write-label">איך תדע שיהיה לך את זה? מה תראה? תשמע? תרגיש?</p>
+            <div class="write-area"></div>
+            <p class="write-label">זה רק בשבילך? והאם זה תלוי רק בך?</p>
+            <div class="write-area"></div>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 13: REPRESENTATIONAL SYSTEMS ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 13</div>
+            <h1 class="chapter-title">מערכות ייצוג</h1>
+        </div>
+
+        <p>מערכות ייצוג זו הדרך שדרכה אנחנו משתמשים ב-5 החושים שלנו. מהרגע שנולדנו קיבלנו את כל המידע שאנחנו יודעים באמצעות חמשת החושים שלנו.</p>
+
+        <div class="definition">
+            <div class="definition-term">שתי דרכים לשימוש בחושים</div>
+            <ul>
+                <li><strong>לקלוט מידע מהמציאות</strong> - שלב 1 במודל התקשורת</li>
+                <li><strong>ליצור ייצוג פנימי</strong> - שלב 3 במודל התקשורת (לאחר המסננים)</li>
+            </ul>
+        </div>
+
+        <!-- INFOGRAPHIC: VAKOG -->
+        <div class="infographic">
+            <svg width="480" height="100" viewBox="0 0 480 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- V - Visual -->
+                <rect x="5" y="10" width="85" height="80" rx="10" fill="#003B46" stroke="#D4AF37" stroke-width="2"/>
+                <text x="47" y="45" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="28" font-weight="800">V</text>
+                <text x="47" y="70" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">חזותי</text>
+                <text x="47" y="85" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="8">Visual</text>
+
+                <!-- A - Auditory -->
+                <rect x="100" y="10" width="85" height="80" rx="10" fill="#003B46" stroke="#D4AF37" stroke-width="2"/>
+                <text x="142" y="45" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="28" font-weight="800">A</text>
+                <text x="142" y="70" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">שמיעתי</text>
+                <text x="142" y="85" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="8">Auditory</text>
+
+                <!-- K - Kinesthetic -->
+                <rect x="195" y="10" width="85" height="80" rx="10" fill="#003B46" stroke="#D4AF37" stroke-width="2"/>
+                <text x="237" y="45" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="28" font-weight="800">K</text>
+                <text x="237" y="70" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">תחושתי</text>
+                <text x="237" y="85" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="8">Kinesthetic</text>
+
+                <!-- O - Olfactory -->
+                <rect x="290" y="10" width="85" height="80" rx="10" fill="#00606B" stroke="#D4AF37" stroke-width="2"/>
+                <text x="332" y="45" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="28" font-weight="800">O</text>
+                <text x="332" y="70" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">ריחני</text>
+                <text x="332" y="85" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="8">Olfactory</text>
+
+                <!-- G - Gustatory -->
+                <rect x="385" y="10" width="85" height="80" rx="10" fill="#00606B" stroke="#D4AF37" stroke-width="2"/>
+                <text x="427" y="45" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="28" font-weight="800">G</text>
+                <text x="427" y="70" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">טעמי</text>
+                <text x="427" y="85" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="8">Gustatory</text>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 10px;">חמש מערכות הייצוג - VAKOG</p>
+        </div>
+
+        <p>כל אחד מאתנו חושב בדרך אחרת, או מקבל מידע בדרך אחרת. לזה קוראים <strong>מערכות ייצוג</strong>. כולנו משתמשים בכל המיצגים לאורך החיים, ובכל זאת, יש אנשים שיש להם מערכת ייצוג מובילה.</p>
+
+        <h2>סוגי מערכות ייצוג</h2>
+
+        <div class="two-columns">
+            <div class="column">
+                <div class="column-title">מערכת ייצוג מובילה</div>
+                <p>מערכת הייצוג שבה אנחנו מעדיפים <strong>לקלוט מידע</strong>.</p>
+                <p><em>דוגמא:</em> אנשים שמעדיפים לקבל מידע דרך שמיעת פודקאסטים על פני קריאת ספרים.</p>
+            </div>
+            <div class="column">
+                <div class="column-title">מערכת ייצוג בסיסית</div>
+                <p>מערכת הייצוג שבה נעדיף <strong>לעבד מידע</strong>.</p>
+                <p><em>דוגמא:</em> יש אנשים שישמעו פודקאסט ובראש יראו תמונות של מה שהמנחה מדבר.</p>
+            </div>
+        </div>
+
+        <h2>שלושת סוגי האנשים</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">אדם ויזואלי (Visual)</div>
+            <ul>
+                <li>תנועות ידיים וגוף מהירות, גדולות, גבוהות</li>
+                <li>קצב דיבור מהיר</li>
+                <li>מדברים על איך דברים נראים: "זה לא נראה לי", "איך זה נראה לך?", "אתה רואה את זה?"</li>
+            </ul>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">אדם אודיטורי (Auditory)</div>
+            <ul>
+                <li>תנועות ידיים בינוניות, פחות מוקצנים בשפת גוף</li>
+                <li>תשומת לב גבוהה לפרטים</li>
+                <li>רגישות לרעשים</li>
+                <li>קצב דיבור רגיל</li>
+                <li>מדברים על איך דברים נשמעים: "זה לא נשמע לי", "איך זה נשמע לך?"</li>
+            </ul>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">אדם קינסטטי (Kinesthetic)</div>
+            <ul>
+                <li>תנועות איטיות, יותר שקולות</li>
+                <li>מדברים יותר לאט, מגיבים יותר לאט</li>
+                <li>אנשים יותר רגשיים</li>
+                <li>מדברים על איך דברים מרגישים: "זה לא מרגיש לי", "איך זה מרגיש לך?"</li>
+            </ul>
+        </div>
+
+        <h2>מילים לזיהוי מערכת ייצוג</h2>
+        <table>
+            <tr>
+                <th>ויזואלי (V)</th>
+                <th>אודיטורי (A)</th>
+                <th>קינסטטי (K)</th>
+            </tr>
+            <tr>
+                <td>תראה, תסתכל, להציג, לחזות, בהיר, מטושטש, צבעוני, חשוך, פוקוס</td>
+                <td>תשמע, זה מצלצל, קולני, לוחש, לדבר, אמרתי לעצמי, חשבתי לעצמי</td>
+                <td>תרגיש, חם, קר, רך, קשה, נוח, כואב, חווה, נעים</td>
+            </tr>
+        </table>
+
+        <h2>רמזי העיניים</h2>
+        <p>דרך תנועות העיניים של האדם ממולנו נוכל לקבל רמזים לאיזו מערכת ייצוג הוא מחובר כרגע. תנועות העיניים שלנו כמעט ולא נשלטות ומופעלות על ידי נוירונים.</p>
+
+        <ul>
+            <li><strong>Vc</strong> (Visual Constructed) - בניית תמונה - עיניים למעלה ימינה</li>
+            <li><strong>Vr</strong> (Visual Remembered) - תמונה מזיכרון - עיניים למעלה שמאלה</li>
+            <li><strong>Ac</strong> (Auditory Constructed) - בניית סאונד - עיניים באמצע ימינה</li>
+            <li><strong>Ar</strong> (Auditory Remembered) - סאונד מזיכרון - עיניים באמצע שמאלה</li>
+            <li><strong>K</strong> (Kinesthetic) - הרגשה - עיניים למטה ימינה</li>
+            <li><strong>Ad</strong> (Auditory Digital) - דיאלוג פנימי - עיניים למטה שמאלה</li>
+        </ul>
+
+        <div class="tip">
+            <div class="tip-title">תקשורת בין מערכות ייצוג</div>
+            <p>כאשר אנחנו מזהים באדם שמולנו את מערכת הייצוג הדומיננטית שלו, נוכל להעצים את הראפור איתו באמצעות שימוש מוגבר במערכת הייצוג הזו.</p>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 14: SUB-MODALITIES ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 14</div>
+            <h1 class="chapter-title">תתי חושים (Sub-Modalities)</h1>
+        </div>
+
+        <div class="definition">
+            <div class="definition-term">מהו תת חוש (סאב מודליטי)?</div>
+            <p>תת חוש (Sub modality) זה <strong>מאפיין מתוך אחד החושים</strong> שיש לנו במיצגים הפנימיים שלנו.</p>
+            <p>לדוגמא, אם ניקח את חוש הראיה, בתוכו יש הרבה מאפיינים שמשנים את החוויה כמו: גודל, בהירות, צבע, פוקוס ועוד.</p>
+        </div>
+
+        <!-- INFOGRAPHIC: Submodalities -->
+        <div class="infographic">
+            <svg width="500" height="340" viewBox="0 0 500 340" xmlns="http://www.w3.org/2000/svg">
+                <!-- Title -->
+                <text x="250" y="25" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="16" font-weight="700">תתי חושים — Sub-Modalities</text>
+
+                <!-- Column 1: Visual (ראייה) -->
+                <rect x="10" y="40" width="150" height="280" rx="12" fill="#003B46"/>
+                <text x="85" y="68" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="15" font-weight="700">ראייה</text>
+                <text x="85" y="83" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="9">Visual</text>
+                <line x1="30" y1="90" x2="140" y2="90" stroke="#D4AF37" stroke-width="1" opacity="0.5"/>
+                <text x="85" y="110" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">גודל</text>
+                <text x="85" y="130" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">בהירות</text>
+                <text x="85" y="150" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">מיקום</text>
+                <text x="85" y="170" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">צבע / שחור-לבן</text>
+                <text x="85" y="190" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">פוקוס / טשטוש</text>
+                <text x="85" y="210" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">עומק</text>
+                <text x="85" y="230" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">תנועה</text>
+                <text x="85" y="250" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">מרחק</text>
+                <text x="85" y="270" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">מיסגור</text>
+                <text x="85" y="290" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">אסוציאציה / דיסוציאציה</text>
+
+                <!-- Column 2: Auditory (שמיעה) -->
+                <rect x="175" y="40" width="150" height="280" rx="12" fill="#00606B"/>
+                <text x="250" y="68" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="15" font-weight="700">שמיעה</text>
+                <text x="250" y="83" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="9">Auditory</text>
+                <line x1="195" y1="90" x2="305" y2="90" stroke="#D4AF37" stroke-width="1" opacity="0.5"/>
+                <text x="250" y="110" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">ווליום</text>
+                <text x="250" y="130" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">קצב</text>
+                <text x="250" y="150" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">מיקום סאונד</text>
+                <text x="250" y="170" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">סטריאו / מונו</text>
+                <text x="250" y="190" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">רועש / חד</text>
+                <text x="250" y="210" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">הד</text>
+                <text x="250" y="230" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">אסוציאציה / דיסוציאציה</text>
+
+                <!-- Column 3: Kinesthetic (תחושה) -->
+                <rect x="340" y="40" width="150" height="280" rx="12" fill="#003B46" stroke="#D4AF37" stroke-width="2"/>
+                <text x="415" y="68" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="15" font-weight="700">תחושה</text>
+                <text x="415" y="83" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="9">Kinesthetic</text>
+                <line x1="360" y1="90" x2="470" y2="90" stroke="#D4AF37" stroke-width="1" opacity="0.5"/>
+                <text x="415" y="110" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">טמפרטורה</text>
+                <text x="415" y="130" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">מיקום</text>
+                <text x="415" y="150" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">כיוון</text>
+                <text x="415" y="170" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">מרקם</text>
+                <text x="415" y="190" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">צבע</text>
+                <text x="415" y="210" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">עוצמה</text>
+                <text x="415" y="230" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">לחץ</text>
+                <text x="415" y="250" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">משקל</text>
+                <text x="415" y="270" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11">צורה</text>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 10px;">תתי החושים של שלוש מערכות הייצוג העיקריות</p>
+        </div>
+
+        <h2>תתי החושים של כל חוש</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">ראייה (ויזואלי)</div>
+            <ul>
+                <li>גודל</li>
+                <li>בהירות</li>
+                <li>מיקום</li>
+                <li>צבע / שחור-לבן</li>
+                <li>מיסגור</li>
+                <li>פוקוס / טשטוש</li>
+                <li>עומק</li>
+                <li>תנועה</li>
+                <li>מרחק</li>
+                <li>אסוציאציה / דיסוציאציה</li>
+            </ul>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">שמיעה (אודיטורי)</div>
+            <ul>
+                <li>ווליום</li>
+                <li>קצב</li>
+                <li>מיקום סאונד</li>
+                <li>סטריאו / מונו</li>
+                <li>רועש / חד</li>
+                <li>הד</li>
+                <li>אסוציאציה / דיסוציאציה</li>
+            </ul>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">תחושה (קינסטטי)</div>
+            <ul>
+                <li>טמפרטורה</li>
+                <li>מיקום</li>
+                <li>כיוון</li>
+                <li>מרקם</li>
+                <li>צבע</li>
+                <li>עוצמה</li>
+                <li>לחץ</li>
+                <li>משקל</li>
+                <li>צורה</li>
+            </ul>
+        </div>
+
+        <h2>הסמ"דים כבניית החוויה הסובייקטיבית</h2>
+        <p>באופן לא מודע יש במוח שלנו קידודים של סמ"דים לכל דבר. זה כמו קוד שהמוח משתמש בו - שברגע שהוא מופעל הוא יוצר לנו מיצג פנימי שמייצר לנו את הרגשות.</p>
+
+        <div class="definition">
+            <div class="definition-term">סמ"ד עיקרי (Driver)</div>
+            <p>תת חוש אחד שברגע שמשנים אותו, <strong>כל החוויה הסובייקטיבית במיצג הפנימי משתנה</strong>.</p>
+            <p>לרוב דרייבר יהיה:</p>
+            <ul>
+                <li>ראייה - תמונה / בהירות / מרחק / צבע / תלת מימד</li>
+                <li>שמיעה - עוצמה / קול</li>
+                <li>תחושה - צבע / תנועה</li>
+            </ul>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">משחק סמ"דים ויזואליים</div>
+            <p><strong>ניסוי 1:</strong></p>
+            <ol>
+                <li>עצום עיניים ודמיין שיש מולך המבורגר</li>
+                <li>הגדל את ההמבורגר</li>
+                <li>עשה את הצבעים שלו חדים יותר, ממש חיים</li>
+                <li>גרום לתמונה להיות בהירה וחדה יותר</li>
+                <li>הגדל עוד את ההמבורגר שתראה אותו בצורה ברורה מול העיניים שלך</li>
+                <li><strong>מ-1-10, כמה בא לך לאכול את ההמבורגר הזה?</strong></li>
+            </ol>
+            <p><strong>ניסוי 2:</strong></p>
+            <ol>
+                <li>עצום עיניים ודמיין תמונה שחור לבן של המבורגר</li>
+                <li>הקטן את הגודל שיהיה כמה שיותר קטן, ממש מיני</li>
+                <li>עשה את התמונה אפלה ומטושטשת</li>
+                <li>שים אבק על התמונה</li>
+                <li><strong>מ-1-10, כמה בא לך לאכול את ההמבורגר הזה?</strong></li>
+            </ol>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">שמת לב?</div>
+            <p>איך כמה שינויים קטנים בסמ"דים יוצרים הרגשה אחרת לחלוטין? יש לסמ"דים כוח גדול בפרשנות ובחוויה הסובייקטיבית שלנו למה שמתרחש לנו בראש.</p>
+        </div>
+
+        <h2>טכניקת סוויש (Swish)</h2>
+        <p>אחת הטכניקות הפשוטות והעוצמתיות שיש ב-NLP. באמצעות הטכניקה הזו אנו יוצרים התניות חדשות במוח ומשנים את המייצגים הפנימיים שמניעים אותנו לפעולה.</p>
+
+        <ol class="steps">
+            <li>ראפור</li>
+            <li>זיהוי מצב הבעיה - מצב שבו הוא מייצר התנהגות אוטומטית לא רצויה</li>
+            <li>זיהוי הטריגר - "איך אתה יודע שהגיע הזמן להתנהג בצורה X?"</li>
+            <li>יצירת תמונה קפואה של הטריגר</li>
+            <li>שבירת המצב הרגשי</li>
+            <li>יצירת תמונת Outcome בדיסוציאציה - דמות שהיא בלי הבעיה</li>
+            <li><strong>סוויש</strong> - תמונת הטריגר בגדול, תמונת ה-Outcome בקטן. ברגע ששומעים "סוויש" - תמונת ה-Outcome הולכת לגדול ולהתעצם בזמן שתמונת הטריגר הולכת להתכווץ ולעוף אחורה</li>
+            <li>חזרה על הסוויש במהירות כמה פעמים</li>
+            <li>בדיקה</li>
+            <li>הכללות והובלות לעתיד</li>
+        </ol>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 15: ECOLOGY ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 15</div>
+            <h1 class="chapter-title">אקולוגיה</h1>
+        </div>
+
+        <p>ב-NLP אנו משתמשים במושג "אקולוגיה" כדי לבדוק שאין חלקים שמתנגדים לשינוי של התנהגות "שלילית".</p>
+
+        <div class="definition">
+            <div class="definition-term">הנחת היסוד</div>
+            <p>מאחורי כל התנהגות ישנה <strong>כוונה חיובית עליונה</strong>.</p>
+        </div>
+
+        <!-- INFOGRAPHIC: Ecology Check -->
+        <div class="infographic">
+            <svg width="320" height="200" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Center Circle - Goal -->
+                <circle cx="160" cy="100" r="35" fill="#003B46"/>
+                <text x="160" y="95" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="11" font-weight="700">המטרה</text>
+                <text x="160" y="112" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="9">/השינוי</text>
+
+                <!-- Surrounding Areas -->
+                <!-- Self - Top -->
+                <circle cx="160" cy="25" r="22" fill="#D4AF37"/>
+                <text x="160" y="30" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="10" font-weight="600">עצמי</text>
+                <line x1="160" y1="47" x2="160" y2="65" stroke="#2F8592" stroke-width="2" stroke-dasharray="3,3"/>
+
+                <!-- Family - Top Right -->
+                <circle cx="250" cy="55" r="22" fill="#00606B"/>
+                <text x="250" y="60" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="10" font-weight="600">משפחה</text>
+                <line x1="230" y1="70" x2="195" y2="85" stroke="#2F8592" stroke-width="2" stroke-dasharray="3,3"/>
+
+                <!-- Work - Bottom Right -->
+                <circle cx="250" cy="145" r="22" fill="#2F8592"/>
+                <text x="250" y="150" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="10" font-weight="600">עבודה</text>
+                <line x1="230" y1="130" x2="195" y2="115" stroke="#2F8592" stroke-width="2" stroke-dasharray="3,3"/>
+
+                <!-- Health - Bottom -->
+                <circle cx="160" cy="175" r="22" fill="#D4AF37"/>
+                <text x="160" y="180" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="10" font-weight="600">בריאות</text>
+                <line x1="160" y1="153" x2="160" y2="135" stroke="#2F8592" stroke-width="2" stroke-dasharray="3,3"/>
+
+                <!-- Values - Bottom Left -->
+                <circle cx="70" cy="145" r="22" fill="#00606B"/>
+                <text x="70" y="150" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="10" font-weight="600">ערכים</text>
+                <line x1="90" y1="130" x2="125" y2="115" stroke="#2F8592" stroke-width="2" stroke-dasharray="3,3"/>
+
+                <!-- Environment - Top Left -->
+                <circle cx="70" cy="55" r="22" fill="#2F8592"/>
+                <text x="70" y="60" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="10" font-weight="600">סביבה</text>
+                <line x1="90" y1="70" x2="125" y2="85" stroke="#2F8592" stroke-width="2" stroke-dasharray="3,3"/>
+
+                <!-- Question marks -->
+                <text x="140" y="60" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="12">?</text>
+                <text x="205" y="78" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="12">?</text>
+                <text x="205" y="130" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="12">?</text>
+                <text x="140" y="148" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="12">?</text>
+                <text x="108" y="130" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="12">?</text>
+                <text x="108" y="78" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="12">?</text>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 5px;">בדיקת אקולוגיה - איך השינוי משפיע על כל תחומי החיים?</p>
+        </div>
+
+        <p>הרבה פעמים ישנה כוונה חיובית מאחורי ההתנהגות - <strong>רווח משני</strong>. לפני שעושים שינוי אנחנו רוצים לוודא מהי הכוונה החיובית. אם לא נוודא שהשינוי אקולוגי בשאר תחומי החיים, השינוי עלול לא לעבוד או לעבוד ולחזור למצב הקודם.</p>
+
+        <h2>דוגמאות לחוסר אקולוגיה</h2>
+        <ul>
+            <li><strong>אדם שרוצה לפתוח עסק</strong> - והוא למד בחייו שעסקים זה דבר מסוכן. יכול להיות שיכול להיות שהוא יפסיד כסף או יסכן את הבטחון שלו.</li>
+            <li><strong>אדם שמתלונן הרבה ומתקרבן</strong> - יכול להיות שלהתנהגות הזאת יש השלכות - פתאום האנשים הקרובים שלו יפסיקו לרחם עליו.</li>
+            <li><strong>ילדה אנורקסית</strong> - אם תפסיק את האנורקסיה פתאום היא לא תקבל יותר יחס מיוחד ותשומת לב אוהבת מאמא שלה.</li>
+        </ul>
+
+        <div class="tip">
+            <div class="tip-title">איך מזהים חוסר אקולוגיה?</div>
+            <p>נזהה חוסר אקולוגיה ב"חוסר הלימה" במה ובאיך שהמונחה מדבר. כאשר אנחנו מזהים שאין הסכמה/אי הסכמה מפורשת, נבין שהשינוי לא בהכרח אקולוגי ונרצה לחפש את הרווחים והכוונות החיוביות.</p>
+        </div>
+
+        <h2>איך ליצור אקולוגיה?</h2>
+        <ul>
+            <li><strong>מוטיבציית כאב גדולה</strong> - הרגע שבו המחיר שאני משלם על חוסר השינוי גדול מהמחיר שאני משלם על השינוי</li>
+            <li><strong>שינוי אמונות מגבילות</strong> - באמצעות מטה מודל, ריפריים, עבודה עם חלקים ועוד</li>
+            <li><strong>דמיון מודרך ועבודה במצבי טראנס</strong> - מצב בו תת המודע פתוח לקבל שינויים חדשים</li>
+            <li><strong>עבודת חלקים</strong> - טכניקה של עבודה עם חלקים פנימיים</li>
+            <li><strong>תוצאות</strong> - ברגע שהאדם יראה את התוצאות, האמונה תשתנה מעצמה</li>
+        </ul>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 16: REFRAMING ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 16</div>
+            <h1 class="chapter-title">מסגור ורי-פריים</h1>
+        </div>
+
+        <div class="definition">
+            <div class="definition-term">Frame (פריים, מסגרת)</div>
+            <p>הפרשנות שלנו לאירועים בעולם החיצוני. כל פרשנות שאנחנו נותנים לחוויה מקבלת מסגרת.</p>
+            <ul>
+                <li>יש מסגרות <strong>אפקטיביות</strong> (מקדמות אותנו)</li>
+                <li>יש מסגרות <strong>דפקטיביות</strong> (מעכבות אותנו)</li>
+            </ul>
+        </div>
+
+        <div class="definition">
+            <div class="definition-term">ReFrame (ריפריים, מסגור מחדש)</div>
+            <p>שינוי המסגרת והפרשנות לאדם, שינוי הפרשנות של אדם להקשר או למשמעות של אמונה, צורת חשיבה, פרשנות.</p>
+        </div>
+
+        <!-- INFOGRAPHIC: Reframing -->
+        <div class="infographic">
+            <svg width="420" height="140" viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg">
+                <!-- Frame 1 - Original Frame (Negative) -->
+                <rect x="20" y="20" width="120" height="100" rx="0" fill="none" stroke="#003B46" stroke-width="6"/>
+                <rect x="35" y="35" width="90" height="70" rx="5" fill="#E8F1F2"/>
+                <text x="80" y="65" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="11" font-weight="600">האירוע</text>
+                <text x="80" y="85" text-anchor="middle" fill="#00606B" font-family="Heebo, sans-serif" font-size="9">☹️ פרשנות א'</text>
+                <text x="80" y="135" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="10">מסגרת מגבילה</text>
+
+                <!-- Arrow -->
+                <path d="M155 70 L195 70" stroke="#D4AF37" stroke-width="3"/>
+                <polygon points="195,65 210,70 195,75" fill="#D4AF37"/>
+                <text x="182" y="55" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="10" font-weight="700">ריפריים</text>
+
+                <!-- Reframe Icon -->
+                <circle cx="210" cy="70" r="12" fill="#D4AF37"/>
+                <text x="210" y="75" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="12">🔄</text>
+
+                <!-- Arrow 2 -->
+                <path d="M225 70 L265 70" stroke="#D4AF37" stroke-width="3"/>
+                <polygon points="265,65 280,70 265,75" fill="#D4AF37"/>
+
+                <!-- Frame 2 - New Frame (Positive) -->
+                <rect x="280" y="20" width="120" height="100" rx="0" fill="none" stroke="#D4AF37" stroke-width="6"/>
+                <rect x="295" y="35" width="90" height="70" rx="5" fill="#E8F1F2"/>
+                <text x="340" y="65" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="11" font-weight="600">האירוע</text>
+                <text x="340" y="85" text-anchor="middle" fill="#00606B" font-family="Heebo, sans-serif" font-size="9">😊 פרשנות ב'</text>
+                <text x="340" y="135" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="10" font-weight="600">מסגרת מעצימה</text>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 5px;">אותו אירוע, מסגרת שונה = משמעות שונה</p>
+        </div>
+
+        <h2>2 סוגים של ריפריים</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">1. ריפריים של משמעות</div>
+            <p>שינוי המשמעות הישירה של התוכן והסתכלות עליה מנקודת מבט שונה.</p>
+            <p><strong>דוגמאות:</strong></p>
+            <ul>
+                <li>"אמא שלך לא חופרת, היא רק דואגת לך"</li>
+                <li>"הוא לא קמצן, הוא שקול בהוצאות שלו"</li>
+                <li>"הוא לא מציק, הוא רק רוצה ממך תשומת לב"</li>
+                <li>"הוא לא טיפש, הוא פשוט קולט דברים לאט יותר"</li>
+            </ul>
+            <p><strong>שאלה:</strong> "איזו משמעות חדשה/אחרת נוכל לתת להתנהגות הזו?"</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">2. ריפריים של הקשר</div>
+            <p>אחת מהנחות היסוד שלנו היא שכל התנהגות יכולה להיות אפקטיבית במצבים מסוימים. בריפריים של הקשר אנחנו משנים את ההקשר של אותה התנהגות שלילית.</p>
+            <p><strong>דוגמאות:</strong></p>
+            <ul>
+                <li>"הוא בכיין" → "זה שהוא רגיש יגרום לך להרגיש יותר אמפתיה ממנו"</li>
+                <li>"הוא כל הזמן בעבודה" → "המחוייבות שלו לדברים תבוא לידי ביטוי גם בקשר שלכם"</li>
+                <li>"הוא כל היום משחק במחשב" → "המשמעת העצמית הגבוהה שלו למשחקים תוכל לבוא לידי ביטוי גם בקריירה"</li>
+            </ul>
+            <p><strong>שאלה:</strong> "באיזה הקשר ההתנהגות הזו יכולה להיות אפקטיבית?"</p>
+        </div>
+
+        <h2>מסגור מראש (Pre-Framing)</h2>
+        <p>פריפריים זה אומר שאנחנו יוצרים את המסגרת לאדם ממולנו <strong>לפני</strong> שאנחנו מעבירים את המסר.</p>
+
+        <h3>מסגרות למסגור מראש:</h3>
+
+        <table>
+            <tr>
+                <th>סוג המסגרת</th>
+                <th>תיאור ודוגמא</th>
+            </tr>
+            <tr>
+                <td>מסגור חיובי</td>
+                <td>מיקוד ביתרונות וברווחים. "חדשות טובות, החלטנו שאנחנו רוצים להקל עליכם..."</td>
+            </tr>
+            <tr>
+                <td>מסגור שלילי</td>
+                <td>מיקוד בחסרונות ובבעיות. "מה הדבר הרע שיקרה ברגע שתרדי במשקל?"</td>
+            </tr>
+            <tr>
+                <td>מסגרת "נגיד ש..."</td>
+                <td>לעבור התנגדויות. "נגיד שפתחת את העסק, איך זה היה גורם לך להרגיש?"</td>
+            </tr>
+            <tr>
+                <td>מסגרת הסכמה</td>
+                <td>יצירת ראפור והסכמה. "אתה מסכים איתי שאתה רוצה להיות עשיר?"</td>
+            </tr>
+            <tr>
+                <td>מסגרת מניעת התנגדות</td>
+                <td>"אתה תיהיה נגד לתת לי הנחה על זה?"</td>
+            </tr>
+            <tr>
+                <td>מסגרת הנחת יסוד מוקדמת</td>
+                <td>"מתי יהיה לך נוח לדבר מחר, ב-16:00 או ב-19:00?"</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 17: TONY ROBBINS NEEDS MODEL ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 17</div>
+            <h1 class="chapter-title">מודל 6 הצרכים של טוני רובינס</h1>
+        </div>
+
+        <p>מודל 6 הצרכים נבנה על ידי טוני רובינס. בניגוד למודל של מאסלו, הצרכים לא אובייקטיבים לכל אדם, אלא <strong>כל אדם רוצה להגשים צרכים מסויימים יותר וצרכים מסויימים פחות</strong>. את כולם אנחנו רוצים להגשים, כל אחד במידה אחרת.</p>
+
+        <!-- INFOGRAPHIC: 6 Human Needs -->
+        <div class="infographic">
+            <svg width="460" height="180" viewBox="0 0 460 180" xmlns="http://www.w3.org/2000/svg">
+                <!-- Title: Basic Needs -->
+                <text x="115" y="20" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="12" font-weight="700">צרכי האישיות</text>
+
+                <!-- Title: Spiritual Needs -->
+                <text x="345" y="20" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="12" font-weight="700">צרכי הרוח</text>
+
+                <!-- Basic Needs - Left Side (Teal) -->
+                <!-- Need 1: Certainty -->
+                <rect x="10" y="35" width="100" height="60" rx="8" fill="#003B46"/>
+                <text x="60" y="60" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="18">🛡️</text>
+                <text x="60" y="82" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">וודאות</text>
+
+                <!-- Need 2: Variety -->
+                <rect x="120" y="35" width="100" height="60" rx="8" fill="#00606B"/>
+                <text x="170" y="60" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="18">🎲</text>
+                <text x="170" y="82" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">גיוון</text>
+
+                <!-- Need 3: Connection -->
+                <rect x="10" y="105" width="100" height="60" rx="8" fill="#00606B"/>
+                <text x="60" y="130" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="18">❤️</text>
+                <text x="60" y="152" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">חיבור</text>
+
+                <!-- Need 4: Significance -->
+                <rect x="120" y="105" width="100" height="60" rx="8" fill="#003B46"/>
+                <text x="170" y="130" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="18">⭐</text>
+                <text x="170" y="152" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">משמעותיות</text>
+
+                <!-- Divider Line -->
+                <line x1="230" y1="35" x2="230" y2="165" stroke="#D4AF37" stroke-width="2" stroke-dasharray="5,5"/>
+
+                <!-- Spiritual Needs - Right Side (Gold) -->
+                <!-- Need 5: Growth -->
+                <rect x="250" y="55" width="100" height="70" rx="8" fill="#D4AF37"/>
+                <text x="300" y="85" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="22">📈</text>
+                <text x="300" y="110" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="12" font-weight="700">צמיחה</text>
+
+                <!-- Need 6: Contribution -->
+                <rect x="360" y="55" width="100" height="70" rx="8" fill="#D4AF37"/>
+                <text x="410" y="85" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="22">🤝</text>
+                <text x="410" y="110" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="12" font-weight="700">תרומה</text>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 10px;">6 הצרכים של טוני רובינס</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">4 צרכים בסיסיים</div>
+            <p>הצרכים שכל אחד מאיתנו צריך לספק בחייו:</p>
+        </div>
+
+        <div class="two-columns">
+            <div class="column">
+                <div class="column-title">1. בטחון ווודאות</div>
+                <p>צורך בסיסי שלנו כאנשים - הידיעה שאנחנו יכולים לשרוד ולהתקיים.</p>
+            </div>
+            <div class="column">
+                <div class="column-title">2. גיוון וחוסר וודאות</div>
+                <p>הצורך שלנו לגוון בחיים, לחוות דברים חדשים ולצאת להרפתקאות.</p>
+            </div>
+        </div>
+
+        <div class="two-columns">
+            <div class="column">
+                <div class="column-title">3. חיבור ואהבה</div>
+                <p>הצורך שלנו להרגיש חיבור ואהבה עם אנשים, להרגיש קרבה עם קבוצות או אנשים.</p>
+            </div>
+            <div class="column">
+                <div class="column-title">4. מיוחדות ומשמעות</div>
+                <p>הצורך שלנו להרגיש מיוחדים ושונים מהשאר, להתבלט ולהיתפס כבעלי ערך מיוחד.</p>
+            </div>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">2 צרכים רוחניים</div>
+            <p>טוני קורא להם הצרכים הרוחניים - הם לא הכרחיים, אבל חשובים ומשפיעים באופן ישיר על רמות האושר שלנו:</p>
+        </div>
+
+        <div class="two-columns">
+            <div class="column">
+                <div class="column-title">5. צמיחה והתפתחות</div>
+                <p>הצורך שלנו להרגיש שאנחנו מתקדמים ומשתפרים בחיינו.</p>
+            </div>
+            <div class="column">
+                <div class="column-title">6. נתינה ותרומה</div>
+                <p>הצורך שלנו לעזור לאנשים אחרים למלא את הצרכים שלהם.</p>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">שימוש במודל</div>
+            <p>המודל מסביר המון התנהגויות אנושיות. כשאנחנו מבינים אילו צרכים חשובים לאדם, אנחנו יכולים להבין טוב יותר את המוטיבציות שלו ולעזור לו למלא אותם בדרכים אפקטיביות.</p>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 18: ANCHORS ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 18</div>
+            <h1 class="chapter-title">עוגנים</h1>
+        </div>
+
+        <div class="definition">
+            <div class="definition-term">עוגן = התנייה</div>
+            <p><strong>התנייה</strong> - תהליך למידה, שבו גירוי נייטרלי מעורר תגובה אינסטינקטיבית.</p>
+            <p>ובשפה פשוטה יותר - <strong>גירוי ותגובה</strong>.</p>
+        </div>
+
+        <!-- INFOGRAPHIC: Anchoring -->
+        <div class="infographic">
+            <svg width="400" height="120" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+                <!-- Stimulus -->
+                <circle cx="60" cy="60" r="45" fill="#003B46"/>
+                <text x="60" y="55" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="24">👆</text>
+                <text x="60" y="80" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">גירוי</text>
+
+                <!-- Arrow -->
+                <path d="M115 60 L175 60" stroke="#D4AF37" stroke-width="3"/>
+                <polygon points="175,55 190,60 175,65" fill="#D4AF37"/>
+                <text x="152" y="45" text-anchor="middle" fill="#00606B" font-family="Heebo, sans-serif" font-size="10" font-weight="600">מפעיל</text>
+
+                <!-- Anchor Icon -->
+                <circle cx="200" cy="60" r="20" fill="#D4AF37"/>
+                <text x="200" y="67" text-anchor="middle" fill="#003B46" font-family="Heebo, sans-serif" font-size="16">⚓</text>
+
+                <!-- Arrow 2 -->
+                <path d="M225 60 L285 60" stroke="#D4AF37" stroke-width="3"/>
+                <polygon points="285,55 300,60 285,65" fill="#D4AF37"/>
+
+                <!-- Response -->
+                <circle cx="345" cy="60" r="45" fill="#00606B"/>
+                <text x="345" y="50" text-anchor="middle" fill="#D4AF37" font-family="Heebo, sans-serif" font-size="20">😊</text>
+                <text x="345" y="75" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="10" font-weight="600">מצב רגשי</text>
+                <text x="345" y="88" text-anchor="middle" fill="#E8F1F2" font-family="Heebo, sans-serif" font-size="9">(תגובה)</text>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 10px;">עוגן = גירוי שמפעיל תגובה רגשית</p>
+        </div>
+
+        <p>בנדלר וגרינדר חקרו את נושא העוגנים בעקבות ניסוי הכלבים של פבלוב. פבלוב נתן לכלבים אוכל ובאותו זמן צלצל בפעמון. אחרי מספר פעמים, גם כשצלצל בפעמון בלי אוכל - הכלבים עדיין ריירו.</p>
+
+        <h2>איך זה קשור אלינו?</h2>
+        <p>בחיי היומיום שלנו אנחנו מונעים מעוגנים שאת רובם אנחנו חווים באופן לא מודע. המוח שלנו יוצר באופן לא מודע עוגנים ולפעמים אנחנו יכולים להיות "מופעלים" מבלי שנדע למה.</p>
+
+        <h3>דוגמאות לעוגנים:</h3>
+        <ul>
+            <li>שיר שמח שישר גורם לאנרגיה גבוהה</li>
+            <li>מאכל שיש לו "טעם של בית"</li>
+            <li>ללכת ליד בית הספר ולהזכר באירועים מסויימים</li>
+            <li>ריח בושם שמזכיר לנו אדם קרוב</li>
+            <li>אדם שאנחנו לא אוהבים שאיך שאנחנו רואים אותו אנחנו מרגישים אחרת</li>
+            <li>מילה ספציפית שיכולה "להדליק" אותנו</li>
+            <li>גרבי מזל שכשאנחנו לובשים אותם אנחנו מרגישים טוב</li>
+        </ul>
+
+        <h2>4 עקרונות ליצירת עוגן עוצמתי</h2>
+        <ol>
+            <li><strong>יצירת העוגן כשהרגש גבוה</strong> - ככל שרמת הרגש תיהיה גבוהה יותר, המוח יקלוט אותו בצורה חזקה יותר</li>
+            <li><strong>תזמון מדויק</strong> - ליצור את העוגן כשהרגש מגיע ל"פיק" שלו</li>
+            <li><strong>גירוי ייחודי</strong> - לבחור מקום ייחודי לעוגן שלא יופעל הרבה פעמים ביום</li>
+            <li><strong>חזרתיות</strong> - לחזור על יצירת העוגן מספר פעמים</li>
+        </ol>
+
+        <h2>6 סוגי עוגנים</h2>
+        <table>
+            <tr>
+                <th>סוג העוגן</th>
+                <th>תיאור ודוגמאות</th>
+            </tr>
+            <tr>
+                <td>עוגן תחושה (קינסטטי)</td>
+                <td>העוגן הפשוט ביותר לשימוש. דוגמאות: חיבוק, החזקת ידיים</td>
+            </tr>
+            <tr>
+                <td>עוגן שמיעתי (אודיטורי)</td>
+                <td>שמיעת אזעקה, מוסיקה בעלת מוטיבציה, השם שלנו</td>
+            </tr>
+            <tr>
+                <td>עוגן ראייתי (ויזואלי)</td>
+                <td>לראות סטנדאפיסט וישר לחייך, לראות משטרה ולהכנס ללחץ</td>
+            </tr>
+            <tr>
+                <td>עוגן ריח</td>
+                <td>בושם של אדם אהוב, ריח של מאכל מוכר</td>
+            </tr>
+            <tr>
+                <td>עוגן טעם</td>
+                <td>טעם של אוכל ביתי שמקושר לתחושה של כיף</td>
+            </tr>
+            <tr>
+                <td>עוגן מרחבי</td>
+                <td>המשרד הוא עוגן לעבודה, הספרייה לשקט, מועדון לכיף</td>
+            </tr>
+        </table>
+
+        <h2>טכניקה - יצירת עוגן</h2>
+        <ol class="steps">
+            <li>יצירת ראפור + לוודא שזה בסדר לגעת במיקום שנבחר</li>
+            <li><strong>משאב רצוי</strong> - "איזה משאב היית רוצה שיהיה לך?"</li>
+            <li><strong>חיבור באסוציאציה למשאב</strong> - "דמיין אירוע מזכרונך שבו היית מחובר למשאב הזה"</li>
+            <li><strong>יצירת העוגן</strong> - לחיצה על הנקודה בגוף כשהרגש בפיק</li>
+            <li>ברייק סטייט</li>
+            <li>חזרה על שלבים 3-5</li>
+            <li><strong>בדיקת עוגן</strong> - הפעלת העוגן לבדיקה</li>
+            <li>הכללות והובלות לעתיד</li>
+        </ol>
+
+        <h2>מיטוט עוגנים</h2>
+        <p>באמצעות טכניקה זו נוכל לשבור עוגנים "שליליים" שיש לנו וליצור עוגנים חדשים אפקטיביים. הטכניקה עובדת כמעט לחלוטין ברמה לא מודעת.</p>
+
+        <div class="tip">
+            <div class="tip-title">יתרון משמעותי</div>
+            <p>האדם שחווה את הטכניקה לא צריך לפתוח חוויות עבר לא נעימות ולהעלות אותן בזיכרון. חשוב לציין שלא נשתמש בה בחוויות רגשיות וטראומות קשות.</p>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 19: STATE ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 19</div>
+            <h1 class="chapter-title">סטייט (מצב רגשי)</h1>
+        </div>
+
+        <div class="definition">
+            <div class="definition-term">סטייט = מצב רגשי רגעי / מצב רוח</div>
+            <p>כל פעולה אשר אנחנו מבצעים נגרמת כתוצאה מ"סטייט" שאנחנו נמצאים בו באותו הרגע.</p>
+        </div>
+
+        <p>סטייט זה דבר שמשתנה מרגע לרגע בהתאם לשני דברים:</p>
+
+        <div class="two-columns">
+            <div class="column">
+                <div class="column-title">1. הפיזיולוגיה שלנו</div>
+                <ul>
+                    <li>תנוחה</li>
+                    <li>ביוכימיה</li>
+                    <li>נשימה</li>
+                    <li>מתח או רפיון שרירים</li>
+                </ul>
+            </div>
+            <div class="column">
+                <div class="column-title">2. התצוגה הפנימית שלנו בראש</div>
+                <ul>
+                    <li>מה ואיך אנחנו מדמים במוחנו</li>
+                    <li>מה ואיך אנו אומרים ושומעים במוחנו</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">הנוסחה</div>
+            <p><strong>פיזיולוגיה של הגוף + המיצג הפנימי במוחנו = סטייט (מצב רגשי רגעי)</strong></p>
+            <p>המצב הרגשי הרגעי שלנו → התנהגות</p>
+        </div>
+
+        <p>חשבו על כך - מה קורה כשאנחנו עצובים? איך הפיזיולוגיה שלנו? עמידה זקופה? ראש מורם? הדיבור חזק או חלש? הנשימה חלשה או חזקה?</p>
+        <p>עכשיו חשבו - מה קורה כשאנחנו שמחים? העמידה, הנשימה, מנח הגוף, הישיבה, הראש - הכל זקוף! הכל משדר משהו אחר.</p>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגיל: שינוי פיזיולוגיה</div>
+            <ol>
+                <li>שבו בכיסא כאילו אתם מלאים בטחון ומלאי אנרגיה</li>
+                <li>נשמו בדרך שנשמתם כאילו שאתם מלאים באנרגיה ובטחון</li>
+                <li>גרמו לפנים שלכם להראות שאתם מלאים באנרגיה ובטחון</li>
+                <li><strong>כמה אתם מרגישים את השינוי? את האנרגיה?</strong></li>
+                <li>וכעת חזרו לשבת כאילו אתם משועממים ועייפים...</li>
+                <li>שימו לב לאיך שאתם מרגישים עכשיו</li>
+                <li>ושוב! בחזרה לאנרגטי המלא בטחון!</li>
+            </ol>
+            <p><strong>איזה הבדל, לא ככה?</strong></p>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">המסקנה</div>
+            <p>שינוי הפיזיולוגיה שלנו משפיע על הסטייט שאנחנו נמצאים בו. כאשר אנחנו נמצאים בסטייט מסוים, ההתנהגות שלנו תשתנה בהתאם.</p>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 20: HABITS ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 20</div>
+            <h1 class="chapter-title">הרגלים</h1>
+        </div>
+
+        <div class="quote">
+            "כל שינוי קשה בהתחלה, מסובך באמצעו ונהדר בסופו" - רובין שארמה
+        </div>
+
+        <p>אחד מהדברים שגורמים לנו להיות יעילים יותר בחיינו אלו הם הרגלים. <strong>40%-50% מפעולות היום שלנו הן הרגלים</strong>.</p>
+
+        <div class="definition">
+            <div class="definition-term">מהו הרגל?</div>
+            <p>הרגל זו פעולה שאנחנו עושים מבלי לחשוב עליה - היא קורת באופן אוטומטי. זו פעולה שהמוח שלנו חווה כמה וכמה פעמים, עד שאנחנו מבצעים אותה מבלי לחשוב.</p>
+            <p><em>דוגמאות:</em> נהיגה, רכיבה על אופניים, קשירת נעליים, צחצוח שיניים, מקלחת</p>
+        </div>
+
+        <p>הרגלים זה דבר אינדיבידואלי - אין באמת הרגל רע או טוב. יש הרגלים מקדמים והרגלים מורידים. לוקח לסגל הרגל חדש בין 21 ל-66 ימים.</p>
+
+        <div class="highlight">
+            <div class="highlight-title">מבנה ההרגל - 3 חלקים</div>
+            <p><strong>טריגר → חשק → פעולה רוטינית → גמול</strong></p>
+        </div>
+
+        <h2>4 דרכים לייצר/לשנות הרגלים</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">דרך 1: המנעות מהטריגר</div>
+            <p>אחת הדרכים הפשוטות והאפקטיביות לשבירת הרגלים. במידה ונצליח להמנע מהטריגר, נשבור את לולאת ההרגל מהשלב הראשון.</p>
+            <p><em>דוגמא:</em> אדם שרגיל לנשנש עוגיות - אם יפסיק לקנות עוגיות ולא יראה אותן, יהיה לו קל יותר לשבור את ההרגל. "רחוק מהעין, רחוק מהלב".</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">דרך 2: שינוי הפעולה הרוטינית</div>
+            <p>הטריגר והגמול ישארו זהים, נשנה רק את הפעולה. נמצא פעולה חדשה שתתן לנו את אותו הגמול.</p>
+            <p><em>דוגמא:</em></p>
+            <ul>
+                <li><strong>טריגר:</strong> אני מרגיש לחץ וסטרס מעומס עבודה</li>
+                <li><strong>פעולה רוטינית ישנה:</strong> להתחבא מתחת לשמיכה ולברוח</li>
+                <li><strong>פעולה רוטינית חדשה:</strong> לעשות מדיטציה של 5 דקות ולהכיר תודה</li>
+                <li><strong>גמול:</strong> תחושה של רוגע</li>
+            </ul>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">דרך 3: חיבור להרגל קיים</div>
+            <p>לקשר הרגל חדש להרגל שכבר קיים. הגמול של ההרגל הקיים הופך להיות הטריגר של ההרגל החדש.</p>
+            <p><em>דוגמאות:</em></p>
+            <ul>
+                <li>סיום יום עבודה (הרגל קיים) → נסיעה לחדר הכושר (הרגל חדש)</li>
+                <li>צחצוח שיניים בלילה (הרגל קיים) → קריאה (הרגל חדש)</li>
+            </ul>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">דרך 4: דמיון מודרך</div>
+            <p>אתם נלפיסטים, לכן תבינו את זה יותר. המוח לא יודע להבדיל בין דמיון למציאות - כאן אנחנו משתמשים בזה לטובתנו.</p>
+            <p><strong>איך לעשות:</strong></p>
+            <ul>
+                <li>דמיינו אתכם מבצעים את ההרגל החדש</li>
+                <li>דמיינו את זה לפרטי פרטים, כאילו אתם נכנסים לדמות ועושים בדיוק את ההרגל המבוקש</li>
+                <li>ראו זאת מהעיניים שלכם, הרגישו את מה שתרגישו, שמעו את מה שתשמעו</li>
+                <li>ככל שתעמיקו יותר בפרטים ותבצעו זאת יותר, ההרגל ייטמע עמוק יותר בתת המודע</li>
+            </ul>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">משימה: שבירת הרגלים שליליים</div>
+            <p class="write-label">רשום 3 הרגלים שליליים שתרצה לשנות:</p>
+            <div class="write-area"></div>
+            <p class="write-label">מדוע הרגלים אלו שליליים? למה אתה רוצה לשנות אותם?</p>
+            <div class="write-area"></div>
+            <p class="write-label">איך תרגיש במידה ותשנה את ההרגלים האלו? איך זה ישפיע על חייך?</p>
+            <div class="write-area"></div>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 21: BELIEFS ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 21</div>
+            <h1 class="chapter-title">אמונות</h1>
+        </div>
+
+        <div class="definition">
+            <div class="definition-term">מהי אמונה?</div>
+            <p>אמונה היא <strong>תחושת וודאות בנוגע למשהו בחיינו</strong>, בין אם היא נכונה ובין אם לא. רוב האמונות שלנו נמצאות בתת המודע והתגבשו מהרגע שנולדנו.</p>
+        </div>
+
+        <h2>3 סוגים של אמונות</h2>
+        <ul>
+            <li><strong>אמונה ניטרלית</strong> - אמונה שלא מעצימה ולא מורידה. דוגמא: "השולחן הוא בצבע אפור"</li>
+            <li><strong>אמונה מעצימה</strong> - אמונה שמעצימה ומחזקת. דוגמא: "אני בן אדם שמתמיד בדברים שחשובים לו"</li>
+            <li><strong>אמונה מגבילה</strong> - אמונה שמגבילה אותנו מלהשיג מטרות. דוגמא: "אני גרוע בלהכיר אנשים חדשים"</li>
+        </ul>
+
+        <h2>איך אמונות נוצרות?</h2>
+        <p>כשתינוק נולד, הוא כמו דף לבן וחלק. הוא נחשף לעולם והסביבה שלו מלמדת אותו ונותנת לו מידע על העולם ועליו. לפי הפרשנות שלו לאירועים שקוראים סביבו, הוא מתחיל לפתח אמונות.</p>
+
+        <h2>2 מבנים של אמונות</h2>
+        <div class="two-columns">
+            <div class="column">
+                <div class="column-title">סיבה ותוצאה (X → Y)</div>
+                <p>דבר אחד גורם לדבר אחר</p>
+                <p><em>דוגמאות:</em></p>
+                <ul>
+                    <li>"אם אעלה סרטונים לרשתות אז אנשים יצחקו עליי"</li>
+                    <li>"אם אהפוך לעשיר אז אנשים יפסיקו לאהוב אותי"</li>
+                </ul>
+            </div>
+            <div class="column">
+                <div class="column-title">השוואה מורכבת (X = Y)</div>
+                <p>דבר אחד שווה לדבר אחר</p>
+                <p><em>דוגמאות:</em></p>
+                <ul>
+                    <li>"אנשים שמעלים סרטונים לרשתות צוחקים עליהם"</li>
+                    <li>"אנשים לא אוהבים אנשים עשירים"</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>3 גורמים שיוצרים אמונות</h2>
+        <ol>
+            <li><strong>דמויות סמכות</strong> - הורים, אחים גדולים, גננת, מורה, שדרן בחדשות, דודים, סבא וסבתא</li>
+            <li><strong>קבוצת השווים</strong> - קבוצה של אנשים בגילנו שאני תופס אותם כשווים לי. לא סתם נאמר ש"סביבה חזקה מכוח רצון"</li>
+            <li><strong>אירועים רגשיים עוצמתיים</strong> - באירועים רגשיים חזקים בילדות שבהן נפגענו יכולות להיווצר אמונות לגבי עצמנו או העולם</li>
+        </ol>
+
+        <div class="highlight">
+            <div class="highlight-title">עוצמת האמונה</div>
+            <p>עוצמת האמונה נמדדת בשני דברים:</p>
+            <ul>
+                <li>עוצמת הרגש שהיה באירוע</li>
+                <li>כמות האירועים שחווינו</li>
+            </ul>
+        </div>
+
+        <h2>5 שלבים לשינוי אמונה</h2>
+        <ol class="steps">
+            <li><strong>מוטיבציית כאב לשינוי</strong> - להבין את ההשלכות השליליות של האמונה בעבר, בהווה ובעתיד</li>
+            <li><strong>יצירת מוטיבציית עונג לשינוי</strong> - למצוא אמונה חדשה ולקשר השפעות חיוביות לאימוץ שלה</li>
+            <li><strong>יצירת ספק באמונה</strong> - ליצור "סדק" באמונה דרך תשאולים כמו מטה מודל</li>
+            <li><strong>ביסוס האמונה החדשה</strong> - לבנות רגליים לאמונה החדשה, לחפש מקרים בעבר שהוכיחו שהיא קיימת</li>
+            <li><strong>פעולה</strong> - קיבוע האמונה כאמת וודאית נוצר כתוצאה מפעולות שהאדם נוקט</li>
+        </ol>
+
+        <h2>5 שאלות לשינוי אמונה</h2>
+        <ol>
+            <li>האם זאת האמת?</li>
+            <li>האם אתה יכול לדעת בוודאות מוחלטת שזאת האמת?</li>
+            <li>האם האדם שממנו לקחת את האמונה הזו הוא אדם שאתה רוצה להיות כמוהו?</li>
+            <li>איך אתה מגיב כשעולה בך האמונה הזו?</li>
+            <li>מי תיהיה בלי האמונה הזו?</li>
+        </ol>
+
+        <div class="tip">
+            <div class="tip-title">זכור</div>
+            <p>רובנו איננו מחליטים באופן מודע במה נאמין. לעיתים קרובות, מבוססות אמונותינו על פירוש מוטעה לאירועי עבר. לאחר שאנו מאמצים אמונה, אנו שוכחים שמדובר אלא בפירוש, ואנו מתחילים להתייחס לאמונותינו כאילו מדובר בתורה מסיני.</p>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CHAPTER 22: LOGICAL LEVELS ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">פרק 22</div>
+            <h1 class="chapter-title">מודל הרמות הלוגיות</h1>
+        </div>
+
+        <p>מודל הרמות הלוגיות הוא אחד המודלים החשובים ביותר שיש ב-NLP. הוא מפשט בצורה מאוד ברורה את צורות החשיבה שלנו וגורם לנו להבין באיזו "רמת חשיבה" הבעיה שלנו נמצאת.</p>
+
+        <div class="definition">
+            <div class="definition-term">עיקרון ההיררכיה</div>
+            <p>מדובר על היררכיה מסויימת של תהליכים המארגנת באופן ישיר את הגורמים לשינוי, מהרמה הנמוכה ביותר עד לרמה הגבוהה ביותר.</p>
+            <ul>
+                <li><strong>שינוי ברמה הגבוהה</strong> ישפיע על כל הרמות שמתחתיה</li>
+                <li><strong>שינוי ברמה הנמוכה</strong>, לאורך זמן ישפיע גם על הגבוהות ממנה</li>
+            </ul>
+        </div>
+
+        <!-- INFOGRAPHIC: Logical Levels Pyramid -->
+        <div class="infographic">
+            <svg width="400" height="320" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
+                <!-- Pyramid layers from top to bottom -->
+                <!-- Level 6: Vision/Spirit (Orange - brightest) -->
+                <polygon points="200,10 160,60 240,60" fill="#FF6B35"/>
+                <text x="200" y="45" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">חזון</text>
+
+                <!-- Level 5: Identity (Orange - medium) -->
+                <polygon points="160,65 120,115 280,115 240,65" fill="#FF8C5A"/>
+                <text x="200" y="97" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="12" font-weight="600">זהות</text>
+
+                <!-- Level 4: Beliefs & Values (Orange - light) -->
+                <polygon points="120,120 80,170 320,170 280,120" fill="#FFAB80"/>
+                <text x="200" y="152" text-anchor="middle" fill="#1A1A1A" font-family="Heebo, sans-serif" font-size="12" font-weight="600">אמונות וערכים</text>
+
+                <!-- Level 3: Capabilities (Grey - light) -->
+                <polygon points="80,175 40,225 360,225 320,175" fill="#4D4D4D"/>
+                <text x="200" y="207" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="12" font-weight="600">מיומנויות</text>
+
+                <!-- Level 2: Behavior (Grey - medium) -->
+                <polygon points="40,230 10,280 390,280 360,230" fill="#333333"/>
+                <text x="200" y="262" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="12" font-weight="600">התנהגות</text>
+
+                <!-- Level 1: Environment (Black) -->
+                <polygon points="10,285 0,310 400,310 390,285" fill="#1A1A1A"/>
+                <text x="200" y="302" text-anchor="middle" fill="white" font-family="Heebo, sans-serif" font-size="11" font-weight="600">סביבה</text>
+            </svg>
+            <p style="font-size: 10pt; color: #666; margin-top: 10px;">מודל הרמות הלוגיות - מלמטה למעלה</p>
+        </div>
+
+        <h2>6 הרמות הלוגיות (מלמטה למעלה)</h2>
+
+        <div class="highlight">
+            <div class="highlight-title">1. סביבה (איפה? מתי?)</div>
+            <p>המקום שאנחנו נמצאים, כל דבר שחיצוני לנו.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">2. התנהגות (מה?)</div>
+            <p>הפעולות שאנחנו עושים או לא עושים.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">3. מיומנויות (איך?)</div>
+            <p>הרגלים שלנו, המיומנויות שפיתחנו, פעולות שהפכו לבלתי מודעות.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">4. אמונות וערכים (למה?)</div>
+            <p>תפיסות העולם שלנו בנוגע לעצמנו, לחיים ולאנשים.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">5. זהות (מי?)</div>
+            <p>התפיסה שלנו על עצמנו, הדימוי העצמי שלנו, מי שאנחנו חושבים שאנחנו.</p>
+        </div>
+
+        <div class="highlight">
+            <div class="highlight-title">6. חזון (בשביל מי? בשביל מה?)</div>
+            <p>המהות / המשימה שלנו בעולם, כוח שגדול מאיתנו כפרט.</p>
+        </div>
+
+        <h2>דוגמא: הפסקת עישון לפי הרמות הלוגיות</h2>
+        <table>
+            <tr>
+                <th>רמה</th>
+                <th>יישום</th>
+            </tr>
+            <tr>
+                <td>חזון</td>
+                <td>להיות אבא בריא שמהווה דוגמא לילדים ולמשפחה שלו</td>
+            </tr>
+            <tr>
+                <td>זהות</td>
+                <td>אדם בריא, אדם רגוע</td>
+            </tr>
+            <tr>
+                <td>אמונות</td>
+                <td>מאמין שסיגריות הן רעל, מאמין שחשוב להשקיע בבריאות הגופנית</td>
+            </tr>
+            <tr>
+                <td>מיומנויות</td>
+                <td>משמעת ושליטה עצמית, יודע לסרב, מתמודד עם סיטואציות</td>
+            </tr>
+            <tr>
+                <td>התנהגות</td>
+                <td>לא קונה סיגריות, לא שומר מצתים, אומר לא כשמציעים לו</td>
+            </tr>
+            <tr>
+                <td>סביבה</td>
+                <td>חברים לא מעשנים, אין קופסאות בבית, קופסת מסטיקים זמינה תמיד</td>
+            </tr>
+        </table>
+
+        <div class="tip">
+            <div class="tip-title">סינרגיה ברמות הלוגיות</div>
+            <p>בשביל להשיג מטרות, עלינו ליצור סינרגיה ברמות הלוגיות - כל הרמות צריכות "לדבר" באותו כיוון.</p>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">תרגיל: בעיה לפי הרמות הלוגיות</div>
+            <p class="write-label">בחר בעיה שהיית רוצה לפתור:</p>
+            <div class="write-area"></div>
+            <p class="write-label">מה החזון שלך? איזה מן בן אדם אתה אחרי שפתרת את הבעיה?</p>
+            <div class="write-area"></div>
+            <p class="write-label">במה אתה מאמין? מה המיומנויות שלך?</p>
+            <div class="write-area"></div>
+            <p class="write-label">איך אתה פועל? איזו סביבה יש לך?</p>
+            <div class="write-area"></div>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ==================== CLOSING CHAPTER ==================== -->
+    <div class="chapter">
+        <div class="chapter-header">
+            <div class="chapter-number">סיום</div>
+            <h1 class="chapter-title">בהצלחה במסע!</h1>
+        </div>
+
+        <div class="quote">
+            "המוח שלנו מסתגל להכל. יכול להיות שבמהלך הקורס כשתלמדו דברים חדשים, תצוץ השאלה 'איך אני אזכור לעשות גם וגם וגם..??' אז בדיוק כמו שיעורי הנהיגה הראשונים - בהתחלה נוסעים לאט, מקשיבים למורה, שואלים שאלות, עושים קצת טעויות ולומדים."
+        </div>
+
+        <p>אבל מה שכן, אי אפשר ללמוד נהיגה דרך ספר, אלא רק דרך הנהיגה בשטח.</p>
+
+        <div class="tip">
+            <div class="tip-title">זכור</div>
+            <p>חזרתיות היא אם כל המיומנויות. ככל שתתרגל יותר, כך הטכניקות יהפכו לחלק טבעי ממך.</p>
+        </div>
+
+        <div class="exercise">
+            <div class="exercise-title">מה היה השינוי שלך?</div>
+            <p>החוברת הזו נכתבה בשביל ליצור לכמה שיותר אנשים שינוי משמעותי בחייהם.</p>
+            <div class="write-area" style="min-height: 150px;"></div>
+        </div>
+
+        <p style="text-align: center; font-size: 16pt; color: var(--gold); margin-top: 50px;">
+            <strong>ריפוי הנפש לכל אדם</strong>
+        </p>
+        <p style="text-align: center; color: var(--muted-teal);">
+            מטפל לכל אחד | therapists-for-everyone.com
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

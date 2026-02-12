@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מפגש 6 - תחקור, קבלת החלטות ואסטרטגיה | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --deep-petrol: #003B46; --muted-teal: #00606B; --dusty-aqua: #2F8592; --frost-white: #E8F1F2; --gold: #D4AF37; }
+        body { font-family: 'Heebo', sans-serif; background: #fff; color: var(--deep-petrol); line-height: 1.7; font-size: 16px; }
+        .hero { background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%); padding: 50px 20px 70px; text-align: center; position: relative; }
+        .hero::after { content: ''; position: absolute; bottom: -30px; left: 0; right: 0; height: 60px; background: #fff; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+        .lesson-badge { display: inline-block; background: var(--gold); color: var(--deep-petrol); font-weight: 900; font-size: 28px; width: 64px; height: 64px; line-height: 64px; border-radius: 50%; margin-bottom: 16px; }
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--gold); }
+        .section-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; flex-shrink: 0; }
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+        .topic { background: var(--frost-white); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; border-right: 4px solid var(--dusty-aqua); }
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before { content: ''; position: absolute; right: 0; top: 12px; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
+        .topic p { margin: 8px 0; }
+        .highlight-box { background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); color: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before { content: ''; position: absolute; right: 0; top: 14px; width: 10px; height: 2px; background: var(--gold); }
+        .numbered-list { counter-reset: item; list-style: none; padding: 0; }
+        .numbered-list li { counter-increment: item; padding: 10px 0 10px 0; padding-right: 40px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .numbered-list li::before { content: counter(item); position: absolute; right: 0; top: 10px; width: 28px; height: 28px; background: var(--gold); color: var(--deep-petrol); border-radius: 50%; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .numbered-list li:last-child { border-bottom: none; }
+        .principle { display: flex; gap: 12px; align-items: flex-start; background: white; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; }
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+        .homework { background: var(--frost-white); border-radius: 16px; padding: 24px; border: 2px dashed var(--dusty-aqua); }
+        .homework-item { padding: 10px 0; padding-right: 32px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+        .flow-diagram { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin: 16px 0; padding: 16px; background: var(--frost-white); border-radius: 12px; }
+        .flow-step { background: white; border: 2px solid var(--dusty-aqua); border-radius: 10px; padding: 10px 16px; font-weight: 600; font-size: 14px; text-align: center; }
+        .flow-arrow { color: var(--gold); font-size: 20px; font-weight: 700; }
+        .bottom-nav { display: flex; justify-content: space-between; max-width: 800px; margin: 30px auto; padding: 0 24px; }
+        .bottom-nav a { display: inline-flex; align-items: center; gap: 8px; background: var(--frost-white); color: var(--deep-petrol); text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; transition: background 0.3s; }
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+        @media print { .hero { padding: 30px 20px 40px; } .hero::after { display: none; } .content { padding-top: 20px; } .bottom-nav, .nav-links { display: none; } }
+        @media (max-width: 600px) { .hero h1 { font-size: 26px; } .section-title { font-size: 19px; } .flow-diagram { flex-direction: column; } .flow-arrow { transform: rotate(90deg); } }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="master-lesson-5.html">&#8594; מפגש 5</a>
+            <a href="master-lesson-7.html">מפגש 7 &#8592;</a>
+        </div>
+        <div class="lesson-badge">06</div>
+        <h1>תחקור, קבלת החלטות ואסטרטגיה</h1>
+        <div class="hero-sub">NLP Master - מפגש שישי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Section: Two Degrees Metaphor -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127919;</div>
+                <div class="section-title">מטפורת שתי המעלות</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">שינוי קטן בכיוון = סטייה ענקית לאורך זמן</div>
+                <ul>
+                    <li>אם מטוס משנה כיוון ב-2 מעלות בלבד - אחרי כמה שעות הוא מגיע ליבשת אחרת</li>
+                    <li>ככה גם בחיים: שינוי קטן במחשבה או בהרגל - מוביל לתוצאות שונות לגמרי</li>
+                    <li>הבעיה: רוב האנשים לא עוצרים לבדוק לאן הם טסים</li>
+                    <li>תחקור = לבדוק כל כמה זמן אם הכיוון שלנו נכון</li>
+                </ul>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"שתי מעלות הבדל היום = יבשת אחרת בעוד שנה. לכן תחקור שוטף הוא קריטי"</div>
+            </div>
+        </div>
+
+        <!-- Section: 6-Step Model -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128260;</div>
+                <div class="section-title">מודל 6 שלבים לשיפור מתמיד</div>
+            </div>
+            <div class="flow-diagram">
+                <div class="flow-step">פעולה</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">תחקור</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">מסקנות</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">תוכנית</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">פעולה</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">לעולם לא להפסיק</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">85% לא מתחקרים</div>
+                <ul>
+                    <li>רוב האנשים רצים קדימה בלי לעצור לבדוק מה עבד ומה לא</li>
+                    <li>הם חוזרים על אותן טעויות שוב ושוב - כי אף פעם לא עצרו לשאול</li>
+                    <li>תחקור הוא לא ביקורת עצמית - הוא <strong>למידה</strong></li>
+                    <li>שאלות מפתח: "מה עבד? מה לא עבד? מה אעשה אחרת בפעם הבאה?"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Effective Debrief -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128269;</div>
+                <div class="section-title">תחקור אפקטיבי</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">איך מתחקרים נכון?</div>
+                <ul>
+                    <li><strong>מה עבד?</strong> — לזהות ולחזק את מה שהצליח (רוב האנשים מדלגים על זה)</li>
+                    <li><strong>מה לא עבד?</strong> — בלי שיפוט, בלי אשמה - רק עובדות</li>
+                    <li><strong>מה הפתעה אותי?</strong> — דברים שלא ציפיתי להם מלמדים הכי הרבה</li>
+                    <li><strong>מה אעשה אחרת?</strong> — פעולה קונקרטית, לא רק "אשתפר"</li>
+                    <li>לתחקר <strong>כל שבוע</strong> - לא רק בסוף פרויקט</li>
+                    <li>לכתוב את התחקור - לא רק לחשוב עליו בראש</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Decision Making -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9889;</div>
+                <div class="section-title">קבלת החלטות</div>
+            </div>
+            <ol class="numbered-list">
+                <li><strong>דדליין:</strong> החלטה בלי דדליין היא לא החלטה. תנו לעצמכם זמן מוגבל להחליט</li>
+                <li><strong>מיקוד:</strong> לבחור דבר אחד ולהתמקד בו — לא לפזר אנרגיה ל-10 כיוונים</li>
+                <li><strong>ויתור (Sacrifice):</strong> כל החלטה דורשת ויתור. אם לא ויתרת על משהו - לא באמת החלטת</li>
+                <li><strong>הבנת המצב הנוכחי:</strong> לא אפשר להגיע לאן שרוצים בלי להבין מאיפה מתחילים</li>
+                <li><strong>מהירות:</strong> החלטה לא מושלמת עכשיו עדיפה על החלטה מושלמת שלא מגיעה. מהירות > שלמות</li>
+            </ol>
+        </div>
+
+        <!-- Section: Sales Questions Technique -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128172;</div>
+                <div class="section-title">טכניקת שאלות למכירות</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">6 שאלות אסטרטגיות</div>
+                <ul>
+                    <li><strong>מה המצב הנוכחי?</strong> — היכן הלקוח נמצא עכשיו?</li>
+                    <li><strong>מה המצב הרצוי?</strong> — לאן הוא רוצה להגיע?</li>
+                    <li><strong>מה הפער?</strong> — מה מפריד בין עכשיו לשם?</li>
+                    <li><strong>מה כבר ניסית?</strong> — מה לא עבד עד עכשיו?</li>
+                    <li><strong>מה המחיר של לא לפתור?</strong> — מה יקרה עוד שנה / 5 שנים?</li>
+                    <li><strong>מה היית רוצה שיקרה?</strong> — מה הפתרון האידיאלי מבחינתו?</li>
+                </ul>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">דוגמה: מועדון היזמים</div>
+                <ul>
+                    <li>השאלות האלו מאפשרות להבין את הלקוח בעומק - בלי "למכור" לו</li>
+                    <li>הלקוח מרגיש שמבינים אותו → אמון → פתיחות לפתרון</li>
+                    <li>הם עובדות גם בטיפול, לא רק במכירות - כי הם מבוססות על מטה מודל</li>
+                    <li>התוצאה: הלקוח "מוכר לעצמו" - לא צריך לשכנע אותו</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Gold Bank -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127942;</div>
+                <div class="section-title">בנק מפתחות (Gold Bank)</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">חקירת דפוסי הצלחה</div>
+                <ul>
+                    <li>לקחת 30+ שיחות מוצלחות ולחקור: מה המכנה המשותף?</li>
+                    <li>אילו שאלות הובילו לפריצת דרך? באיזה שלב קרה השינוי?</li>
+                    <li>לבנות "בנק זהב" של טכניקות, שאלות ומשפטים שעובדים</li>
+                    <li>כל מטפל / מאמן / מוכר צריך לדעת מה ה-"נשק הסודי" שלו</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">ויזואליזציית דלת החרדה</div>
+                <ul>
+                    <li>דמיון מודרך: לדמיין דלת שמאחוריה נמצאת החרדה</li>
+                    <li>לפתוח את הדלת ולהבין מה באמת מאחוריה - לרוב זה לא מה שציפינו</li>
+                    <li>הבנת התהליך הפנימי של חרדה: מה הטריגר? מה הפרשנות? מה הגוף עושה?</li>
+                    <li>ברגע שמבינים את המנגנון - אפשר לשנות אותו</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">עקרונות מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"85% מהאנשים לא מתחקרים - הם רצים קדימה בלי לבדוק לאן. תחקור שבועי זה ההבדל בין הצלחה לבינוניות"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"כל החלטה דורשת ויתור. אם לא ויתרת על משהו - לא באמת החלטת"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"החלטה לא מושלמת עכשיו עדיפה על החלטה מושלמת שלעולם לא מגיעה"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"אל תמכור - תשאל. כשאנשים מגלים בעצמם שהם צריכים משהו, הם קונים"</div>
+            </div>
+        </div>
+
+        <!-- Section: Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>עשו תחקור שבועי</strong>
+                    <div class="homework-note">כתבו: מה עבד? מה לא? מה אעשה אחרת? — לפחות 15 דקות, בכתב</div>
+                </div>
+                <div class="homework-item">
+                    <strong>קבלו החלטה אחת שדחיתם</strong>
+                    <div class="homework-note">תנו לעצמכם דדליין של 48 שעות. זכרו: מהירות > שלמות</div>
+                </div>
+                <div class="homework-item">
+                    <strong>תרגלו את 6 השאלות האסטרטגיות</strong>
+                    <div class="homework-note">בשיחה הבאה עם לקוח או חבר - השתמשו בשאלות במקום לייעץ</div>
+                </div>
+                <div class="homework-item">
+                    <strong>התחילו לבנות את בנק המפתחות שלכם</strong>
+                    <div class="homework-note">רשמו 3 דברים שעובדים לכם — שאלות, משפטים, טכניקות שמביאות תוצאות</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="master-lesson-5.html">&#8594; מפגש 5</a>
+        <a href="master-lesson-7.html">מפגש 7 &#8592;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

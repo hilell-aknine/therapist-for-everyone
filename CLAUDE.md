@@ -313,3 +313,42 @@ META_PIXEL_ID: '123456789',  // Meta (Facebook) Pixel
 ### NOT Currently Offered (Don't Add to Site!)
 - ❌ סופרוויז'ן (Supervision) - removed from all pages
 - ❌ מחירי מבחנים (Exam prices) - removed from courses section
+
+---
+
+## 14. Skills (מיומנויות אוטונומיות)
+
+### Project-Level Skills (`.claude/skills/`)
+מיומנויות מותאמות לפרויקט — פקודות חוזרות שהפכו לאוטומציה:
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| **create-infographic** | "צור אינפוגרפיקה לפרק X" | יצירת SVG ממותג לפרק בחוברת NLP, שילוב ב-HTML |
+| **generate-branded-pdf** | "צור PDF" / "הפק חוברת" | המרת חוברת NLP ל-PDF ממותג עם אינפוגרפיקות |
+| **mobile-audit** | "בדוק מובייל" / "mobile audit" | סריקת responsive על כל 24 דפי ה-HTML |
+| **deploy-site** | "פרסם" / "deploy" | git add → commit → push → GitHub Pages |
+
+### User-Level Skills (Available via Claude Code)
+כלים כלליים שזמינים בכל פרויקט:
+
+| Skill | Use Case |
+|-------|----------|
+| `html-to-pdf` | המרת HTML ל-PDF (Puppeteer) |
+| `gh-pages-deploy` | פריסה ל-GitHub Pages |
+| `whatsapp` | שליחת הודעות WhatsApp |
+| `nano-banana-poster` | יצירת תמונות עם Gemini AI |
+| `speech-generator` | הפקת דיבור TTS |
+| `social-content` | יצירת תוכן לרשתות חברתיות |
+| `presentation-architect` | בניית מצגות |
+
+### Spaceship Mode Example
+```
+טרמינל: "הרץ create-infographic על פרקים 4, 9, 11, 13, 14, 15, 16, 17, 18"
+→ Claude עובד לבד 20 דקות, יוצר 9 אינפוגרפיקות
+
+טרמינל: "הרץ generate-branded-pdf"
+→ Claude ממיר את החוברת ל-PDF ממותג
+
+טרמינל: "הרץ deploy-site"
+→ Claude מעלה את הכל ל-GitHub Pages
+```

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מפגש 2 - ערכים ומניעים פנימיים | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --deep-petrol: #003B46; --muted-teal: #00606B; --dusty-aqua: #2F8592; --frost-white: #E8F1F2; --gold: #D4AF37; }
+        body { font-family: 'Heebo', sans-serif; background: #fff; color: var(--deep-petrol); line-height: 1.7; font-size: 16px; }
+        .hero { background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%); padding: 50px 20px 70px; text-align: center; position: relative; }
+        .hero::after { content: ''; position: absolute; bottom: -30px; left: 0; right: 0; height: 60px; background: #fff; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+        .lesson-badge { display: inline-block; background: var(--gold); color: var(--deep-petrol); font-weight: 900; font-size: 28px; width: 64px; height: 64px; line-height: 64px; border-radius: 50%; margin-bottom: 16px; }
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--gold); }
+        .section-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; flex-shrink: 0; }
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+        .topic { background: var(--frost-white); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; border-right: 4px solid var(--dusty-aqua); }
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before { content: ''; position: absolute; right: 0; top: 12px; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
+        .topic p { margin: 8px 0; }
+        .highlight-box { background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); color: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before { content: ''; position: absolute; right: 0; top: 14px; width: 10px; height: 2px; background: var(--gold); }
+        .numbered-list { counter-reset: item; list-style: none; padding: 0; }
+        .numbered-list li { counter-increment: item; padding: 10px 0 10px 0; padding-right: 40px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .numbered-list li::before { content: counter(item); position: absolute; right: 0; top: 10px; width: 28px; height: 28px; background: var(--gold); color: var(--deep-petrol); border-radius: 50%; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .numbered-list li:last-child { border-bottom: none; }
+        .principle { display: flex; gap: 12px; align-items: flex-start; background: white; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; }
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+        .homework { background: var(--frost-white); border-radius: 16px; padding: 24px; border: 2px dashed var(--dusty-aqua); }
+        .homework-item { padding: 10px 0; padding-right: 32px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+        .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .vs-card { background: var(--frost-white); border-radius: 12px; padding: 20px; text-align: center; }
+        .vs-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+        .vs-card.approach { border-top: 4px solid #27ae60; }
+        .vs-card.approach h3 { color: #27ae60; }
+        .vs-card.avoid { border-top: 4px solid #c0392b; }
+        .vs-card.avoid h3 { color: #c0392b; }
+        .vs-card ul { list-style: none; padding: 0; text-align: right; }
+        .vs-card li { padding: 3px 0; font-size: 15px; }
+        .bottom-nav { display: flex; justify-content: space-between; max-width: 800px; margin: 30px auto; padding: 0 24px; }
+        .bottom-nav a { display: inline-flex; align-items: center; gap: 8px; background: var(--frost-white); color: var(--deep-petrol); text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; transition: background 0.3s; }
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+        @media print { .hero { padding: 30px 20px 40px; } .hero::after { display: none; } .content { padding-top: 20px; } .bottom-nav, .nav-links { display: none; } }
+        @media (max-width: 600px) { .hero h1 { font-size: 26px; } .section-title { font-size: 19px; } .vs-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="master-lesson-1.html">&#8594; מפגש 1</a>
+            <a href="master-lesson-3.html">מפגש 3 &#8592;</a>
+        </div>
+        <div class="lesson-badge">02</div>
+        <h1>ערכים ומניעים פנימיים</h1>
+        <div class="hero-sub">NLP Master - מפגש שני</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Section: What are Values -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9878;</div>
+                <div class="section-title">מהם ערכים?</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">ערכים במודל הרמות הלוגיות</div>
+                <ul>
+                    <li>ערכים נמצאים בין רמת האמונות לרמת הזהות</li>
+                    <li>ערך = אמונה של משהו מוחלט - אם הוא טוב או רע</li>
+                    <li>הערכים שלנו מגדירים את הזהות שלנו</li>
+                    <li>כשערכים מתקיימים → מרגישים טוב. כשערכים מופרים → מרגישים רע</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">למה ערכים כל כך חשובים?</div>
+                <ul>
+                    <li><strong>זוגיות:</strong> אם לא מכירים את ערכי בן/בת הזוג - קל להפר אותם ולהיכנס לתסכול</li>
+                    <li><strong>עסקים:</strong> ערך הוא קו מנחה לחבר צוות שלא יודע מה לעשות</li>
+                    <li><strong>אישי:</strong> אם אני לא יודע מה הערכים שלי, אני לא יודע למה אני מתוסכל</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Types of Values -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9889;</div>
+                <div class="section-title">סוגי ערכים</div>
+            </div>
+            <div class="vs-grid">
+                <div class="vs-card approach">
+                    <h3>ערכי משיכה</h3>
+                    <ul>
+                        <li>דברים שאני רוצה להרגיש</li>
+                        <li>דוגמאות: אהבה, צמיחה, שמחה, הכרת תודה, חופש, הצלחה</li>
+                        <li>מניעים אותנו <strong>לכיוון</strong> פעולה</li>
+                    </ul>
+                </div>
+                <div class="vs-card avoid">
+                    <h3>ערכי הימנעות</h3>
+                    <ul>
+                        <li>דברים שאני הכי לא רוצה להרגיש</li>
+                        <li>דוגמאות: כעס, עצבות, בדידות, זלזול, חוסר אונים</li>
+                        <li>מניעים אותנו <strong>הרחק</strong> מפעולה</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">ערך אמצעי vs ערך מטרה</div>
+                <ul>
+                    <li><strong>ערך מטרה:</strong> הרגש הסופי שאני רוצה להרגיש (אהבה, שמחה, צמיחה)</li>
+                    <li><strong>ערך אמצעי:</strong> הדרך / הכלי שדרכו אני ממלא את ערך המטרה (כסף, קריירה)</li>
+                    <li>הרבה אנשים רודפים אחרי ערכי אמצעי ושוכחים את ערכי המטרה</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Value Hierarchy -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128200;</div>
+                <div class="section-title">סולם ערכים ותיעדוף</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">איך מדרגים ערכים?</div>
+                <ul>
+                    <li>שאלת הזהב: "אם הייתי צריך לוותר על ערך אחד - מה הייתי שומר?"</li>
+                    <li>ממשיכים עד שנשארת "החמישייה המנצחת" - 5 הערכים הכי חשובים</li>
+                    <li>אותו הדבר עם ערכי הימנעות - מה הכי לא הייתי רוצה?</li>
+                    <li>הסדר חשוב! ערך #1 שונה מערך #5 בהשפעה על ההתנהגות</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Criteria -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128736;</div>
+                <div class="section-title">קריטריונים - החוקים שלנו</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מהם קריטריונים?</div>
+                <ul>
+                    <li>קריטריונים = החוקים שלנו עם עצמנו לאיך למלא ערך</li>
+                    <li><strong>שאלת המפתח:</strong> "מה צריך לקרות כדי שתרגיש [ערך]?"</li>
+                    <li>אם הקריטריונים קשים למילוי → הערך לא מתמלא → תסכול!</li>
+                    <li>דוגמה: אם "הכפלת העסק" היא הקריטריון היחידי ל"צמיחה" → תסכול רוב הזמן</li>
+                </ul>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">3 מרכיבים של קריטריון מעצים (ערכי משיכה):</div>
+                <ul>
+                    <li><strong>קל למלא אותו</strong> - לא דורש משמעת עצמית גבוהה</li>
+                    <li><strong>תלוי בי</strong> - לא נתון לחסדי העולם</li>
+                    <li><strong>הרבה דרכים למלא</strong> - לא רק דרך אחת ויחידה</li>
+                </ul>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">3 מרכיבים של קריטריון מעצים (ערכי הימנעות):</div>
+                <ul>
+                    <li><strong>קשה למלא אותו</strong> - צריך שיקרה משהו רציני כדי שארגיש רע</li>
+                    <li><strong>תלוי בי</strong> - מוקד שליטה פנימי</li>
+                    <li><strong>מעט קריטריונים</strong> - לא נדלק מכל דבר</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Practical Examples -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128221;</div>
+                <div class="section-title">דוגמאות מעשיות</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מחברת הצלחות</div>
+                <ul>
+                    <li>כלי פשוט: כל יום רושמים הצלחות קטנות (קמתי בשעון, מקלחת קרה, סיימתי משימה)</li>
+                    <li>בהתחלה מרגיש רובוטי → אחרי כמה ימים המוח מתחיל לשים לב להצלחות לאורך היום</li>
+                    <li>משנה את הפוקוס מ"מה לא עבד" ל"מה כן הצלחתי"</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מחברת תודות</div>
+                <ul>
+                    <li>כל יום רושמים דברים שמודים עליהם - גם הכי בסיסיים</li>
+                    <li>משנה את הפוקוס מ"צבע שחור" (דברים רעים) ל"כל שאר הצבעים"</li>
+                    <li>כמו אימון בחדר כושר - צריך תחזוקה יום-יומית</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">הנחות יסוד ומשפטי מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"ערך הוא קו מנחה לחבר צוות שלא יודע מה לעשות"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"ככל שלבן אדם יהיו חוקים פשוטים יותר כדי למלא את הערכים שלו - הוא יוכל לחוות מהם יותר"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"הפוקוס שלנו בטבע הולך לדברים השליליים - אם לא מטפחים את זה, המוח הולך לשחור"</div>
+            </div>
+        </div>
+
+        <!-- Section: Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>סיימו את ערכי המשיכה - 5 ערכים מדורגים</strong>
+                    <div class="homework-note">עם בן/בת הזוג או לבד - מה החמישייה המנצחת שלכם?</div>
+                </div>
+                <div class="homework-item">
+                    <strong>צרו קריטריונים לכל ערך</strong>
+                    <div class="homework-note">חוקים שקל למלא, תלויים בכם, והרבה דרכים לקיים אותם</div>
+                </div>
+                <div class="homework-item">
+                    <strong>שריינו אוגנים ביומן</strong>
+                    <div class="homework-note">תזכורות יומיות לקיום הקריטריונים - עד שזה הופך להרגל</div>
+                </div>
+                <div class="homework-item">
+                    <strong>עשו אותו הדבר לערכי הימנעות</strong>
+                    <div class="homework-note">חוקים הפוכים: קשה למלא, תלויים בי, ומעט קריטריונים</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="master-lesson-1.html">&#8594; מפגש 1</a>
+        <a href="master-lesson-3.html">מפגש 3 &#8592;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

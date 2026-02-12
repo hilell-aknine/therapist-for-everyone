@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מפגש 7 - שליטה בסטייט, כעס וסליחה | מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --deep-petrol: #003B46; --muted-teal: #00606B; --dusty-aqua: #2F8592; --frost-white: #E8F1F2; --gold: #D4AF37; }
+        body { font-family: 'Heebo', sans-serif; background: #fff; color: var(--deep-petrol); line-height: 1.7; font-size: 16px; }
+        .hero { background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%); padding: 50px 20px 70px; text-align: center; position: relative; }
+        .hero::after { content: ''; position: absolute; bottom: -30px; left: 0; right: 0; height: 60px; background: #fff; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+        .nav-links { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto 30px; }
+        .nav-links a { color: var(--frost-white); text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 1; }
+        .lesson-badge { display: inline-block; background: var(--gold); color: var(--deep-petrol); font-weight: 900; font-size: 28px; width: 64px; height: 64px; line-height: 64px; border-radius: 50%; margin-bottom: 16px; }
+        .hero h1 { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; }
+        .hero-sub { font-size: 16px; color: var(--gold); font-weight: 300; }
+        .content { max-width: 800px; margin: 0 auto; padding: 10px 24px 60px; }
+        .section { margin-bottom: 32px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--gold); }
+        .section-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; flex-shrink: 0; }
+        .section-title { font-size: 22px; font-weight: 700; color: var(--deep-petrol); }
+        .topic { background: var(--frost-white); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; border-right: 4px solid var(--dusty-aqua); }
+        .topic-title { font-size: 17px; font-weight: 700; color: var(--muted-teal); margin-bottom: 10px; }
+        .topic ul { list-style: none; padding: 0; }
+        .topic li { padding: 4px 0; padding-right: 20px; position: relative; }
+        .topic li::before { content: ''; position: absolute; right: 0; top: 12px; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; }
+        .topic p { margin: 8px 0; }
+        .highlight-box { background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal)); color: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+        .highlight-box .box-title { color: var(--gold); font-weight: 700; font-size: 17px; margin-bottom: 12px; }
+        .highlight-box ul { list-style: none; padding: 0; }
+        .highlight-box li { padding: 6px 0; padding-right: 24px; position: relative; color: var(--frost-white); }
+        .highlight-box li::before { content: ''; position: absolute; right: 0; top: 14px; width: 10px; height: 2px; background: var(--gold); }
+        .numbered-list { counter-reset: item; list-style: none; padding: 0; }
+        .numbered-list li { counter-increment: item; padding: 10px 0 10px 0; padding-right: 40px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .numbered-list li::before { content: counter(item); position: absolute; right: 0; top: 10px; width: 28px; height: 28px; background: var(--gold); color: var(--deep-petrol); border-radius: 50%; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .numbered-list li:last-child { border-bottom: none; }
+        .principle { display: flex; gap: 12px; align-items: flex-start; background: white; border: 2px solid var(--gold); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; }
+        .principle-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+        .principle-text { font-weight: 600; color: var(--deep-petrol); }
+        .homework { background: var(--frost-white); border-radius: 16px; padding: 24px; border: 2px dashed var(--dusty-aqua); }
+        .homework-item { padding: 10px 0; padding-right: 32px; position: relative; border-bottom: 1px solid rgba(0, 59, 70, 0.08); }
+        .homework-item:last-child { border-bottom: none; }
+        .homework-item::before { content: '\1F381'; position: absolute; right: 0; top: 10px; font-size: 18px; }
+        .homework-note { font-size: 14px; color: var(--dusty-aqua); margin-top: 4px; }
+        .flow-diagram { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin: 16px 0; padding: 16px; background: var(--frost-white); border-radius: 12px; }
+        .flow-step { background: white; border: 2px solid var(--dusty-aqua); border-radius: 10px; padding: 10px 16px; font-weight: 600; font-size: 14px; text-align: center; }
+        .flow-arrow { color: var(--gold); font-size: 20px; font-weight: 700; }
+        .bottom-nav { display: flex; justify-content: space-between; max-width: 800px; margin: 30px auto; padding: 0 24px; }
+        .bottom-nav a { display: inline-flex; align-items: center; gap: 8px; background: var(--frost-white); color: var(--deep-petrol); text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; transition: background 0.3s; }
+        .bottom-nav a:hover { background: var(--gold); color: var(--deep-petrol); }
+        .footer { text-align: center; padding: 24px; color: var(--dusty-aqua); font-size: 14px; }
+        @media print { .hero { padding: 30px 20px 40px; } .hero::after { display: none; } .content { padding-top: 20px; } .bottom-nav, .nav-links { display: none; } }
+        @media (max-width: 600px) { .hero h1 { font-size: 26px; } .section-title { font-size: 19px; } .flow-diagram { flex-direction: column; } .flow-arrow { transform: rotate(90deg); } }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="nav-links">
+            <a href="master-lesson-6.html">&#8594; מפגש 6</a>
+            <a href="index.html">חזרה לרשימה &#8592;</a>
+        </div>
+        <div class="lesson-badge">07</div>
+        <h1>שליטה בסטייט, כעס וסליחה</h1>
+        <div class="hero-sub">NLP Master - מפגש שביעי</div>
+    </div>
+
+    <div class="content">
+
+        <!-- Section: 3 State Components -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9889;</div>
+                <div class="section-title">שלושת מרכיבי הסטייט</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">פיזיולוגיה</div>
+                <ul>
+                    <li>הגוף משפיע על הרגש באופן ישיר ומיידי</li>
+                    <li>עמידה זקופה, נשימה עמוקה, תנועה = שינוי מצב רגשי תוך שניות</li>
+                    <li>כשאנחנו עצובים — הגוף שוקע. כשמשנים את הגוף — הרגש משתנה</li>
+                    <li>טכניקות: קפיצות, מקלחות קרות, ריצה, שינוי יציבה</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">פוקוס</div>
+                <ul>
+                    <li>על מה שמים תשומת לב = מה שגדל. מה שלא שמים עליו — נעלם</li>
+                    <li>אם מתמקדים בבעיות — רואים רק בעיות. מתמקדים בפתרונות — מוצאים פתרונות</li>
+                    <li>שאלות מכוונות פוקוס: "מה טוב עכשיו?" במקום "מה רע?"</li>
+                    <li>שליטה בפוקוס = שליטה ברגש = שליטה בחיים</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">מילים ושפה</div>
+                <ul>
+                    <li>המילים שאנחנו משתמשים בהן <strong>יוצרות</strong> את המציאות הרגשית שלנו</li>
+                    <li>"אני מותש" vs "אני צריך מנוחה" — אותו מצב, רגש שונה לחלוטין</li>
+                    <li>"אני כועס" vs "אני קצת מתוסכל" — עוצמה שונה</li>
+                    <li>הרחבת אוצר מילים רגשי = יכולת לדייק ולשלוט ברגשות</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: State Control Techniques -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128170;</div>
+                <div class="section-title">טכניקות לשליטה בסטייט</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">כלים מעשיים לשינוי מצב רגשי</div>
+                <ul>
+                    <li><strong>אנכור:</strong> עיגון מצב רגשי חיובי לתנועה / מגע / מילה — כדי להפעיל אותו בכל רגע</li>
+                    <li><strong>קפיצות:</strong> 30 שניות של קפיצות משנות את הכימיה במוח — מיידית</li>
+                    <li><strong>מקלחות קרות:</strong> מפעילות את מערכת "הישרדות" — מנקות את הרגש ומחדדות את הפוקוס</li>
+                    <li><strong>הרחבת אוצר מילים:</strong> ככל שיש יותר מילים לרגשות — יש יותר שליטה עליהם</li>
+                    <li><strong>שינוי יציבה:</strong> כתפיים אחורה, ראש למעלה, חיוך — הגוף "מרמה" את המוח</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Anger vs Grudge -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128293;</div>
+                <div class="section-title">כעס vs טינה</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">ההבחנה המרכזית</div>
+                <ul>
+                    <li><strong>כעס:</strong> רגש מיידי, תגובה לאירוע. מגיע ועובר — בריא וטבעי</li>
+                    <li><strong>טינה:</strong> כעס שנצבר לאורך זמן. לא עבר, לא שוחרר — הפך לרעל</li>
+                    <li>כעס הוא כמו אש — שורף ועובר. טינה היא כמו חומצה — אוכלת מבפנים לאט</li>
+                    <li>טינה פוגעת ב<strong>מי שמחזיק בה</strong> — לא באדם שכלפיו היא מופנית</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: 5 Positive Intentions -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128161;</div>
+                <div class="section-title">5 כוונות חיוביות של טינה</div>
+            </div>
+            <ol class="numbered-list">
+                <li><strong>ביטחון:</strong> הטינה "מגנה" עלינו — "אם אני זוכר מה הוא עשה לי, לא אתן לזה לקרות שוב"</li>
+                <li><strong>עוצמה:</strong> הטינה נותנת תחושת כוח — "אני חזק כי אני לא סולח"</li>
+                <li><strong>נקמה / צדק:</strong> "הוא צריך לשלם על מה שעשה" — תחושת צדק פנימי</li>
+                <li><strong>הגנה:</strong> "אם אשחרר את הטינה, אהיה פגיע" — הטינה כשריון רגשי</li>
+                <li><strong>הצדקה:</strong> "מה שקרה לי מסביר למה אני ככה" — הטינה כתירוץ לחיים</li>
+            </ol>
+        </div>
+
+        <!-- Section: Ecological Problems -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#9888;</div>
+                <div class="section-title">בעיות אקולוגיות של טינה</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">המחירים של להחזיק בטינה</div>
+                <ul>
+                    <li>פוגעת בבריאות — מתח כרוני, בעיות שינה, לחץ דם</li>
+                    <li>הורסת מערכות יחסים חדשות — הטינה על העבר משליכה על ההווה</li>
+                    <li>צורכת אנרגיה נפשית אדירה — כמו לשאת משא כבד 24/7</li>
+                    <li>מונעת התקדמות — נשארים תקועים באירוע מהעבר</li>
+                    <li>יוצרת זהות של קורבן — "אני מי שנפגע" הופך לכל הסיפור</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: 4 Steps to Release -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128275;</div>
+                <div class="section-title">4 שלבים לשחרור טינה</div>
+            </div>
+            <div class="flow-diagram">
+                <div class="flow-step">מוטיבציה</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">כוונה חיובית</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">שחרור רגשי</div>
+                <div class="flow-arrow">&#10229;</div>
+                <div class="flow-step">מסגור מחדש</div>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלב 1 — מוטיבציה</div>
+                <ul>
+                    <li>להבין <strong>למה</strong> כדאי לשחרר — מה המחירים שאני משלם?</li>
+                    <li>אם אין מוטיבציה אמיתית — התהליך לא יעבוד</li>
+                    <li>שאלה: "מה יקרה לי עוד 5 שנים אם אמשיך להחזיק את הטינה הזאת?"</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלב 2 — כוונה חיובית</div>
+                <ul>
+                    <li>לזהות מה הטינה נותנת לנו — מהי הכוונה החיובית שלה?</li>
+                    <li>למצוא דרך אחרת לספק את אותה כוונה — בלי טינה</li>
+                    <li>דוגמה: אם הטינה נותנת ביטחון → למצוא מקור ביטחון פנימי אחר</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלב 3 — שחרור רגשי</div>
+                <ul>
+                    <li>לאפשר לרגש לעלות ולצאת — לא לדכא, לא להילחם</li>
+                    <li>טכניקות: כתיבה, בכי, תנועה, צעקה (במקום בטוח)</li>
+                    <li>הגוף צריך "לפרוק" את הרגש שנצבר — אחרת הוא חוזר</li>
+                </ul>
+            </div>
+            <div class="topic">
+                <div class="topic-title">שלב 4 — מסגור מחדש (Reframe)</div>
+                <ul>
+                    <li>לתת משמעות חדשה לאירוע: "מה למדתי מזה? איך זה חיזק אותי?"</li>
+                    <li>לא להצדיק את מה שקרה — אלא למצוא בו ערך</li>
+                    <li>סליחה היא לא בשביל האדם השני — היא <strong>בשבילנו</strong></li>
+                    <li>סליחה = לשחרר את עצמנו מהכלא שבנינו לעצמנו</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Practical Examples -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127793;</div>
+                <div class="section-title">דוגמאות מעשיות</div>
+            </div>
+            <div class="highlight-box">
+                <div class="box-title">סיפורים מהכיתה</div>
+                <ul>
+                    <li><strong>בחורה עם פחד משיחות:</strong> גילתה שהפחד מגן עליה מדחייה — ברגע שהבינה, יכלה לשחרר</li>
+                    <li><strong>סיפור אב שהרביץ:</strong> טינה שנצברה שנים — תהליך של הבנת הכוונה החיובית + שחרור + סליחה</li>
+                    <li><strong>תהליך סליחה בכיתה:</strong> כל אחד עבד על טינה אישית — רגע פריצת הדרך כשהרגש יוצא</li>
+                    <li>המפתח: לא להכריח סליחה — לאפשר לה להגיע טבעית דרך התהליך</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section: Key Principles -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#128273;</div>
+                <div class="section-title">עקרונות מפתח</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"טינה היא כמו לשתות רעל ולצפות שהאויב ימות" — נלסון מנדלה</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"שלושה דברים קובעים את הסטייט: הגוף, הפוקוס, והמילים. שנה אחד מהם — והכל משתנה"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"כעס הוא בריא — טינה היא רעילה. ההבדל: כעס עובר, טינה נצברת"</div>
+            </div>
+            <div class="principle">
+                <div class="principle-icon">&#128273;</div>
+                <div class="principle-text">"סליחה היא לא בשביל מי שפגע בנו — היא בשביל לשחרר את עצמנו"</div>
+            </div>
+        </div>
+
+        <!-- Section: Homework -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon">&#127873;</div>
+                <div class="section-title">מתנות בית</div>
+            </div>
+            <div class="homework">
+                <div class="homework-item">
+                    <strong>תרגלו שליטה בסטייט דרך הגוף</strong>
+                    <div class="homework-note">כל בוקר: 30 שניות קפיצות + יציבה זקופה + 3 נשימות עמוקות. שימו לב לשינוי</div>
+                </div>
+                <div class="homework-item">
+                    <strong>שדרגו את אוצר המילים הרגשי</strong>
+                    <div class="homework-note">במקום "טוב/רע" — חפשו מילים מדויקות: נרגש, סקרן, אסיר תודה, מתוסכל, חסר סבלנות</div>
+                </div>
+                <div class="homework-item">
+                    <strong>זהו טינה אחת שאתם מחזיקים</strong>
+                    <div class="homework-note">כתבו: על מי? מה הכוונה החיובית? מה המחיר שאתם משלמים?</div>
+                </div>
+                <div class="homework-item">
+                    <strong>תרגלו את 4 השלבים לשחרור</strong>
+                    <div class="homework-note">לא חייבים להגיע לסליחה מלאה — גם רק להתחיל בתהליך זה צעד ענק</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="master-lesson-6.html">&#8594; מפגש 6</a>
+        <a href="index.html">חזרה לרשימה &#8592;</a>
+    </div>
+
+    <div class="footer">מטפל לכל אחד &bull; ריפוי הנפש לכל אדם</div>
+</body>
+</html>

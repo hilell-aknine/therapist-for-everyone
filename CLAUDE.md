@@ -25,7 +25,7 @@ Repo: https://github.com/hilell-aknine/therapist-for-everyone
 ## 2. Architecture
 
 ```
-מטפל-לכל-אחד-website/
+beit-vmetaplim/
 ├── index.html              # דף הבית + קורסים
 ├── landing-patient.html    # נחיתה למטופלים
 ├── landing-therapist.html  # נחיתה למטפלים
@@ -33,22 +33,32 @@ Repo: https://github.com/hilell-aknine/therapist-for-everyone
 ├── therapist-onboarding.html # הרשמת מטפל
 ├── patient-dashboard.html  # אזור אישי למטופל
 ├── therapist-dashboard.html # אזור אישי למטפל
-├── admin-dashboard.html    # פאנל ניהול
 ├── legal-gate.html         # שער משפטי
 ├── thank-you.html          # דף תודה
 ├── privacy-policy.html     # מדיניות פרטיות
+├── pages/                  # App pages (admin, steps, learning, etc.)
+│   ├── admin.html          # פאנל ניהול
+│   ├── patient-step[1-4].html
+│   ├── therapist-step[1-4].html
+│   └── ...                 # about, courses, login, etc.
 ├── js/
 │   ├── supabase-client.js  # Supabase initialization (SINGLE SOURCE)
 │   ├── auth-guard.js       # Role & legal checks
 │   ├── patient-flow.js     # Patient logic
 │   ├── admin-dashboard.js  # Admin logic
+│   ├── fill-patient-form.js # Form auto-fill utility
 │   └── marketing-tools.js  # Cookie consent + Analytics
 ├── supabase/
 │   └── migrations/         # Database schema
-├── images/
 ├── docs/
-│   ├── אפיון-מערכת.txt     # System specification
-│   └── אפיון-מערכת.pdf
+│   ├── booklets/           # NLP booklet (HTML, PDF)
+│   ├── transcripts/        # Course transcripts (JSON, MD, TXT)
+│   ├── master-course/      # Master course lessons
+│   ├── images/             # Infographic PNGs
+│   ├── summaries/          # Lesson summaries (DOCX)
+│   ├── legal/              # Legal documents (PDF)
+│   ├── specs/              # System specifications
+│   └── scripts/            # Utility scripts (Python)
 └── DOCUMENTATION.md        # Technical docs (Hebrew)
 ```
 

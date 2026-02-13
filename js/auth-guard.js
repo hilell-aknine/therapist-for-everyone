@@ -257,7 +257,7 @@
         redirectByRole(role) {
             switch (role) {
                 case 'admin':
-                    window.location.href = 'admin-dashboard.html';
+                    window.location.href = 'pages/admin.html';
                     break;
                 case 'therapist':
                     window.location.href = 'therapist-dashboard.html';

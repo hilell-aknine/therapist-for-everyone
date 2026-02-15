@@ -11,6 +11,7 @@
     <title>הרשמה לטיפול - מטפל לכל אחד</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/accessibility.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/auth-guard.js"></script>
@@ -427,12 +428,14 @@
                         <label>שם מלא <span class="required">*</span></label>
                         <input type="text" id="full-name" name="full_name" required
                                placeholder="השם המלא שלך">
+                        <div class="error-msg" id="full-name-error">יש להזין שם מלא</div>
                     </div>
 
                     <div class="form-group">
                         <label>טלפון נייד <span class="required">*</span></label>
                         <input type="tel" id="phone" name="phone" required
                                placeholder="050-0000000" pattern="[0-9\-]+">
+                        <div class="error-msg" id="phone-error">מספר טלפון לא תקין</div>
                     </div>
 
                     <div class="form-group">
@@ -539,6 +542,7 @@
                         <label>במה נוכל לעזור? <span class="required">*</span></label>
                         <textarea id="main-concern" name="main_concern" required
                                   placeholder="תארו בקצרה את מה שאתם חווים או מחפשים... (כל מה שתרגישו בנוח לשתף)"></textarea>
+                        <div class="error-msg" id="main-concern-error">יש לכתוב לפחות 10 תווים</div>
                     </div>
                 </div>
 
@@ -668,6 +672,32 @@
                 document.getElementById(id).addEventListener('change', validateCheckboxes);
             });
         });
+    </script>
+    <!-- Inline Validation -->
+    <script>
+    (function() {
+        const phoneRegex = /^05\d{8}$|^0[2-4,8-9]\d{7}$/;
+        const rules = [
+            { id: 'full-name', errId: 'full-name-error', test: v => v.length >= 2 },
+            { id: 'phone', errId: 'phone-error', test: v => phoneRegex.test(v.replace(/[-\s]/g, '')) },
+            { id: 'main-concern', errId: 'main-concern-error', test: v => v.length >= 10 }
+        ];
+        function validate(rule) {
+            const el = document.getElementById(rule.id);
+            const err = document.getElementById(rule.errId);
+            if (!el || !err) return;
+            const val = el.value.trim();
+            if (val.length === 0) { el.classList.remove('field-error','field-success'); err.classList.remove('show'); return; }
+            if (rule.test(val)) { el.classList.remove('field-error'); el.classList.add('field-success'); err.classList.remove('show'); }
+            else { el.classList.remove('field-success'); el.classList.add('field-error'); err.classList.add('show'); }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            rules.forEach(function(rule) {
+                var el = document.getElementById(rule.id);
+                if (el) el.addEventListener('blur', function() { validate(rule); });
+            });
+        });
+    })();
     </script>
     <!-- Marketing & Analytics -->
     <script src="js/marketing-tools.js"></script>

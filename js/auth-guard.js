@@ -136,16 +136,21 @@
                 return { user, role: null, hasConsent: null };
             }
 
+            // Show loading while checking access
+            if (window.UI) UI.showLoading();
+
             // Step 1: Check authentication
             const user = await this.getCurrentUser();
 
             if (requireAuth && !user) {
                 console.log('AuthGuard: User not logged in, redirecting to index');
-                window.location.href = 'index.html';
+                if (window.UI) UI.hideLoading();
+                await this._toastAndRedirect('יש להתחבר כדי לגשת לדף זה', 'index.html', 1500);
                 return null;
             }
 
             if (!user) {
+                if (window.UI) UI.hideLoading();
                 return { user: null, role: null, hasConsent: null };
             }
 
@@ -155,7 +160,8 @@
 
                 if (!hasConsent) {
                     console.log('AuthGuard: No legal consent, redirecting to legal-gate');
-                    window.location.href = 'legal-gate.html';
+                    if (window.UI) UI.hideLoading();
+                    await this._toastAndRedirect('יש לחתום על תנאי השימוש', 'legal-gate.html', 1500);
                     return null;
                 }
             }
@@ -165,10 +171,13 @@
 
             if (requiredRole && role !== requiredRole) {
                 console.log(`AuthGuard: Role mismatch. Required: ${requiredRole}, Got: ${role}`);
-                // Redirect based on actual role
-                this.redirectByRole(role);
+                if (window.UI) UI.hideLoading();
+                await this._toastAndRedirect('מעביר לאזור האישי שלך', null, 1000, role);
                 return null;
             }
+
+            // All checks passed — hide loading
+            if (window.UI) UI.hideLoading();
 
             return { user, role, hasConsent: true };
         },
@@ -247,6 +256,23 @@
             } catch (error) {
                 console.error('Error signing legal agreement:', error);
                 return { success: false, error: error.message };
+            }
+        },
+
+        /**
+         * Show a toast message and redirect after a delay
+         * @param {string} message - Toast message
+         * @param {string|null} url - URL to redirect to (null = use redirectByRole)
+         * @param {number} delay - Delay in ms before redirect
+         * @param {string|null} role - Role for redirectByRole (only when url is null)
+         */
+        async _toastAndRedirect(message, url, delay, role = null) {
+            if (window.UI) UI.showToast(message, 'info');
+            await new Promise(resolve => setTimeout(resolve, delay));
+            if (url) {
+                window.location.href = url;
+            } else if (role) {
+                this.redirectByRole(role);
             }
         },
 

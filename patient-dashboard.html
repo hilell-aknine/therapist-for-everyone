@@ -9,9 +9,11 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icon-192.svg">
     <title>אזור אישי מטופל - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/accessibility.css">
     <script src="js/supabase-client.js"></script>
     <script src="js/auth-guard.js"></script>
     <script>
@@ -24,18 +26,97 @@
         //     }
         // });
     </script>
+    <style>
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --pure-white: #FFFFFF;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+        }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--frost-white);
+            color: var(--deep-petrol);
+        }
+        /* Navbar override */
+        nav.brand-nav {
+            background: var(--deep-petrol);
+            box-shadow: 0 2px 12px rgba(0, 59, 70, 0.15);
+        }
+        nav.brand-nav a.brand-logo {
+            color: var(--gold);
+            font-weight: 700;
+        }
+        nav.brand-nav a.brand-logo i {
+            color: var(--gold);
+        }
+        /* Stepper overrides */
+        .step-active {
+            background: var(--deep-petrol) !important;
+            color: var(--pure-white) !important;
+            box-shadow: 0 4px 12px rgba(0, 59, 70, 0.3) !important;
+        }
+        .step-inactive {
+            background: #d1d5db !important;
+            color: #6b7280 !important;
+        }
+        .progress-line-active {
+            background: var(--gold) !important;
+        }
+        /* Cards */
+        .brand-card {
+            background: var(--pure-white);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 59, 70, 0.08);
+            border: 1px solid rgba(0, 59, 70, 0.06);
+        }
+        /* Searching state */
+        .searching-state {
+            background: linear-gradient(135deg, rgba(47, 133, 146, 0.08), rgba(0, 59, 70, 0.04));
+            border: 1px solid rgba(47, 133, 146, 0.15);
+        }
+        .searching-state .spin-icon { color: var(--dusty-aqua); }
+        .searching-state h3 { color: var(--deep-petrol); }
+        .searching-state p { color: var(--muted-teal); }
+        /* Match state */
+        .match-banner {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            color: #2e7d32;
+        }
+        .therapist-card {
+            border: 1px solid rgba(0, 59, 70, 0.08);
+        }
+        .therapist-specialty {
+            color: var(--dusty-aqua);
+        }
+        /* Buttons — keep WhatsApp green */
+        .btn-whatsapp {
+            background: #25D366;
+        }
+        .btn-whatsapp:hover {
+            background: #1da851;
+        }
+        /* Logout */
+        .logout-btn { color: rgba(255,255,255,0.7); }
+        .logout-btn:hover { color: #FF6F61; }
+    </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-900">
+<body>
 
-    <nav class="bg-white shadow-md p-4">
+    <nav class="brand-nav p-4">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-xl font-bold text-indigo-700 flex items-center gap-2">
+            <a href="index.html" class="brand-logo text-xl flex items-center gap-2">
                 <i class="fa-solid fa-heart-pulse"></i>
                 מטפל לכל אחד
             </a>
             <div class="flex items-center gap-4">
-                <span id="user-info" class="text-sm font-medium"></span>
-                <button onclick="logout()" class="text-sm text-gray-500 hover:text-red-500 transition">
+                <span id="user-info" class="text-sm font-medium" style="color: var(--frost-white)"></span>
+                <button onclick="logout()" class="logout-btn text-sm transition">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     התנתקות
                 </button>
@@ -45,53 +126,53 @@
 
     <main class="max-w-4xl mx-auto p-6">
         <!-- Progress Stepper -->
-        <div class="bg-white rounded-xl shadow-sm p-8 mb-8">
+        <div class="brand-card p-8 mb-8">
             <h2 class="text-lg font-bold mb-6 text-center">סטטוס הבקשה שלך</h2>
             <div class="flex items-center justify-between relative">
                 <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 z-0"></div>
-                <div id="line-progress" class="absolute top-1/2 left-0 h-1 bg-indigo-500 -translate-y-1/2 z-0 transition-all duration-500" style="width: 0%"></div>
+                <div id="line-progress" class="absolute top-1/2 left-0 h-1 progress-line-active -translate-y-1/2 z-0 transition-all duration-500" style="width: 0%"></div>
 
                 <div class="relative z-10 flex flex-col items-center">
-                    <div class="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg">1</div>
+                    <div class="w-10 h-10 step-active rounded-full flex items-center justify-center mb-2">1</div>
                     <span class="text-xs font-bold">בקשה התקבלה</span>
                 </div>
                 <div class="relative z-10 flex flex-col items-center">
-                    <div id="step-2" class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center mb-2">2</div>
+                    <div id="step-2" class="w-10 h-10 step-inactive rounded-full flex items-center justify-center mb-2">2</div>
                     <span class="text-xs">בחינת התאמה</span>
                 </div>
                 <div class="relative z-10 flex flex-col items-center">
-                    <div id="step-3" class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center mb-2">3</div>
+                    <div id="step-3" class="w-10 h-10 step-inactive rounded-full flex items-center justify-center mb-2">3</div>
                     <span class="text-xs">נמצא מטפל</span>
                 </div>
             </div>
         </div>
 
         <!-- Searching View (shown when no therapist assigned) -->
-        <div id="searching-view" class="bg-indigo-50 border border-indigo-100 rounded-xl p-8 text-center">
-            <div class="animate-spin text-indigo-600 text-4xl mb-4 inline-block">
+        <div id="searching-view" class="searching-state rounded-xl p-8 text-center">
+            <div class="animate-spin spin-icon text-4xl mb-4 inline-block">
                 <i class="fas fa-circle-notch"></i>
             </div>
-            <h3 class="text-xl font-bold text-indigo-900 mb-2">אנחנו מחפשים לך את המטפל המדויק...</h3>
-            <p class="text-indigo-700">הצוות המקצועי שלנו עובר על הפרטים כדי למצוא התאמה מושלמת. זה לוקח בדרך כלל בין 24 ל-48 שעות.</p>
+            <h3 class="text-xl font-bold mb-2">אנחנו מחפשים לך את המטפל המדויק...</h3>
+            <p>הצוות המקצועי שלנו עובר על הפרטים כדי למצוא התאמה מושלמת. זה לוקח בדרך כלל בין 24 ל-48 שעות.</p>
         </div>
 
         <!-- Match View (shown when therapist is assigned) -->
         <div id="match-view" class="hidden space-y-6">
-            <div class="bg-green-100 border border-green-200 p-4 rounded-lg flex items-center gap-3 text-green-800">
+            <div class="match-banner p-4 rounded-lg flex items-center gap-3">
                 <i class="fas fa-check-circle text-2xl"></i>
                 <span class="font-bold text-lg">יש לנו התאמה! נמצא עבורך המטפל המתאים ביותר.</span>
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+            <div class="brand-card therapist-card overflow-hidden">
                 <div class="md:flex">
-                    <div class="md:w-1/3 bg-gray-200 h-64 md:h-auto flex items-center justify-center">
-                        <i class="fas fa-user-tie text-6xl text-gray-400"></i>
+                    <div class="md:w-1/3 h-64 md:h-auto flex items-center justify-center" style="background: var(--frost-white)">
+                        <i class="fas fa-user-tie text-6xl" style="color: var(--dusty-aqua)"></i>
                     </div>
                     <div class="p-8 md:w-2/3">
-                        <h3 id="therapist-name" class="text-2xl font-bold text-gray-800 mb-1"></h3>
-                        <p id="therapist-specialty" class="text-indigo-600 font-medium mb-4"></p>
-                        <p id="therapist-bio" class="text-gray-600 mb-6"></p>
-                        <a id="whatsapp-btn" href="#" target="_blank" class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full font-bold transition shadow-md">
+                        <h3 id="therapist-name" class="text-2xl font-bold mb-1" style="color: var(--deep-petrol)"></h3>
+                        <p id="therapist-specialty" class="therapist-specialty font-medium mb-4"></p>
+                        <p id="therapist-bio" class="mb-6" style="color: var(--muted-teal)"></p>
+                        <a id="whatsapp-btn" href="#" target="_blank" class="inline-flex items-center gap-2 btn-whatsapp text-white px-6 py-3 rounded-full font-bold transition shadow-md">
                             <i class="fab fa-whatsapp text-xl"></i>
                             פתיחת שיחה בוואטסאפ
                         </a>
@@ -137,8 +218,8 @@
             const step3 = document.getElementById('step-3');
 
             line.style.width = '100%';
-            step2.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
-            step3.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
+            step2.className = "w-10 h-10 step-active rounded-full flex items-center justify-center mb-2";
+            step3.className = "w-10 h-10 step-active rounded-full flex items-center justify-center mb-2";
 
             document.getElementById('searching-view').classList.add('hidden');
             document.getElementById('match-view').classList.remove('hidden');
@@ -185,8 +266,8 @@
             if (patient.assigned_therapist_id && patient.therapists) {
                 // Step 3 - Therapist found
                 line.style.width = '100%';
-                step2.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
-                step3.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
+                step2.className = "w-10 h-10 step-active rounded-full flex items-center justify-center mb-2";
+                step3.className = "w-10 h-10 step-active rounded-full flex items-center justify-center mb-2";
 
                 document.getElementById('searching-view').classList.add('hidden');
                 document.getElementById('match-view').classList.remove('hidden');
@@ -205,7 +286,7 @@
             } else {
                 // Step 2 - Matching in progress
                 line.style.width = '50%';
-                step2.className = "w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-2 shadow-lg";
+                step2.className = "w-10 h-10 step-active rounded-full flex items-center justify-center mb-2";
             }
         }
 

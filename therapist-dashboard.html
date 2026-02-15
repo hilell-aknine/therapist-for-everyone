@@ -1253,11 +1253,14 @@
                 </div>
             `;
 
-            document.getElementById('patient-modal').classList.add('active');
+            const modalEl = document.getElementById('patient-modal');
+            modalEl.classList.add('active');
+            if (window.UI && UI.trapFocus) window._focusTrapCleanup = UI.trapFocus(modalEl);
         }
 
         function closePatientModal() {
             document.getElementById('patient-modal').classList.remove('active');
+            if (window._focusTrapCleanup) { window._focusTrapCleanup(); window._focusTrapCleanup = null; }
         }
 
         // ============================================================================

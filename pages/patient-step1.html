@@ -261,6 +261,15 @@
     </style>
 </head>
 <body>
+    <nav class="form-nav">
+        <a href="../index.html" class="form-nav-logo"><i class="fa-solid fa-heart-pulse"></i> מטפל לכל אחד</a>
+        <a href="../landing-patient.html"><i class="fa-solid fa-arrow-right"></i> חזרה לאתר</a>
+    </nav>
+    <div class="form-breadcrumb">
+        <a href="../index.html">בית</a> <span class="separator">›</span>
+        <a href="../landing-patient.html">הרשמה</a> <span class="separator">›</span>
+        <span class="current">שלב 1 מתוך 4</span>
+    </div>
     <div class="header">
         <h1><i class="fa-solid fa-heart-pulse"></i> מטפל לכל אחד</h1>
         <p>בקשה לקבלת טיפול רגשי</p>
@@ -447,8 +456,8 @@
                 showToast('יש להזין שם מלא');
                 return;
             }
-            if (!phone || phone.length < 9) {
-                showToast('יש להזין מספר טלפון תקין');
+            if (!phone || !/^05\d{8}$|^0[2-4,8-9]\d{7}$/.test(phone.replace(/[-\s]/g, ''))) {
+                showToast('מספר טלפון לא תקין — יש להזין מספר ישראלי');
                 return;
             }
             if (!email || !email.includes('@')) {

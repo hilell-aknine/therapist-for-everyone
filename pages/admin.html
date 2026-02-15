@@ -1196,7 +1196,7 @@
                 </div>
                 ` : ''}
             `;
-            document.getElementById('patient-modal').classList.add('active');
+            openModal('patient-modal');
         }
 
         function viewTherapist(id) {
@@ -1338,7 +1338,7 @@
                 </div>
                 ` : ''}
             `;
-            document.getElementById('therapist-modal').classList.add('active');
+            openModal('therapist-modal');
         }
 
         function genderDisplayLabel(gender) {
@@ -1420,7 +1420,16 @@
             loadMatches();
         }
 
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        let _focusTrapCleanup = null;
+        function openModal(id) {
+            const el = document.getElementById(id);
+            el.classList.add('active');
+            if (window.UI && UI.trapFocus) _focusTrapCleanup = UI.trapFocus(el);
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            if (_focusTrapCleanup) { _focusTrapCleanup(); _focusTrapCleanup = null; }
+        }
 
         function statusLabel(status) {
             const labels = { 'new': 'חדש', 'pending_review': 'בבדיקה', 'waiting': 'ממתין', 'matched': 'שובץ', 'in_treatment': 'בטיפול', 'completed': 'הושלם', 'rejected': 'נדחה', 'approved': 'מאושר', 'active': 'פעיל', 'inactive': 'לא פעיל', 'cancelled': 'בוטל' };
@@ -1537,7 +1546,7 @@
             updateExportCount();
 
             // Show modal
-            document.getElementById('export-modal').classList.add('active');
+            openModal('export-modal');
         }
 
         function exportTherapistsCSV() { openExportModal('therapists'); }

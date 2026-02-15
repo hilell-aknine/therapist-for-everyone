@@ -467,26 +467,45 @@
         showToast(message, type = 'info') {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'polite');
+            toast.setAttribute('aria-atomic', 'true');
+
+            const msg = document.createElement('span');
+            msg.textContent = message;
+
+            const dismiss = document.createElement('button');
+            dismiss.textContent = '\u2715';
+            dismiss.setAttribute('aria-label', 'סגור הודעה');
+            dismiss.style.cssText = 'background:none;border:none;color:white;font-size:1.1rem;cursor:pointer;margin-right:12px;padding:0 4px;opacity:0.8;';
+            dismiss.addEventListener('click', () => { toast.style.animation = 'slideDown 0.3s ease-out'; setTimeout(() => toast.remove(), 300); });
+
+            toast.appendChild(msg);
+            toast.appendChild(dismiss);
             toast.style.cssText = `
                 position: fixed;
                 bottom: 20px;
                 left: 50%;
                 transform: translateX(-50%);
-                padding: 1rem 2rem;
+                padding: 1rem 1.2rem 1rem 2rem;
                 border-radius: 10px;
                 color: white;
                 font-weight: 500;
                 z-index: 9999;
                 animation: slideUp 0.3s ease-out;
+                display: flex;
+                align-items: center;
+                gap: 8px;
                 background: ${type === 'success' ? '#2F8592' : type === 'error' ? '#FF6F61' : '#00606B'};
             `;
             document.body.appendChild(toast);
 
             setTimeout(() => {
-                toast.style.animation = 'slideDown 0.3s ease-out';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+                if (toast.parentNode) {
+                    toast.style.animation = 'slideDown 0.3s ease-out';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 4000);
         },
 
         showLoading() {
@@ -518,6 +537,29 @@
         hideLoading() {
             const loader = document.getElementById('global-loader');
             if (loader) loader.remove();
+        },
+
+        /**
+         * Trap focus inside a modal element. Returns a cleanup function.
+         * @param {HTMLElement} modal - The modal container element
+         * @returns {Function} Call to remove the trap
+         */
+        trapFocus(modal) {
+            const focusable = modal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+            if (!focusable.length) return () => {};
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            first.focus();
+            function handler(e) {
+                if (e.key !== 'Tab') return;
+                if (e.shiftKey) {
+                    if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+                } else {
+                    if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+                }
+            }
+            modal.addEventListener('keydown', handler);
+            return () => modal.removeEventListener('keydown', handler);
         },
 
         updateAuthUI(user) {

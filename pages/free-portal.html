@@ -1296,6 +1296,60 @@
             font-size: 0.9rem;
         }
 
+        /* Questionnaire Modal */
+        .questionnaire-modal {
+            max-width: 520px;
+            max-height: 85vh;
+            overflow-y: auto;
+            text-align: right;
+        }
+
+        .questionnaire-modal h2,
+        .questionnaire-modal .subtitle {
+            text-align: center;
+        }
+
+        .questionnaire-modal .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .questionnaire-modal label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--deep-petrol);
+            margin-bottom: 0.4rem;
+        }
+
+        .questionnaire-modal select,
+        .questionnaire-modal textarea,
+        .questionnaire-modal input[type="tel"] {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            direction: rtl;
+        }
+
+        .questionnaire-modal select:focus,
+        .questionnaire-modal textarea:focus,
+        .questionnaire-modal input[type="tel"]:focus {
+            outline: none;
+            border-color: var(--dusty-aqua);
+        }
+
+        .questionnaire-modal input[type="tel"] {
+            direction: ltr;
+            text-align: right;
+        }
+
+        .questionnaire-modal .auth-form-actions {
+            margin-top: 1.5rem;
+        }
+
         /* Toast */
         .toast {
             position: fixed;
@@ -1935,6 +1989,87 @@
         </div>
     </div>
 
+    <!-- Questionnaire Modal -->
+    <div class="modal-overlay" id="questionnaireModal" onclick="handleQuestionnaireOverlayClick(event)">
+        <div class="modal-box questionnaire-modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="skipQuestionnaire()" aria-label="סגור">✕</button>
+            <div class="modal-icon">
+                <i class="fa-solid fa-clipboard-question"></i>
+            </div>
+            <h2>ספרו לנו קצת על עצמכם 📋</h2>
+            <p class="subtitle">עזרו לנו להתאים את הקורס עבורכם (אופציונלי)</p>
+
+            <form id="questionnaireForm" onsubmit="submitQuestionnaire(event)">
+                <div class="form-group">
+                    <label>מה גרם לך להתחיל את הקורס?</label>
+                    <textarea id="qMotivation" rows="2" placeholder="סקרנות, רצון ללמוד, המלצה..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>מה הרקע שלך ב-NLP?</label>
+                    <select id="qExperience">
+                        <option value="">בחר...</option>
+                        <option value="beginner">מתחיל — לא למדתי NLP בעבר</option>
+                        <option value="intermediate">בינוני — למדתי קורס בסיסי</option>
+                        <option value="advanced">מתקדם — בעל ניסיון וידע</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>מעוניין/ת בהסמכה בתשלום?</label>
+                    <select id="qCertification">
+                        <option value="">בחר...</option>
+                        <option value="yes">כן, מעוניין/ת!</option>
+                        <option value="maybe">אולי, תלוי בפרטים</option>
+                        <option value="no">לא כרגע</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>מעדיף/ה למידה...</label>
+                    <select id="qLearning">
+                        <option value="">בחר...</option>
+                        <option value="online">אונליין</option>
+                        <option value="in_person">פרונטלי</option>
+                        <option value="both">שניהם</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>איך שמעת עלינו?</label>
+                    <select id="qSource">
+                        <option value="">בחר...</option>
+                        <option value="facebook">פייסבוק</option>
+                        <option value="instagram">אינסטגרם</option>
+                        <option value="friend">חבר/ה</option>
+                        <option value="google">חיפוש בגוגל</option>
+                        <option value="other">אחר</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>טלפון ליצירת קשר (אופציונלי)</label>
+                    <input type="tel" id="qPhone" placeholder="050-1234567" dir="ltr">
+                </div>
+                <div class="form-group">
+                    <label>משהו נוסף? (אופציונלי)</label>
+                    <textarea id="qNotes" rows="2" placeholder="הערות, שאלות..."></textarea>
+                </div>
+                <div class="auth-form-actions">
+                    <button type="submit" class="auth-btn-primary" id="qSubmitBtn">
+                        <i class="fa-solid fa-paper-plane"></i> שלח
+                    </button>
+                    <button type="button" class="auth-btn-secondary" onclick="skipQuestionnaire()">
+                        <i class="fa-solid fa-forward"></i> דלג
+                    </button>
+                </div>
+            </form>
+
+            <div class="success-message" id="qSuccessMessage" style="display:none;">
+                <div class="check-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3>תודה רבה! 🙏</h3>
+                <p>המשיכו ליהנות מהקורס</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast">
         <div class="toast-icon">
@@ -2140,11 +2275,61 @@
             // Update profile name from form (profile creation handled by supabase-client.js)
             await ensureProfileWithFormName(user);
 
+            // Sync localStorage progress to Supabase
+            await syncProgressToSupabase();
+
             // Update UI
             updateUI();
 
             // Show success and close modal
             showAuthSuccess();
+
+            // Show questionnaire after a short delay (only once)
+            setTimeout(() => checkAndShowQuestionnaire(), 2000);
+        }
+
+        // ===== Sync localStorage Progress to Supabase =====
+        async function syncProgressToSupabase() {
+            if (!window.CourseProgress || !completedLessons.length) return;
+            try {
+                for (const lessonId of completedLessons) {
+                    const [modIdx, lesIdx] = lessonId.split('-').map(Number);
+                    if (modules[modIdx] && modules[modIdx].lessons[lesIdx]) {
+                        const lesson = modules[modIdx].lessons[lesIdx];
+                        await window.CourseProgress.markVideoWatched(lesson.id, 'nlp-practitioner', parseInt(lesIdx) + 1);
+                    }
+                }
+                console.log(`✅ Synced ${completedLessons.length} lessons to Supabase`);
+            } catch (err) {
+                console.error('Progress sync error:', err);
+            }
+        }
+
+        // ===== Check and Show Questionnaire =====
+        async function checkAndShowQuestionnaire() {
+            // Skip if already completed
+            if (localStorage.getItem('questionnaireCompleted')) return;
+
+            // Check Supabase too (in case localStorage was cleared)
+            if (supabaseClient && currentUser) {
+                try {
+                    const { data } = await supabaseClient
+                        .from('course_questionnaires')
+                        .select('id')
+                        .eq('user_id', currentUser.id)
+                        .limit(1);
+                    if (data && data.length > 0) {
+                        localStorage.setItem('questionnaireCompleted', 'true');
+                        return;
+                    }
+                } catch (e) {
+                    // Table might not exist yet — continue to show modal
+                    console.log('Questionnaire check skipped:', e.message);
+                }
+            }
+
+            // Show questionnaire modal
+            openQuestionnaireModal();
         }
 
         // ===== Ensure Profile Exists (delegates to shared supabase-client.js) =====
@@ -2419,6 +2604,14 @@
 
         // ===== Select Lesson =====
         function selectLesson(moduleIndex, lessonIndex, autoplay = false) {
+            // Registration wall at 50% — block new lessons for unauthenticated users
+            const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+            const wallThreshold = Math.ceil(totalLessons * 0.5); // 26 out of 51
+            if (completedLessons.length >= wallThreshold && !isAuthenticated) {
+                openModal(true);
+                return;
+            }
+
             currentModuleIndex = moduleIndex;
             currentLessonIndex = lessonIndex;
 
@@ -2526,6 +2719,20 @@
                 localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
                 updateProgress();
                 renderSyllabus();
+
+                // Sync to Supabase if authenticated
+                if (isAuthenticated && window.CourseProgress) {
+                    const lesson = modules[moduleIndex].lessons[lessonIndex];
+                    window.CourseProgress.markVideoWatched(lesson.id, 'nlp-practitioner', completedLessons.length)
+                        .catch(err => console.error('Sync error:', err));
+                }
+
+                // Registration wall at 50%
+                const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+                const wallThreshold = Math.ceil(totalLessons * 0.5);
+                if (completedLessons.length >= wallThreshold && !isAuthenticated) {
+                    openModal(true);
+                }
             }
         }
 
@@ -2669,8 +2876,21 @@
         }
 
         // ===== Modal =====
-        function openModal() {
-            document.getElementById('registrationModal').classList.add('active');
+        let registrationWallActive = false;
+
+        function openModal(isWall = false) {
+            registrationWallActive = isWall;
+            const modal = document.getElementById('registrationModal');
+            const subtitle = modal.querySelector('.subtitle');
+            const modalTitle = modal.querySelector('h2');
+            if (isWall) {
+                modalTitle.textContent = 'הגעת לחצי מהקורס! 🎉';
+                subtitle.textContent = 'כדי להמשיך ללמוד, נשמח שתירשמו — זה חינם!';
+            } else {
+                modalTitle.textContent = 'קבלו גישה מלאה בחינם!';
+                subtitle.textContent = 'התחברו כדי לקבל גישה לכל התכנים הבונוס';
+            }
+            modal.classList.add('active');
             hideToast();
         }
 
@@ -2749,6 +2969,73 @@
         window.signInWithGoogle = signInWithGoogle;
         window.handleEmailAuth = handleEmailAuth;
         window.handleSignup = handleSignup;
+
+        // ===== Questionnaire Functions =====
+        function openQuestionnaireModal() {
+            document.getElementById('questionnaireModal').classList.add('active');
+        }
+
+        function closeQuestionnaireModal() {
+            document.getElementById('questionnaireModal').classList.remove('active');
+        }
+
+        function handleQuestionnaireOverlayClick(event) {
+            if (event.target.id === 'questionnaireModal') {
+                skipQuestionnaire();
+            }
+        }
+
+        function skipQuestionnaire() {
+            localStorage.setItem('questionnaireCompleted', 'true');
+            closeQuestionnaireModal();
+        }
+
+        async function submitQuestionnaire(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('qSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
+
+            try {
+                const data = {
+                    user_id: currentUser?.id,
+                    course_slug: 'nlp-practitioner',
+                    full_name: currentUser?.user_metadata?.full_name || '',
+                    email: currentUser?.email || '',
+                    phone: document.getElementById('qPhone').value.trim(),
+                    motivation: document.getElementById('qMotivation').value.trim(),
+                    experience_level: document.getElementById('qExperience').value || null,
+                    interest_certification: document.getElementById('qCertification').value || null,
+                    preferred_learning: document.getElementById('qLearning').value || null,
+                    how_found_us: document.getElementById('qSource').value || null,
+                    notes: document.getElementById('qNotes').value.trim() || null
+                };
+
+                if (supabaseClient) {
+                    const { error } = await supabaseClient
+                        .from('course_questionnaires')
+                        .insert(data);
+                    if (error) console.error('Questionnaire save error:', error);
+                }
+
+                localStorage.setItem('questionnaireCompleted', 'true');
+
+                // Show success
+                document.getElementById('questionnaireForm').style.display = 'none';
+                document.getElementById('qSuccessMessage').style.display = 'block';
+                setTimeout(closeQuestionnaireModal, 2000);
+            } catch (err) {
+                console.error('Questionnaire error:', err);
+                localStorage.setItem('questionnaireCompleted', 'true');
+                closeQuestionnaireModal();
+            }
+        }
+
+        window.openQuestionnaireModal = openQuestionnaireModal;
+        window.closeQuestionnaireModal = closeQuestionnaireModal;
+        window.handleQuestionnaireOverlayClick = handleQuestionnaireOverlayClick;
+        window.skipQuestionnaire = skipQuestionnaire;
+        window.submitQuestionnaire = submitQuestionnaire;
     </script>
 </body>
 </html>

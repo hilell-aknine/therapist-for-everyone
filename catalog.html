@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>קטלוג עיצוב - בית המטפלים</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+            --dark-bg: #0d1f24;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        @page { size: A4; margin: 12mm 14mm; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--dark-bg);
+            color: var(--frost-white);
+            direction: rtl;
+            font-size: 11px;
+            line-height: 1.5;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* ===== COVER ===== */
+        .cover {
+            height: 267mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, #001218 50%, var(--muted-teal) 100%);
+            page-break-after: always;
+        }
+        .cover-label { font-size: 13px; color: var(--gold); letter-spacing: 5px; font-weight: 300; margin-bottom: 16px; }
+        .cover h1 { font-size: 56px; font-weight: 900; line-height: 1.1; margin-bottom: 10px; }
+        .cover h1 span { color: var(--gold); }
+        .cover .sub { font-size: 20px; color: var(--dusty-aqua); font-weight: 300; margin-bottom: 36px; }
+        .cover .line { width: 100px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 0 auto 30px; }
+        .cover .meta { font-size: 12px; color: rgba(232,241,242,0.45); }
+        .cover .meta b { color: var(--gold); }
+
+        /* ===== SECTION ===== */
+        .section { padding: 24px 0 12px; }
+        .section-head {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 18px; padding-bottom: 10px;
+            border-bottom: 1px solid rgba(212,175,55,0.2);
+        }
+        .section-num { font-size: 32px; font-weight: 900; color: var(--gold); line-height: 1; }
+        .section-head h2 { font-size: 20px; font-weight: 700; }
+        .section-head p { font-size: 11px; color: var(--dusty-aqua); margin-top: 2px; }
+
+        /* ===== CARD ===== */
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(212,175,55,0.12);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            page-break-inside: avoid;
+        }
+        .card-top {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 16px;
+            background: rgba(0,59,70,0.35);
+            border-bottom: 1px solid rgba(212,175,55,0.08);
+        }
+        .card-top .label { display: flex; align-items: center; gap: 8px; }
+        .badge {
+            background: var(--gold); color: var(--deep-petrol);
+            font-size: 10px; font-weight: 700; padding: 2px 10px;
+            border-radius: 10px; letter-spacing: 0.5px;
+        }
+        .card-top .name { font-size: 14px; font-weight: 700; }
+        .tags { display: flex; gap: 5px; }
+        .tag { font-size: 9px; padding: 2px 8px; border-radius: 8px; font-weight: 500; }
+        .t-desk { background: rgba(47,133,146,0.2); color: var(--dusty-aqua); border: 1px solid rgba(47,133,146,0.3); }
+        .t-mob { background: rgba(212,175,55,0.12); color: var(--gold); border: 1px solid rgba(212,175,55,0.25); }
+        .t-rec { background: rgba(76,175,80,0.12); color: #81C784; border: 1px solid rgba(76,175,80,0.25); }
+
+        .card img { width: 100%; display: block; }
+
+        .card-info {
+            padding: 10px 16px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+        }
+        .card-info .i-label { font-size: 9px; color: rgba(232,241,242,0.35); text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-info .i-val { font-size: 11px; font-weight: 500; margin-top: 2px; }
+
+        .card-desc {
+            padding: 8px 16px 12px;
+            font-size: 11px; color: rgba(232,241,242,0.6); line-height: 1.6;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+
+        /* ===== GRID 2-COL ===== */
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .grid2 .card { margin-bottom: 0; }
+        .grid2 .card img { height: 180px; object-fit: cover; }
+        .card-foot { padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; }
+        .card-foot .title { font-size: 12px; font-weight: 600; }
+
+        /* ===== SUMMARY ===== */
+        .summary {
+            padding: 40px 0 20px;
+            page-break-before: always;
+        }
+        .summary h2 { text-align: center; font-size: 28px; font-weight: 900; margin-bottom: 6px; }
+        .gold-line { width: 60px; height: 2px; background: var(--gold); margin: 0 auto 24px; }
+
+        .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
+        .stat { text-align: center; padding: 16px 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.12); border-radius: 12px; }
+        .stat .num { font-size: 32px; font-weight: 900; color: var(--gold); }
+        .stat .txt { font-size: 11px; margin-top: 4px; }
+
+        .rec-box {
+            background: rgba(212,175,55,0.06);
+            border: 1px solid rgba(212,175,55,0.18);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 11px;
+            color: rgba(232,241,242,0.65);
+            line-height: 1.8;
+        }
+        .rec-box b { color: var(--gold); }
+        .rec-row { margin-bottom: 4px; }
+
+        .footer-text { text-align: center; margin-top: 28px; font-size: 10px; color: rgba(232,241,242,0.25); }
+
+        /* ===== NOTE ===== */
+        .note {
+            background: rgba(212,175,55,0.06);
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 8px;
+            padding: 8px 14px;
+            margin-bottom: 14px;
+            font-size: 10px; color: rgba(232,241,242,0.6);
+        }
+        .note b { color: var(--gold); }
+    </style>
+</head>
+<body>
+
+<!-- ===== COVER ===== -->
+<div class="cover">
+    <div class="cover-label">B E I T &nbsp; H A M E T A P L I M</div>
+    <h1>קטלוג <span>עיצוב</span></h1>
+    <p class="sub">אפשרויות ויזואליות לאתר בית המטפלים</p>
+    <div class="line"></div>
+    <p class="meta"><b>18</b> אפשרויות &nbsp;|&nbsp; <b>8</b> קטגוריות &nbsp;|&nbsp; <b>Desktop + Mobile + Tablet</b></p>
+    <br>
+    <p class="meta">פברואר 2026</p>
+</div>
+
+<!-- ===== 01 – מטפלת אישית ===== -->
+<div class="section">
+    <div class="section-head">
+        <div class="section-num">01</div>
+        <div><h2>Hero — מטפלת אישית</h2><p>דמות מטפלת מקצועית בכורסה — אווירה חמה ומזמינה</p></div>
+    </div>
+
+    <div class="grid2">
+        <div class="card">
+            <div class="card-top">
+                <div class="label"><span class="badge">A</span><span class="name">מבט ישיר</span></div>
+                <div class="tags"><span class="tag t-desk">Desktop</span><span class="tag t-rec">מומלץ</span></div>
+            </div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_icdt2ricdt2ricdt.jpg">
+            <div class="card-foot"><span class="title">חיבור אישי מיידי — מבט ישירות לצופה</span></div>
+        </div>
+        <div class="card">
+            <div class="card-top">
+                <div class="label"><span class="badge">B</span><span class="name">מבט צדדי</span></div>
+                <div class="tags"><span class="tag t-desk">Desktop</span></div>
+            </div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_idhwwxidhwwxidhw.jpg">
+            <div class="card-foot"><span class="title">רגע שנתפס — אווירה אינטימית ומקצועית</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 02 – טיפול קבוצתי ===== -->
+<div class="section">
+    <div class="section-head">
+        <div class="section-num">02</div>
+        <div><h2>Hero — טיפול קבוצתי</h2><p>מעגל שיחה בחלל טיפולי — מסר קהילתי חזק</p></div>
+    </div>
+
+    <div class="card">
+        <div class="card-top">
+            <div class="label"><span class="badge">C</span><span class="name">מעגל קבוצתי — תצוגה רחבה</span></div>
+            <div class="tags"><span class="tag t-desk">Desktop</span><span class="tag t-rec">מומלץ</span></div>
+        </div>
+        <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_okrw4ookrw4ookrw.jpg">
+        <div class="card-info">
+            <div><div class="i-label">סגנון</div><div class="i-val">קהילתי-מקצועי</div></div>
+            <div><div class="i-label">פוקוס</div><div class="i-val">קבוצה מגוונת</div></div>
+            <div><div class="i-label">צבע</div><div class="i-val">טיל + עץ חם</div></div>
+        </div>
+        <div class="card-desc">קבוצה מגוונת במעגל בסלון טיל. מעביר מסר "אתה לא לבד" — מתאים כ-Hero ראשי שמדגיש את הקהילה.</div>
+    </div>
+
+    <div class="grid2">
+        <div class="card">
+            <div class="card-top"><div class="label"><span class="badge">D</span><span class="name">זווית ימנית</span></div><div class="tags"><span class="tag t-desk">Desktop</span></div></div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_m94a5pm94a5pm94a.jpg">
+        </div>
+        <div class="card">
+            <div class="card-top"><div class="label"><span class="badge">E</span><span class="name">אור טבעי</span></div><div class="tags"><span class="tag t-desk">Desktop</span></div></div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_hl0vmzhl0vmzhl0v.jpg">
+        </div>
+    </div>
+
+    <div class="grid2">
+        <div class="card">
+            <div class="card-top">
+                <div class="label"><span class="badge">F</span><span class="name">ברנד "בית המטפלים"</span></div>
+                <div class="tags"><span class="tag t-desk">Desktop</span><span class="tag t-rec">מומלץ</span></div>
+            </div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_teusznteusznteus.jpg">
+            <div class="card-foot"><span class="title">שם המותג במרכז + 2 כפתורי CTA</span></div>
+        </div>
+        <div class="card">
+            <div class="card-top"><div class="label"><span class="badge">G</span><span class="name">חלל מודרני + צמחייה</span></div><div class="tags"><span class="tag t-desk">Desktop</span></div></div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_fe8l15fe8l15fe8l.jpg">
+            <div class="card-foot"><span class="title">ביתי ירוק — שטיח עגול מגדיר את המעגל</span></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-top">
+            <div class="label"><span class="badge">R</span><span class="name">מעגל קבוצתי — רקע נקי ללא טקסט</span></div>
+            <div class="tags"><span class="tag t-desk">Desktop</span></div>
+        </div>
+        <img loading="lazy" src="תמונות קטלוג לאתר-small/new_herogroup.jpg">
+        <div class="card-desc">תמונת רקע נקייה ללא טקסט מוטמע — גמישות מקסימלית לעיצוב Hero עם כל כותרת שתרצו.</div>
+    </div>
+</div>
+
+<!-- ===== 03 – סשן טיפולי ===== -->
+<div class="section">
+    <div class="section-head">
+        <div class="section-num">03</div>
+        <div><h2>Hero — סשן טיפולי אישי</h2><p>מפגש 1-על-1 — אינטימי ומקצועי</p></div>
+    </div>
+
+    <div class="card">
+        <div class="card-top">
+            <div class="label"><span class="badge">H</span><span class="name">"טיפול נפשי הוא זכות בסיסית, לא מותרות"</span></div>
+            <div class="tags"><span class="tag t-desk">Desktop</span><span class="tag t-rec">מומלץ</span></div>
+        </div>
+        <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_x2wllax2wllax2wl.jpg">
+        <div class="card-info">
+            <div><div class="i-label">סגנון</div><div class="i-val">אינטימי-חם</div></div>
+            <div><div class="i-label">מסר מרכזי</div><div class="i-val">זכות, לא מותרות</div></div>
+            <div><div class="i-label">קהל יעד</div><div class="i-val">מטופלים</div></div>
+        </div>
+        <div class="card-desc">מטפלת ומטופלת מול מול בכורסאות. הגב למצלמה — הצופה "נכנס" לחלל. מסר חברתי חזק. מושלם ל-Landing מטופלים.</div>
+    </div>
+</div>
+
+<!-- ===== 04 – כיתת לימוד ===== -->
+<div class="section">
+    <div class="section-head">
+        <div class="section-num">04</div>
+        <div><h2>Hero — כיתת לימוד</h2><p>סביבה לימודית מקצועית — מרצה מול תלמידים</p></div>
+    </div>
+
+    <div class="card">
+        <div class="card-top">
+            <div class="label"><span class="badge">I</span><span class="name">סרטון הסבר — כיתת הכשרה</span></div>
+            <div class="tags"><span class="tag t-desk">Desktop</span></div>
+        </div>
+        <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_f67h8bf67h8bf67h.jpg">
+        <div class="card-info">
+            <div><div class="i-label">סגנון</div><div class="i-val">אקדמי-מקצועי</div></div>
+            <div><div class="i-label">אלמנט מיוחד</div><div class="i-val">כפתור Play</div></div>
+            <div><div class="i-label">שימוש</div><div class="i-val">סקשן קורסים</div></div>
+        </div>
+        <div class="card-desc">מרצה בכיתה עם "בית המטפלים" ברקע. כפתור Play זהוב מזמין לצפייה. מתאים לסקשן "קורסים מקצועיים".</div>
+    </div>
+</div>
+
+<!-- ===== 05 – מובייל ===== -->
+<div class="section">
+    <div class="section-head">
+        <div class="section-num">05</div>
+        <div><h2>Hero — גרסאות מובייל</h2><p>וריאציות לנייד (9:16) — טבע, אנשים ואווירות שונות</p></div>
+    </div>
+
+    <div class="grid2">
+        <div class="card">
+            <div class="card-top">
+                <div class="label"><span class="badge">J</span><span class="name">3 רקעי טבע</span></div>
+                <div class="tags"><span class="tag t-mob">Mobile</span></div>
+            </div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_evsnmqevsnmqevsn.jpg" style="height: 220px; object-fit: cover;">
+            <div class="card-desc">ידיים / צמח / אגם — "המקום בו טיפול פוגש שליחות"</div>
+        </div>
+        <div class="card">
+            <div class="card-top">
+                <div class="label"><span class="badge">K</span><span class="name">5 רקעים מעורבים</span></div>
+                <div class="tags"><span class="tag t-mob">Mobile</span></div>
+            </div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_kvvfjgkvvfjgkvvf.jpg" style="height: 220px; object-fit: cover;">
+            <div class="card-desc">אם+ילד / אבנים / חלל טיפולי / יער / מטפלת</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 06 – גריד וריאציות ===== -->
+<div class="section">
+    <div class="section-head">
+        <div class="section-num">06</div>
+        <div><h2>גריד וריאציות — "בית המטפלים"</h2><p>5 רקעים שונים לאותו מבנה Hero</p></div>
+    </div>
+
+    <div class="card">
+        <div class="card-top">
+            <div class="label"><span class="badge">L</span><span class="name">5 סגנונות רקע — גריד השוואתי</span></div>
+            <div class="tags"><span class="tag t-desk">Desktop</span></div>
+        </div>
+        <img loading="lazy" src="תמונות קטלוג לאתר-small/Gemini_Generated_Image_sbda3vsbda3vsbda.jpg">
+        <div class="card-desc">גינה / ספה / שולחן ישיבות / פגישת צוות / סלון — כולן עם ברנדינג זהב על רקע כהה.</div>
+    </div>
+</div>
+
+<!-- ===== 07 – חוויית הפלטפורמה ===== -->
+<div class="section">
+    <div class="section-head">
+        <div class="section-num">07</div>
+        <div><h2>חוויית הפלטפורמה</h2><p>Dashboard, טיפול מקוון וחתימה דיגיטלית</p></div>
+    </div>
+
+    <div class="card">
+        <div class="card-top">
+            <div class="label"><span class="badge">M</span><span class="name">Dashboard מטפל — מעקב פגישות</span></div>
+            <div class="tags"><span class="tag t-mob">Tablet</span><span class="tag t-rec">מומלץ</span></div>
+        </div>
+        <img loading="lazy" src="תמונות קטלוג לאתר-small/new_dashboard_ea6erj.jpg">
+        <div class="card-info">
+            <div><div class="i-label">אלמנט מרכזי</div><div class="i-val">מונה 8/10</div></div>
+            <div><div class="i-label">סגנון</div><div class="i-val">UI מודרני</div></div>
+            <div><div class="i-label">שימוש</div><div class="i-val">סקשן "איך זה עובד"</div></div>
+        </div>
+        <div class="card-desc">מטפל מחזיק טאבלט עם Dashboard — לוח שנה, תיקי מטופלים, ספריית VOD ומונה פגישות. מראה את המוצר בפעולה.</div>
+    </div>
+
+    <div class="grid2">
+        <div class="card">
+            <div class="card-top">
+                <div class="label"><span class="badge">N</span><span class="name">טיפול מקוון</span></div>
+                <div class="tags"><span class="tag t-mob">Mobile</span><span class="tag t-rec">מומלץ</span></div>
+            </div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/new_videocall_xnmlte.jpg">
+            <div class="card-foot"><span class="title">שיחת וידאו — טיפול נגיש מכל מקום</span></div>
+        </div>
+        <div class="card">
+            <div class="card-top">
+                <div class="label"><span class="badge">O</span><span class="name">שער משפטי</span></div>
+                <div class="tags"><span class="tag t-mob">Mobile</span></div>
+            </div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/new_legal_ee5why1.jpg">
+            <div class="card-foot"><span class="title">חתימה דיגיטלית — תנאי שימוש והצהרת פרטיות</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 08 – טכנולוגיה ===== -->
+<div class="section">
+    <div class="section-head">
+        <div class="section-num">08</div>
+        <div><h2>טכנולוגיה ומערכת</h2><p>AI Smart Match ואפיון המערכת</p></div>
+    </div>
+
+    <div class="grid2">
+        <div class="card">
+            <div class="card-top">
+                <div class="label"><span class="badge">P</span><span class="name">AI Smart Match</span></div>
+                <div class="tags"><span class="tag t-mob">Mobile</span><span class="tag t-rec">מומלץ</span></div>
+            </div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/new_tech_ee5why.jpg">
+            <div class="card-desc">רשת נוירונים — מטפלים מוסמכים ↔ מבקשי סיוע. מציג את הבידול הטכנולוגי.</div>
+        </div>
+        <div class="card">
+            <div class="card-top">
+                <div class="label"><span class="badge">Q</span><span class="name">אפיון מערכת</span></div>
+                <div class="tags"><span class="tag t-desk">Desktop</span></div>
+            </div>
+            <img loading="lazy" src="תמונות קטלוג לאתר-small/new_wireframe_fqnc3s.jpg">
+            <div class="card-desc">מפת אזורים: מטפל / מטופל / שער משפטי / קליניקה. מתאים למצגת.</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SUMMARY ===== -->
+<div class="summary">
+    <h2>סיכום והמלצות</h2>
+    <div class="gold-line"></div>
+
+    <div class="stats">
+        <div class="stat"><div class="num">18</div><div class="txt">אפשרויות</div></div>
+        <div class="stat"><div class="num">8</div><div class="txt">קטגוריות</div></div>
+        <div class="stat"><div class="num">10</div><div class="txt">Desktop</div></div>
+        <div class="stat"><div class="num">8</div><div class="txt">Mobile/Tablet</div></div>
+    </div>
+
+    <div class="rec-box">
+        <div class="rec-row"><b>דף הבית:</b> אפשרות <b>F</b> — מעגל קבוצתי + ברנד "בית המטפלים"</div>
+        <div class="rec-row"><b>Landing מטופלים:</b> אפשרות <b>H</b> — "טיפול נפשי הוא זכות בסיסית, לא מותרות"</div>
+        <div class="rec-row"><b>Landing מטפלים:</b> אפשרות <b>A</b> — מטפלת בכורסה, מבט ישיר</div>
+        <div class="rec-row"><b>סקשן קורסים:</b> אפשרות <b>I</b> — כיתת לימוד + כפתור Play</div>
+        <div class="rec-row"><b>סקשן "איך זה עובד":</b> אפשרויות <b>M</b> + <b>N</b> — Dashboard + שיחת וידאו</div>
+        <div class="rec-row"><b>סקשן טכנולוגיה:</b> אפשרות <b>P</b> — AI Smart Match</div>
+        <div class="rec-row"><b>דף Legal Gate:</b> אפשרות <b>O</b> — חתימה דיגיטלית</div>
+        <div class="rec-row"><b>מובייל:</b> גרסת הצמח מתוך <b>J</b> — נקי ואוניברסלי</div>
+        <div class="rec-row"><b>Hero חלופי:</b> אפשרות <b>R</b> — רקע נקי ללא טקסט</div>
+    </div>
+
+    <div class="footer-text">
+        <p>בית המטפלים — קטלוג עיצוב &nbsp;|&nbsp; פברואר 2026</p>
+        <p>כל הזכויות שמורות &copy; הלל אקנין</p>
+    </div>
+</div>
+
+</body>
+</html>

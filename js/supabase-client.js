@@ -455,13 +455,34 @@
     // UI Helper Functions
     // ============================================================================
 
+    // Hebrew translation map for common Supabase / Auth errors
+    const ERROR_TRANSLATIONS = {
+        'Invalid login credentials': 'אימייל או סיסמה שגויים',
+        'Email not confirmed': 'יש לאשר את כתובת האימייל לפני התחברות',
+        'User already registered': 'כתובת האימייל כבר רשומה במערכת',
+        'Password should be at least 6 characters': 'הסיסמה חייבת להכיל לפחות 6 תווים',
+        'Signup requires a valid password': 'יש להזין סיסמה תקינה',
+        'Unable to validate email address: invalid format': 'כתובת האימייל אינה תקינה',
+        'Token has expired or is invalid': 'פג תוקף ההתחברות. יש להתחבר מחדש',
+        'New password should be different from the old password': 'הסיסמה החדשה חייבת להיות שונה מהקודמת',
+        'For security purposes, you can only request this once every 60 seconds': 'מטעמי אבטחה, ניתן לשלוח בקשה זו פעם ב-60 שניות',
+        'User not found': 'המשתמש לא נמצא במערכת',
+        'Rate limit exceeded': 'יותר מדי ניסיונות. נסו שוב בעוד מספר דקות',
+        'Email rate limit exceeded': 'נשלחו יותר מדי אימיילים. נסו שוב מאוחר יותר',
+    };
+
+    function translateError(errorMessage) {
+        if (!errorMessage) return 'אירעה שגיאה. נסו שוב מאוחר יותר';
+        return ERROR_TRANSLATIONS[errorMessage] || errorMessage;
+    }
+
     const UI = {
         showSuccess(message) {
             this.showToast(message, 'success');
         },
 
         showError(message) {
-            this.showToast(message, 'error');
+            this.showToast(translateError(message), 'error');
         },
 
         showToast(message, type = 'info') {
@@ -678,6 +699,7 @@
     window.ContactRequests = ContactRequests;
     window.Certifications = Certifications;
     window.UI = UI;
+    window.translateError = translateError;
 
     // Also export as a namespace for backwards compatibility
     window.TherapistApp = {

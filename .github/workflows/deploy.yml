@@ -23,12 +23,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Prepare deployment (exclude sensitive files)
+        run: |
+          mkdir -p _site
+          # Copy public files
+          cp -r assets js pages *.html manifest.json _site/ 2>/dev/null || true
+          # Copy docs that should be public (booklets, images)
+          mkdir -p _site/docs
+          cp -r docs/booklets docs/images docs/master-course _site/docs/ 2>/dev/null || true
+          # Remove admin page from deployment
+          rm -f _site/pages/admin.html
+          # Remove any accidentally included sensitive files
+          find _site -name '.env' -o -name '*.db' -o -name 'CLAUDE.md' | xargs rm -f 2>/dev/null || true
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

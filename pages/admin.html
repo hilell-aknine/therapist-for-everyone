@@ -1386,10 +1386,13 @@
         }
 
         async function approveTherapist(id) {
+            const btn = document.querySelector(`[onclick="approveTherapist('${id}')"]`);
+            const row = btn?.closest('tr');
             const { error } = await db.from('therapists').update({ status: 'approved' }).eq('id', id);
             if (error) { showToast('שגיאה באישור', 'error'); return; }
+            if (row) row.classList.add('flash-success');
             showToast('המטפל אושר!', 'success');
-            loadTherapists();
+            setTimeout(() => loadTherapists(), 800);
         }
 
         async function createMatch(patientId) {
@@ -1411,14 +1414,20 @@
             await db.from('patients').update({ status: 'matched' }).eq('id', patientId);
             showToast('השידוך נוצר!', 'success');
             closeModal('patient-modal');
-            loadAllData();
+            // Flash the patients stat card
+            const statCards = document.querySelectorAll('.stat-card');
+            if (statCards[0]) statCards[0].classList.add('flash-success');
+            setTimeout(() => { statCards[0]?.classList.remove('flash-success'); loadAllData(); }, 800);
         }
 
         async function updateMatchStatus(id, status) {
+            const btn = document.querySelector(`[onclick*="updateMatchStatus('${id}'"]`);
+            const row = btn?.closest('tr');
             const { error } = await db.from('matches').update({ status }).eq('id', id);
             if (error) { showToast('שגיאה בעדכון', 'error'); return; }
+            if (row) row.classList.add('flash-success');
             showToast('הסטטוס עודכן', 'success');
-            loadMatches();
+            setTimeout(() => loadMatches(), 800);
         }
 
         let _focusTrapCleanup = null;

@@ -582,5 +582,37 @@
     </script>
     <!-- Marketing & Analytics -->
     <script src="../js/marketing-tools.js"></script>
+    <script>
+    // P3-17: Autosave form data every 30s
+    (function() {
+        var key = 'autosave_' + location.pathname;
+        var fields = document.querySelectorAll('input, select, textarea');
+        if (!fields.length) return;
+        try {
+            var saved = JSON.parse(localStorage.getItem(key));
+            if (saved) Object.keys(saved).forEach(function(k) {
+                var el = document.querySelector('[name="' + k + '"]') || document.getElementById(k);
+                if (!el || el.value) return;
+                if (el.type === 'checkbox') el.checked = saved[k];
+                else if (el.type === 'radio') { if (el.value === saved[k]) el.checked = true; }
+                else el.value = saved[k];
+            });
+        } catch(e) {}
+        setInterval(function() {
+            var data = {};
+            fields.forEach(function(el) {
+                var k = el.name || el.id;
+                if (!k || el.type === 'hidden' || el.type === 'submit' || el.type === 'button') return;
+                if (el.type === 'checkbox') data[k] = el.checked;
+                else if (el.type === 'radio') { if (el.checked) data[k] = el.value; }
+                else if (el.value) data[k] = el.value;
+            });
+            if (Object.keys(data).length) localStorage.setItem(key, JSON.stringify(data));
+        }, 30000);
+        document.querySelectorAll('form').forEach(function(f) {
+            f.addEventListener('submit', function() { localStorage.removeItem(key); });
+        });
+    })();
+    </script>
 </body>
 </html>

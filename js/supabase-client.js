@@ -602,6 +602,128 @@
     };
 
     // ============================================================================
+    // P3-17: Form Autosave (localStorage, 30s interval)
+    // ============================================================================
+
+    const FormAutosave = {
+        _key: null,
+        _interval: null,
+
+        init(containerSelector) {
+            const container = containerSelector
+                ? document.querySelector(containerSelector)
+                : document.querySelector('form') || document.querySelector('main') || document.body;
+            const inputs = container.querySelectorAll('input, select, textarea');
+            if (!inputs.length) return;
+
+            this._key = 'autosave_' + location.pathname;
+            this._container = container;
+            this._restore();
+            this._interval = setInterval(() => this._save(), 30000);
+
+            // Clear on form submit
+            const form = container.closest('form') || container.querySelector('form');
+            if (form) form.addEventListener('submit', () => this.clear());
+        },
+
+        _save() {
+            if (!this._container) return;
+            const data = {};
+            this._container.querySelectorAll('input, select, textarea').forEach(el => {
+                const key = el.name || el.id;
+                if (!key || el.type === 'hidden' || el.type === 'submit' || el.type === 'button') return;
+                if (el.type === 'checkbox') data[key] = el.checked;
+                else if (el.type === 'radio') { if (el.checked) data[key] = el.value; }
+                else if (el.value) data[key] = el.value;
+            });
+            if (Object.keys(data).length) {
+                localStorage.setItem(this._key, JSON.stringify(data));
+            }
+        },
+
+        _restore() {
+            const saved = localStorage.getItem(this._key);
+            if (!saved) return;
+            try {
+                const data = JSON.parse(saved);
+                let restored = 0;
+                Object.entries(data).forEach(([key, value]) => {
+                    const el = this._container.querySelector(`[name="${key}"], #${CSS.escape(key)}`);
+                    if (!el || el.value) return; // don't overwrite already-filled fields
+                    if (el.type === 'checkbox') { el.checked = value; restored++; }
+                    else if (el.type === 'radio') { if (el.value === value) { el.checked = true; restored++; } }
+                    else { el.value = value; restored++; }
+                });
+                if (restored > 0) {
+                    UI.showToast('שוחזרו נתונים שנשמרו אוטומטית', 'info');
+                }
+            } catch (e) { /* ignore corrupt data */ }
+        },
+
+        clear() {
+            if (this._key) localStorage.removeItem(this._key);
+            if (this._interval) clearInterval(this._interval);
+        }
+    };
+
+    // ============================================================================
+    // P3-18: Retry wrapper for network operations
+    // ============================================================================
+
+    async function withRetry(fn, maxRetries = 3) {
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                return await fn();
+            } catch (err) {
+                const isNetworkError = !navigator.onLine ||
+                    (err.message && (err.message.includes('fetch') || err.message.includes('network') || err.message.includes('Failed')));
+                if (!isNetworkError || attempt === maxRetries) throw err;
+                await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+            }
+        }
+    }
+
+    // ============================================================================
+    // P3-20: Offline Detection Banner
+    // ============================================================================
+
+    function initOfflineDetection() {
+        let banner = null;
+
+        function showOfflineBanner() {
+            if (banner) return;
+            banner = document.createElement('div');
+            banner.id = 'offline-banner';
+            banner.setAttribute('role', 'alert');
+            banner.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0;
+                background: #FF6F61; color: white;
+                text-align: center; padding: 10px 16px;
+                font-family: 'Heebo', sans-serif; font-weight: 600;
+                font-size: 0.9rem; z-index: 10001;
+                animation: slideFromTop 0.3s ease-out;
+            `;
+            banner.textContent = 'אין חיבור לאינטרנט — ננסה שוב אוטומטית';
+            document.body.prepend(banner);
+        }
+
+        function hideOfflineBanner() {
+            if (!banner) return;
+            banner.style.animation = 'slideFromTopOut 0.3s ease-out';
+            setTimeout(() => { if (banner) { banner.remove(); banner = null; } }, 300);
+        }
+
+        window.addEventListener('offline', showOfflineBanner);
+        window.addEventListener('online', () => {
+            hideOfflineBanner();
+            UI.showToast('החיבור חזר', 'success');
+        });
+
+        // Check on init
+        if (!navigator.onLine) showOfflineBanner();
+    }
+
+    // ============================================================================
     // Initialize
     // ============================================================================
 
@@ -619,8 +741,27 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        @keyframes slideFromTop {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        @keyframes slideFromTopOut {
+            from { transform: translateY(0); }
+            to { transform: translateY(-100%); }
+        }
+        @keyframes flashSuccess {
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.6); }
+            50% { box-shadow: 0 0 20px 4px rgba(76, 175, 80, 0.4); }
+            100% { box-shadow: none; }
+        }
+        .flash-success {
+            animation: flashSuccess 0.8s ease-out;
+        }
     `;
     document.head.appendChild(style);
+
+    // Initialize offline detection
+    initOfflineDetection();
 
     // ============================================================================
     // Ensure Profile Exists (CRM fallback — runs on every page)
@@ -700,6 +841,8 @@
     window.Certifications = Certifications;
     window.UI = UI;
     window.translateError = translateError;
+    window.FormAutosave = FormAutosave;
+    window.withRetry = withRetry;
 
     // Also export as a namespace for backwards compatibility
     window.TherapistApp = {

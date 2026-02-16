@@ -2590,8 +2590,40 @@
             const firstModule = document.querySelector('.module');
             if (firstModule) firstModule.classList.add('open');
 
-            // Auto-select first lesson so video is ready to play
-            selectLesson(0, 0);
+            // Restore lesson from URL hash, or default to first lesson
+            const hashMatch = location.hash.match(/^#m(\d+)l(\d+)$/);
+            if (hashMatch) {
+                const m = parseInt(hashMatch[1]), l = parseInt(hashMatch[2]);
+                if (modules[m] && modules[m].lessons[l]) {
+                    _skipPushState = true;
+                    selectLesson(m, l);
+                    _skipPushState = false;
+                } else {
+                    selectLesson(0, 0);
+                }
+            } else {
+                selectLesson(0, 0);
+            }
+
+            // Handle browser back/forward between lessons
+            window.addEventListener('popstate', (e) => {
+                if (e.state && typeof e.state.m === 'number' && typeof e.state.l === 'number') {
+                    _skipPushState = true;
+                    selectLesson(e.state.m, e.state.l);
+                    _skipPushState = false;
+                } else {
+                    // No state — check hash as fallback
+                    const hm = location.hash.match(/^#m(\d+)l(\d+)$/);
+                    if (hm) {
+                        _skipPushState = true;
+                        selectLesson(parseInt(hm[1]), parseInt(hm[2]));
+                        _skipPushState = false;
+                    }
+                }
+            });
+
+            // Replace initial state so first lesson also has state data
+            history.replaceState({ m: currentModuleIndex, l: currentLessonIndex }, '', `#m${currentModuleIndex}l${currentLessonIndex}`);
 
             // Auth setup (non-blocking)
             if (supabaseClient) {
@@ -2973,6 +3005,8 @@
         }
 
         // ===== Select Lesson =====
+        let _skipPushState = false; // Flag to avoid pushState on popstate/init
+
         function selectLesson(moduleIndex, lessonIndex, autoplay = false) {
             // Registration wall at 50% — block new lessons for unauthenticated users
             const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
@@ -2984,6 +3018,12 @@
 
             currentModuleIndex = moduleIndex;
             currentLessonIndex = lessonIndex;
+
+            // Update URL hash & browser history so "back" navigates between lessons
+            const hash = `#m${moduleIndex}l${lessonIndex}`;
+            if (!_skipPushState && location.hash !== hash) {
+                history.pushState({ m: moduleIndex, l: lessonIndex }, '', hash);
+            }
 
             const lesson = modules[moduleIndex].lessons[lessonIndex];
             currentVideoId = lesson.id;

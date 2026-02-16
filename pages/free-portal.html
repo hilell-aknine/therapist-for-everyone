@@ -2199,13 +2199,17 @@
                             <!-- Locked state (not authenticated) -->
                             <div class="ai-chat-placeholder" id="aiLocked">
                                 <div class="ai-avatar">
-                                    <i class="fa-solid fa-robot"></i>
+                                    <i class="fa-solid fa-gift"></i>
                                 </div>
-                                <h3>העוזר האישי שלכם</h3>
-                                <p>מורה AI שילווה אתכם לאורך הקורס, יענה על שאלות ויעזור לכם להבין לעומק את החומר</p>
-                                <button class="unlock-btn" id="unlockAiBtn" onclick="handleLockedAction('ai')">
-                                    <i class="fa-solid fa-unlock"></i>
-                                    פתח גישה חינם
+                                <h3>הירשמו בחינם וקבלו:</h3>
+                                <ul style="list-style: none; padding: 0; margin: 12px 0; text-align: right; font-size: 1.05em; line-height: 2;">
+                                    <li>🤖 <strong>מורה AI אישי</strong> — שילווה אתכם לאורך הקורס</li>
+                                    <li>📖 <strong>חוברת עבודה + סיכומים</strong> — להורדה חינם</li>
+                                    <li>💾 <strong>שמירת התקדמות</strong> — תמשיכו מאיפה שעצרתם</li>
+                                </ul>
+                                <button class="unlock-btn" id="unlockAiBtn" onclick="handleLockedAction('ai')" style="font-size: 1.1em; padding: 12px 32px;">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                    הרשמה חינם — 10 שניות
                                 </button>
                             </div>
                             <!-- Chat state (authenticated) -->
@@ -2685,9 +2689,6 @@
 
             // Show success and close modal
             showAuthSuccess();
-
-            // Show questionnaire after a short delay (only once)
-            setTimeout(() => checkAndShowQuestionnaire(), 2000);
         }
 
         // ===== Sync localStorage Progress to Supabase =====
@@ -3598,7 +3599,7 @@
                 }
             });
 
-            // Fetch student profile and personalize welcome message
+            // Fetch student profile — if exists, personalize. If not, prompt questionnaire.
             loadStudentProfile();
         }
 
@@ -3627,10 +3628,38 @@
                         const level = levelText[profile.experience_level] || 'שאלו אותי כל שאלה על החומר';
                         welcomeBubble.innerHTML = `${greeting} 👋 אני המורה האישי שלך לקורס NLP. ${level}.<br><span style="font-size:0.8em; opacity:0.7;">✨ מותאם אישית לרמה שלך</span>`;
                     }
+                    localStorage.setItem('questionnaireCompleted', 'true');
+                } else {
+                    // No profile — show prompt to fill questionnaire inside AI chat
+                    if (!localStorage.getItem('questionnaireCompleted')) {
+                        showAiQuestionnairePrompt();
+                    }
                 }
             } catch (e) {
-                // No profile — keep default welcome message
+                // No profile — show prompt
+                if (!localStorage.getItem('questionnaireCompleted')) {
+                    showAiQuestionnairePrompt();
+                }
             }
+        }
+
+        function showAiQuestionnairePrompt() {
+            const suggestions = document.getElementById('aiSuggestions');
+            if (!suggestions) return;
+            // Add questionnaire prompt before the suggestion buttons
+            const prompt = document.createElement('div');
+            prompt.id = 'aiQuestionnairePrompt';
+            prompt.style.cssText = 'background: linear-gradient(135deg, #003B46, #00606B); color: #fff; border-radius: 12px; padding: 14px 18px; margin: 0 10px 10px; text-align: right; cursor: pointer; transition: transform 0.2s;';
+            prompt.innerHTML = `
+                <div style="font-weight: 700; font-size: 1em; margin-bottom: 4px;">🎯 רוצה שהמורה AI ידבר אליך ברמה שלך?</div>
+                <div style="font-size: 0.85em; opacity: 0.9;">מלא 30 שניות שאלון קצר וה-AI יתאים את עצמו אליך</div>
+            `;
+            prompt.onmouseenter = () => prompt.style.transform = 'scale(1.02)';
+            prompt.onmouseleave = () => prompt.style.transform = 'scale(1)';
+            prompt.onclick = () => {
+                openQuestionnaireModal();
+            };
+            suggestions.parentNode.insertBefore(prompt, suggestions);
         }
 
         function updateAiLessonBadge() {

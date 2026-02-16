@@ -1111,6 +1111,56 @@
             color: var(--deep-petrol);
         }
 
+        .ai-series-input {
+            padding: 0.5rem 1rem 0.8rem;
+            direction: rtl;
+        }
+
+        .ai-series-label {
+            font-size: 0.8rem;
+            color: var(--muted-teal);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .ai-series-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .ai-series-row input {
+            flex: 1;
+            border: 1px solid rgba(47, 133, 146, 0.25);
+            border-radius: 18px;
+            padding: 0.45rem 1rem;
+            font-size: 0.85rem;
+            font-family: 'Heebo', sans-serif;
+            direction: rtl;
+            outline: none;
+        }
+
+        .ai-series-row input:focus {
+            border-color: var(--dusty-aqua);
+            box-shadow: 0 0 0 2px rgba(47, 133, 146, 0.15);
+        }
+
+        .ai-series-go {
+            background: var(--gradient-gold);
+            color: var(--deep-petrol);
+            border: none;
+            border-radius: 18px;
+            padding: 0.45rem 1.2rem;
+            font-size: 0.85rem;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .ai-series-go:hover {
+            transform: scale(1.05);
+        }
+
         /* Typing indicator */
         .ai-typing-indicator .ai-message-bubble {
             display: flex;
@@ -2184,6 +2234,14 @@
                                     </div>
                                     <div class="ai-suggestions" id="aiSuggestions">
                                         <button class="ai-suggestion-btn" onclick="handleAiSuggestion()">💡 מה אתה יודע לעשות?</button>
+                                        <button class="ai-suggestion-btn" onclick="showSeriesInput()">🎬 תרגול NLP דרך סדרה/סרט</button>
+                                    </div>
+                                    <div class="ai-series-input" id="aiSeriesInput" style="display:none;">
+                                        <span class="ai-series-label">שם הסדרה או הסרט:</span>
+                                        <div class="ai-series-row">
+                                            <input type="text" id="aiSeriesName" placeholder="למשל: שוברים את הכלים, פאודה, פולפ פיקשן..." maxlength="100" />
+                                            <button class="ai-series-go" onclick="startSeriesPractice()">יאללה!</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="ai-chat-input-area">
@@ -3359,12 +3417,45 @@
             // Hide the suggestions area
             const suggestions = document.getElementById('aiSuggestions');
             if (suggestions) suggestions.style.display = 'none';
+            const seriesInput = document.getElementById('aiSeriesInput');
+            if (seriesInput) seriesInput.style.display = 'none';
 
             // Show the question as user message
             appendAiMessage('user', 'מה אתה יודע לעשות?');
 
             // Show the predefined answer as bot message
             appendAiMessage('bot', 'אני המאמן האישי שלך לקורס 💪 אני פה כדי לחדד לך את התכנים כדי שתוכל ליישם בצורה פרקטית.');
+        }
+
+        function showSeriesInput() {
+            const suggestions = document.getElementById('aiSuggestions');
+            if (suggestions) suggestions.style.display = 'none';
+            const seriesInput = document.getElementById('aiSeriesInput');
+            if (seriesInput) {
+                seriesInput.style.display = 'block';
+                const nameField = document.getElementById('aiSeriesName');
+                nameField.focus();
+                nameField.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') startSeriesPractice();
+                });
+            }
+        }
+
+        function startSeriesPractice() {
+            const nameInput = document.getElementById('aiSeriesName');
+            const name = nameInput.value.trim();
+            if (!name) { nameInput.focus(); return; }
+
+            // Hide the series input
+            document.getElementById('aiSeriesInput').style.display = 'none';
+
+            // Show user message
+            appendAiMessage('user', `בוא נתרגל NLP דרך "${name}"`);
+
+            // Send to AI with special context
+            const input = document.getElementById('aiInput');
+            input.value = `אני רוצה לתרגל את הידע שלי ב-NLP דרך הדמויות מ"${name}". תן לי ניתוח NLP של הדמויות המרכזיות — מערכות ייצוג, אסטרטגיות תקשורת, דפוסי שפה, ואיך אפשר לזהות טכניקות NLP ביחסים ביניהן. בסוף שאל אותי שאלת תרגול.`;
+            sendAiMessage();
         }
 
         let aiChatHistory = [];

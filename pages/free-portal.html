@@ -3449,13 +3449,87 @@
             // Hide the series input
             document.getElementById('aiSeriesInput').style.display = 'none';
 
-            // Show user message
-            appendAiMessage('user', `בוא נתרגל NLP דרך "${name}"`);
+            // Build the detailed prompt (sent to AI but not shown)
+            const detailedPrompt = `אני רוצה לתרגל את הידע שלי ב-NLP דרך הדמויות מ"${name}". תן לי ניתוח NLP של הדמויות המרכזיות — מערכות ייצוג, אסטרטגיות תקשורת, דפוסי שפה, ואיך אפשר לזהות טכניקות NLP ביחסים ביניהן. בסוף שאל אותי שאלת תרגול.`;
 
-            // Send to AI with special context
+            // Show only the clean user message
+            appendAiMessage('user', `🎬 בוא נתרגל NLP דרך "${name}"`);
+
+            // Send directly to API (bypass sendAiMessage to avoid duplicate bubble)
+            sendAiMessageDirect(detailedPrompt);
+        }
+
+        async function sendAiMessageDirect(message) {
             const input = document.getElementById('aiInput');
-            input.value = `אני רוצה לתרגל את הידע שלי ב-NLP דרך הדמויות מ"${name}". תן לי ניתוח NLP של הדמויות המרכזיות — מערכות ייצוג, אסטרטגיות תקשורת, דפוסי שפה, ואיך אפשר לזהות טכניקות NLP ביחסים ביניהן. בסוף שאל אותי שאלת תרגול.`;
-            sendAiMessage();
+            const sendBtn = document.getElementById('aiSendBtn');
+            sendBtn.disabled = true;
+            input.disabled = true;
+
+            aiChatHistory.push({ role: 'user', content: message });
+            showTypingIndicator();
+
+            try {
+                const session = await supabaseClient.auth.getSession();
+                const token = session?.data?.session?.access_token;
+
+                if (!token) {
+                    removeTypingIndicator();
+                    appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
+                    input.disabled = false;
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                const mod = modules[currentModuleIndex];
+                const lesson = mod?.lessons[currentLessonIndex];
+                const lessonContext = {
+                    moduleIndex: currentModuleIndex,
+                    moduleTitle: mod?.title || '',
+                    lessonTitle: lesson?.title || ''
+                };
+
+                const response = await fetch(
+                    `${SUPABASE_URL}/functions/v1/ai-chat`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            message,
+                            history: aiChatHistory.slice(-10),
+                            lessonContext
+                        })
+                    }
+                );
+
+                removeTypingIndicator();
+
+                const data = await response.json();
+
+                if (data.error) {
+                    appendAiMessage('bot', data.error);
+                } else {
+                    const reply = data.reply || 'לא הצלחתי לענות. נסו שוב.';
+                    appendAiMessage('bot', reply);
+                    aiChatHistory.push({ role: 'model', content: reply });
+
+                    if (data.remaining !== undefined) {
+                        aiRemainingMessages = data.remaining;
+                        const remainingEl = document.getElementById('aiRemaining');
+                        if (remainingEl) remainingEl.textContent = `${data.remaining}/50`;
+                    }
+                }
+            } catch (err) {
+                removeTypingIndicator();
+                appendAiMessage('bot', 'שגיאה. נסו שוב.');
+            }
+
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
         }
 
         let aiChatHistory = [];

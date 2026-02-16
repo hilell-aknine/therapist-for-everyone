@@ -1084,6 +1084,33 @@
             transform: none;
         }
 
+        .ai-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 1rem 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .ai-suggestion-btn {
+            background: rgba(47, 133, 146, 0.08);
+            border: 1px solid rgba(47, 133, 146, 0.25);
+            border-radius: 18px;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            font-family: 'Heebo', sans-serif;
+            color: var(--muted-teal);
+            cursor: pointer;
+            transition: all 0.2s;
+            direction: rtl;
+        }
+
+        .ai-suggestion-btn:hover {
+            background: rgba(47, 133, 146, 0.15);
+            border-color: var(--dusty-aqua);
+            color: var(--deep-petrol);
+        }
+
         /* Typing indicator */
         .ai-typing-indicator .ai-message-bubble {
             display: flex;
@@ -2154,6 +2181,9 @@
                                         <div class="ai-message-bubble">
                                             שלום! 👋 אני המורה שלכם לקורס NLP. שאלו אותי כל שאלה על החומר — טכניקות, מושגים, תרגולים. אני כאן כדי לעזור!
                                         </div>
+                                    </div>
+                                    <div class="ai-suggestions" id="aiSuggestions">
+                                        <button class="ai-suggestion-btn" onclick="handleAiSuggestion()">💡 מה אתה יודע לעשות?</button>
                                     </div>
                                 </div>
                                 <div class="ai-chat-input-area">
@@ -3325,6 +3355,18 @@
         }
 
         // ===== AI Chat Functions =====
+        function handleAiSuggestion() {
+            // Hide the suggestions area
+            const suggestions = document.getElementById('aiSuggestions');
+            if (suggestions) suggestions.style.display = 'none';
+
+            // Show the question as user message
+            appendAiMessage('user', 'מה אתה יודע לעשות?');
+
+            // Show the predefined answer as bot message
+            appendAiMessage('bot', 'אני המאמן האישי שלך לקורס 💪 אני פה כדי לחדד לך את התכנים כדי שתוכל ליישם בצורה פרקטית.');
+        }
+
         let aiChatHistory = [];
         let aiChatInitialized = false;
         let aiRemainingMessages = null;

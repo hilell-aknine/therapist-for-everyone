@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { NLP_KNOWLEDGE } from './knowledge.ts'
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')
+const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
@@ -104,64 +105,103 @@ serve(async (req) => {
         .insert({ user_id: user.id, message_count: 1, date: today })
     }
 
-    // --- Check API key ---
-    if (!GEMINI_API_KEY) {
+    // --- Check API keys ---
+    if (!GEMINI_API_KEY && !GROQ_API_KEY) {
       return new Response(
         JSON.stringify({ reply: 'העוזר הלימודי עדיין בהקמה. פנו אלינו ב-WhatsApp לכל שאלה.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // --- Build Gemini messages ---
+    // --- Build context ---
     const contextNote = lessonContext
       ? `\n\n[התלמיד לומד כרגע: מודול ${lessonContext.moduleIndex + 1} — "${lessonContext.moduleTitle}", שיעור: "${lessonContext.lessonTitle}". התמקד בנושא זה.]`
       : ''
 
-    const geminiContents: Array<{ role: string; parts: Array<{ text: string }> }> = []
+    const fullSystemPrompt = SYSTEM_PROMPT + contextNote
 
-    // Add history
+    // Build chat history for OpenAI-compatible format (Groq)
+    const chatMessages: Array<{ role: string; content: string }> = [
+      { role: 'system', content: fullSystemPrompt }
+    ]
     for (const m of history) {
-      if (m.role === 'user' || m.role === 'model') {
-        geminiContents.push({
-          role: m.role === 'assistant' ? 'model' : m.role,
-          parts: [{ text: m.content }]
+      if (m.role === 'user' || m.role === 'assistant' || m.role === 'model') {
+        chatMessages.push({
+          role: m.role === 'model' ? 'assistant' : m.role,
+          content: m.content
         })
       }
     }
+    chatMessages.push({ role: 'user', content: message })
 
-    // Add current message
-    geminiContents.push({
-      role: 'user',
-      parts: [{ text: message }]
-    })
+    let reply = ''
 
-    // --- Call Gemini 2.0 Flash ---
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
+    // --- Try Gemini first, fall back to Groq ---
+    let usedProvider = 'none'
+
+    if (GEMINI_API_KEY) {
+      const geminiContents: Array<{ role: string; parts: Array<{ text: string }> }> = []
+      for (const m of history) {
+        if (m.role === 'user' || m.role === 'model') {
+          geminiContents.push({
+            role: m.role === 'assistant' ? 'model' : m.role,
+            parts: [{ text: m.content }]
+          })
+        }
+      }
+      geminiContents.push({ role: 'user', parts: [{ text: message }] })
+
+      const geminiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: fullSystemPrompt }] },
+            contents: geminiContents,
+            generationConfig: { maxOutputTokens: 1024, temperature: 0.7 }
+          })
+        }
+      )
+
+      if (geminiResponse.ok) {
+        const data = await geminiResponse.json()
+        reply = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+        if (reply) usedProvider = 'gemini'
+      } else {
+        console.log('Gemini failed, status:', geminiResponse.status)
+      }
+    }
+
+    // Fallback to Groq if Gemini failed
+    if (!reply && GROQ_API_KEY) {
+      const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: SYSTEM_PROMPT + contextNote }]
-          },
-          contents: geminiContents,
-          generationConfig: {
-            maxOutputTokens: 1024,
-            temperature: 0.7,
-          }
+          model: 'llama-3.3-70b-versatile',
+          messages: chatMessages,
+          max_tokens: 1024,
+          temperature: 0.7
         })
-      }
-    )
+      })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Gemini API error:', errorText)
-      throw new Error('API call failed')
+      if (groqResponse.ok) {
+        const data = await groqResponse.json()
+        reply = data.choices?.[0]?.message?.content || ''
+        if (reply) usedProvider = 'groq'
+      } else {
+        const errText = await groqResponse.text()
+        console.error('Groq API error:', errText)
+      }
     }
 
-    const data = await response.json()
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'לא הצלחתי לענות. נסו שוב.'
+    if (!reply) {
+      throw new Error('All AI providers failed')
+    }
 
     return new Response(
       JSON.stringify({

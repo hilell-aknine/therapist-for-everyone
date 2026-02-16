@@ -2591,19 +2591,19 @@
             if (firstModule) firstModule.classList.add('open');
 
             // Restore lesson from URL hash, or default to first lesson
+            _skipPushState = true; // Never pushState on initial load
             const hashMatch = location.hash.match(/^#m(\d+)l(\d+)$/);
             if (hashMatch) {
                 const m = parseInt(hashMatch[1]), l = parseInt(hashMatch[2]);
                 if (modules[m] && modules[m].lessons[l]) {
-                    _skipPushState = true;
                     selectLesson(m, l);
-                    _skipPushState = false;
                 } else {
                     selectLesson(0, 0);
                 }
             } else {
                 selectLesson(0, 0);
             }
+            _skipPushState = false;
 
             // Handle browser back/forward between lessons
             window.addEventListener('popstate', (e) => {

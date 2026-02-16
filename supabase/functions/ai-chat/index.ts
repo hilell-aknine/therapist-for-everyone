@@ -120,7 +120,7 @@ async function callGemini(
       const data = await response.json()
       return data.candidates?.[0]?.content?.parts?.[0]?.text || null
     }
-    console.log('Gemini failed, status:', response.status)
+    console.error('Gemini failed, status:', response.status)
   } catch (e) {
     console.error('Gemini error:', e)
   }

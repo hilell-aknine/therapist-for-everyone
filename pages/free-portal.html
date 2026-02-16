@@ -1581,25 +1581,6 @@
             color: var(--deep-petrol);
         }
 
-        .user-badge {
-            display: none;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 0.8rem;
-            background: rgba(212, 175, 55, 0.15);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--gold);
-        }
-
-        .user-badge.show {
-            display: flex;
-        }
-
-        .user-badge i {
-            font-size: 0.9rem;
-        }
-
         /* Questionnaire Modal */
         .questionnaire-modal {
             max-width: 520px;
@@ -2637,7 +2618,6 @@
 
                     // Listen for auth state changes (for OAuth redirect)
                     supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                        console.log('Auth state changed:', event);
                         if (event === 'SIGNED_IN' && session) {
                             await handleSuccessfulAuth(session.user);
                         } else if (event === 'SIGNED_OUT') {
@@ -2702,39 +2682,12 @@
                         await window.CourseProgress.markVideoWatched(lesson.id, 'nlp-practitioner', parseInt(lesIdx) + 1);
                     }
                 }
-                console.log(`✅ Synced ${completedLessons.length} lessons to Supabase`);
             } catch (err) {
                 console.error('Progress sync error:', err);
             }
         }
 
         // ===== Check and Show Questionnaire =====
-        async function checkAndShowQuestionnaire() {
-            // Skip if already completed
-            if (localStorage.getItem('questionnaireCompleted')) return;
-
-            // Check Supabase too (in case localStorage was cleared)
-            if (supabaseClient && currentUser) {
-                try {
-                    const { data } = await supabaseClient
-                        .from('course_questionnaires')
-                        .select('id')
-                        .eq('user_id', currentUser.id)
-                        .limit(1);
-                    if (data && data.length > 0) {
-                        localStorage.setItem('questionnaireCompleted', 'true');
-                        return;
-                    }
-                } catch (e) {
-                    // Table might not exist yet — continue to show modal
-                    console.log('Questionnaire check skipped:', e.message);
-                }
-            }
-
-            // Show questionnaire modal
-            openQuestionnaireModal();
-        }
-
         // ===== Ensure Profile Exists (delegates to shared supabase-client.js) =====
         // Profile creation is handled globally by supabase-client.js ensureProfile().
         // Here we only update the name if the user typed it in the auth form.
@@ -3298,10 +3251,7 @@
         }
 
         // ===== Modal =====
-        let registrationWallActive = false;
-
         function openModal(isWall = false) {
-            registrationWallActive = isWall;
             const modal = document.getElementById('registrationModal');
             const subtitle = modal.querySelector('.subtitle');
             const modalTitle = modal.querySelector('h2');

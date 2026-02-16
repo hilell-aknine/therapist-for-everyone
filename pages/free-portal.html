@@ -889,6 +889,233 @@
             margin: 0 auto 1.5rem;
         }
 
+        /* AI Chat Interface */
+        .ai-chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            border: 1px solid rgba(0, 59, 70, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--frost-white);
+        }
+
+        .ai-chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: var(--deep-petrol);
+            color: white;
+        }
+
+        .ai-chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .ai-chat-avatar-small {
+            width: 36px; height: 36px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--deep-petrol);
+        }
+
+        .ai-chat-header h4 {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .ai-chat-status {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .ai-chat-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .ai-lesson-badge {
+            background: rgba(212, 175, 55, 0.2);
+            color: #D4AF37;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ai-remaining {
+            opacity: 0.8;
+            font-size: 0.75rem;
+        }
+
+        .ai-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .ai-message {
+            display: flex;
+            gap: 0.5rem;
+            max-width: 85%;
+            animation: fadeInMsg 0.3s ease;
+        }
+
+        @keyframes fadeInMsg {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-message-bot {
+            align-self: flex-start;
+        }
+
+        .ai-message-user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .ai-message-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .ai-message-bot .ai-message-avatar {
+            background: var(--gradient-gold);
+            color: var(--deep-petrol);
+        }
+
+        .ai-message-user .ai-message-avatar {
+            background: var(--deep-petrol);
+            color: white;
+        }
+
+        .ai-message-bubble {
+            padding: 0.65rem 0.9rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .ai-message-bot .ai-message-bubble {
+            background: white;
+            color: var(--deep-petrol);
+            border: 1px solid rgba(0, 59, 70, 0.08);
+            border-top-right-radius: 4px;
+        }
+
+        .ai-message-user .ai-message-bubble {
+            background: var(--deep-petrol);
+            color: white;
+            border-top-left-radius: 4px;
+        }
+
+        .ai-chat-input-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-top: 1px solid rgba(0, 59, 70, 0.1);
+            background: white;
+        }
+
+        #aiInput {
+            flex: 1;
+            border: 1px solid rgba(0, 59, 70, 0.15);
+            border-radius: 20px;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            font-family: 'Heebo', sans-serif;
+            resize: none;
+            max-height: 100px;
+            outline: none;
+            direction: rtl;
+        }
+
+        #aiInput:focus {
+            border-color: var(--dusty-aqua);
+            box-shadow: 0 0 0 2px rgba(47, 133, 146, 0.15);
+        }
+
+        .ai-send-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: var(--gradient-gold);
+            color: var(--deep-petrol);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .ai-send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .ai-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Typing indicator */
+        .ai-typing-indicator .ai-message-bubble {
+            display: flex;
+            gap: 4px;
+            padding: 0.8rem 1.2rem;
+        }
+
+        .ai-typing-dot {
+            width: 8px; height: 8px;
+            background: var(--dusty-aqua);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .ai-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .ai-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40% { transform: translateY(-6px); opacity: 1; }
+        }
+
+        .ai-rate-limit-msg {
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            margin: 0.5rem;
+        }
+
         .unlock-btn {
             display: inline-flex;
             align-items: center;
@@ -1638,6 +1865,28 @@
                 font-size: 1.2rem;
             }
 
+            .ai-chat-container {
+                height: 400px;
+                border-radius: 8px;
+            }
+
+            .ai-chat-header {
+                padding: 0.6rem 0.75rem;
+            }
+
+            .ai-lesson-badge {
+                max-width: 100px;
+                font-size: 0.65rem;
+            }
+
+            .ai-message {
+                max-width: 90%;
+            }
+
+            .ai-message-bubble {
+                font-size: 0.85rem;
+            }
+
             /* Modal - mobile friendly */
             .modal-box {
                 padding: 1.5rem;
@@ -1870,7 +2119,8 @@
 
                         <!-- AI Tab -->
                         <div class="tab-panel" id="aiPanel">
-                            <div class="ai-chat-placeholder">
+                            <!-- Locked state (not authenticated) -->
+                            <div class="ai-chat-placeholder" id="aiLocked">
                                 <div class="ai-avatar">
                                     <i class="fa-solid fa-robot"></i>
                                 </div>
@@ -1880,6 +2130,38 @@
                                     <i class="fa-solid fa-unlock"></i>
                                     פתח גישה חינם
                                 </button>
+                            </div>
+                            <!-- Chat state (authenticated) -->
+                            <div class="ai-chat-container" id="aiChat" style="display:none;">
+                                <div class="ai-chat-header">
+                                    <div class="ai-chat-header-info">
+                                        <div class="ai-chat-avatar-small">
+                                            <i class="fa-solid fa-robot"></i>
+                                        </div>
+                                        <div>
+                                            <h4>המורה של NLP</h4>
+                                            <span class="ai-chat-status">מוכן לעזור</span>
+                                        </div>
+                                    </div>
+                                    <div class="ai-chat-meta">
+                                        <span class="ai-lesson-badge" id="aiLessonBadge"></span>
+                                        <span class="ai-remaining" id="aiRemaining" title="הודעות שנותרו היום"></span>
+                                    </div>
+                                </div>
+                                <div class="ai-chat-messages" id="aiMessages">
+                                    <div class="ai-message ai-message-bot">
+                                        <div class="ai-message-avatar"><i class="fa-solid fa-robot"></i></div>
+                                        <div class="ai-message-bubble">
+                                            שלום! 👋 אני המורה שלכם לקורס NLP. שאלו אותי כל שאלה על החומר — טכניקות, מושגים, תרגולים. אני כאן כדי לעזור!
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ai-chat-input-area">
+                                    <textarea id="aiInput" placeholder="שאלו שאלה על NLP..." rows="1" maxlength="500"></textarea>
+                                    <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMessage()">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2636,6 +2918,9 @@
             document.getElementById('currentLessonMeta').textContent = `מודול ${moduleIndex + 1} • ${lesson.title}`;
             document.getElementById('lessonDescTitle').textContent = lesson.title;
 
+            // Update AI lesson badge
+            if (typeof updateAiLessonBadge === 'function') updateAiLessonBadge();
+
             // Update syllabus highlighting
             document.querySelectorAll('.lesson-item').forEach(item => item.classList.remove('active'));
             const activeItem = document.querySelector(`.lesson-item[data-module="${moduleIndex}"][data-lesson="${lessonIndex}"]`);
@@ -2824,14 +3109,19 @@
             const aiLock = document.getElementById('aiLock');
             const workbookCard = document.getElementById('workbookCard');
             const summaryCard = document.getElementById('summaryCard');
-            const unlockAiBtn = document.getElementById('unlockAiBtn');
+            const aiLocked = document.getElementById('aiLocked');
+            const aiChat = document.getElementById('aiChat');
 
             if (isAuthenticated) {
                 resourcesLock.style.display = 'none';
                 aiLock.style.display = 'none';
                 workbookCard.classList.remove('locked');
                 summaryCard.classList.remove('locked');
-                unlockAiBtn.innerHTML = '<i class="fa-solid fa-comments"></i> התחל שיחה';
+
+                // Show chat, hide placeholder
+                aiLocked.style.display = 'none';
+                aiChat.style.display = 'flex';
+                initAiChat();
 
                 // Hide toast if authenticated
                 hideToast();
@@ -2840,7 +3130,8 @@
                 summaryCard.classList.add('locked');
                 resourcesLock.style.display = '';
                 aiLock.style.display = '';
-                unlockAiBtn.innerHTML = '<i class="fa-solid fa-unlock"></i> פתח גישה חינם';
+                aiLocked.style.display = '';
+                aiChat.style.display = 'none';
             }
         }
 
@@ -2870,8 +3161,10 @@
         function handleLockedAction(type) {
             if (!isAuthenticated) {
                 openModal();
-            } else {
-                alert('פיצ\'ר זה יפעל בקרוב...');
+            } else if (type === 'ai') {
+                // Already authenticated — switch to AI tab
+                switchTab('ai');
+                document.getElementById('aiInput')?.focus();
             }
         }
 
@@ -3030,6 +3323,199 @@
                 closeQuestionnaireModal();
             }
         }
+
+        // ===== AI Chat Functions =====
+        let aiChatHistory = [];
+        let aiChatInitialized = false;
+        let aiRemainingMessages = null;
+
+        function initAiChat() {
+            if (aiChatInitialized) return;
+            aiChatInitialized = true;
+
+            // Update lesson badge
+            updateAiLessonBadge();
+
+            // Auto-resize textarea
+            const input = document.getElementById('aiInput');
+            input.addEventListener('input', () => {
+                input.style.height = 'auto';
+                input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+            });
+
+            // Enter to send (Shift+Enter for new line)
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendAiMessage();
+                }
+            });
+        }
+
+        function updateAiLessonBadge() {
+            const badge = document.getElementById('aiLessonBadge');
+            if (!badge) return;
+            const mod = modules[currentModuleIndex];
+            const lesson = mod?.lessons[currentLessonIndex];
+            if (lesson) {
+                badge.textContent = lesson.title;
+                badge.title = `מודול ${currentModuleIndex + 1}: ${mod.title}`;
+            }
+        }
+
+        async function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const sendBtn = document.getElementById('aiSendBtn');
+            const message = input.value.trim();
+
+            if (!message || sendBtn.disabled) return;
+
+            // Disable input
+            sendBtn.disabled = true;
+            input.disabled = true;
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Add user message
+            appendAiMessage('user', message);
+
+            // Add to history
+            aiChatHistory.push({ role: 'user', content: message });
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                const session = await supabaseClient.auth.getSession();
+                const token = session?.data?.session?.access_token;
+
+                if (!token) {
+                    removeTypingIndicator();
+                    appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
+                    input.disabled = false;
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                // Get current lesson context
+                const mod = modules[currentModuleIndex];
+                const lesson = mod?.lessons[currentLessonIndex];
+                const lessonContext = {
+                    moduleIndex: currentModuleIndex,
+                    moduleTitle: mod?.title || '',
+                    lessonTitle: lesson?.title || ''
+                };
+
+                const response = await fetch(
+                    `${SUPABASE_URL}/functions/v1/ai-chat`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            message,
+                            history: aiChatHistory.slice(-10), // Last 10 messages for context
+                            lessonContext
+                        })
+                    }
+                );
+
+                removeTypingIndicator();
+
+                const data = await response.json();
+
+                if (data.rateLimited) {
+                    appendRateLimitMessage();
+                    input.disabled = true;
+                    sendBtn.disabled = true;
+                    return;
+                }
+
+                if (data.error && response.status === 401) {
+                    appendAiMessage('bot', data.error);
+                    input.disabled = false;
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                const reply = data.reply || data.error || 'שגיאה. נסו שוב.';
+                appendAiMessage('bot', reply);
+                aiChatHistory.push({ role: 'model', content: reply });
+
+                // Update remaining counter
+                if (data.remaining !== undefined) {
+                    aiRemainingMessages = data.remaining;
+                    const remainEl = document.getElementById('aiRemaining');
+                    if (remainEl) remainEl.textContent = `${data.remaining}/50`;
+                }
+
+            } catch (err) {
+                console.error('AI chat error:', err);
+                removeTypingIndicator();
+                appendAiMessage('bot', 'שגיאת תקשורת. בדקו את החיבור לאינטרנט ונסו שוב.');
+            }
+
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+
+        function appendAiMessage(type, text) {
+            const container = document.getElementById('aiMessages');
+            const isBot = type === 'bot';
+            const div = document.createElement('div');
+            div.className = `ai-message ${isBot ? 'ai-message-bot' : 'ai-message-user'}`;
+            div.innerHTML = `
+                <div class="ai-message-avatar">
+                    <i class="fa-solid fa-${isBot ? 'robot' : 'user'}"></i>
+                </div>
+                <div class="ai-message-bubble">${escapeHtml(text)}</div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const container = document.getElementById('aiMessages');
+            const div = document.createElement('div');
+            div.className = 'ai-message ai-message-bot ai-typing-indicator';
+            div.id = 'aiTyping';
+            div.innerHTML = `
+                <div class="ai-message-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="ai-message-bubble">
+                    <div class="ai-typing-dot"></div>
+                    <div class="ai-typing-dot"></div>
+                    <div class="ai-typing-dot"></div>
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typing = document.getElementById('aiTyping');
+            if (typing) typing.remove();
+        }
+
+        function appendRateLimitMessage() {
+            const container = document.getElementById('aiMessages');
+            const div = document.createElement('div');
+            div.className = 'ai-rate-limit-msg';
+            div.innerHTML = '🕐 הגעת למגבלה של 50 הודעות היום. חזור מחר לשיחה נוספת!';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        window.sendAiMessage = sendAiMessage;
 
         window.openQuestionnaireModal = openQuestionnaireModal;
         window.closeQuestionnaireModal = closeQuestionnaireModal;

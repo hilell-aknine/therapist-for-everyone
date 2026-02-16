@@ -1,36 +1,32 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { NLP_KNOWLEDGE } from './knowledge.ts'
 
-const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-const SYSTEM_PROMPT = `אתה עוזר לימודי מקצועי של קורס NLP פרקטישנר ומאסטר פרקטישנר של בית הספר "מטפל לכל אחד".
+const DAILY_LIMIT = 50
 
-תפקידך:
+const SYSTEM_PROMPT = `אתה "המורה של NLP" — עוזר לימודי מקצועי של קורס NLP פרקטישנר ומאסטר פרקטישנר של בית הספר "מטפל לכל אחד".
+
+## תפקידך:
 - לענות על שאלות לגבי חומרי הקורס, טכניקות NLP, ותרגולים
 - להסביר מושגים בצורה ברורה ופשוטה בעברית
 - לעזור לתלמידים להבין טכניקות ולתרגל אותן
+- לתת דוגמאות מעשיות ליישום הטכניקות בחיי היומיום
 
-נושאי הקורס כוללים:
-- הנחות יסוד של NLP (מפת המציאות, אין כישלון רק משוב, הגוף והנפש מערכת אחת)
-- מערכות ייצוג (ויזואלי, אודיטורי, קינסתטי, אולפקטורי/גוסטטורי)
-- תנועות עיניים ומערכות ייצוג
-- עוגנים (Anchoring) - יצירה, שרשור, קריסה
-- מטא-מודל ומילטון-מודל
-- רפריימינג (reframing) - תוכן והקשר
-- תת-אופנויות (Submodalities)
-- קווי זמן (Timeline)
-- אסטרטגיות NLP
-- מודלים של שפה - מחיקות, עיוותים, הכללות
-- ראפור ומיררינג
-- פוביות ומודל הריפוי המהיר
-- חלקים (Parts Integration)
-- מטא-תוכניות (Meta Programs)
-- מודלינג (Modeling)
+## בסיס הידע שלך:
+${NLP_KNOWLEDGE}
 
-כללים:
+## כללים:
 - ענה תמיד בעברית
-- תשובות קצרות וממוקדות (3-5 משפטים אלא אם צריך יותר)
-- אל תמציא מידע - אם אתה לא בטוח, אמור זאת
-- אם התלמיד שואל משהו מחוץ לנושאי הקורס, הפנה אותו בעדינות חזרה`
+- תשובות ממוקדות (3-6 משפטים). הרחב רק אם התלמיד מבקש
+- אל תמציא מידע — אם אתה לא בטוח, אמור "לא מצאתי מידע על זה בחומרי הקורס, אבל..."
+- אם התלמיד שואל משהו מחוץ לנושאי הקורס, הפנה אותו בעדינות חזרה
+- כשמסביר טכניקה, תן את השלבים בצורה מסודרת (1, 2, 3...)
+- השתמש בדוגמאות מחיי היומיום כדי להמחיש מושגים
+- אם התלמיד לומד שיעור ספציפי, התמקד בנושא של אותו שיעור`
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -43,14 +39,28 @@ serve(async (req) => {
   }
 
   try {
-    if (!ANTHROPIC_API_KEY) {
+    // --- Auth verification ---
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
       return new Response(
-        JSON.stringify({ reply: 'העוזר הלימודי עדיין בהקמה. פנו אלינו ב-WhatsApp לכל שאלה.' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'לא מחובר. התחבר כדי להשתמש בעוזר הלימודי.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const { message, history = [] } = await req.json()
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'אימות נכשל. נסה להתחבר מחדש.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // --- Parse request ---
+    const { message, history = [], lessonContext } = await req.json()
 
     if (!message) {
       return new Response(
@@ -59,52 +69,112 @@ serve(async (req) => {
       )
     }
 
-    // Build messages array from history
-    const messages = history
-      .filter((m: { role: string; content: string }) => m.role === 'user' || m.role === 'assistant')
-      .map((m: { role: string; content: string }) => ({
-        role: m.role,
-        content: m.content
-      }))
+    // --- Rate limiting ---
+    const today = new Date().toISOString().split('T')[0]
+    const { data: usage } = await supabaseAdmin
+      .from('ai_chat_usage')
+      .select('message_count')
+      .eq('user_id', user.id)
+      .eq('date', today)
+      .single()
 
-    // Ensure the latest user message is included
-    if (messages.length === 0 || messages[messages.length - 1].content !== message) {
-      messages.push({ role: 'user', content: message })
+    const currentCount = usage?.message_count || 0
+
+    if (currentCount >= DAILY_LIMIT) {
+      return new Response(
+        JSON.stringify({
+          error: `הגעת למגבלה היומית של ${DAILY_LIMIT} הודעות. חזור מחר! 😊`,
+          rateLimited: true,
+          remaining: 0
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 1024,
-        system: SYSTEM_PROMPT,
-        messages
-      })
+    // Increment usage
+    if (usage) {
+      await supabaseAdmin
+        .from('ai_chat_usage')
+        .update({ message_count: currentCount + 1 })
+        .eq('user_id', user.id)
+        .eq('date', today)
+    } else {
+      await supabaseAdmin
+        .from('ai_chat_usage')
+        .insert({ user_id: user.id, message_count: 1, date: today })
+    }
+
+    // --- Check API key ---
+    if (!GEMINI_API_KEY) {
+      return new Response(
+        JSON.stringify({ reply: 'העוזר הלימודי עדיין בהקמה. פנו אלינו ב-WhatsApp לכל שאלה.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // --- Build Gemini messages ---
+    const contextNote = lessonContext
+      ? `\n\n[התלמיד לומד כרגע: מודול ${lessonContext.moduleIndex + 1} — "${lessonContext.moduleTitle}", שיעור: "${lessonContext.lessonTitle}". התמקד בנושא זה.]`
+      : ''
+
+    const geminiContents: Array<{ role: string; parts: Array<{ text: string }> }> = []
+
+    // Add history
+    for (const m of history) {
+      if (m.role === 'user' || m.role === 'model') {
+        geminiContents.push({
+          role: m.role === 'assistant' ? 'model' : m.role,
+          parts: [{ text: m.content }]
+        })
+      }
+    }
+
+    // Add current message
+    geminiContents.push({
+      role: 'user',
+      parts: [{ text: message }]
     })
+
+    // --- Call Gemini 2.0 Flash ---
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: SYSTEM_PROMPT + contextNote }]
+          },
+          contents: geminiContents,
+          generationConfig: {
+            maxOutputTokens: 1024,
+            temperature: 0.7,
+          }
+        })
+      }
+    )
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Anthropic API error:', errorText)
+      console.error('Gemini API error:', errorText)
       throw new Error('API call failed')
     }
 
     const data = await response.json()
-    const reply = data.content?.[0]?.text || 'לא הצלחתי לענות. נסו שוב.'
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'לא הצלחתי לענות. נסו שוב.'
 
     return new Response(
-      JSON.stringify({ reply }),
+      JSON.stringify({
+        reply,
+        remaining: DAILY_LIMIT - (currentCount + 1)
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
     console.error('Function error:', error)
     return new Response(
-      JSON.stringify({ reply: 'העוזר הלימודי עדיין בהקמה. בינתיים, פנו אלינו ב-WhatsApp לכל שאלה על הקורס.' }),
+      JSON.stringify({ reply: 'שגיאה זמנית. נסו שוב בעוד כמה שניות.' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

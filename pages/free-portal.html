@@ -2364,10 +2364,10 @@
         <div class="modal-box questionnaire-modal" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="skipQuestionnaire()" aria-label="סגור">✕</button>
             <div class="modal-icon">
-                <i class="fa-solid fa-clipboard-question"></i>
+                <i class="fa-solid fa-robot"></i>
             </div>
-            <h2>ספרו לנו קצת על עצמכם 📋</h2>
-            <p class="subtitle">עזרו לנו להתאים את הקורס עבורכם (אופציונלי)</p>
+            <h2>התאימו את המורה AI שלכם</h2>
+            <p class="subtitle">מלאו כדי שהעוזר האישי ידבר אליכם ברמה שלכם — מתחיל או מתקדם, הוא יתאים את עצמו</p>
 
             <form id="questionnaireForm" onsubmit="submitQuestionnaire(event)">
                 <div class="form-group">
@@ -2434,8 +2434,8 @@
                 <div class="check-icon">
                     <i class="fa-solid fa-check"></i>
                 </div>
-                <h3>תודה רבה! 🙏</h3>
-                <p>המשיכו ליהנות מהקורס</p>
+                <h3>מעולה! המורה AI שלך מותאם אישית</h3>
+                <p>מעכשיו התשובות יהיו ברמה שלך</p>
             </div>
         </div>
     </div>
@@ -3597,6 +3597,40 @@
                     sendAiMessage();
                 }
             });
+
+            // Fetch student profile and personalize welcome message
+            loadStudentProfile();
+        }
+
+        async function loadStudentProfile() {
+            if (!supabaseClient || !currentUser) return;
+            try {
+                const { data: profile } = await supabaseClient
+                    .from('course_questionnaires')
+                    .select('full_name, experience_level')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (profile) {
+                    // Personalize welcome message
+                    const welcomeBubble = document.querySelector('#aiMessages .ai-message-bot .ai-message-bubble');
+                    if (welcomeBubble) {
+                        const name = profile.full_name ? profile.full_name.split(' ')[0] : '';
+                        const levelText = {
+                            'beginner': 'אני אסביר לך הכל בפשטות עם דוגמאות',
+                            'intermediate': 'נעמיק יחד בחומר ונתרגל',
+                            'advanced': 'נצלול לעומק הטכניקות ונאתגר את הידע שלך'
+                        };
+                        const greeting = name ? `שלום ${name}!` : 'שלום!';
+                        const level = levelText[profile.experience_level] || 'שאלו אותי כל שאלה על החומר';
+                        welcomeBubble.innerHTML = `${greeting} 👋 אני המורה האישי שלך לקורס NLP. ${level}.<br><span style="font-size:0.8em; opacity:0.7;">✨ מותאם אישית לרמה שלך</span>`;
+                    }
+                }
+            } catch (e) {
+                // No profile — keep default welcome message
+            }
         }
 
         function updateAiLessonBadge() {

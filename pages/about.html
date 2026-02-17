@@ -8,8 +8,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
-    <title>מי אנחנו — מטפל לכל אחד</title>
-    <meta name="description" content="הסיפור, החזון והמשימה של מטפל לכל אחד — בית הספר להכשרת מטפלים">
+    <title>בואו נכיר — מטפל לכל אחד</title>
+    <meta name="description" content="הסיפור האישי מאחורי בית המטפלים — רם והילל מספרים איך הכל התחיל">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -134,69 +134,76 @@
             font-weight: 700; color: var(--deep-petrol); letter-spacing: -0.02em;
         }
 
-        /* Vision & Mission */
-        .vision-mission { padding: 6rem 2rem; background: var(--cream); }
+        /* Ram's Letter */
+        .letter-section { padding: 6rem 2rem; background: var(--cream); }
 
-        .vm-grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 2rem; max-width: 950px; margin: 0 auto;
-        }
-
-        .vm-card {
-            background: var(--pure-white); border: 1px solid var(--border-light);
-            border-radius: 16px; padding: 3rem 2.5rem;
+        .letter-card {
+            max-width: 800px; margin: 0 auto;
+            background: var(--pure-white);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 3.5rem 3rem;
             position: relative; overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
         }
 
-        .vm-card::before {
+        .letter-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0;
             height: 3px; background: var(--gradient-gold);
         }
 
-        .vm-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 40px rgba(0,59,70,0.08);
-        }
-
-        .vm-icon {
-            width: 56px; height: 56px; border-radius: 14px;
-            background: rgba(212,175,55,0.08); color: var(--gold);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.4rem; margin-bottom: 1.5rem;
-        }
-
-        .vm-card h3 {
+        .letter-card::after {
+            content: '\201e';
             font-family: var(--font-display);
-            font-size: 1.4rem; font-weight: 700; color: var(--deep-petrol);
-            margin-bottom: 1rem; letter-spacing: -0.01em;
+            font-size: 8rem; color: var(--gold); opacity: 0.07;
+            position: absolute; top: -0.5rem; right: 1.5rem;
+            line-height: 1; pointer-events: none;
         }
 
-        .vm-card p {
-            color: var(--muted-teal); font-size: 1rem; line-height: 1.85;
+        .letter-greeting {
+            font-family: var(--font-display);
+            font-size: 1.5rem; font-weight: 700;
+            color: var(--deep-petrol); margin-bottom: 0.5rem;
         }
 
-        /* Values */
-        .values { padding: 6rem 2rem; background: var(--deep-petrol); color: var(--pure-white); }
-        .values .section-title { color: var(--pure-white); }
+        .letter-note {
+            font-size: 0.92rem; color: var(--dusty-aqua);
+            margin-bottom: 2rem; font-style: italic;
+        }
 
-        .values-grid {
+        .letter-card p {
+            color: var(--text-dark); font-size: 1.05rem;
+            line-height: 1.9; margin-bottom: 1.2rem;
+        }
+
+        .letter-card p:last-child { margin-bottom: 0; }
+
+        .letter-highlight {
+            font-family: var(--font-display);
+            font-weight: 700; font-size: 1.15rem;
+            color: var(--deep-petrol);
+        }
+
+        /* Three Pillars */
+        .pillars { padding: 6rem 2rem; background: var(--deep-petrol); color: var(--pure-white); }
+        .pillars .section-title { color: var(--pure-white); }
+
+        .pillars-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem; max-width: 950px; margin: 0 auto;
         }
 
-        .value-card {
+        .pillar-card {
             background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
             border-radius: 14px; padding: 2.5rem 2rem; text-align: center;
             transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
         }
 
-        .value-card:hover {
+        .pillar-card:hover {
             background: rgba(255,255,255,0.06);
             transform: translateY(-4px);
         }
 
-        .value-icon {
+        .pillar-icon {
             width: 64px; height: 64px; border-radius: 50%;
             background: rgba(212,175,55,0.1); color: var(--gold);
             display: flex; align-items: center; justify-content: center;
@@ -204,43 +211,65 @@
             border: 1px solid rgba(212,175,55,0.15);
         }
 
-        .value-card h3 {
+        .pillar-card h3 {
             font-family: var(--font-display);
             font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;
         }
 
-        .value-card p {
+        .pillar-card p {
             color: var(--frost-white); font-size: 0.9rem; line-height: 1.75; opacity: 0.8;
         }
 
-        /* Approach */
-        .approach { padding: 6rem 2rem; background: var(--cream); }
+        /* Founders Section */
+        .founders { padding: 6rem 2rem; background: var(--cream); }
 
-        .approach-content {
-            max-width: 750px; margin: 0 auto;
+        .founders-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 2rem; max-width: 1000px; margin: 0 auto;
         }
 
-        .approach-quote {
+        .founder-card {
+            background: var(--pure-white); border: 1px solid var(--border-light);
+            border-radius: 16px; padding: 2.5rem 2rem;
+            position: relative; overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        .founder-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; background: var(--gradient-gold);
+        }
+
+        .founder-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0,59,70,0.08);
+        }
+
+        .founder-avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: rgba(212,175,55,0.08); color: var(--gold);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; margin: 0 auto 1.5rem;
+            border: 2px solid rgba(212,175,55,0.2);
+        }
+
+        .founder-name {
             font-family: var(--font-display);
-            font-size: clamp(1.3rem, 2.5vw, 1.7rem);
-            font-weight: 500; color: var(--deep-petrol);
-            line-height: 1.7; text-align: center;
-            padding: 3rem;
-            background: var(--pure-white);
-            border-radius: 16px;
-            border: 1px solid var(--border-light);
-            position: relative;
+            font-size: 1.4rem; font-weight: 700; color: var(--deep-petrol);
+            text-align: center; margin-bottom: 0.3rem;
         }
 
-        .approach-quote::before {
-            content: '״';
-            font-family: var(--font-display);
-            font-size: 6rem; color: var(--gold); opacity: 0.15;
-            position: absolute; top: -1rem; right: 1.5rem;
-            line-height: 1;
+        .founder-role {
+            text-align: center; font-size: 0.85rem; color: var(--gold);
+            font-weight: 600; margin-bottom: 1.5rem;
         }
 
-        .approach-quote .gold { color: var(--gold); }
+        .founder-card p {
+            color: var(--text-dark); font-size: 0.95rem;
+            line-height: 1.85; margin-bottom: 1rem;
+        }
+
+        .founder-card p:last-child { margin-bottom: 0; }
 
         /* CTA */
         .cta-section {
@@ -310,9 +339,9 @@
 
             .hero { padding: 8rem 1.5rem 4rem; }
             .hero h1 { font-size: 2rem; }
-            .vm-grid { grid-template-columns: 1fr; }
-            .values-grid { grid-template-columns: 1fr; }
-            .approach-quote { padding: 2rem; font-size: 1.1rem; }
+            .letter-card { padding: 2.5rem 1.5rem; }
+            .pillars-grid { grid-template-columns: 1fr; }
+            .founders-grid { grid-template-columns: 1fr; }
             .footer-content { grid-template-columns: 1fr; text-align: center; }
         }
 
@@ -353,68 +382,118 @@
     <section class="hero">
         <div class="hero-bg" aria-hidden="true"><div class="hero-bg-layer"></div></div>
         <div class="hero-content">
-            <h1>מי <span>אנחנו</span></h1>
-            <p>הסיפור שלנו, החזון והמשימה שמניעים אותנו כל יום מחדש</p>
+            <h1>בואו <span>נכיר</span></h1>
+            <p>אודות בית המטפלים</p>
         </div>
     </section>
 
-    <!-- Vision & Mission -->
-    <section class="vision-mission">
+    <!-- Ram's Letter -->
+    <section class="letter-section">
         <div class="section-header" data-reveal>
-            <div class="section-eyebrow">הכוח המניע שלנו</div>
-            <h2 class="section-title">חזון ומשימה</h2>
+            <div class="section-eyebrow">מכתב מרם, מייסד שותף בפרויקט</div>
+            <h2 class="section-title">הסיפור שלנו</h2>
         </div>
 
-        <div class="vm-grid">
-            <div class="vm-card" data-reveal data-reveal-delay="1">
-                <div class="vm-icon"><i class="fa-solid fa-heart"></i></div>
-                <h3>החזון שלנו</h3>
-                <p>אנחנו מאמינים שכל אדם זכאי לגישה לטיפול נפשי איכותי, ללא קשר למצבו הכלכלי. אנחנו חולמים על עולם שבו כל מי שזקוק לעזרה יכול לקבל אותה — ושכל מי שרוצה לעזור יכול להכשיר את עצמו לכך.</p>
+        <div class="letter-card" data-reveal>
+            <div class="letter-greeting">הייי חברים! איזה כיף שאתם כאן :)</div>
+            <div class="letter-note">כל מה שתקראו כאן נכתבה על ידי ולא על ידי קופירייטיר או משהו בסגנון. היה לי חשוב להעביר את הלב והכוונות שלי בתוך הכתב.</div>
+
+            <p>בעמוד הזה קצת נסביר יותר עלינו ועל בית המטפלים ולמה קמנו.</p>
+
+            <p>בינואר 2026 נסעתי לכנס שיווק עם חברי הטוב צביקה עינב לדובאי. בדרך הלוך במטוס, דיברנו על תרומת מעשר וצביקה שיתף אותי במעשר שהוא נתן כאשר היה ב״אבא חטוב״ לקבוצת הכדורסל שגדל בה ברמת השרון. הוא המליץ לי לתת את המעשר שלי לפרויקטים שמרגשים אותי ושאני חלק מהם, מהסיבה שכאשר אנחנו רק תורמים כסף מבלי להרגיש ולחוות את ההשפעה זה הופך לאקט טכני ולא לאקט רגשי.</p>
+
+            <p class="letter-highlight">לקחתי את מה שהוא אמר והחלטתי שאני רוצה באמצעות המעשר שלי להקים פרויקט חברתי ״מטפל לכל אחד״</p>
+
+            <p>פרויקט שהמטרה שלו היא להנגיש לפוסט טראומתיים, הלומי קרב, נפגעי נובה, לוחמי חרבות ברזל ועוד… סשנים טיפוליים עם מטפלים מוסמכים, מקצועיים ומנוסים כדי לאפשר להם ריפוי במתנה אחרי כל מה שעברו.</p>
+
+            <p>לפרויקט נרתם אליי הילל (מייסד ושותף בפרויקט) והתחלנו בבנייה שלו. תוך כדי העשייה, הבנו שיש כאן פוטנציאל למשהו גדול יותר.</p>
+
+            <p>לי בעבר היה מכללה ל-NLP שהכשירה במצטבר 350+ מטפלים בשיטת NLP PRACTITIONER וגם NLP MASTER PRACTITIONER ובשנתיים האחרונות שמתי ב-YouTube את הקורס NLP שלי בחינם לצפייה ישירה. (מה שגרם להמון אנשים להחשף לתוכן הזה ולהנות ממנו)</p>
+
+            <p>הילל הציע לי שנעלה רמה וממש נבנה לו פורטל לימודים איכותי בחינם שמונגש לכולם עם חומרי לימוד, צאטבוטים, סיכומים, מבחנים ועוד!</p>
+
+            <p>הבנו שיש לנו כאן משהו טוב בידיים, רק שחסר לנו את החתיכה האחרונה של הפאזל. מה אנחנו עושים עם כל מי שרוצה לקבל תעודת הסמכה רשמית? ואז עלה הרעיון!</p>
+
+            <p class="letter-highlight">נפתח את תוכנית ההכשרה המקצועית והמורחבת ביותר שיש לאנשים שרוצים ללמוד טיפול או למטפלים קיימים שרוצים להרחיב את סל הכלים שלהם ולהצטרף לליווי, תמיכה וקהילה תומכת!</p>
+        </div>
+    </section>
+
+    <!-- Three Pillars -->
+    <section class="pillars">
+        <div class="section-header" data-reveal>
+            <div class="section-eyebrow">וזה בעצם בית המטפלים</div>
+            <h2 class="section-title" style="color: var(--pure-white);">שלושת העמודים</h2>
+        </div>
+
+        <div class="pillars-grid">
+            <div class="pillar-card" data-reveal data-reveal-delay="1">
+                <div class="pillar-icon"><i class="fa-solid fa-book-open"></i></div>
+                <h3>פורטל לימודים</h3>
+                <p>פורטל לימודים עם מלא תוכן משנה חיים!</p>
             </div>
-            <div class="vm-card" data-reveal data-reveal-delay="2">
-                <div class="vm-icon"><i class="fa-solid fa-bullseye"></i></div>
-                <h3>המשימה שלנו</h3>
-                <p>להכשיר מטפלים מקצועיים ברמה הגבוהה ביותר, להנגיש ידע טיפולי לכל מי שמעוניין, ולחבר בין מטפלים מתנדבים לאנשים שזקוקים לעזרה — הכל תחת קורת גג אחת.</p>
+            <div class="pillar-card" data-reveal data-reveal-delay="2">
+                <div class="pillar-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <h3>תוכנית הכשרה</h3>
+                <p>תוכנית הכשרה שנתית למטפלים</p>
+            </div>
+            <div class="pillar-card" data-reveal data-reveal-delay="3">
+                <div class="pillar-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                <h3>מיזם חברתי</h3>
+                <p>מיזם חברתי שמנגיש טיפול בחינם למי שצריך</p>
             </div>
         </div>
     </section>
 
-    <!-- Values -->
-    <section class="values">
+    <!-- Meet the Founders -->
+    <section class="founders">
         <div class="section-header" data-reveal>
-            <div class="section-eyebrow">מה מנחה אותנו</div>
-            <h2 class="section-title">הערכים שלנו</h2>
+            <div class="section-eyebrow">ואם אנחנו עדיין לא מכירים אז...</div>
+            <h2 class="section-title">נעים להכיר!</h2>
         </div>
 
-        <div class="values-grid">
-            <div class="value-card" data-reveal data-reveal-delay="1">
-                <div class="value-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
-                <h3>נגישות</h3>
-                <p>טיפול נפשי הוא זכות בסיסית. אנחנו עובדים כל יום כדי להפוך אותו לנגיש יותר לכולם.</p>
-            </div>
-            <div class="value-card" data-reveal data-reveal-delay="2">
-                <div class="value-icon"><i class="fa-solid fa-award"></i></div>
-                <h3>מקצועיות</h3>
-                <p>לא מתפשרים על הרמה. הכשרה מקצועית עם הסמכה בינלאומית וסטנדרטים גבוהים.</p>
-            </div>
-            <div class="value-card" data-reveal data-reveal-delay="3">
-                <div class="value-icon"><i class="fa-solid fa-users"></i></div>
-                <h3>קהילה</h3>
-                <p>מאמינים בכוח של קהילה. מטפלים שתומכים אחד בשני ובוגרים שממשיכים לגדול ביחד.</p>
-            </div>
-        </div>
-    </section>
+        <div class="founders-grid">
+            <!-- Ram -->
+            <div class="founder-card" data-reveal data-reveal-delay="1">
+                <div class="founder-avatar"><i class="fa-solid fa-user"></i></div>
+                <h3 class="founder-name">רם</h3>
+                <div class="founder-role">מייסד שותף</div>
 
-    <!-- Approach -->
-    <section class="approach">
-        <div class="section-header" data-reveal>
-            <div class="section-eyebrow">הגישה שלנו</div>
-            <h2 class="section-title">השילוב הייחודי</h2>
-        </div>
+                <p>התחלתי את מסע היזמות שלי ב-2021 עם עסק לירידה במשקל בשם ״תודעה מחטבת״ — עסק שמשלב את עולמות הכושר והתזונה עם עולמות ה-NLP והריפוי הרגשי. משם הייתי מטפל בקליניקה ועזרתי לעשרות אנשים שבאו אליי ל-1 על 1.</p>
 
-        <div class="approach-content" data-reveal>
-            <div class="approach-quote">
-                השילוב הייחודי שלנו בין <span class="gold">הכשרה מקצועית</span> ברמה הגבוהה ביותר לבין <span class="gold">המיזם החברתי</span> יוצר מערכת אקולוגית שלמה — מטפלים שמתפתחים מקצועית תוך כדי תרומה לקהילה.
+                <p>לאחר מכן המשכתי ל״מועדון היזמים״ והייתי שם, יועץ עסקי, ראש צוות יועצים, מנהל השיווק, סמנכ״ל ובנוסף פתחתי בית ספר ל-NLP עם עומרי כהן ומתן ניסטור שהכשרנו בו 350+ מטפלים.</p>
+
+                <p>לימים פתחתי עמותה בשם ״ה-20 החדש״ בה שמטרתה הייתה להנגיש קורסים וידע בחינם לחבר׳ה בגילאי ה-20 ולאחר חצי שנה אינטסיבית עם 21 חברי צוות ואופרציה גדולה, הבנתי שזה גדול עליי וסגרתי אותה.</p>
+
+                <p>ב-7.10 לחמתי כשריונר למשך חודש וקצת וכשסיימתי את השירות שלי חזרתי הביתה מדוכא ואובדני. תהליכי הריפוי והטיפול שעברתי הצילו לי את החיים ואני מאמין שכל אדם (ובפרט לוחמים) צריכים לקבל את זה מבלי שזו תהיה פריוולגיה.</p>
+
+                <p>בשנה וחצי האחרונות אני במסע חזרה בתשובה אל הבורא הטוב והמיטיב. אני מלמד תורה, יהדות וקבלה ברשתות החברתיות להנאתי ואני שותף בעסק בשם ״כנות״ עם רועי בן יוסף שקיים כבר 13 שנה ומעביר תהלכי משני חיים לאנשים שרוצים ללמוד איך להרוויח (בכל תחום) ממי שהם בעולם.</p>
+            </div>
+
+            <!-- Hillel -->
+            <div class="founder-card" data-reveal data-reveal-delay="2">
+                <div class="founder-avatar"><i class="fa-solid fa-user"></i></div>
+                <h3 class="founder-name">הילל אקנין</h3>
+                <div class="founder-role">מייסד שותף</div>
+
+                <p>מעל הכל אני ילד מגודל ואיש משפחה, והתשוקה הגדולה שלי היא לעזור לכמה שיותר אנשי רוח ועומק להגשים את עצמם. ולהפוך את הנסיון והיחודיות שלהם לכלים פשוטים, חמים ואנושיים.</p>
+
+                <p>אני מאמין שהאנשים החשובים ביותר בחברה הישראלית היום הם המטפלים והמאמנים. אלו שמחזיקים את התקווה והמרפא כשהכול סביב רועש, ומזכירים לנו שגם מתוך הקושי אפשר לצמוח.</p>
+
+                <p>נפגשתי עם עולם הטיפול לפני 4 שנים אבא לתינקות מבוהל שמפחד איך במציאות הזו אוכל לגדל משפחה בריאה בכל ההבטים במקרה לחלוטין נרשמתי לקורס NLP כשלא היה לי מושג מזה תאכלס כי זה היה ממש ממש זול והבטיח לשנות לי את החיים.</p>
+
+                <p>כבר בשיעור השני אמרתי למרצה שאני מרגיש שאני זורע עץ סקויה (העץ הגדול בעולם) בתוכי ושזה רק ילך ויתעצם.</p>
+
+                <p>ובאמת מאז אני לומד כל הזמן ומשכלל את הנכס הכי חשוב שיש לי בחיים שזה אני והעולם הפנימי שלי.</p>
+
+                <p>לאורך השנים האחרונות בזמן שאני מרגיש שאני גודל ומתפתח ובעיקר אחרי ה-7 לאוקטובר כשאני מאבד חברים טובים רואה איך חברים שלי שנתנו הכל עבורנו לא מקבלים מענה מספיק מקצועי והשיח מאד ציני הבנתי שאני רוצה לשנות את המצב הזה.</p>
+
+                <p>וכשרם הציע לי להצטרף אל הפרויקט המדהים והמחייב הזה לא יכולתי להישאר אדיש וקפצתי אל המסע הזה ביחד איתו.</p>
+
+                <p>מעל עשור שאני חי את עולם העסקים היה לי עסק של תכשיטי יוקרה ויהלומים. הייתי שותף במועדון שמנגיש את עולם הבינה מלאכותית לעסקים קטנים.</p>
+
+                <p>והשאיפה שלי היא לקחת את כל העולמות האלה — טכנולוגיה, עסקים והתפתחות אישית — ולשלב אותם למשהו נגיש שמשנה את החברה הישראלית.</p>
+
+                <p>היום אני מקדיש את כולי כדי ש״בית למטפלים״ יהיה הכתובת לכל מי שיש לו תשוקה לעזור, להפיץ אור, למקצוע אמיתי שעוזר לאנשים ומפרנס אותם בכבוד.</p>
             </div>
         </div>
     </section>

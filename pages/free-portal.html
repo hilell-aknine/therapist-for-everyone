@@ -22,8 +22,8 @@
         :root {
             /* Brand Colors */
             --sidebar-dark: #0a3a42;
-            --sidebar-hover: #0d4a54;
-            --sidebar-active: #0f5560;
+            --sidebar-hover: #F3F4F6;
+            --sidebar-active: #EBF5F7;
             --deep-petrol: #0E5660;
             --muted-teal: #005C66;
             --dusty-aqua: #2A727C;
@@ -38,6 +38,19 @@
             --gold-glow: rgba(216, 175, 71, 0.3);
             --success: #00b894;
             --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            /* Base44 Light Theme */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8F9FB;
+            --border-default: #E5E7EB;
+            --text-primary: #111827;
+            --text-secondary: #4B5563;
+            --text-tertiary: #9CA3AF;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -50,208 +63,190 @@
             overflow-x: hidden;
         }
 
-        /* ===== Top Navigation Bar ===== */
-        .top-nav {
+        /* ===== Course Header ===== */
+        .course-header {
             position: fixed;
             top: 0;
             left: 0;
-            right: 380px;
-            height: 60px;
-            background: var(--deep-petrol);
+            right: 0;
+            height: 64px;
+            background: var(--bg-primary);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 1.5rem;
             z-index: 150;
-            border-bottom: 1px solid rgba(47, 133, 146, 0.3);
+            border-bottom: 1px solid var(--border-default);
+            box-shadow: var(--shadow-sm);
         }
 
-        .top-nav-right {
+        .header-right {
             display: flex;
             align-items: center;
             gap: 1rem;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .header-brand-icon {
+            width: 36px; height: 36px;
+            background: var(--gradient-gold);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--sidebar-dark);
+        }
+
+        .header-brand-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--deep-petrol);
+        }
+
+        .header-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--border-default);
+        }
+
+        .header-course-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .header-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .header-progress-bar {
+            width: 120px;
+            height: 6px;
+            background: var(--border-default);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .header-progress-fill {
+            height: 100%;
+            background: var(--gradient-gold);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .header-progress-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gold);
+            min-width: 32px;
         }
 
         .back-to-site {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--frost-white);
+            color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 0.45rem 1rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            border: 1px solid var(--border-default);
         }
 
         .back-to-site:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--gold);
-        }
-
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--frost-white);
-            font-size: 0.85rem;
-        }
-
-        .breadcrumb a {
-            color: var(--frost-white);
-            text-decoration: none;
-            opacity: 0.7;
-            transition: all 0.2s;
-        }
-
-        .breadcrumb a:hover {
-            opacity: 1;
-            color: var(--gold);
-        }
-
-        .breadcrumb .separator {
-            opacity: 0.5;
-        }
-
-        .breadcrumb .current {
-            color: var(--gold);
-            font-weight: 500;
-        }
-
-        .top-nav-left {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .quick-links {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .quick-link {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            color: var(--frost-white);
-            text-decoration: none;
-            font-size: 0.85rem;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            transition: all 0.2s;
-            opacity: 0.8;
-        }
-
-        .quick-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-            opacity: 1;
-        }
-
-        .quick-link i {
-            font-size: 0.8rem;
+            background: var(--bg-secondary);
+            color: var(--deep-petrol);
+            border-color: var(--dusty-aqua);
         }
 
         /* ===== LMS Layout ===== */
         .lms-container {
             display: flex;
             min-height: 100vh;
-            padding-top: 60px;
+            padding-top: 64px;
         }
 
         /* ===== Sidebar ===== */
         .sidebar {
-            width: 380px;
-            background: var(--sidebar-dark);
-            color: var(--pure-white);
+            width: 360px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             display: flex;
             flex-direction: column;
             position: fixed;
             right: 0;
-            top: 60px;
+            top: 64px;
             bottom: 0;
             z-index: 100;
             transition: transform 0.3s ease;
+            border-left: 1px solid var(--border-default);
         }
 
         .sidebar-header {
-            padding: 1.5rem;
-            background: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.25rem 1.25rem 1rem;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .sidebar-progress-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.6rem;
+        }
+
+        .sidebar-progress-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .sidebar-progress-count {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
         }
 
         .sidebar-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            text-decoration: none;
-            color: var(--pure-white);
-            margin-bottom: 1rem;
+            display: none;
         }
-
-        .sidebar-logo .logo-icon {
-            width: 40px; height: 40px;
-            background: var(--gradient-gold);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            color: var(--sidebar-dark);
-        }
-
-        .sidebar-logo .logo-text {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .sidebar-logo .logo-text span { color: var(--gold); }
 
         .course-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+            display: none;
         }
 
         .course-meta {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .course-meta span {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
+            display: none;
         }
 
         /* Progress Bar */
         .progress-container {
-            padding: 1rem 1.5rem;
-            background: rgba(0, 0, 0, 0.15);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
         }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-        }
-
-        .progress-label { color: rgba(255, 255, 255, 0.8); }
-        .progress-percent { color: var(--gold); font-weight: 600; }
 
         .progress-bar {
             height: 6px;
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--border-default);
             border-radius: 3px;
             overflow: hidden;
+            margin-bottom: 0.6rem;
         }
 
         .progress-fill {
@@ -262,33 +257,92 @@
             width: 0%;
         }
 
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .progress-label { color: var(--text-secondary); }
+        .progress-percent { color: var(--gold); font-weight: 600; }
+
+        /* Sidebar Search */
+        .sidebar-search {
+            padding: 0 1.25rem 0.75rem;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .sidebar-search input {
+            width: 100%;
+            padding: 0.55rem 0.9rem;
+            padding-right: 2.2rem;
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.85rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s;
+            direction: rtl;
+        }
+
+        .sidebar-search input:focus {
+            border-color: var(--dusty-aqua);
+            background: var(--bg-primary);
+        }
+
+        .sidebar-search-wrap {
+            position: relative;
+        }
+
+        .sidebar-search-wrap i {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+        }
+
+        .sidebar-section-title {
+            padding: 0.75rem 1.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         /* Syllabus */
         .syllabus {
             flex: 1;
             overflow-y: auto;
-            padding: 1rem 0;
+            padding: 0;
         }
 
         .syllabus::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
 
         .syllabus::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
+            background: transparent;
         }
 
         .syllabus::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--border-default);
             border-radius: 3px;
         }
 
         /* Module Accordion */
         .module {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid var(--border-default);
         }
 
         .module-header {
-            padding: 1rem 1.5rem;
+            padding: 0.85rem 1.25rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -304,30 +358,39 @@
         .module-info {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 0.7rem;
         }
 
         .module-number {
             width: 28px; height: 28px;
-            background: rgba(212, 175, 55, 0.2);
-            border: 1px solid rgba(212, 175, 55, 0.4);
+            background: rgba(14, 86, 96, 0.08);
+            border: 1px solid rgba(14, 86, 96, 0.15);
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.8rem;
             font-weight: 600;
-            color: var(--gold);
+            color: var(--deep-petrol);
         }
 
         .module-title {
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .module-count {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            margin-right: auto;
+            margin-left: 0.5rem;
         }
 
         .module-toggle {
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-tertiary);
             transition: transform 0.3s;
+            font-size: 0.75rem;
         }
 
         .module.open .module-toggle {
@@ -336,7 +399,7 @@
 
         .module-lessons {
             display: none;
-            background: rgba(0, 0, 0, 0.15);
+            background: var(--bg-secondary);
         }
 
         .module.open .module-lessons {
@@ -345,10 +408,10 @@
 
         /* Lesson Item */
         .lesson-item {
-            padding: 0.9rem 1.5rem 0.9rem 2.5rem;
+            padding: 0.7rem 1.25rem 0.7rem 1rem;
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 0.7rem;
             cursor: pointer;
             transition: all 0.2s;
             border-right: 3px solid transparent;
@@ -369,14 +432,14 @@
         }
 
         .lesson-status {
-            width: 24px; height: 24px;
+            width: 22px; height: 22px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.7rem;
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.6rem;
+            background: var(--border-default);
+            color: var(--text-tertiary);
             flex-shrink: 0;
         }
 
@@ -386,100 +449,33 @@
         }
 
         .lesson-title {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
             flex: 1;
         }
 
         .lesson-item.active .lesson-title {
-            color: var(--pure-white);
+            color: var(--text-primary);
             font-weight: 500;
         }
 
         .lesson-duration {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.72rem;
+            color: var(--text-tertiary);
         }
 
         /* ===== Main Content ===== */
         .main-content {
             flex: 1;
-            margin-right: 380px;
+            margin-right: 360px;
             display: flex;
             flex-direction: column;
-        }
-
-        /* Top Bar */
-        .top-bar {
-            background: var(--pure-white);
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border-light);
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-
-        .current-lesson-info h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 0.2rem;
-        }
-
-        .current-lesson-info p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .top-bar-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .nav-btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-light);
-            background: var(--pure-white);
-            color: var(--text-dark);
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        .nav-btn:hover:not(:disabled) {
-            background: var(--light-gray);
-            border-color: var(--dusty-aqua);
-        }
-
-        .nav-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .nav-btn.primary {
-            background: var(--gradient-gold);
-            border: none;
-            color: var(--sidebar-dark);
-        }
-
-        .nav-btn.primary:hover {
-            box-shadow: 0 4px 15px var(--gold-glow);
         }
 
         /* Video Area */
         .video-section {
             flex: 1;
-            padding: 2rem;
+            padding: 1.5rem 2rem 2rem;
         }
 
         .video-wrapper {
@@ -606,11 +602,12 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: var(--pure-white);
-            border-radius: 12px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
             margin-top: 1rem;
             padding: 0.8rem 1.2rem;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-default);
+            box-shadow: var(--shadow-sm);
             gap: 0.8rem;
         }
 
@@ -711,25 +708,27 @@
 
         /* Tabs Section */
         .tabs-section {
-            background: var(--pure-white);
-            border-radius: 16px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
             margin-top: 1.5rem;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-default);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
         }
 
         .tabs-header {
             display: flex;
-            border-bottom: 1px solid var(--border-light);
+            border-bottom: 1px solid var(--border-default);
+            background: var(--bg-secondary);
         }
 
         .tab-btn {
-            padding: 1rem 2rem;
+            padding: 0.9rem 1.5rem;
             background: none;
             border: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
-            color: var(--text-muted);
+            color: var(--text-tertiary);
             cursor: pointer;
             position: relative;
             transition: color 0.2s;
@@ -740,11 +739,12 @@
         }
 
         .tab-btn:hover {
-            color: var(--text-dark);
+            color: var(--text-primary);
         }
 
         .tab-btn.active {
-            color: var(--dusty-aqua);
+            color: var(--deep-petrol);
+            background: var(--bg-primary);
         }
 
         .tab-btn.active::after {
@@ -766,7 +766,7 @@
         }
 
         .tabs-content {
-            padding: 2rem;
+            padding: 1.75rem;
         }
 
         .tab-panel {
@@ -775,6 +775,58 @@
 
         .tab-panel.active {
             display: block;
+        }
+
+        /* Notes Tab */
+        .notes-container {
+            position: relative;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            resize: vertical;
+            outline: none;
+            direction: rtl;
+            transition: border-color 0.2s;
+        }
+
+        .notes-textarea:focus {
+            border-color: var(--dusty-aqua);
+            background: var(--bg-primary);
+            box-shadow: 0 0 0 3px rgba(42, 114, 124, 0.08);
+        }
+
+        .notes-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--text-tertiary);
+        }
+
+        .notes-saved-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: opacity 0.3s;
+        }
+
+        .notes-saved-indicator.saving {
+            color: var(--gold);
+        }
+
+        .notes-saved-indicator.saved {
+            color: var(--success);
         }
 
         /* Tab 1: About */
@@ -1740,13 +1792,9 @@
 
         /* Responsive */
         @media (max-width: 1024px) {
-            .top-nav {
-                right: 0;
-            }
-
             .sidebar {
                 transform: translateX(100%);
-                top: 60px;
+                top: 64px;
             }
 
             .sidebar.open {
@@ -1763,50 +1811,45 @@
                 justify-content: center;
             }
 
-            .quick-links {
+            .header-course-name {
+                display: none;
+            }
+
+            .header-separator {
                 display: none;
             }
         }
 
         @media (max-width: 768px) {
-            /* Top Nav - compact */
-            .top-nav {
+            /* Header - compact */
+            .course-header {
                 padding: 0 0.8rem;
-                height: 50px;
+                height: 56px;
+            }
+
+            .header-progress-bar {
+                width: 80px;
+            }
+
+            .back-to-site span {
+                display: none;
             }
 
             .back-to-site {
-                padding: 0.4rem 0.7rem;
-                font-size: 0.8rem;
-            }
-
-            .breadcrumb {
-                display: none;
+                padding: 0.4rem 0.6rem;
             }
 
             /* LMS Layout */
             .lms-container {
-                padding-top: 50px;
+                padding-top: 56px;
                 flex-direction: column;
             }
 
             /* Sidebar - fullscreen overlay */
             .sidebar {
                 width: 100%;
-                top: 50px;
+                top: 56px;
                 bottom: 0;
-            }
-
-            .sidebar-header {
-                padding: 1rem;
-            }
-
-            .course-title {
-                font-size: 1.1rem;
-            }
-
-            .sidebar-logo {
-                margin-bottom: 0.5rem;
             }
 
             .module-header {
@@ -1814,44 +1857,7 @@
             }
 
             .lesson-item {
-                padding: 0.7rem 1rem 0.7rem 1.5rem;
-            }
-
-            /* Main Content */
-            .top-bar {
-                padding: 0.8rem;
-                flex-wrap: nowrap;
-                gap: 0.5rem;
-            }
-
-            .current-lesson-info {
-                flex: 1;
-                min-width: 0;
-            }
-
-            .current-lesson-info h2 {
-                font-size: 0.9rem;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .current-lesson-info p {
-                font-size: 0.75rem;
-            }
-
-            .top-bar-actions {
-                gap: 0.4rem;
-                flex-shrink: 0;
-            }
-
-            .nav-btn {
-                padding: 0.5rem 0.8rem;
-                font-size: 0.8rem;
-            }
-
-            .nav-btn span {
-                display: none;
+                padding: 0.65rem 1rem 0.65rem 0.8rem;
             }
 
             /* Video */
@@ -1885,6 +1891,10 @@
                 white-space: nowrap;
                 font-size: 0.8rem;
                 gap: 0.3rem;
+            }
+
+            .tab-btn i {
+                display: none;
             }
 
             .tabs-content {
@@ -1945,6 +1955,11 @@
                 font-size: 0.85rem;
             }
 
+            /* Notes */
+            .notes-textarea {
+                min-height: 150px;
+            }
+
             /* Modal - mobile friendly */
             .modal-box {
                 padding: 1.5rem;
@@ -1997,57 +2012,52 @@
     </style>
 </head>
 <body>
-    <!-- Top Navigation Bar -->
-    <nav class="top-nav">
-        <div class="top-nav-right">
+    <!-- Course Header -->
+    <header class="course-header">
+        <div class="header-right">
+            <a href="../index.html" class="header-brand">
+                <div class="header-brand-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <span class="header-brand-text">בית המטפלים</span>
+            </a>
+            <div class="header-separator"></div>
+            <span class="header-course-name">קורס NLP - יסודות ומעשה</span>
+        </div>
+        <div class="header-left">
+            <div class="header-progress">
+                <div class="header-progress-bar">
+                    <div class="header-progress-fill" id="headerProgressFill"></div>
+                </div>
+                <span class="header-progress-text" id="headerProgressPercent">0%</span>
+            </div>
             <a href="../index.html" class="back-to-site">
                 <i class="fa-solid fa-arrow-right"></i>
-                חזרה לאתר
+                <span>חזרה לאתר</span>
             </a>
-            <div class="breadcrumb">
-                <a href="../index.html">דף הבית</a>
-                <span class="separator">/</span>
-                <span class="current">קורס NLP חינמי</span>
-            </div>
         </div>
-        <div class="top-nav-left">
-            <div class="quick-links">
-                <a href="training.html" class="quick-link">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                    הכשרה מקצועית
-                </a>
-                <a href="project-lobby.html" class="quick-link">
-                    <i class="fa-solid fa-heart"></i>
-                    מיזם חברתי
-                </a>
-            </div>
-        </div>
-    </nav>
+    </header>
 
     <div class="lms-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <a href="../index.html" class="sidebar-logo">
-                    <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
-                    <div class="logo-text">בית <span>המטפלים</span></div>
-                </a>
-                <h1 class="course-title">קורס NLP - יסודות ומעשה</h1>
-                <div class="course-meta">
-                    <span><i class="fa-solid fa-video"></i> 51 שיעורים</span>
-                    <span><i class="fa-solid fa-clock"></i> 7 מודולים</span>
-                </div>
-            </div>
-
-            <div class="progress-container">
-                <div class="progress-header">
-                    <span class="progress-label">התקדמות בקורס</span>
-                    <span class="progress-percent" id="progressPercent">0%</span>
+                <div class="sidebar-progress-section">
+                    <span class="sidebar-progress-label">התקדמות בקורס</span>
+                    <span class="sidebar-progress-count" id="sidebarProgressCount">0/51 שיעורים</span>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
+                <span class="progress-percent" id="progressPercent" style="display:none;">0%</span>
             </div>
+
+            <div class="sidebar-search">
+                <div class="sidebar-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="lessonSearch" placeholder="חפש שיעור..." oninput="filterLessons(this.value)">
+                </div>
+            </div>
+
+            <div class="sidebar-section-title">תוכן הקורס</div>
 
             <nav class="syllabus" id="syllabus">
                 <!-- Modules populated by JS -->
@@ -2056,23 +2066,6 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="top-bar">
-                <div class="current-lesson-info">
-                    <h2 id="currentLessonTitle">בחרו שיעור להתחלה</h2>
-                    <p id="currentLessonMeta">מודול 1 • חלק 1</p>
-                </div>
-                <div class="top-bar-actions">
-                    <button class="nav-btn" id="prevLessonBtn" onclick="navigateLesson(-1)" disabled>
-                        <i class="fa-solid fa-arrow-right"></i>
-                        <span>הקודם</span>
-                    </button>
-                    <button class="nav-btn primary" id="nextLessonBtn" onclick="navigateLesson(1)">
-                        <span>הבא</span>
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </button>
-                </div>
-            </header>
-
             <div class="video-section">
                 <div class="video-wrapper">
                     <div class="video-placeholder" id="videoPlaceholder">
@@ -2115,14 +2108,18 @@
 
                 <div class="tabs-section">
                     <div class="tabs-header">
-                        <button class="tab-btn active" onclick="switchTab('about')">
-                            <i class="fa-solid fa-info-circle"></i>
-                            אודות השיעור
+                        <button class="tab-btn active" onclick="switchTab('summary')">
+                            <i class="fa-solid fa-file-lines"></i>
+                            סיכום השיעור
                         </button>
                         <button class="tab-btn" onclick="switchTab('resources')" id="resourcesTab">
                             <i class="fa-solid fa-download"></i>
                             חומרי עזר
                             <span class="lock-badge" id="resourcesLock">🔒</span>
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('notes')">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            הערות אישיות
                         </button>
                         <button class="tab-btn" onclick="switchTab('ai')" id="aiTab">
                             <i class="fa-solid fa-robot"></i>
@@ -2132,8 +2129,8 @@
                     </div>
 
                     <div class="tabs-content">
-                        <!-- About Tab -->
-                        <div class="tab-panel active" id="aboutPanel">
+                        <!-- Summary Tab -->
+                        <div class="tab-panel active" id="summaryPanel">
                             <div class="lesson-description">
                                 <h3 id="lessonDescTitle">ברוכים הבאים לקורס NLP</h3>
                                 <p id="lessonDescText">
@@ -2171,6 +2168,17 @@
                                         <h4>סיכום השיעור</h4>
                                         <p>נקודות מפתח לזכור</p>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes Tab -->
+                        <div class="tab-panel" id="notesPanel">
+                            <div class="notes-container">
+                                <textarea class="notes-textarea" id="notesTextarea" placeholder="כתבו כאן את ההערות שלכם לשיעור זה..." oninput="handleNotesInput()"></textarea>
+                                <div class="notes-footer">
+                                    <span class="notes-saved-indicator" id="notesSavedIndicator"></span>
+                                    <span id="notesCharCount">0 תווים</span>
                                 </div>
                             </div>
                         </div>
@@ -2947,13 +2955,18 @@
         // ===== Render Syllabus =====
         function renderSyllabus() {
             const syllabus = document.getElementById('syllabus');
-            syllabus.innerHTML = modules.map((module, mIndex) => `
+            syllabus.innerHTML = modules.map((module, mIndex) => {
+                const completedInModule = module.lessons.filter((_, lIdx) =>
+                    completedLessons.includes(`${mIndex}-${lIdx}`)
+                ).length;
+                return `
                 <div class="module ${mIndex === 0 ? 'open' : ''}" data-module="${mIndex}">
                     <div class="module-header" onclick="toggleModule(${mIndex})">
                         <div class="module-info">
                             <div class="module-number">${module.id}</div>
                             <div class="module-title">${module.title}</div>
                         </div>
+                        <span class="module-count">${completedInModule}/${module.lessons.length}</span>
                         <i class="fa-solid fa-chevron-down module-toggle"></i>
                     </div>
                     <div class="module-lessons">
@@ -2977,7 +2990,8 @@
                         }).join('')}
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // ===== Toggle Module =====
@@ -3024,9 +3038,10 @@
             thumbnail.style.display = 'none';
 
             // Update UI text
-            document.getElementById('currentLessonTitle').textContent = lesson.title;
-            document.getElementById('currentLessonMeta').textContent = `מודול ${moduleIndex + 1} • ${lesson.title}`;
             document.getElementById('lessonDescTitle').textContent = lesson.title;
+
+            // Load notes for this lesson
+            loadNotes();
 
             // Update AI lesson badge
             if (typeof updateAiLessonBadge === 'function') updateAiLessonBadge();
@@ -3164,8 +3179,6 @@
 
         // ===== Update Nav Buttons =====
         function updateNavButtons() {
-            const prevBtn = document.getElementById('prevLessonBtn');
-            const nextBtn = document.getElementById('nextLessonBtn');
             const bottomPrevBtn = document.getElementById('bottomPrevBtn');
             const bottomNextBtn = document.getElementById('bottomNextBtn');
 
@@ -3173,8 +3186,6 @@
             const isLast = currentModuleIndex === modules.length - 1 &&
                           currentLessonIndex === modules[modules.length - 1].lessons.length - 1;
 
-            prevBtn.disabled = isFirst;
-            nextBtn.disabled = isLast;
             bottomPrevBtn.disabled = isFirst;
             bottomNextBtn.disabled = isLast;
 
@@ -3218,6 +3229,16 @@
 
             document.getElementById('progressPercent').textContent = `${percent}%`;
             document.getElementById('progressFill').style.width = `${percent}%`;
+
+            // Update header progress bar
+            const headerFill = document.getElementById('headerProgressFill');
+            const headerPercent = document.getElementById('headerProgressPercent');
+            if (headerFill) headerFill.style.width = `${percent}%`;
+            if (headerPercent) headerPercent.textContent = `${percent}%`;
+
+            // Update sidebar count
+            const sidebarCount = document.getElementById('sidebarProgressCount');
+            if (sidebarCount) sidebarCount.textContent = `${completed}/${totalLessons} שיעורים`;
         }
 
         // ===== Update UI based on authentication =====
@@ -3259,6 +3280,9 @@
 
             document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
             document.getElementById(`${tabName}Panel`).classList.add('active');
+
+            // Load notes when switching to notes tab
+            if (tabName === 'notes') loadNotes();
         }
 
         // ===== Handle Resource Click =====
@@ -3378,6 +3402,86 @@
             }
         });
 
+        // ===== Notes Functions =====
+        let notesDebounceTimer = null;
+
+        function loadNotes() {
+            const textarea = document.getElementById('notesTextarea');
+            if (!textarea || !currentVideoId) return;
+            const key = `notes_nlp_${currentVideoId}`;
+            const saved = localStorage.getItem(key);
+            textarea.value = saved || '';
+            updateNotesCharCount();
+            // Show last saved time
+            const indicator = document.getElementById('notesSavedIndicator');
+            const lastSavedTime = localStorage.getItem(key + '_time');
+            if (indicator && lastSavedTime) {
+                indicator.className = 'notes-saved-indicator saved';
+                indicator.innerHTML = `<i class="fa-solid fa-check"></i> נשמר ${lastSavedTime}`;
+            } else if (indicator) {
+                indicator.innerHTML = '';
+            }
+        }
+
+        function saveNotes() {
+            const textarea = document.getElementById('notesTextarea');
+            if (!textarea || !currentVideoId) return;
+            const key = `notes_nlp_${currentVideoId}`;
+            localStorage.setItem(key, textarea.value);
+            const now = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+            localStorage.setItem(key + '_time', now);
+            const indicator = document.getElementById('notesSavedIndicator');
+            if (indicator) {
+                indicator.className = 'notes-saved-indicator saved';
+                indicator.innerHTML = `<i class="fa-solid fa-check"></i> נשמר ${now}`;
+            }
+        }
+
+        function handleNotesInput() {
+            updateNotesCharCount();
+            const indicator = document.getElementById('notesSavedIndicator');
+            if (indicator) {
+                indicator.className = 'notes-saved-indicator saving';
+                indicator.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שומר...';
+            }
+            clearTimeout(notesDebounceTimer);
+            notesDebounceTimer = setTimeout(saveNotes, 800);
+        }
+
+        function updateNotesCharCount() {
+            const textarea = document.getElementById('notesTextarea');
+            const counter = document.getElementById('notesCharCount');
+            if (textarea && counter) {
+                counter.textContent = `${textarea.value.length} תווים`;
+            }
+        }
+
+        // ===== Sidebar Search Filter =====
+        function filterLessons(query) {
+            query = query.trim().toLowerCase();
+            const allModules = document.querySelectorAll('.module');
+            allModules.forEach(mod => {
+                const lessons = mod.querySelectorAll('.lesson-item');
+                let hasVisible = false;
+                lessons.forEach(item => {
+                    const title = item.querySelector('.lesson-title')?.textContent?.toLowerCase() || '';
+                    if (!query || title.includes(query)) {
+                        item.style.display = '';
+                        hasVisible = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                // Show module if any lesson matches, and auto-open it
+                if (query) {
+                    mod.style.display = hasVisible ? '' : 'none';
+                    if (hasVisible) mod.classList.add('open');
+                } else {
+                    mod.style.display = '';
+                }
+            });
+        }
+
         // ===== Expose functions to global scope for onclick handlers =====
         window.toggleModule = toggleModule;
         window.selectLesson = selectLesson;
@@ -3398,6 +3502,8 @@
         window.signInWithGoogle = signInWithGoogle;
         window.handleEmailAuth = handleEmailAuth;
         window.handleSignup = handleSignup;
+        window.filterLessons = filterLessons;
+        window.handleNotesInput = handleNotesInput;
 
         // ===== Questionnaire Functions =====
         function openQuestionnaireModal() {

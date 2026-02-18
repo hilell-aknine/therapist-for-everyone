@@ -109,11 +109,15 @@
 
         /* ===== Hero ===== */
         .hero {
+            min-height: 100vh;
             padding: 9rem 2rem 5rem;
             background: var(--deep-petrol);
             text-align: center;
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .hero-bg { position: absolute; inset: 0; overflow: hidden; }
@@ -181,6 +185,22 @@
             color: var(--pure-white); line-height: 1.8; font-weight: 500;
             text-shadow: 0 1px 6px rgba(0,0,0,0.35);
             opacity: 0; animation: fadeIn 0.8s ease-out 0.6s forwards;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-cta {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 1.1rem 2.8rem; border-radius: 12px;
+            font-size: 1.15rem; font-weight: 700; text-decoration: none;
+            background: var(--gradient-gold); color: var(--deep-petrol);
+            box-shadow: 0 4px 20px var(--gold-glow);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: var(--font-body);
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.8s forwards;
+        }
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(216, 175, 71, 0.4);
         }
 
         @keyframes fadeIn {
@@ -188,384 +208,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ===== Course Spotlight ===== */
-        .course-spotlight {
-            padding: 5rem 2rem;
-            max-width: 850px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .spotlight-card {
-            background: var(--pure-white);
-            border: 1px solid var(--border-light);
-            border-radius: 24px;
-            padding: 3.5rem 3rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .spotlight-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0;
-            height: 5px;
-            background: var(--gradient-gold);
-        }
-
-        .spotlight-lock {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            background: rgba(76, 175, 80, 0.06);
-            border: 2px solid rgba(76, 175, 80, 0.15);
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 1.5rem;
-        }
-
-        .spotlight-lock i {
-            font-size: 2rem;
-            color: var(--green-soft);
-        }
-
-        .spotlight-badge {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            background: rgba(76, 175, 80, 0.08);
-            border: 1px solid rgba(76, 175, 80, 0.15);
-            padding: 0.35rem 1rem; border-radius: 20px;
-            font-size: 0.82rem; font-weight: 600; color: var(--green-soft);
-            margin-bottom: 1.2rem;
-        }
-
-        .spotlight-title {
-            font-family: var(--font-display);
-            font-size: clamp(1.8rem, 3.5vw, 2.4rem);
-            font-weight: 700; color: var(--deep-petrol);
-            margin-bottom: 1rem;
-        }
-
-        .spotlight-description {
-            font-size: 1.05rem; color: var(--muted-teal);
-            max-width: 600px; margin: 0 auto 2rem; line-height: 1.85;
-        }
-
-        .spotlight-stats {
-            display: flex; justify-content: center; gap: 2.5rem;
-            margin-bottom: 2.5rem;
-            padding: 1.2rem 0;
-            border-top: 1px solid var(--border-light);
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .spotlight-stat { text-align: center; }
-
-        .spotlight-stat-number {
-            font-family: var(--font-display);
-            font-size: 1.6rem; font-weight: 800;
-            color: var(--gold);
-        }
-
-        .spotlight-stat-label {
-            font-size: 0.82rem;
-            color: var(--muted-teal);
-        }
-
-        .spotlight-cta {
-            display: inline-flex; align-items: center; gap: 0.6rem;
-            padding: 1.1rem 2.8rem; border-radius: 12px;
-            font-size: 1.1rem; font-weight: 700; text-decoration: none;
-            background: var(--gradient-gold); color: var(--deep-petrol);
-            box-shadow: 0 4px 20px var(--gold-glow);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            font-family: var(--font-body);
-        }
-
-        .spotlight-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(216, 175, 71, 0.4);
-        }
-
-        /* ===== What's Inside ===== */
-        .free-section {
-            padding: 5rem 2rem;
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .section-eyebrow {
-            font-size: 0.8rem; font-weight: 600; color: var(--gold);
-            text-transform: uppercase; letter-spacing: 0.15em;
-            margin-bottom: 0.8rem;
-            display: flex; align-items: center; justify-content: center; gap: 0.7rem;
-        }
-
-        .section-eyebrow::before,
-        .section-eyebrow::after {
-            content: ''; width: 30px; height: 1px; background: var(--gold); opacity: 0.4;
-        }
-
-        .section-title {
-            font-family: var(--font-display);
-            font-size: clamp(1.8rem, 3.5vw, 2.4rem);
-            font-weight: 700; color: var(--deep-petrol);
-            margin-bottom: 1rem;
-        }
-
-        .section-subtitle {
-            font-size: 1.05rem; color: var(--muted-teal);
-            max-width: 600px; margin: 0 auto 3rem; line-height: 1.8;
-        }
-
-        .free-items {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-        }
-
-        .free-item {
-            background: var(--pure-white);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .free-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(14, 86, 96, 0.08);
-        }
-
-        .free-item-icon {
-            width: 56px; height: 56px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.4rem; margin: 0 auto 1rem;
-            background: rgba(42, 114, 124, 0.08);
-            color: var(--dusty-aqua);
-        }
-
-        .free-item h4 {
-            font-size: 1rem; font-weight: 600; color: var(--deep-petrol);
-            margin-bottom: 0.3rem;
-        }
-
-        .free-item p {
-            font-size: 0.85rem; color: var(--muted-teal); line-height: 1.6;
-        }
-
-        /* ===== Signup CTA Section ===== */
-        .signup-section {
-            padding: 5rem 2rem;
-            background: var(--deep-petrol);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .signup-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(ellipse at 50% 50%, rgba(42, 114, 124, 0.15) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .signup-inner {
-            max-width: 700px; margin: 0 auto; text-align: center;
-            position: relative; z-index: 1;
-        }
-
-        .signup-lock {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            background: rgba(216, 175, 71, 0.1);
-            border: 1px solid rgba(216, 175, 71, 0.2);
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 2rem;
-        }
-
-        .signup-lock i {
-            font-size: 2rem; color: var(--gold);
-        }
-
-        .signup-section .section-title {
-            color: var(--pure-white);
-            margin-bottom: 0.8rem;
-        }
-
-        .signup-subtitle {
-            font-size: 1.05rem; color: var(--frost-white);
-            opacity: 0.85; margin-bottom: 2.5rem; line-height: 1.8;
-        }
-
-        .signup-perks {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .signup-perk {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .signup-perk:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.12);
-        }
-
-        .signup-perk-icon {
-            width: 56px; height: 56px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.4rem; margin: 0 auto 1rem;
-        }
-
-        .signup-perk:nth-child(1) .signup-perk-icon {
-            background: rgba(216, 175, 71, 0.1); color: var(--gold);
-        }
-        .signup-perk:nth-child(2) .signup-perk-icon {
-            background: rgba(42, 114, 124, 0.15); color: var(--dusty-aqua);
-        }
-        .signup-perk:nth-child(3) .signup-perk-icon {
-            background: rgba(76, 175, 80, 0.1); color: var(--green-soft);
-        }
-
-        .signup-perk h4 {
-            font-size: 1rem; font-weight: 600; color: var(--pure-white);
-            margin-bottom: 0.3rem;
-        }
-
-        .signup-perk p {
-            font-size: 0.85rem; color: var(--frost-white); opacity: 0.7; line-height: 1.6;
-        }
-
-        .signup-perk .lock-badge {
-            display: inline-flex; align-items: center; gap: 0.3rem;
-            font-size: 0.72rem; font-weight: 600;
-            color: var(--gold); margin-top: 0.6rem;
-            padding: 0.2rem 0.7rem; border-radius: 10px;
-            background: rgba(216, 175, 71, 0.08);
-            border: 1px solid rgba(216, 175, 71, 0.15);
-        }
-
-        .signup-buttons {
-            display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
-        }
-
-        .btn-signup {
-            display: inline-flex; align-items: center; gap: 0.6rem;
-            padding: 1rem 2rem; border-radius: 10px;
-            font-size: 1rem; font-weight: 600; text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            font-family: var(--font-body); cursor: pointer; border: none;
-        }
-
-        .btn-signup.btn-gold {
-            background: var(--gradient-gold); color: var(--deep-petrol);
-            box-shadow: 0 4px 20px var(--gold-glow);
-        }
-
-        .btn-signup.btn-gold:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(216, 175, 71, 0.35);
-        }
-
-        .btn-signup.btn-google {
-            background: var(--pure-white); color: var(--text-dark);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .btn-signup.btn-google:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-
-        .btn-signup.btn-google img { width: 20px; height: 20px; }
-
-        .signup-skip { margin-top: 1.5rem; }
-
-        .signup-skip a {
-            color: var(--frost-white); opacity: 0.5;
-            font-size: 0.88rem; text-decoration: none; transition: opacity 0.3s;
-        }
-        .signup-skip a:hover { opacity: 0.8; }
-
-        /* ===== Coming Soon Section ===== */
-        .coming-soon-section {
-            padding: 4rem 2rem 5rem;
-            text-align: center;
-        }
-
-        .coming-soon-eyebrow {
-            font-size: 0.8rem; font-weight: 600; color: var(--dusty-aqua);
-            text-transform: uppercase; letter-spacing: 0.15em;
-            margin-bottom: 2rem;
-            display: flex; align-items: center; justify-content: center; gap: 0.7rem;
-        }
-
-        .coming-soon-eyebrow::before,
-        .coming-soon-eyebrow::after {
-            content: ''; width: 30px; height: 1px; background: var(--dusty-aqua); opacity: 0.3;
-        }
-
-        .coming-soon-card {
-            background: var(--pure-white);
-            border: 1px solid var(--border-light);
-            border-radius: 20px;
-            padding: 3rem 2.5rem;
-            max-width: 480px;
-            margin: 0 auto;
-            opacity: 0.75;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .coming-soon-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0;
-            height: 4px;
-            background: var(--dusty-aqua);
-        }
-
-        .coming-soon-card .card-icon {
-            width: 80px; height: 80px; border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; margin: 0 auto 1.5rem;
-            background: rgba(42, 114, 124, 0.1);
-            color: var(--dusty-aqua);
-        }
-
-        .coming-soon-card .card-status {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            padding: 0.35rem 1rem; border-radius: 20px;
-            font-size: 0.78rem; font-weight: 600; margin-bottom: 1.2rem;
-            background: rgba(42, 114, 124, 0.08);
-            color: var(--dusty-aqua);
-            border: 1px solid rgba(42, 114, 124, 0.15);
-        }
-
-        .coming-soon-card .card-title {
-            font-family: var(--font-display);
-            font-size: 1.5rem; font-weight: 700;
-            color: var(--deep-petrol);
-            margin-bottom: 0.8rem; line-height: 1.3;
-        }
-
-        .coming-soon-card .card-description {
-            font-size: 0.95rem; color: var(--muted-teal);
-            margin-bottom: 1.5rem; line-height: 1.85;
-        }
-
-        .coming-soon-card .card-btn {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.8rem 1.8rem; border-radius: 10px;
-            font-size: 0.95rem; font-weight: 600;
-            background: rgba(42, 114, 124, 0.08);
-            color: var(--dusty-aqua);
-            border: 1px solid rgba(42, 114, 124, 0.15);
-            cursor: default;
-        }
+        /* (removed unused spotlight/free/signup/coming-soon sections) */
 
         /* ===== Footer ===== */
         .footer {
@@ -641,21 +284,6 @@
 
             .hero { padding: 7rem 1.5rem 3.5rem; }
 
-            .course-spotlight { padding: 3rem 1.5rem; }
-            .spotlight-card { padding: 2.5rem 1.5rem; }
-            .spotlight-stats { gap: 1.5rem; }
-
-            .free-section { padding: 3.5rem 1.5rem; }
-            .free-items { grid-template-columns: 1fr; max-width: 350px; margin: 0 auto; }
-
-            .signup-section { padding: 4rem 1.5rem; }
-            .signup-perks { grid-template-columns: 1fr; max-width: 350px; margin: 0 auto 2.5rem; }
-            .signup-buttons { flex-direction: column; align-items: center; }
-            .btn-signup { width: 100%; max-width: 320px; justify-content: center; }
-
-            .coming-soon-section { padding: 3rem 1.5rem 4rem; }
-            .coming-soon-card { padding: 2.5rem 1.8rem; }
-
             .footer-inner { flex-direction: column; gap: 1.5rem; text-align: center; }
             .footer-links { flex-direction: column; gap: 0.8rem; }
         }
@@ -719,167 +347,10 @@
                 אנחנו מאמינים שידע צריך להיות נגיש לכולם.<br>
                 כל הקורסים כאן פתוחים לצפייה חופשית, ללא תשלום.
             </p>
-        </div>
-    </section>
-
-    <!-- NLP Practitioner Spotlight -->
-    <section class="course-spotlight" id="main-content">
-        <div class="spotlight-card" data-reveal>
-            <div class="spotlight-lock">
-                <i class="fa-solid fa-lock-open"></i>
-            </div>
-            <div class="spotlight-badge">
-                <i class="fa-solid fa-circle-check"></i>
-                חינמי ופתוח לכולם
-            </div>
-            <h2 class="spotlight-title">קורס NLP Practitioner</h2>
-            <p class="spotlight-description">
-                קורס מלא ומקיף ביסודות ה-NLP &mdash; מהי תכנות עצבי-לשוני, איך המוח עובד, ואיך אפשר להשתמש בזה בחיים.
-                פתוח לצפייה חופשית, בלי תשלום, בלי התחייבות. למדו בקצב שלכם, מתי שנוח לכם.
-            </p>
-            <div class="spotlight-stats">
-                <div class="spotlight-stat">
-                    <div class="spotlight-stat-number">51</div>
-                    <div class="spotlight-stat-label">שיעורים</div>
-                </div>
-                <div class="spotlight-stat">
-                    <div class="spotlight-stat-number">7</div>
-                    <div class="spotlight-stat-label">מודולים</div>
-                </div>
-                <div class="spotlight-stat">
-                    <div class="spotlight-stat-number">70+</div>
-                    <div class="spotlight-stat-label">שעות תוכן</div>
-                </div>
-            </div>
-            <a href="free-portal.html" class="spotlight-cta">
+            <a href="free-portal.html" class="hero-cta" id="main-content">
                 <i class="fa-solid fa-play"></i>
-                התחילו ללמוד עכשיו
+                היכנסו לפורטל הלמידה
             </a>
-        </div>
-    </section>
-
-    <!-- What's Inside -->
-    <section class="free-section">
-        <div data-reveal>
-            <div class="section-eyebrow">מה כלול בקורס</div>
-            <h2 class="section-title">מה מחכה לכם בפנים?</h2>
-            <p class="section-subtitle">
-                הקורס כולל את כל מה שצריך כדי להבין את עולם ה-NLP מהיסוד
-            </p>
-        </div>
-        <div class="free-items">
-            <div class="free-item" data-reveal data-reveal-delay="1">
-                <div class="free-item-icon">
-                    <i class="fa-solid fa-video"></i>
-                </div>
-                <h4>51 שיעורי וידאו</h4>
-                <p>שיעורים מצולמים באיכות גבוהה, מחולקים ל-7 מודולים</p>
-            </div>
-            <div class="free-item" data-reveal data-reveal-delay="2">
-                <div class="free-item-icon">
-                    <i class="fa-solid fa-brain"></i>
-                </div>
-                <h4>תוכן מקצועי</h4>
-                <p>מהבסיס ועד טכניקות מתקדמות &mdash; NLP Practitioner מלא</p>
-            </div>
-            <div class="free-item" data-reveal data-reveal-delay="3">
-                <div class="free-item-icon">
-                    <i class="fa-solid fa-infinity"></i>
-                </div>
-                <h4>גישה ללא הגבלה</h4>
-                <p>צפו כמה שרוצים, חזרו לשיעורים, בכל זמן ובכל מקום</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Signup Upsell -->
-    <section class="signup-section">
-        <div class="signup-bg" aria-hidden="true"></div>
-        <div class="signup-inner" data-reveal>
-            <div class="signup-lock">
-                <i class="fa-solid fa-gift"></i>
-            </div>
-            <h2 class="section-title">רוצים חוויית למידה משודרגת?</h2>
-            <p class="signup-subtitle">
-                הירשמו בחינם עם מייל או חשבון גוגל וקבלו גישה לכלים נוספים שישפרו את חוויית הלמידה שלכם
-            </p>
-
-            <div class="signup-perks">
-                <div class="signup-perk" data-reveal data-reveal-delay="1">
-                    <div class="signup-perk-icon">
-                        <i class="fa-solid fa-gamepad"></i>
-                    </div>
-                    <h4>משחק לימודי</h4>
-                    <p>תרגלו את החומר בצורה מהנה עם משחק אינטראקטיבי</p>
-                    <div class="lock-badge">
-                        <i class="fa-solid fa-lock-open" style="font-size: 0.65rem;"></i>
-                        נפתח עם הרשמה
-                    </div>
-                </div>
-                <div class="signup-perk" data-reveal data-reveal-delay="2">
-                    <div class="signup-perk-icon">
-                        <i class="fa-solid fa-book"></i>
-                    </div>
-                    <h4>חוברת תרגול</h4>
-                    <p>חוברת PDF מלווה עם תרגילים ותרגולים לכל שיעור</p>
-                    <div class="lock-badge">
-                        <i class="fa-solid fa-lock-open" style="font-size: 0.65rem;"></i>
-                        נפתח עם הרשמה
-                    </div>
-                </div>
-                <div class="signup-perk" data-reveal data-reveal-delay="3">
-                    <div class="signup-perk-icon">
-                        <i class="fa-solid fa-file-lines"></i>
-                    </div>
-                    <h4>סיכומי שיעורים</h4>
-                    <p>סיכומים מפורטים של כל שיעור להורדה ולמידה</p>
-                    <div class="lock-badge">
-                        <i class="fa-solid fa-lock-open" style="font-size: 0.65rem;"></i>
-                        נפתח עם הרשמה
-                    </div>
-                </div>
-            </div>
-
-            <div class="signup-buttons">
-                <a href="login.html?redirect=free-portal.html" class="btn-signup btn-gold">
-                    <i class="fa-solid fa-envelope"></i>
-                    הרשמה עם מייל
-                </a>
-                <a href="login.html?provider=google&redirect=free-portal.html" class="btn-signup btn-google">
-                    <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                    הרשמה עם Google
-                </a>
-            </div>
-
-            <div class="signup-skip">
-                <a href="free-portal.html">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    אני רוצה רק לצפות בשיעורים, בלי הרשמה
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Master Practitioner - Coming Soon -->
-    <section class="coming-soon-section">
-        <div class="coming-soon-eyebrow">עוד קורסים בדרך</div>
-        <div class="coming-soon-card" data-reveal>
-            <div class="card-icon">
-                <i class="fa-solid fa-crown"></i>
-            </div>
-            <div class="card-status">
-                <i class="fa-solid fa-clock"></i>
-                יעלה בקרוב
-            </div>
-            <h3 class="card-title">קורס NLP Master Practitioner</h3>
-            <p class="card-description">
-                העמקה ברמה אחרת: עבודה עם טראומה, שינוי אמונות מגבילות ודפוסים עמוקים.
-                הקורס בהכנה ויעלה לצפייה בקרוב.
-            </p>
-            <div class="card-btn">
-                <i class="fa-solid fa-clock"></i>
-                בקרוב...
-            </div>
         </div>
     </section>
 

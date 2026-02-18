@@ -296,6 +296,51 @@
             box-shadow: 0 8px 25px rgba(216, 175, 71, 0.35);
         }
 
+        /* Authenticated Welcome Bar */
+        .auth-welcome-bar {
+            display: none;
+            background: linear-gradient(135deg, rgba(216,175,71,0.12), rgba(47,133,146,0.08));
+            border: 1px solid rgba(216,175,71,0.2);
+            border-radius: 14px;
+            padding: 1rem 1.5rem;
+            margin: 0 2rem 0 2rem;
+            margin-top: -1.5rem;
+            position: relative;
+            z-index: 2;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .auth-welcome-bar.visible { display: flex; }
+        .auth-welcome-bar .welcome-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        .auth-welcome-bar .welcome-text span { color: var(--gold); }
+        .auth-welcome-bar .resume-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--gradient-gold);
+            color: var(--deep-petrol);
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .auth-welcome-bar .resume-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(216,175,71,0.3); }
+
+        @media (max-width: 768px) {
+            .auth-welcome-bar { flex-direction: column; text-align: center; margin: -1rem 1rem 0; padding: 0.8rem 1rem; }
+        }
+
         /* Overview Section */
         .portal-section {
             padding: 4rem 2rem;
@@ -2586,6 +2631,18 @@
             </a>
         </section>
 
+        <!-- Authenticated Welcome Bar (hidden by default, shown via JS) -->
+        <div class="auth-welcome-bar" id="authWelcomeBar">
+            <div class="welcome-text">
+                <i class="fa-solid fa-hand-sparkles" style="color:var(--gold);margin-left:0.4rem;"></i>
+                <span id="authWelcomeName">שלום!</span> — נחמד לראות אותך שוב
+            </div>
+            <a href="#" class="resume-btn" id="authResumeBtn" style="display:none;">
+                <i class="fa-solid fa-play"></i>
+                <span id="authResumeBtnText">המשך ללמוד</span>
+            </a>
+        </div>
+
         <!-- Section 2: Overview -->
         <section class="portal-section">
             <div class="portal-section-header">
@@ -2771,6 +2828,11 @@
 
             <div class="sidebar-section-title">תוכן הקורס</div>
 
+            <div id="searchNoResults" style="display:none; text-align:center; padding:2rem 1rem; color:var(--text-muted, #8b949e);">
+                <i class="fa-solid fa-search" style="font-size:1.5rem; display:block; margin-bottom:0.5rem; opacity:0.4;"></i>
+                <span style="font-size:0.85rem;">לא נמצאו שיעורים</span>
+            </div>
+
             <nav class="syllabus" id="syllabus">
                 <!-- Modules populated by JS -->
             </nav>
@@ -2846,12 +2908,9 @@
                             <div class="lesson-description">
                                 <h3 id="lessonDescTitle">ברוכים הבאים לקורס NLP</h3>
                                 <p id="lessonDescText">
-                                    קורס זה יספק לכם את הבסיס המוצק ביותר בתחום ה-NLP. תלמדו טכניקות מעשיות שתוכלו ליישם מיד בחייכם האישיים והמקצועיים.
+                                    בחרו שיעור מהתפריט כדי לראות את תיאור השיעור כאן.
                                 </p>
-                                <p>
-                                    הקורס כולל 7 מודולים מקיפים עם 51 שיעורי וידאו, תרגילים מעשיים וחומרי לימוד להורדה.
-                                </p>
-                                <div class="lesson-tags">
+                                <div class="lesson-tags" id="lessonTagsContainer">
                                     <span class="lesson-tag">NLP</span>
                                     <span class="lesson-tag">תקשורת</span>
                                     <span class="lesson-tag">התפתחות אישית</span>
@@ -3168,6 +3227,17 @@
         const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
 
+        // ===== Module tags for lesson summary display =====
+        const moduleTags = {
+            0: ['NLP בסיסי', 'מבוא', 'תקשורת', 'ראפור'],
+            1: ['עמדות תפיסה', 'אמפתיה', 'מערכות יחסים'],
+            2: ['שאלות', 'מטא-מודל', 'הצבת מטרות', 'SMART'],
+            3: ['מערכות ייצוג', 'VAK', 'עיבוד מידע'],
+            4: ['צרכים', 'אישיות', 'מוטיבציה', 'חלקים'],
+            5: ['מסגור', 'רגשות', 'עוגנים', 'ריפריימינג'],
+            6: ['אמונות', 'ציר הזמן', 'שינוי', 'אינטגרציה']
+        };
+
         // ===== Course Data (7 Modules, 51 Videos) =====
         const modules = [
             {
@@ -3274,6 +3344,7 @@
         let currentUser = null;
         let toastShown = false;
         let toastTimeout = null;
+        let completionTimer = null;
 
         // ===== Supabase Client (with fallback) =====
         let supabaseClient = null;
@@ -3462,10 +3533,7 @@
                 }
             }
 
-            // Toast timer
-            if (!isAuthenticated) {
-                toastTimeout = setTimeout(showToast, 60000);
-            }
+            // Toast timer moved to playVideo() — only fires after user actually starts watching
         });
 
         // ===== Check Existing Auth Session =====
@@ -3846,8 +3914,20 @@
             loading.classList.remove('active');
             thumbnail.style.display = 'none';
 
-            // Update UI text
+            // Update UI text — title, description, and tags
             document.getElementById('lessonDescTitle').textContent = lesson.title;
+            const descEl = document.getElementById('lessonDescText');
+            if (descEl) {
+                const moduleData = modules[moduleIndex];
+                const lessonNum = lessonIndex + 1;
+                const totalInModule = moduleData.lessons.length;
+                descEl.textContent = `שיעור ${lessonNum} מתוך ${totalInModule} במודול "${moduleData.title}" — ${lesson.duration} דקות.`;
+            }
+            const tagsContainer = document.getElementById('lessonTagsContainer');
+            if (tagsContainer) {
+                const tags = moduleTags[moduleIndex] || ['NLP'];
+                tagsContainer.innerHTML = tags.map(t => `<span class="lesson-tag">${t}</span>`).join('');
+            }
 
             // Load notes for this lesson
             loadNotes();
@@ -3924,6 +4004,11 @@
             thumbnail.style.display = 'none';
             loading.classList.add('active');
 
+            // Start registration toast timer (only once, only for unauthenticated)
+            if (!isAuthenticated && !toastShown && !toastTimeout) {
+                toastTimeout = setTimeout(showToast, 60000);
+            }
+
             // Load iframe
             player.src = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1`;
 
@@ -3932,8 +4017,10 @@
                 loading.classList.remove('active');
                 player.style.display = 'block';
 
-                // Mark as completed after watching
-                setTimeout(() => markLessonCompleted(currentModuleIndex, currentLessonIndex), 30000);
+                // Mark as completed after watching (clear previous timer first)
+                if (completionTimer) clearTimeout(completionTimer);
+                const mIdx = currentModuleIndex, lIdx = currentLessonIndex;
+                completionTimer = setTimeout(() => markLessonCompleted(mIdx, lIdx), 30000);
             };
         }
 
@@ -4072,6 +4159,9 @@
 
                 // Hide toast if authenticated
                 hideToast();
+
+                // Personalize portal home
+                personalizePortalHome();
             } else {
                 workbookCard.classList.add('locked');
                 summaryCard.classList.add('locked');
@@ -4079,7 +4169,47 @@
                 aiLock.style.display = '';
                 aiLocked.style.display = '';
                 aiChat.style.display = 'none';
+
+                // Reset portal home personalization
+                const bar = document.getElementById('authWelcomeBar');
+                if (bar) bar.classList.remove('visible');
+                const benefitsSection = document.querySelector('.benefits-section');
+                if (benefitsSection) benefitsSection.style.display = '';
             }
+        }
+
+        async function personalizePortalHome() {
+            // Show welcome bar
+            const bar = document.getElementById('authWelcomeBar');
+            if (bar) {
+                const name = currentUser?.user_metadata?.full_name || currentUser?.user_metadata?.name || '';
+                const firstName = name ? name.split(' ')[0] : '';
+                const welcomeEl = document.getElementById('authWelcomeName');
+                if (welcomeEl) welcomeEl.textContent = firstName ? `שלום ${firstName}` : 'שלום!';
+                bar.classList.add('visible');
+            }
+
+            // Hide benefits/registration section for logged-in users
+            const benefitsSection = document.querySelector('.benefits-section');
+            if (benefitsSection) benefitsSection.style.display = 'none';
+
+            // Show resume button if there's a last-watched lesson
+            try {
+                if (window.CourseProgress) {
+                    const lastWatched = await CourseProgress.getLastWatched('nlp-practitioner');
+                    if (lastWatched) {
+                        const lesson = modules[lastWatched.moduleIndex]?.lessons[lastWatched.lessonIndex];
+                        const resumeBtn = document.getElementById('authResumeBtn');
+                        const resumeText = document.getElementById('authResumeBtnText');
+                        if (resumeBtn && lesson) {
+                            resumeBtn.href = `#m${lastWatched.moduleIndex}l${lastWatched.lessonIndex}`;
+                            resumeBtn.onclick = (e) => { e.preventDefault(); navigateToLesson(lastWatched.moduleIndex, lastWatched.lessonIndex); };
+                            if (resumeText) resumeText.textContent = `המשך: ${lesson.title}`;
+                            resumeBtn.style.display = '';
+                        }
+                    }
+                }
+            } catch (e) { console.warn('Resume button error:', e); }
         }
 
         // ===== Tabs =====
@@ -4319,6 +4449,7 @@
         function filterLessons(query) {
             query = query.trim().toLowerCase();
             const allModules = document.querySelectorAll('.module');
+            let anyVisible = false;
             allModules.forEach(mod => {
                 const lessons = mod.querySelectorAll('.lesson-item');
                 let hasVisible = false;
@@ -4331,14 +4462,16 @@
                         item.style.display = 'none';
                     }
                 });
-                // Show module if any lesson matches, and auto-open it
                 if (query) {
                     mod.style.display = hasVisible ? '' : 'none';
-                    if (hasVisible) mod.classList.add('open');
+                    if (hasVisible) { mod.classList.add('open'); anyVisible = true; }
                 } else {
                     mod.style.display = '';
+                    anyVisible = true;
                 }
             });
+            const noResults = document.getElementById('searchNoResults');
+            if (noResults) noResults.style.display = (query && !anyVisible) ? '' : 'none';
         }
 
         // ===== Expose functions to global scope for onclick handlers =====

@@ -105,38 +105,35 @@
 }
 
 /* ============================================
-   Theme Toggle Button
+   Theme Toggle Button — Inline Nav Style
    ============================================ */
 .theme-toggle-btn {
-    position: fixed;
-    bottom: 24px;
-    left: 24px;
-    z-index: 9999;
-    width: 44px;
-    height: 44px;
+    position: relative;
+    z-index: 100;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border: 2px solid var(--t-gold);
-    background: var(--t-bg-card);
+    border: none;
+    background: transparent;
     color: var(--t-gold);
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    box-shadow: var(--t-shadow-md);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
 }
 
 .theme-toggle-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 16px var(--t-gold-glow);
-    background: var(--t-gold);
-    color: var(--t-bg);
+    transform: scale(1.15);
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--t-gold-light);
 }
 
 .theme-toggle-btn:focus-visible {
     outline: 2px solid var(--t-gold);
-    outline-offset: 3px;
+    outline-offset: 2px;
 }
 
 .theme-toggle-btn .icon-sun,
@@ -144,7 +141,7 @@
     position: absolute;
     transition: opacity 0.3s ease, transform 0.3s ease;
     font-style: normal;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 1;
 }
 
@@ -155,6 +152,26 @@
 /* Dark mode: show sun (switch-to-light affordance) */
 [data-theme="dark"] .theme-toggle-btn .icon-moon { opacity: 0; transform: rotate(90deg); }
 [data-theme="dark"] .theme-toggle-btn .icon-sun  { opacity: 1; transform: rotate(0deg); }
+
+/* Fallback: fixed position for pages with no nav (summaries etc.) */
+.theme-toggle-btn--fixed {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 9999;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--t-border);
+    background: var(--t-bg-card);
+    box-shadow: var(--t-shadow-md);
+    font-size: 18px;
+}
+
+.theme-toggle-btn--fixed:hover {
+    background: var(--t-gold);
+    color: var(--t-bg);
+    border-color: var(--t-gold);
+}
 
 /* ============================================
    Smooth transition on theme change

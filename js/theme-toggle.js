@@ -63,11 +63,8 @@
         }, 350);
     }
 
-    // --- Inject toggle button ---
-    function injectToggleButton() {
-        // Don't double-inject
-        if (document.querySelector('.theme-toggle-btn')) return;
-
+    // --- Create toggle button element ---
+    function createToggleBtn() {
         var btn = document.createElement('button');
         btn.className = 'theme-toggle-btn';
         btn.setAttribute('aria-label', 'החלף מצב תצוגה בהיר/כהה');
@@ -75,13 +72,75 @@
         btn.innerHTML =
             '<span class="icon-sun" aria-hidden="true">&#9728;</span>' +
             '<span class="icon-moon" aria-hidden="true">&#9790;</span>';
-
         btn.addEventListener('click', function (e) {
             e.preventDefault();
+            e.stopPropagation();
             toggleTheme();
         });
+        return btn;
+    }
 
-        document.body.appendChild(btn);
+    // --- Inject toggle button into the nav/header ---
+    function injectToggleButton() {
+        // Don't double-inject
+        if (document.querySelector('.theme-toggle-btn')) return;
+
+        var btn = createToggleBtn();
+        var injected = false;
+
+        // Strategy 1: Public pages — .navbar (insert before mobile-menu-btn)
+        var navbar = document.querySelector('nav.navbar, .navbar');
+        if (navbar) {
+            var mobileBtn = navbar.querySelector('.mobile-menu-btn');
+            if (mobileBtn) {
+                navbar.insertBefore(btn, mobileBtn);
+            } else {
+                navbar.appendChild(btn);
+            }
+            injected = true;
+        }
+
+        // Strategy 2: Dark app pages — .header .header-actions
+        if (!injected) {
+            var headerActions = document.querySelector('.header .header-actions');
+            if (headerActions) {
+                headerActions.insertBefore(btn, headerActions.firstChild);
+                injected = true;
+            }
+        }
+
+        // Strategy 3: Admin — .header .user-info
+        if (!injected) {
+            var userInfo = document.querySelector('.header .user-info');
+            if (userInfo) {
+                userInfo.insertBefore(btn, userInfo.firstChild);
+                injected = true;
+            }
+        }
+
+        // Strategy 4: Course portal — .course-header .header-left
+        if (!injected) {
+            var headerLeft = document.querySelector('.course-header .header-left');
+            if (headerLeft) {
+                headerLeft.insertBefore(btn, headerLeft.firstChild);
+                injected = true;
+            }
+        }
+
+        // Strategy 5: Any generic <header> element
+        if (!injected) {
+            var header = document.querySelector('header, .header');
+            if (header) {
+                header.appendChild(btn);
+                injected = true;
+            }
+        }
+
+        // Strategy 6: Fallback — fixed position (pages with no nav like summaries)
+        if (!injected) {
+            btn.classList.add('theme-toggle-btn--fixed');
+            document.body.appendChild(btn);
+        }
     }
 
     // --- Listen for OS preference changes ---

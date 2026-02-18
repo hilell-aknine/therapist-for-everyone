@@ -47,9 +47,10 @@
         },
 
         async signInWithGoogle() {
+            const basePath = window.location.pathname.replace(/\/[^/]*$/, '');
             const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: window.location.origin }
+                options: { redirectTo: window.location.origin + basePath + '/login.html' }
             });
             if (error) throw error;
             return data;
@@ -410,6 +411,38 @@
             const progress = await this.getAll(courseType);
             const completed = progress.filter(p => p.completed).length;
             return Math.round((completed / totalVideos) * 100);
+        },
+
+        async saveLastWatched(courseType, moduleIndex, lessonIndex) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return;
+
+            await supabaseClient
+                .from('course_progress')
+                .upsert({
+                    user_id: user.id,
+                    video_id: `last_watched_${courseType}`,
+                    course_type: courseType,
+                    lesson_number: lessonIndex,
+                    watched_seconds: moduleIndex,
+                    completed: false
+                }, { onConflict: 'user_id,video_id', ignoreDuplicates: false });
+        },
+
+        async getLastWatched(courseType) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return null;
+
+            const { data, error } = await supabaseClient
+                .from('course_progress')
+                .select('lesson_number, watched_seconds')
+                .eq('user_id', user.id)
+                .eq('video_id', `last_watched_${courseType}`)
+                .single();
+
+            if (error && error.code !== 'PGRST116') return null;
+            if (!data) return null;
+            return { moduleIndex: data.watched_seconds, lessonIndex: data.lesson_number };
         }
     };
 

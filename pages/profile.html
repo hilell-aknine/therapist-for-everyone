@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#003B46">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="../assets/icon-192.svg">
+    <title>הפרופיל שלי - מטפל לכל אחד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/accessibility.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/auth-guard.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f1419;
+            --bg-card: #1a1f2e;
+            --bg-card-hover: #242b3d;
+            --border-color: #2d3548;
+            --text-primary: #ffffff;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --gold-glow: rgba(212, 175, 55, 0.2);
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --teal: #2F8592;
+            --deep-petrol: #003B46;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo i { font-size: 1.8rem; color: var(--gold); }
+        .logo span { font-size: 1.2rem; font-weight: 700; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Main */
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .page-title i { color: var(--gold); }
+
+        /* Avatar Section */
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .avatar-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--teal), var(--gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 3px solid var(--border-color);
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-upload-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .avatar-upload-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* Cards */
+        .profile-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-header i { color: var(--gold); font-size: 1.1rem; }
+        .card-header h2 { font-size: 1.1rem; font-weight: 700; }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .form-group input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Buttons */
+        .save-btn {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--bg-dark);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .save-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px var(--gold-glow); }
+        .save-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Progress Section */
+        .progress-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .progress-card h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progress-card h3 i { color: var(--gold); }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background: var(--bg-card-hover);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--teal), var(--gold));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .no-progress {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .no-progress i { font-size: 2rem; display: block; margin-bottom: 0.8rem; color: var(--border-color); }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 300;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { background: var(--success); color: white; }
+        .toast.error { background: var(--danger); color: white; }
+
+        /* Loading */
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Role Badge */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .role-badge.therapist { background: rgba(47,133,146,0.2); color: var(--teal); }
+        .role-badge.patient { background: rgba(212,175,55,0.2); color: var(--gold); }
+        .role-badge.student { background: rgba(88,166,255,0.2); color: var(--info); }
+        .role-badge.admin { background: rgba(248,81,73,0.2); color: var(--danger); }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header { padding: 0.8rem 1rem; }
+            .main-container { padding: 1rem; }
+            .page-title { font-size: 1.4rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .avatar-preview { width: 90px; height: 90px; font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
+
+    <!-- Loading -->
+    <div class="loading-container" id="loading-screen">
+        <div class="spinner"></div>
+        <span style="color: var(--text-secondary);">טוען פרופיל...</span>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <a href="../index.html" class="logo">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span>בית המטפלים</span>
+            </a>
+            <div class="header-actions">
+                <a href="#" id="back-link" class="back-btn">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    חזרה לאזור האישי
+                </a>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    התנתקות
+                </button>
+            </div>
+        </header>
+
+        <main class="main-container">
+            <h1 class="page-title">
+                <i class="fa-solid fa-user-circle"></i>
+                הפרופיל שלי
+                <span id="role-badge"></span>
+            </h1>
+
+            <!-- Avatar -->
+            <div class="avatar-section">
+                <div class="avatar-preview" id="avatar-preview"></div>
+                <input type="file" id="avatar-input" accept="image/png,image/jpeg,image/webp" hidden>
+                <button class="avatar-upload-btn" onclick="document.getElementById('avatar-input').click()">
+                    <i class="fa-solid fa-camera"></i>
+                    שינוי תמונה
+                </button>
+            </div>
+
+            <!-- Personal Info -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <i class="fa-solid fa-id-card"></i>
+                    <h2>פרטים אישיים</h2>
+                </div>
+                <div class="form-group">
+                    <label for="field-fullname">שם מלא</label>
+                    <input type="text" id="field-fullname" placeholder="השם שלך">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="field-email">אימייל</label>
+                        <input type="email" id="field-email" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="field-phone">טלפון</label>
+                        <input type="tel" id="field-phone" placeholder="050-1234567">
+                    </div>
+                </div>
+                <button class="save-btn" onclick="saveProfile()">
+                    <i class="fa-solid fa-check"></i>
+                    שמור שינויים
+                </button>
+            </div>
+
+            <!-- Therapist Section (hidden by default) -->
+            <div class="profile-card" id="therapist-section" style="display: none;">
+                <div class="card-header">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <h2>פרטי מטפל</h2>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="field-city">עיר</label>
+                        <input type="text" id="field-city" placeholder="עיר המגורים">
+                    </div>
+                    <div class="form-group">
+                        <label for="field-specialization">התמחות</label>
+                        <input type="text" id="field-specialization" placeholder="תחום ההתמחות">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="field-license">מספר רישיון</label>
+                        <input type="text" id="field-license" placeholder="מספר רישיון">
+                    </div>
+                    <div class="form-group">
+                        <label for="field-education">השכלה</label>
+                        <input type="text" id="field-education" placeholder="השכלה">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="field-social">קישור לרשת חברתית</label>
+                    <input type="url" id="field-social" placeholder="https://...">
+                </div>
+                <button class="save-btn" onclick="saveTherapistProfile()">
+                    <i class="fa-solid fa-check"></i>
+                    שמור פרטי מטפל
+                </button>
+            </div>
+
+            <!-- Patient Section (hidden by default) -->
+            <div class="profile-card" id="patient-section" style="display: none;">
+                <div class="card-header">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                    <h2>פרטי מטופל</h2>
+                </div>
+                <div class="form-group">
+                    <label for="field-concern">סיבת הפנייה</label>
+                    <textarea id="field-concern" disabled placeholder="הוזן בתהליך הרישום"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="field-gender-pref">העדפת מגדר מטפל</label>
+                    <select id="field-gender-pref">
+                        <option value="">לא משנה</option>
+                        <option value="male">גבר</option>
+                        <option value="female">אישה</option>
+                    </select>
+                </div>
+                <button class="save-btn" onclick="savePatientProfile()">
+                    <i class="fa-solid fa-check"></i>
+                    שמור העדפות
+                </button>
+            </div>
+
+            <!-- Course Progress -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <h2>התקדמות בקורסים</h2>
+                </div>
+                <div id="progress-container"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentUser = null;
+        let userProfile = null;
+        let userRole = null;
+        let therapistData = null;
+        let patientData = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for dependencies
+            await new Promise(r => setTimeout(r, 200));
+
+            // Auth check
+            try {
+                const user = await Auth.getCurrentUser();
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = user;
+            } catch (e) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load profile
+            try {
+                userProfile = await Profiles.getCurrent();
+            } catch (e) {
+                console.error('Profile load error:', e);
+            }
+
+            // Determine role
+            userRole = userProfile?.role || 'student_lead';
+
+            // Set back link based on role
+            const backLink = document.getElementById('back-link');
+            if (userRole === 'therapist') {
+                backLink.href = '../therapist-dashboard.html';
+            } else if (userRole === 'patient') {
+                backLink.href = '../patient-dashboard.html';
+            } else {
+                backLink.href = '../index.html';
+                backLink.textContent = '';
+                backLink.innerHTML = '<i class="fa-solid fa-arrow-right"></i> חזרה לאתר';
+            }
+
+            // Fill role badge
+            const roleBadge = document.getElementById('role-badge');
+            const roleLabels = {
+                therapist: { label: 'מטפל', class: 'therapist', icon: 'fa-user-doctor' },
+                patient: { label: 'מטופל', class: 'patient', icon: 'fa-hand-holding-heart' },
+                admin: { label: 'מנהל', class: 'admin', icon: 'fa-shield' },
+                student_lead: { label: 'תלמיד', class: 'student', icon: 'fa-graduation-cap' }
+            };
+            const r = roleLabels[userRole] || roleLabels.student_lead;
+            roleBadge.className = `role-badge ${r.class}`;
+            roleBadge.innerHTML = `<i class="fa-solid ${r.icon}"></i> ${r.label}`;
+
+            // Fill common fields
+            document.getElementById('field-fullname').value = userProfile?.full_name || currentUser.user_metadata?.full_name || '';
+            document.getElementById('field-email').value = currentUser.email || '';
+            document.getElementById('field-phone').value = userProfile?.phone || '';
+
+            // Avatar
+            renderAvatar();
+
+            // Role-specific sections
+            if (userRole === 'therapist') {
+                document.getElementById('therapist-section').style.display = 'block';
+                try {
+                    therapistData = await Therapists.getCurrent();
+                    if (therapistData) {
+                        document.getElementById('field-city').value = therapistData.city || '';
+                        document.getElementById('field-specialization').value = therapistData.specialization || '';
+                        document.getElementById('field-license').value = therapistData.license_number || '';
+                        document.getElementById('field-education').value = therapistData.education || '';
+                        document.getElementById('field-social').value = therapistData.social_link || '';
+                    }
+                } catch (e) { console.error('Therapist data error:', e); }
+            }
+
+            if (userRole === 'patient') {
+                document.getElementById('patient-section').style.display = 'block';
+                try {
+                    const { data } = await supabaseClient
+                        .from('patients')
+                        .select('*')
+                        .eq('user_id', currentUser.id)
+                        .maybeSingle();
+                    patientData = data;
+                    if (patientData) {
+                        document.getElementById('field-concern').value = patientData.main_concern || '';
+                        document.getElementById('field-gender-pref').value = patientData.preferred_therapist_gender || '';
+                    }
+                } catch (e) { console.error('Patient data error:', e); }
+            }
+
+            // Load course progress
+            await loadCourseProgress();
+
+            // Show content
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        });
+
+        function renderAvatar() {
+            const el = document.getElementById('avatar-preview');
+            if (userProfile?.avatar_url) {
+                el.innerHTML = `<img src="${userProfile.avatar_url}" alt="תמונת פרופיל">`;
+            } else {
+                const name = userProfile?.full_name || currentUser?.user_metadata?.full_name || '';
+                el.textContent = name ? name.charAt(0).toUpperCase() : '?';
+            }
+        }
+
+        // Avatar upload
+        document.getElementById('avatar-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                showToastMsg('הקובץ גדול מדי (מקסימום 2MB)', 'error');
+                return;
+            }
+            try {
+                const btn = document.querySelector('.avatar-upload-btn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> מעלה...';
+
+                const publicUrl = await Profiles.uploadAvatar(currentUser.id, file);
+                userProfile.avatar_url = publicUrl;
+                renderAvatar();
+                showToastMsg('התמונה עודכנה בהצלחה', 'success');
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-camera"></i> שינוי תמונה';
+            } catch (err) {
+                console.error('Upload error:', err);
+                showToastMsg('שגיאה בהעלאת התמונה', 'error');
+                const btn = document.querySelector('.avatar-upload-btn');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-camera"></i> שינוי תמונה';
+            }
+        });
+
+        async function saveProfile() {
+            const btn = document.querySelector('#main-content .profile-card:nth-child(2) .save-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שומר...';
+
+            try {
+                const updates = {
+                    full_name: document.getElementById('field-fullname').value.trim(),
+                    phone: document.getElementById('field-phone').value.trim()
+                };
+                await Profiles.update(currentUser.id, updates);
+                userProfile = { ...userProfile, ...updates };
+                renderAvatar();
+                showToastMsg('הפרופיל עודכן בהצלחה', 'success');
+            } catch (err) {
+                console.error('Save error:', err);
+                showToastMsg('שגיאה בשמירה', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> שמור שינויים';
+        }
+
+        async function saveTherapistProfile() {
+            if (!therapistData) return;
+            const btn = document.querySelector('#therapist-section .save-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שומר...';
+
+            try {
+                const updates = {
+                    city: document.getElementById('field-city').value.trim(),
+                    specialization: document.getElementById('field-specialization').value.trim(),
+                    license_number: document.getElementById('field-license').value.trim(),
+                    education: document.getElementById('field-education').value.trim(),
+                    social_link: document.getElementById('field-social').value.trim()
+                };
+
+                await supabaseClient
+                    .from('therapists')
+                    .update(updates)
+                    .eq('id', therapistData.id);
+
+                showToastMsg('פרטי מטפל עודכנו בהצלחה', 'success');
+            } catch (err) {
+                console.error('Save therapist error:', err);
+                showToastMsg('שגיאה בשמירה', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> שמור פרטי מטפל';
+        }
+
+        async function savePatientProfile() {
+            if (!patientData) return;
+            const btn = document.querySelector('#patient-section .save-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שומר...';
+
+            try {
+                const updates = {
+                    preferred_therapist_gender: document.getElementById('field-gender-pref').value || null
+                };
+
+                await supabaseClient
+                    .from('patients')
+                    .update(updates)
+                    .eq('id', patientData.id);
+
+                showToastMsg('ההעדפות עודכנו בהצלחה', 'success');
+            } catch (err) {
+                console.error('Save patient error:', err);
+                showToastMsg('שגיאה בשמירה', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> שמור העדפות';
+        }
+
+        async function loadCourseProgress() {
+            const container = document.getElementById('progress-container');
+
+            try {
+                const progress = await CourseProgress.getAll();
+
+                if (!progress || progress.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-progress">
+                            <i class="fa-solid fa-book-open"></i>
+                            <p>עדיין לא התחלת לצפות בקורסים</p>
+                            <a href="free-portal.html" style="color: var(--gold); text-decoration: none; font-weight: 600;">
+                                התחל ללמוד עכשיו &larr;
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Filter out last_watched markers
+                const actual = progress.filter(p => !p.video_id?.startsWith('last_watched_'));
+
+                // Group by course_type
+                const byType = {};
+                actual.forEach(p => {
+                    const type = p.course_type || 'nlp-practitioner';
+                    if (!byType[type]) byType[type] = [];
+                    byType[type].push(p);
+                });
+
+                const courseConfig = {
+                    'nlp-practitioner': { name: 'קורס NLP פרקטישנר', total: 51, icon: 'fa-play-circle' },
+                    'nlp-master': { name: 'קורס NLP מאסטר', total: 7, icon: 'fa-crown' }
+                };
+
+                let html = '';
+                for (const [type, items] of Object.entries(byType)) {
+                    const config = courseConfig[type] || { name: type, total: items.length, icon: 'fa-book' };
+                    const completed = items.filter(i => i.completed).length;
+                    const percent = Math.min(100, Math.round((completed / config.total) * 100));
+
+                    html += `
+                        <div class="progress-card">
+                            <h3><i class="fa-solid ${config.icon}"></i> ${config.name}</h3>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: ${percent}%"></div>
+                            </div>
+                            <span class="progress-text">${completed} מתוך ${config.total} שיעורים (${percent}%)</span>
+                        </div>
+                    `;
+                }
+
+                // Get last watched for resume link
+                try {
+                    const lastWatched = await CourseProgress.getLastWatched('nlp-practitioner');
+                    if (lastWatched) {
+                        html += `
+                            <a href="free-portal.html#m${lastWatched.moduleIndex}l${lastWatched.lessonIndex}"
+                               style="display: flex; align-items: center; gap: 0.5rem; color: var(--gold); text-decoration: none;
+                                      font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem; padding: 0.5rem 0;">
+                                <i class="fa-solid fa-play"></i> המשך מאיפה שהפסקתי
+                            </a>
+                        `;
+                    }
+                } catch (e) {}
+
+                container.innerHTML = html || '<div class="no-progress"><i class="fa-solid fa-book-open"></i><p>עדיין לא התחלת לצפות בקורסים</p></div>';
+            } catch (err) {
+                console.error('Progress load error:', err);
+                container.innerHTML = '<div class="no-progress"><p>שגיאה בטעינת ההתקדמות</p></div>';
+            }
+        }
+
+        function showToastMsg(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        async function logout() {
+            try {
+                await Auth.signOut();
+                window.location.href = '../index.html';
+            } catch (e) {
+                window.location.href = '../index.html';
+            }
+        }
+    </script>
+
+    <script src="../js/marketing-tools.js"></script>
+</body>
+</html>

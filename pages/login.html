@@ -410,13 +410,21 @@
 
     <script src="../js/supabase-client.js"></script>
     <script>
-        // Check if already logged in
+        // Check if already logged in (with delay for OAuth token parsing)
         (async function() {
+            await new Promise(r => setTimeout(r, 300));
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 redirectLoggedInUser(session.user);
             }
         })();
+
+        // Safety net: catch OAuth redirect that the IIFE might miss
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+                redirectLoggedInUser(session.user);
+            }
+        });
 
         // Tab switching
         function switchTab(tab) {
@@ -604,7 +612,7 @@
                 const { data, error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + '/legal-gate.html'
+                        redirectTo: window.location.href.split('?')[0]
                     }
                 });
 

@@ -2575,10 +2575,11 @@
             const firstModule = document.querySelector('.module');
             if (firstModule) firstModule.classList.add('open');
 
-            // Restore lesson from URL hash, or default to first lesson
+            // Restore lesson from URL hash, localStorage resume, or default to first lesson
             _skipPushState = true; // Never pushState on initial load
             const hashMatch = location.hash.match(/^#m(\d+)l(\d+)$/);
             if (hashMatch) {
+                // URL hash takes priority (explicit navigation)
                 const m = parseInt(hashMatch[1]), l = parseInt(hashMatch[2]);
                 if (modules[m] && modules[m].lessons[l]) {
                     selectLesson(m, l);
@@ -2586,7 +2587,20 @@
                     selectLesson(0, 0);
                 }
             } else {
-                selectLesson(0, 0);
+                // Try to resume from localStorage
+                let resumed = false;
+                try {
+                    const saved = JSON.parse(localStorage.getItem('lastWatched_nlp-practitioner'));
+                    if (saved && modules[saved.moduleIndex]?.lessons[saved.lessonIndex]) {
+                        selectLesson(saved.moduleIndex, saved.lessonIndex);
+                        resumed = true;
+                        if (saved.moduleIndex > 0 || saved.lessonIndex > 0) {
+                            const title = modules[saved.moduleIndex].lessons[saved.lessonIndex].title;
+                            setTimeout(() => showResumeToast(title), 800);
+                        }
+                    }
+                } catch (e) {}
+                if (!resumed) selectLesson(0, 0);
             }
             _skipPushState = false;
 
@@ -2663,6 +2677,20 @@
 
             // Sync localStorage progress to Supabase
             await syncProgressToSupabase();
+
+            // Resume from Supabase last-watched (if different from current)
+            try {
+                if (window.CourseProgress) {
+                    const lastWatched = await window.CourseProgress.getLastWatched('nlp-practitioner');
+                    if (lastWatched && modules[lastWatched.moduleIndex]?.lessons[lastWatched.lessonIndex]) {
+                        if (lastWatched.moduleIndex !== currentModuleIndex || lastWatched.lessonIndex !== currentLessonIndex) {
+                            selectLesson(lastWatched.moduleIndex, lastWatched.lessonIndex);
+                            const title = modules[lastWatched.moduleIndex].lessons[lastWatched.lessonIndex].title;
+                            showResumeToast(title);
+                        }
+                    }
+                }
+            } catch (e) { console.error('Resume from Supabase error:', e); }
 
             // Update UI
             updateUI();
@@ -3051,6 +3079,13 @@
                     document.querySelector('.video-wrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
             }
+
+            // Save last watched position
+            localStorage.setItem('lastWatched_nlp-practitioner', JSON.stringify({ moduleIndex, lessonIndex }));
+            if (isAuthenticated && window.CourseProgress) {
+                window.CourseProgress.saveLastWatched('nlp-practitioner', moduleIndex, lessonIndex)
+                    .catch(err => console.error('Save last watched error:', err));
+            }
         }
 
         // ===== Play Video (on thumbnail click) =====
@@ -3284,6 +3319,28 @@
                 document.getElementById('toast').classList.add('show');
                 toastShown = true;
             }
+        }
+
+        function showResumeToast(lessonTitle) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+                background: var(--deep-petrol); color: white; padding: 0.8rem 1.2rem;
+                border-radius: 12px; display: flex; align-items: center; gap: 0.8rem;
+                z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                font-family: 'Heebo', sans-serif; font-size: 0.9rem;
+                border: 1px solid var(--dusty-aqua);
+            `;
+            toast.innerHTML = `
+                <i class="fa-solid fa-play-circle" style="color: var(--gold); font-size: 1.2rem;"></i>
+                <span>ממשיכים מאיפה שהפסקת: <strong>${lessonTitle}</strong></span>
+                <button onclick="this.parentElement.remove()" style="
+                    background: none; border: none; color: rgba(255,255,255,0.6);
+                    cursor: pointer; font-size: 1.1rem; padding: 0 0.3rem;
+                ">&times;</button>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => { if (toast.parentElement) toast.remove(); }, 6000);
         }
 
         function hideToast() {

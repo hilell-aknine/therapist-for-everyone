@@ -826,7 +826,7 @@
         }
 
         .progress-label { color: var(--text-secondary); }
-        .progress-percent { color: var(--gold); font-weight: 600; }
+        .progress-percent { color: var(--gold); font-weight: 600; font-size: 0.8rem; display: block; text-align: left; }
 
         /* Sidebar Search */
         .sidebar-search {
@@ -1045,6 +1045,11 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             position: relative;
             padding-top: 56.25%;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-wrapper.lesson-transitioning {
+            opacity: 0.4;
         }
 
         .video-wrapper iframe {
@@ -2807,7 +2812,7 @@
     <div id="playerView" class="portal-view" style="display:none;">
     <div class="lms-container">
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar" id="sidebar" role="navigation" aria-label="תוכן הקורס">
             <div class="sidebar-header">
                 <div class="sidebar-progress-section">
                     <span class="sidebar-progress-label">התקדמות בקורס</span>
@@ -2816,13 +2821,13 @@
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <span class="progress-percent" id="progressPercent" style="display:none;">0%</span>
+                <span class="progress-percent" id="progressPercent">0%</span>
             </div>
 
             <div class="sidebar-search">
                 <div class="sidebar-search-wrap">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="lessonSearch" placeholder="חפש שיעור..." oninput="filterLessons(this.value)">
+                    <input type="text" id="lessonSearch" placeholder="חפש שיעור..." oninput="filterLessons(this.value)" aria-label="חיפוש שיעור">
                 </div>
             </div>
 
@@ -2881,21 +2886,21 @@
                 </div>
 
                 <div class="tabs-section">
-                    <div class="tabs-header">
-                        <button class="tab-btn active" onclick="switchTab('summary')">
+                    <div class="tabs-header" role="tablist" aria-label="תוכן השיעור">
+                        <button class="tab-btn active" onclick="switchTab('summary')" role="tab" aria-selected="true" aria-controls="summaryPanel" id="summaryTabBtn">
                             <i class="fa-solid fa-file-lines"></i>
                             סיכום השיעור
                         </button>
-                        <button class="tab-btn" onclick="switchTab('resources')" id="resourcesTab">
+                        <button class="tab-btn" onclick="switchTab('resources')" id="resourcesTab" role="tab" aria-selected="false" aria-controls="resourcesPanel">
                             <i class="fa-solid fa-download"></i>
                             חומרי עזר
                             <span class="lock-badge" id="resourcesLock">🔒</span>
                         </button>
-                        <button class="tab-btn" onclick="switchTab('notes')">
+                        <button class="tab-btn" onclick="switchTab('notes')" role="tab" aria-selected="false" aria-controls="notesPanel" id="notesTabBtn">
                             <i class="fa-solid fa-pen-to-square"></i>
                             הערות אישיות
                         </button>
-                        <button class="tab-btn" onclick="switchTab('ai')" id="aiTab">
+                        <button class="tab-btn" onclick="switchTab('ai')" id="aiTab" role="tab" aria-selected="false" aria-controls="aiPanel">
                             <i class="fa-solid fa-robot"></i>
                             העוזר האישי
                             <span class="lock-badge" id="aiLock">🔒</span>
@@ -2904,7 +2909,7 @@
 
                     <div class="tabs-content">
                         <!-- Summary Tab -->
-                        <div class="tab-panel active" id="summaryPanel">
+                        <div class="tab-panel active" id="summaryPanel" role="tabpanel" aria-labelledby="summaryTabBtn">
                             <div class="lesson-description">
                                 <h3 id="lessonDescTitle">ברוכים הבאים לקורס NLP</h3>
                                 <p id="lessonDescText">
@@ -2920,7 +2925,7 @@
                         </div>
 
                         <!-- Resources Tab -->
-                        <div class="tab-panel" id="resourcesPanel">
+                        <div class="tab-panel" id="resourcesPanel" role="tabpanel" aria-labelledby="resourcesTab">
                             <div class="resources-grid">
                                 <div class="resource-card" id="workbookCard" onclick="handleResource('workbook')">
                                     <div class="resource-icon">
@@ -2944,7 +2949,7 @@
                         </div>
 
                         <!-- Notes Tab -->
-                        <div class="tab-panel" id="notesPanel">
+                        <div class="tab-panel" id="notesPanel" role="tabpanel" aria-labelledby="notesTabBtn">
                             <div class="notes-container">
                                 <textarea class="notes-textarea" id="notesTextarea" placeholder="כתבו כאן את ההערות שלכם לשיעור זה..." oninput="handleNotesInput()"></textarea>
                                 <div class="notes-footer">
@@ -2955,7 +2960,7 @@
                         </div>
 
                         <!-- AI Tab -->
-                        <div class="tab-panel" id="aiPanel">
+                        <div class="tab-panel" id="aiPanel" role="tabpanel" aria-labelledby="aiTab">
                             <!-- Locked state (not authenticated) -->
                             <div class="ai-chat-placeholder" id="aiLocked">
                                 <div class="ai-avatar">
@@ -3026,13 +3031,13 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Mobile Toggle -->
-    <button class="mobile-toggle" onclick="toggleSidebar()">
+    <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="פתח/סגור תפריט שיעורים" aria-expanded="false" id="mobileSidebarToggle">
         <i class="fa-solid fa-list"></i>
     </button>
     </div><!-- /playerView -->
 
     <!-- Auth Modal -->
-    <div class="modal-overlay" id="registrationModal" onclick="handleOverlayClick(event)">
+    <div class="modal-overlay" id="registrationModal" onclick="handleOverlayClick(event)" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-box" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeModal()" aria-label="סגור">
                 ✕
@@ -3040,7 +3045,7 @@
             <div class="modal-icon">
                 <i class="fa-solid fa-gift"></i>
             </div>
-            <h2>קבלו גישה מלאה בחינם!</h2>
+            <h2 id="modalTitle">קבלו גישה מלאה בחינם!</h2>
             <p class="subtitle">התחברו כדי לקבל גישה לכל התכנים הבונוס</p>
 
             <ul class="benefits-list">
@@ -3965,14 +3970,23 @@
                 document.body.style.overflow = '';
             }
 
+            // Lesson transition animation
+            const wrapper = document.querySelector('.video-wrapper');
+            wrapper.classList.add('lesson-transitioning');
+            setTimeout(() => wrapper.classList.remove('lesson-transitioning'), 350);
+
             if (autoplay) {
                 // Auto-play: load iframe directly
                 playVideo();
             } else {
-                // Show thumbnail with play button (initial load)
+                // Show thumbnail with play button — triple fallback
                 thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/maxresdefault.jpg`;
                 thumbnailImg.onerror = () => {
                     thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/hqdefault.jpg`;
+                    thumbnailImg.onerror = () => {
+                        thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/mqdefault.jpg`;
+                        thumbnailImg.onerror = null;
+                    };
                 };
                 thumbnail.style.display = 'block';
             }
@@ -4214,10 +4228,15 @@
 
         // ===== Tabs =====
         function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
 
-            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            const activeBtn = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+            activeBtn.classList.add('active');
+            activeBtn.setAttribute('aria-selected', 'true');
             document.getElementById(`${tabName}Panel`).classList.add('active');
 
             // Load notes when switching to notes tab
@@ -4320,9 +4339,12 @@
             toggleBtn.classList.toggle('active');
             overlay.classList.toggle('active');
 
+            const isOpen = sidebar.classList.contains('open');
+            toggleBtn.setAttribute('aria-expanded', isOpen);
+
             // Update icon
             const icon = toggleBtn.querySelector('i');
-            if (sidebar.classList.contains('open')) {
+            if (isOpen) {
                 icon.className = 'fa-solid fa-times';
                 document.body.style.overflow = 'hidden';
             } else {
@@ -4333,7 +4355,32 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
+            // Escape: close modal or sidebar
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('registrationModal');
+                if (modal.classList.contains('active')) {
+                    closeModal();
+                } else {
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar.classList.contains('open') && window.innerWidth <= 1024) {
+                        toggleSidebar();
+                    }
+                }
+            }
+
+            // Focus trap inside open modal
+            if (e.key === 'Tab') {
+                const modal = document.getElementById('registrationModal');
+                if (modal.classList.contains('active')) {
+                    const focusable = modal.querySelectorAll('button, input, a, [tabindex]:not([tabindex="-1"])');
+                    if (focusable.length) {
+                        const first = focusable[0], last = focusable[focusable.length - 1];
+                        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                    }
+                }
+            }
+
             // Arrow keys for navigation (only when not focused on an input)
             if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
                 if (e.key === 'ArrowLeft') navigateLesson(1);  // Next (RTL: left = forward)
@@ -4878,6 +4925,7 @@
             input.focus();
         }
 
+        let aiMessageCount = 0;
         function appendAiMessage(type, text) {
             const container = document.getElementById('aiMessages');
             const isBot = type === 'bot';
@@ -4891,6 +4939,18 @@
             `;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
+
+            // Update AI tab badge with message count
+            aiMessageCount++;
+            const aiTab = document.getElementById('aiTab');
+            let badge = aiTab.querySelector('.ai-msg-count');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'ai-msg-count';
+                badge.style.cssText = 'background:var(--gold);color:var(--deep-petrol,#0E5660);font-size:0.65rem;font-weight:700;padding:1px 5px;border-radius:8px;margin-inline-start:4px;';
+                aiTab.appendChild(badge);
+            }
+            badge.textContent = aiMessageCount;
         }
 
         function showTypingIndicator() {

@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
-    <title>הפרופיל שלי - מטפל לכל אחד</title>
+    <title>האזור האישי - בית המטפלים</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../css/accessibility.css">
@@ -109,45 +109,42 @@
 
         /* Main */
         .main-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        .page-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin-bottom: 2rem;
+        /* Welcome Hero */
+        .welcome-hero {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-        }
-
-        .page-title i { color: var(--gold); }
-
-        /* Avatar Section */
-        .avatar-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            gap: 1.5rem;
             margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(47,133,146,0.1), rgba(212,175,55,0.08));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
         }
 
         .avatar-preview {
-            width: 120px;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--teal), var(--gold));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
+            font-size: 2rem;
             font-weight: 700;
             color: white;
             overflow: hidden;
-            margin-bottom: 1rem;
+            flex-shrink: 0;
             border: 3px solid var(--border-color);
+            cursor: pointer;
+            transition: border-color 0.2s;
         }
+
+        .avatar-preview:hover { border-color: var(--gold); }
 
         .avatar-preview img {
             width: 100%;
@@ -155,25 +152,157 @@
             object-fit: cover;
         }
 
-        .avatar-upload-btn {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 0.5rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
+        .welcome-info {
+            flex: 1;
         }
 
-        .avatar-upload-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .welcome-info h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
 
-        /* Cards */
-        .profile-card {
+        .welcome-info .welcome-sub {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .role-badge.therapist { background: rgba(47,133,146,0.2); color: var(--teal); }
+        .role-badge.patient { background: rgba(212,175,55,0.2); color: var(--gold); }
+        .role-badge.student { background: rgba(88,166,255,0.2); color: #58a6ff; }
+        .role-badge.admin { background: rgba(248,81,73,0.2); color: var(--danger); }
+
+        /* Stat Cards Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .stat-card .stat-icon {
+            font-size: 1.3rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        /* Progress Ring */
+        .progress-ring-section {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .course-progress-card {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            transition: border-color 0.2s;
+        }
+
+        .course-progress-card:hover { border-color: var(--teal); }
+
+        .progress-ring {
+            width: 80px;
+            height: 80px;
+            flex-shrink: 0;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring .ring-bg {
+            fill: none;
+            stroke: var(--bg-card-hover);
+            stroke-width: 6;
+        }
+
+        .progress-ring .ring-fill {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .progress-ring .ring-text {
+            fill: var(--text-primary);
+            font-size: 14px;
+            font-weight: 700;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+
+        .course-progress-info h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .course-progress-info .progress-detail {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .resume-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--gold);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .resume-link:hover { color: var(--gold-light); }
+
+        /* Section Cards */
+        .section-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 16px;
@@ -181,19 +310,228 @@
             margin-bottom: 1.5rem;
         }
 
-        .card-header {
+        .section-header {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            justify-content: space-between;
             margin-bottom: 1.2rem;
             padding-bottom: 0.8rem;
             border-bottom: 1px solid var(--border-color);
         }
 
-        .card-header i { color: var(--gold); font-size: 1.1rem; }
-        .card-header h2 { font-size: 1.1rem; font-weight: 700; }
+        .section-header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
 
-        /* Form */
+        .section-header i { color: var(--gold); font-size: 1.1rem; }
+        .section-header h2 { font-size: 1.1rem; font-weight: 700; }
+
+        .section-header .badge-count {
+            background: rgba(212,175,55,0.15);
+            color: var(--gold);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+        }
+
+        /* Notebook / Notes List */
+        .notes-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notes-list::-webkit-scrollbar { width: 4px; }
+        .notes-list::-webkit-scrollbar-track { background: transparent; }
+        .notes-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+        .note-item {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .note-item:hover { border-color: var(--teal); }
+
+        .note-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.4rem;
+        }
+
+        .note-item-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .note-item-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .note-item-module {
+            font-size: 0.75rem;
+            color: var(--teal);
+            margin-bottom: 0.4rem;
+        }
+
+        .note-item-preview {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .note-item-full {
+            display: none;
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .note-item.expanded .note-item-full { display: block; }
+        .note-item.expanded .note-item-preview { display: none; }
+
+        .note-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.6rem;
+        }
+
+        .note-action-link {
+            font-size: 0.75rem;
+            color: var(--gold);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: color 0.2s;
+        }
+
+        .note-action-link:hover { color: var(--gold-light); }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.8rem;
+            color: var(--border-color);
+        }
+
+        .empty-state p { font-size: 0.9rem; margin-bottom: 0.5rem; }
+
+        .empty-state a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* AI Chat Stats */
+        .ai-stats-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-stat {
+            flex: 1;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .ai-stat .ai-stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .ai-stat .ai-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Quick Links */
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .quick-link:hover {
+            border-color: var(--gold);
+            transform: translateY(-1px);
+        }
+
+        .quick-link i {
+            font-size: 1.2rem;
+            color: var(--gold);
+            width: 24px;
+            text-align: center;
+        }
+
+        .quick-link span {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Profile Form (collapsible) */
+        .profile-toggle-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+
+        .profile-toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+        .profile-form-body { display: none; }
+        .profile-form-body.open { display: block; }
+
         .form-group {
             margin-bottom: 1.2rem;
         }
@@ -240,7 +578,6 @@
             gap: 1rem;
         }
 
-        /* Buttons */
         .save-btn {
             background: linear-gradient(135deg, var(--gold), var(--gold-light));
             color: var(--bg-dark);
@@ -261,55 +598,22 @@
         .save-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px var(--gold-glow); }
         .save-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        /* Progress Section */
-        .progress-card {
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-        }
-
-        .progress-card h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-            display: flex;
+        /* CTA Button Style */
+        .cta-link {
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            background: linear-gradient(135deg, var(--teal), #1a6b76);
+            color: white;
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
         }
 
-        .progress-card h3 i { color: var(--gold); }
-
-        .progress-bar-container {
-            width: 100%;
-            height: 10px;
-            background: var(--bg-card-hover);
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--teal), var(--gold));
-            border-radius: 5px;
-            transition: width 0.5s ease;
-        }
-
-        .progress-text {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .no-progress {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            text-align: center;
-            padding: 1.5rem;
-        }
-
-        .no-progress i { font-size: 2rem; display: block; margin-bottom: 0.8rem; color: var(--border-color); }
+        .cta-link:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(47,133,146,0.3); }
 
         /* Toast */
         .toast {
@@ -353,29 +657,24 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Role Badge */
-        .role-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .progress-ring-section { flex-direction: column; }
+            .quick-links-grid { grid-template-columns: 1fr; }
         }
 
-        .role-badge.therapist { background: rgba(47,133,146,0.2); color: var(--teal); }
-        .role-badge.patient { background: rgba(212,175,55,0.2); color: var(--gold); }
-        .role-badge.student { background: rgba(88,166,255,0.2); color: var(--info); }
-        .role-badge.admin { background: rgba(248,81,73,0.2); color: var(--danger); }
-
-        /* Responsive */
         @media (max-width: 600px) {
             .header { padding: 0.8rem 1rem; }
             .main-container { padding: 1rem; }
-            .page-title { font-size: 1.4rem; }
+            .welcome-hero { flex-direction: column; text-align: center; }
+            .welcome-info h1 { font-size: 1.3rem; }
+            .avatar-preview { width: 70px; height: 70px; font-size: 1.8rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+            .stat-card { padding: 0.8rem; }
+            .stat-card .stat-value { font-size: 1.3rem; }
             .form-row { grid-template-columns: 1fr; }
-            .avatar-preview { width: 90px; height: 90px; font-size: 2.2rem; }
+            .ai-stats-row { flex-direction: column; }
         }
     </style>
 </head>
@@ -385,7 +684,7 @@
     <!-- Loading -->
     <div class="loading-container" id="loading-screen">
         <div class="spinner"></div>
-        <span style="color: var(--text-secondary);">טוען פרופיל...</span>
+        <span style="color: var(--text-secondary);">טוען את האזור האישי...</span>
     </div>
 
     <!-- Main Content -->
@@ -399,7 +698,7 @@
             <div class="header-actions">
                 <a href="#" id="back-link" class="back-btn">
                     <i class="fa-solid fa-arrow-right"></i>
-                    חזרה לאזור האישי
+                    חזרה לאתר
                 </a>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fa-solid fa-right-from-bracket"></i>
@@ -409,116 +708,213 @@
         </header>
 
         <main class="main-container">
-            <h1 class="page-title">
-                <i class="fa-solid fa-user-circle"></i>
-                הפרופיל שלי
-                <span id="role-badge"></span>
-            </h1>
 
-            <!-- Avatar -->
-            <div class="avatar-section">
-                <div class="avatar-preview" id="avatar-preview"></div>
+            <!-- Welcome Hero -->
+            <div class="welcome-hero">
+                <div class="avatar-preview" id="avatar-preview" onclick="document.getElementById('avatar-input').click()" title="לחצו לשינוי תמונה"></div>
                 <input type="file" id="avatar-input" accept="image/png,image/jpeg,image/webp" hidden>
-                <button class="avatar-upload-btn" onclick="document.getElementById('avatar-input').click()">
-                    <i class="fa-solid fa-camera"></i>
-                    שינוי תמונה
-                </button>
+                <div class="welcome-info">
+                    <h1 id="welcome-name">שלום!</h1>
+                    <div class="welcome-sub">
+                        <span id="role-badge"></span>
+                        <span id="welcome-email"></span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Personal Info -->
-            <div class="profile-card">
-                <div class="card-header">
-                    <i class="fa-solid fa-id-card"></i>
-                    <h2>פרטים אישיים</h2>
+            <!-- Stats Grid -->
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-play-circle"></i></div>
+                    <div class="stat-value" id="stat-lessons">0</div>
+                    <div class="stat-label">שיעורים שנצפו</div>
                 </div>
-                <div class="form-group">
-                    <label for="field-fullname">שם מלא</label>
-                    <input type="text" id="field-fullname" placeholder="השם שלך">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-percent"></i></div>
+                    <div class="stat-value" id="stat-completion">0%</div>
+                    <div class="stat-label">אחוז השלמה</div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="field-email">אימייל</label>
-                        <input type="email" id="field-email" disabled>
-                    </div>
-                    <div class="form-group">
-                        <label for="field-phone">טלפון</label>
-                        <input type="tel" id="field-phone" placeholder="050-1234567">
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-fire"></i></div>
+                    <div class="stat-value" id="stat-streak">0</div>
+                    <div class="stat-label">ימי רצף</div>
                 </div>
-                <button class="save-btn" onclick="saveProfile()">
-                    <i class="fa-solid fa-check"></i>
-                    שמור שינויים
-                </button>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+                    <div class="stat-value" id="stat-notes">0</div>
+                    <div class="stat-label">הערות</div>
+                </div>
             </div>
 
-            <!-- Therapist Section (hidden by default) -->
-            <div class="profile-card" id="therapist-section" style="display: none;">
-                <div class="card-header">
-                    <i class="fa-solid fa-user-doctor"></i>
-                    <h2>פרטי מטפל</h2>
+            <!-- Course Progress Rings -->
+            <div class="progress-ring-section" id="progress-rings-section"></div>
+
+            <!-- Notebook -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <i class="fa-solid fa-book-open"></i>
+                        <h2>המחברת שלי</h2>
+                    </div>
+                    <span class="badge-count" id="notes-count-badge">0 הערות</span>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="field-city">עיר</label>
-                        <input type="text" id="field-city" placeholder="עיר המגורים">
-                    </div>
-                    <div class="form-group">
-                        <label for="field-specialization">התמחות</label>
-                        <input type="text" id="field-specialization" placeholder="תחום ההתמחות">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="field-license">מספר רישיון</label>
-                        <input type="text" id="field-license" placeholder="מספר רישיון">
-                    </div>
-                    <div class="form-group">
-                        <label for="field-education">השכלה</label>
-                        <input type="text" id="field-education" placeholder="השכלה">
+                <div id="notes-container">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-pen-nib"></i>
+                        <p>עדיין לא כתבת הערות</p>
+                        <a href="free-portal.html">התחל ללמוד וכתוב הערות בכל שיעור</a>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="field-social">קישור לרשת חברתית</label>
-                    <input type="url" id="field-social" placeholder="https://...">
-                </div>
-                <button class="save-btn" onclick="saveTherapistProfile()">
-                    <i class="fa-solid fa-check"></i>
-                    שמור פרטי מטפל
-                </button>
             </div>
 
-            <!-- Patient Section (hidden by default) -->
-            <div class="profile-card" id="patient-section" style="display: none;">
-                <div class="card-header">
-                    <i class="fa-solid fa-hand-holding-heart"></i>
-                    <h2>פרטי מטופל</h2>
+            <!-- AI Tutor -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <i class="fa-solid fa-robot"></i>
+                        <h2>המורה AI שלי</h2>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="field-concern">סיבת הפנייה</label>
-                    <textarea id="field-concern" disabled placeholder="הוזן בתהליך הרישום"></textarea>
+                <div class="ai-stats-row" id="ai-stats-row">
+                    <div class="ai-stat">
+                        <div class="ai-stat-value" id="ai-stat-today">0</div>
+                        <div class="ai-stat-label">הודעות היום</div>
+                    </div>
+                    <div class="ai-stat">
+                        <div class="ai-stat-value" id="ai-stat-total">0</div>
+                        <div class="ai-stat-label">סה"כ הודעות</div>
+                    </div>
+                    <div class="ai-stat">
+                        <div class="ai-stat-value" id="ai-stat-days">0</div>
+                        <div class="ai-stat-label">ימי שימוש</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="field-gender-pref">העדפת מגדר מטפל</label>
-                    <select id="field-gender-pref">
-                        <option value="">לא משנה</option>
-                        <option value="male">גבר</option>
-                        <option value="female">אישה</option>
-                    </select>
-                </div>
-                <button class="save-btn" onclick="savePatientProfile()">
-                    <i class="fa-solid fa-check"></i>
-                    שמור העדפות
-                </button>
+                <a href="free-portal.html" class="cta-link">
+                    <i class="fa-solid fa-comments"></i>
+                    פתח את המורה AI בקורס
+                </a>
             </div>
 
-            <!-- Course Progress -->
-            <div class="profile-card">
-                <div class="card-header">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <h2>התקדמות בקורסים</h2>
+            <!-- Quick Access -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <i class="fa-solid fa-bolt"></i>
+                        <h2>גישה מהירה</h2>
+                    </div>
                 </div>
-                <div id="progress-container"></div>
+                <div class="quick-links-grid">
+                    <a href="free-portal.html" class="quick-link">
+                        <i class="fa-solid fa-play-circle"></i>
+                        <span>פורטל הקורסים</span>
+                    </a>
+                    <a href="learning-portal.html" class="quick-link">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>כל הקורסים</span>
+                    </a>
+                    <a href="https://chat.whatsapp.com/EXAMPLE" target="_blank" class="quick-link" id="whatsapp-link" style="display:none;">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        <span>קבוצת WhatsApp</span>
+                    </a>
+                    <a href="about.html" class="quick-link">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>אודות ויצירת קשר</span>
+                    </a>
+                </div>
             </div>
+
+            <!-- Profile Settings (Collapsible) -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <i class="fa-solid fa-gear"></i>
+                        <h2>הגדרות פרופיל</h2>
+                    </div>
+                    <button class="profile-toggle-btn" onclick="toggleProfileForm()">
+                        <i class="fa-solid fa-chevron-down" id="profile-toggle-icon"></i>
+                        <span id="profile-toggle-text">הצג</span>
+                    </button>
+                </div>
+                <div class="profile-form-body" id="profile-form-body">
+                    <div class="form-group">
+                        <label for="field-fullname">שם מלא</label>
+                        <input type="text" id="field-fullname" placeholder="השם שלך">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="field-email">אימייל</label>
+                            <input type="email" id="field-email" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="field-phone">טלפון</label>
+                            <input type="tel" id="field-phone" placeholder="050-1234567">
+                        </div>
+                    </div>
+                    <button class="save-btn" onclick="saveProfile()">
+                        <i class="fa-solid fa-check"></i>
+                        שמור שינויים
+                    </button>
+
+                    <!-- Therapist Section (hidden by default) -->
+                    <div id="therapist-section" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: var(--teal);">
+                            <i class="fa-solid fa-user-doctor"></i> פרטי מטפל
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="field-city">עיר</label>
+                                <input type="text" id="field-city" placeholder="עיר המגורים">
+                            </div>
+                            <div class="form-group">
+                                <label for="field-specialization">התמחות</label>
+                                <input type="text" id="field-specialization" placeholder="תחום ההתמחות">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="field-license">מספר רישיון</label>
+                                <input type="text" id="field-license" placeholder="מספר רישיון">
+                            </div>
+                            <div class="form-group">
+                                <label for="field-education">השכלה</label>
+                                <input type="text" id="field-education" placeholder="השכלה">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="field-social">קישור לרשת חברתית</label>
+                            <input type="url" id="field-social" placeholder="https://...">
+                        </div>
+                        <button class="save-btn" onclick="saveTherapistProfile()">
+                            <i class="fa-solid fa-check"></i>
+                            שמור פרטי מטפל
+                        </button>
+                    </div>
+
+                    <!-- Patient Section (hidden by default) -->
+                    <div id="patient-section" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: var(--gold);">
+                            <i class="fa-solid fa-hand-holding-heart"></i> פרטי מטופל
+                        </h3>
+                        <div class="form-group">
+                            <label for="field-concern">סיבת הפנייה</label>
+                            <textarea id="field-concern" disabled placeholder="הוזן בתהליך הרישום"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="field-gender-pref">העדפת מגדר מטפל</label>
+                            <select id="field-gender-pref">
+                                <option value="">לא משנה</option>
+                                <option value="male">גבר</option>
+                                <option value="female">אישה</option>
+                            </select>
+                        </div>
+                        <button class="save-btn" onclick="savePatientProfile()">
+                            <i class="fa-solid fa-check"></i>
+                            שמור העדפות
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -533,65 +929,61 @@
         let patientData = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Wait for dependencies
             await new Promise(r => setTimeout(r, 200));
 
             // Auth check
             try {
                 const user = await Auth.getCurrentUser();
-                if (!user) {
-                    window.location.href = 'login.html';
-                    return;
-                }
+                if (!user) { window.location.href = 'login.html'; return; }
                 currentUser = user;
-            } catch (e) {
-                window.location.href = 'login.html';
-                return;
-            }
+            } catch (e) { window.location.href = 'login.html'; return; }
 
             // Load profile
-            try {
-                userProfile = await Profiles.getCurrent();
-            } catch (e) {
-                console.error('Profile load error:', e);
-            }
+            try { userProfile = await Profiles.getCurrent(); }
+            catch (e) { console.error('Profile load error:', e); }
 
             // Determine role
             userRole = userProfile?.role || 'student_lead';
 
-            // Set back link based on role
+            // Set back link
             const backLink = document.getElementById('back-link');
             if (userRole === 'therapist') {
                 backLink.href = '../therapist-dashboard.html';
+                backLink.innerHTML = '<i class="fa-solid fa-arrow-right"></i> חזרה לאזור האישי';
             } else if (userRole === 'patient') {
                 backLink.href = '../patient-dashboard.html';
+                backLink.innerHTML = '<i class="fa-solid fa-arrow-right"></i> חזרה לאזור האישי';
             } else {
                 backLink.href = '../index.html';
-                backLink.textContent = '';
                 backLink.innerHTML = '<i class="fa-solid fa-arrow-right"></i> חזרה לאתר';
             }
 
-            // Fill role badge
+            // Welcome hero
+            const displayName = userProfile?.full_name || currentUser.user_metadata?.full_name || 'משתמש';
+            document.getElementById('welcome-name').textContent = `שלום, ${displayName}`;
+            document.getElementById('welcome-email').textContent = currentUser.email || '';
+
+            // Role badge
             const roleBadge = document.getElementById('role-badge');
             const roleLabels = {
-                therapist: { label: 'מטפל', class: 'therapist', icon: 'fa-user-doctor' },
-                patient: { label: 'מטופל', class: 'patient', icon: 'fa-hand-holding-heart' },
-                admin: { label: 'מנהל', class: 'admin', icon: 'fa-shield' },
-                student_lead: { label: 'תלמיד', class: 'student', icon: 'fa-graduation-cap' }
+                therapist: { label: 'מטפל', cls: 'therapist', icon: 'fa-user-doctor' },
+                patient: { label: 'מטופל', cls: 'patient', icon: 'fa-hand-holding-heart' },
+                admin: { label: 'מנהל', cls: 'admin', icon: 'fa-shield' },
+                student_lead: { label: 'תלמיד', cls: 'student', icon: 'fa-graduation-cap' }
             };
             const r = roleLabels[userRole] || roleLabels.student_lead;
-            roleBadge.className = `role-badge ${r.class}`;
+            roleBadge.className = `role-badge ${r.cls}`;
             roleBadge.innerHTML = `<i class="fa-solid ${r.icon}"></i> ${r.label}`;
-
-            // Fill common fields
-            document.getElementById('field-fullname').value = userProfile?.full_name || currentUser.user_metadata?.full_name || '';
-            document.getElementById('field-email').value = currentUser.email || '';
-            document.getElementById('field-phone').value = userProfile?.phone || '';
 
             // Avatar
             renderAvatar();
 
-            // Role-specific sections
+            // Fill profile form fields
+            document.getElementById('field-fullname').value = userProfile?.full_name || currentUser.user_metadata?.full_name || '';
+            document.getElementById('field-email').value = currentUser.email || '';
+            document.getElementById('field-phone').value = userProfile?.phone || '';
+
+            // Role-specific form sections
             if (userRole === 'therapist') {
                 document.getElementById('therapist-section').style.display = 'block';
                 try {
@@ -609,7 +1001,7 @@
             if (userRole === 'patient') {
                 document.getElementById('patient-section').style.display = 'block';
                 try {
-                    const { data } = await supabaseClient
+                    const { data } = await window.supabaseClient
                         .from('patients')
                         .select('*')
                         .eq('user_id', currentUser.id)
@@ -622,55 +1014,293 @@
                 } catch (e) { console.error('Patient data error:', e); }
             }
 
-            // Load course progress
-            await loadCourseProgress();
+            // Load all dashboard data in parallel
+            await Promise.all([
+                loadProgressStats(),
+                loadNotebook(),
+                loadAiStats()
+            ]);
 
             // Show content
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
         });
 
+        // ===== Avatar =====
         function renderAvatar() {
             const el = document.getElementById('avatar-preview');
             if (userProfile?.avatar_url) {
                 el.innerHTML = `<img src="${userProfile.avatar_url}" alt="תמונת פרופיל">`;
             } else {
                 const name = userProfile?.full_name || currentUser?.user_metadata?.full_name || '';
-                el.textContent = name ? name.charAt(0).toUpperCase() : '?';
+                el.textContent = name ? name.charAt(0) : '?';
             }
         }
 
-        // Avatar upload
         document.getElementById('avatar-input').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 2 * 1024 * 1024) {
-                showToastMsg('הקובץ גדול מדי (מקסימום 2MB)', 'error');
-                return;
-            }
+            if (file.size > 2 * 1024 * 1024) { showToastMsg('הקובץ גדול מדי (מקסימום 2MB)', 'error'); return; }
             try {
-                const btn = document.querySelector('.avatar-upload-btn');
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> מעלה...';
-
                 const publicUrl = await Profiles.uploadAvatar(currentUser.id, file);
                 userProfile.avatar_url = publicUrl;
                 renderAvatar();
                 showToastMsg('התמונה עודכנה בהצלחה', 'success');
-
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-camera"></i> שינוי תמונה';
             } catch (err) {
                 console.error('Upload error:', err);
                 showToastMsg('שגיאה בהעלאת התמונה', 'error');
-                const btn = document.querySelector('.avatar-upload-btn');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-camera"></i> שינוי תמונה';
             }
         });
 
+        // ===== Progress Stats + Rings =====
+        async function loadProgressStats() {
+            try {
+                const progress = await CourseProgress.getAll();
+                const actual = (progress || []).filter(p => !p.video_id?.startsWith('last_watched_'));
+
+                const totalWatched = actual.filter(p => p.completed).length;
+                document.getElementById('stat-lessons').textContent = totalWatched;
+
+                // Group by course type
+                const byType = {};
+                actual.forEach(p => {
+                    const type = p.course_type || 'nlp-practitioner';
+                    if (!byType[type]) byType[type] = [];
+                    byType[type].push(p);
+                });
+
+                const courseConfig = {
+                    'nlp-practitioner': { name: 'קורס NLP פרקטישנר', total: 51, color: '#2F8592' },
+                    'nlp-master': { name: 'קורס NLP מאסטר', total: 7, color: '#D4AF37' }
+                };
+
+                // Overall completion
+                let totalCourseVideos = 0;
+                let totalCompleted = 0;
+                let ringsHtml = '';
+
+                for (const [type, items] of Object.entries(byType)) {
+                    const config = courseConfig[type] || { name: type, total: items.length, color: '#2F8592' };
+                    const completed = items.filter(i => i.completed).length;
+                    totalCourseVideos += config.total;
+                    totalCompleted += completed;
+                    const percent = Math.min(100, Math.round((completed / config.total) * 100));
+                    const circumference = 2 * Math.PI * 34;
+                    const offset = circumference - (percent / 100) * circumference;
+
+                    ringsHtml += `
+                        <div class="course-progress-card">
+                            <div class="progress-ring">
+                                <svg viewBox="0 0 80 80" width="80" height="80">
+                                    <circle class="ring-bg" cx="40" cy="40" r="34"/>
+                                    <circle class="ring-fill" cx="40" cy="40" r="34"
+                                        stroke="${config.color}"
+                                        stroke-dasharray="${circumference}"
+                                        stroke-dashoffset="${offset}"/>
+                                    <text class="ring-text" x="40" y="42" transform="rotate(90 40 40)">${percent}%</text>
+                                </svg>
+                            </div>
+                            <div class="course-progress-info">
+                                <h3>${config.name}</h3>
+                                <div class="progress-detail">${completed} מתוך ${config.total} שיעורים</div>
+                                <div id="resume-${type}"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // If no progress at all, show empty state
+                if (!actual.length) {
+                    ringsHtml = `
+                        <div class="course-progress-card" style="justify-content: center; text-align: center; flex-direction: column; padding: 2rem;">
+                            <i class="fa-solid fa-book-open" style="font-size: 2rem; color: var(--border-color); margin-bottom: 0.8rem;"></i>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">עדיין לא התחלת לצפות בקורסים</p>
+                            <a href="free-portal.html" class="resume-link" style="margin-top: 0.8rem;">
+                                <i class="fa-solid fa-play"></i> התחל ללמוד עכשיו
+                            </a>
+                        </div>
+                    `;
+                    totalCourseVideos = 51;
+                }
+
+                const overallPercent = totalCourseVideos > 0 ? Math.round((totalCompleted / totalCourseVideos) * 100) : 0;
+                document.getElementById('stat-completion').textContent = overallPercent + '%';
+
+                document.getElementById('progress-rings-section').innerHTML = ringsHtml;
+
+                // Resume links
+                try {
+                    const lastWatched = await CourseProgress.getLastWatched('nlp-practitioner');
+                    const resumeEl = document.getElementById('resume-nlp-practitioner');
+                    if (lastWatched && resumeEl) {
+                        resumeEl.innerHTML = `
+                            <a href="free-portal.html#m${lastWatched.moduleIndex}l${lastWatched.lessonIndex}" class="resume-link">
+                                <i class="fa-solid fa-play"></i> המשך מאיפה שהפסקתי
+                            </a>
+                        `;
+                    }
+                } catch (e) {}
+
+                // Streak: count consecutive recent days with progress
+                const streakDays = calculateStreak(actual);
+                document.getElementById('stat-streak').textContent = streakDays;
+
+            } catch (err) {
+                console.error('Progress load error:', err);
+            }
+        }
+
+        function calculateStreak(progressItems) {
+            const completedDates = progressItems
+                .filter(p => p.completed && p.completed_at)
+                .map(p => new Date(p.completed_at).toDateString());
+            const uniqueDates = [...new Set(completedDates)].sort((a, b) => new Date(b) - new Date(a));
+            if (!uniqueDates.length) return 0;
+
+            let streak = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < uniqueDates.length; i++) {
+                const checkDate = new Date(today);
+                checkDate.setDate(checkDate.getDate() - i);
+                if (uniqueDates.includes(checkDate.toDateString())) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            return streak;
+        }
+
+        // ===== Notebook =====
+        async function loadNotebook() {
+            const container = document.getElementById('notes-container');
+            const countBadge = document.getElementById('notes-count-badge');
+
+            try {
+                let notes = [];
+                if (window.UserNotes) {
+                    notes = await UserNotes.getAll('nlp-practitioner');
+                }
+
+                // Filter out empty notes
+                notes = notes.filter(n => n.content && n.content.trim().length > 0);
+
+                document.getElementById('stat-notes').textContent = notes.length;
+                countBadge.textContent = `${notes.length} הערות`;
+
+                if (!notes.length) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-pen-nib"></i>
+                            <p>עדיין לא כתבת הערות</p>
+                            <a href="free-portal.html">התחל ללמוד וכתוב הערות בכל שיעור</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Group by module
+                const grouped = {};
+                notes.forEach(n => {
+                    const mod = n.module_title || 'כללי';
+                    if (!grouped[mod]) grouped[mod] = [];
+                    grouped[mod].push(n);
+                });
+
+                let html = '<div class="notes-list">';
+                for (const [mod, items] of Object.entries(grouped)) {
+                    items.forEach(note => {
+                        const preview = note.content.substring(0, 120) + (note.content.length > 120 ? '...' : '');
+                        const timeStr = new Date(note.updated_at).toLocaleDateString('he-IL', {
+                            day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                        });
+
+                        html += `
+                            <div class="note-item" onclick="toggleNote(this)">
+                                <div class="note-item-header">
+                                    <div class="note-item-title">${note.lesson_title || 'שיעור'}</div>
+                                    <div class="note-item-time">${timeStr}</div>
+                                </div>
+                                <div class="note-item-module">${mod}</div>
+                                <div class="note-item-preview">${escapeHtml(preview)}</div>
+                                <div class="note-item-full">${escapeHtml(note.content)}</div>
+                            </div>
+                        `;
+                    });
+                }
+                html += '</div>';
+                container.innerHTML = html;
+
+            } catch (err) {
+                console.error('Notes load error:', err);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-pen-nib"></i>
+                        <p>עדיין לא כתבת הערות</p>
+                        <a href="free-portal.html">התחל ללמוד וכתוב הערות בכל שיעור</a>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleNote(el) {
+            el.classList.toggle('expanded');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ===== AI Stats =====
+        async function loadAiStats() {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('ai_chat_usage')
+                    .select('messages_today, total_messages, created_at')
+                    .eq('user_id', currentUser.id);
+
+                if (error && error.code !== 'PGRST116') throw error;
+
+                if (data && data.length > 0) {
+                    // Sum up stats
+                    let todayTotal = 0;
+                    let allTimeTotal = 0;
+                    const uniqueDays = new Set();
+
+                    data.forEach(row => {
+                        todayTotal += row.messages_today || 0;
+                        allTimeTotal += row.total_messages || 0;
+                        if (row.created_at) {
+                            uniqueDays.add(new Date(row.created_at).toDateString());
+                        }
+                    });
+
+                    document.getElementById('ai-stat-today').textContent = todayTotal;
+                    document.getElementById('ai-stat-total').textContent = allTimeTotal;
+                    document.getElementById('ai-stat-days').textContent = uniqueDays.size;
+                }
+            } catch (err) {
+                console.error('AI stats load error:', err);
+            }
+        }
+
+        // ===== Profile Form Toggle =====
+        function toggleProfileForm() {
+            const body = document.getElementById('profile-form-body');
+            const icon = document.getElementById('profile-toggle-icon');
+            const text = document.getElementById('profile-toggle-text');
+            const isOpen = body.classList.toggle('open');
+            icon.className = isOpen ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
+            text.textContent = isOpen ? 'הסתר' : 'הצג';
+        }
+
+        // ===== Save Functions =====
         async function saveProfile() {
-            const btn = document.querySelector('#main-content .profile-card:nth-child(2) .save-btn');
+            const btn = document.querySelector('#profile-form-body .save-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שומר...';
 
@@ -682,6 +1312,7 @@
                 await Profiles.update(currentUser.id, updates);
                 userProfile = { ...userProfile, ...updates };
                 renderAvatar();
+                document.getElementById('welcome-name').textContent = `שלום, ${updates.full_name || 'משתמש'}`;
                 showToastMsg('הפרופיל עודכן בהצלחה', 'success');
             } catch (err) {
                 console.error('Save error:', err);
@@ -707,7 +1338,7 @@
                     social_link: document.getElementById('field-social').value.trim()
                 };
 
-                await supabaseClient
+                await window.supabaseClient
                     .from('therapists')
                     .update(updates)
                     .eq('id', therapistData.id);
@@ -733,7 +1364,7 @@
                     preferred_therapist_gender: document.getElementById('field-gender-pref').value || null
                 };
 
-                await supabaseClient
+                await window.supabaseClient
                     .from('patients')
                     .update(updates)
                     .eq('id', patientData.id);
@@ -748,79 +1379,7 @@
             btn.innerHTML = '<i class="fa-solid fa-check"></i> שמור העדפות';
         }
 
-        async function loadCourseProgress() {
-            const container = document.getElementById('progress-container');
-
-            try {
-                const progress = await CourseProgress.getAll();
-
-                if (!progress || progress.length === 0) {
-                    container.innerHTML = `
-                        <div class="no-progress">
-                            <i class="fa-solid fa-book-open"></i>
-                            <p>עדיין לא התחלת לצפות בקורסים</p>
-                            <a href="free-portal.html" style="color: var(--gold); text-decoration: none; font-weight: 600;">
-                                התחל ללמוד עכשיו &larr;
-                            </a>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Filter out last_watched markers
-                const actual = progress.filter(p => !p.video_id?.startsWith('last_watched_'));
-
-                // Group by course_type
-                const byType = {};
-                actual.forEach(p => {
-                    const type = p.course_type || 'nlp-practitioner';
-                    if (!byType[type]) byType[type] = [];
-                    byType[type].push(p);
-                });
-
-                const courseConfig = {
-                    'nlp-practitioner': { name: 'קורס NLP פרקטישנר', total: 51, icon: 'fa-play-circle' },
-                    'nlp-master': { name: 'קורס NLP מאסטר', total: 7, icon: 'fa-crown' }
-                };
-
-                let html = '';
-                for (const [type, items] of Object.entries(byType)) {
-                    const config = courseConfig[type] || { name: type, total: items.length, icon: 'fa-book' };
-                    const completed = items.filter(i => i.completed).length;
-                    const percent = Math.min(100, Math.round((completed / config.total) * 100));
-
-                    html += `
-                        <div class="progress-card">
-                            <h3><i class="fa-solid ${config.icon}"></i> ${config.name}</h3>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar-fill" style="width: ${percent}%"></div>
-                            </div>
-                            <span class="progress-text">${completed} מתוך ${config.total} שיעורים (${percent}%)</span>
-                        </div>
-                    `;
-                }
-
-                // Get last watched for resume link
-                try {
-                    const lastWatched = await CourseProgress.getLastWatched('nlp-practitioner');
-                    if (lastWatched) {
-                        html += `
-                            <a href="free-portal.html#m${lastWatched.moduleIndex}l${lastWatched.lessonIndex}"
-                               style="display: flex; align-items: center; gap: 0.5rem; color: var(--gold); text-decoration: none;
-                                      font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem; padding: 0.5rem 0;">
-                                <i class="fa-solid fa-play"></i> המשך מאיפה שהפסקתי
-                            </a>
-                        `;
-                    }
-                } catch (e) {}
-
-                container.innerHTML = html || '<div class="no-progress"><i class="fa-solid fa-book-open"></i><p>עדיין לא התחלת לצפות בקורסים</p></div>';
-            } catch (err) {
-                console.error('Progress load error:', err);
-                container.innerHTML = '<div class="no-progress"><p>שגיאה בטעינת ההתקדמות</p></div>';
-            }
-        }
-
+        // ===== Utilities =====
         function showToastMsg(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;

@@ -447,6 +447,79 @@
     };
 
     // ============================================================================
+    // User Notes Functions (Supabase-synced lesson notes)
+    // ============================================================================
+
+    const UserNotes = {
+        async save(videoId, content, metadata = {}) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return null;
+
+            const { data, error } = await supabaseClient
+                .from('user_notes')
+                .upsert({
+                    user_id: user.id,
+                    video_id: videoId,
+                    content: content,
+                    course_type: metadata.courseType || 'nlp-practitioner',
+                    lesson_title: metadata.lessonTitle || null,
+                    module_title: metadata.moduleTitle || null,
+                    lesson_number: metadata.lessonNumber || null,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'user_id,video_id' })
+                .select()
+                .single();
+            if (error) throw error;
+            return data;
+        },
+
+        async get(videoId) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return null;
+
+            const { data, error } = await supabaseClient
+                .from('user_notes')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('video_id', videoId)
+                .single();
+            if (error && error.code !== 'PGRST116') throw error;
+            return data;
+        },
+
+        async getAll(courseType) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return [];
+
+            let query = supabaseClient
+                .from('user_notes')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('updated_at', { ascending: false });
+
+            if (courseType) {
+                query = query.eq('course_type', courseType);
+            }
+
+            const { data, error } = await query;
+            if (error) throw error;
+            return data || [];
+        },
+
+        async delete(videoId) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return;
+
+            const { error } = await supabaseClient
+                .from('user_notes')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('video_id', videoId);
+            if (error) throw error;
+        }
+    };
+
+    // ============================================================================
     // Contact Requests Functions
     // ============================================================================
 
@@ -872,6 +945,7 @@
     window.CourseProgress = CourseProgress;
     window.ContactRequests = ContactRequests;
     window.Certifications = Certifications;
+    window.UserNotes = UserNotes;
     window.UI = UI;
     window.translateError = translateError;
     window.FormAutosave = FormAutosave;
@@ -888,6 +962,7 @@
         CourseProgress: CourseProgress,
         ContactRequests: ContactRequests,
         Certifications: Certifications,
+        UserNotes: UserNotes,
         UI: UI
     };
 

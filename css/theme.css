@@ -1,0 +1,170 @@
+/* ============================================
+   Beit HaMetaplim — Global Theme Tokens
+   Light mode (default) + Dark mode override
+   ============================================ */
+
+:root {
+    /* Background */
+    --t-bg: #FAF8F4;
+    --t-bg-card: #FFFFFF;
+    --t-bg-card-hover: #F0F2F5;
+    --t-bg-secondary: #f8f9fa;
+
+    /* Text */
+    --t-text: #1A2D33;
+    --t-text-secondary: #4B5563;
+    --t-text-muted: #6e7681;
+
+    /* Borders */
+    --t-border: rgba(47, 133, 146, 0.12);
+    --t-border-strong: rgba(47, 133, 146, 0.3);
+
+    /* Brand colors */
+    --t-gold: #D4AF37;
+    --t-gold-light: #E6C65A;
+    --t-gold-glow: rgba(212, 175, 55, 0.25);
+    --t-gradient-gold: linear-gradient(135deg, #D4AF37 0%, #E6C65A 100%);
+    --t-deep-petrol: #003B46;
+    --t-muted-teal: #00606B;
+    --t-dusty-aqua: #2F8592;
+    --t-frost-white: #E8F1F2;
+
+    /* Status */
+    --t-success: #00b894;
+    --t-warning: #d29922;
+    --t-danger: #f85149;
+    --t-info: #58a6ff;
+
+    /* Shadows */
+    --t-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --t-shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --t-shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+
+    /* Nav */
+    --t-nav-bg: rgba(0, 59, 70, 0.97);
+    --t-nav-text: rgba(255, 255, 255, 0.8);
+
+    /* Sidebar (for portal pages) */
+    --t-sidebar-bg: #0a3a42;
+    --t-sidebar-hover: #F3F4F6;
+    --t-sidebar-active: #EBF5F7;
+
+    /* Fonts (unchanged across themes) */
+    --t-font-display: 'Frank Ruhl Libre', 'Noto Serif Hebrew', serif;
+    --t-font-body: 'Heebo', sans-serif;
+}
+
+/* ============================================
+   Dark Mode Overrides
+   ============================================ */
+[data-theme="dark"] {
+    /* Background */
+    --t-bg: #0f1419;
+    --t-bg-card: #1a1f2e;
+    --t-bg-card-hover: #242b3d;
+    --t-bg-secondary: #161b22;
+
+    /* Text */
+    --t-text: #ffffff;
+    --t-text-secondary: #8b949e;
+    --t-text-muted: #6e7681;
+
+    /* Borders */
+    --t-border: #2d3548;
+    --t-border-strong: #3d4560;
+
+    /* Brand colors (adjusted for dark bg) */
+    --t-gold: #D4AF37;
+    --t-gold-light: #e6c65a;
+    --t-gold-glow: rgba(212, 175, 55, 0.2);
+    --t-gradient-gold: linear-gradient(135deg, #D4AF37 0%, #e6c65a 100%);
+    --t-deep-petrol: #1a3a42;
+    --t-muted-teal: #2F8592;
+    --t-dusty-aqua: #4AABB8;
+    --t-frost-white: #1a2530;
+
+    /* Status */
+    --t-success: #3fb950;
+    --t-warning: #d29922;
+    --t-danger: #f85149;
+    --t-info: #58a6ff;
+
+    /* Shadows */
+    --t-shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --t-shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --t-shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
+
+    /* Nav */
+    --t-nav-bg: rgba(15, 20, 25, 0.97);
+    --t-nav-text: rgba(255, 255, 255, 0.9);
+
+    /* Sidebar */
+    --t-sidebar-bg: #0d1117;
+    --t-sidebar-hover: #1a1f2e;
+    --t-sidebar-active: #242b3d;
+}
+
+/* ============================================
+   Theme Toggle Button
+   ============================================ */
+.theme-toggle-btn {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 9999;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--t-gold);
+    background: var(--t-bg-card);
+    color: var(--t-gold);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: var(--t-shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 16px var(--t-gold-glow);
+    background: var(--t-gold);
+    color: var(--t-bg);
+}
+
+.theme-toggle-btn:focus-visible {
+    outline: 2px solid var(--t-gold);
+    outline-offset: 3px;
+}
+
+.theme-toggle-btn .icon-sun,
+.theme-toggle-btn .icon-moon {
+    position: absolute;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* Light mode: show moon (switch-to-dark affordance) */
+.theme-toggle-btn .icon-moon { opacity: 1; transform: rotate(0deg); }
+.theme-toggle-btn .icon-sun  { opacity: 0; transform: rotate(-90deg); }
+
+/* Dark mode: show sun (switch-to-light affordance) */
+[data-theme="dark"] .theme-toggle-btn .icon-moon { opacity: 0; transform: rotate(90deg); }
+[data-theme="dark"] .theme-toggle-btn .icon-sun  { opacity: 1; transform: rotate(0deg); }
+
+/* ============================================
+   Smooth transition on theme change
+   ============================================ */
+.theme-transitioning,
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+    transition: background-color 0.3s ease,
+                color 0.3s ease,
+                border-color 0.3s ease,
+                box-shadow 0.3s ease !important;
+}

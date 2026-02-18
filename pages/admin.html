@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="../css/accessibility.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
+    <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+    <link rel="stylesheet" href="../css/theme.css">
+    <script src="../js/theme-toggle.js" defer></script>
     <script>
         // AUTH GUARD - Redirect to login if not authenticated
         (async function() {
@@ -27,34 +30,19 @@
         })();
     </script>
     <style>
-        /* Dark Mode (Default) */
+        /* Theme Bridge — uses shared css/theme.css tokens */
         :root {
-            --bg: #0f1419;
-            --card: #1a1f2e;
-            --card-hover: #242b3d;
-            --border: #2d3548;
-            --text: #ffffff;
-            --text-secondary: #8b949e;
-            --gold: #D4AF37;
-            --success: #3fb950;
-            --warning: #d29922;
-            --danger: #f85149;
-            --info: #58a6ff;
-        }
-
-        /* Light Mode */
-        [data-theme="light"] {
-            --bg: #f5f7fa;
-            --card: #ffffff;
-            --card-hover: #f0f2f5;
-            --border: #e1e5eb;
-            --text: #1a1a2e;
-            --text-secondary: #6c757d;
-            --gold: #c9a227;
-            --success: #28a745;
-            --warning: #e6a817;
-            --danger: #dc3545;
-            --info: #0d6efd;
+            --bg: var(--t-bg);
+            --card: var(--t-bg-card);
+            --card-hover: var(--t-bg-card-hover);
+            --border: var(--t-border);
+            --text: var(--t-text);
+            --text-secondary: var(--t-text-secondary);
+            --gold: var(--t-gold);
+            --success: var(--t-success);
+            --warning: var(--t-warning);
+            --danger: var(--t-danger);
+            --info: var(--t-info);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -82,30 +70,7 @@
         }
         .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
 
-        /* Theme Toggle Button */
-        .theme-toggle {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            transition: all 0.3s;
-        }
-        .theme-toggle:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-            transform: rotate(15deg);
-        }
-        [data-theme="light"] .theme-toggle .fa-moon { display: none; }
-        [data-theme="light"] .theme-toggle .fa-sun { display: inline; }
-        :root .theme-toggle .fa-sun { display: none; }
-        :root .theme-toggle .fa-moon { display: inline; }
+        /* Old theme toggle removed — using shared theme-toggle.js */
 
         .main { display: flex; min-height: calc(100vh - 60px); }
 
@@ -550,10 +515,7 @@
                 <span>מטפל לכל אחד - CRM</span>
             </div>
             <div class="user-info">
-                <button class="theme-toggle" onclick="toggleTheme()" title="החלף מצב תצוגה">
-                    <i class="fa-solid fa-sun"></i>
-                    <i class="fa-solid fa-moon"></i>
-                </button>
+                <!-- Theme toggle handled by global theme-toggle.js -->
                 <span id="user-email"></span>
                 <button class="btn-logout" onclick="logout()">
                     <i class="fa-solid fa-sign-out-alt"></i> יציאה
@@ -887,29 +849,8 @@
     </style>
 
     <script>
-        // ===================
-        // THEME TOGGLE
-        // ===================
-        function initTheme() {
-            const savedTheme = localStorage.getItem('admin-theme') || 'dark';
-            if (savedTheme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        }
-        initTheme(); // Run immediately
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-            if (newTheme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-            } else {
-                document.documentElement.removeAttribute('data-theme');
-            }
-
-            localStorage.setItem('admin-theme', newTheme);
-        }
+        // Theme toggle handled by shared js/theme-toggle.js
+        // Old admin-theme key is auto-migrated to beit-theme
 
         // Supabase Configuration
         const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';

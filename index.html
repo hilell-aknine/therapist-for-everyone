@@ -308,13 +308,40 @@
         .hero-subtitle {
             font-size: clamp(1.15rem, 2.2vw, 1.45rem);
             color: var(--frost-white);
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
             line-height: 1.8;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
             opacity: 0;
             animation: heroFadeIn 0.8s ease-out 0.6s forwards;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: heroFadeIn 0.8s ease-out 0.7s forwards;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-number {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 800;
+            color: var(--gold);
+            line-height: 1.1;
+        }
+
+        .hero-stat-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 400;
         }
 
         .hero-subtitle .purple-heart {
@@ -420,63 +447,7 @@
             50% { opacity: 0.8; transform: scaleY(1.3); }
         }
 
-        /* ===== Stats Strip ===== */
-        .stats-strip {
-            background: var(--pure-white);
-            border-bottom: 1px solid var(--border-light);
-            padding: 3.5rem 2rem;
-        }
-
-        .stats-grid {
-            max-width: 900px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            position: relative;
-        }
-
-        .stat-item {
-            text-align: center;
-            position: relative;
-        }
-
-        .stat-item:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            top: 15%; bottom: 15%;
-            left: 0;
-            width: 1px;
-            background: var(--border-light);
-        }
-
-        .stat-icon {
-            font-size: 1.6rem;
-            color: var(--gold);
-            margin-bottom: 0.6rem;
-        }
-
-        .stat-number {
-            font-family: var(--font-display);
-            font-size: clamp(2.5rem, 4vw, 3.2rem);
-            font-weight: 800;
-            color: var(--deep-petrol);
-            line-height: 1;
-            margin-bottom: 0.3rem;
-        }
-
-        .stat-suffix {
-            font-family: var(--font-display);
-            font-size: clamp(1.5rem, 2.5vw, 2rem);
-            font-weight: 700;
-            color: var(--gold);
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--muted-teal);
-            font-weight: 500;
-        }
+        /* (stats moved to hero) */
 
         /* ===== About Section ===== */
         .about-section {
@@ -523,7 +494,7 @@
 
         .about-text {
             font-size: 1.15rem;
-            color: var(--text-dark);
+            color: var(--deep-petrol);
             line-height: 2;
             margin-bottom: 1rem;
             max-width: 700px;
@@ -654,7 +625,7 @@
         }
 
         .pillar-card p {
-            color: var(--muted-teal);
+            color: var(--deep-petrol);
             font-size: 0.95rem;
             line-height: 1.85;
             margin-bottom: 1.5rem;
@@ -727,139 +698,7 @@
 
         .pillar-link:hover i { transform: translateX(-4px); }
 
-        /* ===== Testimonials ===== */
-        .testimonials-section {
-            padding: 7rem 2rem;
-            background: var(--deep-petrol);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .testimonials-section .section-eyebrow {
-            color: var(--gold);
-        }
-
-        .testimonials-section .section-eyebrow::before,
-        .testimonials-section .section-eyebrow::after {
-            background: var(--gold);
-        }
-
-        .testimonials-section .section-title {
-            color: var(--pure-white);
-        }
-
-        .testimonials-bg {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: radial-gradient(ellipse at 30% 50%, rgba(155, 114, 207, 0.08) 0%, transparent 60%),
-                        radial-gradient(ellipse at 70% 50%, rgba(47, 133, 146, 0.1) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .testimonials-header {
-            text-align: center;
-            margin-bottom: 4rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            max-width: 1100px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .testimonial-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 2.5rem 2rem;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-        }
-
-        .testimonial-card:hover {
-            background: rgba(255, 255, 255, 0.07);
-            border-color: rgba(255, 255, 255, 0.12);
-            transform: translateY(-4px);
-        }
-
-        .testimonial-quote-mark {
-            font-family: var(--font-display);
-            font-size: 4rem;
-            color: var(--gold);
-            opacity: 0.3;
-            line-height: 1;
-            margin-bottom: -0.5rem;
-            user-select: none;
-        }
-
-        .testimonial-text {
-            font-size: 1rem;
-            color: var(--frost-white);
-            line-height: 1.9;
-            margin-bottom: 1.8rem;
-            font-style: italic;
-            opacity: 0.9;
-        }
-
-        .testimonial-author {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            padding-top: 1.2rem;
-        }
-
-        .testimonial-avatar {
-            width: 48px; height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-
-        .testimonial-card:nth-child(1) .testimonial-avatar {
-            background: rgba(47, 133, 146, 0.2);
-            color: var(--dusty-aqua);
-        }
-
-        .testimonial-card:nth-child(2) .testimonial-avatar {
-            background: rgba(212, 175, 55, 0.15);
-            color: var(--gold);
-        }
-
-        .testimonial-card:nth-child(3) .testimonial-avatar {
-            background: var(--purple-glow);
-            color: var(--purple-soft);
-        }
-
-        .testimonial-name {
-            font-weight: 600;
-            color: var(--pure-white);
-            font-size: 0.95rem;
-        }
-
-        .testimonial-role {
-            font-size: 0.82rem;
-            color: var(--frost-white);
-            opacity: 0.6;
-        }
-
-        .testimonial-stars {
-            color: var(--gold);
-            font-size: 0.75rem;
-            letter-spacing: 2px;
-            margin-top: 2px;
-        }
+        /* (testimonials removed) */
 
         /* ===== CTA Section ===== */
         .cta-section {
@@ -972,7 +811,6 @@
         /* ===== Responsive ===== */
         @media (max-width: 1024px) {
             .pillars-grid { max-width: 750px; grid-template-columns: 1fr; }
-            .testimonials-grid { max-width: 750px; grid-template-columns: 1fr; }
             .footer-content { grid-template-columns: 1fr 1fr; }
         }
 
@@ -1062,17 +900,12 @@
             .nav-cta { display: none; }
 
             .hero { padding: 7rem 1.5rem 4rem; min-height: auto; }
+            .hero-stats { gap: 1.5rem; }
             .scroll-hint { display: none; }
-
-            .stats-strip { padding: 2.5rem 1.5rem; }
-            .stats-grid { gap: 1rem; }
-            .stat-item:not(:last-child)::after { display: none; }
 
             .about-section { padding: 5rem 1.5rem; }
             .pillars-section { padding: 3rem 1.5rem 5rem; }
             .pillar-card { padding: 2.5rem 2rem; }
-
-            .testimonials-section { padding: 5rem 1.5rem; }
 
             .cta-section { padding: 4rem 1.5rem; }
 
@@ -1083,7 +916,7 @@
             .navbar { padding: 0.8rem 1rem; }
             .logo-icon { width: 36px; height: 36px; font-size: 1rem; }
             .logo-text { font-size: 1.1rem; }
-            .stats-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .hero-stats { flex-direction: column; gap: 1rem; }
             .hero-cta-group { flex-direction: column; align-items: center; }
             .btn { width: 100%; justify-content: center; }
             .cta-buttons { flex-direction: column; align-items: center; }
@@ -1146,6 +979,20 @@
             <p class="hero-subtitle">
                 הבית של המטפלים בישראל <span class="purple-heart">💜</span>
             </p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-number"><span data-count="25000">0</span>+</div>
+                    <div class="hero-stat-label">צפיות בקורסים</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number"><span data-count="70">0</span>+</div>
+                    <div class="hero-stat-label">שעות תוכן חינמי</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number"><span data-count="350">0</span>+</div>
+                    <div class="hero-stat-label">מטפלים שהכשרנו</div>
+                </div>
+            </div>
             <div class="hero-cta-group">
                 <a href="pages/learning-portal.html" class="btn btn-primary">
                     <i class="fa-solid fa-play"></i>
@@ -1163,32 +1010,6 @@
         </div>
     </section>
 
-    <!-- Stats Strip -->
-    <section class="stats-strip" data-reveal>
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-icon"><i class="fa-solid fa-eye"></i></div>
-                <div class="stat-number">
-                    <span data-count="25000">0</span><span class="stat-suffix">+</span>
-                </div>
-                <div class="stat-label">צפיות בקורסים שלנו</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
-                <div class="stat-number">
-                    <span data-count="70">0</span><span class="stat-suffix">+</span>
-                </div>
-                <div class="stat-label">שעות תוכן לצפייה בחינם</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-icon"><i class="fa-solid fa-user-graduate"></i></div>
-                <div class="stat-number">
-                    <span data-count="350">0</span><span class="stat-suffix">+</span>
-                </div>
-                <div class="stat-label">מטפלים שהכשרנו</div>
-            </div>
-        </div>
-    </section>
 
     <!-- About -->
     <section class="about-section">
@@ -1279,79 +1100,6 @@
         </div>
     </section>
 
-    <!-- Testimonials -->
-    <section class="testimonials-section">
-        <div class="testimonials-bg" aria-hidden="true"></div>
-        <div class="testimonials-header" data-reveal>
-            <div class="section-eyebrow">עדויות</div>
-            <h2 class="section-title">מה אנשים מספרים עלינו?</h2>
-        </div>
-
-        <div class="testimonials-grid">
-            <div class="testimonial-card" data-reveal data-reveal-delay="1">
-                <div class="testimonial-quote-mark" aria-hidden="true">״</div>
-                <p class="testimonial-text">
-                    ההכשרה שינתה לי את החיים. קיבלתי כלים מעשיים שאני משתמשת בהם כל יום &mdash; גם בקליניקה וגם בחיים האישיים. הליווי האישי היה מדהים.
-                </p>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">מ.כ</div>
-                    <div>
-                        <div class="testimonial-name">מיכל כ.</div>
-                        <div class="testimonial-role">בוגרת הכשרת NLP Practitioner</div>
-                        <div class="testimonial-stars">
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="testimonial-card" data-reveal data-reveal-delay="2">
-                <div class="testimonial-quote-mark" aria-hidden="true">״</div>
-                <p class="testimonial-text">
-                    הקורסים בחינם הם ברמה גבוהה שלא ראיתי במקום אחר. רם מלמד בצורה פשוטה ונגישה, ומרגיש שהוא באמת רוצה שתצליח. ממליץ בחום.
-                </p>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">א.ד</div>
-                    <div>
-                        <div class="testimonial-name">אלון ד.</div>
-                        <div class="testimonial-role">צופה בקורסים החינמיים</div>
-                        <div class="testimonial-stars">
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="testimonial-card" data-reveal data-reveal-delay="3">
-                <div class="testimonial-quote-mark" aria-hidden="true">״</div>
-                <p class="testimonial-text">
-                    אחרי 10 מפגשים במיזם החברתי חזרתי לתפקד. מה שהצבא והביטוח הלאומי לא הצליחו לעשות בשנה, המטפלת שלי עשתה בחודשיים. תודה מכל הלב.
-                </p>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">י.ש</div>
-                    <div>
-                        <div class="testimonial-name">יוסי ש.</div>
-                        <div class="testimonial-role">מטופל במיזם ״מטפל לכל אחד״</div>
-                        <div class="testimonial-stars">
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- CTA -->
     <section class="cta-section">
@@ -1410,7 +1158,7 @@
         </div>
 
         <div class="footer-bottom">
-            <p>&copy; 2025 בית המטפלים. כל הזכויות שמורות.</p>
+            <p>&copy; 2026 בית המטפלים. כל הזכויות שמורות.</p>
         </div>
     </footer>
 
@@ -1484,7 +1232,7 @@
             });
         }, { threshold: 0.3 });
 
-        const statsSection = document.querySelector('.stats-strip');
+        const statsSection = document.querySelector('.hero-stats');
         if (statsSection) counterObserver.observe(statsSection);
 
         function animateCounters() {

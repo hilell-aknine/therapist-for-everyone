@@ -337,6 +337,71 @@
 
         .form-note { text-align: center; margin-top: 1rem; color: var(--muted-teal); font-size: 0.82rem; }
 
+        /* ===== Registration Popup ===== */
+        .popup-overlay {
+            position: fixed; inset: 0; z-index: 10001;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            padding: 1.5rem;
+        }
+        .popup-overlay.active { opacity: 1; visibility: visible; }
+
+        .popup-card {
+            background: var(--pure-white); border-radius: 20px;
+            max-width: 420px; width: 100%; padding: 2.5rem 2rem;
+            text-align: center; position: relative;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        .popup-overlay.active .popup-card { transform: translateY(0) scale(1); }
+
+        .popup-close {
+            position: absolute; top: 12px; left: 12px;
+            width: 32px; height: 32px; border-radius: 50%;
+            border: none; background: rgba(0,0,0,0.06);
+            color: var(--muted-teal); font-size: 1rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .popup-close:hover { background: rgba(0,0,0,0.12); }
+
+        .popup-icon {
+            width: 70px; height: 70px; background: var(--gradient-gold);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.2rem; font-size: 1.8rem; color: var(--deep-petrol);
+            box-shadow: 0 8px 30px var(--gold-glow);
+        }
+
+        .popup-card h3 {
+            font-family: var(--font-display); font-size: 1.4rem;
+            color: var(--deep-petrol); margin-bottom: 0.6rem; font-weight: 700;
+        }
+        .popup-card p {
+            color: var(--muted-teal); font-size: 0.95rem;
+            line-height: 1.7; margin-bottom: 1.5rem;
+        }
+
+        .popup-cta {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.9rem 2rem; background: var(--gradient-gold);
+            color: var(--deep-petrol); border: none; border-radius: 10px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            font-family: var(--font-body); text-decoration: none;
+            transition: all 0.3s; box-shadow: 0 4px 15px var(--gold-glow);
+        }
+        .popup-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,175,55,0.4); }
+
+        .popup-dismiss {
+            display: block; margin-top: 0.8rem;
+            background: none; border: none; color: var(--muted-teal);
+            font-size: 0.82rem; cursor: pointer; font-family: var(--font-body);
+            opacity: 0.7; transition: opacity 0.2s;
+        }
+        .popup-dismiss:hover { opacity: 1; }
+
         /* ===== Footer ===== */
         .footer {
             background: var(--deep-petrol); border-top: 1px solid rgba(255,255,255,0.04);
@@ -592,6 +657,21 @@
         </div>
     </section>
 
+    <!-- Registration Popup -->
+    <div class="popup-overlay" id="regPopup" role="dialog" aria-modal="true" aria-label="הרשמה להכשרה">
+        <div class="popup-card">
+            <button class="popup-close" onclick="closePopup()" aria-label="סגור">&times;</button>
+            <div class="popup-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+            <h3>רוצה להפוך למטפל מוסמך?</h3>
+            <p>המקומות בהכשרה מוגבלים — השאירו פרטים ונחזור אליכם עם כל המידע תוך 24 שעות.</p>
+            <a href="#registration" class="popup-cta" onclick="closePopup()">
+                <i class="fa-solid fa-pen-to-square"></i>
+                להרשמה עכשיו
+            </a>
+            <button class="popup-dismiss" onclick="dismissPopup()">לא עכשיו, תודה</button>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-links-row">
@@ -644,9 +724,39 @@
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             console.log('Form submitted:', { name, phone });
+            localStorage.setItem('training-registered', 'true');
             alert('תודה! נחזור אליך בהקדם.');
             e.target.reset();
         }
+
+        // Registration Popup
+        var popupTimer = null;
+        function showPopup() {
+            document.getElementById('regPopup').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closePopup() {
+            document.getElementById('regPopup').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        function dismissPopup() {
+            localStorage.setItem('training-popup-dismissed', 'true');
+            closePopup();
+        }
+        // Only show if user hasn't registered or dismissed
+        if (!localStorage.getItem('training-registered') && !localStorage.getItem('training-popup-dismissed')) {
+            popupTimer = setTimeout(showPopup, 60000);
+        }
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('regPopup').classList.contains('active')) {
+                dismissPopup();
+            }
+        });
+        // Close on overlay click
+        document.getElementById('regPopup').addEventListener('click', function(e) {
+            if (e.target === this) dismissPopup();
+        });
 
         // Scroll reveal
         const revealObserver = new IntersectionObserver((entries) => {

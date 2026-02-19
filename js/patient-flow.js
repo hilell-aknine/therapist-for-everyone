@@ -309,9 +309,9 @@
     // Database Operations
     // ============================================================================
 
-    // Insert anonymous patient directly to patients table
+    // Insert anonymous patient to patients table + contact_requests for CRM
     async function insertContactRequest(formData) {
-        // For anonymous users - save directly to patients table
+        // Save to patients table
         const patientData = {
             full_name: formData.full_name,
             phone: formData.phone,
@@ -330,7 +330,23 @@
             throw new Error('שגיאה בשמירת הפרטים');
         }
 
-        console.log('Anonymous patient created');
+        // Also save to contact_requests so CRM bot can track leads
+        try {
+            await window.ContactRequests.submit({
+                name: formData.full_name,
+                full_name: formData.full_name,
+                phone: formData.phone,
+                email: formData.email || null,
+                city: formData.city,
+                message: formData.main_concern,
+                request_type: 'patient',
+                status: 'new'
+            });
+        } catch (e) {
+            console.warn('Could not save to contact_requests:', e);
+        }
+
+        console.log('Anonymous patient created + lead saved');
         return { success: true };
     }
 

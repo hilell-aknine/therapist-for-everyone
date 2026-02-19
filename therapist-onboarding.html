@@ -1317,7 +1317,18 @@
                         .insert(therapistPayload);
 
                     if (error) throw error;
-                    // No therapistRecord for anonymous - AI analysis skipped
+
+                    // Also save to contact_requests so CRM bot can track leads
+                    try {
+                        await supabaseClient.from('contact_requests').insert({
+                            name: therapistData.name,
+                            full_name: therapistData.name,
+                            phone: therapistData.phone,
+                            message: 'הרשמת מטפל — ' + therapistData.specialization,
+                            request_type: 'therapist',
+                            status: 'new'
+                        });
+                    } catch (e) { console.warn('Could not save to contact_requests:', e); }
                 }
 
                 hideLoading();

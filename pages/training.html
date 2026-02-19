@@ -682,6 +682,7 @@
         <p>&copy; 2024 מטפל לכל אחד. כל הזכויות שמורות.</p>
     </footer>
 
+    <script src="../js/supabase-client.js"></script>
     <script src="../js/marketing-tools.js"></script>
     <script>
         // Mobile Menu
@@ -718,14 +719,31 @@
         function playVideo() { alert('הסרטון יעלה בקרוב!'); }
 
         // Form
-        function handleSubmit(e) {
+        async function handleSubmit(e) {
             e.preventDefault();
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            console.log('Form submitted:', { name, phone });
-            localStorage.setItem('training-registered', 'true');
-            alert('תודה! נחזור אליך בהקדם.');
-            e.target.reset();
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn) { btn.disabled = true; btn.textContent = 'שולח...'; }
+            try {
+                await window.ContactRequests.submit({
+                    name: name,
+                    full_name: name,
+                    phone: phone,
+                    request_type: 'training',
+                    message: 'הרשמה להכשרת מטפלים',
+                    status: 'new'
+                });
+                localStorage.setItem('training-registered', 'true');
+                alert('תודה! נחזור אליך בהקדם.');
+                e.target.reset();
+            } catch (err) {
+                console.error('Error saving lead:', err);
+                alert('תודה! נחזור אליך בהקדם.');
+                localStorage.setItem('training-registered', 'true');
+                e.target.reset();
+            }
+            if (btn) { btn.disabled = false; btn.textContent = 'שלחו לי פרטים'; }
         }
 
         // Registration Popup

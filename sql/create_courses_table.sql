@@ -48,7 +48,7 @@ VALUES
     ),
     (
         'nlp-master',
-        'NLP Master Practitioner — מאסטר',
+        'NLP Master — מאסטר',
         'הכשרת מאסטר NLP מתקדמת. העמקה בטכניקות מתקדמות, עבודה עם טראומה, ושליטה מלאה בשפת הגוף.',
         'fa-crown',
         'coming_soon',

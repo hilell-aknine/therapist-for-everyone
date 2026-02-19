@@ -352,7 +352,6 @@
 
     async function insertPatientRecord(userId, formData) {
         const patientData = {
-            user_id: userId,
             full_name: formData.full_name,
             phone: formData.phone,
             email: null,

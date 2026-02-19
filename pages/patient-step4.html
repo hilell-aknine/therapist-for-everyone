@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#003B46">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
@@ -843,7 +843,8 @@
                     inner_world: {
                         early_memory: formData.early_memory || '',
                         open_space: formData.open_space || ''
-                    }
+                    },
+                    marketing_consent: document.getElementById('marketing_consent').checked
                 };
 
                 // Build final data object
@@ -864,7 +865,8 @@
                     signature_data: signatureData,
                     legal_consent_date: new Date().toISOString(),
                     status: 'new',
-                    marketing_consent: document.getElementById('marketing_consent').checked
+                    terms_confirmed: document.getElementById('terms_confirmed').checked,
+                    age_confirmed: document.getElementById('age_confirmed').checked
                 };
 
                 // Submit to Supabase

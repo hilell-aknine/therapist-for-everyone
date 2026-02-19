@@ -323,51 +323,162 @@
             box-shadow: 0 8px 25px rgba(216, 175, 71, 0.35);
         }
 
-        /* Authenticated Welcome Bar — compact pill inside hero */
-        .auth-welcome-bar {
+        /* ===== User Menu in Header ===== */
+        .header-user-menu {
             display: none;
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 50px;
-            padding: 0.45rem 1.2rem;
-            margin: -2.5rem auto 0;
+            align-items: center;
+            gap: 0.6rem;
+            margin-left: 0.5rem;
+        }
+        .header-user-menu.visible { display: flex; }
+
+        .header-notif-btn {
             position: relative;
-            z-index: 2;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .header-notif-btn:hover { background: var(--bg-secondary); }
+        .header-notif-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background: #e74c3c;
+            border-radius: 50%;
+            display: none;
+        }
+        .header-notif-badge.has-notif { display: block; }
+
+        .header-user-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border: 1px solid var(--border-default);
+            border-radius: 50px;
+            padding: 0.3rem 0.8rem 0.3rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+        .header-user-trigger:hover { background: var(--bg-secondary); border-color: var(--gold); }
+
+        .header-user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--gradient-gold);
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.8rem;
-            width: fit-content;
-            max-width: 90%;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--deep-petrol);
         }
-        .auth-welcome-bar.visible { display: inline-flex; }
-        .auth-welcome-bar .welcome-text {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: rgba(255,255,255,0.9);
-        }
-        .auth-welcome-bar .welcome-text span { color: var(--gold-light); font-weight: 600; }
-        .auth-welcome-bar .welcome-text i { font-size: 0.9rem; }
-        .auth-welcome-bar .resume-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-            padding: 0.3rem 0.8rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-size: 0.78rem;
+        .header-user-name {
+            font-size: 0.82rem;
             font-weight: 600;
-            transition: all 0.2s;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
             white-space: nowrap;
-            border: 1px solid rgba(255,255,255,0.2);
         }
-        .auth-welcome-bar .resume-btn:hover { background: rgba(255,255,255,0.25); }
+        .header-user-chevron {
+            font-size: 0.6rem;
+            color: var(--text-tertiary);
+            transition: transform 0.2s;
+        }
+        .header-user-trigger.open .header-user-chevron { transform: rotate(180deg); }
+
+        .header-user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            min-width: 200px;
+            z-index: 200;
+            overflow: hidden;
+        }
+        .header-user-dropdown.open { display: block; }
+
+        .dropdown-header {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border-default);
+            font-size: 0.78rem;
+            color: var(--text-tertiary);
+        }
+        .dropdown-header strong {
+            display: block;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 1rem;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: background 0.15s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: right;
+        }
+        .dropdown-item:hover { background: var(--bg-secondary); }
+        .dropdown-item i { width: 18px; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+
+        .dropdown-divider { height: 1px; background: var(--border-default); margin: 0.2rem 0; }
+
+        .dropdown-item.logout { color: #e74c3c; }
+        .dropdown-item.logout i { color: #e74c3c; }
+
+        /* Hide old welcome bar */
+        .auth-welcome-bar { display: none !important; }
+
+        /* User menu wrapper for dropdown positioning */
+        .header-user-wrapper {
+            position: relative;
+        }
+
+        /* Login button for non-authenticated */
+        .header-login-btn {
+            display: none;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--gradient-gold);
+            color: var(--deep-petrol);
+            border: none;
+            border-radius: 50px;
+            padding: 0.4rem 1rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Heebo', sans-serif;
+        }
+        .header-login-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(216,175,71,0.3); }
 
         @media (max-width: 768px) {
-            .auth-welcome-bar { margin-top: -2rem; padding: 0.4rem 1rem; gap: 0.5rem; }
+            .header-user-name { display: none; }
+            .header-user-trigger { padding: 0.25rem 0.4rem; }
+            .header-user-dropdown { left: auto; right: 0; min-width: 180px; }
+            .header-login-btn span { display: none; }
         }
 
         /* Overview Section */
@@ -2630,6 +2741,43 @@
                 <i class="fa-solid fa-arrow-right"></i>
                 <span>חזרה לאתר</span>
             </a>
+
+            <!-- Login button (shown when NOT authenticated) -->
+            <button class="header-login-btn" id="headerLoginBtn" onclick="openAuthModal()">
+                <i class="fa-solid fa-user"></i>
+                <span>התחברות</span>
+            </button>
+
+            <!-- User menu (shown when authenticated) -->
+            <div class="header-user-menu" id="headerUserMenu">
+                <button class="header-notif-btn" id="headerNotifBtn" title="הודעות">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="header-notif-badge" id="headerNotifBadge"></span>
+                </button>
+                <div class="header-user-wrapper">
+                    <button class="header-user-trigger" id="headerUserTrigger">
+                        <div class="header-user-avatar" id="headerUserAvatar">?</div>
+                        <span class="header-user-name" id="headerUserName">משתמש</span>
+                        <i class="fa-solid fa-chevron-down header-user-chevron"></i>
+                    </button>
+                    <div class="header-user-dropdown" id="headerUserDropdown">
+                        <div class="dropdown-header">
+                            <strong id="dropdownFullName">שם משתמש</strong>
+                            <span id="dropdownEmail">email@example.com</span>
+                        </div>
+                        <a href="profile.html" class="dropdown-item">
+                            <i class="fa-solid fa-user-circle"></i> האזור האישי
+                        </a>
+                        <a href="profile.html#settings" class="dropdown-item">
+                            <i class="fa-solid fa-gear"></i> הגדרות
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item logout" id="headerLogoutBtn">
+                            <i class="fa-solid fa-right-from-bracket"></i> התנתקות
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -2662,17 +2810,7 @@
                 <i class="fa-solid fa-play"></i>
                 לספריית הקורסים
             </a>
-            <!-- Authenticated Welcome Bar — compact pill inside hero -->
-            <div class="auth-welcome-bar" id="authWelcomeBar">
-                <div class="welcome-text">
-                    <i class="fa-solid fa-hand-sparkles" style="margin-left:0.3rem;"></i>
-                    <span id="authWelcomeName">שלום!</span> — נחמד לראות אותך שוב
-                </div>
-                <a href="#" class="resume-btn" id="authResumeBtn" style="display:none;">
-                    <i class="fa-solid fa-play"></i>
-                    <span id="authResumeBtnText">המשך ללמוד</span>
-                </a>
-            </div>
+            <!-- Old welcome bar removed — user menu is now in the header -->
         </section>
 
         <!-- Section 2: Overview -->
@@ -4201,6 +4339,9 @@
                 // Hide toast if authenticated
                 hideToast();
 
+                // Show header user menu, hide login btn
+                updateHeaderUserMenu();
+
                 // Personalize portal home
                 personalizePortalHome();
             } else {
@@ -4211,24 +4352,18 @@
                 aiLocked.style.display = '';
                 aiChat.style.display = 'none';
 
-                // Reset portal home personalization
-                const bar = document.getElementById('authWelcomeBar');
-                if (bar) bar.classList.remove('visible');
+                // Show login btn, hide user menu
+                const loginBtn = document.getElementById('headerLoginBtn');
+                if (loginBtn) loginBtn.style.display = 'flex';
+                const userMenu = document.getElementById('headerUserMenu');
+                if (userMenu) userMenu.classList.remove('visible');
+
                 const benefitsSection = document.querySelector('.benefits-section');
                 if (benefitsSection) benefitsSection.style.display = '';
             }
         }
 
         async function personalizePortalHome() {
-            // Show welcome bar
-            const bar = document.getElementById('authWelcomeBar');
-            if (bar) {
-                const name = currentUser?.user_metadata?.full_name || currentUser?.user_metadata?.name || '';
-                const firstName = name ? name.split(' ')[0] : '';
-                const welcomeEl = document.getElementById('authWelcomeName');
-                if (welcomeEl) welcomeEl.textContent = firstName ? `שלום ${firstName}` : 'שלום!';
-                bar.classList.add('visible');
-            }
 
             // Hide benefits/registration section for logged-in users
             const benefitsSection = document.querySelector('.benefits-section');
@@ -4293,6 +4428,69 @@
                 document.getElementById('aiInput')?.focus();
             }
         }
+
+        // ===== Header User Menu =====
+        function updateHeaderUserMenu() {
+            const menu = document.getElementById('headerUserMenu');
+            const loginBtn = document.getElementById('headerLoginBtn');
+            if (!menu || !currentUser) return;
+
+            // Hide login, show user menu
+            if (loginBtn) loginBtn.style.display = 'none';
+            menu.classList.add('visible');
+
+            // Set avatar initials + name
+            const fullName = currentUser?.user_metadata?.full_name || currentUser?.user_metadata?.name || currentUser?.email || '';
+            const firstName = fullName.split(' ')[0] || fullName.split('@')[0] || '?';
+            const initials = firstName.charAt(0).toUpperCase();
+
+            document.getElementById('headerUserAvatar').textContent = initials;
+            document.getElementById('headerUserName').textContent = firstName;
+            document.getElementById('dropdownFullName').textContent = fullName;
+            document.getElementById('dropdownEmail').textContent = currentUser?.email || '';
+        }
+
+        // Toggle dropdown
+        document.addEventListener('DOMContentLoaded', () => {
+            const trigger = document.getElementById('headerUserTrigger');
+            const dropdown = document.getElementById('headerUserDropdown');
+            if (trigger && dropdown) {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    trigger.classList.toggle('open');
+                    dropdown.classList.toggle('open');
+                });
+                document.addEventListener('click', () => {
+                    trigger.classList.remove('open');
+                    dropdown.classList.remove('open');
+                });
+            }
+
+            // Logout
+            const logoutBtn = document.getElementById('headerLogoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    if (supabaseClient) {
+                        await supabaseClient.auth.signOut();
+                    }
+                    isAuthenticated = false;
+                    currentUser = null;
+                    updateUI();
+                    location.reload();
+                });
+            }
+
+            // Notifications button (placeholder)
+            const notifBtn = document.getElementById('headerNotifBtn');
+            if (notifBtn) {
+                notifBtn.addEventListener('click', () => {
+                    alert('אין הודעות חדשות');
+                });
+            }
+        });
+
+        // Alias for login button
+        function openAuthModal() { openModal(false); }
 
         // ===== Modal =====
         function openModal(isWall = false) {

@@ -323,49 +323,51 @@
             box-shadow: 0 8px 25px rgba(216, 175, 71, 0.35);
         }
 
-        /* Authenticated Welcome Bar */
+        /* Authenticated Welcome Bar — compact pill inside hero */
         .auth-welcome-bar {
             display: none;
-            background: linear-gradient(135deg, rgba(216,175,71,0.12), rgba(47,133,146,0.08));
-            border: 1px solid rgba(216,175,71,0.2);
-            border-radius: 14px;
-            padding: 1rem 1.5rem;
-            margin: 0 2rem 0 2rem;
-            margin-top: -1.5rem;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 50px;
+            padding: 0.45rem 1.2rem;
+            margin: -2.5rem auto 0;
             position: relative;
             z-index: 2;
             align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            max-width: 1100px;
-            margin-left: auto;
-            margin-right: auto;
+            justify-content: center;
+            gap: 0.8rem;
+            width: fit-content;
+            max-width: 90%;
         }
-        .auth-welcome-bar.visible { display: flex; }
+        .auth-welcome-bar.visible { display: inline-flex; }
         .auth-welcome-bar .welcome-text {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-dark);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
         }
-        .auth-welcome-bar .welcome-text span { color: var(--gold); }
+        .auth-welcome-bar .welcome-text span { color: var(--gold-light); font-weight: 600; }
+        .auth-welcome-bar .welcome-text i { font-size: 0.9rem; }
         .auth-welcome-bar .resume-btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            background: var(--gradient-gold);
-            color: var(--deep-petrol);
-            padding: 0.5rem 1.2rem;
-            border-radius: 8px;
+            gap: 0.3rem;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
             text-decoration: none;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             font-weight: 600;
             transition: all 0.2s;
             white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        .auth-welcome-bar .resume-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(216,175,71,0.3); }
+        .auth-welcome-bar .resume-btn:hover { background: rgba(255,255,255,0.25); }
 
         @media (max-width: 768px) {
-            .auth-welcome-bar { flex-direction: column; text-align: center; margin: -1rem 1rem 0; padding: 0.8rem 1rem; }
+            .auth-welcome-bar { margin-top: -2rem; padding: 0.4rem 1rem; gap: 0.5rem; }
         }
 
         /* Overview Section */
@@ -2660,19 +2662,18 @@
                 <i class="fa-solid fa-play"></i>
                 לספריית הקורסים
             </a>
-        </section>
-
-        <!-- Authenticated Welcome Bar (hidden by default, shown via JS) -->
-        <div class="auth-welcome-bar" id="authWelcomeBar">
-            <div class="welcome-text">
-                <i class="fa-solid fa-hand-sparkles" style="color:var(--gold);margin-left:0.4rem;"></i>
-                <span id="authWelcomeName">שלום!</span> — נחמד לראות אותך שוב
+            <!-- Authenticated Welcome Bar — compact pill inside hero -->
+            <div class="auth-welcome-bar" id="authWelcomeBar">
+                <div class="welcome-text">
+                    <i class="fa-solid fa-hand-sparkles" style="margin-left:0.3rem;"></i>
+                    <span id="authWelcomeName">שלום!</span> — נחמד לראות אותך שוב
+                </div>
+                <a href="#" class="resume-btn" id="authResumeBtn" style="display:none;">
+                    <i class="fa-solid fa-play"></i>
+                    <span id="authResumeBtnText">המשך ללמוד</span>
+                </a>
             </div>
-            <a href="#" class="resume-btn" id="authResumeBtn" style="display:none;">
-                <i class="fa-solid fa-play"></i>
-                <span id="authResumeBtnText">המשך ללמוד</span>
-            </a>
-        </div>
+        </section>
 
         <!-- Section 2: Overview -->
         <section class="portal-section">

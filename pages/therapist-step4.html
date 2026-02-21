@@ -303,6 +303,16 @@
             color: var(--error);
         }
 
+        .field-error {
+            color: #dc3545;
+            font-size: 0.82rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+        .field-error.show { display: block; }
+        .checkbox-group.error { border-color: #dc3545; }
+        .signature-canvas-container.error { border-color: #dc3545; }
+
         .nav-buttons {
             display: flex;
             gap: 1rem;
@@ -453,7 +463,7 @@
                 <div class="step-circle"><i class="fa-solid fa-check" style="font-size: 0.7rem;"></i></div>
                 <div class="step-label">בריאות והתחייבות</div>
             </div>
-            <div class="step active">
+            <div class="step active" aria-current="step">
                 <div class="step-circle">4</div>
                 <div class="step-label">הסכם וחתימה</div>
             </div>
@@ -527,6 +537,7 @@
                         אני מאשר/ת שיש ברשותי ביטוח אחריות מקצועית בתוקף <span class="required">*</span>
                     </label>
                 </div>
+                <div class="field-error" id="insurance-error">יש לאשר ביטוח אחריות מקצועית</div>
 
                 <div class="checkbox-group disabled" id="responsibility-group">
                     <input type="checkbox" id="accepts_responsibility" name="accepts_responsibility" disabled required>
@@ -534,6 +545,7 @@
                         אני מבין/ה שכל האחריות המקצועית, החוקית (דיווח) והתיעודית היא עלי בלבד <span class="required">*</span>
                     </label>
                 </div>
+                <div class="field-error" id="responsibility-error">יש לאשר קבלת אחריות מקצועית וחוקית</div>
 
                 <div class="checkbox-group disabled" id="waiver-group">
                     <input type="checkbox" id="waiver_confirmed" name="waiver_confirmed" disabled required>
@@ -541,6 +553,7 @@
                         אני משחרר/ת את האתר מכל אחריות לטיפול או לתוצאותיו <span class="required">*</span>
                     </label>
                 </div>
+                <div class="field-error" id="waiver-error">יש לאשר שחרור האתר מאחריות</div>
 
                 <div class="signature-section">
                     <label>חתימה דיגיטלית <span class="required">*</span></label>
@@ -554,6 +567,14 @@
                         <button type="button" class="btn-clear" onclick="clearSignature()">
                             <i class="fa-solid fa-eraser"></i> נקה חתימה
                         </button>
+                    </div>
+                    <div class="field-error" id="signature-error">יש לחתום על ההסכם</div>
+                    <div class="typed-signature-fallback" style="margin-top: 0.8rem;">
+                        <label for="typed-name" style="font-size: 0.85rem; color: var(--text-light, #6c757d);">
+                            <i class="fa-solid fa-keyboard"></i>
+                            לא ניתן לחתום? הקלד/י את שמך המלא:
+                        </label>
+                        <input type="text" id="typed-name" placeholder="שם מלא" style="width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--border, #e0e0e0); border-radius: 8px; font-family: inherit; font-size: 0.95rem; margin-top: 0.3rem;">
                     </div>
                 </div>
 
@@ -651,8 +672,14 @@
 
         function resizeCanvas() {
             const rect = canvas.parentElement.getBoundingClientRect();
+            const tempData = hasSignature ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null;
+            const oldWidth = canvas.width;
+            const oldHeight = canvas.height;
             canvas.width = rect.width;
             canvas.height = 150;
+            if (tempData && oldWidth > 0 && oldHeight > 0) {
+                ctx.putImageData(tempData, 0, 0);
+            }
         }
         window.addEventListener('resize', resizeCanvas);
 
@@ -720,7 +747,9 @@
             const waiverChecked = document.getElementById('waiver_confirmed').checked;
 
             const allChecked = insuranceChecked && responsibilityChecked && waiverChecked;
-            const canSubmit = hasScrolledToBottom && allChecked && hasSignature;
+            const typedName = document.getElementById('typed-name')?.value.trim();
+            const hasValidSignature = hasSignature || (typedName && typedName.length >= 2);
+            const canSubmit = hasScrolledToBottom && allChecked && hasValidSignature;
 
             submitBtn.disabled = !canSubmit;
         }
@@ -728,6 +757,7 @@
         ['has_insurance', 'accepts_responsibility', 'waiver_confirmed'].forEach(id => {
             document.getElementById(id).addEventListener('change', validateForm);
         });
+        document.getElementById('typed-name')?.addEventListener('input', validateForm);
 
         // ===================
         // FORM SUBMISSION
@@ -735,8 +765,36 @@
         document.getElementById('step4-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (!hasSignature) {
-                showToast('נא לחתום על ההסכם', 'error');
+            // Clear previous errors
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.checkbox-group.error, .signature-canvas-container.error').forEach(el => el.classList.remove('error'));
+
+            let hasErrors = false;
+
+            if (!document.getElementById('has_insurance').checked) {
+                document.getElementById('insurance-error').classList.add('show');
+                document.getElementById('insurance-group').classList.add('error');
+                hasErrors = true;
+            }
+            if (!document.getElementById('accepts_responsibility').checked) {
+                document.getElementById('responsibility-error').classList.add('show');
+                document.getElementById('responsibility-group').classList.add('error');
+                hasErrors = true;
+            }
+            if (!document.getElementById('waiver_confirmed').checked) {
+                document.getElementById('waiver-error').classList.add('show');
+                document.getElementById('waiver-group').classList.add('error');
+                hasErrors = true;
+            }
+            const typedNameVal = document.getElementById('typed-name')?.value.trim();
+            if (!hasSignature && !(typedNameVal && typedNameVal.length >= 2)) {
+                document.getElementById('signature-error').classList.add('show');
+                document.querySelector('.signature-canvas-container').classList.add('error');
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
+                showToast('יש למלא את כל השדות הנדרשים', 'error');
                 return;
             }
 
@@ -745,7 +803,8 @@
 
             try {
                 const formData = JSON.parse(localStorage.getItem('therapist_form_data') || '{}');
-                const signatureData = canvas.toDataURL('image/png');
+                const typedName = document.getElementById('typed-name')?.value.trim();
+                const signatureData = hasSignature ? canvas.toDataURL('image/png') : null;
 
                 // Build questionnaire JSONB
                 const questionnaire = {

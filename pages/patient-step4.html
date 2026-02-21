@@ -290,6 +290,15 @@
             text-decoration: underline;
         }
         .btn-clear-signature:hover { color: var(--error); }
+        .field-error {
+            color: #dc3545;
+            font-size: 0.82rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+        .field-error.show { display: block; }
+        .checkbox-item.error { border-color: #dc3545 !important; }
+        .signature-canvas-container.error { border-color: #dc3545 !important; }
         .signature-canvas-container {
             border: 2px dashed var(--border);
             border-radius: 12px;
@@ -456,7 +465,7 @@
                 <div class="step-circle"><i class="fa-solid fa-check"></i></div>
                 <span class="step-label">ציפיות ורפואי</span>
             </div>
-            <div class="step active">
+            <div class="step active" aria-current="step">
                 <div class="step-circle">4</div>
                 <span class="step-label">התחייבות</span>
             </div>
@@ -548,7 +557,7 @@
                             אני מאשר/ת שקראתי והבנתי את הסכם תנאי השימוש המלא <span class="required">*</span>
                         </label>
                     </div>
-
+                    <div class="field-error" id="terms-error">יש לאשר את תנאי השימוש</div>
 
                     <!-- Checkbox 3: Age Declaration -->
                     <div class="checkbox-item locked" id="age-checkbox">
@@ -557,6 +566,7 @@
                             אני מצהיר/ה שאני מעל גיל 18 <span class="required">*</span>
                         </label>
                     </div>
+                    <div class="field-error" id="age-error">יש לאשר הצהרת גיל</div>
 
                     <!-- Marketing Consent -->
                     <div class="checkbox-item" style="margin-top: 0.8rem;">
@@ -575,6 +585,14 @@
                         <div class="signature-canvas-container" id="signature-container">
                             <canvas id="signature-canvas"></canvas>
                             <span class="signature-placeholder">חתום/י כאן</span>
+                        </div>
+                        <div class="field-error" id="signature-error">יש לחתום על ההסכם</div>
+                        <div class="typed-signature-fallback" style="margin-top: 0.8rem;">
+                            <label for="typed-name" style="font-size: 0.85rem; color: var(--text-light, #6c757d);">
+                                <i class="fa-solid fa-keyboard"></i>
+                                לא ניתן לחתום? הקלד/י את שמך המלא:
+                            </label>
+                            <input type="text" id="typed-name" placeholder="שם מלא" style="width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--border, #e0e0e0); border-radius: 8px; font-family: inherit; font-size: 0.95rem; margin-top: 0.3rem;">
                         </div>
                     </div>
 
@@ -639,9 +657,13 @@
 
         function resizeCanvas() {
             const container = document.getElementById('signature-container');
+            const tempData = hasSignature ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null;
             const rect = container.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = 150;
+            if (tempData) {
+                ctx.putImageData(tempData, 0, 0);
+            }
             ctx.strokeStyle = '#1a1a2e';
             ctx.lineWidth = 2;
             ctx.lineCap = 'round';
@@ -754,7 +776,9 @@
         function updateSubmitButton() {
             const termsConfirmed = document.getElementById('terms_confirmed').checked;
             const ageConfirmed = document.getElementById('age_confirmed').checked;
-            const canSubmit = termsConfirmed && ageConfirmed && hasSignature;
+            const typedName = document.getElementById('typed-name')?.value.trim();
+            const hasValidSignature = hasSignature || (typedName && typedName.length >= 2);
+            const canSubmit = termsConfirmed && ageConfirmed && hasValidSignature;
             document.getElementById('submit-btn').disabled = !canSubmit;
         }
 
@@ -765,6 +789,8 @@
                 updateSubmitButton();
             });
         });
+
+        document.getElementById('typed-name')?.addEventListener('input', updateSubmitButton);
 
         // Allow clicking on the div area to toggle checkbox
         document.querySelectorAll('.checkbox-item').forEach(item => {
@@ -801,13 +827,32 @@
             const termsConfirmed = document.getElementById('terms_confirmed').checked;
             const ageConfirmed = document.getElementById('age_confirmed').checked;
 
-            if (!termsConfirmed || !ageConfirmed) {
-                showToast('יש לאשר את כל ההצהרות');
-                return;
+            // Clear previous errors
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.checkbox-item.error, .signature-canvas-container.error').forEach(el => el.classList.remove('error'));
+
+            let hasErrors = false;
+
+            if (!termsConfirmed) {
+                document.getElementById('terms-error').classList.add('show');
+                document.getElementById('terms-checkbox')?.classList.add('error');
+                hasErrors = true;
+            }
+            if (!ageConfirmed) {
+                document.getElementById('age-error').classList.add('show');
+                document.getElementById('age-checkbox')?.classList.add('error');
+                hasErrors = true;
             }
 
-            if (!hasSignature) {
-                showToast('יש לחתום בתיבת החתימה');
+            const typedNameVal = document.getElementById('typed-name')?.value.trim();
+            if (!hasSignature && !(typedNameVal && typedNameVal.length >= 2)) {
+                document.getElementById('signature-error').classList.add('show');
+                document.getElementById('signature-container')?.classList.add('error');
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
+                showToast('יש למלא את כל השדות הנדרשים');
                 return;
             }
 
@@ -817,7 +862,8 @@
 
             try {
                 // Get signature as base64
-                const signatureData = canvas.toDataURL('image/png');
+                const typedName = document.getElementById('typed-name')?.value.trim();
+                const signatureData = hasSignature ? canvas.toDataURL('image/png') : null;
 
                 // Build questionnaire object
                 const questionnaire = {

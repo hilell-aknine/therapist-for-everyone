@@ -249,6 +249,7 @@
         .nlp-level-select:focus {
             border-color: var(--primary);
             outline: none;
+            box-shadow: 0 0 0 3px rgba(47, 133, 146, 0.1);
         }
 
         .section-divider {
@@ -371,32 +372,32 @@
             <form id="step1-form">
                 <!-- Personal Details -->
                 <div class="form-group">
-                    <label>שם מלא <span class="required">*</span></label>
+                    <label for="full_name">שם מלא <span class="required">*</span></label>
                     <input type="text" name="full_name" id="full_name" required placeholder="שם פרטי ומשפחה" autocomplete="name">
                     <div class="error-msg" id="full_name-error">יש להזין שם מלא</div>
                 </div>
 
                 <div class="row">
                     <div class="form-group">
-                        <label>טלפון <span class="required">*</span></label>
+                        <label for="phone">טלפון <span class="required">*</span></label>
                         <input type="tel" name="phone" id="phone" required placeholder="050-0000000" autocomplete="tel">
                         <div class="error-msg" id="phone-error">מספר טלפון לא תקין</div>
                     </div>
                     <div class="form-group">
-                        <label>אימייל <span class="required">*</span></label>
-                        <input type="email" name="email" id="email" required placeholder="your@email.com" autocomplete="email">
+                        <label for="email">אימייל <span class="required">*</span></label>
+                        <input type="email" name="email" id="email" required placeholder="your@email.com" autocomplete="email" pattern="[^@\s]+@[^@\s]+\.[^@\s]+">
                         <div class="error-msg" id="email-error">כתובת אימייל לא תקינה</div>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="form-group">
-                        <label>תאריך לידה</label>
-                        <input type="date" name="birth_date">
+                        <label for="birth_date">תאריך לידה</label>
+                        <input type="date" name="birth_date" id="birth_date" autocomplete="bday">
                     </div>
                     <div class="form-group">
-                        <label>מגדר</label>
-                        <select name="gender">
+                        <label for="gender">מגדר</label>
+                        <select name="gender" id="gender">
                             <option value="">בחר/י</option>
                             <option value="male">זכר</option>
                             <option value="female">נקבה</option>
@@ -406,8 +407,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>עיר מגורים</label>
-                    <input type="text" name="city" placeholder="תל אביב">
+                    <label for="city">עיר מגורים</label>
+                    <input type="text" name="city" id="city" placeholder="תל אביב" autocomplete="address-level2">
                 </div>
 
                 <!-- ============ סעיף 1: התמחות ואוכלוסיית יעד ============ -->
@@ -417,8 +418,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>באילו אוכלוסיות את/ה מתמחה? <span class="required">*</span> <span class="hint">(ניתן לבחור מספר)</span></label>
-                    <div class="checkbox-grid">
+                    <label id="label-target-population">באילו אוכלוסיות את/ה מתמחה? <span class="required">*</span> <span class="hint">(ניתן לבחור מספר)</span></label>
+                    <div class="checkbox-grid" role="group" aria-labelledby="label-target-population">
                         <label class="checkbox-item">
                             <input type="checkbox" name="target_population" value="soldiers">
                             חיילים בשירות סדיר
@@ -447,8 +448,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>תחומי התמחות עיקריים <span class="required">*</span> <span class="hint">(ניתן לבחור מספר)</span></label>
-                    <div class="checkbox-grid">
+                    <label id="label-specialization">תחומי התמחות עיקריים <span class="required">*</span> <span class="hint">(ניתן לבחור מספר)</span></label>
+                    <div class="checkbox-grid" role="group" aria-labelledby="label-specialization">
                         <label class="checkbox-item">
                             <input type="checkbox" name="specialization" value="trauma">
                             טראומה ו-PTSD
@@ -491,8 +492,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>תארים אקדמיים <span class="hint">(סמן/י את כל הרלוונטיים)</span></label>
-                    <div class="checkbox-grid">
+                    <label id="label-academic-degree">תארים אקדמיים <span class="hint">(סמן/י את כל הרלוונטיים)</span></label>
+                    <div class="checkbox-grid" role="group" aria-labelledby="label-academic-degree">
                         <label class="checkbox-item">
                             <input type="checkbox" name="academic_degree" value="psychology_ba">
                             תואר ראשון בפסיכולוגיה
@@ -546,8 +547,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>גישות פסיכותרפיות קלאסיות <span class="hint">(סמן/י הכשרות שעברת)</span></label>
-                    <div class="checkbox-grid">
+                    <label id="label-therapy-methods">גישות פסיכותרפיות קלאסיות <span class="hint">(סמן/י הכשרות שעברת)</span></label>
+                    <div class="checkbox-grid" role="group" aria-labelledby="label-therapy-methods">
                         <label class="checkbox-item">
                             <input type="checkbox" name="therapy_methods" value="cbt">
                             CBT - קוגניטיבי התנהגותי
@@ -592,8 +593,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>קואצ'ינג ו-NLP</label>
-                    <div class="checkbox-grid">
+                    <label id="label-coaching-nlp">קואצ'ינג ו-NLP</label>
+                    <div class="checkbox-grid" role="group" aria-labelledby="label-coaching-nlp">
                         <label class="checkbox-item">
                             <input type="checkbox" name="therapy_methods" value="coaching">
                             קואצ'ינג / אימון אישי
@@ -612,8 +613,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>גישות גוף-נפש והוליסטיות</label>
-                    <div class="checkbox-grid">
+                    <label id="label-holistic">גישות גוף-נפש והוליסטיות</label>
+                    <div class="checkbox-grid" role="group" aria-labelledby="label-holistic">
                         <label class="checkbox-item">
                             <input type="checkbox" name="therapy_methods" value="mindfulness">
                             מיינדפולנס / מדיטציה

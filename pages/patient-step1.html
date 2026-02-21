@@ -200,7 +200,8 @@
             background: white;
         }
         input:focus, select:focus, textarea:focus {
-            outline: none;
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(47, 133, 146, 0.1);
         }
@@ -273,6 +274,7 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
     <nav class="form-nav">
         <a href="../index.html" class="form-nav-logo"><img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle"> בית המטפלים</a>
         <a href="../landing-patient.html"><i class="fa-solid fa-arrow-right"></i> חזרה לאתר</a>
@@ -308,7 +310,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <main id="main-content" class="container">
         <div class="form-card">
             <div class="step-header">
                 <div class="step-icon"><i class="fa-solid fa-user"></i></div>
@@ -326,19 +328,19 @@
 
                 <div class="form-group">
                     <label>שם מלא <span class="required">*</span></label>
-                    <input type="text" name="full_name" id="full_name" required placeholder="שם פרטי ומשפחה">
+                    <input type="text" name="full_name" id="full_name" required placeholder="שם פרטי ומשפחה" autocomplete="name">
                     <div class="error-msg" id="full_name-error">יש להזין שם מלא</div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>טלפון <span class="required">*</span></label>
-                        <input type="tel" name="phone" id="phone" required placeholder="050-0000000">
+                        <input type="tel" name="phone" id="phone" required placeholder="050-0000000" autocomplete="tel">
                         <div class="error-msg" id="phone-error">מספר טלפון לא תקין</div>
                     </div>
                     <div class="form-group">
                         <label>אימייל <span class="required">*</span></label>
-                        <input type="email" name="email" id="email" required placeholder="your@email.com">
+                        <input type="email" name="email" id="email" required placeholder="your@email.com" autocomplete="email">
                         <div class="error-msg" id="email-error">כתובת אימייל לא תקינה</div>
                     </div>
                 </div>
@@ -346,7 +348,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>תאריך לידה</label>
-                        <input type="date" name="birth_date" id="birth_date">
+                        <input type="date" name="birth_date" id="birth_date" autocomplete="bday">
                     </div>
                     <div class="form-group">
                         <label>מגדר</label>
@@ -362,7 +364,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>עיר מגורים</label>
-                        <input type="text" name="city" id="city" placeholder="תל אביב">
+                        <input type="text" name="city" id="city" placeholder="תל אביב" autocomplete="address-level2">
                     </div>
                     <div class="form-group">
                         <label>מצב משפחתי</label>
@@ -436,9 +438,9 @@
                 </button>
             </form>
         </div>
-    </div>
+    </main>
 
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
     <script>
         // Load saved data
@@ -468,11 +470,11 @@
                 showToast('יש להזין שם מלא');
                 return;
             }
-            if (!phone || !/^05\d{8}$|^0[2-4,8-9]\d{7}$/.test(phone.replace(/[-\s]/g, ''))) {
+            if (!phone || !/^05\d{8}$|^0[2-489]\d{7}$/.test(phone.replace(/[-\s]/g, ''))) {
                 showToast('מספר טלפון לא תקין — יש להזין מספר ישראלי');
                 return;
             }
-            if (!email || !email.includes('@')) {
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 showToast('יש להזין כתובת אימייל תקינה');
                 return;
             }
@@ -512,11 +514,11 @@
     <!-- Inline Validation -->
     <script>
     (function() {
-        const phoneRegex = /^05\d{8}$|^0[2-4,8-9]\d{7}$/;
+        const phoneRegex = /^05\d{8}$|^0[2-489]\d{7}$/;
         const rules = [
             { id: 'full_name', errId: 'full_name-error', test: v => v.length >= 2 },
             { id: 'phone', errId: 'phone-error', test: v => phoneRegex.test(v.replace(/[-\s]/g, '')) },
-            { id: 'email', errId: 'email-error', test: v => v.includes('@') && v.includes('.') },
+            { id: 'email', errId: 'email-error', test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
             { id: 'main_reason', errId: 'main_reason-error', test: v => v.length >= 10 }
         ];
         function validate(rule) {

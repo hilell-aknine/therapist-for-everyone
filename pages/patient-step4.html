@@ -427,6 +427,7 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
     <nav class="form-nav">
         <a href="../index.html" class="form-nav-logo"><img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle"> בית המטפלים</a>
         <a href="../landing-patient.html"><i class="fa-solid fa-arrow-right"></i> חזרה לאתר</a>
@@ -462,7 +463,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <main id="main-content" class="container">
         <!-- Form View -->
         <div id="form-view">
             <div class="form-card">
@@ -616,9 +617,9 @@
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
     <script>
         // Supabase Configuration
@@ -781,11 +782,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             formData = JSON.parse(localStorage.getItem('patientForm') || '{}');
 
-            // DEBUG MODE - disabled validation
-            // if (!formData.full_name || !formData.therapy_type || !formData.mother_relationship) {
-            //     window.location.href = 'patient-step1.html';
-            //     return;
-            // }
+            if (!formData.full_name || !formData.therapy_type || !formData.mother_relationship) {
+                window.location.href = 'patient-step1.html';
+                return;
+            }
 
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);

@@ -367,6 +367,7 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
     <nav class="form-nav">
         <a href="../index.html" class="form-nav-logo"><img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle"> בית המטפלים</a>
         <a href="../landing-patient.html"><i class="fa-solid fa-arrow-right"></i> חזרה לאתר</a>
@@ -402,7 +403,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <main id="main-content" class="container">
         <form id="step3-form">
             <div class="form-card">
                 <div class="step-header">
@@ -414,22 +415,22 @@
                 <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> ניסיון עבר</h3>
 
                 <div class="form-group">
-                    <label>האם עברת טיפול רגשי בעבר?</label>
+                    <label for="previous_therapy_history">האם עברת טיפול רגשי בעבר?</label>
                     <textarea name="previous_therapy_history" id="previous_therapy_history" placeholder="אם כן, ספר/י בקצרה על הניסיון - מה עבד, מה פחות..."></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>למה דווקא עכשיו? <span class="label-hint">(מה הטריגר לפנייה)</span></label>
+                    <label for="why_now">למה דווקא עכשיו? <span class="label-hint">(מה הטריגר לפנייה)</span></label>
                     <textarea name="why_now" id="why_now" placeholder="מה קרה שגרם לך לחפש עזרה דווקא בתקופה הזו?"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>האם יש לך חששות או פחדים לגבי הטיפול?</label>
+                    <label for="fears">האם יש לך חששות או פחדים לגבי הטיפול?</label>
                     <textarea name="fears" id="fears" placeholder="חששות, פחדים, חסמים..."></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>מה את/ה מקווה להשיג מהטיפול?</label>
+                    <label for="expectations">מה את/ה מקווה להשיג מהטיפול?</label>
                     <textarea name="expectations" id="expectations" placeholder="מה היית רוצה שישתנה בחיים שלך?"></textarea>
                 </div>
             </div>
@@ -443,12 +444,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label>האם יש לך מחלות כרוניות או בעיות בריאותיות?</label>
+                    <label for="chronic_issues">האם יש לך מחלות כרוניות או בעיות בריאותיות?</label>
                     <textarea name="chronic_issues" id="chronic_issues" placeholder="אם כן, פרט/י..." style="min-height: 60px;"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>האם את/ה נוטל/ת תרופות פסיכיאטריות או אחרות?</label>
+                    <label for="medications">האם את/ה נוטל/ת תרופות פסיכיאטריות או אחרות?</label>
                     <input type="text" name="medications" id="medications" placeholder="שמות תרופות (אם יש)">
                 </div>
 
@@ -551,9 +552,9 @@
                 </button>
             </div>
         </form>
-    </div>
+    </main>
 
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
     <script>
         // Toggle treatment details visibility
@@ -569,11 +570,10 @@
         // Check if previous steps were completed
         document.addEventListener('DOMContentLoaded', () => {
             const saved = JSON.parse(localStorage.getItem('patientForm') || '{}');
-            // DEBUG MODE - disabled validation
-            // if (!saved.full_name || !saved.mother_relationship) {
-            //     window.location.href = 'patient-step1.html';
-            //     return;
-            // }
+            if (!saved.full_name || !saved.mother_relationship) {
+                window.location.href = 'patient-step1.html';
+                return;
+            }
 
             // Load saved data
             const fields = ['previous_therapy_history', 'why_now', 'fears', 'expectations',

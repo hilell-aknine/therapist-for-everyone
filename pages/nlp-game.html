@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <meta name="theme-color" content="#003B46">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="../assets/icon-192.svg">
+    <title>משחק NLP - בית המטפלים</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/nlp-game.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Page-level layout (not in nlp-game.css) */
+        :root {
+            --sidebar-dark: var(--t-sidebar-bg, #0a3a42);
+            --deep-petrol: var(--t-deep-petrol, #003B46);
+            --gold: var(--t-gold, #D4AF37);
+            --gold-light: var(--t-gold-light, #E1B13F);
+            --gradient-gold: var(--t-gradient-gold, linear-gradient(135deg, #D4AF37, #E1B13F));
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--t-bg, #FAF8F4);
+            color: var(--t-text, #2d3436);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== Page Header (matches free-portal) ===== */
+        .page-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--t-bg-card, #fff);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            z-index: 150;
+            border-bottom: 1px solid var(--t-border, #e5e7eb);
+            box-shadow: var(--t-shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: var(--t-text, #111);
+        }
+
+        .header-brand-icon {
+            width: 36px; height: 36px;
+            background: var(--gradient-gold);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--sidebar-dark);
+        }
+
+        .header-brand-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--deep-petrol);
+        }
+
+        .header-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--t-border, #e5e7eb);
+        }
+
+        .header-page-name {
+            font-size: 0.9rem;
+            color: var(--t-text-secondary, #6b7280);
+            font-weight: 500;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .back-to-portal {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gold);
+            background: none;
+            border: 1px solid var(--t-border, #e5e7eb);
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            font-family: 'Heebo', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-to-portal:hover {
+            background: var(--t-bg-secondary, #f3f4f6);
+            border-color: var(--gold);
+        }
+
+        .theme-toggle-btn {
+            background: none;
+            border: 1px solid var(--t-border, #e5e7eb);
+            border-radius: 8px;
+            width: 36px; height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--t-text-secondary, #6b7280);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--t-bg-secondary, #f3f4f6);
+        }
+
+        /* Body offset for fixed header */
+        .page-body {
+            padding-top: 64px;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--deep-petrol);
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .page-header {
+                padding: 0 1rem;
+            }
+            .header-brand-text,
+            .header-separator,
+            .header-page-name {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="header-right">
+            <a href="free-portal.html" class="header-brand">
+                <div class="header-brand-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <span class="header-brand-text">בית המטפלים</span>
+            </a>
+            <div class="header-separator"></div>
+            <span class="header-page-name">משחק NLP</span>
+        </div>
+        <div class="header-left">
+            <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="מצב כהה/בהיר">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <a href="free-portal.html" class="back-to-portal">
+                <i class="fa-solid fa-arrow-right"></i>
+                חזרה לפורטל
+            </a>
+        </div>
+    </header>
+
+    <!-- Page Body -->
+    <div class="page-body">
+
+        <!-- Loading Screen -->
+        <div id="game-loading-screen" class="game-loading-screen">
+            <div class="game-loading-content">
+                <div class="game-loading-spinner"></div>
+                <p class="game-loading-text">טוען את המשחק...</p>
+            </div>
+        </div>
+
+        <!-- Onboarding Overlay -->
+        <div id="game-onboarding-overlay" class="game-onboarding-overlay" style="display: none;">
+            <div class="game-onboarding-card">
+                <div class="game-onboarding-step" id="game-onboarding-step-content"></div>
+                <div class="game-onboarding-dots" id="game-onboarding-dots"></div>
+                <button class="btn btn-primary btn-full" id="game-onboarding-btn" onclick="game.nextOnboardingStep()">הבא</button>
+            </div>
+        </div>
+
+        <!-- Game Header (stats bar) -->
+        <header class="game-header" id="game-app-header" style="display: none;">
+            <div class="game-stats-bar">
+                <div class="game-stat-item xp">
+                    <span class="icon">&#11088;</span>
+                    <span id="game-xp-value">0</span>
+                </div>
+                <div class="game-stat-item streak">
+                    <span class="icon">&#128293;</span>
+                    <span id="game-streak-value">0</span>
+                </div>
+                <div class="game-stat-item hearts">
+                    <div class="game-hearts-display" id="game-hearts-container">
+                        <span class="heart">&#10084;&#65039;</span>
+                        <span class="heart">&#10084;&#65039;</span>
+                        <span class="heart">&#10084;&#65039;</span>
+                        <span class="heart">&#10084;&#65039;</span>
+                        <span class="heart">&#10084;&#65039;</span>
+                    </div>
+                </div>
+                <button class="game-sound-toggle" id="game-sound-toggle" onclick="game.toggleSound()" title="השתק/הפעל צלילים">
+                    &#128266;
+                </button>
+                <button class="game-user-menu-btn" id="game-user-menu-btn" onclick="game.toggleUserMenu()">
+                    &#128100;
+                </button>
+            </div>
+
+            <!-- Heart Recovery Timer -->
+            <div class="game-heart-timer-bar" id="game-heart-timer-bar" style="display: none;">
+                <span class="game-heart-timer-text" id="game-heart-timer-text">&#10084;&#65039; +1 בעוד 20:00</span>
+                <div class="game-heart-timer-progress">
+                    <div class="game-heart-timer-fill" id="game-heart-timer-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- User Menu Dropdown -->
+        <div class="game-user-menu" id="game-user-menu" style="display: none;">
+            <div class="game-user-menu-email" id="game-user-menu-email"></div>
+            <button class="game-user-menu-item" onclick="game.showStats()">&#128202; הסטטיסטיקות שלי</button>
+            <button class="game-user-menu-item" onclick="game.logout()">&#128682; התנתקות</button>
+        </div>
+
+        <!-- Level Up Overlay -->
+        <div class="game-level-up-overlay" id="game-level-up-overlay" style="display: none;">
+            <div class="game-level-up-text" id="game-level-up-text"></div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="game-progress-wrapper" style="display: none; max-width: 600px; margin: 0 auto; padding: 0 1.25rem;">
+            <div class="game-progress-container" id="game-progress-container" style="display: none;">
+                <div class="game-progress-bar" id="game-progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main id="game-main-content" style="display: none;">
+            <div id="game-container">
+                <!-- Dynamic game content renders here -->
+            </div>
+        </main>
+
+        <!-- Footer Actions -->
+        <div class="game-footer-actions" id="game-footer-actions" style="display: none;">
+            <div class="game-footer-inner">
+                <button class="btn btn-secondary" onclick="game.exitLesson()">יציאה</button>
+                <button class="btn btn-primary" id="game-check-btn" disabled onclick="game.checkAnswer()">בדיקה</button>
+            </div>
+        </div>
+
+        <!-- Feedback Panel -->
+        <div class="game-feedback-panel" id="game-feedback-panel">
+            <div class="game-feedback-content">
+                <div class="game-feedback-header">
+                    <span class="game-feedback-icon" id="game-feedback-icon">&#127881;</span>
+                    <span class="game-feedback-title" id="game-feedback-title">מעולה!</span>
+                </div>
+                <div class="game-feedback-explanation" id="game-feedback-explanation"></div>
+                <button class="game-feedback-btn" id="game-feedback-btn" onclick="game.continueToNext()">המשך</button>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="game-modal-overlay" id="game-modal-overlay">
+            <div class="game-modal-content">
+                <div class="game-modal-icon" id="game-modal-icon">&#128682;</div>
+                <div class="game-modal-title" id="game-modal-title"></div>
+                <div class="game-modal-text" id="game-modal-text"></div>
+                <div class="game-modal-buttons" id="game-modal-buttons"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Scripts -->
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/nlp-game-data.js"></script>
+    <script src="../js/nlp-game.js"></script>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('beit-theme', next);
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const btn = document.getElementById('themeToggleBtn');
+            if (!btn) return;
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            btn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        }
+
+        updateThemeIcon();
+
+        // Toast utility
+        function showToast(msg, duration) {
+            duration = duration || 3000;
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(function() { t.classList.remove('show'); }, duration);
+        }
+
+        // Check for login_required redirect
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('msg') === 'login_required') {
+                showToast('יש להירשם כדי לגשת למשחק');
+                history.replaceState(null, '', window.location.pathname);
+            }
+        })();
+    </script>
+</body>
+</html>

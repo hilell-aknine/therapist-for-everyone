@@ -576,6 +576,8 @@
             transition: all 0.3s;
         }
         .tool-card:hover { box-shadow: var(--shadow-sm); }
+        a.tool-card-link { text-decoration: none; color: inherit; cursor: pointer; }
+        a.tool-card-link:hover { border-color: var(--gold); box-shadow: 0 4px 16px rgba(212, 175, 55, 0.15); }
         .tool-badge {
             position: absolute;
             top: 0.75rem;
@@ -2880,14 +2882,14 @@
                         <h4>מורה AI אישי</h4>
                         <p>שאלו שאלות, תרגלו ותקבלו משוב מותאם</p>
                     </div>
-                    <div class="tool-card">
-                        <span class="tool-badge coming-soon"><i class="fa-solid fa-clock"></i> בקרוב</span>
-                        <div class="tool-card-icon" style="background: #FFF3E0; color: #E65100;">
+                    <a href="nlp-game.html" class="tool-card tool-card-link" onclick="return checkGameAccess()">
+                        <span class="tool-badge available"><i class="fa-solid fa-lock-open"></i> זמין</span>
+                        <div class="tool-card-icon" style="background: rgba(216, 175, 71, 0.1); color: var(--gold);">
                             <i class="fa-solid fa-gamepad"></i>
                         </div>
-                        <h4>משחק לימודי</h4>
-                        <p>תרגול החומר בצורה מהנה ואינטראקטיבית</p>
-                    </div>
+                        <h4>משחק NLP</h4>
+                        <p>תרגול החומר בצורה מהנה ואינטראקטיבית — XP, רמות והישגים</p>
+                    </a>
                 </div>
             </div>
         </section>
@@ -4616,6 +4618,39 @@
             document.getElementById('toast').classList.remove('show');
             if (toastTimeout) clearTimeout(toastTimeout);
         }
+
+        // ===== Game Access Check =====
+        function checkGameAccess() {
+            if (!isAuthenticated) {
+                showGameToast('יש להירשם כדי לגשת למשחק');
+                return false;
+            }
+            return true;
+        }
+
+        function showGameToast(msg) {
+            var t = document.createElement('div');
+            t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--deep-petrol);color:#fff;padding:0.75rem 1.5rem;border-radius:10px;font-size:0.9rem;font-weight:500;z-index:9999;opacity:0;transition:all 0.3s ease;font-family:Heebo,sans-serif;white-space:nowrap;';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            requestAnimationFrame(function() {
+                t.style.opacity = '1';
+                t.style.transform = 'translateX(-50%) translateY(0)';
+            });
+            setTimeout(function() {
+                t.style.opacity = '0';
+                setTimeout(function() { t.remove(); }, 300);
+            }, 3000);
+        }
+
+        // Check for redirected login_required message
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('msg') === 'login_required') {
+                setTimeout(function() { showGameToast('יש להירשם כדי לגשת למשחק'); }, 500);
+                history.replaceState(null, '', window.location.pathname);
+            }
+        })();
 
         // ===== Mobile Sidebar =====
         function toggleSidebar() {

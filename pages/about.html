@@ -30,7 +30,7 @@
     <style>
         /* Hero */
         .hero {
-            padding: 10rem 2rem 5rem; text-align: center;
+            padding: 8rem 2rem 0; text-align: center;
             background: var(--deep-petrol); color: var(--pure-white);
             position: relative; overflow: hidden;
         }
@@ -46,7 +46,7 @@
             33% { transform: translate(-20px,30px); }
             66% { transform: translate(15px,-20px); }
         }
-        .hero-content { position: relative; z-index: 2; max-width: 700px; margin: 0 auto; }
+        .hero-content { position: relative; z-index: 2; max-width: 700px; margin: 0 auto; padding-bottom: 2.5rem; }
         .hero h1 {
             font-family: var(--font-display);
             font-size: clamp(2.5rem, 5vw, 3.5rem);
@@ -57,10 +57,35 @@
         .hero h1 span { color: var(--gold); }
         .hero p {
             color: var(--frost-white); font-size: 1.2rem; max-width: 550px;
-            margin: 0 auto; opacity: 0.9; line-height: 1.8;
+            margin: 0 auto; line-height: 1.8;
             opacity: 0; animation: fadeIn 0.8s ease-out 0.4s forwards;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Hero Founders Photos */
+        .hero-founders {
+            position: relative; z-index: 2;
+            display: flex; justify-content: center; align-items: flex-end;
+            gap: 0; max-width: 750px; margin: 0 auto;
+            opacity: 0; animation: fadeIn 0.8s ease-out 0.6s forwards;
+        }
+        .hero-founder-photo {
+            flex: 0 0 auto; position: relative;
+        }
+        .hero-founder-photo img {
+            display: block; height: 340px; width: auto;
+            object-fit: cover; object-position: center top;
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        }
+        .hero-founder-photo .hero-photo-name {
+            position: absolute; bottom: 85px; left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-display); font-size: 1.1rem;
+            font-weight: 700; color: var(--pure-white);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
 
         /* Ram's Letter */
         .letter-section { padding: 6rem 2rem; background: var(--cream); }
@@ -246,8 +271,11 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .hero { padding: 8rem 1.5rem 4rem; }
+            .hero { padding: 7rem 1.5rem 0; }
             .hero h1 { font-size: 2rem; }
+            .hero-founders { max-width: 100%; }
+            .hero-founder-photo img { height: 240px; }
+            .hero-founder-photo .hero-photo-name { bottom: 60px; font-size: 0.95rem; }
             .letter-card { padding: 2.5rem 1.5rem; }
             .pillars-grid { grid-template-columns: 1fr; }
             .founders-grid { grid-template-columns: 1fr; }
@@ -288,6 +316,16 @@
         <div class="hero-content">
             <h1>בית המטפלים</h1>
             <p>קהילה מקצועית שמנגישה ריפוי, ידע והכשרה — לכל מי שרוצה לעזור או להירפא</p>
+        </div>
+        <div class="hero-founders">
+            <div class="hero-founder-photo">
+                <img src="../assets/hillel-photo.png" alt="הילל אקנין — מייסד שותף">
+                <span class="hero-photo-name">הילל</span>
+            </div>
+            <div class="hero-founder-photo">
+                <img src="../assets/ram-photo.png" alt="רם — מייסד שותף">
+                <span class="hero-photo-name">רם</span>
+            </div>
         </div>
     </section>
 
@@ -366,7 +404,9 @@
 
             <!-- Hillel -->
             <div class="founder-card" data-reveal data-reveal-delay="2">
-                <div class="founder-avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="founder-avatar">
+                    <img src="../assets/hillel-photo.png" alt="הילל אקנין — מייסד שותף בבית המטפלים" loading="lazy">
+                </div>
                 <h3 class="founder-name">הילל אקנין</h3>
                 <div class="founder-role">מייסד שותף</div>
 

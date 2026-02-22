@@ -184,7 +184,6 @@
             background: white;
         }
         input:focus, select:focus, textarea:focus {
-            outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(47, 133, 146, 0.1);
         }
@@ -416,22 +415,22 @@
 
                 <div class="form-group">
                     <label for="previous_therapy_history">האם עברת טיפול רגשי בעבר?</label>
-                    <textarea name="previous_therapy_history" id="previous_therapy_history" placeholder="אם כן, ספר/י בקצרה על הניסיון - מה עבד, מה פחות..."></textarea>
+                    <textarea name="previous_therapy_history" id="previous_therapy_history" placeholder="אם כן, ספר/י בקצרה על הניסיון - מה עבד, מה פחות..." autocomplete="off"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="why_now">למה דווקא עכשיו? <span class="label-hint">(מה הטריגר לפנייה)</span></label>
-                    <textarea name="why_now" id="why_now" placeholder="מה קרה שגרם לך לחפש עזרה דווקא בתקופה הזו?"></textarea>
+                    <textarea name="why_now" id="why_now" placeholder="מה קרה שגרם לך לחפש עזרה דווקא בתקופה הזו?" autocomplete="off"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="fears">האם יש לך חששות או פחדים לגבי הטיפול?</label>
-                    <textarea name="fears" id="fears" placeholder="חששות, פחדים, חסמים..."></textarea>
+                    <textarea name="fears" id="fears" placeholder="חששות, פחדים, חסמים..." autocomplete="off"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="expectations">מה את/ה מקווה להשיג מהטיפול?</label>
-                    <textarea name="expectations" id="expectations" placeholder="מה היית רוצה שישתנה בחיים שלך?"></textarea>
+                    <textarea name="expectations" id="expectations" placeholder="מה היית רוצה שישתנה בחיים שלך?" autocomplete="off"></textarea>
                 </div>
             </div>
 
@@ -445,19 +444,19 @@
 
                 <div class="form-group">
                     <label for="chronic_issues">האם יש לך מחלות כרוניות או בעיות בריאותיות?</label>
-                    <textarea name="chronic_issues" id="chronic_issues" placeholder="אם כן, פרט/י..." style="min-height: 60px;"></textarea>
+                    <textarea name="chronic_issues" id="chronic_issues" placeholder="אם כן, פרט/י..." style="min-height: 60px;" autocomplete="off"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="medications">האם את/ה נוטל/ת תרופות פסיכיאטריות או אחרות?</label>
-                    <input type="text" name="medications" id="medications" placeholder="שמות תרופות (אם יש)">
+                    <input type="text" name="medications" id="medications" placeholder="שמות תרופות (אם יש)" autocomplete="off">
                 </div>
 
                 <div class="form-group">
-                    <label>האם את/ה נמצא/ת בטיפול נפשי או רפואי נוסף כרגע?</label>
+                    <label for="other_treatment_yes">האם את/ה נמצא/ת בטיפול נפשי או רפואי נוסף כרגע?</label>
                     <div class="radio-group" id="other-treatment-group">
                         <label class="radio-option" data-value="yes" onclick="setTimeout(toggleTreatmentDetails, 10)">
-                            <input type="radio" name="other_treatment" value="yes">
+                            <input type="radio" name="other_treatment" value="yes" id="other_treatment_yes">
                             <span>כן</span>
                         </label>
                         <label class="radio-option" data-value="no" onclick="setTimeout(toggleTreatmentDetails, 10)">
@@ -466,7 +465,7 @@
                         </label>
                     </div>
                     <div id="treatment-details-container" style="display: none; margin-top: 1rem;">
-                        <textarea name="other_treatment_details" id="other_treatment_details" placeholder="ספר/י לנו על הטיפול - איזה סוג טיפול, כמה זמן, תדירות..." style="min-height: 80px;"></textarea>
+                        <textarea name="other_treatment_details" id="other_treatment_details" placeholder="ספר/י לנו על הטיפול - איזה סוג טיפול, כמה זמן, תדירות..." style="min-height: 80px;" autocomplete="off"></textarea>
                     </div>
                 </div>
             </div>
@@ -475,10 +474,10 @@
                 <h3 class="section-title"><i class="fa-solid fa-sliders"></i> העדפות לוגיסטיות</h3>
 
                 <div class="form-group">
-                    <label>סוג טיפול מועדף <span class="required">*</span></label>
+                    <label for="therapy_type_online">סוג טיפול מועדף <span class="required">*</span></label>
                     <div class="option-cards" id="therapy-type-options">
                         <label class="option-card" data-value="online">
-                            <input type="radio" name="therapy_type" value="online">
+                            <input type="radio" name="therapy_type" value="online" id="therapy_type_online">
                             <div class="option-icon"><i class="fa-solid fa-video"></i></div>
                             <div class="option-text">
                                 <strong>זום (אונליין)</strong>
@@ -508,10 +507,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label>העדפת מגדר המטפל/ת</label>
+                    <label for="therapist_gender_any">העדפת מגדר המטפל/ת</label>
                     <div class="option-cards" id="gender-options">
                         <label class="option-card selected" data-value="any">
-                            <input type="radio" name="therapist_gender_preference" value="any" checked>
+                            <input type="radio" name="therapist_gender_preference" value="any" id="therapist_gender_any" checked>
                             <div class="option-icon"><i class="fa-solid fa-users"></i></div>
                             <div class="option-text">
                                 <strong>לא משנה לי</strong>

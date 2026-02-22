@@ -158,27 +158,11 @@
         }
     }
 
-    // --- Check if current page is a learning page ---
-    function isLearningPage() {
-        var path = window.location.pathname.toLowerCase();
-        return path.indexOf('free-portal') !== -1 ||
-               path.indexOf('learning-') !== -1 ||
-               path.indexOf('summaries') !== -1 ||
-               path.indexOf('profile') !== -1 ||
-               path.indexOf('admin') !== -1;
-    }
-
     // --- Init on DOMContentLoaded ---
     function init() {
-        if (isLearningPage()) {
-            // Learning pages: full dark mode support
-            applyTheme(getPreferredTheme());
-            injectToggleButton();
-            listenOSChange();
-        } else {
-            // Non-learning pages: always light, no toggle
-            document.documentElement.removeAttribute('data-theme');
-        }
+        applyTheme(getPreferredTheme());
+        injectToggleButton();
+        listenOSChange();
     }
 
     if (document.readyState === 'loading') {

@@ -277,31 +277,42 @@ body {
     .nav-links {
         display: none !important;
         position: fixed;
-        top: 0; right: 0; bottom: 0;
-        width: min(280px, 80vw);
+        inset: 0;
         background: var(--deep-petrol) !important;
         flex-direction: column;
-        padding: 5rem 2rem 2rem;
+        align-items: center;
+        justify-content: center;
         gap: 0;
-        border-inline-start: 1px solid var(--border-dark);
-        box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
         z-index: 1001;
         overflow-y: auto;
+        opacity: 0;
     }
 
-    .nav-links.active { display: flex !important; }
+    .nav-links.active {
+        display: flex !important;
+        animation: menuFadeIn 0.25s ease-out forwards;
+    }
+
+    @keyframes menuFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
 
     .nav-links li {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         list-style: none;
+        text-align: center;
+        width: 100%;
     }
 
     .nav-links a {
         display: block;
-        padding: 1.1rem 0.5rem;
-        font-size: 1.05rem;
+        padding: 1.2rem 2rem;
+        font-size: 1.3rem;
+        font-weight: 600;
         color: var(--pure-white) !important;
         -webkit-text-fill-color: var(--pure-white) !important;
+        letter-spacing: 0.02em;
+        transition: color 0.2s;
     }
 
     .nav-links a::after { display: none; }
@@ -310,16 +321,16 @@ body {
     .nav-links a:active {
         color: var(--gold) !important;
         -webkit-text-fill-color: var(--gold) !important;
-        background: rgba(255, 255, 255, 0.03);
     }
 
     .nav-links.active .mobile-cta-group {
         display: flex !important;
         flex-direction: column;
         gap: 0.8rem;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        width: 70%;
     }
 
     .mobile-cta {
@@ -327,10 +338,10 @@ body {
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        padding: 0.9rem 1.5rem;
+        padding: 1rem 1.5rem;
         border-radius: var(--t-btn-radius, 10px);
-        font-weight: 600;
-        font-size: 0.95rem;
+        font-weight: 700;
+        font-size: 1.05rem;
         text-decoration: none;
         transition: all 0.3s;
     }

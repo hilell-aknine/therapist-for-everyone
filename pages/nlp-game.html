@@ -11,33 +11,14 @@
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
     <title>משחק NLP - בית המטפלים</title>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
     <link rel="stylesheet" href="../css/theme.css">
     <link rel="stylesheet" href="../css/nlp-game.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Page-level layout (not in nlp-game.css) */
-        :root {
-            --sidebar-dark: var(--t-sidebar-bg, #0a3a42);
-            --deep-petrol: var(--t-deep-petrol, #003B46);
-            --gold: var(--t-gold, #D4AF37);
-            --gold-light: var(--t-gold-light, #E1B13F);
-            --gradient-gold: var(--t-gradient-gold, linear-gradient(135deg, #D4AF37, #E1B13F));
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Heebo', sans-serif;
-            background: var(--t-bg, #FAF8F4);
-            color: var(--t-text, #2d3436);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* ===== Page Header (matches free-portal) ===== */
+        /* Page-level layout overrides */
         .page-header {
             position: fixed;
             top: 0;
@@ -70,19 +51,19 @@
 
         .header-brand-icon {
             width: 36px; height: 36px;
-            background: var(--gradient-gold);
+            background: var(--t-gradient-gold, linear-gradient(135deg, #D4AF37, #E1B13F));
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1rem;
-            color: var(--sidebar-dark);
+            color: var(--t-sidebar-bg, #0a3a42);
         }
 
         .header-brand-text {
             font-size: 1rem;
             font-weight: 700;
-            color: var(--deep-petrol);
+            color: var(--t-deep-petrol, #003B46);
         }
 
         .header-separator {
@@ -107,7 +88,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--gold);
+            color: var(--t-gold, #D4AF37);
             background: none;
             border: 1px solid var(--t-border, #e5e7eb);
             padding: 0.45rem 1rem;
@@ -122,7 +103,7 @@
 
         .back-to-portal:hover {
             background: var(--t-bg-secondary, #f3f4f6);
-            border-color: var(--gold);
+            border-color: var(--t-gold, #D4AF37);
         }
 
         .theme-toggle-btn {
@@ -143,7 +124,7 @@
             background: var(--t-bg-secondary, #f3f4f6);
         }
 
-        /* Body offset for fixed header */
+        /* Body offset for fixed page header */
         .page-body {
             padding-top: 64px;
         }
@@ -154,7 +135,7 @@
             top: 80px;
             left: 50%;
             transform: translateX(-50%) translateY(-20px);
-            background: var(--deep-petrol);
+            background: var(--t-deep-petrol, #003B46);
             color: #fff;
             padding: 0.75rem 1.5rem;
             border-radius: 10px;
@@ -172,7 +153,6 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* Responsive */
         @media (max-width: 640px) {
             .page-header {
                 padding: 0 1rem;
@@ -212,115 +192,144 @@
     <div class="page-body">
 
         <!-- Loading Screen -->
-        <div id="game-loading-screen" class="game-loading-screen">
-            <div class="game-loading-content">
-                <div class="game-loading-spinner"></div>
-                <p class="game-loading-text">טוען את המשחק...</p>
+        <div id="loading-screen" class="loading-screen" style="display: none;">
+            <div class="loading-content">
+                <div class="loading-spinner-large"></div>
+                <p class="loading-text">טוען את המשחק...</p>
             </div>
         </div>
 
         <!-- Onboarding Overlay -->
-        <div id="game-onboarding-overlay" class="game-onboarding-overlay" style="display: none;">
-            <div class="game-onboarding-card">
-                <div class="game-onboarding-step" id="game-onboarding-step-content"></div>
-                <div class="game-onboarding-dots" id="game-onboarding-dots"></div>
-                <button class="btn btn-primary btn-full" id="game-onboarding-btn" onclick="game.nextOnboardingStep()">הבא</button>
+        <div id="onboarding-overlay" class="onboarding-overlay" style="display: none;">
+            <div class="onboarding-card">
+                <button class="onboarding-skip" onclick="game.skipOnboarding()">דלג &larr;</button>
+                <div class="onboarding-step" id="onboarding-step-content"></div>
+                <div class="onboarding-dots" id="onboarding-dots"></div>
+                <button class="btn btn-primary btn-full" id="onboarding-btn" onclick="game.nextOnboardingStep()">הבא</button>
             </div>
         </div>
 
         <!-- Game Header (stats bar) -->
-        <header class="game-header" id="game-app-header" style="display: none;">
-            <div class="game-stats-bar">
-                <div class="game-stat-item xp">
-                    <span class="icon">&#11088;</span>
-                    <span id="game-xp-value">0</span>
-                </div>
-                <div class="game-stat-item streak">
-                    <span class="icon">&#128293;</span>
-                    <span id="game-streak-value">0</span>
-                </div>
-                <div class="game-stat-item hearts">
-                    <div class="game-hearts-display" id="game-hearts-container">
-                        <span class="heart">&#10084;&#65039;</span>
-                        <span class="heart">&#10084;&#65039;</span>
-                        <span class="heart">&#10084;&#65039;</span>
-                        <span class="heart">&#10084;&#65039;</span>
-                        <span class="heart">&#10084;&#65039;</span>
+        <header class="header" id="app-header" style="display: none;">
+            <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="logo">🧠 NLP Master</div>
+                <div class="stats-bar">
+                    <div class="stat-item xp">
+                        <span class="icon">⭐</span>
+                        <span id="xp-value">0</span>
                     </div>
+                    <div class="stat-item streak">
+                        <span class="icon">🔥</span>
+                        <span id="streak-value">0</span>
+                    </div>
+                    <div class="stat-item hearts">
+                        <div class="hearts-display" id="hearts-container">
+                            <span class="heart">❤️</span>
+                            <span class="heart">❤️</span>
+                            <span class="heart">❤️</span>
+                            <span class="heart">❤️</span>
+                            <span class="heart">❤️</span>
+                        </div>
+                    </div>
+                    <button class="sound-toggle" id="sound-toggle" onclick="game.toggleSound()" title="השתק/הפעל צלילים">
+                        🔊
+                    </button>
+                    <button class="user-menu-btn" id="user-menu-btn" onclick="game.toggleUserMenu()" aria-label="תפריט משתמש">
+                        👤
+                    </button>
                 </div>
-                <button class="game-sound-toggle" id="game-sound-toggle" onclick="game.toggleSound()" title="השתק/הפעל צלילים">
-                    &#128266;
-                </button>
-                <button class="game-user-menu-btn" id="game-user-menu-btn" onclick="game.toggleUserMenu()">
-                    &#128100;
-                </button>
             </div>
-
             <!-- Heart Recovery Timer -->
-            <div class="game-heart-timer-bar" id="game-heart-timer-bar" style="display: none;">
-                <span class="game-heart-timer-text" id="game-heart-timer-text">&#10084;&#65039; +1 בעוד 20:00</span>
-                <div class="game-heart-timer-progress">
-                    <div class="game-heart-timer-fill" id="game-heart-timer-fill" style="width: 0%"></div>
+            <div class="heart-timer-bar" id="heart-timer-bar" style="display: none;">
+                <div class="container">
+                    <span class="heart-timer-text" id="heart-timer-text">❤️ +1 בעוד 20:00</span>
+                    <div class="heart-timer-progress">
+                        <div class="heart-timer-fill" id="heart-timer-fill" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </header>
 
         <!-- User Menu Dropdown -->
-        <div class="game-user-menu" id="game-user-menu" style="display: none;">
-            <div class="game-user-menu-email" id="game-user-menu-email"></div>
-            <button class="game-user-menu-item" onclick="game.showStats()">&#128202; הסטטיסטיקות שלי</button>
-            <button class="game-user-menu-item" onclick="game.logout()">&#128682; התנתקות</button>
+        <div class="user-menu" id="user-menu" style="display: none;">
+            <div class="user-menu-email" id="user-menu-email"></div>
+            <button class="user-menu-item" onclick="game.showStats()">📊 הסטטיסטיקות שלי</button>
+            <button class="user-menu-item" onclick="game.logout()">🚪 התנתקות</button>
         </div>
 
         <!-- Level Up Overlay -->
-        <div class="game-level-up-overlay" id="game-level-up-overlay" style="display: none;">
-            <div class="game-level-up-text" id="game-level-up-text"></div>
+        <div class="level-up-overlay" id="level-up-overlay" style="display: none;">
+            <div class="level-up-text" id="level-up-text"></div>
         </div>
 
         <!-- Progress Bar -->
-        <div id="game-progress-wrapper" style="display: none; max-width: 600px; margin: 0 auto; padding: 0 1.25rem;">
-            <div class="game-progress-container" id="game-progress-container" style="display: none;">
-                <div class="game-progress-bar" id="game-progress-bar" style="width: 0%"></div>
+        <div class="container" id="progress-wrapper" style="display: none;">
+            <div class="progress-container" id="progress-container" style="display: none;">
+                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
             </div>
         </div>
 
         <!-- Main Content -->
-        <main id="game-main-content" style="display: none;">
+        <main class="container" id="main-content" style="display: none;">
             <div id="game-container">
                 <!-- Dynamic game content renders here -->
             </div>
         </main>
 
         <!-- Footer Actions -->
-        <div class="game-footer-actions" id="game-footer-actions" style="display: none;">
-            <div class="game-footer-inner">
+        <div class="footer-actions" id="footer-actions" style="display: none;">
+            <div class="container">
                 <button class="btn btn-secondary" onclick="game.exitLesson()">יציאה</button>
-                <button class="btn btn-primary" id="game-check-btn" disabled onclick="game.checkAnswer()">בדיקה</button>
+                <button class="btn btn-primary" id="check-btn" disabled onclick="game.checkAnswer()">בדיקה</button>
             </div>
         </div>
 
         <!-- Feedback Panel -->
-        <div class="game-feedback-panel" id="game-feedback-panel">
-            <div class="game-feedback-content">
-                <div class="game-feedback-header">
-                    <span class="game-feedback-icon" id="game-feedback-icon">&#127881;</span>
-                    <span class="game-feedback-title" id="game-feedback-title">מעולה!</span>
+        <div class="feedback-panel" id="feedback-panel">
+            <div class="feedback-content">
+                <div class="feedback-header">
+                    <span class="feedback-icon" id="feedback-icon">🎉</span>
+                    <span class="feedback-title" id="feedback-title">מעולה!</span>
                 </div>
-                <div class="game-feedback-explanation" id="game-feedback-explanation"></div>
-                <button class="game-feedback-btn" id="game-feedback-btn" onclick="game.continueToNext()">המשך</button>
+                <div class="feedback-explanation" id="feedback-explanation"></div>
+                <button class="feedback-btn" id="feedback-btn" onclick="game.continueToNext()">המשך</button>
             </div>
         </div>
 
         <!-- Modal -->
-        <div class="game-modal-overlay" id="game-modal-overlay">
-            <div class="game-modal-content">
-                <div class="game-modal-icon" id="game-modal-icon">&#128682;</div>
-                <div class="game-modal-title" id="game-modal-title"></div>
-                <div class="game-modal-text" id="game-modal-text"></div>
-                <div class="game-modal-buttons" id="game-modal-buttons"></div>
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-icon" id="modal-icon">🚪</div>
+                <div class="modal-title" id="modal-title"></div>
+                <div class="modal-text" id="modal-text"></div>
+                <div class="modal-buttons" id="modal-buttons"></div>
             </div>
         </div>
 
+    </div>
+
+    <!-- Ram Chat FAB -->
+    <div class="ram-chat-fab" id="ram-chat-fab" onclick="game.toggleRamChat()" style="display:none;">
+        <img src="../assets/mentor-ram.png" alt="רם" class="ram-fab-img" />
+    </div>
+
+    <!-- Ram Chat Panel -->
+    <div class="ram-chat-panel" id="ram-chat-panel" style="display:none;">
+        <div class="ram-chat-header">
+            <img src="../assets/mentor-ram.png" alt="רם" class="ram-chat-avatar" />
+            <div>
+                <div class="ram-chat-name">שאל את רם</div>
+                <div class="ram-chat-status">מנטור NLP • AI</div>
+            </div>
+            <button class="ram-chat-close" onclick="game.toggleRamChat()">✕</button>
+        </div>
+        <div class="ram-chat-messages" id="ram-chat-messages">
+            <div class="ram-msg ram-msg-ai">היי! אני רם 🧑‍🏫 שאלו אותי כל שאלה על NLP ואשמח לעזור!</div>
+        </div>
+        <div class="ram-chat-input-area">
+            <input type="text" id="ram-chat-input" class="ram-chat-input" placeholder="שאלו אותי על NLP..." onkeydown="if(event.key==='Enter')game.sendRamChat()" />
+            <button class="ram-chat-send" onclick="game.sendRamChat()">➤</button>
+        </div>
     </div>
 
     <!-- Toast -->

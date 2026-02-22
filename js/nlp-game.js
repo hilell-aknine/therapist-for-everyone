@@ -1,5 +1,5 @@
 // nlp-game.js — NLP Game Engine for Beit HaMetaplim Portal
-// Based on StoryGame — uses Auth from supabase-client.js
+// Uses Auth module + supabaseClient from supabase-client.js
 
 const HEART_RECOVERY_MINUTES = 20;
 
@@ -80,10 +80,84 @@ class SoundManager {
     }
 }
 
+// AuthManager removed — uses window.Auth from supabase-client.js
+
+// ═══════════════════════════════════════
+// Gemini AI Mentor (Ram)
+// ═══════════════════════════════════════
+class GeminiMentor {
+    constructor() {
+        this.apiKey = 'AIzaSyDGVrc0sqFrsx7k5UZmMbNKZ6An813KEBw';
+        this.model = 'gemini-2.0-flash';
+        this.endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+        this.systemPrompt = `אתה רם, מנטור NLP חם, מעודד וידידותי במשחק לימודי בעברית.
+הנחיות:
+- דבר בעברית בלבד, בגובה העיניים, בגוף שני (את/ה)
+- תשובות קצרות — מקסימום 2-3 משפטים
+- השתמש בדוגמאות מהחיים ובמטאפורות
+- תמיד עודד, גם כשהתשובה שגויה — "אין כשלונות, רק משוב"
+- שלב מונחי NLP כשרלוונטי (ריפריימינג, עוגנים, סטייטים, מטא-מודל וכו')
+- אל תחזור על ההסבר שכבר ניתן — הוסף זווית חדשה או דוגמה`;
+    }
+
+    async ask(userMessage, context = '') {
+        try {
+            const messages = [];
+            if (context) {
+                messages.push({ role: 'user', parts: [{ text: this.systemPrompt + '\n\nהקשר: ' + context }] });
+                messages.push({ role: 'model', parts: [{ text: 'מבין, אני רם. אשמח לעזור!' }] });
+            } else {
+                messages.push({ role: 'user', parts: [{ text: this.systemPrompt }] });
+                messages.push({ role: 'model', parts: [{ text: 'מבין, אני רם. אשמח לעזור!' }] });
+            }
+            messages.push({ role: 'user', parts: [{ text: userMessage }] });
+
+            const res = await fetch(this.endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: messages,
+                    generationConfig: {
+                        temperature: 0.8,
+                        maxOutputTokens: 200,
+                        topP: 0.9
+                    }
+                })
+            });
+
+            if (!res.ok) return null;
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+        } catch (e) {
+            console.warn('Gemini API error:', e);
+            return null;
+        }
+    }
+
+    async getFeedback(exercise, isCorrect, selectedAnswer) {
+        const correctText = exercise.options ? exercise.options[exercise.correct] : '';
+        const selectedText = exercise.options && selectedAnswer !== null ? exercise.options[selectedAnswer] : '';
+        const prompt = isCorrect
+            ? `השחקן ענה נכון על שאלה: "${exercise.question}". התשובה: "${correctText}". תן טיפ קצר או תובנה מעניינת שמרחיבה את ההבנה.`
+            : `השחקן ענה שגוי. השאלה: "${exercise.question}". בחר: "${selectedText}" במקום "${correctText}". עודד אותו בקצרה והסבר בזווית אחרת מההסבר הרגיל.`;
+        return this.ask(prompt, `מודול: ${exercise.question}`);
+    }
+
+    async chat(userMessage, playerLevel, moduleName) {
+        const context = `השחקן ברמה ${playerLevel}, לומד כרגע: ${moduleName || 'NLP כללי'}`;
+        return this.ask(userMessage, context);
+    }
+
+    async coachPractice(stepTitle, userAnswer) {
+        const prompt = `השחקן כתב בתרגול חופשי (${stepTitle}): "${userAnswer}". תן משוב קצר ומעשי כמנטור NLP — מה טוב, ומה אפשר לחדד.`;
+        return this.ask(prompt);
+    }
+}
+
 // ═══════════════════════════════════════
 // Main Game Class
 // ═══════════════════════════════════════
-class NlpGame {
+class StoryGame {
     constructor() {
         this.currentScreen = 'home';
         this.currentModule = null;
@@ -97,62 +171,128 @@ class NlpGame {
         this.saveDebounceTimer = null;
         this.heartTimerInterval = null;
         this.userMenuOpen = false;
-        this.user = null;
 
         // Managers
         this.sound = new SoundManager();
+        this.gemini = new GeminiMentor();
+        this.user = null;
+        this.isGuest = false;
 
-        // Player data
+        // Player data (loaded later)
         this.playerData = this.getDefaultPlayerData();
 
-        // Story builder
+        // Practice builder
         this.storyBuilderData = { currentStep: 0, answers: {} };
 
-        // Story steps
+        // Practice steps
         this.storySteps = [
-            { id: 'target', title: 'שלב 1: קהל היעד', question: 'למי הסיפור הזה מיועד? תארו את הלקוח האידיאלי שלכם.', hint: 'חשבו: מה הכאב שלהם? מה הם מחפשים?', example: 'מאמנות עסקיות בתחילת הדרך שיודעות שהן טובות אבל מתקשות למכור את עצמן.', mentorMessage: 'הכרת קהל היעד היא הבסיס לכל סיפור טוב.' },
-            { id: 'before', title: 'שלב 2: הלפני - הכאב', question: 'תארו את המצב של הלקוח לפני שפגש אתכם.', hint: 'השתמשו בתיאורים רגשיים וספציפיים.', example: 'היא הייתה יושבת מול המחשב שעות, כל מילה הרגישה מזויפת.', mentorMessage: 'ככל שתתארו את הכאב בצורה מדויקת, הקהל ירגיש "היא מבינה אותי".' },
-            { id: 'turning', title: 'שלב 3: נקודת המפנה', question: 'מה היה הרגע שבו משהו השתנה?', hint: 'פגישה, תובנה, או אירוע מסוים.', example: 'בפגישה השלישית שאלתי אותה: "מה היית אומרת לחברה הכי טובה שלך?"', mentorMessage: 'נקודת המפנה היא הלב של הסיפור.' },
-            { id: 'after', title: 'שלב 4: האחרי - השינוי', question: 'מה השתנה? איך נראים החיים היום?', hint: 'מספרים, הרגשות, שינויים קונקרטיים.', example: 'היום יש לה 12 לקוחות קבועים וכותבת פוסטים בהנאה.', mentorMessage: 'ה"אחרי" צריך להיות ספציפי ומדיד.' },
-            { id: 'message', title: 'שלב 5: המסר והקריאה לפעולה', question: 'מה המסר המרכזי? ומה הצעד הבא?', hint: 'משפט אחד חזק + קריאה לפעולה ספציפית.', example: 'אם גם את מרגישה ככה - את לא לבד. אני מזמינה אותך לשיחת היכרות.', mentorMessage: 'סיום חזק = לקוחות שפועלים!' }
+            {
+                id: 'situation',
+                title: 'שלב 1: בחירת מצב',
+                question: 'תארו מצב בחיים שלכם שאתם רוצים לשנות. מה קורה? מה אתם מרגישים?',
+                hint: 'זה יכול להיות: חרדה לפני הרצאות, קושי בתקשורת, הרגל שרוצים לשנות.',
+                example: 'כל פעם שאני צריך לדבר מול קבוצה, אני מרגיש לחץ בבטן, הידיים מזיעות, והמחשבות רצות: "מה אם אכשל?"',
+                mentorMessage: 'מעולה שהתחלנו! זיהוי המצב הוא הצעד הראשון לשינוי. ככל שתהיו יותר ספציפיים, כך נוכל לעבוד עם זה טוב יותר.'
+            },
+            {
+                id: 'belief',
+                title: 'שלב 2: זיהוי האמונה',
+                question: 'מה האמונה המגבילה שעומדת מאחורי המצב הזה? מה אתם אומרים לעצמכם?',
+                hint: 'חפשו משפטים כמו: "אני לא מספיק טוב", "אף פעם לא אצליח", "אנשים ישפטו אותי".',
+                example: '"אני לא מספיק מקצועי כדי לעמוד מול קהל. אנשים יראו שאני לא באמת יודע. מי אני בכלל?"',
+                mentorMessage: 'זיהוי האמונה המגבילה הוא כמו להדליק אור בחדר חשוך. ברגע שרואים אותה, אפשר להתחיל לשנות.'
+            },
+            {
+                id: 'reframe',
+                title: 'שלב 3: ריפריים',
+                question: 'איך אפשר לפרש את המצב הזה בצורה אחרת? מה הפרשנות המעצימה?',
+                hint: 'נסו: מה הייתם אומרים לחבר טוב שמרגיש ככה? מה הפרשנות של מישהו שמאמין בעצמו?',
+                example: 'הלחץ שאני מרגיש הוא סימן שאכפת לי. כל מומחה הרגיש ככה בהתחלה. הקהל בא ללמוד, לא לשפוט.',
+                mentorMessage: 'ריפריים מדהים! שימו לב איך אותם עובדות בדיוק מקבלות משמעות חדשה לגמרי. זה הכוח של NLP!'
+            },
+            {
+                id: 'anchor',
+                title: 'שלב 4: יצירת עוגן',
+                question: 'תארו רגע בחייכם שהרגשתם ביטחון מלא ועוצמה. מה קרה? מה הרגשתם?',
+                hint: 'זה יכול להיות: הצלחה בעבודה, רגע משפחתי, הישג ספורטיבי — כל רגע של עוצמה.',
+                example: 'כשסיימתי את המרתון הראשון שלי. הרגשתי חזק, מסוגל, גאה. הגוף היה עייף אבל הנשמה הייתה בשמיים.',
+                mentorMessage: 'מצוין! עכשיו כשהזיכרון חי ומרגש — דמיינו שאתם לוחצים על נקודה ביד. זה העוגן שלכם. תוכלו להשתמש בו בכל פעם שתצטרכו ביטחון.'
+            },
+            {
+                id: 'action',
+                title: 'שלב 5: צעד ראשון',
+                question: 'מה הצעד הראשון הקטן שתעשו השבוע כדי להתחיל את השינוי?',
+                hint: 'הצעד צריך להיות קטן, ספציפי, ומדיד. לא "אהיה יותר בטוח" אלא פעולה קונקרטית.',
+                example: 'השבוע אעשה תרגיל ויזואליזציה של 5 דקות כל בוקר — אדמיין את עצמי עומד בביטחון מול הקהל ומדבר בבהירות.',
+                mentorMessage: 'מושלם! זוכרים — חזרה היא אם כל המיומנויות. צעד קטן כל יום יוצר שינוי אדיר. בהצלחה!'
+            }
         ];
 
         // Mentor messages
         this.mentorMessages = {
             welcome: [
-                "היי! אני גל, ואני כאן ללוות אותך בדרך להפוך לסטוריטלר מעולה!",
-                "ברוכים הבאים! אני גל, המנטור שלך לסיפורים שמושכים לקוחות.",
-                "שמח לראות אותך! יחד נלמד ליצור סיפורים שמשנים עסקים."
+                "היי! אני רם, ואני כאן ללוות אותך במסע לעולם ה-NLP!",
+                "ברוכים הבאים! אני רם, המנטור שלך לשליטה במוח.",
+                "שמח לראות אותך! יחד נלמד איך המוח עובד ואיך לתכנת אותו מחדש."
             ],
             moduleIntro: {
-                1: "פתיחה טובה היא חצי מהדרך! בואו נלמד איך לגרום לקהל לרצות לשמוע עוד.",
-                2: "סיפורי טרנספורמציה של לקוחות הם הכלי השיווקי החזק ביותר. מוכנים?",
-                3: "פגיעות היא לא חולשה - היא סופר-פאוור! בואו נלמד להשתמש בה.",
-                4: "נקודת המפנה היא הרגע הקסום שבו הקהל מבין שהשינוי אפשרי.",
-                5: "סיום חזק = לקוחות שפועלים. זה השיעור האחרון והוא קריטי!"
+                1: "הבסיס של הכל! בואו נבין מהו NLP ואיך המוח שלנו באמת עובד.",
+                2: "עכשיו נלמד לראות את העולם מזוויות שונות — רמות לוגיות ועמדות תפיסה!",
+                3: "המסננים של המוח קובעים מה אנחנו רואים. בואו נלמד לזהות אותם ולהגדיר מטרות חכמות!",
+                4: "השפה של המוח — ויזואלי, אודיטורי, קינסתטי. מוכנים לגלות את שפת המוח שלכם?",
+                5: "מה מניע אותנו? ששת הצרכים האנושיים וכוח המחשבה!",
+                6: "מסגור, מצבים רגשיים ועוגנים — הכלים המתקדמים ביותר של NLP!",
+                7: "אין כשלונות, רק משוב! בואו נלמד לזהות ולשנות אמונות מגבילות."
             },
-            lessonStart: ["מעולה! בואו נתחיל.", "אני לצידך בכל שלב. בהצלחה!", "כל תשובה נכונה מקרבת אתכם!"],
-            correctAnswer: ["מדהים! בדיוק ככה!", "וואו, את/ה תופס/ת את זה!", "נכון מאוד!", "יופי! את/ה בדרך הנכונה!", "מצוין!"],
-            wrongAnswer: ["לא נורא! טעויות הן חלק מהלמידה.", "קרוב! בפעם הבאה חשבו מה היה מושך אתכם.", "לא בדיוק, אבל הזדמנות ללמוד!", "אל דאגה, גם אני טעיתי בהתחלה!"],
-            encouragement: ["את/ה עושה עבודה נהדרת!", "כל תרגיל מקרב אותך!", "אני גאה בך!", "המשיכו ככה!"],
-            lessonComplete: ["איזה כיף! סיימת שיעור נוסף!", "מעולה! עוד צעד לקראת סיפורים מעולים!", "אלופים! הידע הזה ישנה לכם את השיווק!"]
+            lessonStart: [
+                "מעולה! בואו נתחיל. קחו את הזמן, אין לחץ.",
+                "אני לצידך בכל שלב. בהצלחה!",
+                "זוכרים — כל תשובה נכונה מחזקת את המסלולים העצביים החדשים שלכם!"
+            ],
+            correctAnswer: [
+                "מדהים! בדיוק ככה!",
+                "וואו, את/ה ממש תופס/ת את זה!",
+                "נכון מאוד! רואים שה-NLP כבר עובד עליך!",
+                "יופי! המוח שלך יוצר חיבורים חדשים!",
+                "מצוין! את/ה בדרך להיות פרקטישנר מעולה!"
+            ],
+            wrongAnswer: [
+                "לא נורא! טעויות הן חלק מהלמידה — זה בדיוק מה ש-NLP מלמד.",
+                "קרוב! בפעם הבאה נסו להיזכר בעקרון הבסיסי.",
+                "לא בדיוק, אבל זו הזדמנות ללמוד משהו חדש!",
+                "אל דאגה, אין כשלונות — רק משוב ולמידה!"
+            ],
+            encouragement: [
+                "את/ה עושה עבודה נהדרת!",
+                "כל תרגיל מקרב אותך לשליטה במוח!",
+                "אני גאה בך! ממשיכים!",
+                "המשיכו ככה, פרקטישנר!"
+            ],
+            lessonComplete: [
+                "איזה כיף! סיימת שיעור נוסף!",
+                "מעולה! עוד צעד בדרך לשליטה ב-NLP!",
+                "אלופים! הידע הזה ישנה לכם את החיים!"
+            ]
         };
 
         // Achievements
         this.achievements = [
-            { id: 'first_lesson', title: 'צעד ראשון', desc: 'סיימת את השיעור הראשון', icon: '🎯', condition: (d) => Object.keys(d.completedLessons).length >= 1 },
-            { id: 'five_lessons', title: 'בדרך הנכונה', desc: 'סיימת 5 שיעורים', icon: '📚', condition: (d) => Object.keys(d.completedLessons).length >= 5 },
-            { id: 'all_lessons', title: 'מאסטר', desc: 'סיימת את כל השיעורים', icon: '👑', condition: (d) => Object.keys(d.completedLessons).length >= 15 },
-            { id: 'streak_3', title: 'התמדה', desc: '3 ימים ברצף', icon: '🔥', condition: (d) => d.streak >= 3 },
-            { id: 'streak_7', title: 'שבוע של הצלחה', desc: '7 ימים ברצף', icon: '⭐', condition: (d) => d.streak >= 7 },
-            { id: 'xp_500', title: 'צובר נקודות', desc: 'צברת 500 XP', icon: '🏅', condition: (d) => d.xp >= 500 },
-            { id: 'xp_1000', title: 'אלוף XP', desc: 'צברת 1000 XP', icon: '🏆', condition: (d) => d.xp >= 1000 },
-            { id: 'first_story', title: 'סיפור ראשון', desc: 'יצרת סיפור בתרגול חופשי', icon: '✍️', condition: (d) => d.storiesCreated >= 1 },
-            { id: 'perfect_lesson', title: 'מושלם!', desc: 'סיימת שיעור בלי טעויות', icon: '💯', condition: (d) => d.perfectLessons >= 1 },
-            { id: 'accuracy_80', title: 'דיוק גבוה', desc: 'דיוק של 80% ומעלה', icon: '🎯', condition: (d) => d.totalCorrectAnswers > 0 && (d.totalCorrectAnswers / (d.totalCorrectAnswers + d.totalWrongAnswers)) >= 0.8 }
+            { id: 'first_lesson', title: 'צעד ראשון', desc: 'סיימת את השיעור הראשון', icon: '🧠', condition: (data) => Object.keys(data.completedLessons).length >= 1 },
+            { id: 'five_lessons', title: 'לומד NLP', desc: 'סיימת 5 שיעורים', icon: '📚', condition: (data) => Object.keys(data.completedLessons).length >= 5 },
+            { id: 'all_lessons', title: 'NLP פרקטישנר', desc: 'סיימת את כל השיעורים', icon: '👑', condition: (data) => Object.keys(data.completedLessons).length >= 21 },
+            { id: 'streak_3', title: 'התמדה', desc: '3 ימים ברצף', icon: '🔥', condition: (data) => data.streak >= 3 },
+            { id: 'streak_7', title: 'שבוע של שינוי', desc: '7 ימים ברצף', icon: '⭐', condition: (data) => data.streak >= 7 },
+            { id: 'streak_30', title: 'מחויבות אמיתית', desc: '30 ימים ברצף', icon: '💎', condition: (data) => data.streak >= 30 },
+            { id: 'xp_500', title: 'צובר ניסיון', desc: 'צברת 500 XP', icon: '🏅', condition: (data) => data.xp >= 500 },
+            { id: 'xp_1000', title: 'מאסטר XP', desc: 'צברת 1000 XP', icon: '🏆', condition: (data) => data.xp >= 1000 },
+            { id: 'perfect_lesson', title: 'ראפור מושלם!', desc: 'סיימת שיעור בלי טעויות', icon: '💯', condition: (data) => data.perfectLessons >= 1 },
+            { id: 'accuracy_80', title: 'חדות חושים', desc: 'דיוק של 80% ומעלה', icon: '🎯', condition: (data) => data.totalCorrectAnswers > 0 && (data.totalCorrectAnswers / (data.totalCorrectAnswers + data.totalWrongAnswers)) >= 0.8 }
         ];
 
+        // Init ripple effect on all interactive elements
         this.initRipple();
+
+        // Init auth flow
         this.initAuth();
     }
 
@@ -161,8 +301,9 @@ class NlpGame {
     // ═══════════════════════════════════════
     initRipple() {
         document.addEventListener('click', (e) => {
-            const target = e.target.closest('.btn, .option-btn, .word-chip, .compare-card, .home-path-node:not(.locked), .path-node:not(.locked)');
+            const target = e.target.closest('.btn, .option-btn, .word-chip, .compare-card, .module-card, .lesson-item, .daily-challenge-btn, .practice-mode-btn, .path-node:not(.locked), .home-path-node:not(.locked)');
             if (!target) return;
+
             const ripple = document.createElement('span');
             ripple.className = 'ripple-effect';
             const rect = target.getBoundingClientRect();
@@ -170,56 +311,74 @@ class NlpGame {
             ripple.style.width = ripple.style.height = size + 'px';
             ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
             ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-            target.style.position = target.style.position || 'relative';
-            target.style.overflow = 'hidden';
             target.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
         });
     }
 
     // ═══════════════════════════════════════
-    // Auth Flow (uses portal's Auth module)
+    // Auth Flow
     // ═══════════════════════════════════════
     async initAuth() {
-        document.getElementById('game-loading-screen').style.display = 'flex';
-
+        // Check existing session via Auth module from supabase-client.js
         try {
-            const session = await Auth.getSession();
-            if (session && session.user) {
-                this.user = session.user;
-                await this.onAuthSuccess(session.user);
+            const session = await window.Auth.getSession();
+            if (session?.user) {
+                this.onAuthSuccess(session.user);
             } else {
-                // Not logged in — redirect to portal with message
-                window.location.href = 'free-portal.html?msg=login_required';
+                // No session — redirect to login
+                window.location.href = 'login.html?redirect=nlp-game.html';
                 return;
             }
         } catch (e) {
-            console.warn('Auth check failed', e);
-            window.location.href = 'free-portal.html?msg=login_required';
+            // Guest mode fallback
+            this.isGuest = true;
+            this.onAuthSuccess(null);
         }
+
+        // Listen for auth state changes
+        window.Auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session?.user && !this.user) {
+                this.onAuthSuccess(session.user);
+            }
+        });
     }
 
     async onAuthSuccess(user) {
+        this.user = user;
+
+        // Show loading screen
+        document.getElementById('loading-screen').style.display = 'flex';
+
+        // Load player data
         await this.loadPlayerData(user);
 
-        document.getElementById('game-loading-screen').style.display = 'none';
-        document.getElementById('game-app-header').style.display = 'block';
-        document.getElementById('game-main-content').style.display = 'block';
-        document.getElementById('game-progress-wrapper').style.display = 'block';
+        // Hide loading, show game
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('app-header').style.display = 'block';
+        document.getElementById('main-content').style.display = 'block';
+        document.getElementById('progress-wrapper').style.display = 'block';
 
-        // Update user email
-        const emailEl = document.getElementById('game-user-menu-email');
-        if (emailEl) emailEl.textContent = user.email || 'משתמש';
+        // Update user menu email
+        if (user) {
+            document.getElementById('user-menu-email').textContent = user.email || 'משתמש';
+        } else {
+            document.getElementById('user-menu-email').textContent = 'מצב אורח';
+        }
 
-        // Sound toggle
-        const soundEl = document.getElementById('game-sound-toggle');
-        if (soundEl) soundEl.textContent = this.sound.enabled ? '🔊' : '🔇';
+        // Update sound toggle
+        document.getElementById('sound-toggle').textContent = this.sound.enabled ? '🔊' : '🔇';
 
+        // Show Ram chat FAB
+        document.getElementById('ram-chat-fab').style.display = 'flex';
+
+        // Init game
         this.updateStreak();
         this.recoverHearts();
         this.updateStatsDisplay();
         this.startHeartTimer();
 
+        // Check onboarding
         if (!this.playerData.onboardingComplete) {
             this.showOnboarding();
         } else {
@@ -228,34 +387,52 @@ class NlpGame {
     }
 
     // ═══════════════════════════════════════
-    // Data Persistence (Supabase + localStorage)
+    // Data Persistence (Supabase + LocalStorage)
     // ═══════════════════════════════════════
     getDefaultPlayerData() {
         return {
-            xp: 0, level: 1, hearts: 5, maxHearts: 5, streak: 0,
-            lastPlayDate: null, lastHeartLost: null,
-            completedLessons: {}, moduleProgress: {},
-            achievements: [], totalCorrectAnswers: 0, totalWrongAnswers: 0,
-            storiesCreated: 0, perfectLessons: 0,
-            dailyChallengeCompleted: null, reviewQueue: [], lastReviewDate: null,
-            onboardingComplete: false, longestStreak: 0,
-            weeklyActivity: {}, moduleAccuracy: {}, perfectLessonsList: []
+            xp: 0,
+            level: 1,
+            hearts: 5,
+            maxHearts: 5,
+            streak: 0,
+            lastPlayDate: null,
+            lastHeartLost: null,
+            completedLessons: {},
+            moduleProgress: {},
+            achievements: [],
+            totalCorrectAnswers: 0,
+            totalWrongAnswers: 0,
+            storiesCreated: 0,
+            perfectLessons: 0,
+            dailyChallengeCompleted: null,
+            reviewQueue: [],
+            lastReviewDate: null,
+            onboardingComplete: false,
+            longestStreak: 0,
+            weeklyActivity: {},
+            moduleAccuracy: {},
+            perfectLessonsList: []
         };
     }
 
     async loadPlayerData(user) {
+        // Try Supabase first if logged in
         if (user) {
             try {
                 const { data, error } = await window.supabaseClient
-                    .from('story_game_players')
+                    .from('nlp_game_players')
                     .select('*')
                     .eq('user_id', user.id)
                     .single();
 
                 if (data && !error) {
+                    // Map DB fields to local playerData
                     this.playerData = {
-                        xp: data.xp || 0, level: data.level || 1,
-                        hearts: data.hearts || 5, maxHearts: data.max_hearts || 5,
+                        xp: data.xp || 0,
+                        level: data.level || 1,
+                        hearts: data.hearts || 5,
+                        maxHearts: data.max_hearts || 5,
                         streak: data.streak || 0,
                         lastPlayDate: data.last_play_date || null,
                         lastHeartLost: data.last_heart_lost || null,
@@ -267,18 +444,19 @@ class NlpGame {
                         storiesCreated: data.stories_created || 0,
                         perfectLessons: data.perfect_lessons || 0,
                         dailyChallengeCompleted: data.daily_challenge_completed || null,
-                        reviewQueue: [], lastReviewDate: null,
-                        onboardingComplete: true,
-                        longestStreak: 0, weeklyActivity: {}, moduleAccuracy: {},
-                        perfectLessonsList: []
+                        reviewQueue: [],
+                        lastReviewDate: null,
+                        onboardingComplete: true // if they have DB data, onboarding was done
                     };
+                    // Also cache to localStorage
                     localStorage.setItem('nlpGameData', JSON.stringify(this.playerData));
                     return;
                 }
 
-                // No DB row — check localStorage
+                // No DB row yet — check localStorage for migration
                 const local = this.loadFromLocalStorage();
                 if (local && Object.keys(local.completedLessons).length > 0) {
+                    // Migrate local data to Supabase
                     this.playerData = local;
                     await this.createSupabaseRow(user);
                     return;
@@ -287,11 +465,14 @@ class NlpGame {
                 // Brand new user
                 this.playerData = this.getDefaultPlayerData();
                 await this.createSupabaseRow(user);
+                return;
             } catch (e) {
-                console.warn('Supabase load failed, using localStorage', e);
-                this.playerData = this.loadFromLocalStorage() || this.getDefaultPlayerData();
+                console.warn('Supabase load failed, falling back to localStorage', e);
             }
         }
+
+        // Guest mode or Supabase failed — use localStorage
+        this.playerData = this.loadFromLocalStorage() || this.getDefaultPlayerData();
     }
 
     loadFromLocalStorage() {
@@ -305,10 +486,12 @@ class NlpGame {
     async createSupabaseRow(user) {
         if (!user) return;
         try {
-            await window.supabaseClient.from('story_game_players').upsert({
+            await window.supabaseClient.from('nlp_game_players').upsert({
                 user_id: user.id,
-                xp: this.playerData.xp, level: this.playerData.level,
-                hearts: this.playerData.hearts, max_hearts: this.playerData.maxHearts,
+                xp: this.playerData.xp,
+                level: this.playerData.level,
+                hearts: this.playerData.hearts,
+                max_hearts: this.playerData.maxHearts,
                 streak: this.playerData.streak,
                 last_play_date: this.playerData.lastPlayDate,
                 last_heart_lost: this.playerData.lastHeartLost,
@@ -320,11 +503,16 @@ class NlpGame {
                 perfect_lessons: this.playerData.perfectLessons,
                 daily_challenge_completed: this.playerData.dailyChallengeCompleted
             }, { onConflict: 'user_id' });
-        } catch (e) { console.warn('Failed to create Supabase row', e); }
+        } catch (e) {
+            console.warn('Failed to create Supabase row', e);
+        }
     }
 
     savePlayerData() {
+        // Always save to localStorage immediately
         localStorage.setItem('nlpGameData', JSON.stringify(this.playerData));
+
+        // Debounced save to Supabase
         if (this.user) {
             clearTimeout(this.saveDebounceTimer);
             this.saveDebounceTimer = setTimeout(() => this.saveToSupabase(), 1000);
@@ -334,9 +522,11 @@ class NlpGame {
     async saveToSupabase() {
         if (!this.user) return;
         try {
-            await window.supabaseClient.from('story_game_players').update({
-                xp: this.playerData.xp, level: this.playerData.level,
-                hearts: this.playerData.hearts, max_hearts: this.playerData.maxHearts,
+            await window.supabaseClient.from('nlp_game_players').update({
+                xp: this.playerData.xp,
+                level: this.playerData.level,
+                hearts: this.playerData.hearts,
+                max_hearts: this.playerData.maxHearts,
                 streak: this.playerData.streak,
                 last_play_date: this.playerData.lastPlayDate,
                 last_heart_lost: this.playerData.lastHeartLost,
@@ -349,11 +539,13 @@ class NlpGame {
                 daily_challenge_completed: this.playerData.dailyChallengeCompleted,
                 updated_at: new Date().toISOString()
             }).eq('user_id', this.user.id);
-        } catch (e) { console.warn('Supabase save failed', e); }
+        } catch (e) {
+            console.warn('Supabase save failed', e);
+        }
     }
 
     // ═══════════════════════════════════════
-    // Heart Recovery
+    // Heart Recovery System
     // ═══════════════════════════════════════
     recoverHearts() {
         if (this.playerData.hearts >= this.playerData.maxHearts) {
@@ -361,15 +553,23 @@ class NlpGame {
             return;
         }
         if (!this.playerData.lastHeartLost) return;
+
         const lostTime = new Date(this.playerData.lastHeartLost).getTime();
-        const elapsed = Date.now() - lostTime;
+        const now = Date.now();
+        const elapsed = now - lostTime;
         const recovered = Math.floor(elapsed / (HEART_RECOVERY_MINUTES * 60 * 1000));
+
         if (recovered > 0) {
-            this.playerData.hearts = Math.min(this.playerData.maxHearts, this.playerData.hearts + recovered);
+            this.playerData.hearts = Math.min(
+                this.playerData.maxHearts,
+                this.playerData.hearts + recovered
+            );
             if (this.playerData.hearts >= this.playerData.maxHearts) {
                 this.playerData.lastHeartLost = null;
             } else {
-                this.playerData.lastHeartLost = new Date(lostTime + recovered * HEART_RECOVERY_MINUTES * 60 * 1000).toISOString();
+                // Advance the timestamp by recovered hearts
+                const newTime = lostTime + recovered * HEART_RECOVERY_MINUTES * 60 * 1000;
+                this.playerData.lastHeartLost = new Date(newTime).toISOString();
             }
             this.savePlayerData();
         }
@@ -382,22 +582,32 @@ class NlpGame {
     }
 
     updateHeartTimer() {
-        const bar = document.getElementById('game-heart-timer-bar');
+        const bar = document.getElementById('heart-timer-bar');
         if (this.playerData.hearts >= this.playerData.maxHearts || !this.playerData.lastHeartLost) {
             bar.style.display = 'none';
             return;
         }
+
         bar.style.display = 'block';
         const lostTime = new Date(this.playerData.lastHeartLost).getTime();
-        const elapsed = Date.now() - lostTime;
+        const now = Date.now();
+        const elapsed = now - lostTime;
         const totalMs = HEART_RECOVERY_MINUTES * 60 * 1000;
         const remaining = totalMs - (elapsed % totalMs);
         const progress = ((totalMs - remaining) / totalMs) * 100;
+
         const mins = Math.floor(remaining / 60000);
         const secs = Math.floor((remaining % 60000) / 1000);
-        document.getElementById('game-heart-timer-text').textContent = `❤️ +1 בעוד ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        document.getElementById('game-heart-timer-fill').style.width = progress + '%';
-        if (elapsed >= totalMs) { this.recoverHearts(); this.updateStatsDisplay(); }
+
+        document.getElementById('heart-timer-text').textContent =
+            `❤️ +1 בעוד ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        document.getElementById('heart-timer-fill').style.width = progress + '%';
+
+        // Check if a heart recovered
+        if (elapsed >= totalMs) {
+            this.recoverHearts();
+            this.updateStatsDisplay();
+        }
     }
 
     // ═══════════════════════════════════════
@@ -405,33 +615,70 @@ class NlpGame {
     // ═══════════════════════════════════════
     showOnboarding() {
         this.onboardingStep = 0;
-        document.getElementById('game-onboarding-overlay').style.display = 'flex';
+        document.getElementById('onboarding-overlay').style.display = 'flex';
         this.renderOnboardingStep();
     }
 
     renderOnboardingStep() {
         const steps = [
-            { icon: '🎯', title: 'ברוכים הבאים למשחק NLP!', text: 'כאן תלמדו ליצור סיפורים שמושכים לקוחות - צעד אחרי צעד, בדרך כיפית ואינטראקטיבית.' },
-            { icon: '👨‍🏫', title: 'הכירו את גל, המנטור שלכם', text: 'גל ילווה אתכם בכל שלב — ייתן טיפים, עידוד, ויעזור לכם להבין מה הופך סיפור לכלי שיווקי חזק.' },
-            { icon: '🚀', title: 'בואו נתחיל!', text: 'תרגלו תרגילים, צברו XP, שמרו על סטריק יומי ופתחו הישגים. מוכנים?' }
+            {
+                icon: '🧠',
+                title: 'ברוכים הבאים ל-NLP Master!',
+                text: 'כאן תלמדו את עקרונות ה-NLP — ניתוב לשוני פיזיולוגי — בדרך כיפית ואינטראקטיבית, צעד אחרי צעד.'
+            },
+            {
+                icon: '👨‍🏫',
+                title: 'הכירו את רם, המנטור שלכם',
+                text: 'רם ילווה אתכם בכל שלב — ייתן טיפים, עידוד, ויעזור לכם להבין איך המוח עובד ואיך לתכנת אותו מחדש.'
+            },
+            {
+                icon: '🚀',
+                title: 'בואו נתחיל!',
+                text: 'תרגלו תרגילים, צברו XP, שמרו על סטריק יומי ופתחו הישגים. מוכנים להפוך לפרקטישנרים?'
+            }
         ];
+
         const step = steps[this.onboardingStep];
-        document.getElementById('game-onboarding-step-content').innerHTML = `<span class="onboarding-icon">${step.icon}</span><h2>${step.title}</h2><p>${step.text}</p>`;
-        document.getElementById('game-onboarding-dots').innerHTML = steps.map((_, i) => `<div class="onboarding-dot ${i < this.onboardingStep ? 'done' : ''} ${i === this.onboardingStep ? 'active' : ''}"></div>`).join('');
-        document.getElementById('game-onboarding-btn').textContent = this.onboardingStep === steps.length - 1 ? 'בואו נתחיל! 🎉' : 'הבא';
+        const content = document.getElementById('onboarding-step-content');
+        content.innerHTML = `
+            <span class="onboarding-icon">${step.icon}</span>
+            <h2>${step.title}</h2>
+            <p>${step.text}</p>
+        `;
+
+        // Dots
+        const dotsEl = document.getElementById('onboarding-dots');
+        dotsEl.innerHTML = steps.map((_, i) => {
+            let cls = 'onboarding-dot';
+            if (i < this.onboardingStep) cls += ' done';
+            if (i === this.onboardingStep) cls += ' active';
+            return `<div class="${cls}"></div>`;
+        }).join('');
+
+        // Button text
+        const btn = document.getElementById('onboarding-btn');
+        btn.textContent = this.onboardingStep === steps.length - 1 ? 'בואו נתחיל! 🎉' : 'הבא';
     }
 
     nextOnboardingStep() {
         this.sound.play('click');
         this.onboardingStep++;
         if (this.onboardingStep >= 3) {
-            document.getElementById('game-onboarding-overlay').style.display = 'none';
+            // Done
+            document.getElementById('onboarding-overlay').style.display = 'none';
             this.playerData.onboardingComplete = true;
             this.savePlayerData();
             this.renderHomeScreen();
         } else {
             this.renderOnboardingStep();
         }
+    }
+
+    skipOnboarding() {
+        document.getElementById('onboarding-overlay').style.display = 'none';
+        this.playerData.onboardingComplete = true;
+        this.savePlayerData();
+        this.renderHomeScreen();
     }
 
     // ═══════════════════════════════════════
@@ -447,19 +694,26 @@ class NlpGame {
         }, 200);
     }
 
+    // ═══════════════════════════════════════
+    // Sound Toggle
+    // ═══════════════════════════════════════
     toggleSound() {
         const enabled = this.sound.toggle();
-        document.getElementById('game-sound-toggle').textContent = enabled ? '🔊' : '🔇';
+        document.getElementById('sound-toggle').textContent = enabled ? '🔊' : '🔇';
         if (enabled) this.sound.play('click');
     }
 
+    // ═══════════════════════════════════════
+    // User Menu
+    // ═══════════════════════════════════════
     toggleUserMenu() {
         this.userMenuOpen = !this.userMenuOpen;
-        document.getElementById('game-user-menu').style.display = this.userMenuOpen ? 'block' : 'none';
+        document.getElementById('user-menu').style.display = this.userMenuOpen ? 'block' : 'none';
         if (this.userMenuOpen) {
+            // Close on click outside
             setTimeout(() => {
                 const handler = (e) => {
-                    if (!e.target.closest('.game-user-menu') && !e.target.closest('.game-user-menu-btn')) {
+                    if (!e.target.closest('.user-menu') && !e.target.closest('.user-menu-btn')) {
                         this.hideUserMenu();
                         document.removeEventListener('click', handler);
                     }
@@ -471,12 +725,15 @@ class NlpGame {
 
     hideUserMenu() {
         this.userMenuOpen = false;
-        document.getElementById('game-user-menu').style.display = 'none';
+        document.getElementById('user-menu').style.display = 'none';
     }
 
     async logout() {
-        try { await Auth.signOut(); } catch (e) { /* ignore */ }
-        window.location.href = 'free-portal.html';
+        try { await window.Auth.signOut(); } catch(e) { /* ignore */ }
+        this.user = null;
+        this.isGuest = false;
+        this.hideUserMenu();
+        window.location.href = 'login.html';
     }
 
     // ═══════════════════════════════════════
@@ -484,12 +741,12 @@ class NlpGame {
     // ═══════════════════════════════════════
     createMentorHTML(message, showName = true, mood = 'idle') {
         return `
-            <div class="mentor-container">
+            <div class="mentor-container mentor-enter">
                 <div class="mentor-avatar mentor-${mood}">
-                    <img src="../assets/mentor-gal.png" alt="גל" />
+                    <img src="../assets/mentor-ram.png" alt="רם" />
                 </div>
                 <div class="mentor-bubble">
-                    ${showName ? '<div class="mentor-name">גל - המנטור שלך</div>' : ''}
+                    ${showName ? '<div class="mentor-name">רם - המנטור שלך</div>' : ''}
                     <div class="mentor-message">${message}</div>
                 </div>
             </div>
@@ -500,12 +757,12 @@ class NlpGame {
         const avatar = document.querySelector('.mentor-avatar');
         if (!avatar) return;
         avatar.className = 'mentor-avatar';
-        void avatar.offsetWidth;
+        void avatar.offsetWidth; // force reflow
         avatar.classList.add(`mentor-${mood}`);
     }
 
-    getRandomMessage(arr) {
-        return arr[Math.floor(Math.random() * arr.length)];
+    getRandomMessage(messageArray) {
+        return messageArray[Math.floor(Math.random() * messageArray.length)];
     }
 
     // ═══════════════════════════════════════
@@ -514,12 +771,15 @@ class NlpGame {
     updateStreak() {
         const today = new Date().toDateString();
         const lastPlay = this.playerData.lastPlayDate;
+
         if (lastPlay) {
             const lastDate = new Date(lastPlay);
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
-            if (lastPlay === today) { /* already played */ }
-            else if (lastDate.toDateString() === yesterday.toDateString()) {
+
+            if (lastPlay === today) {
+                // already played today
+            } else if (lastDate.toDateString() === yesterday.toDateString()) {
                 this.playerData.streak++;
                 this.playerData.lastPlayDate = today;
                 this.savePlayerData();
@@ -533,6 +793,8 @@ class NlpGame {
             this.playerData.lastPlayDate = today;
             this.savePlayerData();
         }
+
+        // Track longest streak
         if (this.playerData.streak > (this.playerData.longestStreak || 0)) {
             this.playerData.longestStreak = this.playerData.streak;
             this.savePlayerData();
@@ -543,63 +805,78 @@ class NlpGame {
     // Stats Display
     // ═══════════════════════════════════════
     updateStatsDisplay() {
-        document.getElementById('game-xp-value').textContent = this.playerData.xp;
-        document.getElementById('game-streak-value').textContent = this.playerData.streak;
+        document.getElementById('xp-value').textContent = this.playerData.xp;
+        document.getElementById('streak-value').textContent = this.playerData.streak;
         this.renderHearts();
     }
 
     renderHearts() {
-        const container = document.getElementById('game-hearts-container');
+        const container = document.getElementById('hearts-container');
         let html = '';
         for (let i = 0; i < this.playerData.maxHearts; i++) {
-            html += `<span class="heart ${i >= this.playerData.hearts ? 'empty' : ''}">❤️</span>`;
+            const isEmpty = i >= this.playerData.hearts;
+            html += `<span class="heart ${isEmpty ? 'empty' : ''}">❤️</span>`;
         }
         container.innerHTML = html;
     }
 
+    // ═══════════════════════════════════════
+    // Level System
+    // ═══════════════════════════════════════
     calculateLevel() {
-        const thresholds = [0, 100, 250, 500, 1000, 2000, 4000, 8000];
-        for (let i = thresholds.length - 1; i >= 0; i--) {
-            if (this.playerData.xp >= thresholds[i]) return i + 1;
+        const xpThresholds = [0, 100, 250, 500, 1000, 2000, 4000, 8000];
+        for (let i = xpThresholds.length - 1; i >= 0; i--) {
+            if (this.playerData.xp >= xpThresholds[i]) {
+                return i + 1;
+            }
         }
         return 1;
     }
 
     getLevelName(level) {
-        return ['מתחיל', 'מספר סיפורים', 'מעורר השראה', 'מחבר קהל', 'מומחה שיווק', 'אמן סטוריטלינג', 'מגנט לקוחות', 'אגדה'][level - 1] || 'אגדה';
+        const names = ['מתחיל', 'סקרן', 'לומד', 'מתרגל', 'מיומן', 'מתקדם', 'פרקטישנר', 'מאסטר NLP'];
+        return names[level - 1] || 'מאסטר NLP';
     }
 
     getLevelProgressInfo() {
-        const thresholds = [0, 100, 250, 500, 1000, 2000, 4000, 8000];
-        const cur = this.playerData.level;
-        const xp = this.playerData.xp;
-        const curT = thresholds[cur - 1] || 0;
-        const nextT = thresholds[cur] || thresholds[thresholds.length - 1];
-        const progress = Math.min(100, ((xp - curT) / (nextT - curT)) * 100);
-        return { progress, xpToNext: Math.max(0, nextT - xp), currentXP: xp, nextThreshold: nextT };
+        const xpThresholds = [0, 100, 250, 500, 1000, 2000, 4000, 8000];
+        const currentLevel = this.playerData.level;
+        const currentXP = this.playerData.xp;
+        const currentThreshold = xpThresholds[currentLevel - 1] || 0;
+        const nextThreshold = xpThresholds[currentLevel] || xpThresholds[xpThresholds.length - 1];
+        const xpInLevel = currentXP - currentThreshold;
+        const xpNeeded = nextThreshold - currentThreshold;
+        const progress = Math.min(100, (xpInLevel / xpNeeded) * 100);
+        const xpToNext = nextThreshold - currentXP;
+        return { progress, xpToNext: Math.max(0, xpToNext), currentXP, nextThreshold };
     }
 
     // ═══════════════════════════════════════
     // Achievements
     // ═══════════════════════════════════════
     renderAchievementsGrid() {
-        return this.achievements.slice(0, 8).map(a => {
-            const unlocked = this.playerData.achievements.includes(a.id);
-            return `<div class="achievement-item ${unlocked ? 'unlocked' : 'locked'}"><div class="achievement-icon">${a.icon}</div><div class="achievement-name">${a.title}</div></div>`;
+        return this.achievements.slice(0, 8).map(achievement => {
+            const isUnlocked = this.playerData.achievements.includes(achievement.id);
+            return `
+                <div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-name">${achievement.title}</div>
+                </div>
+            `;
         }).join('');
     }
 
     checkAchievements() {
-        let newOnes = [];
-        this.achievements.forEach(a => {
-            if (!this.playerData.achievements.includes(a.id) && a.condition(this.playerData)) {
-                this.playerData.achievements.push(a.id);
-                newOnes.push(a);
+        let newAchievements = [];
+        this.achievements.forEach(achievement => {
+            if (!this.playerData.achievements.includes(achievement.id) && achievement.condition(this.playerData)) {
+                this.playerData.achievements.push(achievement.id);
+                newAchievements.push(achievement);
             }
         });
-        if (newOnes.length > 0) {
+        if (newAchievements.length > 0) {
             this.savePlayerData();
-            this.showAchievementPopup(newOnes[0]);
+            this.showAchievementPopup(newAchievements[0]);
         }
     }
 
@@ -607,10 +884,20 @@ class NlpGame {
         this.sound.play('achievement');
         const popup = document.createElement('div');
         popup.className = 'achievement-popup';
-        popup.innerHTML = `<div class="achievement-popup-icon">${achievement.icon}</div><div><div class="achievement-popup-title">הישג חדש!</div><div class="achievement-popup-name">${achievement.title}</div><div class="achievement-popup-desc">${achievement.desc}</div></div>`;
+        popup.innerHTML = `
+            <div class="achievement-popup-icon">${achievement.icon}</div>
+            <div class="achievement-popup-content">
+                <div class="achievement-popup-title">הישג חדש!</div>
+                <div class="achievement-popup-name">${achievement.title}</div>
+                <div class="achievement-popup-desc">${achievement.desc}</div>
+            </div>
+        `;
         document.body.appendChild(popup);
         setTimeout(() => popup.classList.add('show'), 100);
-        setTimeout(() => { popup.classList.remove('show'); setTimeout(() => popup.remove(), 500); }, 3000);
+        setTimeout(() => {
+            popup.classList.remove('show');
+            setTimeout(() => popup.remove(), 500);
+        }, 3000);
     }
 
     // ═══════════════════════════════════════
@@ -619,12 +906,21 @@ class NlpGame {
     startDailyChallenge() {
         const today = new Date().toDateString();
         if (this.playerData.dailyChallengeCompleted === today) return;
-        const available = MODULES.filter((m, i) => i === 0 || this.getModuleProgress(MODULES[i - 1].id) >= 50);
-        if (available.length === 0) { this.transitionTo(() => this.openModule(1)); return; }
+
+        const availableModules = MODULES.filter((module, index) => {
+            if (index === 0) return true;
+            return this.getModuleProgress(MODULES[index - 1].id) >= 50;
+        });
+
+        if (availableModules.length === 0) {
+            this.transitionTo(() => this.openModule(1));
+            return;
+        }
+
+        const randomModule = availableModules[Math.floor(Math.random() * availableModules.length)];
         this.isDailyChallenge = true;
         this.dailyChallengeExercisesLeft = 3;
-        const mod = available[Math.floor(Math.random() * available.length)];
-        this.transitionTo(() => this.openModule(mod.id));
+        this.transitionTo(() => this.openModule(randomModule.id));
     }
 
     completeDailyChallenge() {
@@ -632,11 +928,14 @@ class NlpGame {
         this.addXP(50);
         this.savePlayerData();
         this.isDailyChallenge = false;
-        const modal = document.getElementById('game-modal-overlay');
-        document.getElementById('game-modal-icon').textContent = '🎯';
-        document.getElementById('game-modal-title').textContent = 'אתגר יומי הושלם!';
-        document.getElementById('game-modal-text').textContent = 'קיבלת +50 XP בונוס! חזרו מחר לאתגר חדש.';
-        document.getElementById('game-modal-buttons').innerHTML = `<button class="btn btn-primary" onclick="game.closeModal()">מעולה!</button>`;
+
+        const modal = document.getElementById('modal-overlay');
+        document.getElementById('modal-icon').textContent = '🎯';
+        document.getElementById('modal-title').textContent = 'אתגר יומי הושלם!';
+        document.getElementById('modal-text').textContent = 'קיבלת +50 XP בונוס! חזרו מחר לאתגר חדש.';
+        document.getElementById('modal-buttons').innerHTML = `
+            <button class="btn btn-primary" onclick="game.closeModal()">מעולה!</button>
+        `;
         modal.classList.add('show');
     }
 
@@ -646,49 +945,151 @@ class NlpGame {
     renderHomeScreen() {
         this.currentScreen = 'home';
         const container = document.getElementById('game-container');
-        const welcomeMsg = this.getRandomMessage(this.mentorMessages.welcome);
+        const welcomeMessage = this.getRandomMessage(this.mentorMessages.welcome);
+
         const levelInfo = this.getLevelProgressInfo();
-        const dcDone = this.playerData.dailyChallengeCompleted === new Date().toDateString();
+        const dailyChallengeCompleted = this.playerData.dailyChallengeCompleted === new Date().toDateString();
 
+        // Build journey path nodes
         let pathNodesHtml = '';
-        // Daily challenge
-        pathNodesHtml += `<div class="home-path-node special" onclick="game.startDailyChallenge()"><div class="home-path-icon">${dcDone ? '✅' : '🎯'}</div><div class="home-path-info"><div class="home-path-label">אתגר יומי</div><div class="home-path-title">${dcDone ? 'הושלם היום!' : 'השלימו 3 תרגילים'}</div><div class="home-path-desc">${dcDone ? 'כל הכבוד! חזרו מחר' : 'קבלו בונוס XP!'}</div></div><div class="home-path-arrow">${dcDone ? '' : '←'}</div></div>`;
-        // Story builder
-        pathNodesHtml += `<div class="home-path-node special" onclick="game.transitionTo(function(){game.startStoryBuilder()})"><div class="home-path-icon">✍️</div><div class="home-path-info"><div class="home-path-label">תרגול חופשי</div><div class="home-path-title">בנה סיפור</div><div class="home-path-desc">צרו סיפור שלם עם ליווי של גל</div></div><div class="home-path-arrow">←</div></div>`;
 
-        const prevLocked = this._prevLocked || [];
-        const curLocked = [];
+        // START node — daily challenge
+        pathNodesHtml += `
+            <div class="home-path-node special" onclick="game.startDailyChallenge()">
+                <div class="home-path-icon">${dailyChallengeCompleted ? '✅' : '🎯'}</div>
+                <div class="home-path-info">
+                    <div class="home-path-label">אתגר יומי</div>
+                    <div class="home-path-title">${dailyChallengeCompleted ? 'הושלם היום!' : 'השלימו 3 תרגילים'}</div>
+                    <div class="home-path-desc">${dailyChallengeCompleted ? 'כל הכבוד! חזרו מחר' : 'קבלו בונוס XP!'}</div>
+                </div>
+                <div class="home-path-arrow">${dailyChallengeCompleted ? '' : '←'}</div>
+            </div>
+        `;
 
-        MODULES.forEach((mod, i) => {
-            const progress = this.getModuleProgress(mod.id);
-            const done = progress === 100;
-            const locked = i > 0 && this.getModuleProgress(MODULES[i - 1].id) < 50;
-            const perfect = this.playerData.perfectLessonsList && mod.lessons && mod.lessons.every(l => this.playerData.perfectLessonsList.includes(`${mod.id}-${l.id}`));
-            if (locked) curLocked.push(mod.id);
-            const justUnlocked = prevLocked.includes(mod.id) && !locked;
-            let cls = 'available', icon = mod.icon;
-            if (locked) { cls = 'locked'; icon = '🔒'; }
-            else if (perfect) { cls = 'completed'; icon = '⭐'; }
-            else if (done) { cls = 'completed'; icon = '✅'; }
-            if (justUnlocked) cls += ' just-unlocked';
-            pathNodesHtml += `<div class="home-path-node ${cls}" onclick="${locked ? '' : `game.transitionTo(function(){game.openModule(${mod.id})})`}"><div class="home-path-icon">${icon}</div><div class="home-path-info"><div class="home-path-label">מודול ${i + 1}</div><div class="home-path-title">${mod.title}</div><div class="home-path-desc">${mod.description}</div><div class="home-path-progress"><div class="home-path-progress-bar"><div class="home-path-progress-fill" style="width:${progress}%"></div></div><span class="home-path-progress-text">${progress}%</span></div></div><div class="home-path-arrow">${locked ? '' : '←'}</div></div>`;
+        // Story Builder node
+        pathNodesHtml += `
+            <div class="home-path-node special" onclick="game.transitionTo(function() { game.startStoryBuilder() })">
+                <div class="home-path-icon">✍️</div>
+                <div class="home-path-info">
+                    <div class="home-path-label">תרגול חופשי</div>
+                    <div class="home-path-title">תרגול חופשי</div>
+                    <div class="home-path-desc">תרגלו טכניקות NLP עם ליווי של רם</div>
+                </div>
+                <div class="home-path-arrow">←</div>
+            </div>
+        `;
+
+        // Module nodes — track unlock transitions
+        const previousLocked = this._previousLockedModules || [];
+        const currentLocked = [];
+
+        MODULES.forEach((module, index) => {
+            const progress = this.getModuleProgress(module.id);
+            const isCompleted = progress === 100;
+            const isLocked = index > 0 && this.getModuleProgress(MODULES[index - 1].id) < 50;
+            const isPerfect = this.playerData.perfectLessonsList &&
+                module.lessons && module.lessons.every(l =>
+                    this.playerData.perfectLessonsList.includes(`${module.id}-${l.id}`)
+                );
+
+            if (isLocked) currentLocked.push(module.id);
+            const justUnlocked = previousLocked.includes(module.id) && !isLocked;
+
+            let stateClass = 'available';
+            let stateIcon = module.icon;
+            if (isLocked) {
+                stateClass = 'locked';
+                stateIcon = '🔒';
+            } else if (isPerfect) {
+                stateClass = 'completed';
+                stateIcon = '⭐';
+            } else if (isCompleted) {
+                stateClass = 'completed';
+                stateIcon = '✅';
+            }
+
+            if (justUnlocked) stateClass += ' just-unlocked';
+
+            pathNodesHtml += `
+                <div class="home-path-node ${stateClass}"
+                     onclick="${isLocked ? '' : `game.transitionTo(function() { game.openModule(${module.id}) })`}">
+                    <div class="home-path-icon">${stateIcon}</div>
+                    <div class="home-path-info">
+                        <div class="home-path-label">מודול ${index + 1}</div>
+                        <div class="home-path-title">${module.title}</div>
+                        <div class="home-path-desc">${module.description}</div>
+                        <div class="home-path-progress">
+                            <div class="home-path-progress-bar">
+                                <div class="home-path-progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <span class="home-path-progress-text">${progress}%</span>
+                        </div>
+                    </div>
+                    <div class="home-path-arrow">${isLocked ? '' : '←'}</div>
+                </div>
+            `;
         });
 
-        const totalProg = MODULES.reduce((s, m) => s + this.getModuleProgress(m.id), 0);
-        const overallProg = Math.round(totalProg / MODULES.length);
-        pathNodesHtml += `<div class="home-path-node goal" style="cursor:default"><div class="home-path-icon">🏆</div><div class="home-path-info"><div class="home-path-label">יעד</div><div class="home-path-title">מאסטר הסטוריטלינג</div><div class="home-path-desc">השלימו את כל המודולים</div><div class="home-path-progress"><div class="home-path-progress-bar"><div class="home-path-progress-fill" style="width:${overallProg}%"></div></div><span class="home-path-progress-text">${overallProg}%</span></div></div></div>`;
+        // GOAL node
+        const totalProgress = MODULES.reduce((sum, m) => sum + this.getModuleProgress(m.id), 0);
+        const overallProgress = Math.round(totalProgress / MODULES.length);
+        pathNodesHtml += `
+            <div class="home-path-node goal" style="cursor: default;">
+                <div class="home-path-icon">🏆</div>
+                <div class="home-path-info">
+                    <div class="home-path-label">יעד</div>
+                    <div class="home-path-title">NLP פרקטישנר</div>
+                    <div class="home-path-desc">השלימו את כל המודולים</div>
+                    <div class="home-path-progress">
+                        <div class="home-path-progress-bar">
+                            <div class="home-path-progress-fill" style="width: ${overallProgress}%"></div>
+                        </div>
+                        <span class="home-path-progress-text">${overallProgress}%</span>
+                    </div>
+                </div>
+            </div>
+        `;
 
         container.innerHTML = `
-            ${this.createMentorHTML(welcomeMsg, true, 'wave')}
+            ${this.createMentorHTML(welcomeMessage, true, 'wave')}
+
+            <!-- התקדמות רמה -->
             <div class="level-progress-container">
-                <div class="level-info"><div class="level-current"><span class="level-badge">רמה ${this.playerData.level}</span><span class="level-name">${this.getLevelName(this.playerData.level)}</span></div><span class="level-next">${levelInfo.xpToNext} XP לרמה הבאה</span></div>
-                <div class="level-progress-bar"><div class="level-progress-fill" style="width:${levelInfo.progress}%"></div></div>
-                <div class="level-xp-text"><span>${levelInfo.currentXP} XP</span><span>${levelInfo.nextThreshold} XP</span></div>
+                <div class="level-info">
+                    <div class="level-current">
+                        <span class="level-badge">רמה ${this.playerData.level}</span>
+                        <span class="level-name">${this.getLevelName(this.playerData.level)}</span>
+                    </div>
+                    <span class="level-next">${levelInfo.xpToNext} XP לרמה הבאה</span>
+                </div>
+                <div class="level-progress-bar">
+                    <div class="level-progress-fill" style="width: ${levelInfo.progress}%"></div>
+                </div>
+                <div class="level-xp-text">
+                    <span>${levelInfo.currentXP} XP</span>
+                    <span>${levelInfo.nextThreshold} XP</span>
+                </div>
             </div>
-            <div class="home-journey"><div class="home-path-container">${pathNodesHtml}</div></div>
-            <div class="achievements-section"><div class="achievements-title">🏆 הישגים</div><div class="achievements-grid">${this.renderAchievementsGrid()}</div></div>
+
+            <!-- מסלול למידה -->
+            <div class="home-journey">
+                <div class="home-path-container">
+                    <div class="home-path-line"></div>
+                    ${pathNodesHtml}
+                </div>
+            </div>
+
+            <!-- הישגים -->
+            <div class="achievements-section">
+                <div class="achievements-title">🏆 הישגים</div>
+                <div class="achievements-grid">
+                    ${this.renderAchievementsGrid()}
+                </div>
+            </div>
         `;
-        this._prevLocked = curLocked;
+
+        this._previousLockedModules = currentLocked;
+
         this.hideProgressBar();
         this.hideFooter();
     }
@@ -705,24 +1106,100 @@ class NlpGame {
     renderStoryBuilderStep() {
         const container = document.getElementById('game-container');
         const step = this.storySteps[this.storyBuilderData.currentStep];
-        const total = this.storySteps.length;
-        const cur = this.storyBuilderData.currentStep;
-        let dots = '';
-        for (let i = 0; i < total; i++) dots += `<div class="story-step-dot ${i < cur ? 'completed' : ''} ${i === cur ? 'active' : ''}"></div>`;
-        const saved = this.storyBuilderData.answers[step.id] || '';
-        container.innerHTML = `<div class="story-builder"><button class="back-btn" onclick="game.exitStoryBuilder()">✕</button><div class="story-steps">${dots}</div>${this.createMentorHTML(step.mentorMessage)}<div class="story-step-content"><div class="story-step-title">${step.title}</div><div class="story-step-question">${step.question}</div><textarea class="story-textarea" id="story-answer" placeholder="${step.hint}" oninput="game.updateStoryAnswer('${step.id}')">${saved}</textarea><div class="story-example"><div class="story-example-label">💡 דוגמה:</div><div class="story-example-text">${step.example}</div></div></div><div class="story-nav"><div class="container">${cur > 0 ? '<button class="btn btn-secondary" onclick="game.prevStoryStep()">← הקודם</button>' : '<div></div>'}${cur < total - 1 ? '<button class="btn btn-primary" onclick="game.nextStoryStep()">הבא →</button>' : '<button class="btn btn-primary" onclick="game.showStoryPreview()">סיום ותצוגה מקדימה</button>'}</div></div></div>`;
+        const totalSteps = this.storySteps.length;
+        const currentStepNum = this.storyBuilderData.currentStep;
+
+        let dotsHtml = '';
+        for (let i = 0; i < totalSteps; i++) {
+            let dotClass = 'story-step-dot';
+            if (i < currentStepNum) dotClass += ' completed';
+            if (i === currentStepNum) dotClass += ' active';
+            dotsHtml += `<div class="${dotClass}"></div>`;
+        }
+
+        const savedAnswer = this.storyBuilderData.answers[step.id] || '';
+
+        container.innerHTML = `
+            <div class="story-builder">
+                <button class="back-btn" onclick="game.exitStoryBuilder()">✕</button>
+
+                <div class="story-steps">
+                    ${dotsHtml}
+                </div>
+
+                ${this.createMentorHTML(step.mentorMessage)}
+
+                <div class="story-step-content">
+                    <div class="story-step-title">${step.title}</div>
+                    <div class="story-step-question">${step.question}</div>
+
+                    <textarea
+                        class="story-textarea"
+                        id="story-answer"
+                        placeholder="${step.hint}"
+                        oninput="game.updateStoryAnswer('${step.id}')"
+                    >${savedAnswer}</textarea>
+
+                    <div class="story-example">
+                        <div class="story-example-label">💡 דוגמה:</div>
+                        <div class="story-example-text">${step.example}</div>
+                    </div>
+                </div>
+
+                <div class="story-nav">
+                    <div class="container">
+                        ${currentStepNum > 0 ?
+                            '<button class="btn btn-secondary" onclick="game.prevStoryStep()">← הקודם</button>' :
+                            '<div></div>'
+                        }
+                        ${currentStepNum < totalSteps - 1 ?
+                            '<button class="btn btn-primary" onclick="game.nextStoryStep()">הבא →</button>' :
+                            '<button class="btn btn-primary" onclick="game.showStoryPreview()">סיום ותצוגה מקדימה</button>'
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+
         this.hideProgressBar();
     }
 
-    updateStoryAnswer(stepId) { this.storyBuilderData.answers[stepId] = document.getElementById('story-answer').value; }
+    updateStoryAnswer(stepId) {
+        const textarea = document.getElementById('story-answer');
+        this.storyBuilderData.answers[stepId] = textarea.value;
+    }
 
-    nextStoryStep() {
+    async nextStoryStep() {
         this.sound.play('click');
-        this.updateStoryAnswer(this.storySteps[this.storyBuilderData.currentStep].id);
+        const step = this.storySteps[this.storyBuilderData.currentStep];
+        this.updateStoryAnswer(step.id);
+
+        // Get AI coaching on what user wrote
+        const answer = this.storyBuilderData.answers[step.id];
+        if (answer && answer.trim().length > 10) {
+            this.showRamCoaching(step.title, answer);
+        }
+
         if (this.storyBuilderData.currentStep < this.storySteps.length - 1) {
             this.storyBuilderData.currentStep++;
             this.transitionTo(() => this.renderStoryBuilderStep());
         }
+    }
+
+    async showRamCoaching(stepTitle, userAnswer) {
+        const response = await this.gemini.coachPractice(stepTitle, userAnswer);
+        if (!response) return;
+
+        // Show as a toast notification
+        const toast = document.createElement('div');
+        toast.className = 'ram-coaching-toast';
+        toast.innerHTML = `<img src="../assets/mentor-ram.png" class="ram-toast-img" /><div class="ram-toast-text">${response}</div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 50);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 6000);
     }
 
     prevStoryStep() {
@@ -737,8 +1214,57 @@ class NlpGame {
     showStoryPreview() {
         this.updateStoryAnswer(this.storySteps[this.storyBuilderData.currentStep].id);
         const container = document.getElementById('game-container');
-        const a = this.storyBuilderData.answers;
-        container.innerHTML = `<div class="story-builder"><button class="back-btn" onclick="game.transitionTo(function(){game.renderStoryBuilderStep()})">← חזרה לעריכה</button>${this.createMentorHTML('וואו! יצרת סיפור שלם! העתיקו אותו והשתמשו בשיווק שלכם.')}<div class="story-preview"><div class="story-preview-title">🎯 הסיפור שלך</div><div class="story-preview-section"><div class="story-preview-label">קהל היעד</div><div class="story-preview-text">${a.target || ''}</div></div><div class="story-preview-section"><div class="story-preview-label">הלפני - הכאב</div><div class="story-preview-text">${a.before || ''}</div></div><div class="story-preview-section"><div class="story-preview-label">נקודת המפנה</div><div class="story-preview-text">${a.turning || ''}</div></div><div class="story-preview-section"><div class="story-preview-label">האחרי - השינוי</div><div class="story-preview-text">${a.after || ''}</div></div><div class="story-preview-section"><div class="story-preview-label">המסר וקריאה לפעולה</div><div class="story-preview-text">${a.message || ''}</div></div></div><div class="story-complete-actions"><button class="btn btn-primary copy-btn btn-full" onclick="game.copyStory()">📋 העתק את הסיפור</button><button class="btn btn-secondary btn-full" onclick="game.transitionTo(function(){game.startStoryBuilder()})">✍️ התחל סיפור חדש</button><button class="btn btn-secondary btn-full" onclick="game.transitionTo(function(){game.renderHomeScreen()})">🏠 חזרה לתפריט</button></div></div>`;
+        const answers = this.storyBuilderData.answers;
+
+        container.innerHTML = `
+            <div class="story-builder">
+                <button class="back-btn" onclick="game.transitionTo(function() { game.renderStoryBuilderStep() })">← חזרה לעריכה</button>
+
+                ${this.createMentorHTML('מדהים! עברת תהליך NLP שלם! בואו נראה את כל השלבים ביחד. את/ה יכול/ה להעתיק ולהשתמש בזה בתרגול היומי.')}
+
+                <div class="story-preview">
+                    <div class="story-preview-title">🧠 התרגול שלך</div>
+
+                    <div class="story-preview-section">
+                        <div class="story-preview-label">המצב</div>
+                        <div class="story-preview-text">${answers.situation || ''}</div>
+                    </div>
+
+                    <div class="story-preview-section">
+                        <div class="story-preview-label">האמונה המגבילה</div>
+                        <div class="story-preview-text">${answers.belief || ''}</div>
+                    </div>
+
+                    <div class="story-preview-section">
+                        <div class="story-preview-label">הריפריים</div>
+                        <div class="story-preview-text">${answers.reframe || ''}</div>
+                    </div>
+
+                    <div class="story-preview-section">
+                        <div class="story-preview-label">העוגן</div>
+                        <div class="story-preview-text">${answers.anchor || ''}</div>
+                    </div>
+
+                    <div class="story-preview-section">
+                        <div class="story-preview-label">הצעד הראשון</div>
+                        <div class="story-preview-text">${answers.action || ''}</div>
+                    </div>
+                </div>
+
+                <div class="story-complete-actions">
+                    <button class="btn btn-primary copy-btn btn-full" onclick="game.copyStory()">
+                        📋 העתק את הסיפור
+                    </button>
+                    <button class="btn btn-secondary btn-full" onclick="game.transitionTo(function() { game.startStoryBuilder() })">
+                        ✍️ התחל סיפור חדש
+                    </button>
+                    <button class="btn btn-secondary btn-full" onclick="game.transitionTo(function() { game.renderHomeScreen() })">
+                        🏠 חזרה לתפריט
+                    </button>
+                </div>
+            </div>
+        `;
+
         this.playerData.storiesCreated = (this.playerData.storiesCreated || 0) + 1;
         this.savePlayerData();
         this.addXP(100);
@@ -746,71 +1272,147 @@ class NlpGame {
     }
 
     copyStory() {
-        const a = this.storyBuilderData.answers;
-        const text = `📌 קהל היעד:\n${a.target || ''}\n\n😔 הלפני - הכאב:\n${a.before || ''}\n\n⚡ נקודת המפנה:\n${a.turning || ''}\n\n🌟 האחרי - השינוי:\n${a.after || ''}\n\n🎯 המסר וקריאה לפעולה:\n${a.message || ''}`;
-        navigator.clipboard.writeText(text).then(() => {
+        const answers = this.storyBuilderData.answers;
+        const storyText = `📋 המצב:
+${answers.situation || ''}
+
+🔒 האמונה המגבילה:
+${answers.belief || ''}
+
+🔄 הריפריים:
+${answers.reframe || ''}
+
+⚓ העוגן:
+${answers.anchor || ''}
+
+👣 הצעד הראשון:
+${answers.action || ''}`;
+
+        navigator.clipboard.writeText(storyText).then(() => {
             const btn = document.querySelector('.copy-btn');
-            const orig = btn.innerHTML;
+            const originalText = btn.innerHTML;
             btn.innerHTML = '✅ הועתק!';
-            setTimeout(() => { btn.innerHTML = orig; }, 2000);
+            btn.style.background = 'var(--accent-green)';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+            }, 2000);
         });
     }
 
     exitStoryBuilder() {
-        const modal = document.getElementById('game-modal-overlay');
-        document.getElementById('game-modal-icon').textContent = '✍️';
-        document.getElementById('game-modal-title').textContent = 'לצאת מבניית הסיפור?';
-        document.getElementById('game-modal-text').textContent = 'הסיפור שלך יישמר.';
-        document.getElementById('game-modal-buttons').innerHTML = `<button class="btn btn-secondary" onclick="game.closeModalAndStay()">להישאר</button><button class="btn btn-danger" onclick="game.confirmExitStoryBuilder()">לצאת</button>`;
+        const modal = document.getElementById('modal-overlay');
+        document.getElementById('modal-icon').textContent = '✍️';
+        document.getElementById('modal-title').textContent = 'לצאת מבניית הסיפור?';
+        document.getElementById('modal-text').textContent = 'הסיפור שלך יישמר ותוכל להמשיך אותו אחר כך.';
+        document.getElementById('modal-buttons').innerHTML = `
+            <button class="btn btn-secondary" onclick="game.closeModalAndStay()">להישאר</button>
+            <button class="btn btn-danger" onclick="game.confirmExitStoryBuilder()">לצאת</button>
+        `;
         modal.classList.add('show');
     }
 
     confirmExitStoryBuilder() {
-        document.getElementById('game-modal-overlay').classList.remove('show');
+        document.getElementById('modal-overlay').classList.remove('show');
         this.transitionTo(() => this.renderHomeScreen());
     }
 
     // ═══════════════════════════════════════
-    // Module Progress & Screen
+    // Module Progress
     // ═══════════════════════════════════════
     getModuleProgress(moduleId) {
-        const mod = MODULES.find(m => m.id === moduleId);
-        if (!mod) return 0;
-        const total = mod.lessons.length;
-        let done = 0;
-        mod.lessons.forEach(l => { if (this.playerData.completedLessons[`${moduleId}-${l.id}`]) done++; });
-        return Math.round((done / total) * 100);
+        const module = MODULES.find(m => m.id === moduleId);
+        if (!module) return 0;
+        const totalLessons = module.lessons.length;
+        let completedLessons = 0;
+        module.lessons.forEach(lesson => {
+            if (this.playerData.completedLessons[`${moduleId}-${lesson.id}`]) {
+                completedLessons++;
+            }
+        });
+        return Math.round((completedLessons / totalLessons) * 100);
     }
 
+    // ═══════════════════════════════════════
+    // Module Screen
+    // ═══════════════════════════════════════
     openModule(moduleId) {
         this.currentModule = MODULES.find(m => m.id === moduleId);
         if (!this.currentModule) return;
+
         this.currentScreen = 'module';
         const container = document.getElementById('game-container');
-        const introMsg = this.mentorMessages.moduleIntro[moduleId] || "בואו נתחיל!";
+        const moduleIntroMessage = this.mentorMessages.moduleIntro[moduleId] || "בואו נתחיל!";
         const perfectList = this.playerData.perfectLessonsList || [];
-        const completedCount = this.currentModule.lessons.filter(l => this.playerData.completedLessons[`${moduleId}-${l.id}`]).length;
-        const totalCount = this.currentModule.lessons.length;
-        const pct = Math.round((completedCount / totalCount) * 100);
 
+        // Progress
+        const completedCount = this.currentModule.lessons.filter(l =>
+            this.playerData.completedLessons[`${moduleId}-${l.id}`]
+        ).length;
+        const totalCount = this.currentModule.lessons.length;
+        const progressPct = Math.round((completedCount / totalCount) * 100);
+
+        // Build visual learning path
         let pathHtml = this.currentModule.lessons.map((lesson, index) => {
-            const key = `${moduleId}-${lesson.id}`;
-            const isDone = this.playerData.completedLessons[key];
-            const isPerfect = perfectList.includes(key);
+            const lessonKey = `${moduleId}-${lesson.id}`;
+            const isCompleted = this.playerData.completedLessons[lessonKey];
+            const isPerfect = perfectList.includes(lessonKey);
             const isLocked = index > 0 && !this.playerData.completedLessons[`${moduleId}-${this.currentModule.lessons[index - 1].id}`];
-            let cls = 'locked', icon = '🔒', onclick = '';
-            if (isPerfect) { cls = 'perfect'; icon = '⭐'; onclick = `onclick="game.startLesson(${lesson.id})"`; }
-            else if (isDone) { cls = 'completed'; icon = '✅'; onclick = `onclick="game.startLesson(${lesson.id})"`; }
-            else if (!isLocked) { cls = 'available'; icon = '▶️'; onclick = `onclick="game.startLesson(${lesson.id})"`; }
-            return `<div class="path-node-row">${index < this.currentModule.lessons.length - 1 ? '<div class="path-connector"></div>' : ''}<div class="path-node ${cls}" ${onclick}><div class="path-node-icon">${icon}</div><div class="path-node-info"><div class="path-node-number">שיעור ${index + 1}</div><div class="path-node-title">${lesson.title}</div></div></div></div>`;
+            const isAvailable = !isLocked && !isCompleted;
+
+            let stateClass = 'locked';
+            let icon = '🔒';
+            let onclick = '';
+
+            if (isPerfect) {
+                stateClass = 'perfect';
+                icon = '⭐';
+                onclick = `onclick="game.startLesson(${lesson.id})"`;
+            } else if (isCompleted) {
+                stateClass = 'completed';
+                icon = '✅';
+                onclick = `onclick="game.startLesson(${lesson.id})"`;
+            } else if (isAvailable) {
+                stateClass = 'available';
+                icon = '▶️';
+                onclick = `onclick="game.startLesson(${lesson.id})"`;
+            }
+
+            return `
+                <div class="path-node-row">
+                    ${index < this.currentModule.lessons.length - 1 ? '<div class="path-connector"></div>' : ''}
+                    <div class="path-node ${stateClass}" ${onclick}>
+                        <div class="path-node-icon">${icon}</div>
+                        <div class="path-node-info">
+                            <div class="path-node-number">שיעור ${index + 1}</div>
+                            <div class="path-node-title">${lesson.title}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }).join('');
 
         container.innerHTML = `
-            <button class="back-btn" onclick="game.transitionTo(function(){game.renderHomeScreen()})">→ חזרה</button>
-            <div class="learning-path-header"><h2>${this.currentModule.icon} ${this.currentModule.title}</h2><div class="learning-path-progress"><span>${completedCount}/${totalCount} שיעורים</span><div class="learning-path-progress-bar"><div class="learning-path-progress-fill" style="width:${pct}%"></div></div></div></div>
-            <div class="module-intro">${this.createMentorHTML(introMsg)}</div>
-            <div class="learning-path">${pathHtml}</div>
+            <button class="back-btn" onclick="game.transitionTo(function() { game.renderHomeScreen() })">
+                → חזרה
+            </button>
+            <div class="learning-path-header">
+                <h2>${this.currentModule.icon} ${this.currentModule.title}</h2>
+                <div class="learning-path-progress">
+                    <span>${completedCount}/${totalCount} שיעורים</span>
+                    <div class="learning-path-progress-bar">
+                        <div class="learning-path-progress-fill" style="width: ${progressPct}%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="module-intro">
+                ${this.createMentorHTML(moduleIntroMessage)}
+            </div>
+            <div class="learning-path">
+                ${pathHtml}
+            </div>
         `;
+
         this.hideProgressBar();
         this.hideFooter();
     }
@@ -821,7 +1423,12 @@ class NlpGame {
     startLesson(lessonId) {
         this.currentLesson = this.currentModule.lessons.find(l => l.id === lessonId);
         if (!this.currentLesson) return;
-        if (this.playerData.hearts <= 0) { this.showNoHeartsModal(); return; }
+
+        if (this.playerData.hearts <= 0) {
+            this.showNoHeartsModal();
+            return;
+        }
+
         this.currentScreen = 'exercise';
         this.currentExerciseIndex = 0;
         this.lessonMistakes = 0;
@@ -831,190 +1438,529 @@ class NlpGame {
 
     renderExercise() {
         const exercise = this.currentLesson.exercises[this.currentExerciseIndex];
-        if (!exercise) { this.completeLesson(); return; }
+        if (!exercise) {
+            this.completeLesson();
+            return;
+        }
+
         this.selectedAnswer = null;
         this.exerciseAnswered = false;
         this.updateProgressBar();
+
         const container = document.getElementById('game-container');
+
         switch (exercise.type) {
-            case 'multiple-choice': this.renderMultipleChoice(container, exercise); break;
-            case 'fill-blank': this.renderFillBlank(container, exercise); break;
-            case 'order': this.renderOrder(container, exercise); break;
-            case 'identify': this.renderIdentify(container, exercise); break;
-            case 'compare': this.renderCompare(container, exercise); break;
-            case 'improve': this.renderImprove(container, exercise); break;
-            case 'match': this.renderMatch(container, exercise); break;
+            case 'multiple-choice':
+                this.renderMultipleChoice(container, exercise);
+                break;
+            case 'fill-blank':
+                this.renderFillBlank(container, exercise);
+                break;
+            case 'order':
+                this.renderOrder(container, exercise);
+                break;
+            case 'identify':
+                this.renderIdentify(container, exercise);
+                break;
+            case 'compare':
+                this.renderCompare(container, exercise);
+                break;
+            case 'scenario':
+                this.renderScenario(container, exercise);
+                break;
+            case 'improve':
+                this.renderImprove(container, exercise);
+                break;
+            case 'match':
+                this.renderMatch(container, exercise);
+                break;
         }
+
         this.showFooter();
-        if (exercise.type === 'order') this.enableCheckButton();
+
+        // Order exercises: check button must be enabled immediately
+        // (showFooter disables it, but order has no "selection" step)
+        if (exercise.type === 'order') {
+            this.enableCheckButton();
+        }
     }
 
-    createExerciseTip(type) {
+    createExerciseTip(exerciseType) {
         const tips = {
-            'multiple-choice': "💡 חשבו מה היה מושך אתכם כלקוחות",
-            'fill-blank': "💡 המילה הנכונה יוצרת את הרגש החזק ביותר",
-            'order': "💡 חשבו על המסע של הקהל",
-            'identify': "💡 חפשו את החלק שגורם להרגיש משהו",
-            'compare': "💡 דמיינו את עצמכם כלקוח",
-            'improve': "💡 חפשו רגש, ספציפיות או חיבור אישי",
-            'match': "💡 חפשו את הקשר הלוגי"
+            'multiple-choice': "💡 חשבו מה היה מושך אתכם כלקוחות - זו בדרך כלל התשובה הנכונה!",
+            'fill-blank': "💡 המילה הנכונה היא זו שיוצרת את הרגש החזק ביותר.",
+            'order': "💡 חשבו על המסע של הקהל - מה הם צריכים לשמוע קודם?",
+            'identify': "💡 חפשו את החלק שגורם לכם להרגיש משהו.",
+            'compare': "💡 דמיינו את עצמכם כלקוח - איזו גרסה הייתה גורמת לכם לעצור ולקרוא?",
+            'improve': "💡 חפשו את האפשרות שמוסיפה רגש, ספציפיות או חיבור אישי.",
+            'match': "💡 חפשו את הקשר הלוגי בין העמודות - מה מתחבר למה?",
+            'scenario': "💡 דמיינו את עצמכם במצב הזה — מה הייתם עושים?"
         };
-        return tips[type] || "";
+        return tips[exerciseType] || "";
     }
 
     renderMultipleChoice(container, exercise) {
         const letters = ['א', 'ב', 'ג', 'ד'];
         const tip = this.createExerciseTip('multiple-choice');
-        container.innerHTML = `<button class="back-btn" onclick="game.exitLesson()">✕</button><div class="exercise-container"><div class="exercise-type">בחירה מרובה</div><div class="exercise-question">${exercise.question}</div><div class="options-list">${exercise.options.map((o, i) => `<button class="option-btn" onclick="game.selectOption(${i})"><span class="option-letter">${letters[i]}</span><span>${o}</span></button>`).join('')}</div><div class="mentor-tip"><img class="mentor-tip-icon" src="../assets/mentor-gal.png" alt="גל" /><span class="mentor-tip-text">${tip}</span></div></div>`;
+        const optionsHtml = exercise.options.map((option, index) => `
+            <button class="option-btn" onclick="game.selectOption(${index})">
+                <span class="option-letter">${letters[index]}</span>
+                <span>${option}</span>
+            </button>
+        `).join('');
+
+        container.innerHTML = `
+            <button class="back-btn" onclick="game.exitLesson()">✕</button>
+            <div class="exercise-container">
+                <div class="exercise-type">בחירה מרובה</div>
+                <div class="exercise-question">${exercise.question}</div>
+                <div class="options-list">
+                    ${optionsHtml}
+                </div>
+                <div class="mentor-tip">
+                    <span class="mentor-tip-icon">🧑‍🏫</span>
+                    <span class="mentor-tip-text">${tip}</span>
+                </div>
+            </div>
+        `;
     }
 
     selectOption(index) {
         if (this.exerciseAnswered) return;
         this.sound.play('click');
         this.selectedAnswer = index;
-        document.querySelectorAll('.option-btn').forEach((btn, i) => btn.classList.toggle('selected', i === index));
+        document.querySelectorAll('.option-btn').forEach((btn, i) => {
+            btn.classList.toggle('selected', i === index);
+        });
         this.enableCheckButton();
     }
 
+    renderScenario(container, exercise) {
+        const letters = ['א', 'ב', 'ג', 'ד'];
+        const optionsHtml = exercise.options.map((option, index) => `
+            <button class="option-btn" onclick="game.selectOption(${index})">
+                <span class="option-letter">${letters[index]}</span>
+                <span>${option}</span>
+            </button>
+        `).join('');
+
+        container.innerHTML = `
+            <button class="back-btn" onclick="game.exitLesson()">✕</button>
+            <div class="exercise-container">
+                <div class="exercise-type">תרחיש</div>
+                <div class="exercise-question">${exercise.question}</div>
+                ${exercise.context ? `<div class="scenario-context"><div class="scenario-context-label">📋 הקשר:</div><div class="scenario-context-text">${exercise.context}</div></div>` : ''}
+                <div class="options-list">
+                    ${optionsHtml}
+                </div>
+            </div>
+        `;
+    }
+
     renderFillBlank(container, exercise) {
-        const tmpl = exercise.template.replace('___', '<span class="blank-slot" id="blank-slot">___</span>');
+        const templateHtml = exercise.template.replace('___', '<span class="blank-slot" id="blank-slot">___</span>');
         const tip = this.createExerciseTip('fill-blank');
-        const words = this.shuffleArray([...exercise.options]).map((w) => `<button class="word-chip" data-word-index="${exercise.options.indexOf(w)}" onclick="game.selectWord(this)">${w}</button>`).join('');
-        container.innerHTML = `<button class="back-btn" onclick="game.exitLesson()">✕</button><div class="exercise-container"><div class="exercise-type">השלמת משפט</div><div class="exercise-question">${exercise.question}</div><div class="fill-blank-container"><div class="template-text">${tmpl}</div><div class="word-bank">${words}</div></div><div class="mentor-tip"><img class="mentor-tip-icon" src="../assets/mentor-gal.png" alt="גל" /><span class="mentor-tip-text">${tip}</span></div></div>`;
+
+        const wordsHtml = this.shuffleArray([...exercise.options]).map((word, index) => `
+            <button class="word-chip" data-word-index="${exercise.options.indexOf(word)}" onclick="game.selectWord(this)">${word}</button>
+        `).join('');
+
+        container.innerHTML = `
+            <button class="back-btn" onclick="game.exitLesson()">✕</button>
+            <div class="exercise-container">
+                <div class="exercise-type">השלמת משפט</div>
+                <div class="exercise-question">${exercise.question}</div>
+                <div class="fill-blank-container">
+                    <div class="template-text">${templateHtml}</div>
+                    <div class="word-bank">${wordsHtml}</div>
+                </div>
+                <div class="mentor-tip">
+                    <span class="mentor-tip-icon">🧑‍🏫</span>
+                    <span class="mentor-tip-text">${tip}</span>
+                </div>
+            </div>
+        `;
     }
 
     selectWord(el) {
         if (this.exerciseAnswered) return;
         this.sound.play('click');
-        this.selectedAnswer = parseInt(el.dataset.wordIndex);
-        document.getElementById('blank-slot').textContent = el.textContent;
+        const index = parseInt(el.dataset.wordIndex);
+        const word = el.textContent;
+        this.selectedAnswer = index;
+        document.getElementById('blank-slot').textContent = word;
         document.getElementById('blank-slot').classList.add('filled');
-        document.querySelectorAll('.word-chip').forEach(c => c.classList.toggle('selected', c === el));
+
+        document.querySelectorAll('.word-chip').forEach((chip) => {
+            chip.classList.toggle('selected', chip === el);
+        });
+
         this.enableCheckButton();
     }
 
     renderOrder(container, exercise) {
         const shuffled = this.shuffleArray([...exercise.items].map((item, i) => ({ item, originalIndex: i })));
         const tip = this.createExerciseTip('order');
-        container.innerHTML = `<button class="back-btn" onclick="game.exitLesson()">✕</button><div class="exercise-container"><div class="exercise-type">סידור לפי סדר</div><div class="exercise-question">${exercise.question}</div><div class="order-container" id="order-container">${shuffled.map((o, i) => `<div class="order-item" draggable="true" data-index="${i}" data-original="${o.originalIndex}" ondragstart="game.dragStart(event)" ondragover="game.dragOver(event)" ondrop="game.drop(event)" ondragend="game.dragEnd(event)" ontouchstart="game.touchStart(event)" ontouchmove="game.touchMove(event)" ontouchend="game.touchEnd(event)"><span class="order-number">${i + 1}</span><span>${o.item}</span><span class="drag-handle">⋮⋮</span></div>`).join('')}</div><div class="mentor-tip"><img class="mentor-tip-icon" src="../assets/mentor-gal.png" alt="גל" /><span class="mentor-tip-text">${tip}</span></div></div>`;
+
+        const itemsHtml = shuffled.map((obj, index) => `
+            <div class="order-item" draggable="true" data-index="${index}" data-original="${obj.originalIndex}"
+                 ondragstart="game.dragStart(event)" ondragover="game.dragOver(event)"
+                 ondrop="game.drop(event)" ondragend="game.dragEnd(event)"
+                 ontouchstart="game.touchStart(event)" ontouchmove="game.touchMove(event)" ontouchend="game.touchEnd(event)">
+                <span class="order-number">${index + 1}</span>
+                <span>${obj.item}</span>
+                <span class="drag-handle">⋮⋮</span>
+            </div>
+        `).join('');
+
+        container.innerHTML = `
+            <button class="back-btn" onclick="game.exitLesson()">✕</button>
+            <div class="exercise-container">
+                <div class="exercise-type">סידור לפי סדר</div>
+                <div class="exercise-question">${exercise.question}</div>
+                <div class="order-container" id="order-container">
+                    ${itemsHtml}
+                </div>
+                <div class="mentor-tip">
+                    <span class="mentor-tip-icon">🧑‍🏫</span>
+                    <span class="mentor-tip-text">${tip}</span>
+                </div>
+            </div>
+        `;
+
         this.enableCheckButton();
     }
 
-    dragStart(e) { e.target.classList.add('dragging'); e.dataTransfer.setData('text/plain', e.target.dataset.index); }
-    dragOver(e) { e.preventDefault(); const item = e.target.closest('.order-item'); if (item && !item.classList.contains('dragging')) item.classList.add('drag-over'); }
+    // Drag & Drop
+    dragStart(e) {
+        e.target.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', e.target.dataset.index);
+    }
+
+    dragOver(e) {
+        e.preventDefault();
+        const item = e.target.closest('.order-item');
+        if (item && !item.classList.contains('dragging')) {
+            item.classList.add('drag-over');
+        }
+    }
+
     drop(e) {
         e.preventDefault();
         const container = document.getElementById('order-container');
         const dragging = container.querySelector('.dragging');
         const target = e.target.closest('.order-item');
+
         if (target && dragging && target !== dragging) {
             const items = [...container.children];
-            if (items.indexOf(dragging) < items.indexOf(target)) target.after(dragging);
-            else target.before(dragging);
+            const dragIndex = items.indexOf(dragging);
+            const targetIndex = items.indexOf(target);
+
+            if (dragIndex < targetIndex) {
+                target.after(dragging);
+            } else {
+                target.before(dragging);
+            }
             this.updateOrderNumbers();
         }
-        document.querySelectorAll('.order-item').forEach(i => i.classList.remove('drag-over'));
+
+        document.querySelectorAll('.order-item').forEach(item => {
+            item.classList.remove('drag-over');
+        });
     }
-    dragEnd(e) { e.target.classList.remove('dragging'); document.querySelectorAll('.order-item').forEach(i => i.classList.remove('drag-over')); }
-    touchStart(e) { const item = e.target.closest('.order-item'); if (!item) return; this.touchDragItem = item; this.touchStartY = e.touches[0].clientY; item.classList.add('dragging'); }
+
+    dragEnd(e) {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.order-item').forEach(item => {
+            item.classList.remove('drag-over');
+        });
+    }
+
+    // Touch reorder for mobile
+    touchStart(e) {
+        const item = e.target.closest('.order-item');
+        if (!item) return;
+        this.touchDragItem = item;
+        this.touchStartY = e.touches[0].clientY;
+        item.classList.add('dragging');
+    }
+
     touchMove(e) {
         if (!this.touchDragItem) return;
         e.preventDefault();
-        const y = e.touches[0].clientY;
+        const touchY = e.touches[0].clientY;
         const container = document.getElementById('order-container');
         const items = [...container.querySelectorAll('.order-item:not(.dragging)')];
+
         for (const item of items) {
             const rect = item.getBoundingClientRect();
-            if (y < rect.top + rect.height / 2) { container.insertBefore(this.touchDragItem, item); this.updateOrderNumbers(); break; }
-            if (item === items[items.length - 1] && y >= rect.top + rect.height / 2) { container.appendChild(this.touchDragItem); this.updateOrderNumbers(); }
+            const midY = rect.top + rect.height / 2;
+            if (touchY < midY) {
+                container.insertBefore(this.touchDragItem, item);
+                this.updateOrderNumbers();
+                break;
+            }
+            if (item === items[items.length - 1] && touchY >= midY) {
+                container.appendChild(this.touchDragItem);
+                this.updateOrderNumbers();
+            }
         }
     }
-    touchEnd() { if (this.touchDragItem) { this.touchDragItem.classList.remove('dragging'); this.touchDragItem = null; } }
-    updateOrderNumbers() { document.querySelectorAll('.order-item').forEach((item, i) => item.querySelector('.order-number').textContent = i + 1); }
+
+    touchEnd(e) {
+        if (this.touchDragItem) {
+            this.touchDragItem.classList.remove('dragging');
+            this.touchDragItem = null;
+        }
+    }
+
+    updateOrderNumbers() {
+        document.querySelectorAll('.order-item').forEach((item, index) => {
+            item.querySelector('.order-number').textContent = index + 1;
+        });
+    }
 
     renderIdentify(container, exercise) {
         const tip = this.createExerciseTip('identify');
-        container.innerHTML = `<button class="back-btn" onclick="game.exitLesson()">✕</button><div class="exercise-container"><div class="exercise-type">זיהוי בטקסט</div><div class="exercise-question">${exercise.question}</div><div class="identify-instructions">סמנו את החלק הרלוונטי בטקסט</div><div class="identify-text" id="identify-text" onmouseup="game.handleTextSelection()" ontouchend="setTimeout(function(){game.handleTextSelection()},100)">${exercise.text}</div><div class="mentor-tip"><img class="mentor-tip-icon" src="../assets/mentor-gal.png" alt="גל" /><span class="mentor-tip-text">${tip}</span></div></div>`;
+
+        container.innerHTML = `
+            <button class="back-btn" onclick="game.exitLesson()">✕</button>
+            <div class="exercise-container">
+                <div class="exercise-type">זיהוי בטקסט</div>
+                <div class="exercise-question">${exercise.question}</div>
+                <div class="identify-instructions">סמנו את החלק הרלוונטי בטקסט</div>
+                <div class="identify-text" id="identify-text" onmouseup="game.handleTextSelection()" ontouchend="setTimeout(function(){game.handleTextSelection()}, 100)">${exercise.text}</div>
+                <div class="mentor-tip">
+                    <span class="mentor-tip-icon">🧑‍🏫</span>
+                    <span class="mentor-tip-text">${tip}</span>
+                </div>
+            </div>
+        `;
+
         this.enableCheckButton();
     }
 
     handleTextSelection() {
         if (this.exerciseAnswered) return;
-        const sel = window.getSelection();
-        const text = sel.toString().trim();
+
+        const selection = window.getSelection();
+        const text = selection.toString().trim();
+
         if (text.length > 0) {
             const container = document.getElementById('identify-text');
-            const range = sel.getRangeAt(0);
+            const range = selection.getRangeAt(0);
             const start = this.getTextOffset(container, range.startContainer, range.startOffset);
             const end = start + text.length;
+
             this.selectedAnswer = { start, end, text };
-            const full = container.textContent;
-            container.innerHTML = `${full.substring(0, start)}<span class="highlight">${full.substring(start, end)}</span>${full.substring(end)}`;
+
+            const fullText = container.textContent;
+            const before = fullText.substring(0, start);
+            const selected = fullText.substring(start, end);
+            const after = fullText.substring(end);
+
+            container.innerHTML = `${before}<span class="highlight">${selected}</span>${after}`;
             this.enableCheckButton();
         }
     }
 
     getTextOffset(container, node, offset) {
-        let total = 0;
+        let totalOffset = 0;
         const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
-        while (walker.nextNode()) { if (walker.currentNode === node) return total + offset; total += walker.currentNode.textContent.length; }
-        return total + offset;
+        while (walker.nextNode()) {
+            if (walker.currentNode === node) {
+                return totalOffset + offset;
+            }
+            totalOffset += walker.currentNode.textContent.length;
+        }
+        return totalOffset + offset;
     }
 
+    // ═══════════════════════════════════════
+    // Compare Exercise
+    // ═══════════════════════════════════════
     renderCompare(container, exercise) {
         const tip = this.createExerciseTip('compare');
-        container.innerHTML = `<button class="back-btn" onclick="game.exitLesson()">✕</button><div class="exercise-container"><div class="exercise-type">איזה חזק יותר?</div><div class="exercise-question">${exercise.question}</div><div class="compare-cards"><div class="compare-card" onclick="game.selectCompare(0)"><div class="compare-label">${exercise.optionA.label}</div><div class="compare-text">${exercise.optionA.text}</div></div><div class="compare-vs">VS</div><div class="compare-card" onclick="game.selectCompare(1)"><div class="compare-label">${exercise.optionB.label}</div><div class="compare-text">${exercise.optionB.text}</div></div></div><div class="mentor-tip"><img class="mentor-tip-icon" src="../assets/mentor-gal.png" alt="גל" /><span class="mentor-tip-text">${tip}</span></div></div>`;
+
+        container.innerHTML = `
+            <button class="back-btn" onclick="game.exitLesson()">✕</button>
+            <div class="exercise-container">
+                <div class="exercise-type">איזה חזק יותר?</div>
+                <div class="exercise-question">${exercise.question}</div>
+                <div class="compare-cards">
+                    <div class="compare-card" onclick="game.selectCompare(0)">
+                        <div class="compare-label">${exercise.optionA.label}</div>
+                        <div class="compare-text">${exercise.optionA.text}</div>
+                    </div>
+                    <div class="compare-vs">VS</div>
+                    <div class="compare-card" onclick="game.selectCompare(1)">
+                        <div class="compare-label">${exercise.optionB.label}</div>
+                        <div class="compare-text">${exercise.optionB.text}</div>
+                    </div>
+                </div>
+                <div class="mentor-tip">
+                    <span class="mentor-tip-icon">🧑‍🏫</span>
+                    <span class="mentor-tip-text">${tip}</span>
+                </div>
+            </div>
+        `;
     }
 
     selectCompare(index) {
         if (this.exerciseAnswered) return;
         this.sound.play('click');
         this.selectedAnswer = index;
-        document.querySelectorAll('.compare-card').forEach((c, i) => c.classList.toggle('selected', i === index));
+        document.querySelectorAll('.compare-card').forEach((card, i) => {
+            card.classList.toggle('selected', i === index);
+        });
         this.enableCheckButton();
     }
 
+    showCompareFeedback(isCorrect, exercise) {
+        document.querySelectorAll('.compare-card').forEach((card, i) => {
+            if (i === exercise.correct) {
+                card.classList.add('correct');
+            } else if (i === this.selectedAnswer && !isCorrect) {
+                card.classList.add('incorrect');
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════
+    // Improve Exercise
+    // ═══════════════════════════════════════
     renderImprove(container, exercise) {
         const tip = this.createExerciseTip('improve');
         const letters = ['א', 'ב', 'ג', 'ד'];
-        container.innerHTML = `<button class="back-btn" onclick="game.exitLesson()">✕</button><div class="exercise-container"><div class="exercise-type">שפר את הסיפור</div><div class="exercise-question">${exercise.question}</div><div class="improve-original"><div class="improve-original-label">המשפט המקורי:</div><div class="improve-original-text">${exercise.original}</div></div><div class="options-list">${exercise.options.map((o, i) => `<button class="option-btn" onclick="game.selectOption(${i})"><span class="option-letter">${letters[i]}</span><span>${o}</span></button>`).join('')}</div><div class="mentor-tip"><img class="mentor-tip-icon" src="../assets/mentor-gal.png" alt="גל" /><span class="mentor-tip-text">${tip}</span></div></div>`;
+        const optionsHtml = exercise.options.map((option, index) => `
+            <button class="option-btn" onclick="game.selectOption(${index})">
+                <span class="option-letter">${letters[index]}</span>
+                <span>${option}</span>
+            </button>
+        `).join('');
+
+        container.innerHTML = `
+            <button class="back-btn" onclick="game.exitLesson()">✕</button>
+            <div class="exercise-container">
+                <div class="exercise-type">שפר את הסיפור</div>
+                <div class="exercise-question">${exercise.question}</div>
+                <div class="improve-original">
+                    <div class="improve-original-label">המשפט המקורי:</div>
+                    <div class="improve-original-text">${exercise.original}</div>
+                </div>
+                <div class="options-list">
+                    ${optionsHtml}
+                </div>
+                <div class="mentor-tip">
+                    <span class="mentor-tip-icon">🧑‍🏫</span>
+                    <span class="mentor-tip-text">${tip}</span>
+                </div>
+            </div>
+        `;
     }
 
+    // ═══════════════════════════════════════
+    // Match Exercise
+    // ═══════════════════════════════════════
     renderMatch(container, exercise) {
         const tip = this.createExerciseTip('match');
-        this.matchState = { selectedLeft: null, selectedRight: null, matches: [], pairs: exercise.pairs };
+        this.matchState = {
+            selectedLeft: null,
+            selectedRight: null,
+            matches: [],
+            pairs: exercise.pairs
+        };
+
         const shuffledRight = this.shuffleArray(exercise.pairs.map((p, i) => ({ text: p.right, originalIndex: i })));
-        const leftHtml = exercise.pairs.map((p, i) => `<div class="match-item match-left" data-index="${i}" onclick="game.selectMatchItem('left',${i})">${p.left}</div>`).join('');
-        const rightHtml = shuffledRight.map(item => `<div class="match-item match-right" data-index="${item.originalIndex}" onclick="game.selectMatchItem('right',${item.originalIndex})">${item.text}</div>`).join('');
-        container.innerHTML = `<button class="back-btn" onclick="game.exitLesson()">✕</button><div class="exercise-container"><div class="exercise-type">התאמה</div><div class="exercise-question">${exercise.question}</div><div class="match-instructions">לחצו על פריט משמאל ואז על המתאים מימין</div><div class="match-container"><div class="match-column">${leftHtml}</div><div class="match-column">${rightHtml}</div></div><div class="mentor-tip"><img class="mentor-tip-icon" src="../assets/mentor-gal.png" alt="גל" /><span class="mentor-tip-text">${tip}</span></div></div>`;
+
+        const leftHtml = exercise.pairs.map((p, i) => `
+            <div class="match-item match-left" data-index="${i}" onclick="game.selectMatchItem('left', ${i})">${p.left}</div>
+        `).join('');
+
+        const rightHtml = shuffledRight.map((item) => `
+            <div class="match-item match-right" data-index="${item.originalIndex}" onclick="game.selectMatchItem('right', ${item.originalIndex})">${item.text}</div>
+        `).join('');
+
+        container.innerHTML = `
+            <button class="back-btn" onclick="game.exitLesson()">✕</button>
+            <div class="exercise-container">
+                <div class="exercise-type">התאמה</div>
+                <div class="exercise-question">${exercise.question}</div>
+                <div class="match-instructions">לחצו על פריט משמאל ואז על הפריט המתאים מימין</div>
+                <div class="match-container">
+                    <div class="match-column">${leftHtml}</div>
+                    <div class="match-column">${rightHtml}</div>
+                </div>
+                <div class="mentor-tip">
+                    <span class="mentor-tip-icon">🧑‍🏫</span>
+                    <span class="mentor-tip-text">${tip}</span>
+                </div>
+            </div>
+        `;
     }
 
     selectMatchItem(side, index) {
         if (this.exerciseAnswered) return;
+        // Don't select already matched items
         if (this.matchState.matches.some(m => m[side === 'left' ? 0 : 1] === index)) return;
+
         this.sound.play('click');
+
         if (side === 'left') {
+            // Deselect previous left
             document.querySelectorAll('.match-left').forEach(el => el.classList.remove('selected'));
             this.matchState.selectedLeft = index;
             document.querySelector(`.match-left[data-index="${index}"]`).classList.add('selected');
         } else {
+            // Deselect previous right
             document.querySelectorAll('.match-right').forEach(el => el.classList.remove('selected'));
             this.matchState.selectedRight = index;
             document.querySelector(`.match-right[data-index="${index}"]`).classList.add('selected');
         }
+
+        // If both selected, create a match
         if (this.matchState.selectedLeft !== null && this.matchState.selectedRight !== null) {
-            const colors = ['#D4AF37', '#2F8592', '#00606B', '#003B46', '#E65100'];
-            const color = colors[this.matchState.matches.length % colors.length];
+            const colors = ['#2F8592', '#D4AF37', '#f472b6', '#3da0ae', '#00606B'];
+            const colorIndex = this.matchState.matches.length % colors.length;
+            const color = colors[colorIndex];
+
             this.matchState.matches.push([this.matchState.selectedLeft, this.matchState.selectedRight]);
+
             const leftEl = document.querySelector(`.match-left[data-index="${this.matchState.selectedLeft}"]`);
             const rightEl = document.querySelector(`.match-right[data-index="${this.matchState.selectedRight}"]`);
-            leftEl.classList.remove('selected'); rightEl.classList.remove('selected');
-            leftEl.classList.add('matched'); rightEl.classList.add('matched');
-            leftEl.style.borderColor = color; rightEl.style.borderColor = color;
-            leftEl.style.background = color + '15'; rightEl.style.background = color + '15';
-            this.matchState.selectedLeft = null; this.matchState.selectedRight = null;
-            if (this.matchState.matches.length === this.matchState.pairs.length) this.enableCheckButton();
+            leftEl.classList.remove('selected');
+            rightEl.classList.remove('selected');
+            leftEl.classList.add('matched');
+            rightEl.classList.add('matched');
+            leftEl.style.borderColor = color;
+            rightEl.style.borderColor = color;
+            leftEl.style.background = color + '15';
+            rightEl.style.background = color + '15';
+
+            this.matchState.selectedLeft = null;
+            this.matchState.selectedRight = null;
+
+            // Enable check when all pairs matched
+            if (this.matchState.matches.length === this.matchState.pairs.length) {
+                this.enableCheckButton();
+            }
         }
+    }
+
+    checkMatchAnswer(exercise) {
+        return this.matchState.matches.every(([left, right]) => left === right);
+    }
+
+    showMatchFeedback(isCorrect) {
+        document.querySelectorAll('.match-item').forEach(item => {
+            if (isCorrect) {
+                item.style.borderColor = 'var(--accent-green)';
+                item.style.background = 'rgba(52, 211, 153, 0.08)';
+            } else {
+                item.style.borderColor = 'var(--accent-red)';
+                item.style.background = 'rgba(251, 113, 133, 0.08)';
+            }
+        });
     }
 
     // ═══════════════════════════════════════
@@ -1022,23 +1968,53 @@ class NlpGame {
     // ═══════════════════════════════════════
     checkAnswer() {
         if (this.exerciseAnswered) return;
+
         const exercise = this.currentLesson.exercises[this.currentExerciseIndex];
         let isCorrect = false;
+
         switch (exercise.type) {
-            case 'multiple-choice': isCorrect = this.selectedAnswer === exercise.correct; this.showMultipleChoiceFeedback(isCorrect, exercise); break;
-            case 'fill-blank': isCorrect = this.selectedAnswer === exercise.correct; this.showFillBlankFeedback(isCorrect, exercise); break;
-            case 'order': isCorrect = this.checkOrderAnswer(exercise); this.showOrderFeedback(isCorrect); break;
-            case 'identify': isCorrect = this.checkIdentifyAnswer(exercise); this.showIdentifyFeedback(isCorrect, exercise); break;
-            case 'compare': isCorrect = this.selectedAnswer === exercise.correct; this.showCompareFeedback(isCorrect, exercise); break;
-            case 'improve': isCorrect = this.selectedAnswer === exercise.correct; this.showMultipleChoiceFeedback(isCorrect, exercise); break;
-            case 'match': isCorrect = this.matchState.matches.every(([l, r]) => l === r); this.showMatchFeedback(isCorrect); break;
+            case 'multiple-choice':
+                isCorrect = this.selectedAnswer === exercise.correct;
+                this.showMultipleChoiceFeedback(isCorrect, exercise);
+                break;
+            case 'fill-blank':
+                isCorrect = this.selectedAnswer === exercise.correct;
+                this.showFillBlankFeedback(isCorrect, exercise);
+                break;
+            case 'order':
+                isCorrect = this.checkOrderAnswer(exercise);
+                this.showOrderFeedback(isCorrect);
+                break;
+            case 'identify':
+                isCorrect = this.checkIdentifyAnswer(exercise);
+                this.showIdentifyFeedback(isCorrect, exercise);
+                break;
+            case 'compare':
+                isCorrect = this.selectedAnswer === exercise.correct;
+                this.showCompareFeedback(isCorrect, exercise);
+                break;
+            case 'scenario':
+                isCorrect = this.selectedAnswer === exercise.correct;
+                this.showMultipleChoiceFeedback(isCorrect, exercise);
+                break;
+            case 'improve':
+                isCorrect = this.selectedAnswer === exercise.correct;
+                this.showMultipleChoiceFeedback(isCorrect, exercise);
+                break;
+            case 'match':
+                isCorrect = this.checkMatchAnswer(exercise);
+                this.showMatchFeedback(isCorrect);
+                break;
         }
+
         this.exerciseAnswered = true;
+
         if (isCorrect) {
             this.sound.play('correct');
             this.playerData.totalCorrectAnswers = (this.playerData.totalCorrectAnswers || 0) + 1;
             this.addXP(10);
             this.createStarBurst();
+            // Haptic feedback
             if (navigator.vibrate) navigator.vibrate(50);
         } else {
             this.sound.play('wrong');
@@ -1047,99 +2023,187 @@ class NlpGame {
             this.loseHeart();
             if (navigator.vibrate) navigator.vibrate([100, 30, 100]);
         }
+
+        // Track stats
         this.updateExerciseStats(isCorrect, this.currentModule.id);
+
         this.showFeedback(isCorrect, exercise.explanation);
         this.savePlayerData();
     }
 
-    checkOrderAnswer(exercise) { return JSON.stringify([...document.querySelectorAll('.order-item')].map(i => parseInt(i.dataset.original))) === JSON.stringify(exercise.correctOrder); }
+    checkOrderAnswer(exercise) {
+        const items = document.querySelectorAll('.order-item');
+        const currentOrder = [...items].map(item => parseInt(item.dataset.original));
+        return JSON.stringify(currentOrder) === JSON.stringify(exercise.correctOrder);
+    }
+
     checkIdentifyAnswer(exercise) {
         if (!this.selectedAnswer) return false;
-        const [cs, ce] = exercise.correctRange;
+        const [correctStart, correctEnd] = exercise.correctRange;
         const { start, end } = this.selectedAnswer;
-        const overlap = Math.max(0, Math.min(end, ce) - Math.max(start, cs));
-        return overlap / (end - start) >= 0.6 && overlap / (ce - cs) >= 0.4;
+        const overlapStart = Math.max(start, correctStart);
+        const overlapEnd = Math.min(end, correctEnd);
+        const overlap = Math.max(0, overlapEnd - overlapStart);
+        const selectedLength = end - start;
+        const correctLength = correctEnd - correctStart;
+        return overlap / selectedLength >= 0.6 && overlap / correctLength >= 0.4;
     }
 
     showMultipleChoiceFeedback(isCorrect, exercise) {
-        document.querySelectorAll('.option-btn').forEach((btn, i) => {
-            if (i === exercise.correct) btn.classList.add('correct');
-            else if (i === this.selectedAnswer && !isCorrect) btn.classList.add('incorrect');
+        document.querySelectorAll('.option-btn').forEach((btn, index) => {
+            if (index === exercise.correct) {
+                btn.classList.add('correct');
+            } else if (index === this.selectedAnswer && !isCorrect) {
+                btn.classList.add('incorrect');
+            }
         });
     }
 
     showFillBlankFeedback(isCorrect, exercise) {
-        const slot = document.getElementById('blank-slot');
-        if (slot) slot.classList.add(isCorrect ? 'correct' : 'incorrect');
+        const blankSlot = document.getElementById('blank-slot');
+        if (blankSlot) {
+            blankSlot.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
         const correctWord = exercise.options[exercise.correct];
-        document.querySelectorAll('.word-chip').forEach(c => {
-            if (c.textContent === correctWord) c.classList.add('correct');
-            else if (c.classList.contains('selected') && !isCorrect) c.classList.add('incorrect');
+        document.querySelectorAll('.word-chip').forEach(chip => {
+            if (chip.textContent === correctWord) {
+                chip.classList.add('correct');
+            } else if (chip.classList.contains('selected') && !isCorrect) {
+                chip.classList.add('incorrect');
+            }
         });
-        if (!isCorrect && slot) setTimeout(() => { slot.textContent = correctWord; slot.classList.remove('incorrect'); slot.classList.add('correct'); }, 800);
-    }
-
-    showOrderFeedback(isCorrect) { document.querySelectorAll('.order-item').forEach(i => i.style.borderColor = isCorrect ? 'var(--t-success)' : 'var(--t-danger)'); }
-    showIdentifyFeedback(isCorrect, exercise) {
-        const container = document.getElementById('identify-text');
-        if (isCorrect) { container.querySelector('.highlight')?.classList.add('correct-highlight'); }
-        else {
-            container.querySelector('.highlight')?.classList.add('incorrect-highlight');
-            const [cs, ce] = exercise.correctRange;
-            setTimeout(() => { container.innerHTML = `${exercise.text.substring(0, cs)}<span class="highlight correct-highlight">${exercise.text.substring(cs, ce)}</span>${exercise.text.substring(ce)}`; }, 500);
+        // Show correct word in blank if wrong
+        if (!isCorrect && blankSlot) {
+            setTimeout(() => {
+                blankSlot.textContent = correctWord;
+                blankSlot.classList.remove('incorrect');
+                blankSlot.classList.add('correct');
+            }, 800);
         }
     }
-    showCompareFeedback(isCorrect, exercise) {
-        document.querySelectorAll('.compare-card').forEach((c, i) => {
-            if (i === exercise.correct) c.classList.add('correct');
-            else if (i === this.selectedAnswer && !isCorrect) c.classList.add('incorrect');
+
+    showOrderFeedback(isCorrect) {
+        document.querySelectorAll('.order-item').forEach(item => {
+            item.style.borderColor = isCorrect ? 'var(--accent-green)' : 'var(--accent-red)';
         });
     }
-    showMatchFeedback(isCorrect) {
-        document.querySelectorAll('.match-item').forEach(i => {
-            i.style.borderColor = isCorrect ? 'var(--t-success)' : 'var(--t-danger)';
-            i.style.background = isCorrect ? 'rgba(0,184,148,0.08)' : 'rgba(248,81,73,0.08)';
-        });
+
+    showIdentifyFeedback(isCorrect, exercise) {
+        const container = document.getElementById('identify-text');
+        const [correctStart, correctEnd] = exercise.correctRange;
+
+        if (isCorrect) {
+            container.querySelector('.highlight')?.classList.add('correct-highlight');
+        } else {
+            container.querySelector('.highlight')?.classList.add('incorrect-highlight');
+            setTimeout(() => {
+                const before = exercise.text.substring(0, correctStart);
+                const correct = exercise.text.substring(correctStart, correctEnd);
+                const after = exercise.text.substring(correctEnd);
+                container.innerHTML = `${before}<span class="highlight correct-highlight">${correct}</span>${after}`;
+            }, 500);
+        }
     }
 
     showFeedback(isCorrect, explanation) {
-        const panel = document.getElementById('game-feedback-panel');
-        panel.className = `game-feedback-panel show ${isCorrect ? 'correct' : 'incorrect'}`;
-        const mentorMsg = isCorrect ? this.getRandomMessage(this.mentorMessages.correctAnswer) : this.getRandomMessage(this.mentorMessages.wrongAnswer);
-        document.getElementById('game-feedback-icon').textContent = isCorrect ? '🎉' : '😅';
-        document.getElementById('game-feedback-title').textContent = mentorMsg;
+        const panel = document.getElementById('feedback-panel');
+        panel.className = `feedback-panel show ${isCorrect ? 'correct' : 'incorrect'}`;
+
+        const mentorMessage = isCorrect
+            ? this.getRandomMessage(this.mentorMessages.correctAnswer)
+            : this.getRandomMessage(this.mentorMessages.wrongAnswer);
+
+        document.getElementById('feedback-icon').textContent = isCorrect ? '🎉' : '😅';
+        document.getElementById('feedback-title').textContent = mentorMessage;
+
+        // Animate mentor avatar
         this.animateMentor(isCorrect ? 'happy' : 'sad');
 
+        // Build enhanced feedback for wrong answers
         const exercise = this.currentLesson.exercises[this.currentExerciseIndex];
-        let html = '';
+        let feedbackHtml = '';
+
         if (!isCorrect && exercise.wrongExplanations && this.selectedAnswer !== null) {
             const wrongExp = exercise.wrongExplanations[this.selectedAnswer];
-            const selText = this.getSelectedAnswerText(exercise);
-            const corText = this.getCorrectAnswerText(exercise);
-            html += `<div class="wrong-answer-detail"><div class="feedback-answer-label">❌ בחרת:</div><div class="feedback-answer-text">${selText}</div>${wrongExp ? `<div class="feedback-answer-reason">${wrongExp}</div>` : ''}</div>`;
-            html += `<div class="correct-answer-detail"><div class="feedback-answer-label">✅ התשובה הנכונה:</div><div class="feedback-answer-text">${corText}</div></div>`;
-            if (explanation) html += `<div style="margin-top:8px">${explanation}</div>`;
-        } else { html = explanation; }
-        document.getElementById('game-feedback-explanation').innerHTML = html;
-        document.getElementById('game-feedback-btn').textContent = 'המשך';
+            const selectedText = this.getSelectedAnswerText(exercise);
+            const correctText = this.getCorrectAnswerText(exercise);
+
+            feedbackHtml += `<div class="wrong-answer-detail">`;
+            feedbackHtml += `<div class="feedback-answer-label">❌ בחרת:</div>`;
+            feedbackHtml += `<div class="feedback-answer-text">${selectedText}</div>`;
+            if (wrongExp) feedbackHtml += `<div class="feedback-answer-reason">${wrongExp}</div>`;
+            feedbackHtml += `</div>`;
+
+            feedbackHtml += `<div class="correct-answer-detail">`;
+            feedbackHtml += `<div class="feedback-answer-label">✅ התשובה הנכונה:</div>`;
+            feedbackHtml += `<div class="feedback-answer-text">${correctText}</div>`;
+            feedbackHtml += `</div>`;
+
+            if (explanation) feedbackHtml += `<div style="margin-top:8px">${explanation}</div>`;
+        } else {
+            feedbackHtml = explanation;
+        }
+
+        document.getElementById('feedback-explanation').innerHTML = feedbackHtml;
+        document.getElementById('feedback-btn').textContent = 'המשך';
+
+        // Get AI feedback from Ram (async, non-blocking)
+        this.getAIFeedback(exercise, isCorrect);
+
+        // Streak fire pulse on correct
+        if (isCorrect) {
+            const streakEl = document.querySelector('.stat-item.streak');
+            if (streakEl) {
+                streakEl.classList.add('streak-fire-pulse');
+                setTimeout(() => streakEl.classList.remove('streak-fire-pulse'), 500);
+            }
+        }
+
         this.hideFooter();
     }
 
+    async getAIFeedback(exercise, isCorrect) {
+        const explanationEl = document.getElementById('feedback-explanation');
+        if (!explanationEl) return;
+
+        // Add loading indicator
+        const aiDiv = document.createElement('div');
+        aiDiv.className = 'ai-feedback-container';
+        aiDiv.innerHTML = '<div class="ai-feedback-loading"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span> רם חושב...</div>';
+        explanationEl.appendChild(aiDiv);
+
+        const response = await this.gemini.getFeedback(exercise, isCorrect, this.selectedAnswer);
+        if (response && aiDiv.parentElement) {
+            aiDiv.innerHTML = `<div class="ai-feedback"><div class="ai-feedback-label">🧑‍🏫 רם אומר:</div><div class="ai-feedback-text">${response}</div></div>`;
+        } else if (aiDiv.parentElement) {
+            aiDiv.remove();
+        }
+    }
+
     getSelectedAnswerText(exercise) {
-        if (exercise.type === 'compare') return this.selectedAnswer === 0 ? exercise.optionA.text : exercise.optionB.text;
+        if (exercise.type === 'compare') {
+            return this.selectedAnswer === 0 ? exercise.optionA.text : exercise.optionB.text;
+        }
         if (exercise.options) return exercise.options[this.selectedAnswer];
         return '';
     }
 
     getCorrectAnswerText(exercise) {
-        if (exercise.type === 'compare') return exercise.correct === 0 ? exercise.optionA.text : exercise.optionB.text;
+        if (exercise.type === 'compare') {
+            return exercise.correct === 0 ? exercise.optionA.text : exercise.optionB.text;
+        }
         if (exercise.options) return exercise.options[exercise.correct];
         return '';
     }
 
     continueToNext() {
-        document.getElementById('game-feedback-panel').classList.remove('show');
-        if (this.playerData.hearts <= 0) { this.showNoHeartsModal(); return; }
+        document.getElementById('feedback-panel').classList.remove('show');
+
+        if (this.playerData.hearts <= 0) {
+            this.showNoHeartsModal();
+            return;
+        }
+
         this.currentExerciseIndex++;
         setTimeout(() => this.renderExercise(), 300);
     }
@@ -1148,214 +2212,587 @@ class NlpGame {
     // Lesson Completion
     // ═══════════════════════════════════════
     completeLesson() {
-        const key = `${this.currentModule.id}-${this.currentLesson.id}`;
-        if (!this.playerData.completedLessons[key]) {
-            this.playerData.completedLessons[key] = true;
+        const lessonKey = `${this.currentModule.id}-${this.currentLesson.id}`;
+
+        if (!this.playerData.completedLessons[lessonKey]) {
+            this.playerData.completedLessons[lessonKey] = true;
             this.addXP(50);
+
             if (this.lessonMistakes === 0) {
                 this.playerData.perfectLessons = (this.playerData.perfectLessons || 0) + 1;
                 if (!this.playerData.perfectLessonsList) this.playerData.perfectLessonsList = [];
-                if (!this.playerData.perfectLessonsList.includes(key)) this.playerData.perfectLessonsList.push(key);
+                if (!this.playerData.perfectLessonsList.includes(lessonKey)) {
+                    this.playerData.perfectLessonsList.push(lessonKey);
+                }
             }
+
             this.savePlayerData();
         }
-        if (this.isDailyChallenge) this.completeDailyChallenge();
+
+        if (this.isDailyChallenge) {
+            this.completeDailyChallenge();
+        }
+
         this.checkAchievements();
         this.showCompletionScreen();
     }
 
     showCompletionScreen() {
-        this.hideProgressBar(); this.hideFooter();
-        this.createConfetti(); this.sound.play('levelUp');
-        const msg = this.getRandomMessage(this.mentorMessages.lessonComplete);
-        document.getElementById('game-container').innerHTML = `<div class="completion-screen"><div class="completion-icon">🏆</div><div class="completion-title">כל הכבוד!</div><div class="completion-subtitle">סיימת את השיעור "${this.currentLesson.title}"</div>${this.createMentorHTML(msg, true, 'happy')}<div class="completion-stats"><div class="completion-stat"><div class="completion-stat-value">+50</div><div class="completion-stat-label">XP</div></div><div class="completion-stat"><div class="completion-stat-value">${this.playerData.streak}</div><div class="completion-stat-label">ימים ברצף</div></div></div><button class="btn btn-primary btn-full" onclick="game.transitionTo(function(){game.openModule(${this.currentModule.id})})">המשך ללמוד</button><button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="game.transitionTo(function(){game.renderHomeScreen()})">חזרה לתפריט</button></div>`;
+        this.hideProgressBar();
+        this.hideFooter();
+        this.createConfetti();
+        this.sound.play('levelUp');
+
+        const completionMessage = this.getRandomMessage(this.mentorMessages.lessonComplete);
+
+        const container = document.getElementById('game-container');
+        container.innerHTML = `
+            <div class="completion-screen">
+                <div class="completion-icon">🏆</div>
+                <div class="completion-title">כל הכבוד!</div>
+                <div class="completion-subtitle">סיימת את השיעור "${this.currentLesson.title}"</div>
+                ${this.createMentorHTML(completionMessage, true, 'happy')}
+                <div class="completion-stats">
+                    <div class="completion-stat">
+                        <div class="completion-stat-value">+50</div>
+                        <div class="completion-stat-label">XP</div>
+                    </div>
+                    <div class="completion-stat">
+                        <div class="completion-stat-value">${this.playerData.streak}</div>
+                        <div class="completion-stat-label">ימים ברצף</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="game.transitionTo(function() { game.openModule(${this.currentModule.id}) })">
+                    המשך ללמוד
+                </button>
+                <button class="btn btn-secondary btn-full" style="margin-top: 10px;" onclick="game.transitionTo(function() { game.renderHomeScreen() })">
+                    חזרה לתפריט
+                </button>
+            </div>
+        `;
     }
 
+    // ═══════════════════════════════════════
+    // Improved Confetti
+    // ═══════════════════════════════════════
     createConfetti() {
         const container = document.createElement('div');
         container.className = 'confetti-container';
         document.body.appendChild(container);
-        const colors = ['#D4AF37', '#2F8592', '#00606B', '#003B46', '#E6C65A', '#00b894'];
-        for (let i = 0; i < 60; i++) {
-            const c = document.createElement('div');
-            c.className = Math.random() > 0.5 ? 'confetti-circle' : 'confetti';
+
+        const colors = ['#58CC02', '#1CB0F6', '#FF9600', '#FFC800', '#CE82FF', '#FF86D0', '#FF4B4B', '#7C5CFC'];
+        const shapes = ['square', 'circle', 'star'];
+
+        for (let i = 0; i < 80; i++) {
+            const confetti = document.createElement('div');
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            const color = colors[Math.floor(Math.random() * colors.length)];
             const size = 6 + Math.random() * 8;
-            c.style.cssText = `position:absolute;left:${Math.random()*100}%;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation:confettiSway ${2+Math.random()*2}s ease-out forwards;animation-delay:${Math.random()*1.5}s`;
-            if (c.className === 'confetti-circle') c.style.borderRadius = '50%';
-            container.appendChild(c);
+
+            confetti.style.position = 'absolute';
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.width = size + 'px';
+            confetti.style.height = size + 'px';
+            confetti.style.background = color;
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+
+            if (shape === 'circle') {
+                confetti.className = 'confetti-circle';
+            } else if (shape === 'star') {
+                confetti.className = 'confetti';
+                confetti.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+            } else {
+                confetti.className = 'confetti';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+            }
+
+            confetti.style.animation = `confettiSway ${2 + Math.random() * 2}s ease-out forwards`;
+            confetti.style.animationDelay = Math.random() * 1.5 + 's';
+
+            container.appendChild(confetti);
         }
+
         setTimeout(() => container.remove(), 5000);
     }
 
     // ═══════════════════════════════════════
-    // XP, Hearts, Modals
+    // XP & Hearts
     // ═══════════════════════════════════════
     addXP(amount) {
         const oldXP = this.playerData.xp;
-        const oldLvl = this.playerData.level;
+        const oldLevel = this.playerData.level;
         this.playerData.xp += amount;
         this.playerData.level = this.calculateLevel();
         this.savePlayerData();
         this.showXPPopup(amount);
-        const xpEl = document.getElementById('game-xp-value');
-        if (xpEl) this.animateCountUp(xpEl, oldXP, this.playerData.xp, 500);
-        document.getElementById('game-streak-value').textContent = this.playerData.streak;
+
+        // Animate XP counter
+        const xpEl = document.getElementById('xp-value');
+        if (xpEl) {
+            this.animateCountUp(xpEl, oldXP, this.playerData.xp, 500);
+        }
+        // Update other stats (streak, hearts)
+        document.getElementById('streak-value').textContent = this.playerData.streak;
         this.renderHearts();
-        if (this.playerData.level > oldLvl) this.showLevelUpCelebration(this.playerData.level);
+
+        if (this.playerData.level > oldLevel) {
+            this.showLevelUpCelebration(this.playerData.level);
+        }
+
         this.checkAchievements();
     }
 
     showXPPopup(amount) {
-        const popup = document.createElement('div');
-        popup.className = 'xp-popup';
-        popup.textContent = `+${amount} XP`;
-        document.body.appendChild(popup);
-        setTimeout(() => popup.remove(), 1000);
+        // Floating XP from the XP stat in header
+        const xpStat = document.querySelector('.stat-item.xp');
+        if (xpStat) {
+            const rect = xpStat.getBoundingClientRect();
+            const popup = document.createElement('div');
+            popup.className = 'xp-float';
+            popup.textContent = `+${amount} XP`;
+            popup.style.left = rect.left + rect.width / 2 + 'px';
+            popup.style.top = rect.bottom + 'px';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1200);
+        } else {
+            // Fallback centered popup
+            const popup = document.createElement('div');
+            popup.className = 'xp-popup';
+            popup.textContent = `+${amount} XP`;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1000);
+        }
     }
 
     loseHeart() {
         if (this.playerData.hearts > 0) {
             this.playerData.hearts--;
-            if (!this.playerData.lastHeartLost || this.playerData.hearts === this.playerData.maxHearts - 1) this.playerData.lastHeartLost = new Date().toISOString();
+            // Set the recovery timestamp
+            if (!this.playerData.lastHeartLost || this.playerData.hearts === this.playerData.maxHearts - 1) {
+                this.playerData.lastHeartLost = new Date().toISOString();
+            }
             this.savePlayerData();
             this.updateStatsDisplay();
+
+            const hearts = document.querySelectorAll('.heart:not(.empty)');
+            const lastHeart = hearts[hearts.length - 1];
+            if (lastHeart) {
+                lastHeart.classList.add('losing');
+                setTimeout(() => lastHeart.classList.add('empty'), 500);
+            }
         }
     }
 
+    // ═══════════════════════════════════════
+    // Modals
+    // ═══════════════════════════════════════
     showNoHeartsModal() {
-        const modal = document.getElementById('game-modal-overlay');
-        document.getElementById('game-modal-icon').textContent = '💔';
-        document.getElementById('game-modal-title').textContent = 'נגמרו הלבבות!';
-        document.getElementById('game-modal-text').textContent = `לב חדש יתחדש בעוד ${HEART_RECOVERY_MINUTES} דקות. חזרו מאוחר יותר.`;
-        document.getElementById('game-modal-buttons').innerHTML = `<button class="btn btn-secondary" onclick="game.closeModal()">חזרה</button><button class="btn btn-primary" onclick="game.refillHearts()">מילוי לבבות</button>`;
+        const modal = document.getElementById('modal-overlay');
+        document.getElementById('modal-icon').textContent = '💔';
+        document.getElementById('modal-title').textContent = 'נגמרו הלבבות!';
+
+        const hasTimer = this.playerData.lastHeartLost;
+        const timerMsg = hasTimer ? `לב חדש יתחדש בעוד ${HEART_RECOVERY_MINUTES} דקות.` : '';
+        document.getElementById('modal-text').textContent = `${timerMsg} חזרו מאוחר יותר או מלאו את הלבבות.`;
+
+        document.getElementById('modal-buttons').innerHTML = `
+            <button class="btn btn-secondary" onclick="game.closeModal()">חזרה לתפריט</button>
+            <button class="btn btn-primary" onclick="game.refillHearts()">מילוי לבבות</button>
+        `;
         modal.classList.add('show');
     }
 
-    closeModal() { document.getElementById('game-modal-overlay').classList.remove('show'); this.transitionTo(() => this.renderHomeScreen()); }
-    refillHearts() { this.playerData.hearts = this.playerData.maxHearts; this.playerData.lastHeartLost = null; this.savePlayerData(); this.updateStatsDisplay(); document.getElementById('game-modal-overlay').classList.remove('show'); }
+    closeModal() {
+        document.getElementById('modal-overlay').classList.remove('show');
+        this.transitionTo(() => this.renderHomeScreen());
+    }
+
+    refillHearts() {
+        this.playerData.hearts = this.playerData.maxHearts;
+        this.playerData.lastHeartLost = null;
+        this.savePlayerData();
+        this.updateStatsDisplay();
+        document.getElementById('modal-overlay').classList.remove('show');
+    }
+
     exitLesson() {
-        const modal = document.getElementById('game-modal-overlay');
-        document.getElementById('game-modal-icon').textContent = '🚪';
-        document.getElementById('game-modal-title').textContent = 'לצאת מהשיעור?';
-        document.getElementById('game-modal-text').textContent = 'ההתקדמות בשיעור הזה לא תישמר.';
-        document.getElementById('game-modal-buttons').innerHTML = `<button class="btn btn-secondary" onclick="game.closeModalAndStay()">להישאר</button><button class="btn btn-danger" onclick="game.confirmExit()">לצאת</button>`;
+        const modal = document.getElementById('modal-overlay');
+        document.getElementById('modal-icon').textContent = '🚪';
+        document.getElementById('modal-title').textContent = 'לצאת מהשיעור?';
+        document.getElementById('modal-text').textContent = 'ההתקדמות בשיעור הזה לא תישמר.';
+        document.getElementById('modal-buttons').innerHTML = `
+            <button class="btn btn-secondary" onclick="game.closeModalAndStay()">להישאר</button>
+            <button class="btn btn-danger" onclick="game.confirmExit()">לצאת</button>
+        `;
         modal.classList.add('show');
     }
-    closeModalAndStay() { document.getElementById('game-modal-overlay').classList.remove('show'); }
-    confirmExit() { document.getElementById('game-modal-overlay').classList.remove('show'); document.getElementById('game-feedback-panel').classList.remove('show'); this.transitionTo(() => this.openModule(this.currentModule.id)); }
+
+    closeModalAndStay() {
+        document.getElementById('modal-overlay').classList.remove('show');
+    }
+
+    confirmExit() {
+        document.getElementById('modal-overlay').classList.remove('show');
+        document.getElementById('feedback-panel').classList.remove('show');
+        this.transitionTo(() => this.openModule(this.currentModule.id));
+    }
 
     // ═══════════════════════════════════════
     // Stats Tracking
     // ═══════════════════════════════════════
     updateExerciseStats(isCorrect, moduleId) {
+        // Weekly activity
         const today = new Date().toISOString().split('T')[0];
         if (!this.playerData.weeklyActivity) this.playerData.weeklyActivity = {};
         this.playerData.weeklyActivity[today] = (this.playerData.weeklyActivity[today] || 0) + 1;
+
+        // Module accuracy
         if (!this.playerData.moduleAccuracy) this.playerData.moduleAccuracy = {};
-        if (!this.playerData.moduleAccuracy[moduleId]) this.playerData.moduleAccuracy[moduleId] = { correct: 0, total: 0 };
+        if (!this.playerData.moduleAccuracy[moduleId]) {
+            this.playerData.moduleAccuracy[moduleId] = { correct: 0, total: 0 };
+        }
         this.playerData.moduleAccuracy[moduleId].total++;
-        if (isCorrect) this.playerData.moduleAccuracy[moduleId].correct++;
+        if (isCorrect) {
+            this.playerData.moduleAccuracy[moduleId].correct++;
+        }
     }
 
+    // ═══════════════════════════════════════
+    // Personal Stats Screen
+    // ═══════════════════════════════════════
     showStats() {
         this.hideUserMenu();
         this.transitionTo(() => this.renderStatsScreen());
+    }
+
+    hideStats() {
+        this.transitionTo(() => this.renderHomeScreen());
     }
 
     renderStatsScreen() {
         this.currentScreen = 'stats';
         const container = document.getElementById('game-container');
         const pd = this.playerData;
+
+        // Summary cards
         const totalLessons = Object.keys(pd.completedLessons).length;
         const longestStreak = pd.longestStreak || pd.streak || 0;
+
+        // Weekly activity chart (last 7 days)
         const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
         const weekData = [];
-        let maxAct = 1;
+        let maxActivity = 1;
         for (let i = 6; i >= 0; i--) {
-            const d = new Date(); d.setDate(d.getDate() - i);
+            const d = new Date();
+            d.setDate(d.getDate() - i);
             const key = d.toISOString().split('T')[0];
             const count = (pd.weeklyActivity && pd.weeklyActivity[key]) || 0;
-            if (count > maxAct) maxAct = count;
+            if (count > maxActivity) maxActivity = count;
             weekData.push({ day: dayNames[d.getDay()], count, key });
         }
-        const bars = weekData.map(w => {
-            const h = Math.max(4, (w.count / maxAct) * 100);
+
+        const weeklyBarsHtml = weekData.map(w => {
+            const height = Math.max(4, (w.count / maxActivity) * 100);
             const isToday = w.key === new Date().toISOString().split('T')[0];
-            return `<div class="weekly-bar-wrapper"><div class="weekly-bar ${isToday ? 'today' : ''}" style="height:${h}%"><span class="weekly-bar-count">${w.count || ''}</span></div><div class="weekly-label">${w.day}</div></div>`;
+            return `
+                <div class="weekly-bar-wrapper">
+                    <div class="weekly-bar ${isToday ? 'today' : ''}" style="height: ${height}%">
+                        <span class="weekly-bar-count">${w.count || ''}</span>
+                    </div>
+                    <div class="weekly-label">${w.day}</div>
+                </div>
+            `;
         }).join('');
 
-        const modAcc = MODULES.map(m => {
+        // Module accuracy
+        const moduleAccuracyHtml = MODULES.map(m => {
             const acc = pd.moduleAccuracy && pd.moduleAccuracy[m.id];
-            if (!acc || acc.total === 0) return `<div class="accuracy-row"><span class="accuracy-module-name">${m.icon} ${m.title}</span><div class="accuracy-bar-wrapper"><div class="accuracy-bar" style="width:0%"></div></div><span class="accuracy-percent">--</span></div>`;
+            if (!acc || acc.total === 0) {
+                return `
+                    <div class="accuracy-row">
+                        <span class="accuracy-module-name">${m.icon} ${m.title}</span>
+                        <div class="accuracy-bar-wrapper">
+                            <div class="accuracy-bar" style="width: 0%"></div>
+                        </div>
+                        <span class="accuracy-percent">--</span>
+                    </div>
+                `;
+            }
             const pct = Math.round((acc.correct / acc.total) * 100);
-            const color = pct >= 80 ? 'var(--t-success)' : pct >= 50 ? 'var(--t-warning)' : 'var(--t-danger)';
-            return `<div class="accuracy-row"><span class="accuracy-module-name">${m.icon} ${m.title}</span><div class="accuracy-bar-wrapper"><div class="accuracy-bar" style="width:${pct}%;background:${color}"></div></div><span class="accuracy-percent">${pct}%</span></div>`;
+            const color = pct >= 80 ? 'var(--accent-green)' : pct >= 50 ? 'var(--accent-amber)' : 'var(--accent-red)';
+            return `
+                <div class="accuracy-row">
+                    <span class="accuracy-module-name">${m.icon} ${m.title}</span>
+                    <div class="accuracy-bar-wrapper">
+                        <div class="accuracy-bar" style="width: ${pct}%; background: ${color}"></div>
+                    </div>
+                    <span class="accuracy-percent">${pct}%</span>
+                </div>
+            `;
         }).join('');
 
-        const totalAns = (pd.totalCorrectAnswers || 0) + (pd.totalWrongAnswers || 0);
-        const accPct = totalAns > 0 ? Math.round((pd.totalCorrectAnswers / totalAns) * 100) : 0;
+        // Perfect lessons
+        const perfectList = pd.perfectLessonsList || [];
+        let perfectHtml = '';
+        if (perfectList.length > 0) {
+            perfectHtml = perfectList.map(key => {
+                const [modId, lesId] = key.split('-').map(Number);
+                const mod = MODULES.find(m => m.id === modId);
+                const les = mod && mod.lessons.find(l => l.id === lesId);
+                return les ? `<div class="perfect-lesson-item">⭐ ${les.title}</div>` : '';
+            }).join('');
+        } else {
+            perfectHtml = '<div class="perfect-lesson-empty">עדיין אין שיעורים מושלמים — סיימו שיעור בלי טעויות!</div>';
+        }
 
-        container.innerHTML = `<div class="stats-screen"><button class="back-btn" onclick="game.transitionTo(function(){game.renderHomeScreen()})">→ חזרה</button><h2 class="stats-title">📊 הסטטיסטיקות שלי</h2><div class="stats-cards"><div class="stats-card"><div class="stats-card-value">${pd.xp}</div><div class="stats-card-label">⭐ סה"כ XP</div></div><div class="stats-card"><div class="stats-card-value">${pd.streak}</div><div class="stats-card-label">🔥 סטריק</div></div><div class="stats-card"><div class="stats-card-value">${longestStreak}</div><div class="stats-card-label">🏆 שיא</div></div><div class="stats-card"><div class="stats-card-value">${totalLessons}</div><div class="stats-card-label">📚 שיעורים</div></div></div><div class="stats-section"><div class="stats-section-title">📅 פעילות השבוע</div><div class="weekly-chart">${bars}</div></div><div class="stats-section"><div class="stats-section-title">🎯 דיוק כללי: ${accPct}%</div></div><div class="stats-section"><div class="stats-section-title">📊 דיוק לפי מודול</div><div class="module-accuracy">${modAcc}</div></div></div>`;
-        this.hideProgressBar(); this.hideFooter();
+        // Accuracy percentage
+        const totalAnswers = (pd.totalCorrectAnswers || 0) + (pd.totalWrongAnswers || 0);
+        const accuracyPct = totalAnswers > 0 ? Math.round((pd.totalCorrectAnswers / totalAnswers) * 100) : 0;
+
+        container.innerHTML = `
+            <div class="stats-screen">
+                <button class="back-btn" onclick="game.hideStats()">→ חזרה</button>
+                <h2 class="stats-title">📊 הסטטיסטיקות שלי</h2>
+
+                <div class="stats-cards">
+                    <div class="stats-card">
+                        <div class="stats-card-value">${pd.xp}</div>
+                        <div class="stats-card-label">⭐ סה"כ XP</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-card-value">${pd.streak}</div>
+                        <div class="stats-card-label">🔥 סטריק נוכחי</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-card-value">${longestStreak}</div>
+                        <div class="stats-card-label">🏆 סטריק שיא</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-card-value">${totalLessons}</div>
+                        <div class="stats-card-label">📚 שיעורים</div>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stats-section-title">📅 פעילות השבוע</div>
+                    <div class="weekly-chart">
+                        ${weeklyBarsHtml}
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stats-section-title">🎯 דיוק כללי: ${accuracyPct}%</div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stats-section-title">📊 דיוק לפי מודול</div>
+                    <div class="module-accuracy">
+                        ${moduleAccuracyHtml}
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stats-section-title">⭐ שיעורים מושלמים</div>
+                    <div class="perfect-lessons">
+                        ${perfectHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.hideProgressBar();
+        this.hideFooter();
     }
 
-    showLevelUpCelebration(level) {
-        const overlay = document.getElementById('game-level-up-overlay');
-        document.getElementById('game-level-up-text').innerHTML = `<div class="level-up-icon">🎉</div><div class="level-up-heading">!עלית לרמה ${level}</div><div class="level-up-name">${this.getLevelName(level)}</div>`;
-        overlay.style.display = 'flex';
-        this.sound.play('levelUp');
-        const dismiss = () => { overlay.style.display = 'none'; overlay.removeEventListener('click', dismiss); };
-        overlay.addEventListener('click', dismiss);
-        setTimeout(dismiss, 3500);
-    }
-
+    // ═══════════════════════════════════════
+    // Star Burst Animation (correct answer)
+    // ═══════════════════════════════════════
     createStarBurst() {
         const container = document.createElement('div');
         container.className = 'star-burst-container';
         document.body.appendChild(container);
+
         for (let i = 0; i < 10; i++) {
             const star = document.createElement('div');
-            star.className = 'star-particle'; star.textContent = '⭐';
-            star.style.setProperty('--angle', (i / 10) * 360 + 'deg');
-            star.style.setProperty('--distance', (60 + Math.random() * 80) + 'px');
+            star.className = 'star-particle';
+            star.textContent = '⭐';
+            const angle = (i / 10) * 360;
+            const distance = 60 + Math.random() * 80;
+            star.style.setProperty('--angle', angle + 'deg');
+            star.style.setProperty('--distance', distance + 'px');
+            star.style.animationDelay = (Math.random() * 0.1) + 's';
             container.appendChild(star);
         }
+
         setTimeout(() => container.remove(), 800);
     }
 
-    animateCountUp(el, from, to, dur = 500) {
+    // ═══════════════════════════════════════
+    // Animated XP Counter
+    // ═══════════════════════════════════════
+    animateCountUp(el, from, to, duration = 500) {
         const start = performance.now();
         const diff = to - from;
-        const anim = (now) => {
-            const p = Math.min((now - start) / dur, 1);
-            el.textContent = Math.round(from + diff * (1 - Math.pow(1 - p, 3)));
-            if (p < 1) requestAnimationFrame(anim);
+        const animate = (now) => {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(from + diff * eased);
+            if (progress < 1) requestAnimationFrame(animate);
         };
-        requestAnimationFrame(anim);
+        requestAnimationFrame(animate);
+    }
+
+    // ═══════════════════════════════════════
+    // Level Up Celebration
+    // ═══════════════════════════════════════
+    showLevelUpCelebration(level) {
+        const overlay = document.getElementById('level-up-overlay');
+        const text = document.getElementById('level-up-text');
+        text.innerHTML = `
+            <div class="level-up-icon">🎉</div>
+            <div class="level-up-heading">!עלית לרמה ${level}</div>
+            <div class="level-up-name">${this.getLevelName(level)}</div>
+        `;
+        overlay.style.display = 'flex';
+        overlay.classList.add('party-mode');
+
+        // Screen shake
+        document.body.classList.add('screen-shake');
+        setTimeout(() => document.body.classList.remove('screen-shake'), 600);
+
+        // Confetti particles
+        const confettiContainer = document.createElement('div');
+        confettiContainer.className = 'confetti-container';
+        overlay.appendChild(confettiContainer);
+        const colors = ['#58CC02', '#1CB0F6', '#FF9600', '#FFC800', '#CE82FF', '#FF86D0', '#FF4B4B', '#7C5CFC'];
+        for (let i = 0; i < 100; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti-particle';
+            c.style.left = Math.random() * 100 + '%';
+            c.style.background = colors[Math.floor(Math.random() * colors.length)];
+            c.style.animationDelay = Math.random() * 1.5 + 's';
+            c.style.animationDuration = (2 + Math.random() * 2) + 's';
+            const size = 6 + Math.random() * 6;
+            c.style.width = size + 'px';
+            c.style.height = size + 'px';
+            if (Math.random() > 0.5) c.style.borderRadius = '50%';
+            confettiContainer.appendChild(c);
+        }
+
+        // Emoji rain
+        const emojis = ['🎉', '🎊', '✨', '🌟', '⭐', '🏆', '💫', '🥳'];
+        for (let i = 0; i < 20; i++) {
+            const emoji = document.createElement('div');
+            emoji.className = 'emoji-rain';
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            emoji.style.left = Math.random() * 100 + '%';
+            emoji.style.animationDelay = Math.random() * 2 + 's';
+            emoji.style.fontSize = (18 + Math.random() * 16) + 'px';
+            confettiContainer.appendChild(emoji);
+        }
+
+        this.sound.play('levelUp');
+
+        // Click to dismiss
+        const dismiss = () => {
+            overlay.style.display = 'none';
+            overlay.classList.remove('party-mode');
+            confettiContainer.remove();
+            overlay.removeEventListener('click', dismiss);
+        };
+        overlay.addEventListener('click', dismiss);
+
+        setTimeout(dismiss, 3500);
     }
 
     // ═══════════════════════════════════════
     // Utilities
     // ═══════════════════════════════════════
     shuffleArray(array) {
-        const a = [...array];
-        for (let i = a.length - 1; i > 0; i--) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [a[i], a[j]] = [a[j], a[i]];
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
         }
-        return a;
+        return newArray;
     }
 
-    showProgressBar() { document.getElementById('game-progress-container').style.display = 'block'; }
-    hideProgressBar() { document.getElementById('game-progress-container').style.display = 'none'; }
+    // ═══════════════════════════════════════
+    // UI Helpers
+    // ═══════════════════════════════════════
+    showProgressBar() {
+        document.getElementById('progress-container').style.display = 'block';
+    }
+
+    hideProgressBar() {
+        document.getElementById('progress-container').style.display = 'none';
+    }
+
     updateProgressBar() {
         const total = this.currentLesson.exercises.length;
-        document.getElementById('game-progress-bar').style.width = (this.currentExerciseIndex / total) * 100 + '%';
+        const current = this.currentExerciseIndex;
+        const percentage = (current / total) * 100;
+        document.getElementById('progress-bar').style.width = percentage + '%';
     }
-    showFooter() { document.getElementById('game-footer-actions').style.display = 'block'; this.disableCheckButton(); }
-    hideFooter() { document.getElementById('game-footer-actions').style.display = 'none'; }
-    enableCheckButton() { document.getElementById('game-check-btn').disabled = false; }
-    disableCheckButton() { document.getElementById('game-check-btn').disabled = true; }
+
+    showFooter() {
+        document.getElementById('footer-actions').style.display = 'block';
+        this.disableCheckButton();
+    }
+
+    hideFooter() {
+        document.getElementById('footer-actions').style.display = 'none';
+    }
+
+    enableCheckButton() {
+        document.getElementById('check-btn').disabled = false;
+    }
+
+    disableCheckButton() {
+        document.getElementById('check-btn').disabled = true;
+    }
+
+    // ═══════════════════════════════════════
+    // Ram Chat (AI)
+    // ═══════════════════════════════════════
+    toggleRamChat() {
+        const panel = document.getElementById('ram-chat-panel');
+        const isOpen = panel.style.display !== 'none';
+        panel.style.display = isOpen ? 'none' : 'flex';
+        if (!isOpen) {
+            document.getElementById('ram-chat-input').focus();
+        }
+    }
+
+    async sendRamChat() {
+        const input = document.getElementById('ram-chat-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        input.value = '';
+        const messagesEl = document.getElementById('ram-chat-messages');
+
+        // Add user message
+        messagesEl.innerHTML += `<div class="ram-msg ram-msg-user">${message}</div>`;
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        // Add loading
+        const loadingId = 'ram-loading-' + Date.now();
+        messagesEl.innerHTML += `<div class="ram-msg ram-msg-ai ram-msg-loading" id="${loadingId}"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span></div>`;
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        const moduleName = this.currentModule?.title || '';
+        const response = await this.gemini.chat(message, this.playerData.level, moduleName);
+
+        const loadingEl = document.getElementById(loadingId);
+        if (loadingEl) {
+            loadingEl.classList.remove('ram-msg-loading');
+            loadingEl.textContent = response || 'סליחה, לא הצלחתי לענות כרגע. נסו שוב!';
+        }
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
 }
 
 // ═══════════════════════════════════════
@@ -1363,5 +2800,5 @@ class NlpGame {
 // ═══════════════════════════════════════
 let game;
 document.addEventListener('DOMContentLoaded', () => {
-    game = new NlpGame();
+    game = new StoryGame();
 });

@@ -3732,8 +3732,8 @@
             // Update profile name from form (profile creation handled by supabase-client.js)
             await ensureProfileWithFormName(user);
 
-            // Sync localStorage progress to Supabase
-            await syncProgressToSupabase();
+            // Bi-directional merge: Supabase ↔ localStorage
+            await mergeProgress();
 
             // Resume from Supabase last-watched (if different from current)
             try {
@@ -3756,19 +3756,46 @@
             showAuthSuccess();
         }
 
-        // ===== Sync localStorage Progress to Supabase =====
-        async function syncProgressToSupabase() {
-            if (!window.CourseProgress || !completedLessons.length) return;
+        // ===== Bi-directional Progress Merge (Supabase ↔ localStorage) =====
+        async function mergeProgress() {
+            if (!window.CourseProgress) return;
             try {
-                for (const lessonId of completedLessons) {
+                // 1. Pull completed video IDs from Supabase
+                const serverVideoIds = await window.CourseProgress.getCompletedVideoIds('nlp-practitioner');
+
+                // 2. Map server video_ids to lessonId format ("moduleIdx-lessonIdx")
+                const serverLessonIds = [];
+                serverVideoIds.forEach(videoId => {
+                    modules.forEach((mod, mIdx) => {
+                        mod.lessons.forEach((les, lIdx) => {
+                            if (les.id === videoId) serverLessonIds.push(`${mIdx}-${lIdx}`);
+                        });
+                    });
+                });
+
+                // 3. Union merge: localStorage + Supabase
+                const merged = [...new Set([...completedLessons, ...serverLessonIds])];
+                completedLessons = merged;
+                localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+
+                // 4. Push localStorage-only items to Supabase
+                const newForServer = merged.filter(id => !serverLessonIds.includes(id));
+                for (const lessonId of newForServer) {
                     const [modIdx, lesIdx] = lessonId.split('-').map(Number);
-                    if (modules[modIdx] && modules[modIdx].lessons[lesIdx]) {
+                    if (modules[modIdx]?.lessons[lesIdx]) {
                         const lesson = modules[modIdx].lessons[lesIdx];
-                        await window.CourseProgress.markVideoWatched(lesson.id, 'nlp-practitioner', parseInt(lesIdx) + 1);
+                        await window.CourseProgress.markVideoWatched(lesson.id, 'nlp-practitioner', lesIdx + 1);
                     }
                 }
+
+                // 5. Retry any previously failed syncs
+                await retryPendingSync();
+
+                // 6. Update UI with merged data
+                updateProgress();
+                renderSyllabus();
             } catch (err) {
-                console.error('Progress sync error:', err);
+                console.error('Progress merge error:', err);
             }
         }
 
@@ -4201,7 +4228,7 @@
                 // Mark as completed after watching (clear previous timer first)
                 if (completionTimer) clearTimeout(completionTimer);
                 const mIdx = currentModuleIndex, lIdx = currentLessonIndex;
-                completionTimer = setTimeout(() => markLessonCompleted(mIdx, lIdx), 30000);
+                completionTimer = setTimeout(() => markLessonCompleted(mIdx, lIdx), 45000);
             };
         }
 
@@ -4217,8 +4244,12 @@
                 // Sync to Supabase if authenticated
                 if (isAuthenticated && window.CourseProgress) {
                     const lesson = modules[moduleIndex].lessons[lessonIndex];
-                    window.CourseProgress.markVideoWatched(lesson.id, 'nlp-practitioner', completedLessons.length)
-                        .catch(err => console.error('Sync error:', err));
+                    window.CourseProgress.markVideoWatched(lesson.id, 'nlp-practitioner', lessonIndex + 1)
+                        .then(() => retryPendingSync())
+                        .catch(err => {
+                            console.error('Sync error:', err);
+                            addToPendingSync(lessonId, lesson.id, lessonIndex + 1);
+                        });
                 }
 
                 // Registration wall at 50%
@@ -4228,6 +4259,34 @@
                     openModal(true);
                 }
             }
+        }
+
+        // ===== Pending Sync Queue (retry failed Supabase writes) =====
+        function addToPendingSync(lessonId, videoId, lessonNum) {
+            try {
+                const pending = JSON.parse(localStorage.getItem('pendingSync') || '[]');
+                if (!pending.find(p => p.lessonId === lessonId)) {
+                    pending.push({ lessonId, videoId, lessonNum });
+                    localStorage.setItem('pendingSync', JSON.stringify(pending));
+                }
+            } catch (e) { /* ignore storage errors */ }
+        }
+
+        async function retryPendingSync() {
+            if (!isAuthenticated || !window.CourseProgress) return;
+            try {
+                const pending = JSON.parse(localStorage.getItem('pendingSync') || '[]');
+                if (!pending.length) return;
+                const remaining = [];
+                for (const item of pending) {
+                    try {
+                        await window.CourseProgress.markVideoWatched(item.videoId, 'nlp-practitioner', item.lessonNum);
+                    } catch (e) {
+                        remaining.push(item);
+                    }
+                }
+                localStorage.setItem('pendingSync', JSON.stringify(remaining));
+            } catch (e) { /* ignore */ }
         }
 
         // ===== Navigate Lesson =====

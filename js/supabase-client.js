@@ -417,6 +417,8 @@
             const user = await Auth.getCurrentUser();
             if (!user) return;
 
+            // Note: watched_seconds is repurposed to store moduleIndex for last_watched records.
+            // lesson_number stores the lessonIndex within that module.
             await supabaseClient
                 .from('course_progress')
                 .upsert({
@@ -442,7 +444,25 @@
 
             if (error && error.code !== 'PGRST116') return null;
             if (!data) return null;
+            // watched_seconds = moduleIndex, lesson_number = lessonIndex
             return { moduleIndex: data.watched_seconds, lessonIndex: data.lesson_number };
+        },
+
+        async getCompletedVideoIds(courseType) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return [];
+
+            const { data, error } = await supabaseClient
+                .from('course_progress')
+                .select('video_id')
+                .eq('user_id', user.id)
+                .eq('course_type', courseType)
+                .eq('completed', true);
+
+            if (error) return [];
+            return (data || [])
+                .map(p => p.video_id)
+                .filter(id => !id.startsWith('last_watched_'));
         }
     };
 

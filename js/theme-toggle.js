@@ -158,11 +158,26 @@
         }
     }
 
+    // --- Learning pages only ---
+    function isLearningPage() {
+        var path = window.location.pathname.toLowerCase();
+        var learningPages = [
+            'free-portal', 'learning-summaries', 'learning-booklets',
+            'learning-master', 'profile', 'login'
+        ];
+        return learningPages.some(function (p) { return path.indexOf(p) !== -1; });
+    }
+
     // --- Init on DOMContentLoaded ---
     function init() {
-        applyTheme(getPreferredTheme());
-        injectToggleButton();
-        listenOSChange();
+        if (isLearningPage()) {
+            applyTheme(getPreferredTheme());
+            injectToggleButton();
+            listenOSChange();
+        } else {
+            // Marketing pages — always light, no toggle
+            document.documentElement.removeAttribute('data-theme');
+        }
     }
 
     if (document.readyState === 'loading') {

@@ -1113,9 +1113,25 @@
                     `;
                 }
 
-                // If no progress at all, show empty state
+                // If no Supabase progress, check localStorage for unsynced lessons
                 if (!actual.length) {
-                    ringsHtml = `
+                    const localLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+                    if (localLessons.length > 0) {
+                        // User has local progress that wasn't synced yet
+                        ringsHtml = `
+                        <div class="course-progress-card" style="justify-content: center; text-align: center; flex-direction: column; padding: 2rem;">
+                            <i class="fa-solid fa-rotate" style="font-size: 2rem; color: var(--gold); margin-bottom: 0.8rem;"></i>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">נמצאו ${localLessons.length} שיעורים שטרם סונכרנו</p>
+                            <a href="free-portal.html" class="resume-link" style="margin-top: 0.8rem;">
+                                <i class="fa-solid fa-sync"></i> סנכרן עכשיו בפורטל הלמידה
+                            </a>
+                        </div>
+                        `;
+                        totalCourseVideos = 51;
+                        totalCompleted = localLessons.length;
+                        document.getElementById('stat-lessons').textContent = localLessons.length;
+                    } else {
+                        ringsHtml = `
                         <div class="course-progress-card" style="justify-content: center; text-align: center; flex-direction: column; padding: 2rem;">
                             <i class="fa-solid fa-book-open" style="font-size: 2rem; color: var(--border-color); margin-bottom: 0.8rem;"></i>
                             <p style="color: var(--text-muted); font-size: 0.9rem;">עדיין לא התחלת לצפות בקורסים</p>
@@ -1123,8 +1139,9 @@
                                 <i class="fa-solid fa-play"></i> התחל ללמוד עכשיו
                             </a>
                         </div>
-                    `;
-                    totalCourseVideos = 51;
+                        `;
+                        totalCourseVideos = 51;
+                    }
                 }
 
                 const overallPercent = totalCourseVideos > 0 ? Math.round((totalCompleted / totalCourseVideos) * 100) : 0;

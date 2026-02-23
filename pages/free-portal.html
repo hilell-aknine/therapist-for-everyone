@@ -3745,8 +3745,19 @@
 
                     // Listen for auth state changes (for OAuth redirect)
                     supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                        if (event === 'SIGNED_IN' && session) {
-                            await handleSuccessfulAuth(session.user);
+                        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+                            if (!isAuthenticated) {
+                                await handleSuccessfulAuth(session.user);
+                            }
+                        } else if (event === 'INITIAL_SESSION' && session && !isAuthenticated) {
+                            // Catches OAuth hash tokens processed during init
+                            currentUser = session.user;
+                            isAuthenticated = true;
+                            updateUI();
+                            try {
+                                await ensureProfileWithFormName(session.user);
+                                await mergeProgress();
+                            } catch (e) { console.error('Post-auth setup error:', e); }
                         } else if (event === 'SIGNED_OUT') {
                             isAuthenticated = false;
                             currentUser = null;
@@ -3769,9 +3780,13 @@
                 if (session && session.user) {
                     currentUser = session.user;
                     isAuthenticated = true;
-                    await ensureProfileWithFormName(session.user);
-                    await mergeProgress();
-                    updateUI();
+                    updateUI(); // Update UI first — non-critical ops below may fail
+                    try {
+                        await ensureProfileWithFormName(session.user);
+                        await mergeProgress();
+                    } catch (e) {
+                        console.error('Post-auth setup error:', e);
+                    }
                 }
             } catch (error) {
                 console.error('Session check error:', error);
@@ -3783,14 +3798,16 @@
             currentUser = user;
             isAuthenticated = true;
 
-            // Update profile name from form (profile creation handled by supabase-client.js)
-            await ensureProfileWithFormName(user);
+            // Update UI immediately — everything below is non-critical
+            updateUI();
+            showAuthSuccess();
 
-            // Bi-directional merge: Supabase ↔ localStorage
-            await mergeProgress();
-
-            // Resume from Supabase last-watched (if different from current)
+            // Non-critical post-auth operations (don't block UI)
             try {
+                await ensureProfileWithFormName(user);
+                await mergeProgress();
+
+                // Resume from Supabase last-watched (if different from current)
                 if (window.CourseProgress) {
                     const lastWatched = await window.CourseProgress.getLastWatched('nlp-practitioner');
                     if (lastWatched && modules[lastWatched.moduleIndex]?.lessons[lastWatched.lessonIndex]) {
@@ -3801,13 +3818,9 @@
                         }
                     }
                 }
-            } catch (e) { console.error('Resume from Supabase error:', e); }
-
-            // Update UI
-            updateUI();
-
-            // Show success and close modal
-            showAuthSuccess();
+            } catch (e) {
+                console.error('Post-auth setup error:', e);
+            }
         }
 
         // ===== Bi-directional Progress Merge (Supabase ↔ localStorage) =====

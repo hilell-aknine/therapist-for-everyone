@@ -46,12 +46,15 @@
     html { scroll-behavior: smooth; }
 }
 
+html {
+    overflow-x: hidden;
+}
+
 body {
     font-family: var(--font-body);
     background: var(--cream);
     color: var(--text-dark);
     line-height: 1.7;
-    overflow-x: hidden;
 }
 
 /* === Film Grain Overlay === */
@@ -274,6 +277,15 @@ body {
 
 /* === Mobile Responsive — Navbar === */
 @media (max-width: 768px) {
+    /* Force navbar to stay fixed on mobile (iOS Safari fix) */
+    .navbar {
+        position: fixed !important;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+
     /* Break backdrop-filter containment when menu is open */
     .navbar:has(.nav-links.active) {
         backdrop-filter: none !important;

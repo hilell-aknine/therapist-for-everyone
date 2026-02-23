@@ -14,7 +14,7 @@
 5. **Commit** — עם הודעה תיאורית בעברית/אנגלית
 6. **Push** — `git push origin master`
 7. **וודא** — GitHub Actions deploy.yml ירוץ אוטומטית
-8. **דווח** — "האתר עודכן: https://hilell-aknine.github.io/therapist-for-everyone/"
+8. **דווח** — "האתר עודכן: https://therapist-for-everyone.vercel.app/"
 
 ## Rules
 - NEVER force push

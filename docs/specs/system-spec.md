@@ -163,7 +163,7 @@ font-family: 'Heebo', sans-serif;
 
 ## 8. קישורים
 
-- **אתר נוכחי**: https://hilell-aknine.github.io/therapist-for-everyone/
+- **אתר נוכחי**: https://therapist-for-everyone.vercel.app/
 - **GitHub**: https://github.com/hilell-aknine/therapist-for-everyone
 - **Supabase Dashboard**: https://supabase.com/dashboard/project/vhzdrywvpgaqyivprbds
 - **דומיין עתידי**: therapistforeveryone.com

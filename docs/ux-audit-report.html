@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דו"ח ביקורת UX/UI — בית המטפלים</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+            --gold-light: #E8C84A;
+            --dark: #0f1419;
+            --red: #E74C3C;
+            --orange: #F39C12;
+            --green: #27AE60;
+            --blue: #3498DB;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #fff;
+            color: #1a1a2e;
+            line-height: 1.7;
+            font-size: 11pt;
+        }
+
+        /* ===== COVER PAGE ===== */
+        .cover {
+            height: 100vh;
+            background: linear-gradient(160deg, var(--deep-petrol) 0%, var(--muted-teal) 40%, var(--dusty-aqua) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            page-break-after: always;
+        }
+
+        .cover::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%);
+        }
+
+        .cover::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -20%;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%);
+        }
+
+        .cover-badge {
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.3);
+            color: var(--gold);
+            padding: 8px 24px;
+            border-radius: 50px;
+            font-size: 10pt;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+        }
+
+        .cover h1 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 42pt;
+            font-weight: 900;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .cover h1 span {
+            color: var(--gold);
+        }
+
+        .cover .subtitle {
+            font-size: 16pt;
+            font-weight: 300;
+            opacity: 0.85;
+            margin-bottom: 50px;
+        }
+
+        .cover-meta {
+            display: flex;
+            gap: 40px;
+            font-size: 9.5pt;
+            opacity: 0.7;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cover-meta div {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .cover-meta .label {
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            opacity: 0.6;
+        }
+
+        .cover-line {
+            width: 80px;
+            height: 3px;
+            background: var(--gold);
+            margin: 30px auto;
+            border-radius: 2px;
+        }
+
+        /* ===== TOC ===== */
+        .toc {
+            padding: 60px 50px;
+            page-break-after: always;
+        }
+
+        .toc h2 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 22pt;
+            color: var(--deep-petrol);
+            margin-bottom: 8px;
+        }
+
+        .toc-line {
+            width: 60px;
+            height: 3px;
+            background: var(--gold);
+            margin-bottom: 30px;
+            border-radius: 2px;
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 14px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 11pt;
+        }
+
+        .toc-list .num {
+            color: var(--gold);
+            font-weight: 700;
+            margin-left: 12px;
+            min-width: 28px;
+        }
+
+        .toc-list .title {
+            flex: 1;
+            font-weight: 500;
+            color: var(--deep-petrol);
+        }
+
+        /* ===== PAGE LAYOUT ===== */
+        .page {
+            padding: 50px;
+            page-break-after: always;
+        }
+
+        .page:last-child {
+            page-break-after: avoid;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--frost-white);
+        }
+
+        .section-num {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 16pt;
+            flex-shrink: 0;
+        }
+
+        .section-header h2 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 18pt;
+            color: var(--deep-petrol);
+            line-height: 1.3;
+        }
+
+        .section-header .section-sub {
+            font-size: 9.5pt;
+            color: #888;
+            font-weight: 400;
+        }
+
+        /* ===== SCORE CARD ===== */
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .score-card {
+            background: var(--frost-white);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .score-card .score-value {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 24pt;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .score-card .score-label {
+            font-size: 8.5pt;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .score-excellent { color: var(--green); }
+        .score-good { color: var(--blue); }
+        .score-medium { color: var(--orange); }
+        .score-low { color: var(--red); }
+
+        .overall-score {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .overall-score .big-score {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 42pt;
+            font-weight: 900;
+            color: var(--gold);
+            line-height: 1;
+        }
+
+        .overall-score .score-text {
+            font-size: 10pt;
+            opacity: 0.85;
+        }
+
+        .overall-score .score-text strong {
+            display: block;
+            font-size: 14pt;
+            color: var(--gold);
+            margin-bottom: 2px;
+        }
+
+        /* ===== TABLES ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 10pt;
+        }
+
+        thead th {
+            background: var(--deep-petrol);
+            color: white;
+            padding: 10px 14px;
+            text-align: right;
+            font-weight: 700;
+            font-size: 9pt;
+        }
+
+        thead th:first-child {
+            border-radius: 0 8px 0 0;
+        }
+
+        thead th:last-child {
+            border-radius: 8px 0 0 0;
+        }
+
+        tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafbfc;
+        }
+
+        tbody tr:hover {
+            background: var(--frost-white);
+        }
+
+        /* ===== PRIORITY TAGS ===== */
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: 8pt;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-critical {
+            background: #FDEDEC;
+            color: var(--red);
+            border: 1px solid rgba(231,76,60,0.2);
+        }
+
+        .tag-high {
+            background: #FEF5E7;
+            color: var(--orange);
+            border: 1px solid rgba(243,156,18,0.2);
+        }
+
+        .tag-medium {
+            background: #EBF5FB;
+            color: var(--blue);
+            border: 1px solid rgba(52,152,219,0.2);
+        }
+
+        .tag-low {
+            background: #EAFAF1;
+            color: var(--green);
+            border: 1px solid rgba(39,174,96,0.2);
+        }
+
+        /* ===== CARDS ===== */
+        .issue-card {
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            border-right: 4px solid var(--gold);
+            background: #fff;
+        }
+
+        .issue-card.critical {
+            border-right-color: var(--red);
+            background: #fef9f8;
+        }
+
+        .issue-card.high {
+            border-right-color: var(--orange);
+            background: #fefcf6;
+        }
+
+        .issue-card .issue-title {
+            font-weight: 700;
+            font-size: 11pt;
+            color: var(--deep-petrol);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .issue-card .issue-desc {
+            font-size: 10pt;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .issue-card .issue-pages {
+            margin-top: 6px;
+            font-size: 8.5pt;
+            color: #999;
+        }
+
+        /* ===== RECOMMENDATION BOXES ===== */
+        .rec-group {
+            margin-bottom: 28px;
+        }
+
+        .rec-group-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13pt;
+            font-weight: 700;
+            color: var(--deep-petrol);
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--frost-white);
+        }
+
+        .rec-group-title .priority-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10pt;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        .p0 .priority-circle { background: var(--red); }
+        .p1 .priority-circle { background: var(--orange); }
+        .p2 .priority-circle { background: var(--blue); }
+        .p3 .priority-circle { background: var(--green); }
+
+        .rec-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .rec-item:last-child {
+            border-bottom: none;
+        }
+
+        .rec-num {
+            width: 26px;
+            height: 26px;
+            background: var(--frost-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9pt;
+            font-weight: 700;
+            color: var(--deep-petrol);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .rec-content {
+            flex: 1;
+        }
+
+        .rec-content strong {
+            display: block;
+            color: var(--deep-petrol);
+            font-size: 10.5pt;
+            margin-bottom: 2px;
+        }
+
+        .rec-content p {
+            font-size: 9.5pt;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* ===== HIERARCHY MAP ===== */
+        .hierarchy-box {
+            background: var(--dark);
+            color: #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 9pt;
+            line-height: 1.9;
+            margin-bottom: 20px;
+            direction: ltr;
+            text-align: left;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .hierarchy-box .gold { color: var(--gold); }
+        .hierarchy-box .teal { color: var(--dusty-aqua); }
+        .hierarchy-box .gray { color: #666; }
+
+        /* ===== STATUS INDICATORS ===== */
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .status-box {
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .status-box.good {
+            background: #EAFAF1;
+            border: 1px solid rgba(39,174,96,0.2);
+        }
+
+        .status-box.bad {
+            background: #FDEDEC;
+            border: 1px solid rgba(231,76,60,0.2);
+        }
+
+        .status-box h4 {
+            font-size: 10pt;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-box.good h4 { color: var(--green); }
+        .status-box.bad h4 { color: var(--red); }
+
+        .status-box ul {
+            list-style: none;
+            font-size: 9pt;
+            color: #555;
+        }
+
+        .status-box ul li {
+            padding: 3px 0;
+            padding-right: 16px;
+            position: relative;
+        }
+
+        .status-box.good ul li::before {
+            content: '✓';
+            position: absolute;
+            right: 0;
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .status-box.bad ul li::before {
+            content: '✗';
+            position: absolute;
+            right: 0;
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        /* ===== FOOTER ===== */
+        .page-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px 50px;
+            font-size: 7.5pt;
+            color: #bbb;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #eee;
+        }
+
+        /* ===== PRINT ===== */
+        @media print {
+            body { font-size: 10pt; }
+            .cover { height: 100vh; }
+            .page { padding: 40px; }
+            @page { size: A4; margin: 12mm 14mm; }
+        }
+
+        /* ===== FLOW DIAGRAM ===== */
+        .flow-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 9.5pt;
+        }
+
+        .flow-box {
+            background: var(--frost-white);
+            border: 1px solid #dde;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-weight: 500;
+            color: var(--deep-petrol);
+            white-space: nowrap;
+        }
+
+        .flow-box.active {
+            background: var(--deep-petrol);
+            color: white;
+        }
+
+        .flow-box.problem {
+            background: #FDEDEC;
+            border-color: rgba(231,76,60,0.3);
+            color: var(--red);
+        }
+
+        .flow-arrow {
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .note-box {
+            background: #FFF8E7;
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 9.5pt;
+            color: #665520;
+            margin: 16px 0;
+        }
+
+        .note-box strong {
+            color: var(--gold);
+        }
+
+        h3 {
+            font-size: 12pt;
+            color: var(--deep-petrol);
+            margin: 20px 0 10px;
+            font-weight: 700;
+        }
+
+        p { margin-bottom: 8px; }
+
+        .check-icon { color: var(--green); }
+        .x-icon { color: var(--red); }
+        .warn-icon { color: var(--orange); }
+    </style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover">
+    <div class="cover-badge">ביקורת מקצועית</div>
+    <h1>דו"ח <span>UX/UI</span></h1>
+    <div class="subtitle">בית המטפלים — מטפל לכל אחד</div>
+    <div class="cover-line"></div>
+    <div class="cover-meta">
+        <div>
+            <span class="label">תאריך</span>
+            <span>15 בפברואר 2026</span>
+        </div>
+        <div>
+            <span class="label">דפים שנסרקו</span>
+            <span>35 קבצים</span>
+        </div>
+        <div>
+            <span class="label">ציון כולל</span>
+            <span>6.3 / 10</span>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== TOC ==================== -->
+<div class="toc">
+    <h2>תוכן עניינים</h2>
+    <div class="toc-line"></div>
+    <ul class="toc-list">
+        <li><span class="num">01</span><span class="title">ציון כולל ותמונת מצב</span></li>
+        <li><span class="num">02</span><span class="title">אירכיטקטורת מידע וניווט</span></li>
+        <li><span class="num">03</span><span class="title">היררכיה ויזואלית ועקביות עיצובית</span></li>
+        <li><span class="num">04</span><span class="title">חוויית טפסים ואינטראקציה</span></li>
+        <li><span class="num">05</span><span class="title">ניהול מצבים — Loading, Errors, Success</span></li>
+        <li><span class="num">06</span><span class="title">נגישות (WCAG 2.1 AA)</span></li>
+        <li><span class="num">07</span><span class="title">רספונסיביות, RTL וביצועים</span></li>
+        <li><span class="num">08</span><span class="title">המלצות — סדר עדיפויות</span></li>
+    </ul>
+</div>
+
+<!-- ==================== PAGE 1: OVERALL SCORE ==================== -->
+<div class="page">
+    <div class="section-header">
+        <div class="section-num">1</div>
+        <div>
+            <h2>ציון כולל ותמונת מצב</h2>
+            <div class="section-sub">סקירה של 35 קבצי HTML ו-JS</div>
+        </div>
+    </div>
+
+    <div class="overall-score">
+        <div class="big-score">6.3</div>
+        <div class="score-text">
+            <strong>ציון כולל מתוך 10</strong>
+            עיצוב חזותי חזק, חוסרים בנגישות ובאינטראקציות
+        </div>
+    </div>
+
+    <div class="score-grid">
+        <div class="score-card">
+            <div class="score-value score-good">8.5</div>
+            <div class="score-label">מובייל ו-RTL</div>
+        </div>
+        <div class="score-card">
+            <div class="score-value score-good">8.0</div>
+            <div class="score-label">עיצוב ומיתוג</div>
+        </div>
+        <div class="score-card">
+            <div class="score-value score-medium">6.5</div>
+            <div class="score-label">חוויית טפסים</div>
+        </div>
+        <div class="score-card">
+            <div class="score-value score-medium">6.0</div>
+            <div class="score-label">ארכיטקטורת מידע</div>
+        </div>
+        <div class="score-card">
+            <div class="score-value score-medium">6.0</div>
+            <div class="score-label">ביצועים</div>
+        </div>
+        <div class="score-card">
+            <div class="score-value score-medium">5.0</div>
+            <div class="score-label">אינטראקציות</div>
+        </div>
+        <div class="score-card">
+            <div class="score-value score-low">4.0</div>
+            <div class="score-label">נגישות WCAG</div>
+        </div>
+        <div class="score-card">
+            <div class="score-value" style="color: var(--deep-petrol);">6.3</div>
+            <div class="score-label">ממוצע כולל</div>
+        </div>
+    </div>
+
+    <div class="status-grid">
+        <div class="status-box good">
+            <h4>&#10003; חוזקות עיקריות</h4>
+            <ul>
+                <li>זהות מותגית חזקה — petrol + gold עקבי</li>
+                <li>RTL עברי מושלם בכל הדפים</li>
+                <li>רספונסיביות טובה עם breakpoints</li>
+                <li>CTAs בולטים עם אפקטי hover</li>
+                <li>מנגנון scroll-to-unlock משפטי חכם</li>
+                <li>שמירת נתונים בין שלבי טופס</li>
+                <li>טיפוגרפיה מקצועית (Frank Ruhl + Heebo)</li>
+            </ul>
+        </div>
+        <div class="status-box bad">
+            <h4>&#10007; חולשות עיקריות</h4>
+            <ul>
+                <li>אין focus indicators — כשל נגישות</li>
+                <li>3 סכמות צבע שונות בין דפים</li>
+                <li>Redirects שקטים ללא הסבר</li>
+                <li>ולידציה רק ב-submit, לא real-time</li>
+                <li>שגיאות ב-toast שנעלם מהר</li>
+                <li>דפי טפסים ללא navbar</li>
+                <li>אין skip-to-content לנגישות</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== PAGE 2: INFORMATION ARCHITECTURE ==================== -->
+<div class="page">
+    <div class="section-header">
+        <div class="section-num">2</div>
+        <div>
+            <h2>אירכיטקטורת מידע וניווט</h2>
+            <div class="section-sub">מבנה האתר, נתיבי משתמש, ובעיות ניווט</div>
+        </div>
+    </div>
+
+    <h3>מפת ניווט נוכחית</h3>
+    <div class="hierarchy-box"><span class="gold">index.html</span> (בית המטפלים)
+├── <span class="teal">landing-patient</span> → join-patient → step1→4 → thank-you
+├── <span class="teal">landing-therapist</span> → therapist-step1→4
+├── <span class="teal">learning-portal</span> → courses / booklets / summaries / master
+├── <span class="teal">training</span>
+├── <span class="teal">project-lobby</span>
+├── <span class="teal">about</span>
+├── <span class="teal">login</span> → <span class="gold">legal-gate</span> → dashboard (לפי תפקיד)
+│   ├── <span class="gray">admin → pages/admin.html</span>
+│   ├── <span class="gray">therapist → therapist-dashboard.html</span>
+│   └── <span class="gray">patient → patient-dashboard.html</span>
+├── privacy-policy
+└── catalog <span class="gray">(standalone)</span></div>
+
+    <h3>בעיות שזוהו</h3>
+
+    <div class="issue-card critical">
+        <div class="issue-title"><span class="tag tag-critical">קריטי</span> כפילות נתיבי הרשמה למטופל</div>
+        <div class="issue-desc">קיימים שני נתיבים מקבילים: <code>patient-onboarding.html</code> (שורש) וגם <code>pages/join-patient.html → patient-step1-4</code>. משתמש עלול להגיע לנתיב הלא נכון.</div>
+    </div>
+
+    <div class="issue-card critical">
+        <div class="issue-title"><span class="tag tag-critical">קריטי</span> דפי טפסים ללא navbar</div>
+        <div class="issue-desc">דפי step1-4 (מטופל ומטפל) חסרי כל ניווט. המשתמש "תקוע" — אין דרך חזרה לאתר מלבד כפתור Back של הדפדפן.</div>
+    </div>
+
+    <div class="issue-card high">
+        <div class="issue-title"><span class="tag tag-high">גבוה</span> אסימטריה בסיום תהליך</div>
+        <div class="issue-desc">מטופל → מגיע ל-thank-you.html (דף נפרד). מטפל → רואה הודעה inline. חוויה לא אחידה.</div>
+    </div>
+
+    <div class="issue-card high">
+        <div class="issue-title"><span class="tag tag-high">גבוה</span> אין breadcrumbs</div>
+        <div class="issue-desc">בתהליכים מרובי שלבים (4 שלבים), אין אינדיקציה היכן המשתמש נמצא ביחס לאתר כולו — רק progress bar פנימי.</div>
+    </div>
+</div>
+
+<!-- ==================== PAGE 3: VISUAL HIERARCHY ==================== -->
+<div class="page">
+    <div class="section-header">
+        <div class="section-num">3</div>
+        <div>
+            <h2>היררכיה ויזואלית ועקביות עיצובית</h2>
+            <div class="section-sub">צבעים, טיפוגרפיה, כפתורים, וסגנון</div>
+        </div>
+    </div>
+
+    <h3>סכמת צבעים — 3 גרסאות שונות</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>אזור</th>
+                <th>סכמה</th>
+                <th>דפים</th>
+                <th>בעיה</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>דפים ראשיים</strong></td>
+                <td>Petrol + Gold + Frost White</td>
+                <td>index, landings, onboarding, legal</td>
+                <td><span class="check-icon">&#10003;</span> עקבי</td>
+            </tr>
+            <tr>
+                <td><strong>דשבורד מטופל</strong></td>
+                <td>Tailwind defaults (gray, indigo, green)</td>
+                <td>patient-dashboard.html</td>
+                <td><span class="x-icon">&#10007;</span> שונה לגמרי</td>
+            </tr>
+            <tr>
+                <td><strong>דשבורד מטפל</strong></td>
+                <td>Dark theme (#0f1419, gold)</td>
+                <td>therapist-dashboard.html</td>
+                <td><span class="warn-icon">&#9888;</span> כהה מדי</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>חוסר עקביות בכפתורים</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>תכונה</th>
+                <th>דפים ראשיים</th>
+                <th>דשבורד מטופל</th>
+                <th>דשבורד מטפל</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Border Radius</td>
+                <td>50px (pill)</td>
+                <td>8px (Tailwind)</td>
+                <td>10px</td>
+            </tr>
+            <tr>
+                <td>Shadow</td>
+                <td>box-shadow + glow</td>
+                <td>Tailwind shadow-sm</td>
+                <td>box-shadow custom</td>
+            </tr>
+            <tr>
+                <td>Hover Effect</td>
+                <td>translateY(-2px)</td>
+                <td>Tailwind hover:</td>
+                <td>translateY(-2px)</td>
+            </tr>
+            <tr>
+                <td>Font Family</td>
+                <td>Heebo</td>
+                <td>System (sans-serif)</td>
+                <td>Heebo</td>
+            </tr>
+            <tr>
+                <td>Font Awesome</td>
+                <td>v6.5.1</td>
+                <td>v6.0.0</td>
+                <td>v6.5.1</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="note-box">
+        <strong>&#9888; המלצה:</strong> ליצור קובץ CSS variables אחד (<code>design-tokens.css</code>) שמיובא לכל הדפים. זה יאחד צבעים, border-radius, shadows, ופונטים בפעולה אחת.
+    </div>
+
+    <h3>חוזקות ויזואליות</h3>
+    <div class="status-box good" style="margin-bottom: 16px;">
+        <h4>&#10003; מה עובד מצוין</h4>
+        <ul>
+            <li>H1 ברור בכל דף עם גדלים רספונסיביים (clamp)</li>
+            <li>CTAs זהובים בולטים עם gradient + shadow + hover lift</li>
+            <li>Section eyebrows עם קווים דקורטיביים</li>
+            <li>Frank Ruhl Libre לכותרות — נותן אופי ייחודי</li>
+            <li>Gold shimmer animation על כותרת ראשית</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ==================== PAGE 4: FORM UX ==================== -->
+<div class="page">
+    <div class="section-header">
+        <div class="section-num">4</div>
+        <div>
+            <h2>חוויית טפסים ואינטראקציה</h2>
+            <div class="section-sub">ולידציה, שדות, Multi-step flows</div>
+        </div>
+    </div>
+
+    <h3>תהליך מטופל (4 שלבים)</h3>
+    <div class="flow-row">
+        <div class="flow-box active">שלב 1: פרטים</div>
+        <span class="flow-arrow">←</span>
+        <div class="flow-box active">שלב 2: צרכים</div>
+        <span class="flow-arrow">←</span>
+        <div class="flow-box active">שלב 3: העדפות</div>
+        <span class="flow-arrow">←</span>
+        <div class="flow-box active">שלב 4: הסכמה</div>
+        <span class="flow-arrow">←</span>
+        <div class="flow-box" style="background: #EAFAF1;">תודה</div>
+    </div>
+
+    <h3>תהליך מטפל (4 שלבים)</h3>
+    <div class="flow-row">
+        <div class="flow-box active">שלב 1: פרטים + CV</div>
+        <span class="flow-arrow">←</span>
+        <div class="flow-box problem">שלב 2: 30+ שדות</div>
+        <span class="flow-arrow">←</span>
+        <div class="flow-box active">שלב 3: מוטיבציה</div>
+        <span class="flow-arrow">←</span>
+        <div class="flow-box active">שלב 4: הסכמה</div>
+    </div>
+
+    <h3>ממצאים</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>קטגוריה</th>
+                <th>סטטוס</th>
+                <th>פירוט</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Progress Bar</td>
+                <td><span class="check-icon">&#10003;</span></td>
+                <td>Stepper ויזואלי עם שלבים ממוספרים</td>
+            </tr>
+            <tr>
+                <td>שמירת נתונים</td>
+                <td><span class="check-icon">&#10003;</span></td>
+                <td>localStorage בין שלבים — נתונים לא אובדים</td>
+            </tr>
+            <tr>
+                <td>כפתור "חזור"</td>
+                <td><span class="check-icon">&#10003;</span></td>
+                <td>מעבר בין שלבים קיים</td>
+            </tr>
+            <tr>
+                <td>מונה תווים</td>
+                <td><span class="check-icon">&#10003;</span></td>
+                <td>בטפסי מטפל — מראה 50/250 תווים</td>
+            </tr>
+            <tr>
+                <td>ולידציה inline</td>
+                <td><span class="x-icon">&#10007;</span></td>
+                <td>שגיאות רק ב-submit, לא בזמן אמת ליד השדה</td>
+            </tr>
+            <tr>
+                <td>הודעות שגיאה</td>
+                <td><span class="x-icon">&#10007;</span></td>
+                <td>Toast גנרי שנעלם — לא inline ליד השדה</td>
+            </tr>
+            <tr>
+                <td>ולידציית טלפון</td>
+                <td><span class="x-icon">&#10007;</span></td>
+                <td>בודק אורך בלבד, לא פורמט <code>05XXXXXXXX</code></td>
+            </tr>
+            <tr>
+                <td>חתימת Canvas</td>
+                <td><span class="x-icon">&#10007;</span></td>
+                <td>אין חלופת מקלדת — כשל WCAG</td>
+            </tr>
+            <tr>
+                <td>עומס שלב 1 מטפל</td>
+                <td><span class="warn-icon">&#9888;</span></td>
+                <td>30+ שדות בשלב אחד — עומס קוגניטיבי</td>
+            </tr>
+            <tr>
+                <td>Autosave</td>
+                <td><span class="x-icon">&#10007;</span></td>
+                <td>אין שמירה אוטומטית — ניווט בטעות = אובדן נתונים</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ==================== PAGE 5: STATE MANAGEMENT ==================== -->
+<div class="page">
+    <div class="section-header">
+        <div class="section-num">5</div>
+        <div>
+            <h2>ניהול מצבים</h2>
+            <div class="section-sub">Loading, Errors, Success — מה המשתמש רואה?</div>
+        </div>
+    </div>
+
+    <h3>Loading States</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>פעולה</th>
+                <th>סטטוס</th>
+                <th>מה קורה</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>הגשת טופס</td>
+                <td><span class="check-icon">&#10003;</span></td>
+                <td>Spinner בכפתור + disabled</td>
+            </tr>
+            <tr>
+                <td>בדיקת הרשאות (auth-guard)</td>
+                <td><span class="x-icon">&#10007; קריטי</span></td>
+                <td>דף ריק למשך 1-2 שניות</td>
+            </tr>
+            <tr>
+                <td>טעינת דשבורד אדמין</td>
+                <td><span class="x-icon">&#10007;</span></td>
+                <td>נתונים מופיעים פתאום — שקט מוחלט</td>
+            </tr>
+            <tr>
+                <td>העלאת קובץ CV</td>
+                <td><span class="x-icon">&#10007;</span></td>
+                <td>אין progress bar — המשתמש לא יודע אם עולה</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Error States</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>מצב שגיאה</th>
+                <th>מה קורה היום</th>
+                <th>מה צריך לקרות</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>שגיאת רשת</td>
+                <td>"שגיאה בשליחת הטופס" (גנרי)</td>
+                <td>"אין חיבור לאינטרנט. נסו שוב"</td>
+            </tr>
+            <tr>
+                <td>כשל התחברות</td>
+                <td>הפניה שקטה ל-index</td>
+                <td>הודעה + קישור ללוגין</td>
+            </tr>
+            <tr>
+                <td>חוסר הרשאה</td>
+                <td>הפניה שקטה ל-index</td>
+                <td>"אין לך גישה לדף זה"</td>
+            </tr>
+            <tr>
+                <td>Supabase לא זמין</td>
+                <td>שגיאת JS בקונסול</td>
+                <td>הודעה ידידותית + retry</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Success States</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>פעולה</th>
+                <th>סטטוס</th>
+                <th>הערה</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>הגשת טופס</td>
+                <td><span class="check-icon">&#10003;</span></td>
+                <td>Toast הצלחה + redirect ל-thank-you</td>
+            </tr>
+            <tr>
+                <td>אישור מטפל באדמין</td>
+                <td><span class="warn-icon">&#9888;</span></td>
+                <td>Toast בלבד — אין עדכון ויזואלי לכרטיס</td>
+            </tr>
+            <tr>
+                <td>שיבוץ מטופל</td>
+                <td><span class="warn-icon">&#9888;</span></td>
+                <td>Toast בלבד — אין undo</td>
+            </tr>
+            <tr>
+                <td>חתימה משפטית</td>
+                <td><span class="check-icon">&#10003;</span></td>
+                <td>Spinner + redirect לדשבורד</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ==================== PAGE 6: ACCESSIBILITY ==================== -->
+<div class="page">
+    <div class="section-header">
+        <div class="section-num">6</div>
+        <div>
+            <h2>נגישות (WCAG 2.1 AA)</h2>
+            <div class="section-sub">ציון נוכחי: ~40% — נדרש שיפור משמעותי</div>
+        </div>
+    </div>
+
+    <h3>כשלים קריטיים</h3>
+
+    <div class="issue-card critical">
+        <div class="issue-title"><span class="tag tag-critical">WCAG 2.4.7</span> אין Focus Indicators</div>
+        <div class="issue-desc">רוב הכפתורים והלינקים חסרי <code>:focus</code> ויזואלי. משתמשי מקלדת לא יכולים לדעת איפה הם נמצאים.</div>
+        <div class="issue-pages">דפים: כל האתר</div>
+    </div>
+
+    <div class="issue-card critical">
+        <div class="issue-title"><span class="tag tag-critical">WCAG 4.1.3</span> Toasts ללא role="alert"</div>
+        <div class="issue-desc">קוראי מסך לא מכריזים על הודעות toast. נדרש <code>role="alert"</code> ו-<code>aria-live="polite"</code>.</div>
+        <div class="issue-pages">קובץ: supabase-client.js → showToast()</div>
+    </div>
+
+    <div class="issue-card critical">
+        <div class="issue-title"><span class="tag tag-critical">WCAG 2.4.3</span> Modals ללא Focus Trap</div>
+        <div class="issue-desc">Tab יוצא מהמודאל לתוכן מאחוריו. נדרש focus cycling בתוך המודאל.</div>
+        <div class="issue-pages">דפים: admin.html, therapist-dashboard.html</div>
+    </div>
+
+    <div class="issue-card high">
+        <div class="issue-title"><span class="tag tag-high">WCAG 4.1.2</span> תפריט המבורגר ללא ARIA</div>
+        <div class="issue-desc">חסר <code>aria-label="תפריט"</code> ו-<code>aria-expanded</code> על כפתור ההמבורגר.</div>
+        <div class="issue-pages">דפים: index.html, learning-portal, כל דף עם navbar</div>
+    </div>
+
+    <div class="issue-card high">
+        <div class="issue-title"><span class="tag tag-high">WCAG 2.4.1</span> אין Skip-to-Content</div>
+        <div class="issue-desc">אין לינק נסתר "דלג לתוכן" שמופיע ב-Tab — משתמשי מקלדת חייבים לעבור את כל הניווט.</div>
+        <div class="issue-pages">דפים: כל האתר</div>
+    </div>
+
+    <div class="issue-card high">
+        <div class="issue-title"><span class="tag tag-high">WCAG 1.3.1</span> Checkboxes ללא fieldset</div>
+        <div class="issue-desc">קבוצות checkboxes (הסכמה משפטית) לא עטופות ב-<code>&lt;fieldset&gt;</code> עם <code>&lt;legend&gt;</code>.</div>
+        <div class="issue-pages">דפים: patient-onboarding, therapist-onboarding, patient-step4, therapist-step4</div>
+    </div>
+
+    <div class="issue-card high">
+        <div class="issue-title"><span class="tag tag-high">WCAG 2.1.1</span> Canvas חתימה ללא מקלדת</div>
+        <div class="issue-desc">חתימה דיגיטלית דורשת עכבר/מגע. אין חלופת מקלדת — חוסם משתמשים עם מוגבלות מוטורית.</div>
+        <div class="issue-pages">דפים: therapist-step4.html</div>
+    </div>
+</div>
+
+<!-- ==================== PAGE 7: RESPONSIVE + PERFORMANCE ==================== -->
+<div class="page">
+    <div class="section-header">
+        <div class="section-num">7</div>
+        <div>
+            <h2>רספונסיביות, RTL וביצועים</h2>
+            <div class="section-sub">מובייל, עברית, ומהירות טעינה</div>
+        </div>
+    </div>
+
+    <h3>RTL ורספונסיביות — ציון 8.5/10</h3>
+    <div class="status-grid">
+        <div class="status-box good">
+            <h4>&#10003; מה עובד</h4>
+            <ul>
+                <li><code>dir="rtl"</code> בכל הדפים</li>
+                <li>Layout מתאים ל-RTL</li>
+                <li>Touch targets 44x44px</li>
+                <li>Media queries רספונסיביים</li>
+                <li>Grid collapses on mobile</li>
+            </ul>
+        </div>
+        <div class="status-box bad">
+            <h4>&#10007; מה לא עובד</h4>
+            <ul>
+                <li>חץ חזרה ← במקום → (privacy)</li>
+                <li>catalog.html לא רספונסיבי כלל</li>
+                <li>Benefit pills — 0.8rem במובייל</li>
+                <li>Navbar padding צפוף במובייל</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>בעיות ביצועים</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>בעיה</th>
+                <th>חומרה</th>
+                <th>פתרון</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>אין <code>loading="lazy"</code> על תמונות</td>
+                <td><span class="tag tag-high">גבוה</span></td>
+                <td>הוסף attribute לכל <code>&lt;img&gt;</code></td>
+            </tr>
+            <tr>
+                <td>20 particles מונפשים בנחיתות</td>
+                <td><span class="tag tag-medium">בינוני</span></td>
+                <td>הפחת ל-10 + <code>prefers-reduced-motion</code></td>
+            </tr>
+            <tr>
+                <td>Google Fonts + FA מ-CDN (blocking)</td>
+                <td><span class="tag tag-medium">בינוני</span></td>
+                <td><code>display=swap</code> + preconnect</td>
+            </tr>
+            <tr>
+                <td>SVG grain overlay על כל דף</td>
+                <td><span class="tag tag-low">נמוך</span></td>
+                <td>הסר או הוסף <code>will-change: transform</code></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ==================== PAGE 8: RECOMMENDATIONS ==================== -->
+<div class="page">
+    <div class="section-header">
+        <div class="section-num">8</div>
+        <div>
+            <h2>המלצות — סדר עדיפויות</h2>
+            <div class="section-sub">20 המלצות מדורגות לפי השפעה</div>
+        </div>
+    </div>
+
+    <!-- P0 -->
+    <div class="rec-group p0">
+        <div class="rec-group-title">
+            <div class="priority-circle">P0</div>
+            קריטי — לתקן מיד
+        </div>
+
+        <div class="rec-item">
+            <div class="rec-num">1</div>
+            <div class="rec-content">
+                <strong>הוסף Loading Indicator ל-Auth Guard</strong>
+                <p>במקום דף ריק, הצג spinner ממותג עם "בודק הרשאות..." בזמן בדיקת auth-guard.js</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">2</div>
+            <div class="rec-content">
+                <strong>הוסף הודעות לפני Redirects</strong>
+                <p>במקום הפניה שקטה, הצג "מעביר לדף ההתחברות..." עם השהייה של 1.5 שניות</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">3</div>
+            <div class="rec-content">
+                <strong>אחד את סכמת הצבעים</strong>
+                <p>patient-dashboard צריך לעבור מ-Tailwind defaults ל-brand colors (petrol+gold) + Heebo font</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">4</div>
+            <div class="rec-content">
+                <strong>הוסף Focus Indicators</strong>
+                <p><code>:focus-visible</code> עם outline זהוב (2px solid var(--gold)) על כל אלמנט אינטראקטיבי</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">5</div>
+            <div class="rec-content">
+                <strong>הוסף ולידציה Inline לטפסים</strong>
+                <p>גבול אדום + הודעת שגיאה מתחת לשדה + <code>aria-describedby</code> לנגישות</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- P1 -->
+    <div class="rec-group p1">
+        <div class="rec-group-title">
+            <div class="priority-circle">P1</div>
+            גבוה — ספרינט הבא
+        </div>
+
+        <div class="rec-item">
+            <div class="rec-num">6</div>
+            <div class="rec-content">
+                <strong>הוסף role="alert" ל-Toasts</strong>
+                <p>קוראי מסך יכריזו על הודעות. הוסף גם כפתור dismiss ידני</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">7</div>
+            <div class="rec-content">
+                <strong>הוסף Navbar מינימלי לדפי טפסים</strong>
+                <p>לוגו + "חזרה לאתר" — כדי שמשתמשים לא ירגישו תקועים</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">8</div>
+            <div class="rec-content">
+                <strong>תקן ולידציית טלפון</strong>
+                <p>שנה מבדיקת אורך ל-regex <code>/^05\d{8}$/</code> עם הודעה ברורה</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">9</div>
+            <div class="rec-content">
+                <strong>הוסף Focus Trap ל-Modals</strong>
+                <p>Tab cycle בתוך המודאל בלבד — אלמנטים מחוץ למודאל לא נגישים</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">10</div>
+            <div class="rec-content">
+                <strong>הוסף Breadcrumbs לתהליכים</strong>
+                <p>"בית > הרשמה > שלב 2 מתוך 4" — מיקום ביחס לאתר כולו</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- P2 -->
+    <div class="rec-group p2">
+        <div class="rec-group-title">
+            <div class="priority-circle">P2</div>
+            בינוני — בקרוב
+        </div>
+
+        <div class="rec-item">
+            <div class="rec-num">11</div>
+            <div class="rec-content">
+                <strong>הוסף loading="lazy" לתמונות</strong>
+                <p>כל <code>&lt;img&gt;</code> מקבל attribute — משפר טעינה ראשונית</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">12</div>
+            <div class="rec-content">
+                <strong>הפחת Particles / כבד prefers-reduced-motion</strong>
+                <p>הורד מ-20 ל-10 חלקיקים, בטל אנימציה למשתמשים שמבקשים תנועה מופחתת</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">13</div>
+            <div class="rec-content">
+                <strong>תרגם שגיאות Supabase לעברית</strong>
+                <p>מיפוי error codes להודעות ידידותיות: "שם משתמש שגוי", "אין חיבור" וכו'</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">14</div>
+            <div class="rec-content">
+                <strong>הוסף Skip-to-Content</strong>
+                <p>לינק נסתר שמופיע ב-Tab ראשון — "דלג לתוכן הראשי"</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">15</div>
+            <div class="rec-content">
+                <strong>אחד Border Radius</strong>
+                <p>10px לכפתורים, 12px לכרטיסים — עקבי בכל הדפים</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">16</div>
+            <div class="rec-content">
+                <strong>החלף Lorem Ipsum ב-Legal Gate</strong>
+                <p>טקסט placeholder בתקנון — צריך להחליף בתקנון אמיתי</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- P3 -->
+    <div class="rec-group p3">
+        <div class="rec-group-title">
+            <div class="priority-circle">P3</div>
+            נמוך — Nice to Have
+        </div>
+
+        <div class="rec-item">
+            <div class="rec-num">17</div>
+            <div class="rec-content">
+                <strong>Autosave בטפסים</strong>
+                <p>שמירה אוטומטית כל 30 שניות למניעת אובדן נתונים בניווט בטעות</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">18</div>
+            <div class="rec-content">
+                <strong>מנגנון Retry לשגיאות רשת</strong>
+                <p>כפתור "נסה שוב" בהודעות שגיאה + retry אוטומטי (3 ניסיונות)</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">19</div>
+            <div class="rec-content">
+                <strong>אנימציות הצלחה באדמין</strong>
+                <p>Flash ירוק על כרטיסים אחרי אישור/שיבוץ — משוב ויזואלי מיידי</p>
+            </div>
+        </div>
+        <div class="rec-item">
+            <div class="rec-num">20</div>
+            <div class="rec-content">
+                <strong>Offline Detection</strong>
+                <p>הודעה ידידותית כש-Supabase לא זמין: "אין חיבור — ננסה שוב אוטומטית"</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

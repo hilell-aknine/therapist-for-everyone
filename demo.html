@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>בית המטפלים — Demo Walkthrough</title>
+  <style>
+    /* ============================================
+       RESET & BASE
+       ============================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--demo-bg);
+      color: var(--demo-text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* ============================================
+       THEME VARIABLES
+       ============================================ */
+    :root {
+      --app-primary: #0E5660;
+      --app-primary-light: #2A727C;
+      --app-primary-dark: #005C66;
+      --app-accent: #D8AF47;
+      --app-accent-light: #E1B13F;
+      --app-success: #4CAF50;
+      --app-error: #FF6F61;
+      --app-bg: #FAF8F4;
+      --app-text: #1A2D33;
+      --app-gold-glow: rgba(216, 175, 71, 0.25);
+      --app-frost: #E8F1F2;
+      --app-purple: #9B72CF;
+      --app-login-dark: #0f1419;
+      --app-login-card: #1a1f2e;
+      --app-login-border: #2d3548;
+
+      --demo-bg: #0f0f23;
+      --demo-text: #e2e8f0;
+      --frame-color: #000000;
+      --frame-shadow: rgba(0, 0, 0, 0.5);
+
+      --screen-duration: 3s;
+      --transition-duration: 0.6s;
+    }
+
+    /* ============================================
+       DEMO CONTAINER
+       ============================================ */
+    .demo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      gap: 24px;
+      max-width: 100%;
+    }
+
+    .demo-header { text-align: center; margin-bottom: 8px; }
+    .demo-header h1 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .demo-header p { font-size: 15px; color: rgba(255,255,255,0.5); }
+
+    /* ============================================
+       PHONE FRAME
+       ============================================ */
+    .phone-frame {
+      position: relative;
+      width: 375px;
+      height: 812px;
+      background: var(--frame-color);
+      border-radius: 55px;
+      padding: 12px;
+      box-shadow: 0 0 0 2px #333, 0 0 0 5px #1a1a1a, 0 30px 80px var(--frame-shadow);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .phone-inner {
+      width: 100%; height: 100%;
+      border-radius: 43px;
+      overflow: hidden;
+      position: relative;
+      background: var(--app-bg);
+    }
+
+    .phone-island {
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      width: 126px; height: 37px; background: #000; border-radius: 24px; z-index: 20;
+    }
+
+    .phone-status-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 28px 0; height: 54px; position: relative; z-index: 15;
+    }
+    .status-time { font-size: 16px; font-weight: 600; color: white; mix-blend-mode: difference; }
+    .status-icons { display: flex; align-items: center; gap: 6px; }
+    .status-icons svg { width: 18px; height: 18px; fill: white; mix-blend-mode: difference; }
+
+    .phone-home-bar {
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+      width: 134px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 3px; z-index: 15;
+    }
+
+    /* ============================================
+       SCREEN VIEWPORT & TRANSITIONS
+       ============================================ */
+    .screen-viewport {
+      position: relative; width: 100%; height: calc(100% - 54px); overflow: hidden;
+    }
+
+    .screen {
+      position: absolute; inset: 0; opacity: 0; pointer-events: none;
+      display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+      transform: translateX(0); will-change: transform, opacity;
+    }
+    .screen.active { opacity: 1; pointer-events: auto; z-index: 2; }
+    .screen.exiting { z-index: 1; }
+
+    .screen.slide-left-enter { transform: translateX(100%); opacity: 1; }
+    .screen.slide-left-enter.active { transform: translateX(0); transition: transform var(--transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .screen.slide-left-exit { transform: translateX(0); opacity: 1; }
+    .screen.slide-left-exit.exiting { transform: translateX(-30%); opacity: 0.5; transition: transform var(--transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity var(--transition-duration) ease; }
+
+    .screen.slide-right-enter { transform: translateX(-100%); opacity: 1; }
+    .screen.slide-right-enter.active { transform: translateX(0); transition: transform var(--transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .screen.slide-right-exit { transform: translateX(0); opacity: 1; }
+    .screen.slide-right-exit.exiting { transform: translateX(30%); opacity: 0.5; transition: transform var(--transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity var(--transition-duration) ease; }
+
+    .screen.fade-enter { opacity: 0; }
+    .screen.fade-enter.active { opacity: 1; transition: opacity var(--transition-duration) ease; }
+    .screen.fade-exit.exiting { opacity: 0; transition: opacity var(--transition-duration) ease; }
+
+    .screen.zoom-in-enter { transform: scale(0.85); opacity: 0; }
+    .screen.zoom-in-enter.active { transform: scale(1); opacity: 1; transition: transform var(--transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity var(--transition-duration) ease; }
+    .screen.zoom-in-exit.exiting { transform: scale(1.1); opacity: 0; transition: transform var(--transition-duration) ease, opacity var(--transition-duration) ease; }
+
+    .screen.slide-up-enter { transform: translateY(100%); opacity: 1; }
+    .screen.slide-up-enter.active { transform: translateY(0); transition: transform var(--transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .screen.slide-up-exit.exiting { transform: translateY(100%); transition: transform var(--transition-duration) ease; }
+
+    /* ============================================
+       STAGGERED ELEMENT ANIMATION
+       ============================================ */
+    .screen .s-animate { opacity: 0; transform: translateY(16px); }
+    .screen.active .s-animate { animation: fadeInUp 0.5s ease forwards; }
+    .screen.active .s-animate:nth-child(1) { animation-delay: 0.05s; }
+    .screen.active .s-animate:nth-child(2) { animation-delay: 0.12s; }
+    .screen.active .s-animate:nth-child(3) { animation-delay: 0.19s; }
+    .screen.active .s-animate:nth-child(4) { animation-delay: 0.26s; }
+    .screen.active .s-animate:nth-child(5) { animation-delay: 0.33s; }
+    .screen.active .s-animate:nth-child(6) { animation-delay: 0.40s; }
+    .screen.active .s-animate:nth-child(7) { animation-delay: 0.47s; }
+    .screen.active .s-animate:nth-child(8) { animation-delay: 0.54s; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    @keyframes bounceIn {
+      0% { opacity: 0; transform: scale(0.3); }
+      50% { opacity: 1; transform: scale(1.08); }
+      70% { transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .screen.active .s-bounce-in { opacity: 0; animation: bounceIn 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards; }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0); }
+      70% { transform: scale(1.15); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .screen.active .s-pop-in { opacity: 0; animation: popIn 0.4s ease forwards; }
+    .screen.active .s-pop-in:nth-child(1) { animation-delay: 0.6s; }
+    .screen.active .s-pop-in:nth-child(2) { animation-delay: 0.72s; }
+    .screen.active .s-pop-in:nth-child(3) { animation-delay: 0.84s; }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 var(--app-gold-glow); }
+      50% { box-shadow: 0 0 20px 6px var(--app-gold-glow); }
+    }
+    .screen.active .s-pulse-glow { animation: pulseGlow 2s ease infinite; }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.6); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .screen.active .s-scale-in { opacity: 0; animation: scaleIn 0.5s ease forwards; }
+
+    /* ============================================
+       CAPTION AREA
+       ============================================ */
+    .caption-area {
+      position: relative; min-height: 60px; width: 100%; max-width: 420px; text-align: center;
+    }
+    .caption {
+      position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s ease;
+      font-size: 16px; line-height: 1.6; color: var(--demo-text); padding: 0 16px;
+    }
+    .caption.active { opacity: 1; }
+    .caption strong { color: white; }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    @media (max-width: 420px) {
+      .phone-frame { width: 320px; height: 693px; border-radius: 48px; padding: 10px; }
+      .phone-inner { border-radius: 38px; }
+      .phone-island { width: 110px; height: 32px; }
+      .caption { font-size: 14px; }
+    }
+
+    @media (min-width: 900px) {
+      .demo-container { flex-direction: row; gap: 64px; padding: 3rem; }
+      .demo-side { display: flex; flex-direction: column; gap: 32px; max-width: 340px; }
+      .caption-area { text-align: right; }
+      .caption { text-align: right; }
+    }
+
+    /* ============================================
+       CUSTOM SCREEN STYLES
+       ============================================ */
+
+    /* Screen 0 — Hero */
+    .scr-hero { background: linear-gradient(160deg, #0E5660 0%, #005C66 60%, #003d44 100%); min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px 24px 24px; }
+    .scr-hero-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 40px; }
+    .scr-hero-logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #D8AF47, #E1B13F); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
+    .scr-hero-logo-text { font-size: 15px; font-weight: 700; color: #fff; }
+    .scr-hero-title { font-size: 28px; font-weight: 800; color: #D8AF47; text-align: center; margin-bottom: 8px; }
+    .scr-hero-subtitle { font-size: 14px; color: var(--app-frost); text-align: center; margin-bottom: 32px; }
+    .scr-hero-stats { display: flex; gap: 20px; justify-content: center; margin-bottom: 36px; text-align: center; }
+    .scr-hero-stat-num { font-size: 20px; font-weight: 800; color: #D8AF47; }
+    .scr-hero-stat-label { font-size: 11px; color: #fff; opacity: 0.85; margin-top: 2px; }
+    .scr-hero-buttons { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    .scr-hero-btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, #D8AF47, #E1B13F); color: #fff; font-size: 15px; font-weight: 700; border: none; border-radius: 10px; text-align: center; cursor: default; }
+    .scr-hero-btn-ghost { width: 100%; padding: 14px; background: transparent; color: #fff; font-size: 15px; font-weight: 700; border: 2px solid rgba(255,255,255,0.3); border-radius: 10px; text-align: center; cursor: default; }
+
+    /* Screen 1 — Pillars */
+    .scr-pillars { background: #FAF8F4; min-height: 100%; display: flex; flex-direction: column; padding: 20px 18px; }
+    .scr-pillars-eyebrow { font-size: 11px; font-weight: 700; color: #D8AF47; text-align: center; letter-spacing: 1px; margin-bottom: 6px; }
+    .scr-pillars-title { font-size: 20px; font-weight: 800; color: #0E5660; text-align: center; margin-bottom: 20px; }
+    .scr-pillar-card { background: #fff; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .scr-pillar-card-teal { border-top: 4px solid; border-image: linear-gradient(135deg, #2A727C, #0E5660) 1; }
+    .scr-pillar-card-gold { border-top: 4px solid; border-image: linear-gradient(135deg, #D8AF47, #E1B13F) 1; }
+    .scr-pillar-card-purple { border-top: 4px solid #9B72CF; }
+    .scr-pillar-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .scr-pillar-icon-teal { background: rgba(42, 114, 124, 0.12); }
+    .scr-pillar-icon-gold { background: rgba(216, 175, 71, 0.12); }
+    .scr-pillar-icon-purple { background: rgba(155, 114, 207, 0.12); }
+    .scr-pillar-info-title { font-size: 15px; font-weight: 700; color: #0E5660; }
+    .scr-pillar-info-desc { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+    /* Screen 2 — Portal */
+    .scr-portal { background: linear-gradient(160deg, #0E5660 0%, #005C66 60%, #003d44 100%); min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+    .scr-portal-badge { display: inline-block; background: rgba(0,0,0,0.3); color: #D8AF47; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 6px; margin-bottom: 24px; }
+    .scr-portal-title { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+    .scr-portal-title span { color: #D8AF47; }
+    .scr-portal-sub { font-size: 14px; color: var(--app-frost); margin-bottom: 40px; line-height: 1.5; }
+    .scr-portal-cta { width: 100%; padding: 16px; background: linear-gradient(135deg, #D8AF47, #E1B13F); color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 12px; cursor: default; }
+
+    /* Screen 3 — Course Player */
+    .scr-player { background: #f8f9fa; min-height: 100%; display: flex; flex-direction: column; }
+    .scr-player-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; }
+    .scr-player-brand { display: flex; align-items: center; gap: 6px; }
+    .scr-player-brand-icon { width: 24px; height: 24px; background: linear-gradient(135deg, #D8AF47, #E1B13F); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; }
+    .scr-player-brand-text { font-size: 12px; font-weight: 700; color: var(--app-text); }
+    .scr-player-progress { display: flex; align-items: center; gap: 6px; }
+    .scr-player-progress-bar { width: 60px; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+    .scr-player-progress-fill { height: 100%; width: 35%; background: #D8AF47; border-radius: 3px; }
+    .scr-player-progress-text { font-size: 11px; font-weight: 700; color: #D8AF47; }
+    .scr-player-video { margin: 12px 16px; background: #e5e7eb; border-radius: 12px; height: 140px; display: flex; align-items: center; justify-content: center; }
+    .scr-player-play { width: 48px; height: 48px; background: rgba(0,0,0,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #6b7280; }
+    .scr-player-info { padding: 8px 18px; }
+    .scr-player-lesson-title { font-size: 15px; font-weight: 700; color: var(--app-text); }
+    .scr-player-duration { display: inline-block; background: rgba(42, 114, 124, 0.12); color: var(--app-primary-light); font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-top: 4px; }
+    .scr-player-list { padding: 12px 18px; }
+    .scr-player-list-title { font-size: 13px; font-weight: 700; color: var(--app-text); margin-bottom: 8px; }
+    .scr-player-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: var(--app-text); }
+    .scr-player-item-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+    .scr-player-item-done { background: rgba(76, 175, 80, 0.12); color: #4CAF50; }
+    .scr-player-item-current { background: rgba(216, 175, 71, 0.15); color: #D8AF47; }
+    .scr-player-item-locked { background: #f0f0f0; color: #bbb; }
+    .scr-player-item.current { font-weight: 700; color: #D8AF47; }
+    .scr-player-item.locked { color: #bbb; }
+
+    /* Screen 4 — Lesson Summary */
+    .scr-summary { background: #fff; min-height: 100%; display: flex; flex-direction: column; }
+    .scr-summary-hero { background: linear-gradient(135deg, #0E5660, #2A727C); padding: 28px 20px 20px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .scr-summary-num { width: 48px; height: 48px; background: linear-gradient(135deg, #D8AF47, #E1B13F); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .scr-summary-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .scr-summary-sub { font-size: 12px; color: #D8AF47; }
+    .scr-summary-content { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .scr-summary-section-title { font-size: 14px; font-weight: 700; color: var(--app-text); border-bottom: 2px solid #D8AF47; padding-bottom: 4px; display: inline-block; }
+    .scr-summary-topic { background: var(--app-frost); border-radius: 12px; padding: 14px; border-right: 4px solid var(--app-primary-light); }
+    .scr-summary-topic-title { font-size: 13px; font-weight: 600; color: var(--app-text); margin-bottom: 6px; }
+    .scr-summary-bullet { font-size: 12px; color: #4b5563; padding: 2px 0; }
+    .scr-summary-bullet::before { content: ""; display: inline-block; width: 6px; height: 6px; background: #D8AF47; border-radius: 50%; margin-left: 8px; vertical-align: middle; }
+    .scr-summary-highlight { background: linear-gradient(135deg, #0E5660, #2A727C); border-radius: 12px; padding: 14px; }
+    .scr-summary-highlight-title { font-size: 13px; font-weight: 700; color: #D8AF47; margin-bottom: 4px; }
+    .scr-summary-highlight-text { font-size: 12px; color: var(--app-frost); line-height: 1.5; }
+
+    /* Screen 5 — Training Programs */
+    .scr-training { background: linear-gradient(160deg, #0E5660 0%, #005C66 60%, #003d44 100%); min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 24px 20px; }
+    .scr-training-badge { display: inline-block; background: rgba(0,0,0,0.3); color: #D8AF47; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 6px; margin-bottom: 16px; }
+    .scr-training-title { font-size: 24px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 8px; }
+    .scr-training-title span { color: #D8AF47; }
+    .scr-training-sub { font-size: 13px; color: var(--app-frost); text-align: center; margin-bottom: 24px; line-height: 1.5; }
+    .scr-training-card { background: #fff; border-radius: 12px; padding: 16px; width: 100%; }
+    .scr-training-card-title { font-size: 15px; font-weight: 700; color: var(--app-text); margin-bottom: 4px; }
+    .scr-training-card-meta { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+    .scr-training-card-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .scr-training-badge-teal { background: rgba(42, 114, 124, 0.12); color: var(--app-primary-light); }
+    .scr-training-badge-gold { background: rgba(216, 175, 71, 0.12); color: #D8AF47; }
+
+    /* Screen 6 — Login */
+    .scr-login { background: #0f1419; min-height: 100%; display: flex; flex-direction: column; padding: 16px; }
+    .scr-login-back { font-size: 12px; color: #8b949e; margin-bottom: 16px; }
+    .scr-login-card { background: #1a1f2e; border: 1px solid #2d3548; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    .scr-login-brand { font-size: 13px; font-weight: 700; color: #D8AF47; margin-bottom: 12px; }
+    .scr-login-shield { width: 48px; height: 48px; background: linear-gradient(135deg, #D8AF47, #E1B13F); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 12px; }
+    .scr-login-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .scr-login-subtitle { font-size: 12px; color: #8b949e; margin-bottom: 16px; }
+    .scr-login-tabs { display: flex; width: 100%; background: rgba(255,255,255,0.06); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    .scr-login-tab { flex: 1; padding: 8px; text-align: center; font-size: 13px; font-weight: 600; color: #8b949e; cursor: default; }
+    .scr-login-tab.active { background: linear-gradient(135deg, #D8AF47, #E1B13F); color: #fff; border-radius: 8px; }
+    .scr-login-form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+    .scr-login-label { font-size: 12px; color: #8b949e; font-weight: 600; }
+    .scr-login-input { width: 100%; padding: 10px 14px; background: #0f1419; border: 1px solid #2d3548; border-radius: 8px; color: #555; font-size: 13px; font-family: inherit; }
+    .scr-login-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D8AF47, #E1B13F); color: #fff; font-size: 14px; font-weight: 700; border: none; border-radius: 8px; margin-top: 4px; cursor: default; }
+    .scr-login-divider { text-align: center; color: #555; font-size: 12px; margin: 10px 0; }
+    .scr-login-google { width: 100%; padding: 10px; background: transparent; border: 1px solid #2d3548; border-radius: 8px; color: #ccc; font-size: 13px; font-weight: 600; cursor: default; text-align: center; font-family: inherit; }
+
+    /* Screen 7 — Personal Area */
+    .scr-profile { background: #0f1419; min-height: 100%; display: flex; flex-direction: column; }
+    .scr-profile-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #1a1f2e; border-bottom: 1px solid #2d3548; }
+    .scr-profile-brand { display: flex; align-items: center; gap: 6px; }
+    .scr-profile-brand-icon { font-size: 14px; color: #D8AF47; }
+    .scr-profile-brand-text { font-size: 14px; font-weight: 700; color: #fff; }
+    .scr-profile-logout { font-size: 11px; color: #8b949e; border: 1px solid #2d3548; padding: 4px 10px; border-radius: 6px; }
+    .scr-profile-welcome { margin: 14px 16px; background: linear-gradient(135deg, rgba(42, 114, 124, 0.10), rgba(216, 175, 71, 0.08)); border: 1px solid #2d3548; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 14px; }
+    .scr-profile-avatar { width: 56px; height: 56px; background: linear-gradient(135deg, #2A727C, #D8AF47); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .scr-profile-name { font-size: 18px; font-weight: 700; color: #fff; }
+    .scr-profile-role { font-size: 11px; color: #8b949e; margin-top: 2px; }
+    .scr-profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 16px 14px; }
+    .scr-profile-stat { background: #1a1f2e; border: 1px solid #2d3548; border-radius: 12px; padding: 14px; text-align: center; }
+    .scr-profile-stat-num { font-size: 22px; font-weight: 800; }
+    .scr-profile-stat-num.gold { color: #D8AF47; }
+    .scr-profile-stat-num.teal { color: #2A727C; }
+    .scr-profile-stat-label { font-size: 11px; color: #8b949e; margin-top: 2px; }
+    .scr-profile-links { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
+    .scr-profile-link { padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; cursor: default; }
+    .scr-profile-link-primary { background: var(--app-primary-light); color: #fff; }
+    .scr-profile-link-outline { background: transparent; border: 1px solid #D8AF47; color: #D8AF47; }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-side">
+      <div class="demo-header">
+        <h1>בית המטפלים</h1>
+        <p>הבית של המטפלים בישראל</p>
+      </div>
+      <div class="caption-area">
+        <p class="caption caption-0 active">גלו את <strong>בית המטפלים</strong> — קורסים, הכשרות ומיזם חברתי לטיפול נגיש בישראל</p>
+        <p class="caption caption-1">שלושה מישורים, <strong>מטרה אחת</strong> — להפיץ ריפוי ולעזור לכמה שיותר אנשים</p>
+        <p class="caption caption-2"><strong>קורסי NLP מקצועיים</strong> — 51 שיעורים, 7 מודולים, בחינם ובצפייה ישירה</p>
+        <p class="caption caption-3"><strong>פורטל למידה אינטראקטיבי</strong> — מעקב התקדמות, סיכומים ומורה AI לכל שיעור</p>
+        <p class="caption caption-4"><strong>סיכומי שיעורים</strong> מפורטים — כל מה שלמדתם, מסודר ונגיש</p>
+        <p class="caption caption-5"><strong>הכשרות מקצועיות</strong> — NLP Practitioner ו-Master עם הסמכה מלאה</p>
+        <p class="caption caption-6"><strong>הרשמו בקלות</strong> — עם אימייל או חשבון Google, ותתחילו ללמוד</p>
+        <p class="caption caption-7"><strong>האזור האישי</strong> — מעקב התקדמות, מחברת אישית וסטטיסטיקות למידה</p>
+      </div>
+    </div>
+
+    <div class="phone-frame">
+      <div class="phone-inner">
+        <div class="phone-island"></div>
+        <div class="phone-status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+          </div>
+        </div>
+
+        <div class="screen-viewport">
+
+          <!-- Screen 0: Hero -->
+          <div class="screen screen-0 active" data-transition="fade">
+            <div class="scr-hero">
+              <div class="scr-hero-logo s-animate">
+                <div class="scr-hero-logo-icon">&#9829;</div>
+                <span class="scr-hero-logo-text">בית המטפלים</span>
+              </div>
+              <div class="s-animate" style="text-align:center">
+                <div class="scr-hero-title">בית המטפלים</div>
+                <div class="scr-hero-subtitle">הבית של המטפלים בישראל 💜</div>
+              </div>
+              <div class="scr-hero-stats s-animate">
+                <div><div class="scr-hero-stat-num">25,000+</div><div class="scr-hero-stat-label">צפיות</div></div>
+                <div><div class="scr-hero-stat-num">70+</div><div class="scr-hero-stat-label">שעות תוכן</div></div>
+                <div><div class="scr-hero-stat-num">350+</div><div class="scr-hero-stat-label">מטפלים</div></div>
+              </div>
+              <div class="scr-hero-buttons s-animate">
+                <div class="scr-hero-btn-primary s-pulse-glow">&#9654; לקורסים בחינם</div>
+                <div class="scr-hero-btn-ghost">&#127891; להכשרת מטפלים</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen 1: Three Pillars -->
+          <div class="screen screen-1" data-transition="slide-left">
+            <div class="scr-pillars">
+              <div class="scr-pillars-eyebrow s-animate">קצת עלינו</div>
+              <div class="scr-pillars-title s-animate">3 מישורי הפעולה</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div class="scr-pillar-card scr-pillar-card-teal s-animate">
+                  <div class="scr-pillar-icon scr-pillar-icon-teal">&#128214;</div>
+                  <div>
+                    <div class="scr-pillar-info-title">קורסים בחינם</div>
+                    <div class="scr-pillar-info-desc">51 שיעורים בצפייה חופשית</div>
+                  </div>
+                </div>
+                <div class="scr-pillar-card scr-pillar-card-gold s-animate">
+                  <div class="scr-pillar-icon scr-pillar-icon-gold">&#127891;</div>
+                  <div>
+                    <div class="scr-pillar-info-title">הכשרת מטפלים</div>
+                    <div class="scr-pillar-info-desc">תוכנית הכשרה שנתית</div>
+                  </div>
+                </div>
+                <div class="scr-pillar-card scr-pillar-card-purple s-animate">
+                  <div class="scr-pillar-icon scr-pillar-icon-purple">&#128156;</div>
+                  <div>
+                    <div class="scr-pillar-info-title">מיזם חברתי</div>
+                    <div class="scr-pillar-info-desc">מטפל לכל אחד — טיפול חינם</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen 2: Learning Portal -->
+          <div class="screen screen-2" data-transition="slide-left">
+            <div class="scr-portal">
+              <div class="scr-portal-badge s-animate">&#127916; למידה חינמית ופתוחה</div>
+              <div class="scr-portal-title s-animate"><span>הקורסים</span> שלנו</div>
+              <div class="scr-portal-sub s-animate">כל הקורסים פתוחים לצפייה חופשית, ללא תשלום</div>
+              <div class="scr-portal-cta s-animate s-pulse-glow">&#9654; היכנסו לפורטל הלמידה</div>
+            </div>
+          </div>
+
+          <!-- Screen 3: Course Player -->
+          <div class="screen screen-3" data-transition="slide-left">
+            <div class="scr-player">
+              <div class="scr-player-header s-animate">
+                <div class="scr-player-brand">
+                  <div class="scr-player-brand-icon">&#9829;</div>
+                  <span class="scr-player-brand-text">בית המטפלים</span>
+                </div>
+                <div class="scr-player-progress">
+                  <div class="scr-player-progress-bar"><div class="scr-player-progress-fill"></div></div>
+                  <span class="scr-player-progress-text">35%</span>
+                </div>
+              </div>
+              <div class="scr-player-video s-animate">
+                <div class="scr-player-play">&#9654;</div>
+              </div>
+              <div class="scr-player-info s-animate">
+                <div class="scr-player-lesson-title">שיעור 3: עקרונות הראפור</div>
+                <div class="scr-player-duration">45 דק׳</div>
+              </div>
+              <div class="scr-player-list s-animate">
+                <div class="scr-player-list-title">רשימת שיעורים</div>
+                <div class="scr-player-item">
+                  <div class="scr-player-item-icon scr-player-item-done">&#10003;</div>
+                  <span>שיעור 1: מבוא ל-NLP</span>
+                </div>
+                <div class="scr-player-item">
+                  <div class="scr-player-item-icon scr-player-item-done">&#10003;</div>
+                  <span>שיעור 2: מודל התקשורת</span>
+                </div>
+                <div class="scr-player-item current">
+                  <div class="scr-player-item-icon scr-player-item-current">&#9654;</div>
+                  <span>שיעור 3: עקרונות הראפור</span>
+                </div>
+                <div class="scr-player-item locked">
+                  <div class="scr-player-item-icon scr-player-item-locked">&#9675;</div>
+                  <span>שיעור 4: מערכות ייצוג</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen 4: Lesson Summary -->
+          <div class="screen screen-4" data-transition="slide-left">
+            <div class="scr-summary">
+              <div class="scr-summary-hero s-animate">
+                <div class="scr-summary-num s-bounce-in">1</div>
+                <div class="scr-summary-title">מבוא ל-NLP וראפור</div>
+                <div class="scr-summary-sub">שיעור 1 — NLP Practitioner</div>
+              </div>
+              <div class="scr-summary-content">
+                <div class="s-animate">
+                  <div class="scr-summary-section-title">&#129504; מה זה NLP?</div>
+                </div>
+                <div class="scr-summary-topic s-animate">
+                  <div class="scr-summary-topic-title">Neuro-Linguistic Programming</div>
+                  <div class="scr-summary-bullet">תכנות מחדש של דפוסי חשיבה</div>
+                  <div class="scr-summary-bullet">שינוי תגובות רגשיות</div>
+                </div>
+                <div class="scr-summary-highlight s-animate">
+                  <div class="scr-summary-highlight-title">&#128273; טכניקת ראפור</div>
+                  <div class="scr-summary-highlight-text">יצירת הרמוניה ואמון עם המטופל</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen 5: Training Programs -->
+          <div class="screen screen-5" data-transition="slide-left">
+            <div class="scr-training">
+              <div class="scr-training-badge s-animate">&#127942; תוכנית ההכשרה השנתית</div>
+              <div class="scr-training-title s-animate"><span>הכשרות</span> ותוכניות לימוד</div>
+              <div class="scr-training-sub s-animate">הפכו למטפלים מוסמכים עם הכלים הכי מתקדמים</div>
+              <div style="display:flex;flex-direction:column;gap:12px;width:100%">
+                <div class="scr-training-card s-animate">
+                  <div class="scr-training-card-title">NLP Practitioner</div>
+                  <div class="scr-training-card-meta">8 מודולים &bull; 51 שיעורים &bull; הסמכה</div>
+                  <div class="scr-training-card-badge scr-training-badge-teal">נפתח להרשמה</div>
+                </div>
+                <div class="scr-training-card s-animate">
+                  <div class="scr-training-card-title">NLP Master Practitioner</div>
+                  <div class="scr-training-card-meta">7 מודולים &bull; 28 שיעורים &bull; הסמכה</div>
+                  <div class="scr-training-card-badge scr-training-badge-gold">בקרוב</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen 6: Login -->
+          <div class="screen screen-6" data-transition="slide-left">
+            <div class="scr-login">
+              <div class="scr-login-back s-animate">← חזרה לפורטל</div>
+              <div class="scr-login-card s-animate">
+                <div class="scr-login-brand">&#9829; בית המטפלים</div>
+                <div class="scr-login-shield s-bounce-in">&#128737;</div>
+                <div class="scr-login-title">ברוכים הבאים</div>
+                <div class="scr-login-subtitle">מערכת הלמידה - בית המטפלים</div>
+                <div class="scr-login-tabs">
+                  <div class="scr-login-tab active">כניסה</div>
+                  <div class="scr-login-tab">הרשמה</div>
+                </div>
+                <div class="scr-login-form">
+                  <div class="scr-login-label">אימייל</div>
+                  <div class="scr-login-input">user@example.com</div>
+                  <div class="scr-login-label">סיסמה</div>
+                  <div class="scr-login-input">••••••••</div>
+                  <div class="scr-login-btn s-pulse-glow">התחברות</div>
+                </div>
+                <div class="scr-login-divider">— או —</div>
+                <div class="scr-login-google">כניסה עם Google</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen 7: Personal Area -->
+          <div class="screen screen-7" data-transition="zoom-in">
+            <div class="scr-profile">
+              <div class="scr-profile-header s-animate">
+                <div class="scr-profile-brand">
+                  <span class="scr-profile-brand-icon">&#9829;</span>
+                  <span class="scr-profile-brand-text">בית המטפלים</span>
+                </div>
+                <div class="scr-profile-logout">התנתקות</div>
+              </div>
+              <div class="scr-profile-welcome s-animate">
+                <div class="scr-profile-avatar">ה</div>
+                <div>
+                  <div class="scr-profile-name">שלום, הלל</div>
+                  <div class="scr-profile-role">student_lead</div>
+                </div>
+              </div>
+              <div class="scr-profile-stats s-animate">
+                <div class="scr-profile-stat">
+                  <div class="scr-profile-stat-num gold">12</div>
+                  <div class="scr-profile-stat-label">שיעורים שהושלמו</div>
+                </div>
+                <div class="scr-profile-stat">
+                  <div class="scr-profile-stat-num teal">35%</div>
+                  <div class="scr-profile-stat-label">התקדמות בקורס</div>
+                </div>
+                <div class="scr-profile-stat">
+                  <div class="scr-profile-stat-num gold">8</div>
+                  <div class="scr-profile-stat-label">שיחות AI</div>
+                </div>
+                <div class="scr-profile-stat">
+                  <div class="scr-profile-stat-num teal">3</div>
+                  <div class="scr-profile-stat-label">הערות שנשמרו</div>
+                </div>
+              </div>
+              <div class="scr-profile-links s-animate">
+                <div class="scr-profile-link scr-profile-link-primary">&#127919; חזרה לקורס</div>
+                <div class="scr-profile-link scr-profile-link-outline">&#128221; המחברת שלי</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="phone-home-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    const SCREEN_DURATIONS = [3500, 3500, 3000, 3500, 3000, 3000, 3500, 3500];
+    const TRANSITION_MS = 600;
+
+    const screens = document.querySelectorAll('.screen');
+    const captions = document.querySelectorAll('.caption');
+    const totalScreens = screens.length;
+    let currentIndex = 0;
+    let isPlaying = true;
+    let timer = null;
+
+    function getDuration(index) {
+      return SCREEN_DURATIONS[index] || 3000;
+    }
+
+    function getTransition(screenEl) {
+      return screenEl.dataset.transition || 'fade';
+    }
+
+    function clearTransitionClasses(el) {
+      el.classList.remove(
+        'active', 'exiting',
+        'slide-left-enter', 'slide-left-exit',
+        'slide-right-enter', 'slide-right-exit',
+        'fade-enter', 'fade-exit',
+        'zoom-in-enter', 'zoom-in-exit',
+        'slide-up-enter', 'slide-up-exit'
+      );
+    }
+
+    function goToScreen(newIndex, forceReverse) {
+      if (newIndex < 0) newIndex = totalScreens - 1;
+      if (newIndex >= totalScreens) newIndex = 0;
+      if (newIndex === currentIndex) return;
+
+      const oldScreen = screens[currentIndex];
+      const newScreen = screens[newIndex];
+      const isReverse = forceReverse || newIndex < currentIndex;
+      const transition = isReverse ? getTransition(oldScreen) : getTransition(newScreen);
+
+      screens.forEach(s => clearTransitionClasses(s));
+
+      let enterClass, exitClass;
+      if (transition === 'slide-left' || transition === 'slide-right') {
+        enterClass = isReverse ? 'slide-right-enter' : 'slide-left-enter';
+        exitClass = 'slide-left-exit';
+      } else {
+        enterClass = transition + '-enter';
+        exitClass = transition + '-exit';
+      }
+
+      newScreen.classList.add(enterClass);
+      newScreen.offsetWidth;
+      oldScreen.classList.add(exitClass, 'exiting');
+      newScreen.classList.add('active');
+
+      setTimeout(() => { clearTransitionClasses(oldScreen); }, TRANSITION_MS + 50);
+
+      captions.forEach(c => c.classList.remove('active'));
+      if (captions[newIndex]) captions[newIndex].classList.add('active');
+
+      currentIndex = newIndex;
+      if (isPlaying) scheduleNext();
+    }
+
+    function scheduleNext() {
+      clearTimeout(timer);
+      timer = setTimeout(() => { goToScreen(currentIndex + 1, false); }, getDuration(currentIndex));
+    }
+
+    function play() { isPlaying = true; scheduleNext(); }
+    function pause() { isPlaying = false; clearTimeout(timer); }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { pause(); goToScreen(currentIndex + 1, false); }
+      if (e.key === 'ArrowRight') { pause(); goToScreen(currentIndex - 1, true); }
+      if (e.key === ' ') { e.preventDefault(); isPlaying ? pause() : play(); }
+    });
+
+    screens[0].classList.add('active');
+    captions[0]?.classList.add('active');
+    scheduleNext();
+  })();
+  </script>
+</body>
+</html>

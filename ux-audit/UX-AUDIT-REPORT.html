@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UX Audit Report — בית המטפלים</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap');
+
+        :root {
+            --deep-petrol: #003B46;
+            --muted-teal: #00606B;
+            --dusty-aqua: #2F8592;
+            --frost-white: #E8F1F2;
+            --gold: #D4AF37;
+            --gold-dark: #8B6914;
+            --cream: #FAF8F4;
+            --red: #E74C3C;
+            --orange: #F39C12;
+            --green: #27AE60;
+            --blue: #3498DB;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--cream);
+            color: #1A2D33;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        /* Cover Page */
+        .cover {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 50%, var(--dusty-aqua) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 3rem;
+            page-break-after: always;
+        }
+
+        .cover-badge {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 2rem;
+        }
+
+        .cover h1 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .cover h1 span { color: var(--gold); }
+
+        .cover .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.85;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .cover-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .cover-stat {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            min-width: 140px;
+        }
+
+        .cover-stat .num {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            display: block;
+        }
+
+        .cover-stat .label {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        .cover-meta {
+            opacity: 0.5;
+            font-size: 0.85rem;
+            margin-top: 2rem;
+        }
+
+        /* Content */
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 3rem;
+        }
+
+        /* TOC */
+        .toc {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(47, 133, 146, 0.12);
+            page-break-after: always;
+        }
+
+        .toc h2 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.8rem;
+            color: var(--deep-petrol);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .toc ol {
+            list-style: none;
+            counter-reset: toc;
+        }
+
+        .toc li {
+            counter-increment: toc;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 1.05rem;
+        }
+
+        .toc li::before {
+            content: counter(toc) ".";
+            color: var(--gold-dark);
+            font-weight: 700;
+            margin-left: 0.8rem;
+        }
+
+        /* Section */
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(47, 133, 146, 0.12);
+        }
+
+        .section h2 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.6rem;
+            color: var(--deep-petrol);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-num {
+            background: var(--deep-petrol);
+            color: var(--gold);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: 'Heebo', sans-serif;
+            flex-shrink: 0;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            color: var(--deep-petrol);
+            margin: 1.5rem 0 0.8rem;
+            font-weight: 700;
+        }
+
+        h4 {
+            font-size: 1rem;
+            color: var(--muted-teal);
+            margin: 1rem 0 0.5rem;
+            font-weight: 600;
+        }
+
+        p { margin-bottom: 0.8rem; }
+
+        /* Severity badges */
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+        }
+        .badge-critical { background: #FDEDEC; color: #C0392B; border: 1px solid #E74C3C; }
+        .badge-high { background: #FEF5E7; color: #D68910; border: 1px solid #F39C12; }
+        .badge-medium { background: #EBF5FB; color: #2471A3; border: 1px solid #3498DB; }
+        .badge-low { background: #EAFAF1; color: #1E8449; border: 1px solid #27AE60; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--deep-petrol);
+            color: white;
+            padding: 0.7rem 1rem;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+
+        tr:nth-child(even) { background: rgba(232, 241, 242, 0.3); }
+
+        /* Code */
+        code {
+            background: rgba(47, 133, 146, 0.08);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-family: 'Courier New', monospace;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        pre {
+            background: var(--deep-petrol);
+            color: var(--frost-white);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+            direction: ltr;
+            text-align: left;
+        }
+
+        /* Finding cards */
+        .finding {
+            background: rgba(232, 241, 242, 0.3);
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin: 0.8rem 0;
+            border-right: 4px solid;
+        }
+
+        .finding-critical { border-color: var(--red); }
+        .finding-high { border-color: var(--orange); }
+        .finding-medium { border-color: var(--blue); }
+
+        .finding-title {
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .finding p { margin-bottom: 0.3rem; font-size: 0.92rem; }
+
+        .fix-label {
+            display: inline-block;
+            background: var(--green);
+            color: white;
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 0.3rem;
+        }
+
+        /* Action plan */
+        .action-plan table th:first-child { width: 30px; }
+
+        .priority-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin: 1.5rem 0 0.8rem;
+        }
+
+        .priority-tag {
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .priority-p0 { background: #FDEDEC; color: #C0392B; }
+        .priority-p1 { background: #FEF5E7; color: #D68910; }
+        .priority-p2 { background: #EBF5FB; color: #2471A3; }
+        .priority-p3 { background: #EAFAF1; color: #1E8449; }
+
+        ul { margin: 0.5rem 0 0.8rem 1.5rem; }
+        li { margin-bottom: 0.3rem; }
+
+        /* Summary box */
+        .summary-box {
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            color: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .summary-box h3 {
+            color: var(--gold);
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-box .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .summary-box .stat-item {
+            text-align: center;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .summary-box .stat-item .num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gold);
+        }
+
+        .summary-box .stat-item .label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        .report-footer {
+            text-align: center;
+            padding: 2rem;
+            opacity: 0.5;
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+
+        /* Print */
+        @media print {
+            body { background: white; font-size: 11px; }
+            .cover { min-height: auto; padding: 4rem 2rem; }
+            .section { break-inside: avoid; }
+            .content { padding: 1rem; }
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            vertical-align: middle;
+            margin-left: 4px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+    <div class="cover-badge">PROFESSIONAL UX AUDIT</div>
+    <h1>דוח ביקורת <span>UX</span> מקיף</h1>
+    <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">בית המטפלים</h1>
+    <p class="subtitle">פורטל קהילתי לחיבור מטופלים עם מטפלים</p>
+
+    <div class="cover-stats">
+        <div class="cover-stat">
+            <span class="num">59</span>
+            <span class="label">ממצאים</span>
+        </div>
+        <div class="cover-stat">
+            <span class="num">57</span>
+            <span class="label">דפים נסרקו</span>
+        </div>
+        <div class="cover-stat">
+            <span class="num">11</span>
+            <span class="label">סוכני AI</span>
+        </div>
+        <div class="cover-stat">
+            <span class="num">26</span>
+            <span class="label">פעולות נדרשות</span>
+        </div>
+    </div>
+
+    <p class="cover-meta">
+        19 בפברואר 2026 | Multi-Agent Deep Analysis Methodology<br>
+        בוצע ע"י Claude Code — Pyramid Swarm Strategy
+    </p>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+    <!-- EXECUTIVE SUMMARY -->
+    <div class="summary-box">
+        <h3>תקציר מנהלים</h3>
+        <p>דוח זה מציג ביקורת UX מקיפה של אתר "בית המטפלים". הביקורת בוצעה באמצעות 4 סוכני Discovery מקבילים ו-7 סוכני Investigation ממוקדים, שסרקו את כלל האתר.</p>
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="num">7</div>
+                <div class="label">קריטיים</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">18</div>
+                <div class="label">גבוהים</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">22</div>
+                <div class="label">בינוניים</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">12</div>
+                <div class="label">נמוכים</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOC -->
+    <div class="toc">
+        <h2>תוכן עניינים</h2>
+        <ol>
+            <li>אבטחה ושלמות נתונים</li>
+            <li>עקביות ויזואלית ומיתוג</li>
+            <li>ניגודיות צבע ונגישות</li>
+            <li>ניווט וארכיטקטורת מידע</li>
+            <li>טפסים ואינטראקציות</li>
+            <li>רספונסיביות ומובייל</li>
+            <li>ביצועים וארכיטקטורה</li>
+            <li>תוכנית פעולה מתועדפת</li>
+        </ol>
+    </div>
+
+    <!-- SECTION 1: SECURITY -->
+    <div class="section">
+        <h2><span class="section-num">1</span> אבטחה ושלמות נתונים</h2>
+
+        <div class="finding finding-critical">
+            <div class="finding-title">
+                <span class="badge badge-critical">CRITICAL</span>
+                Debug Mode פעיל בפרודקשן
+            </div>
+            <p><strong>קבצים:</strong> <code>patient-step2.html</code>, <code>patient-step3.html</code>, <code>patient-step4.html</code></p>
+            <p>ולידציית step-guard מבוטלת עם <code>// DEBUG MODE</code>. משתמש יכול לנווט ישירות ל-step4 ולשלוח רשומה ריקה לטבלת patients ב-Supabase.</p>
+            <p><strong>נתיב תקיפה:</strong> פתח step4 &larr; סמן 2 checkboxes &larr; שרבט על canvas &larr; שלח &larr; רשומת מטופל ריקה נוצרת.</p>
+            <p><span class="fix-label">FIX</span> בטל את ה-comment על ה-step guards בכל 3 הקבצים.</p>
+        </div>
+
+        <div class="finding finding-critical">
+            <div class="finding-title">
+                <span class="badge badge-critical">CRITICAL</span>
+                טפסים ישנים יוצרים רשומות כפולות
+            </div>
+            <p><strong>קבצים:</strong> <code>patient-onboarding.html</code>, <code>therapist-onboarding.html</code> (root)</p>
+            <p>שני טפסי הרשמה ישנים קיימים לצד ה-flow החדש (step1-4). שניהם כותבים לאותן טבלאות Supabase ללא הגנה מפני כפילויות. אין unique constraint על phone.</p>
+            <p><span class="fix-label">FIX</span> הפנה טפסים ישנים ל-flow החדש + הוסף unique constraint על phone.</p>
+        </div>
+
+        <div class="finding finding-high">
+            <div class="finding-title">
+                <span class="badge badge-high">HIGH</span>
+                מספר WhatsApp פיקטיבי למטפלים
+            </div>
+            <p><strong>קובץ:</strong> <code>therapist-step4.html</code> שורה 579</p>
+            <p>מסך הצלחה מקשר ל-<code>+972501234567</code> — מספר שלא קיים. ה-flow למטופלים משתמש נכון ב-972549116092.</p>
+            <p><span class="fix-label">FIX</span> החלף למספר הנכון.</p>
+        </div>
+    </div>
+
+    <!-- SECTION 2: VISUAL -->
+    <div class="section">
+        <h2><span class="section-num">2</span> עקביות ויזואלית ומיתוג</h2>
+
+        <h3>מערכת צבעים: תקינה למרות קוד מת</h3>
+        <p><strong>חדשות טובות:</strong> גם <code>index.html</code> וגם <code>free-portal.html</code> כוללים "Theme Bridge" שדורס ערכי hex ישנים עם tokens נכונים מ-<code>theme.css</code>. הצבעים השגויים (כמו <code>#0E5660</code>) הם קוד מת ולא מרונדרים.</p>
+
+        <h3>אי-עקביות צורת כפתורים</h3>
+        <table>
+            <tr><th>דפים</th><th>border-radius</th><th>מראה</th></tr>
+            <tr><td>דפים ראשיים (index, about, training)</td><td><code>10px</code></td><td>מלבן מעוגל</td></tr>
+            <tr><td>דפי נחיתה (patient, therapist)</td><td><code>50px</code></td><td>גלולה</td></tr>
+        </table>
+
+        <h3>סקאלת טיפוגרפיה: אין מערכת משותפת</h3>
+        <table>
+            <tr><th>אלמנט</th><th>דף הבית</th><th>הכשרה</th><th>עלינו</th><th>פורטל</th></tr>
+            <tr><td>H1 max</td><td>5.5rem</td><td>2.8rem</td><td>3.5rem</td><td>2.8rem</td></tr>
+            <tr><td>H2 max</td><td>2.8rem</td><td>2.5rem</td><td>2.5rem</td><td>—</td></tr>
+        </table>
+        <p>H1 בדף הבית <strong>כמעט כפול</strong> מ-H1 בדף ההכשרה. אין סקאלת גדלים מתועדת.</p>
+
+        <h3>אי-התאמה ב-Footer</h3>
+        <table>
+            <tr><th>דפים</th><th>זכויות יוצרים</th><th>שם מותג</th></tr>
+            <tr><td>index.html, free-portal.html</td><td>&copy; 2026</td><td>בית המטפלים</td></tr>
+            <tr><td>about, training, project-lobby</td><td>&copy; 2024</td><td>מטפל לכל אחד</td></tr>
+        </table>
+    </div>
+
+    <!-- SECTION 3: COLOR CONTRAST -->
+    <div class="section">
+        <h2><span class="section-num">3</span> ניגודיות צבע ונגישות</h2>
+
+        <div class="finding finding-critical">
+            <div class="finding-title">
+                <span class="badge badge-critical">CRITICAL</span>
+                זהב <span class="color-swatch" style="background:#D4AF37"></span> #D4AF37 נכשל ב-WCAG AA על רקע בהיר
+            </div>
+            <table>
+                <tr><th>רקע</th><th>יחס ניגודיות</th><th>תוצאה</th></tr>
+                <tr><td>לבן (#FFF) <span class="color-swatch" style="background:#FFF"></span></td><td><strong>2.0:1</strong></td><td style="color:#C0392B; font-weight:700;">FAIL (צריך 4.5:1)</td></tr>
+                <tr><td>קרם (#FAF8F4) <span class="color-swatch" style="background:#FAF8F4"></span></td><td><strong>2.1:1</strong></td><td style="color:#C0392B; font-weight:700;">FAIL</td></tr>
+                <tr><td>teal (#00606B) <span class="color-swatch" style="background:#00606B"></span></td><td><strong>2.3:1</strong></td><td style="color:#C0392B; font-weight:700;">FAIL (טקסט רגיל)</td></tr>
+                <tr><td>petrol (#003B46) <span class="color-swatch" style="background:#003B46"></span></td><td><strong>5.8:1</strong></td><td style="color:#27AE60; font-weight:700;">PASS</td></tr>
+            </table>
+            <p><strong>~40+ אלמנטים ב-20+ קבצים מושפעים:</strong> eyebrow labels, לוגו, nav active, step labels, testimonials, summary titles, badges.</p>
+            <p><span class="fix-label">FIX</span> הוסף <code>--t-gold-text: #8B6914</code> <span class="color-swatch" style="background:#8B6914"></span> (~4.6:1 על לבן) לטקסט על רקע בהיר.</p>
+        </div>
+
+        <h3>ARIA חסרים</h3>
+        <table>
+            <tr><th>אלמנט</th><th>בעיה</th><th>דפים מושפעים</th></tr>
+            <tr><td>Skip link</td><td>חסר ב-7/8 דפים</td><td>כל הדפים מלבד index</td></tr>
+            <tr><td><code>&lt;main&gt;</code> landmark</td><td>חסר</td><td>כל דפי השיווק</td></tr>
+            <tr><td><code>&lt;nav aria-label&gt;</code></td><td>חסר</td><td>כל דפי השיווק</td></tr>
+            <tr><td>כפתור המבורגר <code>aria-expanded</code></td><td>חסר</td><td>כל דפי השיווק</td></tr>
+            <tr><td>Toast <code>role="alert"</code></td><td>חסר</td><td>כל דפי הטפסים</td></tr>
+            <tr><td>Progress stepper <code>aria-current</code></td><td>חסר</td><td>כל שלבי ההרשמה</td></tr>
+        </table>
+
+        <h3>Focus indicators הוסרו מטפסים</h3>
+        <p><code>patient-step1.html</code> קובע <code>outline: none</code> על כל ה-inputs ומחליף ב-box-shadow ב-10% opacity — כמעט בלתי נראה. <code>accessibility.css</code> נטען אבל נדרס ע"י inline styles.</p>
+
+        <h3>תוויות טפסים לא מקושרות ל-inputs</h3>
+        <p>כל טפסי patient/therapist step משתמשים ב-<code>&lt;label&gt;</code> ללא <code>for</code> attribute. קוראי מסך לא יכולים להכריז על התווית בעת מיקוד על השדה.</p>
+    </div>
+
+    <!-- SECTION 4: NAVIGATION -->
+    <div class="section">
+        <h2><span class="section-num">4</span> ניווט וארכיטקטורת מידע</h2>
+
+        <h3>מערכות הרשמה כפולות</h3>
+        <pre>
+ACTIVE (מקושר מהניווט):
+  landing-patient -> join-patient -> patient-intro -> step1 -> step2 -> step3 -> step4
+
+GHOST (ללא קישור, עדיין פעיל):
+  patient-onboarding.html (root) — שולח לאותה טבלה
+  therapist-onboarding.html (root) — שולח לאותה טבלה
+        </pre>
+
+        <h3>פורטל למידה: נקודות כניסה מפוצלות</h3>
+        <pre>
+index.html nav "קורסים בחינם" -> learning-portal.html (דף שיווקי)
+                                      |
+                                      v CTA click
+                                   free-portal.html (נגן הקורסים)
+
+about.html link -> free-portal.html (מדלג על דף השיווק)
+        </pre>
+        <p>4 דפי למידה קיימים ללא ניווט מאוחד ביניהם. <code>learning-booklets.html</code> ו-<code>learning-summaries.html</code> נגישים רק מ-footer של דף הבית.</p>
+
+        <h3>הפורטל הוא "חומה סגורה"</h3>
+        <p><code>free-portal.html</code> חסר navbar סטנדרטי. משתמשים בתוך נגן הקורסים לא יכולים לנווט להכשרה, עלינו, או חלקים אחרים ללא חזרה לדף הבית.</p>
+
+        <h3>דף ההתחברות מוסתר</h3>
+        <p><code>pages/login.html</code> לא מקושר מאף navbar ראשי. נגיש רק מ-dropdown בפורטל או URL ישיר.</p>
+
+        <h3>סתירה בקריטריוני זכאות</h3>
+        <ul>
+            <li><code>project-lobby.html</code>: "ללוחמים, נפגעי נובה ומי שנחשף לאירועי ה-7 באוקטובר"</li>
+            <li><code>patient-intro.html</code>: "אנשים שחווים קושי ואתגרים כלכליים"</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 5: FORMS -->
+    <div class="section">
+        <h2><span class="section-num">5</span> טפסים ואינטראקציות</h2>
+
+        <h3>פערי ולידציה</h3>
+        <table>
+            <tr><th>בעיה</th><th>חומרה</th><th>קבצים</th></tr>
+            <tr><td>Step guards מבוטלים (debug mode)</td><td><span class="badge badge-critical">CRITICAL</span></td><td>patient-step2/3/4</td></tr>
+            <tr><td>ולידציית email מקבלת <code>test@invalid</code></td><td><span class="badge badge-critical">CRITICAL</span></td><td>patient-step1</td></tr>
+            <tr><td>Regex טלפון מאפשר פסיקים</td><td><span class="badge badge-medium">MEDIUM</span></td><td>patient-step1</td></tr>
+            <tr><td>אין ולידציית גיל (18+ נדרש)</td><td><span class="badge badge-medium">MEDIUM</span></td><td>patient/therapist-step1</td></tr>
+            <tr><td>Checkboxes מטפלים לא מאומתים</td><td><span class="badge badge-high">HIGH</span></td><td>therapist-step1</td></tr>
+            <tr><td>סוג טיפול ללא ולידציה</td><td><span class="badge badge-high">HIGH</span></td><td>patient-step3</td></tr>
+        </table>
+
+        <h3>טיפול בשגיאות</h3>
+        <ul>
+            <li><strong>משוב Toast בלבד</strong> — אין שגיאות inline ליד השדות. משתמשי מובייל צריכים לגלול למעלה.</li>
+            <li><strong>שגיאת רשת גנרית</strong> — "שגיאה בשליחת הטופס. נסה שוב." — ללא פירוט.</li>
+            <li><strong>חסר autocomplete</strong> על כל ה-inputs בכל הטפסים.</li>
+        </ul>
+
+        <h3>בעיות Canvas חתימה</h3>
+        <ul>
+            <li>Canvas נמחק בסיבוב מובייל אבל <code>hasSignature</code> נשאר true &larr; תמונה ריקה נשלחת</li>
+            <li>אין חלופה למשתמשים עם מוגבלות מוטורית (WCAG 2.5.1)</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 6: RESPONSIVE -->
+    <div class="section">
+        <h2><span class="section-num">6</span> רספונסיביות ומובייל</h2>
+
+        <h3>פיצול Breakpoints</h3>
+        <table>
+            <tr><th>סוג דף</th><th>Breakpoints</th><th>חסר</th></tr>
+            <tr><td>שיווק (index, about, training)</td><td>768px, 480px</td><td>טאבלט (769-1023px)</td></tr>
+            <tr><td>טפסים (patient steps)</td><td>600px בלבד</td><td>480px, טאבלט</td></tr>
+            <tr><td>נחיתה</td><td>600px בלבד</td><td>480px, טאבלט</td></tr>
+            <tr><td>פורטל</td><td>1024, 768, 480px</td><td>מלא</td></tr>
+            <tr><td>כל הדפים</td><td>—</td><td>375px (iPhone SE)</td></tr>
+        </table>
+
+        <h3>Touch Targets מתחת ל-44px</h3>
+        <ul>
+            <li>קישורי footer: <code>padding: 0.35rem 0</code> &larr; ~22px גובה</li>
+            <li>כפתור סגירת popup: 32x32px</li>
+            <li>קישורי nav במובייל: ~40px (גבולי)</li>
+        </ul>
+
+        <h3>בעיות RTL</h3>
+        <ul>
+            <li>ערבוב CSS properties פיזיים/לוגיים</li>
+            <li><code>.scroll-hint</code> משתמש ב-<code>left: 50%</code> (פיזי) — שגוי ב-RTL</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 7: PERFORMANCE -->
+    <div class="section">
+        <h2><span class="section-num">7</span> ביצועים וארכיטקטורה</h2>
+
+        <div class="finding finding-high">
+            <div class="finding-title">
+                <span class="badge badge-high">HIGH</span>
+                כפילות CSS: ~4,400 שורות
+            </div>
+            <p>רק 2 קבצי CSS משותפים: <code>theme.css</code> (215 שורות) + <code>accessibility.css</code> (135 שורות).</p>
+            <p><strong>~80 שורות כפולות לכל דף</strong> (tokens, navbar, grain, reveal) &times; 55 דפים = <strong>~4,400 שורות</strong> copy-paste.</p>
+            <p>חסר: <code>components.css</code>, <code>navbar.css</code>, <code>layout.css</code></p>
+        </div>
+
+        <h3>משאבים חוסמי Render</h3>
+        <ul>
+            <li>Font Awesome נטען סינכרוני ב-6/8 דפים (רק הפורטל טוען async)</li>
+            <li>Supabase SDK נטען סינכרוני ללא <code>preload</code></li>
+            <li>חסר <code>preconnect</code> ל-Cloudflare CDN</li>
+        </ul>
+
+        <h3>אופטימיזציות חסרות</h3>
+        <ul>
+            <li>אין <code>loading="lazy"</code> על תמונות</li>
+            <li>אין OG/social meta tags (משפיע על תצוגה מקדימה ב-WhatsApp)</li>
+            <li>Grain overlay עם feTurbulence — עתיר GPU במובייל</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 8: ACTION PLAN -->
+    <div class="section action-plan">
+        <h2><span class="section-num">8</span> תוכנית פעולה מתועדפת</h2>
+
+        <div class="priority-header">
+            <span class="priority-tag priority-p0">P0 — אבטחה</span>
+            <span style="opacity:0.5; font-size:0.85rem;">מיידי</span>
+        </div>
+        <table>
+            <tr><th>#</th><th>פעולה</th><th>קבצים</th><th>מאמץ</th></tr>
+            <tr><td>1</td><td><strong>הפעל step guards מחדש</strong> — בטל comment של debug mode</td><td>patient-step2/3/4.html</td><td>5 דק'</td></tr>
+            <tr><td>2</td><td><strong>תקן WhatsApp מטפלים</strong> — החלף מספר placeholder</td><td>therapist-step4.html</td><td>1 דק'</td></tr>
+            <tr><td>3</td><td><strong>הפנה טפסים ישנים</strong> — redirect ל-flow החדש</td><td>2 קבצי root</td><td>10 דק'</td></tr>
+        </table>
+
+        <div class="priority-header">
+            <span class="priority-tag priority-p1">P1 — נגישות</span>
+            <span style="opacity:0.5; font-size:0.85rem;">ספרינט הבא</span>
+        </div>
+        <table>
+            <tr><th>#</th><th>פעולה</th><th>קבצים</th><th>מאמץ</th></tr>
+            <tr><td>4</td><td><strong>הוסף <code>--t-gold-text: #8B6914</code></strong> — זהב כהה לטקסט על רקע בהיר</td><td>theme.css + ~20 קבצים</td><td>2 שעות</td></tr>
+            <tr><td>5</td><td><strong>הוסף <code>for</code> attributes</strong> על כל תוויות הטפסים</td><td>patient/therapist steps</td><td>1 שעה</td></tr>
+            <tr><td>6</td><td><strong>הוסף skip links + <code>&lt;main&gt;</code></strong></td><td>~8 דפים</td><td>30 דק'</td></tr>
+            <tr><td>7</td><td><strong>הוסף <code>aria-expanded</code></strong> לכפתור המבורגר</td><td>~8 דפים</td><td>20 דק'</td></tr>
+            <tr><td>8</td><td><strong>הוסף <code>role="alert"</code></strong> ל-toasts</td><td>~12 דפים</td><td>20 דק'</td></tr>
+            <tr><td>9</td><td><strong>תקן focus indicators</strong> — הסר override של outline:none</td><td>patient-step1-4</td><td>15 דק'</td></tr>
+        </table>
+
+        <div class="priority-header">
+            <span class="priority-tag priority-p2">P2 — UX Polish</span>
+            <span style="opacity:0.5; font-size:0.85rem;">החודש</span>
+        </div>
+        <table>
+            <tr><th>#</th><th>פעולה</th><th>קבצים</th><th>מאמץ</th></tr>
+            <tr><td>10</td><td><strong>אחד border-radius</strong> — <code>--btn-radius: 10px</code></td><td>theme.css + landings</td><td>30 דק'</td></tr>
+            <tr><td>11</td><td><strong>תקן footer</strong> — "&copy; 2026 בית המטפלים" בכל מקום</td><td>about, training, project-lobby</td><td>10 דק'</td></tr>
+            <tr><td>12</td><td><strong>תקן תווית nav</strong> — שגיאת כתיב "מקצועים"</td><td>~6 דפים</td><td>10 דק'</td></tr>
+            <tr><td>13</td><td><strong>תקן ולידציית email</strong> — regex תקין</td><td>patient/therapist-step1</td><td>15 דק'</td></tr>
+            <tr><td>14</td><td><strong>תקן regex טלפון</strong> — <code>[2-489]</code></td><td>patient-step1</td><td>5 דק'</td></tr>
+            <tr><td>15</td><td><strong>הוסף autocomplete</strong> לשדות טפסים</td><td>כל דפי steps</td><td>30 דק'</td></tr>
+            <tr><td>16</td><td><strong>אחד כניסה לפורטל</strong></td><td>~8 דפים</td><td>20 דק'</td></tr>
+            <tr><td>17</td><td><strong>הוסף שגיאות inline</strong> בטפסים</td><td>patient-step1-4</td><td>1 שעה</td></tr>
+            <tr><td>18</td><td><strong>הוסף ולידציית גיל</strong> 18+</td><td>patient/therapist-step1</td><td>20 דק'</td></tr>
+        </table>
+
+        <div class="priority-header">
+            <span class="priority-tag priority-p3">P3 — ארכיטקטורה</span>
+            <span style="opacity:0.5; font-size:0.85rem;">הרבעון</span>
+        </div>
+        <table>
+            <tr><th>#</th><th>פעולה</th><th>קבצים</th><th>מאמץ</th></tr>
+            <tr><td>19</td><td><strong>צור <code>components.css</code></strong> — navbar, grain, reveal</td><td>קובץ חדש + ~30 דפים</td><td>4 שעות</td></tr>
+            <tr><td>20</td><td><strong>העבר :root aliases ל-theme.css</strong></td><td>theme.css + ~55 דפים</td><td>3 שעות</td></tr>
+            <tr><td>21</td><td><strong>Async Font Awesome</strong> בכל מקום</td><td>~6 דפים</td><td>30 דק'</td></tr>
+            <tr><td>22</td><td><strong>הוסף preconnect hints</strong></td><td>~8 דפים</td><td>15 דק'</td></tr>
+            <tr><td>23</td><td><strong>הוסף OG meta tags</strong></td><td>דפים ראשיים</td><td>1 שעה</td></tr>
+            <tr><td>24</td><td><strong>אחד breakpoints</strong> — 1024/768/480/375</td><td>~30 דפים</td><td>4 שעות</td></tr>
+            <tr><td>25</td><td><strong>חלופת חתימה</strong> — הקלדת שם</td><td>patient/therapist-step4</td><td>2 שעות</td></tr>
+            <tr><td>26</td><td><strong>Legal scroll נגיש</strong> — tabindex="0"</td><td>patient/therapist-step4</td><td>15 דק'</td></tr>
+        </table>
+    </div>
+
+    <!-- APPENDIX -->
+    <div class="section">
+        <h2>נספח: קבצים שנותחו</h2>
+
+        <h3>סוכני Discovery (4)</h3>
+        <ol>
+            <li>עקביות ויזואלית וצבעים — 8 קבצי HTML</li>
+            <li>ניווט וזרימות משתמש — 15 קבצי HTML</li>
+            <li>טפסים ואינטראקציות — 8 דפי טפסים + פורטל</li>
+            <li>רספונסיביות ונגישות — 8 דפים + CSS/JS</li>
+        </ol>
+
+        <h3>סוכני Investigation (7)</h3>
+        <ol>
+            <li>Color fork בדף הבית &larr; מקרי (קוד מת)</li>
+            <li>Color fork בפורטל &larr; תקין (theme bridge פעיל)</li>
+            <li>Debug mode &larr; פגיעות מאושרת</li>
+            <li>קישורים מתים &larr; join-patient/therapist קיימים כ-redirects</li>
+            <li>ניגודיות זהב &larr; 20+ קבצים, 40+ אלמנטים נכשלים</li>
+            <li>סיכון טפסים ישנים &larr; כפילויות נתונים מאושרות</li>
+            <li>כפילות CSS &larr; ~4,400 שורות</li>
+        </ol>
+
+        <p><strong>היקף כולל:</strong> ~57 קבצי HTML, 2 קבצי CSS, 6 קבצי JS</p>
+    </div>
+
+    <div class="report-footer">
+        נוצר ע"י Multi-Agent UX Audit Pipeline | 19 בפברואר 2026<br>
+        מתודולוגיה: Night-Research Pyramid Swarm Strategy | Claude Code
+    </div>
+
+</div>
+
+</body>
+</html>

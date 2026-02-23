@@ -16,7 +16,7 @@ let currentPatientFilter = 'waiting_for_match';
 
 // Email configuration
 const SUPABASE_FUNCTIONS_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
-const SITE_URL = 'https://hilell-aknine.github.io/therapist-for-everyone';
+const SITE_URL = 'https://therapist-for-everyone.vercel.app';
 
 // ============================================================================
 // EMAIL HELPER

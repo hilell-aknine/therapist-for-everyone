@@ -33,7 +33,7 @@
 2. **מטפלים/לומדים** - אנשים שרוצים ללמוד טיפול ולהתנדב
 
 ### כתובות
-- **אתר**: https://hilell-aknine.github.io/therapist-for-everyone/
+- **אתר**: https://therapist-for-everyone.vercel.app/
 - **GitHub**: https://github.com/hilell-aknine/therapist-for-everyone
 - **דומיין עתידי**: therapistforeveryone.com
 

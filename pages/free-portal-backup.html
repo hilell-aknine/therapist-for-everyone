@@ -1,0 +1,3844 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#003B46">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="../assets/icon-192.svg">
+    <title>קורס NLP בחינם - בית המטפלים</title>
+    <!-- Preconnect for faster loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://img.youtube.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome - load async -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <style>
+        :root {
+            /* Brand Colors */
+            --sidebar-dark: #0a3a42;
+            --sidebar-hover: #0d4a54;
+            --sidebar-active: #0f5560;
+            --deep-petrol: #0E5660;
+            --muted-teal: #005C66;
+            --dusty-aqua: #2A727C;
+            --frost-white: #E8F1F2;
+            --pure-white: #FFFFFF;
+            --light-gray: #f8f9fa;
+            --border-light: #e9ecef;
+            --text-dark: #2d3436;
+            --text-muted: #636e72;
+            --gold: #D8AF47;
+            --gold-light: #E1B13F;
+            --gold-glow: rgba(216, 175, 71, 0.3);
+            --success: #00b894;
+            --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--light-gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== Top Navigation Bar ===== */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 380px;
+            height: 60px;
+            background: var(--deep-petrol);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            z-index: 150;
+            border-bottom: 1px solid rgba(47, 133, 146, 0.3);
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-to-site {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--frost-white);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .back-to-site:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--gold);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--frost-white);
+            font-size: 0.85rem;
+        }
+
+        .breadcrumb a {
+            color: var(--frost-white);
+            text-decoration: none;
+            opacity: 0.7;
+            transition: all 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 1;
+            color: var(--gold);
+        }
+
+        .breadcrumb .separator {
+            opacity: 0.5;
+        }
+
+        .breadcrumb .current {
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .quick-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--frost-white);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+            opacity: 0.8;
+        }
+
+        .quick-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+
+        .quick-link i {
+            font-size: 0.8rem;
+        }
+
+        /* ===== LMS Layout ===== */
+        .lms-container {
+            display: flex;
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            width: 380px;
+            background: var(--sidebar-dark);
+            color: var(--pure-white);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            right: 0;
+            top: 60px;
+            bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            color: var(--pure-white);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-logo .logo-icon {
+            width: 40px; height: 40px;
+            background: var(--gradient-gold);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--sidebar-dark);
+        }
+
+        .sidebar-logo .logo-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .sidebar-logo .logo-text span { color: var(--gold); }
+
+        .course-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .course-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .progress-label { color: rgba(255, 255, 255, 0.8); }
+        .progress-percent { color: var(--gold); font-weight: 600; }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-gold);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* Syllabus */
+        .syllabus {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .syllabus::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .syllabus::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .syllabus::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        /* Module Accordion */
+        .module {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .module-header {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        .module-header:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .module-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .module-number {
+            width: 28px; height: 28px;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .module-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .module-toggle {
+            color: rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s;
+        }
+
+        .module.open .module-toggle {
+            transform: rotate(180deg);
+        }
+
+        .module-lessons {
+            display: none;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .module.open .module-lessons {
+            display: block;
+        }
+
+        /* Lesson Item */
+        .lesson-item {
+            padding: 0.9rem 1.5rem 0.9rem 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-right: 3px solid transparent;
+        }
+
+        .lesson-item:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .lesson-item.active {
+            background: var(--sidebar-active);
+            border-right-color: var(--gold);
+        }
+
+        .lesson-item.completed .lesson-status {
+            background: var(--success);
+            color: white;
+        }
+
+        .lesson-status {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            flex-shrink: 0;
+        }
+
+        .lesson-item.active .lesson-status {
+            background: var(--gold);
+            color: var(--sidebar-dark);
+        }
+
+        .lesson-title {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            flex: 1;
+        }
+
+        .lesson-item.active .lesson-title {
+            color: var(--pure-white);
+            font-weight: 500;
+        }
+
+        .lesson-duration {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* ===== Main Content ===== */
+        .main-content {
+            flex: 1;
+            margin-right: 380px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: var(--pure-white);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .current-lesson-info h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
+        }
+
+        .current-lesson-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            background: var(--pure-white);
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: var(--light-gray);
+            border-color: var(--dusty-aqua);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.primary {
+            background: var(--gradient-gold);
+            border: none;
+            color: var(--sidebar-dark);
+        }
+
+        .nav-btn.primary:hover {
+            box-shadow: 0 4px 15px var(--gold-glow);
+        }
+
+        /* Video Area */
+        .video-section {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .video-wrapper {
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            position: relative;
+            padding-top: 56.25%;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--sidebar-dark) 100%);
+            color: var(--pure-white);
+        }
+
+        .video-placeholder i {
+            font-size: 4rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .video-placeholder p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Thumbnail Preview (Fast Load) */
+        .video-thumbnail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: none;
+        }
+
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-thumbnail .play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--sidebar-dark);
+            box-shadow: 0 8px 30px var(--gold-glow);
+            transition: all 0.3s;
+        }
+
+        .video-thumbnail:hover .play-btn {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 12px 40px var(--gold-glow);
+        }
+
+        .video-thumbnail .play-btn i {
+            margin-right: -4px;
+        }
+
+        /* Loading Spinner */
+        .video-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--sidebar-dark) 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: var(--pure-white);
+        }
+
+        .video-loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(212, 175, 55, 0.2);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== Bottom Video Navigation ===== */
+        .video-nav-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--pure-white);
+            border-radius: 12px;
+            margin-top: 1rem;
+            padding: 0.8rem 1.2rem;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+            gap: 0.8rem;
+        }
+
+        .video-nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1.4rem;
+            border-radius: 10px;
+            border: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+
+        .video-nav-btn.prev {
+            background: var(--frost-white);
+            color: var(--deep-petrol);
+        }
+
+        .video-nav-btn.prev:hover:not(:disabled) {
+            background: var(--dusty-aqua);
+            color: white;
+        }
+
+        .video-nav-btn.next {
+            background: var(--gradient-gold);
+            color: var(--sidebar-dark);
+        }
+
+        .video-nav-btn.next:hover:not(:disabled) {
+            box-shadow: 0 4px 18px var(--gold-glow);
+            transform: translateY(-1px);
+        }
+
+        .video-nav-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .video-nav-btn .btn-label {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .video-nav-btn .btn-sublabel {
+            font-size: 0.75rem;
+            font-weight: 400;
+            opacity: 0.7;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .video-nav-counter {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .video-nav-counter strong {
+            color: var(--deep-petrol);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .video-nav-bar {
+                padding: 0.6rem;
+                gap: 0.4rem;
+                border-radius: 10px;
+                margin-top: 0.5rem;
+            }
+
+            .video-nav-btn {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.85rem;
+                gap: 0.4rem;
+            }
+
+            .video-nav-btn .btn-sublabel {
+                display: none;
+            }
+
+            .video-nav-counter {
+                font-size: 0.75rem;
+            }
+
+            .video-nav-counter strong {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Tabs Section */
+        .tabs-section {
+            background: var(--pure-white);
+            border-radius: 16px;
+            margin-top: 1.5rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .tabs-header {
+            display: flex;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .tab-btn {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-dark);
+        }
+
+        .tab-btn.active {
+            color: var(--dusty-aqua);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            height: 3px;
+            background: var(--gradient-gold);
+        }
+
+        .tab-btn .lock-badge {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .tabs-content {
+            padding: 2rem;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Tab 1: About */
+        .lesson-description h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--deep-petrol);
+        }
+
+        .lesson-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .lesson-tag {
+            padding: 0.4rem 0.8rem;
+            background: var(--frost-white);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--muted-teal);
+        }
+
+        /* Tab 2: Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .resource-card {
+            padding: 1.5rem;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .resource-card:hover {
+            border-color: var(--dusty-aqua);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .resource-card.locked {
+            opacity: 0.7;
+            background: var(--light-gray);
+        }
+
+        .resource-icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, var(--dusty-aqua) 0%, var(--muted-teal) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        .resource-card.locked .resource-icon {
+            background: var(--text-muted);
+        }
+
+        .resource-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+            color: var(--text-dark);
+        }
+
+        .resource-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Tab 3: AI Assistant */
+        .ai-chat-placeholder {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .ai-avatar {
+            width: 100px; height: 100px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: var(--sidebar-dark);
+        }
+
+        .ai-chat-placeholder h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--deep-petrol);
+        }
+
+        .ai-chat-placeholder p {
+            color: var(--text-muted);
+            max-width: 400px;
+            margin: 0 auto 1.5rem;
+        }
+
+        /* AI Chat Interface */
+        .ai-chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            border: 1px solid rgba(0, 59, 70, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--frost-white);
+        }
+
+        .ai-chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: var(--deep-petrol);
+            color: white;
+        }
+
+        .ai-chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .ai-chat-avatar-small {
+            width: 36px; height: 36px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--deep-petrol);
+        }
+
+        .ai-chat-header h4 {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .ai-chat-status {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .ai-chat-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .ai-lesson-badge {
+            background: rgba(212, 175, 55, 0.2);
+            color: #D4AF37;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ai-remaining {
+            opacity: 0.8;
+            font-size: 0.75rem;
+        }
+
+        .ai-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .ai-message {
+            display: flex;
+            gap: 0.5rem;
+            max-width: 85%;
+            animation: fadeInMsg 0.3s ease;
+        }
+
+        @keyframes fadeInMsg {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-message-bot {
+            align-self: flex-start;
+        }
+
+        .ai-message-user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .ai-message-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .ai-message-bot .ai-message-avatar {
+            background: var(--gradient-gold);
+            color: var(--deep-petrol);
+        }
+
+        .ai-message-user .ai-message-avatar {
+            background: var(--deep-petrol);
+            color: white;
+        }
+
+        .ai-message-bubble {
+            padding: 0.65rem 0.9rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .ai-message-bot .ai-message-bubble {
+            background: white;
+            color: var(--deep-petrol);
+            border: 1px solid rgba(0, 59, 70, 0.08);
+            border-top-right-radius: 4px;
+        }
+
+        .ai-message-user .ai-message-bubble {
+            background: var(--deep-petrol);
+            color: white;
+            border-top-left-radius: 4px;
+        }
+
+        .ai-chat-input-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-top: 1px solid rgba(0, 59, 70, 0.1);
+            background: white;
+        }
+
+        #aiInput {
+            flex: 1;
+            border: 1px solid rgba(0, 59, 70, 0.15);
+            border-radius: 20px;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            font-family: 'Heebo', sans-serif;
+            resize: none;
+            max-height: 100px;
+            outline: none;
+            direction: rtl;
+        }
+
+        #aiInput:focus {
+            border-color: var(--dusty-aqua);
+            box-shadow: 0 0 0 2px rgba(47, 133, 146, 0.15);
+        }
+
+        .ai-send-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: var(--gradient-gold);
+            color: var(--deep-petrol);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .ai-send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .ai-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ai-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 1rem 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .ai-suggestion-btn {
+            background: rgba(47, 133, 146, 0.08);
+            border: 1px solid rgba(47, 133, 146, 0.25);
+            border-radius: 18px;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            font-family: 'Heebo', sans-serif;
+            color: var(--muted-teal);
+            cursor: pointer;
+            transition: all 0.2s;
+            direction: rtl;
+        }
+
+        .ai-suggestion-btn:hover {
+            background: rgba(47, 133, 146, 0.15);
+            border-color: var(--dusty-aqua);
+            color: var(--deep-petrol);
+        }
+
+        .ai-series-input {
+            padding: 0.5rem 1rem 0.8rem;
+            direction: rtl;
+        }
+
+        .ai-series-label {
+            font-size: 0.8rem;
+            color: var(--muted-teal);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .ai-series-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .ai-series-row input {
+            flex: 1;
+            border: 1px solid rgba(47, 133, 146, 0.25);
+            border-radius: 18px;
+            padding: 0.45rem 1rem;
+            font-size: 0.85rem;
+            font-family: 'Heebo', sans-serif;
+            direction: rtl;
+            outline: none;
+        }
+
+        .ai-series-row input:focus {
+            border-color: var(--dusty-aqua);
+            box-shadow: 0 0 0 2px rgba(47, 133, 146, 0.15);
+        }
+
+        .ai-series-go {
+            background: var(--gradient-gold);
+            color: var(--deep-petrol);
+            border: none;
+            border-radius: 18px;
+            padding: 0.45rem 1.2rem;
+            font-size: 0.85rem;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .ai-series-go:hover {
+            transform: scale(1.05);
+        }
+
+        /* Typing indicator */
+        .ai-typing-indicator .ai-message-bubble {
+            display: flex;
+            gap: 4px;
+            padding: 0.8rem 1.2rem;
+        }
+
+        .ai-typing-dot {
+            width: 8px; height: 8px;
+            background: var(--dusty-aqua);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .ai-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .ai-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40% { transform: translateY(-6px); opacity: 1; }
+        }
+
+        .ai-rate-limit-msg {
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            margin: 0.5rem;
+        }
+
+        .unlock-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--gradient-gold);
+            color: var(--sidebar-dark);
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .unlock-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--gold-glow);
+        }
+
+        /* ===== Registration Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 43, 51, 0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--pure-white);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 2.2rem;
+            left: 1.5rem;
+            width: 36px;
+            height: 36px;
+            background: var(--light-gray);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            background: var(--border-light);
+            color: var(--text-dark);
+        }
+
+        .modal-icon {
+            width: 80px; height: 80px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: var(--sidebar-dark);
+        }
+
+        .modal-box h2 {
+            color: var(--deep-petrol);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .modal-box .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .benefits-list {
+            text-align: right;
+            margin: 1.5rem 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .benefits-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .benefits-list li i { color: var(--gold); }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+            text-align: right;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--dusty-aqua);
+            box-shadow: 0 0 0 4px rgba(47, 133, 146, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-gold);
+            color: var(--sidebar-dark);
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px var(--gold-glow);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success-message.show { display: block; }
+
+        .success-message .check-icon {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        /* ===== Auth Component Styles ===== */
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.8rem;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .auth-tab:hover {
+            color: var(--dusty-aqua);
+        }
+
+        .auth-tab.active {
+            color: var(--deep-petrol);
+        }
+
+        .auth-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-gold);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .auth-panel {
+            display: none;
+        }
+
+        .auth-panel.active {
+            display: block;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--pure-white);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .google-btn:hover {
+            border-color: var(--dusty-aqua);
+            background: var(--light-gray);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .google-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .google-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-light);
+        }
+
+        .auth-divider span {
+            padding: 0 1rem;
+        }
+
+        .email-toggle-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: none;
+            border: 2px solid var(--dusty-aqua);
+            border-radius: 12px;
+            color: var(--dusty-aqua);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .email-toggle-btn:hover {
+            background: var(--dusty-aqua);
+            color: var(--pure-white);
+        }
+
+        .auth-form-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .auth-form-actions button {
+            flex: 1;
+            padding: 0.9rem;
+            border-radius: 50px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-btn-primary {
+            background: var(--gradient-gold);
+            border: none;
+            color: var(--sidebar-dark);
+        }
+
+        .auth-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--gold-glow);
+        }
+
+        .auth-btn-secondary {
+            background: none;
+            border: 2px solid var(--dusty-aqua);
+            color: var(--dusty-aqua);
+        }
+
+        .auth-btn-secondary:hover {
+            background: var(--dusty-aqua);
+            color: var(--pure-white);
+        }
+
+        .auth-btn-primary:disabled,
+        .auth-btn-secondary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-error {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+            text-align: right;
+        }
+
+        .auth-error.show {
+            display: block;
+        }
+
+        .back-to-social {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .back-to-social button {
+            background: none;
+            border: none;
+            color: var(--dusty-aqua);
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .back-to-social button:hover {
+            color: var(--deep-petrol);
+        }
+
+        /* Questionnaire Modal */
+        .questionnaire-modal {
+            max-width: 520px;
+            max-height: 85vh;
+            overflow-y: auto;
+            text-align: right;
+        }
+
+        .questionnaire-modal h2,
+        .questionnaire-modal .subtitle {
+            text-align: center;
+        }
+
+        .questionnaire-modal .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .questionnaire-modal label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--deep-petrol);
+            margin-bottom: 0.4rem;
+        }
+
+        .questionnaire-modal select,
+        .questionnaire-modal textarea,
+        .questionnaire-modal input[type="tel"] {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            direction: rtl;
+        }
+
+        .questionnaire-modal select:focus,
+        .questionnaire-modal textarea:focus,
+        .questionnaire-modal input[type="tel"]:focus {
+            outline: none;
+            border-color: var(--dusty-aqua);
+        }
+
+        .questionnaire-modal input[type="tel"] {
+            direction: ltr;
+            text-align: right;
+        }
+
+        .questionnaire-modal .auth-form-actions {
+            margin-top: 1.5rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: var(--sidebar-dark);
+            color: var(--pure-white);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(150%);
+            transition: transform 0.4s ease;
+            z-index: 2000;
+            max-width: 400px;
+        }
+
+        .toast.show { transform: translateY(0); }
+
+        .toast-icon {
+            width: 45px; height: 45px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--sidebar-dark);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .toast-content h4 { margin-bottom: 0.2rem; font-size: 1rem; }
+        .toast-content p { font-size: 0.85rem; opacity: 0.9; }
+
+        .toast-btn {
+            background: var(--gold);
+            color: var(--sidebar-dark);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .toast-btn:hover { transform: scale(1.05); }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--frost-white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .toast-close:hover { opacity: 1; }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 43, 51, 0.7);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* Mobile Toggle */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 56px; height: 56px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            border: none;
+            color: var(--sidebar-dark);
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 200;
+            box-shadow: 0 4px 20px var(--gold-glow);
+            transition: all 0.3s;
+        }
+
+        .mobile-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .mobile-toggle.active {
+            background: var(--sidebar-dark);
+            color: var(--gold);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .top-nav {
+                right: 0;
+            }
+
+            .sidebar {
+                transform: translateX(100%);
+                top: 60px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-right: 0;
+            }
+
+            .mobile-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .quick-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Top Nav - compact */
+            .top-nav {
+                padding: 0 0.8rem;
+                height: 50px;
+            }
+
+            .back-to-site {
+                padding: 0.4rem 0.7rem;
+                font-size: 0.8rem;
+            }
+
+            .breadcrumb {
+                display: none;
+            }
+
+            /* LMS Layout */
+            .lms-container {
+                padding-top: 50px;
+                flex-direction: column;
+            }
+
+            /* Sidebar - fullscreen overlay */
+            .sidebar {
+                width: 100%;
+                top: 50px;
+                bottom: 0;
+            }
+
+            .sidebar-header {
+                padding: 1rem;
+            }
+
+            .course-title {
+                font-size: 1.1rem;
+            }
+
+            .sidebar-logo {
+                margin-bottom: 0.5rem;
+            }
+
+            .module-header {
+                padding: 0.8rem 1rem;
+            }
+
+            .lesson-item {
+                padding: 0.7rem 1rem 0.7rem 1.5rem;
+            }
+
+            /* Main Content */
+            .top-bar {
+                padding: 0.8rem;
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+            }
+
+            .current-lesson-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .current-lesson-info h2 {
+                font-size: 0.9rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .current-lesson-info p {
+                font-size: 0.75rem;
+            }
+
+            .top-bar-actions {
+                gap: 0.4rem;
+                flex-shrink: 0;
+            }
+
+            .nav-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .nav-btn span {
+                display: none;
+            }
+
+            /* Video */
+            .video-section {
+                padding: 0.5rem;
+            }
+
+            .video-wrapper {
+                border-radius: 10px;
+            }
+
+            .video-thumbnail .play-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            /* Tabs */
+            .tabs-section {
+                border-radius: 10px;
+                margin-top: 0.5rem;
+            }
+
+            .tabs-header {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab-btn {
+                padding: 0.7rem 0.8rem;
+                white-space: nowrap;
+                font-size: 0.8rem;
+                gap: 0.3rem;
+            }
+
+            .tabs-content {
+                padding: 1rem;
+            }
+
+            .lesson-description h3 {
+                font-size: 1.1rem;
+            }
+
+            .lesson-description p {
+                font-size: 0.9rem;
+            }
+
+            /* Resources Grid - single column */
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .resource-card {
+                padding: 1rem;
+            }
+
+            /* AI Section */
+            .ai-chat-placeholder {
+                padding: 1.5rem 1rem;
+            }
+
+            .ai-avatar {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+
+            .ai-chat-placeholder h3 {
+                font-size: 1.2rem;
+            }
+
+            .ai-chat-container {
+                height: 400px;
+                border-radius: 8px;
+            }
+
+            .ai-chat-header {
+                padding: 0.6rem 0.75rem;
+            }
+
+            .ai-lesson-badge {
+                max-width: 100px;
+                font-size: 0.65rem;
+            }
+
+            .ai-message {
+                max-width: 90%;
+            }
+
+            .ai-message-bubble {
+                font-size: 0.85rem;
+            }
+
+            /* Modal - mobile friendly */
+            .modal-box {
+                padding: 1.5rem;
+                border-radius: 20px;
+                width: 95%;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .modal-box h2 {
+                font-size: 1.4rem;
+            }
+
+            .modal-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+
+            .modal-close {
+                top: 1rem;
+                left: 1rem;
+                width: 40px;
+                height: 40px;
+            }
+
+            .google-btn {
+                font-size: 0.95rem;
+                padding: 0.9rem;
+            }
+
+            /* Toast - full width */
+            .toast {
+                left: 0.5rem;
+                right: 0.5rem;
+                bottom: 5rem;
+                max-width: none;
+                border-radius: 14px;
+            }
+
+            /* Mobile toggle - above toast */
+            .mobile-toggle {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="top-nav-right">
+            <a href="../index.html" class="back-to-site">
+                <i class="fa-solid fa-arrow-right"></i>
+                חזרה לאתר
+            </a>
+            <div class="breadcrumb">
+                <a href="../index.html">דף הבית</a>
+                <span class="separator">/</span>
+                <span class="current">קורס NLP חינמי</span>
+            </div>
+        </div>
+        <div class="top-nav-left">
+            <div class="quick-links">
+                <a href="training.html" class="quick-link">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    הכשרה מקצועית
+                </a>
+                <a href="project-lobby.html" class="quick-link">
+                    <i class="fa-solid fa-heart"></i>
+                    מיזם חברתי
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="lms-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html" class="sidebar-logo">
+                    <div class="logo-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                    <div class="logo-text">בית <span>המטפלים</span></div>
+                </a>
+                <h1 class="course-title">קורס NLP - יסודות ומעשה</h1>
+                <div class="course-meta">
+                    <span><i class="fa-solid fa-video"></i> 51 שיעורים</span>
+                    <span><i class="fa-solid fa-clock"></i> 7 מודולים</span>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-header">
+                    <span class="progress-label">התקדמות בקורס</span>
+                    <span class="progress-percent" id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <nav class="syllabus" id="syllabus">
+                <!-- Modules populated by JS -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="current-lesson-info">
+                    <h2 id="currentLessonTitle">בחרו שיעור להתחלה</h2>
+                    <p id="currentLessonMeta">מודול 1 • חלק 1</p>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="nav-btn" id="prevLessonBtn" onclick="navigateLesson(-1)" disabled>
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span>הקודם</span>
+                    </button>
+                    <button class="nav-btn primary" id="nextLessonBtn" onclick="navigateLesson(1)">
+                        <span>הבא</span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="video-section">
+                <div class="video-wrapper">
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        <i class="fa-solid fa-play-circle"></i>
+                        <p>בחרו שיעור מהתפריט כדי להתחיל</p>
+                    </div>
+                    <div class="video-thumbnail" id="videoThumbnail" onclick="playVideo()">
+                        <img id="thumbnailImg" src="" alt="Video thumbnail">
+                        <div class="play-btn">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="video-loading" id="videoLoading">
+                        <div class="spinner"></div>
+                        <p>טוען את הסרטון...</p>
+                    </div>
+                    <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="display: none;"></iframe>
+                </div>
+
+                <!-- Bottom Video Navigation -->
+                <div class="video-nav-bar" id="videoNavBar">
+                    <button class="video-nav-btn next" id="bottomNextBtn" onclick="navigateLesson(1)">
+                        <span class="btn-label">
+                            <span>השיעור הבא</span>
+                            <span class="btn-sublabel" id="nextLessonName"></span>
+                        </span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div class="video-nav-counter">
+                        שיעור <strong id="lessonCounter">1</strong> מתוך <strong id="lessonTotal">51</strong>
+                    </div>
+                    <button class="video-nav-btn prev" id="bottomPrevBtn" onclick="navigateLesson(-1)">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span class="btn-label">
+                            <span>הקודם</span>
+                            <span class="btn-sublabel" id="prevLessonName"></span>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="tabs-section">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" onclick="switchTab('about')">
+                            <i class="fa-solid fa-info-circle"></i>
+                            אודות השיעור
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('resources')" id="resourcesTab">
+                            <i class="fa-solid fa-download"></i>
+                            חומרי עזר
+                            <span class="lock-badge" id="resourcesLock">🔒</span>
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('ai')" id="aiTab">
+                            <i class="fa-solid fa-robot"></i>
+                            העוזר האישי
+                            <span class="lock-badge" id="aiLock">🔒</span>
+                        </button>
+                    </div>
+
+                    <div class="tabs-content">
+                        <!-- About Tab -->
+                        <div class="tab-panel active" id="aboutPanel">
+                            <div class="lesson-description">
+                                <h3 id="lessonDescTitle">ברוכים הבאים לקורס NLP</h3>
+                                <p id="lessonDescText">
+                                    קורס זה יספק לכם את הבסיס המוצק ביותר בתחום ה-NLP. תלמדו טכניקות מעשיות שתוכלו ליישם מיד בחייכם האישיים והמקצועיים.
+                                </p>
+                                <p>
+                                    הקורס כולל 7 מודולים מקיפים עם 51 שיעורי וידאו, תרגילים מעשיים וחומרי לימוד להורדה.
+                                </p>
+                                <div class="lesson-tags">
+                                    <span class="lesson-tag">NLP</span>
+                                    <span class="lesson-tag">תקשורת</span>
+                                    <span class="lesson-tag">התפתחות אישית</span>
+                                    <span class="lesson-tag">טיפול</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resources Tab -->
+                        <div class="tab-panel" id="resourcesPanel">
+                            <div class="resources-grid">
+                                <div class="resource-card" id="workbookCard" onclick="handleResource('workbook')">
+                                    <div class="resource-icon">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </div>
+                                    <div class="resource-info">
+                                        <h4>חוברת עבודה</h4>
+                                        <p>PDF מקיף עם תרגילים ושאלות</p>
+                                    </div>
+                                </div>
+                                <div class="resource-card" id="summaryCard" onclick="handleResource('summary')">
+                                    <div class="resource-icon">
+                                        <i class="fa-solid fa-list-check"></i>
+                                    </div>
+                                    <div class="resource-info">
+                                        <h4>סיכום השיעור</h4>
+                                        <p>נקודות מפתח לזכור</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Tab -->
+                        <div class="tab-panel" id="aiPanel">
+                            <!-- Locked state (not authenticated) -->
+                            <div class="ai-chat-placeholder" id="aiLocked">
+                                <div class="ai-avatar">
+                                    <i class="fa-solid fa-gift"></i>
+                                </div>
+                                <h3>הירשמו בחינם וקבלו:</h3>
+                                <ul style="list-style: none; padding: 0; margin: 12px 0; text-align: right; font-size: 1.05em; line-height: 2;">
+                                    <li>🤖 <strong>מורה AI אישי</strong> — שילווה אתכם לאורך הקורס</li>
+                                    <li>📖 <strong>חוברת עבודה + סיכומים</strong> — להורדה חינם</li>
+                                    <li>💾 <strong>שמירת התקדמות</strong> — תמשיכו מאיפה שעצרתם</li>
+                                </ul>
+                                <button class="unlock-btn" id="unlockAiBtn" onclick="handleLockedAction('ai')" style="font-size: 1.1em; padding: 12px 32px;">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                    הרשמה חינם — 10 שניות
+                                </button>
+                            </div>
+                            <!-- Chat state (authenticated) -->
+                            <div class="ai-chat-container" id="aiChat" style="display:none;">
+                                <div class="ai-chat-header">
+                                    <div class="ai-chat-header-info">
+                                        <div class="ai-chat-avatar-small">
+                                            <i class="fa-solid fa-robot"></i>
+                                        </div>
+                                        <div>
+                                            <h4>המורה של NLP</h4>
+                                            <span class="ai-chat-status">מוכן לעזור</span>
+                                        </div>
+                                    </div>
+                                    <div class="ai-chat-meta">
+                                        <span class="ai-lesson-badge" id="aiLessonBadge"></span>
+                                        <span class="ai-remaining" id="aiRemaining" title="הודעות שנותרו היום"></span>
+                                    </div>
+                                </div>
+                                <div class="ai-chat-messages" id="aiMessages">
+                                    <div class="ai-message ai-message-bot">
+                                        <div class="ai-message-avatar"><i class="fa-solid fa-robot"></i></div>
+                                        <div class="ai-message-bubble">
+                                            שלום! 👋 אני המורה שלכם לקורס NLP. שאלו אותי כל שאלה על החומר — טכניקות, מושגים, תרגולים. אני כאן כדי לעזור!
+                                        </div>
+                                    </div>
+                                    <div class="ai-suggestions" id="aiSuggestions">
+                                        <button class="ai-suggestion-btn" onclick="handleAiSuggestion()">💡 מה אתה יודע לעשות?</button>
+                                        <button class="ai-suggestion-btn" onclick="showSeriesInput()">🎬 תרגול NLP דרך סדרה/סרט</button>
+                                    </div>
+                                    <div class="ai-series-input" id="aiSeriesInput" style="display:none;">
+                                        <span class="ai-series-label">שם הסדרה או הסרט:</span>
+                                        <div class="ai-series-row">
+                                            <input type="text" id="aiSeriesName" placeholder="למשל: שוברים את הכלים, פאודה, פולפ פיקשן..." maxlength="100" />
+                                            <button class="ai-series-go" onclick="startSeriesPractice()">יאללה!</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ai-chat-input-area">
+                                    <textarea id="aiInput" placeholder="שאלו שאלה על NLP..." rows="1" maxlength="500"></textarea>
+                                    <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMessage()">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Mobile Toggle -->
+    <button class="mobile-toggle" onclick="toggleSidebar()">
+        <i class="fa-solid fa-list"></i>
+    </button>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="registrationModal" onclick="handleOverlayClick(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()" aria-label="סגור">
+                ✕
+            </button>
+            <div class="modal-icon">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <h2>קבלו גישה מלאה בחינם!</h2>
+            <p class="subtitle">התחברו כדי לקבל גישה לכל התכנים הבונוס</p>
+
+            <ul class="benefits-list">
+                <li><i class="fa-solid fa-check-circle"></i> חוברת עבודה PDF להורדה</li>
+                <li><i class="fa-solid fa-check-circle"></i> מורה AI אישי לתרגול</li>
+                <li><i class="fa-solid fa-check-circle"></i> שמירת התקדמות אוטומטית</li>
+            </ul>
+
+            <!-- Auth Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('social')" id="socialTab">
+                    <i class="fa-solid fa-bolt"></i> התחברות מהירה
+                </button>
+                <button class="auth-tab" onclick="switchAuthTab('email')" id="emailTab">
+                    <i class="fa-solid fa-envelope"></i> אימייל וסיסמה
+                </button>
+            </div>
+
+            <!-- Error Message -->
+            <div class="auth-error" id="authError"></div>
+
+            <!-- Social Login Panel -->
+            <div class="auth-panel active" id="socialPanel">
+                <button class="google-btn" onclick="signInWithGoogle()" id="googleBtn">
+                    <svg viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    המשך באמצעות Google
+                </button>
+
+                <div class="auth-divider">
+                    <span>או</span>
+                </div>
+
+                <button class="email-toggle-btn" onclick="switchAuthTab('email')">
+                    <i class="fa-solid fa-envelope"></i>
+                    המשך באמצעות אימייל
+                </button>
+            </div>
+
+            <!-- Email Login Panel -->
+            <div class="auth-panel" id="emailPanel">
+                <form id="emailAuthForm" onsubmit="handleEmailAuth(event)">
+                    <div class="form-group">
+                        <input type="text" id="authName" placeholder="שם מלא (להרשמה)" autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="authEmail" placeholder="אימייל" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="authPassword" placeholder="סיסמה (מינימום 6 תווים)" required minlength="6" autocomplete="current-password">
+                    </div>
+                    <div class="auth-form-actions">
+                        <button type="submit" class="auth-btn-primary" id="loginBtn" data-action="login">
+                            <i class="fa-solid fa-sign-in-alt"></i> התחבר
+                        </button>
+                        <button type="button" class="auth-btn-secondary" id="signupBtn" onclick="handleSignup()">
+                            <i class="fa-solid fa-user-plus"></i> הירשם
+                        </button>
+                    </div>
+                </form>
+
+                <div class="back-to-social">
+                    <button onclick="switchAuthTab('social')">
+                        <i class="fa-solid fa-arrow-right"></i> חזרה להתחברות מהירה
+                    </button>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                <div class="check-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3>התחברתם בהצלחה!</h3>
+                <p>כעת יש לכם גישה מלאה לכל התכנים</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questionnaire Modal -->
+    <div class="modal-overlay" id="questionnaireModal" onclick="handleQuestionnaireOverlayClick(event)">
+        <div class="modal-box questionnaire-modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="skipQuestionnaire()" aria-label="סגור">✕</button>
+            <div class="modal-icon">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <h2>התאימו את המורה AI שלכם</h2>
+            <p class="subtitle">מלאו כדי שהעוזר האישי ידבר אליכם ברמה שלכם — מתחיל או מתקדם, הוא יתאים את עצמו</p>
+
+            <form id="questionnaireForm" onsubmit="submitQuestionnaire(event)">
+                <div class="form-group">
+                    <label>מה גרם לך להתחיל את הקורס?</label>
+                    <textarea id="qMotivation" rows="2" placeholder="סקרנות, רצון ללמוד, המלצה..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>מה הרקע שלך ב-NLP?</label>
+                    <select id="qExperience">
+                        <option value="">בחר...</option>
+                        <option value="beginner">מתחיל — לא למדתי NLP בעבר</option>
+                        <option value="intermediate">בינוני — למדתי קורס בסיסי</option>
+                        <option value="advanced">מתקדם — בעל ניסיון וידע</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>מעוניין/ת בהסמכה בתשלום?</label>
+                    <select id="qCertification">
+                        <option value="">בחר...</option>
+                        <option value="yes">כן, מעוניין/ת!</option>
+                        <option value="maybe">אולי, תלוי בפרטים</option>
+                        <option value="no">לא כרגע</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>מעדיף/ה למידה...</label>
+                    <select id="qLearning">
+                        <option value="">בחר...</option>
+                        <option value="online">אונליין</option>
+                        <option value="in_person">פרונטלי</option>
+                        <option value="both">שניהם</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>איך שמעת עלינו?</label>
+                    <select id="qSource">
+                        <option value="">בחר...</option>
+                        <option value="facebook">פייסבוק</option>
+                        <option value="instagram">אינסטגרם</option>
+                        <option value="friend">חבר/ה</option>
+                        <option value="google">חיפוש בגוגל</option>
+                        <option value="other">אחר</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>טלפון ליצירת קשר (אופציונלי)</label>
+                    <input type="tel" id="qPhone" placeholder="050-1234567" dir="ltr">
+                </div>
+                <div class="form-group">
+                    <label>משהו נוסף? (אופציונלי)</label>
+                    <textarea id="qNotes" rows="2" placeholder="הערות, שאלות..."></textarea>
+                </div>
+                <div class="auth-form-actions">
+                    <button type="submit" class="auth-btn-primary" id="qSubmitBtn">
+                        <i class="fa-solid fa-paper-plane"></i> שלח
+                    </button>
+                    <button type="button" class="auth-btn-secondary" onclick="skipQuestionnaire()">
+                        <i class="fa-solid fa-forward"></i> דלג
+                    </button>
+                </div>
+            </form>
+
+            <div class="success-message" id="qSuccessMessage" style="display:none;">
+                <div class="check-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3>מעולה! המורה AI שלך מותאם אישית</h3>
+                <p>מעכשיו התשובות יהיו ברמה שלך</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast" role="alert" aria-live="polite">
+        <div class="toast-icon">
+            <i class="fa-solid fa-gift"></i>
+        </div>
+        <div class="toast-content">
+            <h4>רוצים לקבל עוד?</h4>
+            <p>חוברת עבודה + מורה AI אישי בחינם</p>
+        </div>
+        <button class="toast-btn" onclick="openModal()">לקבלה</button>
+        <button class="toast-close" onclick="hideToast()">
+            <i class="fa-solid fa-times"></i>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/marketing-tools.js"></script>
+    <script>
+        // ===== Configuration =====
+        const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+
+        // ===== Course Data (7 Modules, 51 Videos) =====
+        const modules = [
+            {
+                id: 1,
+                title: 'מבוא ל-NLP ויסודות',
+                lessons: [
+                    { id: 'HdJTrqV-8kw', title: 'פתיחה והיכרות', duration: '12:30' },
+                    { id: 'I4r3oERlZpc', title: 'עקרונות יסוד', duration: '15:45' },
+                    { id: 'zGuxyfbYdUY', title: 'מודל התקשורת', duration: '18:20' },
+                    { id: 'fo90wrXPJjQ', title: 'מערכות ייצוג', duration: '14:10' },
+                    { id: 'kccllbuObhs', title: 'קריאת שפת גוף', duration: '16:55' },
+                    { id: 'ahN0Q2wGVa0', title: 'בניית ראפור', duration: '13:40' },
+                    { id: 'Nt8MK8CNvYo', title: 'התאמה והובלה', duration: '17:25' },
+                    { id: '-PMCuz1jiMk', title: 'סיכום המודול', duration: '10:15' }
+                ]
+            },
+            {
+                id: 2,
+                title: 'עמדות תפיסה ומערכות יחסים',
+                lessons: [
+                    { id: '3u52ghUdM9E', title: 'שלוש עמדות התפיסה', duration: '14:20' },
+                    { id: 'lfDEJFV3EO0', title: 'מבט מעיני האחר', duration: '16:35' },
+                    { id: 'ldz6Kb9hqW8', title: 'עמדת הצופה', duration: '12:50' },
+                    { id: '-qk4et9hKCc', title: 'תרגול מעשי', duration: '18:15' },
+                    { id: 'ZxpaiqBCN-A', title: 'יישום במערכות יחסים', duration: '15:40' },
+                    { id: 'NtzzbQKPfuQ', title: 'סיכום המודול', duration: '11:25' }
+                ]
+            },
+            {
+                id: 3,
+                title: 'שאלות עוצמתיות והצבת מטרות',
+                lessons: [
+                    { id: '5EEb8n1rkk8', title: 'כוחה של שאלה טובה', duration: '13:45' },
+                    { id: 'JlRGFcHIlaY', title: 'מטא-מודל בשפה', duration: '17:20' },
+                    { id: '9vOt4qMDErY', title: 'שאלות מעמיקות', duration: '15:10' },
+                    { id: 'M5WYHElp77Y', title: 'הגדרת מטרות SMART', duration: '16:35' },
+                    { id: '_8wvtMUInNg', title: 'Well-Formed Outcomes', duration: '14:50' },
+                    { id: 'HfeTbx94Z_A', title: 'תרגול מעשי', duration: '18:25' },
+                    { id: 'wxswFMy0FFs', title: 'סיכום המודול', duration: '10:40' }
+                ]
+            },
+            {
+                id: 4,
+                title: 'השפה של המוח ומערכות ייצוג',
+                lessons: [
+                    { id: 'bYgv5dLr5DU', title: 'איך המוח מעבד מידע', duration: '15:30' },
+                    { id: 'rfeUPA9HcU4', title: 'מערכת ויזואלית', duration: '13:45' },
+                    { id: 'deckGQrRYd4', title: 'מערכת אודיטורית', duration: '14:20' },
+                    { id: 'cSGrhFYSDmE', title: 'מערכת קינסטטית', duration: '16:10' },
+                    { id: 'gG-3I_TcHe4', title: 'זיהוי מערכת מועדפת', duration: '17:35' },
+                    { id: 'b_b4hhclmR8', title: 'התאמת תקשורת', duration: '15:50' },
+                    { id: 'itbteM8UjBE', title: 'סיכום המודול', duration: '11:15' }
+                ]
+            },
+            {
+                id: 5,
+                title: 'צרכים אנושיים ומבנה האישיות',
+                lessons: [
+                    { id: 'BNBPxr-Qec0', title: 'ששת הצרכים הבסיסיים', duration: '16:40' },
+                    { id: 'h7b8sX0z4nw', title: 'וודאות ומגוון', duration: '14:25' },
+                    { id: 'mphxQlNsGYM', title: 'משמעות וחיבור', duration: '15:50' },
+                    { id: 'Y8ulYYg5XDk', title: 'צמיחה ותרומה', duration: '17:15' },
+                    { id: 'dNKcCwvjVWk', title: 'מבנה האישיות', duration: '18:30' },
+                    { id: 'Gp7gT4TC1n8', title: 'עבודה עם חלקים', duration: '16:45' },
+                    { id: '5SDIvzco0K4', title: 'סיכום המודול', duration: '12:10' }
+                ]
+            },
+            {
+                id: 6,
+                title: 'מסגור, שליטה ברגשות ועוגנים',
+                lessons: [
+                    { id: 'EeGfP30AiLs', title: 'כוח המסגור', duration: '14:35' },
+                    { id: 'I_tnGW-RYmE', title: 'ריפריימינג', duration: '16:20' },
+                    { id: 'akbG-4zxER4', title: 'ניהול מצבים רגשיים', duration: '17:45' },
+                    { id: 'AO6lf_seCqs', title: 'מה הם עוגנים', duration: '13:50' },
+                    { id: 'NcSAnR6WWD4', title: 'יצירת עוגנים חיוביים', duration: '18:15' },
+                    { id: 'bceR1CAGv34', title: 'קריסת עוגנים שליליים', duration: '15:30' },
+                    { id: 'kndSAREj7qQ', title: 'עוגנים בטיפול', duration: '16:55' },
+                    { id: 'X9SUBv6maGs', title: 'סיכום המודול', duration: '11:40' }
+                ]
+            },
+            {
+                id: 7,
+                title: 'אמונות וציר הזמן',
+                lessons: [
+                    { id: '97cbIvdEz8Q', title: 'כוחן של אמונות', duration: '15:25' },
+                    { id: 'ieDGCAvev4w', title: 'זיהוי אמונות מגבילות', duration: '17:10' },
+                    { id: 'ySTzDrBml10', title: 'שינוי אמונות', duration: '18:35' },
+                    { id: 'zWKwwChuEfs', title: 'מבוא לציר הזמן', duration: '14:50' },
+                    { id: 'On9odKKss24', title: 'טיפול בעבר', duration: '16:20' },
+                    { id: 'BE5RLAj1Be4', title: 'בניית עתיד', duration: '17:45' },
+                    { id: 'K_JGmX8Cq-I', title: 'אינטגרציה', duration: '15:30' },
+                    { id: 'EeFCN9Tddh8', title: 'סיכום הקורס', duration: '12:55' }
+                ]
+            }
+        ];
+
+        // ===== State =====
+        let currentModuleIndex = 0;
+        let currentLessonIndex = 0;
+        let currentVideoId = null;
+        let completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+        let isAuthenticated = false;
+        let currentUser = null;
+        let toastShown = false;
+        let toastTimeout = null;
+
+        // ===== Supabase Client (with fallback) =====
+        let supabaseClient = null;
+        try {
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error('Supabase init error:', e);
+        }
+
+        // ===== Initialization =====
+        document.addEventListener('DOMContentLoaded', async () => {
+            // CRITICAL: Always render course content first
+            renderSyllabus();
+            updateProgress();
+            updateUI();
+
+            // Open first module by default
+            const firstModule = document.querySelector('.module');
+            if (firstModule) firstModule.classList.add('open');
+
+            // Restore lesson from URL hash, localStorage resume, or default to first lesson
+            _skipPushState = true; // Never pushState on initial load
+            const hashMatch = location.hash.match(/^#m(\d+)l(\d+)$/);
+            if (hashMatch) {
+                // URL hash takes priority (explicit navigation)
+                const m = parseInt(hashMatch[1]), l = parseInt(hashMatch[2]);
+                if (modules[m] && modules[m].lessons[l]) {
+                    selectLesson(m, l);
+                } else {
+                    selectLesson(0, 0);
+                }
+            } else {
+                // Try to resume from localStorage
+                let resumed = false;
+                try {
+                    const saved = JSON.parse(localStorage.getItem('lastWatched_nlp-practitioner'));
+                    if (saved && modules[saved.moduleIndex]?.lessons[saved.lessonIndex]) {
+                        selectLesson(saved.moduleIndex, saved.lessonIndex);
+                        resumed = true;
+                        if (saved.moduleIndex > 0 || saved.lessonIndex > 0) {
+                            const title = modules[saved.moduleIndex].lessons[saved.lessonIndex].title;
+                            setTimeout(() => showResumeToast(title), 800);
+                        }
+                    }
+                } catch (e) {}
+                if (!resumed) selectLesson(0, 0);
+            }
+            _skipPushState = false;
+
+            // Handle browser back/forward between lessons
+            window.addEventListener('popstate', (e) => {
+                if (e.state && typeof e.state.m === 'number' && typeof e.state.l === 'number') {
+                    _skipPushState = true;
+                    selectLesson(e.state.m, e.state.l);
+                    _skipPushState = false;
+                } else {
+                    // No state — check hash as fallback
+                    const hm = location.hash.match(/^#m(\d+)l(\d+)$/);
+                    if (hm) {
+                        _skipPushState = true;
+                        selectLesson(parseInt(hm[1]), parseInt(hm[2]));
+                        _skipPushState = false;
+                    }
+                }
+            });
+
+            // Replace initial state so first lesson also has state data
+            history.replaceState({ m: currentModuleIndex, l: currentLessonIndex }, '', `#m${currentModuleIndex}l${currentLessonIndex}`);
+
+            // Auth setup (non-blocking)
+            if (supabaseClient) {
+                try {
+                    // Check for existing session
+                    await checkAuthSession();
+
+                    // Listen for auth state changes (for OAuth redirect)
+                    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                        if (event === 'SIGNED_IN' && session) {
+                            await handleSuccessfulAuth(session.user);
+                        } else if (event === 'SIGNED_OUT') {
+                            isAuthenticated = false;
+                            currentUser = null;
+                            updateUI();
+                        }
+                    });
+                } catch (authError) {
+                    console.error('Auth setup error:', authError);
+                }
+            }
+
+            // Toast timer
+            if (!isAuthenticated) {
+                toastTimeout = setTimeout(showToast, 60000);
+            }
+        });
+
+        // ===== Check Existing Auth Session =====
+        async function checkAuthSession() {
+            if (!supabaseClient) return;
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (session && session.user) {
+                    currentUser = session.user;
+                    isAuthenticated = true;
+                    await ensureProfileWithFormName(session.user);
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Session check error:', error);
+            }
+        }
+
+        // ===== Handle Successful Authentication =====
+        async function handleSuccessfulAuth(user) {
+            currentUser = user;
+            isAuthenticated = true;
+
+            // Update profile name from form (profile creation handled by supabase-client.js)
+            await ensureProfileWithFormName(user);
+
+            // Sync localStorage progress to Supabase
+            await syncProgressToSupabase();
+
+            // Resume from Supabase last-watched (if different from current)
+            try {
+                if (window.CourseProgress) {
+                    const lastWatched = await window.CourseProgress.getLastWatched('nlp-practitioner');
+                    if (lastWatched && modules[lastWatched.moduleIndex]?.lessons[lastWatched.lessonIndex]) {
+                        if (lastWatched.moduleIndex !== currentModuleIndex || lastWatched.lessonIndex !== currentLessonIndex) {
+                            selectLesson(lastWatched.moduleIndex, lastWatched.lessonIndex);
+                            const title = modules[lastWatched.moduleIndex].lessons[lastWatched.lessonIndex].title;
+                            showResumeToast(title);
+                        }
+                    }
+                }
+            } catch (e) { console.error('Resume from Supabase error:', e); }
+
+            // Update UI
+            updateUI();
+
+            // Show success and close modal
+            showAuthSuccess();
+        }
+
+        // ===== Sync localStorage Progress to Supabase =====
+        async function syncProgressToSupabase() {
+            if (!window.CourseProgress || !completedLessons.length) return;
+            try {
+                for (const lessonId of completedLessons) {
+                    const [modIdx, lesIdx] = lessonId.split('-').map(Number);
+                    if (modules[modIdx] && modules[modIdx].lessons[lesIdx]) {
+                        const lesson = modules[modIdx].lessons[lesIdx];
+                        await window.CourseProgress.markVideoWatched(lesson.id, 'nlp-practitioner', parseInt(lesIdx) + 1);
+                    }
+                }
+            } catch (err) {
+                console.error('Progress sync error:', err);
+            }
+        }
+
+        // ===== Check and Show Questionnaire =====
+        // ===== Ensure Profile Exists (delegates to shared supabase-client.js) =====
+        // Profile creation is handled globally by supabase-client.js ensureProfile().
+        // Here we only update the name if the user typed it in the auth form.
+        async function ensureProfileWithFormName(user) {
+            if (!supabaseClient) return;
+            try {
+                const formName = document.getElementById('authName')?.value?.trim();
+                if (formName && !user.user_metadata?.full_name && !user.user_metadata?.name) {
+                    await supabaseClient
+                        .from('profiles')
+                        .update({ full_name: formName })
+                        .eq('id', user.id);
+                }
+            } catch (error) {
+                console.error('Profile name update error:', error);
+            }
+        }
+
+        // ===== Google OAuth =====
+        async function signInWithGoogle() {
+            if (!supabaseClient) {
+                showAuthError('שגיאה בטעינת המערכת. רענן את הדף.');
+                return;
+            }
+            const googleBtn = document.getElementById('googleBtn');
+            googleBtn.disabled = true;
+            googleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> מתחבר...';
+            hideAuthError();
+
+            // Show full-page loading overlay
+            showFullPageLoader('מתחבר ל-Google...');
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.href
+                    }
+                });
+
+                if (error) throw error;
+                // Redirect will happen automatically
+            } catch (error) {
+                console.error('Google sign-in error:', error);
+                hideFullPageLoader();
+                showAuthError('שגיאה בהתחברות עם Google. נסה שוב.');
+                googleBtn.disabled = false;
+                googleBtn.innerHTML = `<svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> המשך באמצעות Google`;
+            }
+        }
+
+        // ===== Full Page Loader =====
+        function showFullPageLoader(message) {
+            let loader = document.getElementById('fullPageLoader');
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.id = 'fullPageLoader';
+                loader.style.cssText = `
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 43, 51, 0.95);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                `;
+                loader.innerHTML = `
+                    <div style="width: 50px; height: 50px; border: 4px solid rgba(212, 175, 55, 0.3); border-top-color: #D4AF37; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="color: white; margin-top: 1.5rem; font-size: 1.1rem;" id="loaderMessage">${message || 'טוען...'}</p>
+                `;
+                document.body.appendChild(loader);
+            } else {
+                loader.style.display = 'flex';
+                document.getElementById('loaderMessage').textContent = message || 'טוען...';
+            }
+        }
+
+        function hideFullPageLoader() {
+            const loader = document.getElementById('fullPageLoader');
+            if (loader) loader.style.display = 'none';
+        }
+
+        // ===== Email Login =====
+        async function handleEmailAuth(event) {
+            event.preventDefault();
+            if (!supabaseClient) {
+                showAuthError('שגיאה בטעינת המערכת. רענן את הדף.');
+                return;
+            }
+            const loginBtn = document.getElementById('loginBtn');
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            hideAuthError();
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    if (error.message.includes('Invalid login credentials')) {
+                        showAuthError('אימייל או סיסמה שגויים. נסה שוב או הירשם.');
+                    } else {
+                        showAuthError(error.message);
+                    }
+                } else if (data.user) {
+                    await handleSuccessfulAuth(data.user);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAuthError('שגיאה בהתחברות. נסה שוב.');
+            }
+
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fa-solid fa-sign-in-alt"></i> התחבר';
+        }
+
+        // ===== Email Signup =====
+        async function handleSignup() {
+            if (!supabaseClient) {
+                showAuthError('שגיאה בטעינת המערכת. רענן את הדף.');
+                return;
+            }
+            const signupBtn = document.getElementById('signupBtn');
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const name = document.getElementById('authName').value.trim();
+
+            if (!email || !password) {
+                showAuthError('נא למלא אימייל וסיסמה');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('הסיסמה חייבת להכיל לפחות 6 תווים');
+                return;
+            }
+
+            signupBtn.disabled = true;
+            signupBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            hideAuthError();
+
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name || email.split('@')[0]
+                        }
+                    }
+                });
+
+                if (error) {
+                    if (error.message.includes('already registered')) {
+                        showAuthError('אימייל זה כבר רשום. נסה להתחבר.');
+                    } else {
+                        showAuthError(error.message);
+                    }
+                } else if (data.user) {
+                    // Check if email confirmation is required
+                    if (data.user.identities?.length === 0) {
+                        showAuthError('אימייל זה כבר רשום. נסה להתחבר.');
+                    } else if (data.session) {
+                        // Auto-confirmed (no email verification required)
+                        await handleSuccessfulAuth(data.user);
+                    } else {
+                        // Email confirmation required
+                        showAuthError('נשלח אליך אימייל לאימות. בדוק את תיבת הדואר שלך.');
+                    }
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showAuthError('שגיאה בהרשמה. נסה שוב.');
+            }
+
+            signupBtn.disabled = false;
+            signupBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> הירשם';
+        }
+
+        // ===== Auth Tab Switching =====
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+            hideAuthError();
+
+            if (tab === 'social') {
+                document.getElementById('socialTab').classList.add('active');
+                document.getElementById('socialPanel').classList.add('active');
+            } else {
+                document.getElementById('emailTab').classList.add('active');
+                document.getElementById('emailPanel').classList.add('active');
+            }
+        }
+
+        // ===== Auth Error Handling =====
+        function showAuthError(message) {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function hideAuthError() {
+            document.getElementById('authError').classList.remove('show');
+        }
+
+        // ===== Auth Success =====
+        function showAuthSuccess() {
+            const panels = document.querySelectorAll('.auth-panel, .auth-tabs, .benefits-list, .modal-box .subtitle');
+            panels.forEach(p => p.style.display = 'none');
+
+            document.getElementById('successMessage').classList.add('show');
+
+            setTimeout(() => {
+                closeModal();
+                // Reset modal state
+                panels.forEach(p => p.style.display = '');
+                document.getElementById('successMessage').classList.remove('show');
+                switchAuthTab('social');
+                document.getElementById('emailAuthForm')?.reset();
+            }, 2000);
+        }
+
+        // ===== Render Syllabus =====
+        function renderSyllabus() {
+            const syllabus = document.getElementById('syllabus');
+            syllabus.innerHTML = modules.map((module, mIndex) => `
+                <div class="module ${mIndex === 0 ? 'open' : ''}" data-module="${mIndex}">
+                    <div class="module-header" onclick="toggleModule(${mIndex})">
+                        <div class="module-info">
+                            <div class="module-number">${module.id}</div>
+                            <div class="module-title">${module.title}</div>
+                        </div>
+                        <i class="fa-solid fa-chevron-down module-toggle"></i>
+                    </div>
+                    <div class="module-lessons">
+                        ${module.lessons.map((lesson, lIndex) => {
+                            const lessonId = `${mIndex}-${lIndex}`;
+                            const isCompleted = completedLessons.includes(lessonId);
+                            const isActive = mIndex === currentModuleIndex && lIndex === currentLessonIndex;
+                            return `
+                                <div class="lesson-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}"
+                                     data-module="${mIndex}" data-lesson="${lIndex}"
+                                     onclick="selectLesson(${mIndex}, ${lIndex}, true)">
+                                    <div class="lesson-status">
+                                        ${isCompleted ? '<i class="fa-solid fa-check"></i>' :
+                                          isActive ? '<i class="fa-solid fa-play"></i>' :
+                                          '<i class="fa-solid fa-circle"></i>'}
+                                    </div>
+                                    <span class="lesson-title">${lesson.title}</span>
+                                    <span class="lesson-duration">${lesson.duration}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== Toggle Module =====
+        function toggleModule(index) {
+            const module = document.querySelector(`.module[data-module="${index}"]`);
+            module.classList.toggle('open');
+        }
+
+        // ===== Select Lesson =====
+        let _skipPushState = false; // Flag to avoid pushState on popstate/init
+
+        function selectLesson(moduleIndex, lessonIndex, autoplay = false) {
+            // Registration wall at 50% — block new lessons for unauthenticated users
+            const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+            const wallThreshold = Math.ceil(totalLessons * 0.5); // 26 out of 51
+            if (completedLessons.length >= wallThreshold && !isAuthenticated) {
+                openModal(true);
+                return;
+            }
+
+            currentModuleIndex = moduleIndex;
+            currentLessonIndex = lessonIndex;
+
+            // Update URL hash & browser history so "back" navigates between lessons
+            const hash = `#m${moduleIndex}l${lessonIndex}`;
+            if (!_skipPushState && location.hash !== hash) {
+                history.pushState({ m: moduleIndex, l: lessonIndex }, '', hash);
+            }
+
+            const lesson = modules[moduleIndex].lessons[lessonIndex];
+            currentVideoId = lesson.id;
+
+            const player = document.getElementById('videoPlayer');
+            const placeholder = document.getElementById('videoPlaceholder');
+            const thumbnail = document.getElementById('videoThumbnail');
+            const thumbnailImg = document.getElementById('thumbnailImg');
+            const loading = document.getElementById('videoLoading');
+
+            // Hide everything first
+            player.style.display = 'none';
+            player.src = '';
+            placeholder.style.display = 'none';
+            loading.classList.remove('active');
+            thumbnail.style.display = 'none';
+
+            // Update UI text
+            document.getElementById('currentLessonTitle').textContent = lesson.title;
+            document.getElementById('currentLessonMeta').textContent = `מודול ${moduleIndex + 1} • ${lesson.title}`;
+            document.getElementById('lessonDescTitle').textContent = lesson.title;
+
+            // Update AI lesson badge
+            if (typeof updateAiLessonBadge === 'function') updateAiLessonBadge();
+
+            // Update syllabus highlighting
+            document.querySelectorAll('.lesson-item').forEach(item => item.classList.remove('active'));
+            const activeItem = document.querySelector(`.lesson-item[data-module="${moduleIndex}"][data-lesson="${lessonIndex}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+                // Scroll the active lesson into view in the sidebar
+                activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Open the module containing this lesson
+            const moduleEl = document.querySelector(`.module[data-module="${moduleIndex}"]`);
+            if (moduleEl && !moduleEl.classList.contains('open')) {
+                moduleEl.classList.add('open');
+            }
+
+            // Update nav buttons (top + bottom)
+            updateNavButtons();
+
+            // Close sidebar on mobile
+            if (window.innerWidth <= 1024) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+                const toggleBtn = document.querySelector('.mobile-toggle');
+                if (toggleBtn) {
+                    toggleBtn.classList.remove('active');
+                    toggleBtn.querySelector('i').className = 'fa-solid fa-list';
+                }
+                document.body.style.overflow = '';
+            }
+
+            if (autoplay) {
+                // Auto-play: load iframe directly
+                playVideo();
+            } else {
+                // Show thumbnail with play button (initial load)
+                thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/maxresdefault.jpg`;
+                thumbnailImg.onerror = () => {
+                    thumbnailImg.src = `https://img.youtube.com/vi/${lesson.id}/hqdefault.jpg`;
+                };
+                thumbnail.style.display = 'block';
+            }
+
+            // Scroll to video on mobile
+            if (autoplay && window.innerWidth <= 1024) {
+                setTimeout(() => {
+                    document.querySelector('.video-wrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+
+            // Save last watched position
+            localStorage.setItem('lastWatched_nlp-practitioner', JSON.stringify({ moduleIndex, lessonIndex }));
+            if (isAuthenticated && window.CourseProgress) {
+                window.CourseProgress.saveLastWatched('nlp-practitioner', moduleIndex, lessonIndex)
+                    .catch(err => console.error('Save last watched error:', err));
+            }
+        }
+
+        // ===== Play Video (on thumbnail click) =====
+        function playVideo() {
+            if (!currentVideoId) return;
+
+            const player = document.getElementById('videoPlayer');
+            const thumbnail = document.getElementById('videoThumbnail');
+            const loading = document.getElementById('videoLoading');
+
+            // Show loading
+            thumbnail.style.display = 'none';
+            loading.classList.add('active');
+
+            // Load iframe
+            player.src = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1`;
+
+            // When iframe loads, hide loading and show player
+            player.onload = () => {
+                loading.classList.remove('active');
+                player.style.display = 'block';
+
+                // Mark as completed after watching
+                setTimeout(() => markLessonCompleted(currentModuleIndex, currentLessonIndex), 30000);
+            };
+        }
+
+        // ===== Mark Lesson Completed =====
+        function markLessonCompleted(moduleIndex, lessonIndex) {
+            const lessonId = `${moduleIndex}-${lessonIndex}`;
+            if (!completedLessons.includes(lessonId)) {
+                completedLessons.push(lessonId);
+                localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+                updateProgress();
+                renderSyllabus();
+
+                // Sync to Supabase if authenticated
+                if (isAuthenticated && window.CourseProgress) {
+                    const lesson = modules[moduleIndex].lessons[lessonIndex];
+                    window.CourseProgress.markVideoWatched(lesson.id, 'nlp-practitioner', completedLessons.length)
+                        .catch(err => console.error('Sync error:', err));
+                }
+
+                // Registration wall at 50%
+                const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+                const wallThreshold = Math.ceil(totalLessons * 0.5);
+                if (completedLessons.length >= wallThreshold && !isAuthenticated) {
+                    openModal(true);
+                }
+            }
+        }
+
+        // ===== Navigate Lesson =====
+        function navigateLesson(direction) {
+            let newModule = currentModuleIndex;
+            let newLesson = currentLessonIndex + direction;
+
+            if (newLesson < 0) {
+                if (newModule > 0) {
+                    newModule--;
+                    newLesson = modules[newModule].lessons.length - 1;
+                } else {
+                    return;
+                }
+            } else if (newLesson >= modules[newModule].lessons.length) {
+                if (newModule < modules.length - 1) {
+                    newModule++;
+                    newLesson = 0;
+                } else {
+                    return;
+                }
+            }
+
+            selectLesson(newModule, newLesson, true);
+        }
+
+        // ===== Update Nav Buttons =====
+        function updateNavButtons() {
+            const prevBtn = document.getElementById('prevLessonBtn');
+            const nextBtn = document.getElementById('nextLessonBtn');
+            const bottomPrevBtn = document.getElementById('bottomPrevBtn');
+            const bottomNextBtn = document.getElementById('bottomNextBtn');
+
+            const isFirst = currentModuleIndex === 0 && currentLessonIndex === 0;
+            const isLast = currentModuleIndex === modules.length - 1 &&
+                          currentLessonIndex === modules[modules.length - 1].lessons.length - 1;
+
+            prevBtn.disabled = isFirst;
+            nextBtn.disabled = isLast;
+            bottomPrevBtn.disabled = isFirst;
+            bottomNextBtn.disabled = isLast;
+
+            // Calculate global lesson number
+            let globalIndex = 0;
+            for (let m = 0; m < currentModuleIndex; m++) {
+                globalIndex += modules[m].lessons.length;
+            }
+            globalIndex += currentLessonIndex + 1;
+            const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+
+            document.getElementById('lessonCounter').textContent = globalIndex;
+            document.getElementById('lessonTotal').textContent = totalLessons;
+
+            // Show next/prev lesson names
+            const nextName = document.getElementById('nextLessonName');
+            const prevName = document.getElementById('prevLessonName');
+
+            if (!isLast) {
+                let nm = currentModuleIndex, nl = currentLessonIndex + 1;
+                if (nl >= modules[nm].lessons.length) { nm++; nl = 0; }
+                nextName.textContent = modules[nm].lessons[nl].title;
+            } else {
+                nextName.textContent = '';
+            }
+
+            if (!isFirst) {
+                let pm = currentModuleIndex, pl = currentLessonIndex - 1;
+                if (pl < 0) { pm--; pl = modules[pm].lessons.length - 1; }
+                prevName.textContent = modules[pm].lessons[pl].title;
+            } else {
+                prevName.textContent = '';
+            }
+        }
+
+        // ===== Update Progress =====
+        function updateProgress() {
+            const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+            const completed = completedLessons.length;
+            const percent = Math.round((completed / totalLessons) * 100);
+
+            document.getElementById('progressPercent').textContent = `${percent}%`;
+            document.getElementById('progressFill').style.width = `${percent}%`;
+        }
+
+        // ===== Update UI based on authentication =====
+        function updateUI() {
+            const resourcesLock = document.getElementById('resourcesLock');
+            const aiLock = document.getElementById('aiLock');
+            const workbookCard = document.getElementById('workbookCard');
+            const summaryCard = document.getElementById('summaryCard');
+            const aiLocked = document.getElementById('aiLocked');
+            const aiChat = document.getElementById('aiChat');
+
+            if (isAuthenticated) {
+                resourcesLock.style.display = 'none';
+                aiLock.style.display = 'none';
+                workbookCard.classList.remove('locked');
+                summaryCard.classList.remove('locked');
+
+                // Show chat, hide placeholder
+                aiLocked.style.display = 'none';
+                aiChat.style.display = 'flex';
+                initAiChat();
+
+                // Hide toast if authenticated
+                hideToast();
+            } else {
+                workbookCard.classList.add('locked');
+                summaryCard.classList.add('locked');
+                resourcesLock.style.display = '';
+                aiLock.style.display = '';
+                aiLocked.style.display = '';
+                aiChat.style.display = 'none';
+            }
+        }
+
+        // ===== Tabs =====
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}Panel`).classList.add('active');
+        }
+
+        // ===== Handle Resource Click =====
+        function handleResource(type) {
+            if (!isAuthenticated) {
+                openModal();
+            } else {
+                if (type === 'workbook') {
+                    window.open('../docs/booklets/nlp-booklet-clean.pdf', '_blank');
+                } else if (type === 'summary') {
+                    window.open('summaries/index.html', '_blank');
+                }
+            }
+        }
+
+        // ===== Handle Locked Action =====
+        function handleLockedAction(type) {
+            if (!isAuthenticated) {
+                openModal();
+            } else if (type === 'ai') {
+                // Already authenticated — switch to AI tab
+                switchTab('ai');
+                document.getElementById('aiInput')?.focus();
+            }
+        }
+
+        // ===== Modal =====
+        function openModal(isWall = false) {
+            const modal = document.getElementById('registrationModal');
+            const subtitle = modal.querySelector('.subtitle');
+            const modalTitle = modal.querySelector('h2');
+            if (isWall) {
+                modalTitle.textContent = 'הגעת לחצי מהקורס! 🎉';
+                subtitle.textContent = 'כדי להמשיך ללמוד, נשמח שתירשמו — זה חינם!';
+            } else {
+                modalTitle.textContent = 'קבלו גישה מלאה בחינם!';
+                subtitle.textContent = 'התחברו כדי לקבל גישה לכל התכנים הבונוס';
+            }
+            modal.classList.add('active');
+            hideToast();
+        }
+
+        function closeModal() {
+            document.getElementById('registrationModal').classList.remove('active');
+            hideAuthError();
+        }
+
+        // Close modal when clicking on overlay (outside the box)
+        function handleOverlayClick(event) {
+            if (event.target.id === 'registrationModal') {
+                closeModal();
+            }
+        }
+
+        // ===== Toast =====
+        function showToast() {
+            if (!isAuthenticated && !toastShown) {
+                document.getElementById('toast').classList.add('show');
+                toastShown = true;
+            }
+        }
+
+        function showResumeToast(lessonTitle) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+                background: var(--deep-petrol); color: white; padding: 0.8rem 1.2rem;
+                border-radius: 12px; display: flex; align-items: center; gap: 0.8rem;
+                z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                font-family: 'Heebo', sans-serif; font-size: 0.9rem;
+                border: 1px solid var(--dusty-aqua);
+            `;
+            toast.innerHTML = `
+                <i class="fa-solid fa-play-circle" style="color: var(--gold); font-size: 1.2rem;"></i>
+                <span>ממשיכים מאיפה שהפסקת: <strong>${lessonTitle}</strong></span>
+                <button onclick="this.parentElement.remove()" style="
+                    background: none; border: none; color: rgba(255,255,255,0.6);
+                    cursor: pointer; font-size: 1.1rem; padding: 0 0.3rem;
+                ">&times;</button>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => { if (toast.parentElement) toast.remove(); }, 6000);
+        }
+
+        function hideToast() {
+            document.getElementById('toast').classList.remove('show');
+            if (toastTimeout) clearTimeout(toastTimeout);
+        }
+
+        // ===== Mobile Sidebar =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.querySelector('.mobile-toggle');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            toggleBtn.classList.toggle('active');
+            overlay.classList.toggle('active');
+
+            // Update icon
+            const icon = toggleBtn.querySelector('i');
+            if (sidebar.classList.contains('open')) {
+                icon.className = 'fa-solid fa-times';
+                document.body.style.overflow = 'hidden';
+            } else {
+                icon.className = 'fa-solid fa-list';
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+            // Arrow keys for navigation (only when not focused on an input)
+            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                if (e.key === 'ArrowLeft') navigateLesson(1);  // Next (RTL: left = forward)
+                if (e.key === 'ArrowRight') navigateLesson(-1); // Prev (RTL: right = backward)
+            }
+        });
+
+        // ===== Expose functions to global scope for onclick handlers =====
+        window.toggleModule = toggleModule;
+        window.selectLesson = selectLesson;
+        window.playVideo = playVideo;
+        window.navigateLesson = navigateLesson;
+        window.switchTab = switchTab;
+        window.switchAuthTab = switchAuthTab;
+        window.handleResource = handleResource;
+        window.handleLockedAction = handleLockedAction;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.handleOverlayClick = handleOverlayClick;
+        window.showFullPageLoader = showFullPageLoader;
+        window.hideFullPageLoader = hideFullPageLoader;
+        window.toggleSidebar = toggleSidebar;
+        window.showToast = showToast;
+        window.hideToast = hideToast;
+        window.signInWithGoogle = signInWithGoogle;
+        window.handleEmailAuth = handleEmailAuth;
+        window.handleSignup = handleSignup;
+
+        // ===== Questionnaire Functions =====
+        function openQuestionnaireModal() {
+            document.getElementById('questionnaireModal').classList.add('active');
+        }
+
+        function closeQuestionnaireModal() {
+            document.getElementById('questionnaireModal').classList.remove('active');
+        }
+
+        function handleQuestionnaireOverlayClick(event) {
+            if (event.target.id === 'questionnaireModal') {
+                skipQuestionnaire();
+            }
+        }
+
+        function skipQuestionnaire() {
+            localStorage.setItem('questionnaireCompleted', 'true');
+            closeQuestionnaireModal();
+        }
+
+        async function submitQuestionnaire(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('qSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
+
+            try {
+                const data = {
+                    user_id: currentUser?.id,
+                    course_slug: 'nlp-practitioner',
+                    full_name: currentUser?.user_metadata?.full_name || '',
+                    email: currentUser?.email || '',
+                    phone: document.getElementById('qPhone').value.trim(),
+                    motivation: document.getElementById('qMotivation').value.trim(),
+                    experience_level: document.getElementById('qExperience').value || null,
+                    interest_certification: document.getElementById('qCertification').value || null,
+                    preferred_learning: document.getElementById('qLearning').value || null,
+                    how_found_us: document.getElementById('qSource').value || null,
+                    notes: document.getElementById('qNotes').value.trim() || null
+                };
+
+                if (supabaseClient) {
+                    const { error } = await supabaseClient
+                        .from('course_questionnaires')
+                        .insert(data);
+                    if (error) console.error('Questionnaire save error:', error);
+                }
+
+                localStorage.setItem('questionnaireCompleted', 'true');
+
+                // Show success
+                document.getElementById('questionnaireForm').style.display = 'none';
+                document.getElementById('qSuccessMessage').style.display = 'block';
+                setTimeout(closeQuestionnaireModal, 2000);
+            } catch (err) {
+                console.error('Questionnaire error:', err);
+                localStorage.setItem('questionnaireCompleted', 'true');
+                closeQuestionnaireModal();
+            }
+        }
+
+        // ===== AI Chat Functions =====
+        function handleAiSuggestion() {
+            // Hide the suggestions area
+            const suggestions = document.getElementById('aiSuggestions');
+            if (suggestions) suggestions.style.display = 'none';
+            const seriesInput = document.getElementById('aiSeriesInput');
+            if (seriesInput) seriesInput.style.display = 'none';
+
+            // Show the question as user message
+            appendAiMessage('user', 'מה אתה יודע לעשות?');
+
+            // Show the predefined answer as bot message
+            appendAiMessage('bot', 'אני המאמן האישי שלך לקורס 💪 אני פה כדי לחדד לך את התכנים כדי שתוכל ליישם בצורה פרקטית.');
+        }
+
+        function showSeriesInput() {
+            const suggestions = document.getElementById('aiSuggestions');
+            if (suggestions) suggestions.style.display = 'none';
+            const seriesInput = document.getElementById('aiSeriesInput');
+            if (seriesInput) {
+                seriesInput.style.display = 'block';
+                const nameField = document.getElementById('aiSeriesName');
+                nameField.focus();
+                nameField.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') startSeriesPractice();
+                });
+            }
+        }
+
+        function startSeriesPractice() {
+            const nameInput = document.getElementById('aiSeriesName');
+            const name = nameInput.value.trim();
+            if (!name) { nameInput.focus(); return; }
+
+            // Hide the series input
+            document.getElementById('aiSeriesInput').style.display = 'none';
+
+            // Build the detailed prompt (sent to AI but not shown)
+            const detailedPrompt = `אני רוצה לתרגל את הידע שלי ב-NLP דרך הדמויות מ"${name}". תן לי ניתוח NLP של הדמויות המרכזיות — מערכות ייצוג, אסטרטגיות תקשורת, דפוסי שפה, ואיך אפשר לזהות טכניקות NLP ביחסים ביניהן. בסוף שאל אותי שאלת תרגול.`;
+
+            // Show only the clean user message
+            appendAiMessage('user', `🎬 בוא נתרגל NLP דרך "${name}"`);
+
+            // Send directly to API (bypass sendAiMessage to avoid duplicate bubble)
+            sendAiMessageDirect(detailedPrompt);
+        }
+
+        async function sendAiMessageDirect(message) {
+            const input = document.getElementById('aiInput');
+            const sendBtn = document.getElementById('aiSendBtn');
+            sendBtn.disabled = true;
+            input.disabled = true;
+
+            aiChatHistory.push({ role: 'user', content: message });
+            showTypingIndicator();
+
+            try {
+                const session = await supabaseClient.auth.getSession();
+                const token = session?.data?.session?.access_token;
+
+                if (!token) {
+                    removeTypingIndicator();
+                    appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
+                    input.disabled = false;
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                const mod = modules[currentModuleIndex];
+                const lesson = mod?.lessons[currentLessonIndex];
+                const lessonContext = {
+                    moduleIndex: currentModuleIndex,
+                    moduleTitle: mod?.title || '',
+                    lessonTitle: lesson?.title || ''
+                };
+
+                const response = await fetch(
+                    `${SUPABASE_URL}/functions/v1/ai-chat`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            message,
+                            history: aiChatHistory.slice(-10),
+                            lessonContext
+                        })
+                    }
+                );
+
+                removeTypingIndicator();
+
+                const data = await response.json();
+
+                if (data.error) {
+                    appendAiMessage('bot', data.error);
+                } else {
+                    const reply = data.reply || 'לא הצלחתי לענות. נסו שוב.';
+                    appendAiMessage('bot', reply);
+                    aiChatHistory.push({ role: 'model', content: reply });
+
+                    if (data.remaining !== undefined) {
+                        aiRemainingMessages = data.remaining;
+                        const remainingEl = document.getElementById('aiRemaining');
+                        if (remainingEl) remainingEl.textContent = `${data.remaining}/50`;
+                    }
+                }
+            } catch (err) {
+                removeTypingIndicator();
+                appendAiMessage('bot', 'שגיאה. נסו שוב.');
+            }
+
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+
+        let aiChatHistory = [];
+        let aiChatInitialized = false;
+        let aiRemainingMessages = null;
+
+        function initAiChat() {
+            if (aiChatInitialized) return;
+            aiChatInitialized = true;
+
+            // Update lesson badge
+            updateAiLessonBadge();
+
+            // Auto-resize textarea
+            const input = document.getElementById('aiInput');
+            input.addEventListener('input', () => {
+                input.style.height = 'auto';
+                input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+            });
+
+            // Enter to send (Shift+Enter for new line)
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendAiMessage();
+                }
+            });
+
+            // Fetch student profile — if exists, personalize. If not, prompt questionnaire.
+            loadStudentProfile();
+        }
+
+        async function loadStudentProfile() {
+            if (!supabaseClient || !currentUser) return;
+            try {
+                const { data: profile } = await supabaseClient
+                    .from('course_questionnaires')
+                    .select('full_name, experience_level')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (profile) {
+                    // Personalize welcome message
+                    const welcomeBubble = document.querySelector('#aiMessages .ai-message-bot .ai-message-bubble');
+                    if (welcomeBubble) {
+                        const name = profile.full_name ? profile.full_name.split(' ')[0] : '';
+                        const levelText = {
+                            'beginner': 'אני אסביר לך הכל בפשטות עם דוגמאות',
+                            'intermediate': 'נעמיק יחד בחומר ונתרגל',
+                            'advanced': 'נצלול לעומק הטכניקות ונאתגר את הידע שלך'
+                        };
+                        const greeting = name ? `שלום ${name}!` : 'שלום!';
+                        const level = levelText[profile.experience_level] || 'שאלו אותי כל שאלה על החומר';
+                        welcomeBubble.innerHTML = `${greeting} 👋 אני המורה האישי שלך לקורס NLP. ${level}.<br><span style="font-size:0.8em; opacity:0.7;">✨ מותאם אישית לרמה שלך</span>`;
+                    }
+                    localStorage.setItem('questionnaireCompleted', 'true');
+                } else {
+                    // No profile — show prompt to fill questionnaire inside AI chat
+                    if (!localStorage.getItem('questionnaireCompleted')) {
+                        showAiQuestionnairePrompt();
+                    }
+                }
+            } catch (e) {
+                // No profile — show prompt
+                if (!localStorage.getItem('questionnaireCompleted')) {
+                    showAiQuestionnairePrompt();
+                }
+            }
+        }
+
+        function showAiQuestionnairePrompt() {
+            const suggestions = document.getElementById('aiSuggestions');
+            if (!suggestions) return;
+            // Add questionnaire prompt before the suggestion buttons
+            const prompt = document.createElement('div');
+            prompt.id = 'aiQuestionnairePrompt';
+            prompt.style.cssText = 'background: linear-gradient(135deg, #003B46, #00606B); color: #fff; border-radius: 12px; padding: 14px 18px; margin: 0 10px 10px; text-align: right; cursor: pointer; transition: transform 0.2s;';
+            prompt.innerHTML = `
+                <div style="font-weight: 700; font-size: 1em; margin-bottom: 4px;">🎯 רוצה שהמורה AI ידבר אליך ברמה שלך?</div>
+                <div style="font-size: 0.85em; opacity: 0.9;">מלא 30 שניות שאלון קצר וה-AI יתאים את עצמו אליך</div>
+            `;
+            prompt.onmouseenter = () => prompt.style.transform = 'scale(1.02)';
+            prompt.onmouseleave = () => prompt.style.transform = 'scale(1)';
+            prompt.onclick = () => {
+                openQuestionnaireModal();
+            };
+            suggestions.parentNode.insertBefore(prompt, suggestions);
+        }
+
+        function updateAiLessonBadge() {
+            const badge = document.getElementById('aiLessonBadge');
+            if (!badge) return;
+            const mod = modules[currentModuleIndex];
+            const lesson = mod?.lessons[currentLessonIndex];
+            if (lesson) {
+                badge.textContent = lesson.title;
+                badge.title = `מודול ${currentModuleIndex + 1}: ${mod.title}`;
+            }
+        }
+
+        async function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const sendBtn = document.getElementById('aiSendBtn');
+            const message = input.value.trim();
+
+            if (!message || sendBtn.disabled) return;
+
+            // Disable input
+            sendBtn.disabled = true;
+            input.disabled = true;
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Add user message
+            appendAiMessage('user', message);
+
+            // Add to history
+            aiChatHistory.push({ role: 'user', content: message });
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                const session = await supabaseClient.auth.getSession();
+                const token = session?.data?.session?.access_token;
+
+                if (!token) {
+                    removeTypingIndicator();
+                    appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
+                    input.disabled = false;
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                // Get current lesson context
+                const mod = modules[currentModuleIndex];
+                const lesson = mod?.lessons[currentLessonIndex];
+                const lessonContext = {
+                    moduleIndex: currentModuleIndex,
+                    moduleTitle: mod?.title || '',
+                    lessonTitle: lesson?.title || ''
+                };
+
+                const response = await fetch(
+                    `${SUPABASE_URL}/functions/v1/ai-chat`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            message,
+                            history: aiChatHistory.slice(-10), // Last 10 messages for context
+                            lessonContext
+                        })
+                    }
+                );
+
+                removeTypingIndicator();
+
+                const data = await response.json();
+
+                if (data.rateLimited) {
+                    appendRateLimitMessage();
+                    input.disabled = true;
+                    sendBtn.disabled = true;
+                    return;
+                }
+
+                if (data.error && response.status === 401) {
+                    appendAiMessage('bot', data.error);
+                    input.disabled = false;
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                const reply = data.reply || data.error || 'שגיאה. נסו שוב.';
+                appendAiMessage('bot', reply);
+                aiChatHistory.push({ role: 'model', content: reply });
+
+                // Update remaining counter
+                if (data.remaining !== undefined) {
+                    aiRemainingMessages = data.remaining;
+                    const remainEl = document.getElementById('aiRemaining');
+                    if (remainEl) remainEl.textContent = `${data.remaining}/50`;
+                }
+
+            } catch (err) {
+                console.error('AI chat error:', err);
+                removeTypingIndicator();
+                appendAiMessage('bot', 'שגיאת תקשורת. בדקו את החיבור לאינטרנט ונסו שוב.');
+            }
+
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+
+        function appendAiMessage(type, text) {
+            const container = document.getElementById('aiMessages');
+            const isBot = type === 'bot';
+            const div = document.createElement('div');
+            div.className = `ai-message ${isBot ? 'ai-message-bot' : 'ai-message-user'}`;
+            div.innerHTML = `
+                <div class="ai-message-avatar">
+                    <i class="fa-solid fa-${isBot ? 'robot' : 'user'}"></i>
+                </div>
+                <div class="ai-message-bubble">${escapeHtml(text)}</div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const container = document.getElementById('aiMessages');
+            const div = document.createElement('div');
+            div.className = 'ai-message ai-message-bot ai-typing-indicator';
+            div.id = 'aiTyping';
+            div.innerHTML = `
+                <div class="ai-message-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="ai-message-bubble">
+                    <div class="ai-typing-dot"></div>
+                    <div class="ai-typing-dot"></div>
+                    <div class="ai-typing-dot"></div>
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typing = document.getElementById('aiTyping');
+            if (typing) typing.remove();
+        }
+
+        function appendRateLimitMessage() {
+            const container = document.getElementById('aiMessages');
+            const div = document.createElement('div');
+            div.className = 'ai-rate-limit-msg';
+            div.innerHTML = '🕐 הגעת למגבלה של 50 הודעות היום. חזור מחר לשיחה נוספת!';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        window.sendAiMessage = sendAiMessage;
+
+        window.openQuestionnaireModal = openQuestionnaireModal;
+        window.closeQuestionnaireModal = closeQuestionnaireModal;
+        window.handleQuestionnaireOverlayClick = handleQuestionnaireOverlayClick;
+        window.skipQuestionnaire = skipQuestionnaire;
+        window.submitQuestionnaire = submitQuestionnaire;
+    </script>
+</body>
+</html>

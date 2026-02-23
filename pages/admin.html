@@ -93,18 +93,25 @@
         .page-title { font-size: 1.5rem; margin-bottom: 1.5rem; }
 
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; }
-        .stat-value { font-size: 2rem; font-weight: 700; color: var(--gold); }
-        .stat-label { color: var(--text-secondary); font-size: 0.9rem; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        .stat-icon.gold { background: rgba(212, 175, 55, 0.12); color: var(--gold); }
+        .stat-icon.blue { background: rgba(88, 166, 255, 0.12); color: var(--info); }
+        .stat-icon.green { background: rgba(63, 185, 80, 0.12); color: var(--success); }
+        .stat-icon.red { background: rgba(248, 81, 73, 0.12); color: var(--danger); }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--gold); line-height: 1; }
+        .stat-label { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.15rem; }
 
-        .table-container { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .table-container { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
         .table-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--border);
         }
+        .table-header h3 { font-size: 1rem; font-weight: 600; }
         .search-box {
             display: flex;
             align-items: center;
@@ -125,18 +132,29 @@
         .search-box i { color: var(--text-secondary); }
 
         table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: right; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
-        th { background: var(--bg); color: var(--text-secondary); font-weight: 500; font-size: 0.85rem; }
-        tr:hover { background: var(--card-hover); }
+        th, td { text-align: right; padding: 0.9rem 1.2rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        th { background: var(--bg); color: var(--text-secondary); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; position: sticky; top: 0; z-index: 1; }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:nth-child(even) { background: rgba(0,0,0,0.015); }
+        [data-theme="dark"] tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        tbody tr:hover { background: rgba(212, 175, 55, 0.06); }
+        [data-theme="dark"] tbody tr:hover { background: rgba(212, 175, 55, 0.08); }
+        td strong { font-weight: 600; color: var(--text); }
 
-        .status-badge { padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
-        .status-new { background: rgba(212, 175, 55, 0.2); color: var(--gold); }
-        .status-pending_review { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
-        .status-waiting { background: rgba(88, 166, 255, 0.2); color: var(--info); }
-        .status-matched, .status-approved { background: rgba(88, 166, 255, 0.2); color: var(--info); }
-        .status-in_treatment, .status-active { background: rgba(63, 185, 80, 0.2); color: var(--success); }
-        .status-completed { background: rgba(139, 148, 158, 0.2); color: var(--text-secondary); }
-        .status-rejected, .status-inactive { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        .status-badge { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; display: inline-block; border: 1px solid transparent; }
+        .status-new { background: rgba(212, 175, 55, 0.12); color: var(--gold); border-color: rgba(212, 175, 55, 0.25); }
+        .status-pending_review { background: rgba(210, 153, 34, 0.12); color: var(--warning); border-color: rgba(210, 153, 34, 0.25); }
+        .status-waiting { background: rgba(88, 166, 255, 0.12); color: var(--info); border-color: rgba(88, 166, 255, 0.25); }
+        .status-matched, .status-approved { background: rgba(88, 166, 255, 0.12); color: var(--info); border-color: rgba(88, 166, 255, 0.25); }
+        .status-in_treatment, .status-active { background: rgba(63, 185, 80, 0.12); color: var(--success); border-color: rgba(63, 185, 80, 0.25); }
+        .status-completed { background: rgba(139, 148, 158, 0.12); color: var(--text-secondary); border-color: rgba(139, 148, 158, 0.25); }
+        .status-rejected, .status-inactive { background: rgba(248, 81, 73, 0.12); color: var(--danger); border-color: rgba(248, 81, 73, 0.25); }
+        /* Role-specific badges for leads */
+        .role-badge { padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-block; margin: 0.1rem; }
+        .role-admin { background: rgba(212, 175, 55, 0.15); color: var(--gold); }
+        .role-student_lead { background: rgba(63, 185, 80, 0.12); color: var(--success); }
+        .role-therapist { background: rgba(88, 166, 255, 0.12); color: var(--info); }
+        .role-patient { background: rgba(210, 153, 34, 0.12); color: var(--warning); }
 
         .verified-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; }
         .verified-badge.yes { color: var(--success); }
@@ -531,6 +549,11 @@
                     <span>נרשמים</span>
                     <span class="badge" id="leads-count">0</span>
                 </div>
+                <div class="nav-item" onclick="switchView('contact-leads')">
+                    <i class="fa-solid fa-phone-volume"></i>
+                    <span>לידים</span>
+                    <span class="badge" id="contact-leads-count">0</span>
+                </div>
             </nav>
 
             <main class="content" id="main-content">
@@ -539,16 +562,16 @@
                     <h1 class="page-title">מטופלים</h1>
                     <div class="stats">
                         <div class="stat-card">
-                            <div class="stat-value" id="stat-new">0</div>
-                            <div class="stat-label">חדשים</div>
+                            <div class="stat-icon gold"><i class="fa-solid fa-user-clock"></i></div>
+                            <div><div class="stat-value" id="stat-new">0</div><div class="stat-label">חדשים</div></div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-value" id="stat-waiting">0</div>
-                            <div class="stat-label">ממתינים לשיבוץ</div>
+                            <div class="stat-icon blue"><i class="fa-solid fa-hourglass-half"></i></div>
+                            <div><div class="stat-value" id="stat-waiting">0</div><div class="stat-label">ממתינים לשיבוץ</div></div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-value" id="stat-in-treatment">0</div>
-                            <div class="stat-label">בטיפול</div>
+                            <div class="stat-icon green"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <div><div class="stat-value" id="stat-in-treatment">0</div><div class="stat-label">בטיפול</div></div>
                         </div>
                     </div>
                     <div class="tabs">
@@ -655,16 +678,16 @@
                     <h1 class="page-title">נרשמים לאתר</h1>
                     <div class="stats">
                         <div class="stat-card">
-                            <div class="stat-value" id="stat-total-leads">0</div>
-                            <div class="stat-label">סה"כ נרשמים</div>
+                            <div class="stat-icon gold"><i class="fa-solid fa-users"></i></div>
+                            <div><div class="stat-value" id="stat-total-leads">0</div><div class="stat-label">סה"כ נרשמים</div></div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-value" id="stat-google-leads">0</div>
-                            <div class="stat-label">Google</div>
+                            <div class="stat-icon blue"><i class="fa-brands fa-google"></i></div>
+                            <div><div class="stat-value" id="stat-google-leads">0</div><div class="stat-label">Google</div></div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-value" id="stat-email-leads">0</div>
-                            <div class="stat-label">Email</div>
+                            <div class="stat-icon green"><i class="fa-solid fa-envelope"></i></div>
+                            <div><div class="stat-value" id="stat-email-leads">0</div><div class="stat-label">Email</div></div>
                         </div>
                     </div>
                     <div class="table-container">
@@ -693,6 +716,60 @@
                         </table>
                     </div>
                 </div>
+                <!-- Contact Leads (Form Submissions) View -->
+                <div id="contact-leads-view" class="hidden">
+                    <h1 class="page-title">לידים מטפסי האתר</h1>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon gold"><i class="fa-solid fa-inbox"></i></div>
+                            <div><div class="stat-value" id="stat-contact-total">0</div><div class="stat-label">סה"כ לידים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-graduation-cap"></i></div>
+                            <div><div class="stat-value" id="stat-contact-training">0</div><div class="stat-label">הכשרה</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                            <div><div class="stat-value" id="stat-contact-patient">0</div><div class="stat-label">מטופלים</div></div>
+                        </div>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab active" onclick="filterContactLeads('all')">הכל</button>
+                        <button class="tab" onclick="filterContactLeads('new')">חדשים</button>
+                        <button class="tab" onclick="filterContactLeads('training')">הכשרה</button>
+                        <button class="tab" onclick="filterContactLeads('patient')">מטופלים</button>
+                        <button class="tab" onclick="filterContactLeads('contacted')">טופלו</button>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div style="display:flex;align-items:center;gap:1rem;">
+                                <h3>פניות מהאתר</h3>
+                                <button class="btn btn-export" onclick="exportContactLeadsCSV()">
+                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
+                                </button>
+                            </div>
+                            <div class="search-box">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" placeholder="חיפוש..." id="contact-leads-search" oninput="renderContactLeads()">
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>שם</th>
+                                    <th>טלפון</th>
+                                    <th>סוג פנייה</th>
+                                    <th>הודעה</th>
+                                    <th>סטטוס</th>
+                                    <th>תאריך</th>
+                                    <th>פעולות</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contact-leads-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
@@ -880,7 +957,7 @@
         }
 
         async function loadAllData() {
-            await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads()]);
+            await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads()]);
             updateCounts();
         }
 
@@ -924,10 +1001,9 @@
         function switchView(view) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            document.getElementById('patients-view').classList.toggle('hidden', view !== 'patients');
-            document.getElementById('therapists-view').classList.toggle('hidden', view !== 'therapists');
-            document.getElementById('matches-view').classList.toggle('hidden', view !== 'matches');
-            document.getElementById('leads-view').classList.toggle('hidden', view !== 'leads');
+            ['patients','therapists','matches','leads','contact-leads'].forEach(v => {
+                document.getElementById(v + '-view')?.classList.toggle('hidden', view !== v);
+            });
         }
 
         function filterPatients(status) {
@@ -1041,7 +1117,7 @@
                 <tr>
                     <td><strong>${l.full_name || '-'}</strong></td>
                     <td>${l.email || '-'}</td>
-                    <td>${(l.roles || []).map(r => `<span class="status-badge status-active">${r}</span>`).join(' ')}</td>
+                    <td>${(l.roles || []).map(r => `<span class="role-badge role-${r}">${roleLabel(r)}</span>`).join(' ')}</td>
                     <td>${formatDate(l.created_at)}</td>
                 </tr>
             `).join('');
@@ -1383,8 +1459,23 @@
         }
 
         function statusLabel(status) {
-            const labels = { 'new': 'חדש', 'pending_review': 'בבדיקה', 'waiting': 'ממתין', 'matched': 'שובץ', 'in_treatment': 'בטיפול', 'completed': 'הושלם', 'rejected': 'נדחה', 'approved': 'מאושר', 'active': 'פעיל', 'inactive': 'לא פעיל', 'cancelled': 'בוטל' };
+            const labels = { 'new': 'חדש', 'pending_review': 'בבדיקה', 'waiting': 'ממתין', 'matched': 'שובץ', 'in_treatment': 'בטיפול', 'completed': 'הושלם', 'rejected': 'נדחה', 'approved': 'מאושר', 'active': 'פעיל', 'inactive': 'לא פעיל', 'cancelled': 'בוטל', 'contacted': 'נוצר קשר', 'converted': 'הומר' };
             return labels[status] || status;
+        }
+
+        function roleLabel(role) {
+            const labels = { 'admin': 'מנהל', 'student_lead': 'תלמיד', 'therapist': 'מטפל', 'patient': 'מטופל' };
+            return labels[role] || role;
+        }
+
+        function requestTypeLabel(type) {
+            const labels = { 'training': 'הכשרה', 'patient': 'מטופל', 'general': 'כללי', 'therapist': 'מטפל' };
+            return labels[type] || type || 'כללי';
+        }
+
+        function requestTypeClass(type) {
+            const classes = { 'training': 'green', 'patient': 'blue', 'general': 'gold', 'therapist': 'blue' };
+            return classes[type] || 'gold';
         }
 
         function therapyTypeLabel(type) {
@@ -1413,6 +1504,83 @@
             toast.textContent = message;
             toast.className = `toast ${type} show`;
             setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ===================
+        // CONTACT LEADS (contact_requests)
+        // ===================
+        let contactLeads = [];
+        let currentContactFilter = 'all';
+
+        async function loadContactLeads() {
+            const { data } = await db.from('contact_requests').select('*').order('created_at', { ascending: false });
+            contactLeads = data || [];
+            document.getElementById('contact-leads-count').textContent = contactLeads.length;
+            document.getElementById('stat-contact-total').textContent = contactLeads.length;
+            document.getElementById('stat-contact-training').textContent = contactLeads.filter(l => l.request_type === 'training').length;
+            document.getElementById('stat-contact-patient').textContent = contactLeads.filter(l => l.request_type === 'patient').length;
+            renderContactLeads();
+        }
+
+        function filterContactLeads(filter) {
+            currentContactFilter = filter;
+            document.querySelectorAll('#contact-leads-view .tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            renderContactLeads();
+        }
+
+        function renderContactLeads() {
+            const search = document.getElementById('contact-leads-search')?.value?.toLowerCase() || '';
+            let filtered = contactLeads;
+            if (currentContactFilter === 'new') filtered = filtered.filter(l => l.status === 'new');
+            else if (currentContactFilter === 'training') filtered = filtered.filter(l => l.request_type === 'training');
+            else if (currentContactFilter === 'patient') filtered = filtered.filter(l => l.request_type === 'patient');
+            else if (currentContactFilter === 'contacted') filtered = filtered.filter(l => l.status === 'contacted' || l.status === 'converted');
+            if (search) filtered = filtered.filter(l => (l.name || l.full_name || '').toLowerCase().includes(search) || (l.phone || '').includes(search));
+
+            const tbody = document.getElementById('contact-leads-table');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין לידים</td></tr>';
+                return;
+            }
+            tbody.innerHTML = filtered.map(l => `
+                <tr>
+                    <td><strong>${l.name || l.full_name || 'אנונימי'}</strong></td>
+                    <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;">${l.phone}</a>` : '-'}</td>
+                    <td><span class="stat-icon ${requestTypeClass(l.request_type)}" style="width:auto;height:auto;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;display:inline-flex;">${requestTypeLabel(l.request_type)}</span></td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(l.message || '').replace(/"/g, '&quot;')}">${l.message || '-'}</td>
+                    <td><span class="status-badge status-${l.status}">${statusLabel(l.status)}</span></td>
+                    <td>${formatDate(l.created_at)}</td>
+                    <td class="action-btns">
+                        ${l.phone ? `<a href="https://wa.me/${l.phone.replace(/^0/, '972')}" target="_blank" class="btn-icon" title="WhatsApp" style="border-color:var(--success);color:var(--success);"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                        ${l.status === 'new' ? `<button class="btn-icon" onclick="markContactLeadContacted('${l.id}')" title="סמן כטופל"><i class="fa-solid fa-check"></i></button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function markContactLeadContacted(id) {
+            const { error } = await db.from('contact_requests').update({ status: 'contacted', last_contacted_at: new Date().toISOString() }).eq('id', id);
+            if (error) { showToast('שגיאה בעדכון', 'error'); return; }
+            showToast('הליד סומן כטופל', 'success');
+            loadContactLeads();
+        }
+
+        function exportContactLeadsCSV() {
+            if (contactLeads.length === 0) { showToast('אין נתונים לייצוא', 'warning'); return; }
+            const headers = ['שם', 'טלפון', 'אימייל', 'סוג פנייה', 'הודעה', 'סטטוס', 'תאריך'];
+            const rows = contactLeads.map(l => [
+                l.name || l.full_name || '', l.phone || '', l.email || '',
+                requestTypeLabel(l.request_type), l.message || '', statusLabel(l.status), formatDate(l.created_at)
+            ]);
+            const bom = '\uFEFF';
+            const csv = bom + [headers, ...rows].map(r => r.map(c => `"${(c+'').replace(/"/g,'""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `contact_leads_${getDateString()}.csv`;
+            link.click();
+            showToast('הקובץ הורד בהצלחה!', 'success');
         }
 
         document.addEventListener('keydown', (e) => {

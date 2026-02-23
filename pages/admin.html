@@ -9,26 +9,12 @@
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
     <title>CRM - מטפל לכל אחד</title>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="../css/accessibility.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
     <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
     <link rel="stylesheet" href="../css/theme.css">
     <script src="../js/theme-toggle.js" defer></script>
-    <script>
-        // AUTH GUARD - Redirect to login if not authenticated
-        (async function() {
-            const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
-            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
-            const tempClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const { data: { session } } = await tempClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html';
-            }
-        })();
-    </script>
     <style>
         /* Theme Bridge — uses shared css/theme.css tokens */
         :root {
@@ -848,6 +834,20 @@
         .export-preview span { font-size: 1.3rem; }
     </style>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
+    <script>
+        // AUTH GUARD - Redirect to login if not authenticated
+        (async function() {
+            const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+            const tempClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const { data: { session } } = await tempClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+            }
+        })();
+    </script>
     <script>
         // Theme toggle handled by shared js/theme-toggle.js
         // Old admin-theme key is auto-migrated to beit-theme

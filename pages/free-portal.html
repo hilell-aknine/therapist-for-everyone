@@ -26,7 +26,6 @@
     <script src="../js/theme-toggle.js" defer></script>
     <style>
         :root {
-            --sidebar-dark: var(--t-sidebar-bg, #0a3a42);
             --deep-petrol: var(--t-deep-petrol, #0E5660);
             --muted-teal: var(--t-muted-teal, #005C66);
             --dusty-aqua: var(--t-dusty-aqua, #2A727C);
@@ -34,19 +33,13 @@
             --pure-white: #FFFFFF;
             --gold: var(--t-gold, #D8AF47);
             --gold-light: var(--t-gold-light, #E1B13F);
-            --gold-glow: var(--t-gold-glow, rgba(216, 175, 71, 0.3));
             --gradient-gold: var(--t-gradient-gold, linear-gradient(135deg, #D8AF47 0%, #E1B13F 100%));
             --bg-primary: var(--t-bg-card, #FFFFFF);
             --bg-secondary: var(--t-bg-secondary, #F8F9FB);
             --text-dark: var(--t-text, #2d3436);
             --text-muted: var(--t-text-muted, #636e72);
-            --text-secondary: var(--t-text-secondary, #4B5563);
             --border-default: var(--t-border, #E5E7EB);
-            --border-light: var(--t-border, #e9ecef);
             --shadow-md: var(--t-shadow-md, 0 4px 12px rgba(0,0,0,0.08));
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -58,333 +51,250 @@
             line-height: 1.6;
         }
 
-        /* ===== Portal Hero ===== */
-        .portal-hero {
+        /* ===== Welcome Banner ===== */
+        .welcome-banner {
             background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 50%, var(--dusty-aqua) 100%);
-            padding: 9rem 2rem 5rem;
+            padding: 7rem 2rem 2.5rem;
             text-align: center;
             color: var(--pure-white);
             position: relative;
             overflow: hidden;
         }
-        .portal-hero::before {
+        .welcome-banner::before {
             content: '';
             position: absolute;
-            top: -50%; right: -20%;
-            width: 500px; height: 500px;
+            top: -40%; right: -15%;
+            width: 400px; height: 400px;
             border-radius: 50%;
             background: rgba(216, 175, 71, 0.06);
         }
-        .portal-hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 0.4rem 1.2rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-bottom: 1.5rem;
-        }
-        .portal-hero h1 {
-            font-size: 2.8rem;
+        .welcome-banner h1 {
+            font-size: 2.4rem;
             font-weight: 800;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             line-height: 1.2;
         }
-        .portal-hero p {
-            font-size: 1.15rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            line-height: 1.7;
-        }
-        .portal-hero-stats {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            margin-bottom: 2rem;
-        }
-        .portal-hero-stat { text-align: center; }
-        .portal-hero-stat .number {
-            display: block;
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: var(--gold);
-        }
-        .portal-hero-stat .label {
-            font-size: 0.85rem;
-            opacity: 0.8;
-        }
-        .portal-hero-buttons {
-            display: flex;
-            gap: 0.8rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .portal-hero-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--gradient-gold);
-            color: var(--deep-petrol);
-            padding: 0.9rem 2.5rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            font-family: 'Heebo', sans-serif;
-        }
-        .portal-hero-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(216, 175, 71, 0.35);
-        }
-        .portal-hero-cta-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            color: var(--pure-white);
-            padding: 0.9rem 2.5rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            transition: all 0.3s;
-            border: 2px solid rgba(255,255,255,0.4);
-            cursor: pointer;
-            font-family: 'Heebo', sans-serif;
-        }
-        .portal-hero-cta-secondary:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.7);
-            transform: translateY(-2px);
-        }
-
-        /* ===== Sections ===== */
-        .portal-section {
-            padding: 4rem 2rem;
-            max-width: 1100px;
+        .welcome-banner p {
+            font-size: 1.05rem;
+            opacity: 0.85;
+            max-width: 500px;
             margin: 0 auto;
         }
-        .portal-section-header { text-align: center; margin-bottom: 3rem; }
-        .portal-section-eyebrow {
-            font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 1.5px; color: var(--dusty-aqua); margin-bottom: 0.5rem;
-        }
-        .portal-section-title {
-            font-size: 2rem; font-weight: 800;
-            color: var(--deep-petrol); margin-bottom: 0.5rem;
-        }
-        .portal-section-subtitle {
-            font-size: 1rem; color: var(--text-muted);
-            max-width: 550px; margin: 0 auto;
+
+        /* ===== Content Container ===== */
+        .portal-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
-        /* Overview */
-        .overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-        .overview-card {
+        /* ===== Bulletin Board ===== */
+        .bulletin-board {
             background: var(--bg-primary);
             border: 1px solid var(--border-default);
-            border-radius: var(--radius-lg);
-            padding: 2rem 1.5rem;
-            text-align: center;
+            border-radius: 14px;
+            padding: 1.3rem 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+        .bulletin-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.8rem;
+        }
+        .bulletin-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(216, 175, 71, 0.12);
+            color: var(--gold);
+            font-size: 1rem;
+        }
+        .bulletin-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .bulletin-messages {
+            position: relative;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+        }
+        .bulletin-msg {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+        .bulletin-msg.active { opacity: 1; }
+        .bulletin-msg i {
+            color: var(--dusty-aqua);
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .bulletin-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-top: 0.8rem;
+        }
+        .bulletin-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--border-default);
+            border: none;
+            cursor: pointer;
             transition: all 0.3s;
+            padding: 0;
         }
-        .overview-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-        .overview-card-icon {
-            width: 56px; height: 56px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 1rem; font-size: 1.4rem;
-            background: var(--frost-white); color: var(--dusty-aqua);
-        }
-        .overview-card h4 { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.5rem; }
-        .overview-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
+        .bulletin-dot.active { background: var(--dusty-aqua); transform: scale(1.2); }
 
-        /* Tools */
-        .tools-section {
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-default);
-            border-bottom: 1px solid var(--border-default);
-        }
-        .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; }
-        .tool-card {
+        /* ===== Embedded Video ===== */
+        .video-section {
             background: var(--bg-primary);
             border: 1px solid var(--border-default);
-            border-radius: var(--radius-md);
-            padding: 1.5rem; text-align: center;
-            position: relative; transition: all 0.3s;
+            border-radius: 14px;
+            padding: 1.3rem 1.5rem;
+            box-shadow: var(--shadow-md);
         }
-        .tool-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .tool-badge {
-            position: absolute; top: 0.75rem; left: 0.75rem;
-            font-size: 0.65rem; font-weight: 700;
-            padding: 0.2rem 0.6rem; border-radius: 50px;
+        .video-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
         }
-        .tool-badge.available { background: rgba(216,175,71,0.12); color: #8B6914; }
-        .tool-card-icon {
-            width: 48px; height: 48px; border-radius: 12px;
+        .video-section-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 0.8rem; font-size: 1.2rem;
+            background: rgba(47, 133, 146, 0.12);
+            color: var(--dusty-aqua);
+            font-size: 1rem;
         }
-        .tool-card h4 { font-size: 0.95rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.3rem; }
-        .tool-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+        .video-section-title h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 */
+            border-radius: 10px;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
+        }
+        .video-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            color: rgba(255,255,255,0.7);
+        }
+        .video-placeholder i {
+            font-size: 3rem;
+            color: var(--gold);
+        }
+        .video-placeholder span {
+            font-size: 0.95rem;
+        }
 
-        /* Benefits */
-        .benefits-section {
-            background: linear-gradient(135deg, var(--deep-petrol) 0%, var(--muted-teal) 100%);
-            color: var(--pure-white);
+        /* ===== Quick Access Grid ===== */
+        .quick-access-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
         }
-        .benefits-section .portal-section-eyebrow { color: var(--gold); }
-        .benefits-section .portal-section-title { color: var(--pure-white); }
-        .benefits-section .portal-section-subtitle { color: rgba(255,255,255,0.7); }
-        .benefits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2.5rem; }
-        .benefit-card {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: var(--radius-md);
-            padding: 1.5rem; text-align: center;
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
         }
-        .benefit-card-icon {
-            width: 48px; height: 48px; border-radius: 12px;
+        .quick-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: 14px;
+            padding: 1.2rem 1.3rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .quick-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--dusty-aqua);
+        }
+        .quick-card-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 0.8rem; font-size: 1.2rem;
-            background: rgba(216,175,71,0.15); color: var(--gold);
+            font-size: 1.2rem;
+            flex-shrink: 0;
         }
-        .benefit-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
-        .benefit-card p { font-size: 0.8rem; opacity: 0.7; line-height: 1.5; }
-        .benefits-actions { text-align: center; }
-        .btn-signup {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.75rem 2rem; border-radius: 10px;
-            font-weight: 600; font-size: 0.95rem;
-            font-family: 'Heebo', sans-serif;
-            border: none; cursor: pointer; transition: all 0.3s;
+        .quick-card-icon.gold {
+            background: rgba(216, 175, 71, 0.12);
+            color: var(--gold);
         }
-        .btn-signup-gold { background: var(--gradient-gold); color: var(--deep-petrol); }
-        .btn-signup-gold:hover { box-shadow: 0 6px 20px rgba(216,175,71,0.35); }
-
-        /* ===== Auth Modal ===== */
-        .modal-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0, 43, 51, 0.95); z-index: 1000;
-            align-items: center; justify-content: center;
-            backdrop-filter: blur(10px);
+        .quick-card-icon.teal {
+            background: rgba(47, 133, 146, 0.12);
+            color: var(--dusty-aqua);
         }
-        .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: var(--bg-primary); border-radius: 24px;
-            padding: 3rem; width: 90%; max-width: 450px;
-            text-align: center; position: relative;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+        .quick-card-text h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.15rem;
         }
-        .modal-close {
-            position: absolute; top: 2.2rem; left: 1.5rem;
-            width: 36px; height: 36px; background: var(--bg-secondary);
-            border: none; border-radius: 50%; font-size: 1.3rem;
-            color: var(--text-muted); cursor: pointer; transition: all 0.3s;
-            display: flex; align-items: center; justify-content: center; z-index: 10;
+        .quick-card-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
         }
-        .modal-close:hover { background: var(--border-light); color: var(--text-dark); }
-        .modal-icon {
-            width: 80px; height: 80px; background: var(--gradient-gold);
-            border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; margin: 0 auto 1.5rem;
-            font-size: 2.5rem; color: var(--sidebar-dark);
+        .quick-card-arrow {
+            margin-right: auto;
+            color: var(--border-default);
+            font-size: 0.9rem;
+            transition: color 0.3s;
         }
-        .modal-box h2 { color: var(--deep-petrol); margin-bottom: 0.5rem; font-size: 1.8rem; }
-        .modal-box .subtitle { color: var(--text-muted); margin-bottom: 1.5rem; }
-        .benefits-list { text-align: right; margin: 1.5rem 0; padding: 0; list-style: none; }
-        .benefits-list li { display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0; color: var(--text-muted); font-size: 0.95rem; }
-        .benefits-list li i { color: var(--gold); }
-        .auth-tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-light); }
-        .auth-tab {
-            flex: 1; padding: 0.8rem; background: none; border: none;
-            font-family: inherit; font-size: 0.95rem; font-weight: 500;
-            color: var(--text-muted); cursor: pointer; position: relative; transition: all 0.3s;
-        }
-        .auth-tab:hover { color: var(--dusty-aqua); }
-        .auth-tab.active { color: var(--deep-petrol); }
-        .auth-tab.active::after {
-            content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
-            height: 3px; background: var(--gradient-gold); border-radius: 2px 2px 0 0;
-        }
-        .auth-panel { display: none; }
-        .auth-panel.active { display: block; }
-        .google-btn {
-            width: 100%; padding: 1rem 1.5rem;
-            background: var(--bg-primary); border: 2px solid var(--border-light);
-            border-radius: 12px; display: flex; align-items: center;
-            justify-content: center; gap: 0.8rem;
-            font-family: inherit; font-size: 1.05rem; font-weight: 600;
-            color: var(--text-dark); cursor: pointer; transition: all 0.3s;
-        }
-        .google-btn:hover { border-color: var(--dusty-aqua); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .google-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .google-btn svg { width: 24px; height: 24px; }
-        .auth-divider { display: flex; align-items: center; margin: 1.5rem 0; color: var(--text-muted); font-size: 0.9rem; }
-        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-light); }
-        .auth-divider span { padding: 0 1rem; }
-        .email-toggle-btn {
-            width: 100%; padding: 0.9rem; background: none;
-            border: 2px solid var(--dusty-aqua); border-radius: 12px;
-            color: var(--dusty-aqua); font-family: inherit; font-size: 1rem;
-            font-weight: 500; cursor: pointer; transition: all 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-        }
-        .email-toggle-btn:hover { background: var(--dusty-aqua); color: var(--pure-white); }
-        .form-group { margin-bottom: 1rem; }
-        .form-group input {
-            width: 100%; padding: 1rem 1.2rem; border: 2px solid var(--border-light);
-            border-radius: 12px; font-size: 1rem; font-family: inherit;
-            transition: all 0.3s; text-align: right;
-            background: var(--bg-primary); color: var(--text-dark);
-        }
-        .form-group input:focus { outline: none; border-color: var(--dusty-aqua); box-shadow: 0 0 0 4px rgba(47,133,146,0.1); }
-        .auth-form-actions { display: flex; gap: 0.8rem; margin-top: 1rem; }
-        .auth-form-actions button {
-            flex: 1; padding: 0.9rem; border-radius: var(--radius-sm);
-            font-family: inherit; font-size: 1rem; font-weight: 600;
-            cursor: pointer; transition: all 0.3s;
-        }
-        .auth-btn-primary { background: var(--gradient-gold); border: none; color: var(--sidebar-dark); }
-        .auth-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--gold-glow); }
-        .auth-btn-secondary { background: none; border: 2px solid var(--dusty-aqua); color: var(--dusty-aqua); }
-        .auth-btn-secondary:hover { background: var(--dusty-aqua); color: var(--pure-white); }
-        .auth-btn-primary:disabled, .auth-btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .auth-error { background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; display: none; text-align: right; }
-        .auth-error.show { display: block; }
-        .back-to-social { margin-top: 1.5rem; text-align: center; }
-        .back-to-social button { background: none; border: none; color: var(--dusty-aqua); font-family: inherit; font-size: 0.9rem; cursor: pointer; text-decoration: underline; }
-        .back-to-social button:hover { color: var(--deep-petrol); }
-        .success-message { display: none; text-align: center; padding: 2rem; }
-        .success-message.show { display: block; }
-        .success-message .check-icon {
-            width: 80px; height: 80px;
-            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
-            border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; margin: 0 auto 1.5rem;
-            font-size: 2.5rem; color: white;
-        }
+        .quick-card:hover .quick-card-arrow { color: var(--dusty-aqua); }
 
         /* ===== Responsive ===== */
         @media (max-width: 768px) {
-            .portal-hero { padding: 7rem 1.5rem 3.5rem; }
-            .portal-hero h1 { font-size: 2rem; }
-            .portal-hero-stats { gap: 1.5rem; }
-            .portal-hero-stat .number { font-size: 1.7rem; }
-            .overview-grid { grid-template-columns: 1fr; gap: 1rem; }
-            .tools-grid { grid-template-columns: repeat(2, 1fr); }
-            .benefits-grid { grid-template-columns: 1fr; }
-            .portal-section { padding: 3rem 1.2rem; }
-            .benefits-actions .btn-signup { display: flex; width: 100%; justify-content: center; }
+            .welcome-banner { padding: 6rem 1.2rem 2rem; }
+            .welcome-banner h1 { font-size: 1.8rem; }
+            .welcome-banner p { font-size: 0.95rem; }
+            .portal-content { padding: 1rem; gap: 1rem; }
+            .quick-grid { grid-template-columns: 1fr; }
+            .bulletin-board, .video-section { padding: 1rem 1.2rem; }
         }
         @media (max-width: 480px) {
-            .tools-grid { grid-template-columns: 1fr; }
-            .portal-hero h1 { font-size: 1.6rem; }
+            .welcome-banner h1 { font-size: 1.5rem; }
+            .quick-card { padding: 1rem; }
+            .quick-card-icon { width: 42px; height: 42px; font-size: 1.1rem; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -424,144 +334,79 @@
     </nav>
 
     <main id="main-content">
-        <!-- Hero -->
-        <section class="portal-hero">
-            <div class="portal-hero-badge">
-                <i class="fa-solid fa-graduation-cap"></i>
-                למידה מקצועית &bull; חינמית &bull; בקצב שלך
-            </div>
-            <h1>פורטל הלמידה</h1>
-            <p>הכל במקום אחד — שיעורי וידאו מקצועיים, כלים ליישום, ותוכן שילווה אתכם בדרך.</p>
-            <div class="portal-hero-stats">
-                <div class="portal-hero-stat">
-                    <span class="number">51</span>
-                    <span class="label">שיעורים</span>
-                </div>
-                <div class="portal-hero-stat">
-                    <span class="number">7</span>
-                    <span class="label">מודולים</span>
-                </div>
-                <div class="portal-hero-stat">
-                    <span class="number">70+</span>
-                    <span class="label">שעות תוכן</span>
-                </div>
-            </div>
-            <div class="portal-hero-buttons">
-                <a href="course-library.html" class="portal-hero-cta" style="text-decoration:none;">
-                    <i class="fa-solid fa-play"></i>
-                    התחילו ללמוד
-                </a>
-                <a href="course-library.html" class="portal-hero-cta-secondary" style="text-decoration:none;">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                    לספריית הקורסים
-                </a>
-            </div>
+        <!-- Welcome Banner -->
+        <section class="welcome-banner">
+            <h1>ברוך הבא לפורטל</h1>
+            <p>הכל במקום אחד — שיעורים, כלים ותוכן מקצועי</p>
         </section>
 
-        <!-- Overview -->
-        <section class="portal-section">
-            <div class="portal-section-header">
-                <div class="portal-section-eyebrow">מה בפנים?</div>
-                <h2 class="portal-section-title">מה מחכה לכם בפורטל</h2>
-                <p class="portal-section-subtitle">הפורטל כולל את כל מה שצריך כדי ללמוד ולהתפתח בעולמות הטיפול והאימון</p>
-            </div>
-            <div class="overview-grid">
-                <div class="overview-card">
-                    <div class="overview-card-icon"><i class="fa-solid fa-video"></i></div>
-                    <h4>51 שיעורי וידאו</h4>
-                    <p>שיעורים מצולמים באיכות גבוהה, מחולקים ל-7 מודולים</p>
+        <div class="portal-content">
+            <!-- Bulletin Board -->
+            <section class="bulletin-board" aria-label="לוח מודעות">
+                <div class="bulletin-header">
+                    <div class="bulletin-icon"><i class="fa-solid fa-bullhorn"></i></div>
+                    <h3>לוח מודעות</h3>
                 </div>
-                <div class="overview-card">
-                    <div class="overview-card-icon"><i class="fa-solid fa-brain"></i></div>
-                    <h4>תוכן מקצועי</h4>
-                    <p>מהבסיס ועד טכניקות מתקדמות — NLP Practitioner מלא</p>
-                </div>
-                <div class="overview-card">
-                    <div class="overview-card-icon"><i class="fa-solid fa-trophy"></i></div>
-                    <h4>למידה בקצב שלך</h4>
-                    <p>צפו מתי שנוח לכם, חזרו על שיעורים ועקבו אחרי ההתקדמות</p>
-                </div>
-            </div>
-        </section>
+                <div class="bulletin-messages" id="bulletinMessages" aria-live="polite"></div>
+                <div class="bulletin-dots" id="bulletinDots" role="tablist" aria-label="ניווט הודעות"></div>
+            </section>
 
-        <!-- Tools -->
-        <section class="tools-section">
-            <div class="portal-section" style="padding-bottom: 3rem;">
-                <div class="portal-section-header">
-                    <div class="portal-section-eyebrow">כלים ליישום</div>
-                    <h2 class="portal-section-title">לא רק תיאוריה — כלים לתרגול</h2>
-                    <p class="portal-section-subtitle">הפורטל כולל כלים שיעזרו לכם ליישם את מה שלמדתם</p>
+            <!-- Embedded Video -->
+            <section class="video-section">
+                <div class="video-section-title">
+                    <div class="video-section-icon"><i class="fa-solid fa-circle-play"></i></div>
+                    <h3>איך הפלטפורמה עובדת?</h3>
                 </div>
-                <div class="tools-grid">
-                    <div class="tool-card">
-                        <span class="tool-badge available"><i class="fa-solid fa-lock"></i> לרשומים בלבד</span>
-                        <div class="tool-card-icon" style="background: var(--frost-white); color: var(--dusty-aqua);">
-                            <i class="fa-solid fa-book"></i>
-                        </div>
-                        <h4>חוברת עבודה</h4>
-                        <p>חוברת PDF מלווה עם תרגילים לכל שיעור</p>
-                    </div>
-                    <div class="tool-card">
-                        <span class="tool-badge available"><i class="fa-solid fa-lock"></i> לרשומים בלבד</span>
-                        <div class="tool-card-icon" style="background: var(--frost-white); color: var(--dusty-aqua);">
-                            <i class="fa-solid fa-file-lines"></i>
-                        </div>
-                        <h4>סיכומי שיעורים</h4>
-                        <p>סיכומים מפורטים של כל שיעור להורדה</p>
-                    </div>
-                    <div class="tool-card">
-                        <span class="tool-badge available"><i class="fa-solid fa-lock"></i> לרשומים בלבד</span>
-                        <div class="tool-card-icon" style="background: rgba(216, 175, 71, 0.1); color: var(--gold);">
-                            <i class="fa-solid fa-robot"></i>
-                        </div>
-                        <h4>מורה AI אישי</h4>
-                        <p>שאלו שאלות, תרגלו ותקבלו משוב מותאם</p>
-                    </div>
-                    <div class="tool-card">
-                        <span class="tool-badge available"><i class="fa-solid fa-lock"></i> לרשומים בלבד</span>
-                        <div class="tool-card-icon" style="background: rgba(216, 175, 71, 0.1); color: var(--gold);">
-                            <i class="fa-solid fa-gamepad"></i>
-                        </div>
-                        <h4>משחק תרגול מקצועי</h4>
-                        <p>תרגול החומר בצורה מהנה ואינטראקטיבית — XP, רמות והישגים</p>
+                <div class="video-container">
+                    <!-- Replace with YouTube iframe when ready:
+                    <iframe src="https://www.youtube.com/embed/VIDEO_ID" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    -->
+                    <div class="video-placeholder">
+                        <i class="fa-solid fa-play-circle"></i>
+                        <span>סרטון הסבר יעלה כאן בקרוב</span>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Benefits -->
-        <section class="benefits-section">
-            <div class="portal-section">
-                <div class="portal-section-header">
-                    <div class="portal-section-eyebrow">הרשמה חינמית</div>
-                    <h2 class="portal-section-title">רוצים חוויית למידה מלאה?</h2>
-                    <p class="portal-section-subtitle">הירשמו בחינם וקבלו גישה לכל הכלים והתכנים</p>
-                </div>
-                <div class="benefits-grid">
-                    <div class="benefit-card">
-                        <div class="benefit-card-icon"><i class="fa-solid fa-chart-line"></i></div>
-                        <h4>שמירת התקדמות</h4>
-                        <p>המערכת שומרת איפה עצרתם ומראה את ההתקדמות</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-card-icon"><i class="fa-solid fa-robot"></i></div>
-                        <h4>מורה AI אישי</h4>
-                        <p>שאלו שאלות, תרגלו מיומנויות ותקבלו תשובות מותאמות</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-card-icon"><i class="fa-solid fa-download"></i></div>
-                        <h4>חומרי עזר להורדה</h4>
-                        <p>חוברות, סיכומים ותרגילים — הכל בגישה מלאה</p>
-                    </div>
-                </div>
-                <div class="benefits-actions">
-                    <a href="course-library.html" class="btn-signup btn-signup-gold" style="text-decoration:none;display:inline-flex;">
-                        <i class="fa-solid fa-play"></i>
-                        התחילו ללמוד בחינם
+            <!-- Quick Access -->
+            <section>
+                <h3 class="quick-access-title">גישה מהירה</h3>
+                <div class="quick-grid">
+                    <a href="course-library.html" class="quick-card">
+                        <div class="quick-card-icon gold"><i class="fa-solid fa-play"></i></div>
+                        <div class="quick-card-text">
+                            <h4>ספריית הקורסים</h4>
+                            <p>51 שיעורי וידאו ב-7 מודולים</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-left quick-card-arrow"></i>
+                    </a>
+                    <a href="learning-booklets.html" class="quick-card">
+                        <div class="quick-card-icon teal"><i class="fa-solid fa-book"></i></div>
+                        <div class="quick-card-text">
+                            <h4>חוברות עבודה</h4>
+                            <p>תרגילים מעשיים לכל שיעור</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-left quick-card-arrow"></i>
+                    </a>
+                    <a href="learning-summaries.html" class="quick-card">
+                        <div class="quick-card-icon teal"><i class="fa-solid fa-file-lines"></i></div>
+                        <div class="quick-card-text">
+                            <h4>סיכומי שיעורים</h4>
+                            <p>סיכומים מפורטים להורדה</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-left quick-card-arrow"></i>
+                    </a>
+                    <a href="learning-master.html" class="quick-card">
+                        <div class="quick-card-icon gold"><i class="fa-solid fa-scroll"></i></div>
+                        <div class="quick-card-text">
+                            <h4>קורס מאסטר</h4>
+                            <p>שיעורי העמקה ברמה מתקדמת</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-left quick-card-arrow"></i>
                     </a>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -626,6 +471,55 @@
         });
         document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', closeMobileMenu));
         window.addEventListener('resize', () => { if (window.innerWidth > 768 && menuOpen) closeMobileMenu(); });
+
+        // ===== Bulletin Board =====
+        const bulletinData = [
+            { icon: 'fa-solid fa-star', text: 'חדש! קורס NLP Practitioner מלא — 51 שיעורים בחינם' },
+            { icon: 'fa-solid fa-robot', text: 'מורה AI אישי זמין עכשיו בתוך הפורטל' },
+            { icon: 'fa-solid fa-download', text: 'חוברות עבודה וסיכומי שיעורים — להורדה חינם' },
+            { icon: 'fa-solid fa-gamepad', text: 'משחק תרגול מקצועי חדש — XP, רמות והישגים' }
+        ];
+
+        let currentMsg = 0;
+        let bulletinInterval;
+
+        function initBulletin() {
+            const container = document.getElementById('bulletinMessages');
+            const dotsContainer = document.getElementById('bulletinDots');
+
+            container.innerHTML = bulletinData.map((msg, i) =>
+                '<div class="bulletin-msg' + (i === 0 ? ' active' : '') + '">' +
+                '<i class="' + msg.icon + '"></i><span>' + msg.text + '</span></div>'
+            ).join('');
+
+            dotsContainer.innerHTML = bulletinData.map((_, i) =>
+                '<button class="bulletin-dot' + (i === 0 ? ' active' : '') + '" role="tab" aria-label="הודעה ' + (i + 1) + '" onclick="goToMsg(' + i + ')"></button>'
+            ).join('');
+
+            bulletinInterval = setInterval(nextMsg, 5000);
+        }
+
+        function nextMsg() {
+            showMsg((currentMsg + 1) % bulletinData.length);
+        }
+
+        function goToMsg(idx) {
+            clearInterval(bulletinInterval);
+            showMsg(idx);
+            bulletinInterval = setInterval(nextMsg, 5000);
+        }
+
+        function showMsg(idx) {
+            const msgs = document.querySelectorAll('.bulletin-msg');
+            const dots = document.querySelectorAll('.bulletin-dot');
+            msgs[currentMsg].classList.remove('active');
+            dots[currentMsg].classList.remove('active');
+            currentMsg = idx;
+            msgs[currentMsg].classList.add('active');
+            dots[currentMsg].classList.add('active');
+        }
+
+        initBulletin();
     </script>
 </body>
 </html>

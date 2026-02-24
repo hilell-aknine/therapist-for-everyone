@@ -2719,8 +2719,8 @@
                 <div class="tabs-section">
                     <div class="tabs-header" role="tablist" aria-label="תוכן השיעור">
                         <button class="tab-btn active" onclick="switchTab('summary')" role="tab" aria-selected="true" aria-controls="summaryPanel" id="summaryTabBtn">
-                            <i class="fa-solid fa-file-lines"></i>
-                            סיכום השיעור
+                            <i class="fa-brands fa-whatsapp"></i>
+                            קבוצת עדכונים
                         </button>
                         <button class="tab-btn" onclick="switchTab('resources')" id="resourcesTab" role="tab" aria-selected="false" aria-controls="resourcesPanel">
                             <i class="fa-solid fa-download"></i>
@@ -2745,19 +2745,20 @@
                     </div>
 
                     <div class="tabs-content">
-                        <!-- Summary Tab -->
+                        <!-- WhatsApp Group Tab -->
                         <div class="tab-panel active" id="summaryPanel" role="tabpanel" aria-labelledby="summaryTabBtn">
-                            <div class="lesson-description">
-                                <h3 id="lessonDescTitle">ברוכים הבאים לקורס NLP</h3>
-                                <p id="lessonDescText">
-                                    בחרו שיעור מהתפריט כדי לראות את תיאור השיעור כאן.
-                                </p>
-                                <div class="lesson-tags" id="lessonTagsContainer">
-                                    <span class="lesson-tag">NLP</span>
-                                    <span class="lesson-tag">תקשורת</span>
-                                    <span class="lesson-tag">התפתחות אישית</span>
-                                    <span class="lesson-tag">טיפול</span>
+                            <div style="text-align: center; padding: 2rem 1rem;">
+                                <div style="width: 64px; height: 64px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem; font-size: 1.8rem; color: #fff;">
+                                    <i class="fa-brands fa-whatsapp"></i>
                                 </div>
+                                <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--t-text, #111);">הצטרפו לקבוצת העדכונים שלנו</h3>
+                                <p style="color: var(--t-text-secondary, #6b7280); margin-bottom: 1.5rem; line-height: 1.7; max-width: 400px; margin-left: auto; margin-right: auto;">
+                                    קבלו עדכונים על אירועים, הטבות בלעדיות, תכנים חדשים וטיפים מקצועיים — ישירות לוואטסאפ
+                                </p>
+                                <a href="#" id="whatsappGroupLink" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.6rem; background: #25D366; color: #fff; padding: 0.85rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1.05rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 10px rgba(37,211,102,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 15px rgba(37,211,102,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 10px rgba(37,211,102,0.3)'">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                    הצטרפו לקבוצה
+                                </a>
                             </div>
                         </div>
 
@@ -3772,8 +3773,9 @@
             loading.classList.remove('active');
             thumbnail.style.display = 'none';
 
-            // Update UI text — title, description, and tags
-            document.getElementById('lessonDescTitle').textContent = lesson.title;
+            // Update UI text
+            const descTitle = document.getElementById('lessonDescTitle');
+            if (descTitle) descTitle.textContent = lesson.title;
             const descEl = document.getElementById('lessonDescText');
             if (descEl) {
                 const moduleData = modules[moduleIndex];

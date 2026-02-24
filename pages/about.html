@@ -117,47 +117,24 @@
 
         .letter-card p:last-child { margin-bottom: 0; }
 
+        .letter-list {
+            list-style: none; padding: 0; margin: 0.5rem 0 0;
+        }
+        .letter-list li {
+            position: relative; padding-right: 1.5rem;
+            color: var(--text-dark); font-size: 1.05rem;
+            line-height: 1.9; margin-bottom: 0.3rem;
+        }
+        .letter-list li::before {
+            content: ''; position: absolute; right: 0; top: 0.75rem;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--gold);
+        }
+
         .letter-highlight {
             font-family: var(--font-display);
             font-weight: 700; font-size: 1.15rem;
             color: var(--text-dark);
-        }
-
-        /* Three Pillars */
-        .pillars { padding: 6rem 2rem; background: var(--deep-petrol); color: var(--pure-white); }
-        .pillars .section-title { color: var(--pure-white); }
-
-        .pillars-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem; max-width: 950px; margin: 0 auto;
-        }
-
-        .pillar-card {
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 14px; padding: 2.5rem 2rem; text-align: center;
-            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
-        }
-
-        .pillar-card:hover {
-            background: rgba(255,255,255,0.06);
-            transform: translateY(-4px);
-        }
-
-        .pillar-icon {
-            width: 64px; height: 64px; border-radius: 50%;
-            background: rgba(212,175,55,0.1); color: var(--gold);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; margin: 0 auto 1.2rem;
-            border: 1px solid rgba(212,175,55,0.15);
-        }
-
-        .pillar-card h3 {
-            font-family: var(--font-display);
-            font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;
-        }
-
-        .pillar-card p {
-            color: var(--frost-white); font-size: 0.9rem; line-height: 1.75; opacity: 0.8;
         }
 
         /* Founders Section */
@@ -166,6 +143,7 @@
         .founders-grid {
             display: grid; grid-template-columns: 1fr 1fr;
             gap: 2rem; max-width: 1000px; margin: 0 auto;
+            align-items: start;
         }
 
         .founder-card {
@@ -210,6 +188,31 @@
 
         .founder-card p:last-child { margin-bottom: 0; }
 
+        .founder-more {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .founder-card.expanded .founder-more {
+            max-height: 600px;
+        }
+
+        .read-more-btn {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: none; border: none; cursor: pointer;
+            color: var(--t-gold-text, #8B6914); font-family: var(--font-body);
+            font-size: 0.9rem; font-weight: 600;
+            padding: 0.5rem 0; margin-top: 0.8rem;
+            transition: gap 0.3s;
+        }
+        .read-more-btn:hover { gap: 0.6rem; }
+        .read-more-btn i {
+            font-size: 0.7rem;
+            transition: transform 0.3s;
+        }
+        .founder-card.expanded .read-more-btn i {
+            transform: rotate(180deg);
+        }
+
         /* CTA */
         .cta-section {
             padding: 6rem 2rem; background: var(--muted-teal);
@@ -240,20 +243,12 @@
         .btn-outline { background: transparent; color: var(--pure-white); border: 2px solid rgba(255,255,255,0.4); }
         .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: var(--pure-white); transform: translateY(-2px); }
 
-        .pillar-link {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            color: var(--gold); font-size: 0.85rem; font-weight: 600;
-            text-decoration: none; margin-top: 1rem; transition: gap 0.3s;
-        }
-        .pillar-link:hover { gap: 0.7rem; }
-
         /* Responsive */
         @media (max-width: 768px) {
             .hero { padding: 7rem 1.5rem 0; }
             .hero h1 { font-size: 2rem; }
             .hero-founders { max-width: 90%; }
             .letter-card { padding: 2.5rem 1.5rem; }
-            .pillars-grid { grid-template-columns: 1fr; }
             .founders-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -298,56 +293,6 @@
         </div>
     </section>
 
-    <!-- Three Pillars -->
-    <section class="pillars">
-        <div class="section-header" data-reveal>
-            <div class="section-eyebrow">מה זה בית המטפלים</div>
-            <h2 class="section-title" style="color: var(--pure-white);">שלושת העמודים</h2>
-        </div>
-
-        <div class="pillars-grid">
-            <div class="pillar-card" data-reveal data-reveal-delay="1">
-                <div class="pillar-icon"><i class="fa-solid fa-book-open"></i></div>
-                <h3>פורטל לימודים חינמי</h3>
-                <p>51 שיעורי וידאו מקצועיים, סיכומים, AI Tutor ומבחנים — הכל בחינם וללא הרשמה.</p>
-                <a href="free-portal.html" class="pillar-link">לפורטל הלמידה <i class="fa-solid fa-arrow-left"></i></a>
-            </div>
-            <div class="pillar-card" data-reveal data-reveal-delay="2">
-                <div class="pillar-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-                <h3>תוכנית הכשרה מקצועית</h3>
-                <p>הכשרה שנתית עם הסמכה בינלאומית, ליווי אישי, מפגשים חודשיים וקהילה תומכת של מטפלים.</p>
-                <a href="training.html" class="pillar-link">לפרטים על ההכשרה <i class="fa-solid fa-arrow-left"></i></a>
-            </div>
-            <div class="pillar-card" data-reveal data-reveal-delay="3">
-                <div class="pillar-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
-                <h3>מיזם חברתי</h3>
-                <p>טיפול נפשי ב-100% מימון שלנו — ללוחמים, נפגעי נובה ולכל מי שאין לו יכולת כלכלית לטיפול.</p>
-                <a href="project-lobby.html" class="pillar-link">למיזם החברתי <i class="fa-solid fa-arrow-left"></i></a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Ram's Letter -->
-    <section class="letter-section">
-        <div class="section-header" data-reveal>
-            <div class="section-eyebrow">מכתב מרם, מייסד שותף בפרויקט</div>
-            <h2 class="section-title">הסיפור שלנו</h2>
-        </div>
-
-        <div class="letter-card" data-reveal>
-            <div class="letter-greeting">הייי חברים! איזה כיף שאתם כאן :)</div>
-            <div class="letter-note">כל מה שתקראו כאן נכתב על ידי, מהלב — בלי קופירייטר.</div>
-
-            <p class="letter-highlight">החלטתי להקדיש את המעשר שלי להקמת פרויקט חברתי — ״מטפל לכל אחד״.</p>
-
-            <p>המטרה: להנגיש טיפול נפשי מקצועי לפוסט-טראומתיים, הלומי קרב, נפגעי נובה ולוחמי חרבות ברזל — סשנים טיפוליים עם מטפלים מוסמכים ומנוסים, בחינם מלא. הילל (שותפי בפרויקט) נרתם אליי ויחד התחלנו לבנות.</p>
-
-            <p>תוך כדי הבנינו שיש כאן פוטנציאל למשהו גדול יותר. לי היה בית ספר ל-NLP שהכשיר 350+ מטפלים, ובשנתיים האחרונות שמתי את הקורס שלי בחינם ביוטיוב. הילל הציע שנבנה פורטל לימודים איכותי ונגיש לכולם — עם סיכומים, AI Tutor, מבחנים ועוד.</p>
-
-            <p class="letter-highlight">ואז הבנו שחסרה לנו עוד חתיכה: מה עם מי שרוצה תעודת הסמכה? ככה נולדה תוכנית ההכשרה המקצועית — ליווי, קהילה תומכת והסמכה בינלאומית למי שרוצה להפוך את הטיפול למקצוע.</p>
-        </div>
-    </section>
-
     <!-- Meet the Founders -->
     <section class="founders">
         <div class="section-header" data-reveal>
@@ -365,11 +310,18 @@
                 <h3 class="founder-name">רם</h3>
                 <div class="founder-role">מייסד שותף</div>
 
-                <p>מטפל NLP ויזם חברתי. הקמתי בית ספר ל-NLP שהכשיר 350+ מטפלים, ובשנתיים האחרונות העליתי את כל קורס ה-NLP שלי בחינם ליוטיוב — כדי שכל אחד יוכל ללמוד.</p>
+                <p>התחלתי את מסע היזמות שלי ב-2021 עם עסק לירידה במשקל בשם ״תודעה מחטבת״ — עסק שמשלב את עולמות הכושר והתזונה עם עולמות ה-NLP והריפוי הרגשי. משם הייתי מטפל בקליניקה ועזרתי לעשרות אנשים שבאו אליי ל-1 על 1.</p>
 
-                <p>ב-7 באוקטובר לחמתי כשריונר. כשחזרתי הביתה — מדוכא ואובדני — תהליכי הריפוי והטיפול שעברתי הצילו לי את החיים. מאז אני מאמין שכל אדם, ובפרט לוחמים, צריכים לקבל את זה בלי שזו תהיה פריווילגיה.</p>
+                <p>לאחר מכן המשכתי ל״מועדון היזמים״ והייתי שם יועץ עסקי, ראש צוות יועצים, מנהל השיווק וסמנכ״ל. בנוסף פתחתי בית ספר ל-NLP עם עומרי כהן ומתן ניסטור שהכשרנו בו 350+ מטפלים.</p>
 
-                <p>זו הסיבה שהקמתי את בית המטפלים — כדי שטיפול מקצועי ואיכותי יהיה נגיש לכולם.</p>
+                <div class="founder-more">
+                    <p>לימים פתחתי עמותה בשם ״ה-20 החדש״ שמטרתה הייתה להנגיש קורסים וידע בחינם לחבר׳ה בגילאי ה-20, ולאחר חצי שנה אינטנסיבית עם 21 חברי צוות ואופרציה גדולה, הבנתי שזה גדול עליי וסגרתי אותה.</p>
+
+                    <p>ב-7.10 לחמתי כשריונר למשך חודש וקצת. כשסיימתי את השירות חזרתי הביתה מדוכא ואובדני. תהליכי הריפוי והטיפול שעברתי הצילו לי את החיים, ואני מאמין שכל אדם (ובפרט לוחמים) צריכים לקבל את זה מבלי שזו תהיה פריווילגיה.</p>
+
+                    <p>בשנה וחצי האחרונות אני במסע חזרה בתשובה אל הבורא הטוב והמיטיב. אני מלמד תורה, יהדות וקבלה ברשתות החברתיות להנאתי, ואני שותף בעסק בשם ״כנות״ עם רועי בן יוסף שקיים כבר 13 שנה ומעביר תהליכי משני חיים לאנשים שרוצים ללמוד איך להרוויח (בכל תחום) ממי שהם בעולם.</p>
+                </div>
+                <button class="read-more-btn" onclick="toggleFounder(this)" aria-expanded="false">קרא עוד <i class="fa-solid fa-chevron-down"></i></button>
             </div>
 
             <!-- Hillel -->
@@ -377,12 +329,59 @@
                 <h3 class="founder-name">הילל אקנין</h3>
                 <div class="founder-role">מייסד שותף</div>
 
-                <p>איש משפחה, יזם ואיש טכנולוגיה. נכנסתי לעולם ה-NLP לפני 4 שנים — אבא צעיר שחיפש כלים לגדל משפחה בריאה. כבר בשיעור השני הרגשתי שאני זורע עץ סקויה בתוכי, ומאז לא הפסקתי ללמוד ולצמוח.</p>
+                <p>מעל הכל אני ילד מגודל ואיש משפחה, והתשוקה הגדולה שלי היא לעזור לכמה שיותר אנשי רוח ועומק להגשים את עצמם ולהפוך את הניסיון והייחודיות שלהם לכלים פשוטים, חמים ואנושיים.</p>
 
-                <p>אחרי ה-7 באוקטובר, כשראיתי חברים שנתנו הכל עבורנו לא מקבלים מענה מקצועי מספיק — הבנתי שאני רוצה לשנות את המצב. כשרם הציע להקים את הפרויקט, קפצתי למסע הזה ביחד איתו.</p>
+                <p>אני מאמין שהאנשים החשובים ביותר בחברה הישראלית היום הם המטפלים והמאמנים. אלו שמחזיקים את התקווה והמרפא כשהכול סביב רועש, ומזכירים לנו שגם מתוך הקושי אפשר לצמוח.</p>
 
-                <p>מעל עשור בעולם העסקים והטכנולוגיה, והשאיפה שלי היא לחבר את כל העולמות האלה למשהו נגיש שמשנה את החברה — ש״בית המטפלים״ יהיה הכתובת לכל מי שרוצה לעזור, להפיץ אור ולהתפרנס ממקצוע אמיתי בכבוד.</p>
+                <div class="founder-more">
+                    <p>נפגשתי עם עולם הטיפול לפני 4 שנים — אבא לתינוקות מבוהל שמפחד איך במציאות הזו אוכל לגדל משפחה בריאה בכל ההיבטים. במקרה לחלוטין נרשמתי לקורס NLP כשלא היה לי מושג מה זה, כי זה היה ממש זול והבטיח לשנות לי את החיים.</p>
+
+                    <p>כבר בשיעור השני אמרתי למרצה שאני מרגיש שאני זורע עץ סקויה (העץ הגדול בעולם) בתוכי ושזה רק ילך ויתעצם. ובאמת מאז אני לומד כל הזמן ומשכלל את הנכס הכי חשוב שיש לי בחיים — אני והעולם הפנימי שלי.</p>
+
+                    <p>לאורך השנים האחרונות, בזמן שאני מרגיש שאני גדל ומתפתח, ובעיקר אחרי ה-7 באוקטובר — כשאני מאבד חברים טובים, רואה איך חברים שלי שנתנו הכל עבורנו לא מקבלים מענה מספיק מקצועי והשיח מאוד ציני — הבנתי שאני רוצה לשנות את המצב הזה. וכשרם הציע לי להצטרף לפרויקט המדהים והמחייב הזה, לא יכולתי להישאר אדיש וקפצתי אל המסע הזה ביחד איתו.</p>
+
+                    <p>מעל עשור שאני חי את עולם העסקים — היה לי עסק של תכשיטי יוקרה ויהלומים, הייתי שותף במועדון שמנגיש את עולם הבינה המלאכותית לעסקים קטנים, והשאיפה שלי היא לקחת את כל העולמות האלה — טכנולוגיה, עסקים והתפתחות אישית — ולשלב אותם למשהו נגיש שמשנה את החברה הישראלית.</p>
+
+                    <p>היום אני מקדיש את כולי כדי ש״בית המטפלים״ יהיה הכתובת לכל מי שיש לו תשוקה לעזור, להפיץ אור, למקצוע אמיתי שעוזר לאנשים ומפרנס אותם בכבוד.</p>
+                </div>
+                <button class="read-more-btn" onclick="toggleFounder(this)" aria-expanded="false">קרא עוד <i class="fa-solid fa-chevron-down"></i></button>
             </div>
+        </div>
+    </section>
+
+    <!-- Ram's Full Letter -->
+    <section class="letter-section">
+        <div class="section-header" data-reveal>
+            <div class="section-eyebrow">מכתב מרם, מייסד שותף בפרויקט</div>
+            <h2 class="section-title">הסיפור שלנו</h2>
+        </div>
+
+        <div class="letter-card" data-reveal>
+            <div class="letter-greeting">הייי חברים! איזה כיף שאתם כאן :)</div>
+            <div class="letter-note">כל מה שתקראו כאן נכתב על ידי ולא על ידי קופירייטר או משהו בסגנון. היה לי חשוב להעביר את הלב והכוונות שלי בתוך הכתב.</div>
+
+            <p>בעמוד הזה קצת נסביר יותר עלינו ועל בית המטפלים ולמה קמנו.</p>
+
+            <p>בינואר 2026 נסעתי לכנס שיווק עם חברי הטוב צביקה עינב לדובאי. בדרך הלוך במטוס, דיברנו על תרומת מעשר וצביקה שיתף אותי במעשר שהוא נתן כאשר היה ב״אבא חטוב״ לקבוצת הכדורסל שגדל בה ברמת השרון. הוא המליץ לי לתת את המעשר שלי לפרויקטים שמרגשים אותי ושאני חלק מהם, מהסיבה שכאשר אנחנו רק תורמים כסף מבלי להרגיש ולחוות את ההשפעה — זה הופך לאקט טכני ולא לאקט רגשי.</p>
+
+            <p class="letter-highlight">לקחתי את מה שהוא אמר והחלטתי שאני רוצה באמצעות המעשר שלי להקים פרויקט חברתי — ״מטפל לכל אחד״.</p>
+
+            <p>פרויקט שהמטרה שלו היא להנגיש לפוסט-טראומתיים, הלומי קרב, נפגעי נובה, לוחמי חרבות ברזל ועוד… סשנים טיפוליים עם מטפלים מוסמכים, מקצועיים ומנוסים כדי לאפשר להם ריפוי במתנה אחרי כל מה שעברו.</p>
+
+            <p>לפרויקט נרתם אליי הילל (מייסד ושותף בפרויקט) והתחלנו בבנייה שלו. תוך כדי העשייה, הבנו שיש כאן פוטנציאל למשהו גדול יותר.</p>
+
+            <p>לי בעבר היה מכללה ל-NLP שהכשירה במצטבר 350+ מטפלים בשיטת NLP Practitioner וגם NLP Master Practitioner, ובשנתיים האחרונות שמתי ביוטיוב את הקורס NLP שלי בחינם לצפייה ישירה (מה שגרם להמון אנשים להיחשף לתוכן הזה וליהנות ממנו). הילל הציע לי שנעלה רמה וממש נבנה לו פורטל לימודים איכותי בחינם שמונגש לכולם — עם חומרי לימוד, צ׳אטבוטים, סיכומים, מבחנים ועוד!</p>
+
+            <p>הבנו שיש לנו כאן משהו טוב בידיים, רק שחסר לנו את החתיכה האחרונה של הפאזל. מה אנחנו עושים עם כל מי שרוצה לקבל תעודת הסמכה רשמית?</p>
+
+            <p class="letter-highlight">ואז עלה הרעיון! נפתח את תוכנית ההכשרה המקצועית והמורחבת ביותר שיש — לאנשים שרוצים ללמוד טיפול, או למטפלים קיימים שרוצים להרחיב את סל הכלים שלהם ולהצטרף לליווי, תמיכה וקהילה תומכת!</p>
+
+            <p>וזה בעצם <strong>בית המטפלים</strong>:</p>
+            <ul class="letter-list">
+                <li>פורטל לימודים עם מלא תוכן משנה חיים</li>
+                <li>תוכנית הכשרה שנתית למטפלים</li>
+                <li>מיזם חברתי שמנגיש טיפול בחינם למי שצריך</li>
+            </ul>
         </div>
     </section>
 
@@ -460,6 +459,14 @@
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileMenu(); });
         document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', closeMobileMenu));
         window.addEventListener('resize', () => { if (window.innerWidth > 768 && menuOpen) closeMobileMenu(); });
+
+        // Read more toggle
+        function toggleFounder(btn) {
+            const card = btn.closest('.founder-card');
+            const expanded = card.classList.toggle('expanded');
+            btn.setAttribute('aria-expanded', expanded);
+            btn.firstChild.textContent = expanded ? 'סגור ' : 'קרא עוד ';
+        }
 
         // Scroll reveal
         const revealObserver = new IntersectionObserver((entries) => {

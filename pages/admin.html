@@ -914,7 +914,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
     <script>
-        // AUTH GUARD - Redirect to login if not authenticated
+        // AUTH GUARD - Redirect if not authenticated or not admin
         (async function() {
             const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
@@ -922,6 +922,17 @@
             const { data: { session } } = await tempClient.auth.getSession();
             if (!session) {
                 window.location.href = 'login.html';
+                return;
+            }
+            // Verify admin role
+            const { data: profile } = await tempClient
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+            if (!profile || profile.role !== 'admin') {
+                window.location.href = '../index.html';
+                return;
             }
         })();
     </script>

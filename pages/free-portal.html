@@ -3,11 +3,520 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <meta name="theme-color" content="#003B46">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta property="og:title" content="קורסים בחינם — בית המטפלים">
+    <meta property="og:description" content="פורטל למידה חינמי: קורסי NLP מלאים, כלים ליישום, אזור אישי ו-AI Tutor — הכל בחינם">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://therapist-for-everyone.vercel.app/pages/free-portal.html">
+    <meta property="og:image" content="https://therapist-for-everyone.vercel.app/assets/logo.png">
+    <meta property="og:locale" content="he_IL">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="../assets/icon-192.svg">
     <title>קורסים בחינם | בית המטפלים</title>
-    <meta http-equiv="refresh" content="0;url=course-library.html">
-    <script>window.location.replace('course-library.html');</script>
+    <meta name="description" content="פורטל הלמידה החינמי של בית המטפלים — קורסי NLP מלאים, חוברות עבודה, סיכומי שיעורים, אזור אישי ו-AI Tutor">
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="../css/accessibility.css">
+    <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <script src="../js/theme-toggle.js" defer></script>
+    <style>
+        /* Hero */
+        .hero {
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 5rem;
+            background: var(--deep-petrol);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .hero-bg-layer {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            will-change: transform;
+        }
+
+        .hero-bg-layer:nth-child(1) {
+            width: 600px; height: 600px;
+            top: 10%; right: -10%;
+            background: radial-gradient(circle, rgba(47, 133, 146, 0.25) 0%, transparent 70%);
+            animation: gentleFloat 25s ease-in-out infinite;
+        }
+
+        .hero-bg-layer:nth-child(2) {
+            width: 400px; height: 400px;
+            bottom: 10%; left: -5%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+            animation: gentleFloat 30s ease-in-out infinite reverse;
+        }
+
+        @keyframes gentleFloat {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-20px, 30px); }
+            66% { transform: translate(15px, -20px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50px;
+            padding: 0.4rem 1.2rem;
+            font-size: 0.85rem;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.2s forwards;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            color: var(--frost-white);
+            line-height: 1.25;
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.02em;
+            opacity: 0;
+            animation: fadeIn 0.7s ease-out 0.3s forwards;
+        }
+
+        .hero h1 .gold { color: var(--gold); }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: rgba(232, 241, 242, 0.85);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            opacity: 0;
+            animation: fadeIn 0.7s ease-out 0.5s forwards;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--gradient-gold);
+            color: #1a1a1a;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.9rem 2.4rem;
+            border-radius: var(--t-btn-radius, 10px);
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+            opacity: 0;
+            animation: fadeIn 0.7s ease-out 0.7s forwards;
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(212, 175, 55, 0.45);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 5rem 2rem;
+            background: var(--cream);
+        }
+
+        .features-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .features-header .section-eyebrow {
+            font-size: 0.85rem;
+            color: var(--dusty-aqua);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .features-header h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 4vw, 2.4rem);
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--pure-white);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--t-shadow-lg);
+        }
+
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .feature-icon.teal {
+            background: rgba(47, 133, 146, 0.12);
+            color: var(--dusty-aqua);
+        }
+
+        .feature-icon.gold {
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--gold);
+        }
+
+        .feature-icon.petrol {
+            background: rgba(0, 59, 70, 0.1);
+            color: var(--deep-petrol);
+        }
+
+        .feature-icon.green {
+            background: rgba(0, 184, 148, 0.1);
+            color: #00b894;
+        }
+
+        .feature-card h3 {
+            font-family: var(--font-body);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.6rem;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: var(--t-text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Bottom CTA */
+        .cta-section {
+            padding: 5rem 2rem;
+            background: var(--deep-petrol);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: var(--gradient-gold);
+            border-radius: 3px;
+        }
+
+        .cta-inner {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-section h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 800;
+            color: var(--frost-white);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.05rem;
+            color: rgba(232, 241, 242, 0.8);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--gradient-gold);
+            color: #1a1a1a;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.9rem 2.4rem;
+            border-radius: var(--t-btn-radius, 10px);
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(212, 175, 55, 0.45);
+        }
+
+        /* Dark mode adjustments */
+        [data-theme="dark"] .features-section {
+            background: var(--t-bg);
+        }
+
+        [data-theme="dark"] .feature-card {
+            background: var(--t-bg-card);
+            border-color: var(--t-border);
+        }
+
+        [data-theme="dark"] .feature-icon.teal {
+            background: rgba(59, 160, 172, 0.15);
+            color: var(--t-dusty-aqua);
+        }
+
+        [data-theme="dark"] .feature-icon.gold {
+            background: rgba(230, 198, 90, 0.12);
+            color: var(--t-gold);
+        }
+
+        [data-theme="dark"] .feature-icon.petrol {
+            background: rgba(59, 160, 172, 0.1);
+            color: var(--t-muted-teal);
+        }
+
+        [data-theme="dark"] .feature-icon.green {
+            background: rgba(63, 185, 80, 0.1);
+            color: #3fb950;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .hero { min-height: 70vh; padding: 7rem 1.5rem 3rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .features-section { padding: 3.5rem 1.5rem; }
+            .cta-section { padding: 3.5rem 1.5rem; }
+        }
+    </style>
 </head>
 <body>
-    <p style="text-align:center;font-family:sans-serif;padding:2rem;">מעביר לספריית הקורסים...</p>
+    <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
+    <div class="grain" aria-hidden="true"></div>
+
+    <nav class="navbar" aria-label="ניווט ראשי">
+        <a href="../index.html" class="logo">
+            <img src="../assets/logo.png" alt="בית המטפלים" class="logo-img">
+        </a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="../index.html">דף הבית</a></li>
+            <li><a href="about.html">עלינו</a></li>
+            <li><a href="free-portal.html" class="active">קורסים בחינם</a></li>
+            <li><a href="training.html">הכשרת מטפלים</a></li>
+            <li><a href="project-lobby.html">מיזם חברתי</a></li>
+            <div class="mobile-cta-group">
+                <a href="training.html" class="mobile-cta primary">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    להרשמה להכשרה
+                </a>
+            </div>
+        </ul>
+        <a href="training.html" class="nav-cta">להרשמה להכשרה</a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-expanded="false" aria-label="תפריט ניווט">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-bg" aria-hidden="true">
+            <div class="hero-bg-layer"></div>
+            <div class="hero-bg-layer"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-eyebrow">
+                <i class="fa-solid fa-gift"></i>
+                100% חינם, בלי הגבלות
+            </div>
+            <h1>הפורטל החינמי של<br><span class="gold">בית המטפלים</span></h1>
+            <p class="hero-subtitle">
+                קורסי NLP מלאים, כלים ליישום, אזור אישי עם מעקב התקדמות ו-AI Tutor — הכל במקום אחד, בחינם ופתוח לכולם
+            </p>
+            <a href="course-library.html" class="hero-cta">
+                <i class="fa-solid fa-play"></i>
+                כניסה לפורטל
+            </a>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features-section">
+        <div class="features-inner">
+            <div class="features-header" data-reveal>
+                <div class="section-eyebrow">מה מחכה לכם בפנים</div>
+                <h2>פורטל למידה מקצועי — בחינם</h2>
+            </div>
+
+            <div class="features-grid">
+                <!-- Card 1 -->
+                <div class="feature-card" data-reveal data-reveal-delay="1">
+                    <div class="feature-icon teal">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3>קורסים מקצועיים בחינם</h3>
+                    <p>קורס NLP Practitioner מלא עם 51 שיעורים ב-7 מודולים, וקורס NLP Master בקרוב — צפייה ישירה, בלי הרשמה</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="feature-card" data-reveal data-reveal-delay="2">
+                    <div class="feature-icon gold">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <h3>כלים ליישום</h3>
+                    <p>חוברות עבודה, סיכומי שיעורים וחומרי עזר שמלווים את הקורס — כדי שתוכלו ליישם מה שלמדתם בחיים האמיתיים</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="feature-card" data-reveal data-reveal-delay="3">
+                    <div class="feature-icon petrol">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <h3>אזור אישי</h3>
+                    <p>מעקב התקדמות אוטומטי, מחברת הערות אישית, AI Tutor שעוזר לכם להבין כל נושא — חוויית למידה אישית</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="feature-card" data-reveal data-reveal-delay="4">
+                    <div class="feature-icon green">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <h3>לוח מודעות ועדכונים</h3>
+                    <p>חדשות מבית המטפלים, עדכונים על קורסים חדשים, אירועים קהילתיים ומבצעים — הכל במקום אחד</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom CTA -->
+    <section class="cta-section">
+        <div class="cta-inner">
+            <h2>מוכנים להתחיל?</h2>
+            <p>הפורטל פתוח לכולם — בחרו קורס, התחילו לצפות, ותנו לתהליך לעשות את שלו</p>
+            <a href="course-library.html" class="cta-btn">
+                <i class="fa-solid fa-rocket"></i>
+                התחילו ללמוד עכשיו
+            </a>
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="../index.html" class="footer-logo">
+                    <img src="../assets/logo-dark.png" alt="בית המטפלים" class="footer-logo-img">
+                </a>
+                <p>קהילה מקצועית שמנגישה ריפוי, ידע והכשרה<br>לכל מי שרוצה לעזור או להירפא</p>
+            </div>
+            <div class="footer-links">
+                <h4>תוכן חינמי</h4>
+                <ul>
+                    <li><a href="course-library.html">פורטל למידה</a></li>
+                    <li><a href="courses.html">קורסים מקצועיים</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>הכשרות</h4>
+                <ul>
+                    <li><a href="training.html">תוכנית ההכשרה</a></li>
+                    <li><a href="about.html">מי אנחנו</a></li>
+                    <li><a href="project-lobby.html">מיזם חברתי</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>משפטי</h4>
+                <ul>
+                    <li><a href="../privacy-policy.html">מדיניות פרטיות</a></li>
+                    <li><a href="../legal-gate.html">תנאי שימוש</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 בית המטפלים. כל הזכויות שמורות.</p>
+        </div>
+    </footer>
+
+    <script src="../js/marketing-tools.js" defer></script>
+    <script>
+        function toggleMobileMenu() {
+            const nav = document.getElementById('navLinks');
+            const btn = document.getElementById('mobileMenuBtn');
+            const isOpen = nav.classList.toggle('active');
+            btn.setAttribute('aria-expanded', isOpen);
+            btn.innerHTML = isOpen ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
+        }
+
+        // Scroll reveal
+        const revealEls = document.querySelectorAll('[data-reveal]');
+        if (revealEls.length) {
+            const obs = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        const delay = e.target.dataset.revealDelay || 0;
+                        e.target.style.transitionDelay = (delay * 0.15) + 's';
+                        e.target.classList.add('revealed');
+                        obs.unobserve(e.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+            revealEls.forEach(el => obs.observe(el));
+        }
+    </script>
 </body>
 </html>

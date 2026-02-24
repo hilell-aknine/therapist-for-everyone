@@ -162,7 +162,7 @@
     function isLearningPage() {
         var path = window.location.pathname.toLowerCase();
         var learningPages = [
-            'free-portal', 'learning-summaries', 'learning-booklets',
+            'course-library', 'learning-summaries', 'learning-booklets',
             'learning-master', 'profile', 'login'
         ];
         return learningPages.some(function (p) { return path.indexOf(p) !== -1; });

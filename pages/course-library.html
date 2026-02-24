@@ -3296,21 +3296,7 @@
         const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
 
-        // ===== Auth Guard — redirect unauthenticated users =====
-        (async function authGuard() {
-            try {
-                const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                if (!client) return;
-                const { data: { session } } = await client.auth.getSession();
-                if (!session) {
-                    window.location.replace('free-portal.html');
-                    return;
-                }
-            } catch (e) {
-                console.error('Auth guard error:', e);
-                window.location.replace('free-portal.html');
-            }
-        })();
+        // Auth guard removed — portal is open to all visitors
 
         // ===== Module tags for lesson summary display =====
         const moduleTags = {

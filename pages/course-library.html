@@ -2730,6 +2730,7 @@
                         <button class="tab-btn" onclick="switchTab('notes')" role="tab" aria-selected="false" aria-controls="notesPanel" id="notesTabBtn">
                             <i class="fa-solid fa-pen-to-square"></i>
                             הערות אישיות
+                            <span class="lock-badge" id="notesLock">🔒</span>
                         </button>
                         <button class="tab-btn" onclick="switchTab('ai')" id="aiTab" role="tab" aria-selected="false" aria-controls="aiPanel">
                             <i class="fa-solid fa-robot"></i>
@@ -4039,6 +4040,8 @@
         function updateUI() {
             const resourcesLock = document.getElementById('resourcesLock');
             const aiLock = document.getElementById('aiLock');
+            const notesLock = document.getElementById('notesLock');
+            const gameLock = document.getElementById('gameLock');
             const workbookCard = document.getElementById('workbookCard');
             const summaryCard = document.getElementById('summaryCard');
             const aiLocked = document.getElementById('aiLocked');
@@ -4047,6 +4050,8 @@
             if (isAuthenticated) {
                 resourcesLock.style.display = 'none';
                 aiLock.style.display = 'none';
+                if (notesLock) notesLock.style.display = 'none';
+                if (gameLock) gameLock.style.display = 'none';
                 workbookCard.classList.remove('locked');
                 summaryCard.classList.remove('locked');
 
@@ -4068,6 +4073,8 @@
                 summaryCard.classList.add('locked');
                 resourcesLock.style.display = '';
                 aiLock.style.display = '';
+                if (notesLock) notesLock.style.display = '';
+                if (gameLock) gameLock.style.display = '';
                 aiLocked.style.display = '';
                 aiChat.style.display = 'none';
 
@@ -4108,7 +4115,15 @@
         }
 
         // ===== Tabs =====
+        const PREMIUM_TABS = ['resources', 'notes', 'ai', 'game'];
+
         function switchTab(tabName) {
+            // Gate premium tabs for guests
+            if (PREMIUM_TABS.includes(tabName) && !isAuthenticated) {
+                openModal();
+                return;
+            }
+
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
                 btn.setAttribute('aria-selected', 'false');
@@ -4384,6 +4399,7 @@
         let notesDebounceTimer = null;
 
         async function loadNotes() {
+            if (!isAuthenticated) return;
             const textarea = document.getElementById('notesTextarea');
             if (!textarea || !currentVideoId) return;
             const key = `notes_nlp_${currentVideoId}`;
@@ -4424,6 +4440,7 @@
         }
 
         function saveNotes() {
+            if (!isAuthenticated) return;
             const textarea = document.getElementById('notesTextarea');
             if (!textarea || !currentVideoId) return;
             const key = `notes_nlp_${currentVideoId}`;

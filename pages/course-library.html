@@ -2909,6 +2909,147 @@
                 font-size: 1.1rem;
             }
         }
+
+        /* ===== Welcome Dashboard (inside playerView) ===== */
+        .welcome-sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.75rem 1rem;
+            margin: 0 0.5rem 0.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(216, 175, 71, 0.08);
+            border: 1px solid rgba(216, 175, 71, 0.2);
+            color: var(--t-gold, #D4AF37);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .welcome-sidebar-item:hover {
+            background: rgba(216, 175, 71, 0.15);
+            border-color: rgba(216, 175, 71, 0.4);
+        }
+        .welcome-sidebar-item.active {
+            background: rgba(216, 175, 71, 0.18);
+            border-color: var(--t-gold, #D4AF37);
+            box-shadow: 0 0 8px rgba(216, 175, 71, 0.15);
+        }
+        .welcome-sidebar-item i { font-size: 1rem; }
+        .welcome-sidebar-sep {
+            border: none;
+            border-top: 1px solid var(--t-border, rgba(255,255,255,0.08));
+            margin: 0.3rem 0.5rem 0.5rem;
+        }
+
+        #welcomeDashboard {
+            padding: 0;
+            overflow-y: auto;
+            height: 100%;
+        }
+        .wd-banner {
+            background: linear-gradient(135deg, var(--t-deep-petrol, #0E5660) 0%, var(--t-muted-teal, #005C66) 50%, var(--t-dusty-aqua, #2A727C) 100%);
+            padding: 2rem 1.5rem 1.5rem;
+            text-align: center;
+            color: #fff;
+            border-radius: 0 0 16px 16px;
+        }
+        .wd-banner h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.3rem; }
+        .wd-banner p { font-size: 0.95rem; opacity: 0.85; }
+        .wd-content { padding: 1.2rem; display: flex; flex-direction: column; gap: 1.2rem; }
+
+        .wd-card {
+            background: var(--t-bg-card, #fff);
+            border: 1px solid var(--t-border, #e5e7eb);
+            border-radius: 14px;
+            padding: 1.2rem;
+        }
+        .wd-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.7rem;
+        }
+        .wd-card-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem;
+        }
+        .wd-card-icon.gold { background: rgba(216,175,71,0.12); color: var(--t-gold, #D4AF37); }
+        .wd-card-icon.teal { background: rgba(47,133,146,0.12); color: var(--t-dusty-aqua, #2A727C); }
+        .wd-card-header h3 { font-size: 0.95rem; font-weight: 700; color: var(--t-text, #2d3436); }
+
+        /* Bulletin */
+        .wd-bulletin-messages {
+            position: relative;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        .wd-bulletin-msg {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            font-size: 0.88rem;
+            color: var(--t-text, #2d3436);
+            line-height: 1.5;
+        }
+        .wd-bulletin-msg.active { opacity: 1; }
+        .wd-bulletin-msg i { color: var(--t-dusty-aqua, #2A727C); font-size: 0.75rem; flex-shrink: 0; }
+        .wd-bulletin-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.35rem;
+            margin-top: 0.6rem;
+        }
+        .wd-bulletin-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--t-border, #e5e7eb);
+            border: none; cursor: pointer;
+            transition: all 0.3s;
+            padding: 0;
+        }
+        .wd-bulletin-dot.active { background: var(--t-dusty-aqua, #2A727C); transform: scale(1.2); }
+
+        /* Video placeholder */
+        .wd-video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            border-radius: 10px;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--t-deep-petrol, #0E5660), var(--t-muted-teal, #005C66));
+        }
+        .wd-video-container iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
+        }
+        .wd-video-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            color: rgba(255,255,255,0.7);
+        }
+        .wd-video-placeholder i { font-size: 2.5rem; color: var(--t-gold, #D4AF37); }
+        .wd-video-placeholder span { font-size: 0.88rem; }
+
+        @media (max-width: 768px) {
+            .wd-banner { padding: 1.5rem 1rem 1rem; }
+            .wd-banner h2 { font-size: 1.3rem; }
+            .wd-content { padding: 0.8rem; gap: 0.8rem; }
+        }
     </style>
 </head>
 <body>
@@ -3088,6 +3229,43 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Welcome Dashboard (shown when "ברוך הבא" sidebar item is selected) -->
+            <div id="welcomeDashboard" style="display:none;">
+                <div class="wd-banner">
+                    <h2>ברוך הבא לפורטל</h2>
+                    <p>הכל במקום אחד — שיעורים, כלים ותוכן מקצועי</p>
+                </div>
+                <div class="wd-content">
+                    <!-- Bulletin Board -->
+                    <div class="wd-card">
+                        <div class="wd-card-header">
+                            <div class="wd-card-icon gold"><i class="fa-solid fa-bullhorn"></i></div>
+                            <h3>לוח מודעות</h3>
+                        </div>
+                        <div class="wd-bulletin-messages" id="wdBulletinMessages" aria-live="polite"></div>
+                        <div class="wd-bulletin-dots" id="wdBulletinDots" role="tablist" aria-label="ניווט הודעות"></div>
+                    </div>
+
+                    <!-- Video Section -->
+                    <div class="wd-card">
+                        <div class="wd-card-header">
+                            <div class="wd-card-icon teal"><i class="fa-solid fa-circle-play"></i></div>
+                            <h3>איך הפלטפורמה עובדת?</h3>
+                        </div>
+                        <div class="wd-video-container">
+                            <!-- Replace with YouTube iframe when ready:
+                            <iframe src="https://www.youtube.com/embed/VIDEO_ID" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            -->
+                            <div class="wd-video-placeholder">
+                                <i class="fa-solid fa-play-circle"></i>
+                                <span>סרטון הסבר יעלה כאן בקרוב</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
             <div class="video-section">
                 <div class="video-wrapper">
                     <div class="video-placeholder" id="videoPlaceholder">
@@ -3626,12 +3804,13 @@
             window.scrollTo(0, 0);
         }
 
-        function switchToPlayerView() {
+        function switchToPlayerView(showWelcome) {
             document.getElementById('portalHomeView').style.display = 'none';
             document.getElementById('playerView').style.display = '';
             document.querySelector('.course-header').classList.remove('portal-home-mode');
             document.querySelector('.mobile-toggle').style.display = '';
             currentView = 'player';
+            if (showWelcome) showWelcomeDashboard();
             window.scrollTo(0, 0);
         }
 
@@ -4131,7 +4310,14 @@
         // ===== Render Syllabus =====
         function renderSyllabus() {
             const syllabus = document.getElementById('syllabus');
-            syllabus.innerHTML = modules.map((module, mIndex) => {
+            const welcomeItem = `
+                <div class="welcome-sidebar-item active" id="welcomeSidebarItem" onclick="showWelcomeDashboard()">
+                    <i class="fa-solid fa-home"></i>
+                    <span>ברוך הבא לפורטל</span>
+                </div>
+                <hr class="welcome-sidebar-sep">
+            `;
+            syllabus.innerHTML = welcomeItem + modules.map((module, mIndex) => {
                 const completedInModule = module.lessons.filter((_, lIdx) =>
                     completedLessons.includes(`${mIndex}-${lIdx}`)
                 ).length;
@@ -4179,7 +4365,78 @@
         // ===== Select Lesson =====
         let _skipPushState = false; // Flag to avoid pushState on popstate/init
 
+        // ===== Welcome Dashboard =====
+        let wdBulletinInterval;
+        let wdCurrentMsg = 0;
+        const wdBulletinData = [
+            { icon: 'fa-solid fa-star', text: 'חדש! קורס NLP Practitioner מלא — 51 שיעורים בחינם' },
+            { icon: 'fa-solid fa-robot', text: 'מורה AI אישי זמין עכשיו בתוך הפורטל' },
+            { icon: 'fa-solid fa-download', text: 'חוברות עבודה וסיכומי שיעורים — להורדה חינם' },
+            { icon: 'fa-solid fa-gamepad', text: 'משחק תרגול מקצועי חדש — XP, רמות והישגים' }
+        ];
+
+        function initWdBulletin() {
+            const container = document.getElementById('wdBulletinMessages');
+            const dotsContainer = document.getElementById('wdBulletinDots');
+            if (!container) return;
+            container.innerHTML = wdBulletinData.map((msg, i) =>
+                '<div class="wd-bulletin-msg' + (i === 0 ? ' active' : '') + '">' +
+                '<i class="' + msg.icon + '"></i><span>' + msg.text + '</span></div>'
+            ).join('');
+            dotsContainer.innerHTML = wdBulletinData.map((_, i) =>
+                '<button class="wd-bulletin-dot' + (i === 0 ? ' active' : '') + '" role="tab" aria-label="הודעה ' + (i + 1) + '" onclick="wdGoToMsg(' + i + ')"></button>'
+            ).join('');
+            wdCurrentMsg = 0;
+            clearInterval(wdBulletinInterval);
+            wdBulletinInterval = setInterval(wdNextMsg, 5000);
+        }
+        function wdNextMsg() { wdShowMsg((wdCurrentMsg + 1) % wdBulletinData.length); }
+        function wdGoToMsg(idx) {
+            clearInterval(wdBulletinInterval);
+            wdShowMsg(idx);
+            wdBulletinInterval = setInterval(wdNextMsg, 5000);
+        }
+        function wdShowMsg(idx) {
+            const msgs = document.querySelectorAll('.wd-bulletin-msg');
+            const dots = document.querySelectorAll('.wd-bulletin-dot');
+            if (!msgs.length) return;
+            msgs[wdCurrentMsg].classList.remove('active');
+            dots[wdCurrentMsg].classList.remove('active');
+            wdCurrentMsg = idx;
+            msgs[wdCurrentMsg].classList.add('active');
+            dots[wdCurrentMsg].classList.add('active');
+        }
+
+        function showWelcomeDashboard() {
+            // Hide video section, show welcome dashboard
+            document.querySelector('.video-section').style.display = 'none';
+            document.getElementById('welcomeDashboard').style.display = '';
+            // Update sidebar: deselect all lessons, highlight welcome item
+            document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
+            const welcomeItem = document.getElementById('welcomeSidebarItem');
+            if (welcomeItem) welcomeItem.classList.add('active');
+            // Hide video nav bar
+            const navBar = document.getElementById('videoNavBar');
+            if (navBar) navBar.style.display = 'none';
+            // Init bulletin board
+            initWdBulletin();
+            // Close mobile sidebar if open
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
+        }
+
+        function hideWelcomeDashboard() {
+            document.getElementById('welcomeDashboard').style.display = 'none';
+            document.querySelector('.video-section').style.display = '';
+            const welcomeItem = document.getElementById('welcomeSidebarItem');
+            if (welcomeItem) welcomeItem.classList.remove('active');
+            clearInterval(wdBulletinInterval);
+        }
+
         function selectLesson(moduleIndex, lessonIndex, autoplay = false) {
+            // Hide welcome dashboard when a lesson is selected
+            hideWelcomeDashboard();
+
             // Registration wall at 50% — block new lessons for unauthenticated users
             const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
             const wallThreshold = Math.ceil(totalLessons * 0.5); // 26 out of 51

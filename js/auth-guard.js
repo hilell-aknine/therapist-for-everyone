@@ -292,7 +292,7 @@
                     window.location.href = 'patient-dashboard.html';
                     break;
                 case 'student_lead':
-                    window.location.href = 'pages/learning-portal.html';
+                    window.location.href = 'pages/free-portal.html';
                     break;
                 default:
                     window.location.href = 'index.html';

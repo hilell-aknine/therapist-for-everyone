@@ -8,7 +8,7 @@ const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-const DAILY_LIMIT = 50
+const DAILY_LIMIT = 200
 
 // ===== SYSTEM PROMPTS =====
 

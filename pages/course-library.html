@@ -5328,7 +5328,7 @@
                     }
                 );
 
-                if (!response.ok) {
+                if (!response.ok && response.status !== 429) {
                     const errorText = await response.text();
                     console.error('[AI Chat Direct] HTTP Error:', response.status, errorText);
                     appendAiMessage('bot', 'שגיאה בתקשורת עם המורה AI. נסו שוב.');
@@ -5337,6 +5337,11 @@
 
                 const data = await response.json();
                 console.log('[AI Chat Direct] Response OK, provider:', data.provider);
+
+                if (data.rateLimited) {
+                    appendRateLimitMessage();
+                    return;
+                }
 
                 if (data.error) {
                     appendAiMessage('bot', data.error);
@@ -5348,7 +5353,7 @@
                     if (data.remaining !== undefined) {
                         aiRemainingMessages = data.remaining;
                         const remainingEl = document.getElementById('aiRemaining');
-                        if (remainingEl) remainingEl.textContent = `${data.remaining}/50`;
+                        if (remainingEl) remainingEl.textContent = `${data.remaining}/200`;
                     }
                 }
             } catch (err) {
@@ -5558,7 +5563,7 @@
                 if (data.remaining !== undefined) {
                     aiRemainingMessages = data.remaining;
                     const remainEl = document.getElementById('aiRemaining');
-                    if (remainEl) remainEl.textContent = `${data.remaining}/50`;
+                    if (remainEl) remainEl.textContent = `${data.remaining}/200`;
                 }
 
             } catch (err) {
@@ -5635,9 +5640,15 @@
             const container = document.getElementById('aiMessages');
             const div = document.createElement('div');
             div.className = 'ai-rate-limit-msg';
-            div.innerHTML = '🕐 הגעת למגבלה של 50 הודעות היום. חזור מחר לשיחה נוספת!';
+            div.innerHTML = '😴 ניצלת את מכסת השאלות היומית שלך למורה ה-AI. המורה הלך לנוח, נתראה מחר להמשך למידה!';
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
+
+            // Disable input for the rest of the session
+            const input = document.getElementById('aiInput');
+            const sendBtn = document.getElementById('aiSendBtn');
+            if (input) { input.disabled = true; input.placeholder = 'המורה חזר מחר 😴'; }
+            if (sendBtn) sendBtn.disabled = true;
         }
 
         function escapeHtml(text) {

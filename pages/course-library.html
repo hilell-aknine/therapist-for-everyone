@@ -1243,6 +1243,36 @@
             color: var(--success);
         }
 
+        .notes-export-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-export-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.7rem;
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm, 6px);
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-export-note:hover {
+            border-color: var(--dusty-aqua);
+            color: var(--dusty-aqua);
+            background: rgba(47, 133, 146, 0.06);
+        }
+
+        .btn-export-note i {
+            font-size: 0.82rem;
+        }
+
         /* Tab 1: About */
         .lesson-description h3 {
             font-size: 1.3rem;
@@ -2947,7 +2977,17 @@
                                 <textarea class="notes-textarea" id="notesTextarea" placeholder="כתבו כאן את ההערות שלכם לשיעור זה..." oninput="handleNotesInput()"></textarea>
                                 <div class="notes-footer">
                                     <span class="notes-saved-indicator" id="notesSavedIndicator"></span>
-                                    <span id="notesCharCount">0 תווים</span>
+                                    <div style="display:flex;align-items:center;gap:0.8rem;">
+                                        <div class="notes-export-btns">
+                                            <button class="btn-export-note" onclick="exportNotesToPDF()" title="ייצוא ל-PDF">
+                                                <i class="fa-solid fa-file-pdf"></i> PDF
+                                            </button>
+                                            <button class="btn-export-note" onclick="exportNotesToWord()" title="ייצוא ל-Word">
+                                                <i class="fa-solid fa-file-word"></i> Word
+                                            </button>
+                                        </div>
+                                        <span id="notesCharCount">0 תווים</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3260,6 +3300,7 @@
 
     <!-- Toast -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
     <script src="../js/marketing-tools.js"></script>
     <script>
         // ===== Configuration =====
@@ -4819,6 +4860,85 @@
             }
         }
 
+        // ===== Notes Export Functions =====
+        function getNotesExportData() {
+            const textarea = document.getElementById('notesTextarea');
+            const content = textarea?.value?.trim();
+            if (!content) {
+                showToast('אין הערות לייצוא', 'warning');
+                return null;
+            }
+            const lesson = modules[currentModuleIndex]?.lessons[currentLessonIndex];
+            const moduleName = modules[currentModuleIndex]?.title || '';
+            const lessonTitle = lesson?.title || 'שיעור';
+            const date = new Date().toLocaleDateString('he-IL');
+            return { content, lessonTitle, moduleName, date };
+        }
+
+        function exportNotesToPDF() {
+            const data = getNotesExportData();
+            if (!data) return;
+
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <div style="direction:rtl;font-family:'Heebo',sans-serif;padding:20px;color:#1a1a1a;">
+                    <div style="border-bottom:2px solid #003B46;padding-bottom:12px;margin-bottom:20px;">
+                        <h1 style="margin:0 0 4px;font-size:20px;color:#003B46;">📝 ${data.lessonTitle}</h1>
+                        <p style="margin:0;font-size:13px;color:#666;">${data.moduleName} · ${data.date}</p>
+                    </div>
+                    <div style="font-size:14px;line-height:2;white-space:pre-wrap;">${data.content}</div>
+                    <div style="margin-top:30px;padding-top:10px;border-top:1px solid #ddd;font-size:11px;color:#999;text-align:center;">
+                        מטפל לכל אחד — הערות אישיות
+                    </div>
+                </div>
+            `;
+
+            const filename = `הערות_${data.lessonTitle.replace(/[^\u0590-\u05FFa-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '_')}.pdf`;
+            html2pdf().set({
+                margin: [10, 10, 10, 10],
+                filename,
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(container).save().then(() => {
+                showToast('הקובץ הורד בהצלחה!', 'success');
+            }).catch(() => {
+                showToast('שגיאה בייצוא PDF', 'error');
+            });
+        }
+
+        function exportNotesToWord() {
+            const data = getNotesExportData();
+            if (!data) return;
+
+            const html = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office"
+                      xmlns:w="urn:schemas-microsoft-com:office:word"
+                      xmlns="http://www.w3.org/TR/REC-html40">
+                <head><meta charset="utf-8">
+                <style>
+                    body { direction: rtl; font-family: 'David', 'Arial', sans-serif; padding: 40px; color: #1a1a1a; }
+                    h1 { font-size: 22px; color: #003B46; border-bottom: 2px solid #003B46; padding-bottom: 8px; }
+                    .meta { font-size: 13px; color: #666; margin-bottom: 24px; }
+                    .content { font-size: 14px; line-height: 2; white-space: pre-wrap; }
+                    .footer { margin-top: 40px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 11px; color: #999; text-align: center; }
+                </style></head>
+                <body>
+                    <h1>📝 ${data.lessonTitle}</h1>
+                    <p class="meta">${data.moduleName} · ${data.date}</p>
+                    <div class="content">${data.content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+                    <div class="footer">מטפל לכל אחד — הערות אישיות</div>
+                </body></html>
+            `;
+
+            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `הערות_${data.lessonTitle.replace(/[^\u0590-\u05FFa-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '_')}.doc`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showToast('הקובץ הורד בהצלחה!', 'success');
+        }
+
         // ===== Sidebar Search Filter =====
         function filterLessons(query) {
             query = query.trim().toLowerCase();
@@ -4870,6 +4990,8 @@
         window.handleSignup = handleSignup;
         window.filterLessons = filterLessons;
         window.handleNotesInput = handleNotesInput;
+        window.exportNotesToPDF = exportNotesToPDF;
+        window.exportNotesToWord = exportNotesToWord;
 
         // ===== Questionnaire Functions =====
         function openQuestionnaireModal() {

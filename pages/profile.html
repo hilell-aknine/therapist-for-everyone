@@ -448,68 +448,71 @@
             font-weight: 600;
         }
 
-        /* AI Chat Stats */
-        .ai-stats-row {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .ai-stat {
-            flex: 1;
-            background: var(--bg-dark);
+        /* Resume Learning Card */
+        .resume-card {
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1rem;
-            text-align: center;
+            border-radius: 16px;
+            border-right: 4px solid var(--gold);
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        .ai-stat .ai-stat-value {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--t-gold-text, #8B6914);
+        .resume-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 4px 16px var(--gold-glow);
         }
 
-        .ai-stat .ai-stat-label {
-            font-size: 0.75rem;
+        .resume-card-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .resume-card-icon {
+            font-size: 2rem;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+
+        .resume-card-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .resume-card-label {
+            font-size: 0.8rem;
             color: var(--text-secondary);
         }
 
-        /* Quick Links */
-        .quick-links-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.8rem;
+        .resume-card-lesson {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
-        .quick-link {
-            display: flex;
+        .resume-card-btn {
+            display: inline-flex;
             align-items: center;
-            gap: 0.8rem;
-            padding: 1rem;
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--bg-dark);
             text-decoration: none;
-            color: var(--text-primary);
+            padding: 0.6rem 1.4rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: inherit;
+            white-space: nowrap;
             transition: all 0.2s;
         }
 
-        .quick-link:hover {
-            border-color: var(--gold);
+        .resume-card-btn:hover {
             transform: translateY(-1px);
-        }
-
-        .quick-link i {
-            font-size: 1.2rem;
-            color: var(--t-gold-text, #8B6914);
-            width: 24px;
-            text-align: center;
-        }
-
-        .quick-link span {
-            font-size: 0.85rem;
-            font-weight: 500;
+            box-shadow: 0 4px 12px var(--gold-glow);
         }
 
         /* Profile Form (collapsible) */
@@ -662,7 +665,6 @@
         @media (max-width: 768px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .progress-ring-section { flex-direction: column; }
-            .quick-links-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 600px) {
@@ -675,7 +677,8 @@
             .stat-card { padding: 0.8rem; }
             .stat-card .stat-value { font-size: 1.3rem; }
             .form-row { grid-template-columns: 1fr; }
-            .ai-stats-row { flex-direction: column; }
+            .resume-card-content { flex-direction: column; text-align: center; }
+            .resume-card-info { align-items: center; }
         }
     </style>
 </head>
@@ -750,6 +753,23 @@
             <!-- Course Progress Rings -->
             <div class="progress-ring-section" id="progress-rings-section"></div>
 
+            <!-- Resume Learning -->
+            <div class="resume-card" id="resumeCard" style="display: none;">
+                <div class="resume-card-content">
+                    <div class="resume-card-icon">
+                        <i class="fa-solid fa-circle-play"></i>
+                    </div>
+                    <div class="resume-card-info">
+                        <span class="resume-card-label">המשך מאיפה שהפסקת</span>
+                        <span class="resume-card-lesson" id="resumeCardLesson">שיעור 1, מודול 1</span>
+                    </div>
+                    <a href="#" class="resume-card-btn" id="resumeCardBtn">
+                        <i class="fa-solid fa-play"></i>
+                        המשך צפייה
+                    </a>
+                </div>
+            </div>
+
             <!-- Notebook -->
             <div class="section-card">
                 <div class="section-header">
@@ -761,68 +781,16 @@
                 </div>
                 <div id="notes-container">
                     <div class="empty-state">
-                        <i class="fa-solid fa-pen-nib"></i>
-                        <p>עדיין לא כתבת הערות</p>
-                        <a href="course-library.html">התחל ללמוד וכתוב הערות בכל שיעור</a>
+                        <i class="fa-solid fa-pen-nib" style="color: var(--t-gold-text, #8B6914); opacity: 0.6;"></i>
+                        <p>ההערות שלך יופיעו כאן</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem;">כתוב הערות בזמן הצפייה בשיעורים</p>
+                        <a href="course-library.html" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                            <i class="fa-solid fa-play"></i> התחל ללמוד
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- AI Tutor -->
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-header-title">
-                        <i class="fa-solid fa-robot"></i>
-                        <h2>המורה AI שלי</h2>
-                    </div>
-                </div>
-                <div class="ai-stats-row" id="ai-stats-row">
-                    <div class="ai-stat">
-                        <div class="ai-stat-value" id="ai-stat-today">0</div>
-                        <div class="ai-stat-label">הודעות היום</div>
-                    </div>
-                    <div class="ai-stat">
-                        <div class="ai-stat-value" id="ai-stat-total">0</div>
-                        <div class="ai-stat-label">סה"כ הודעות</div>
-                    </div>
-                    <div class="ai-stat">
-                        <div class="ai-stat-value" id="ai-stat-days">0</div>
-                        <div class="ai-stat-label">ימי שימוש</div>
-                    </div>
-                </div>
-                <a href="course-library.html" class="cta-link">
-                    <i class="fa-solid fa-comments"></i>
-                    פתח את המורה AI בקורס
-                </a>
-            </div>
-
-            <!-- Quick Access -->
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-header-title">
-                        <i class="fa-solid fa-bolt"></i>
-                        <h2>גישה מהירה</h2>
-                    </div>
-                </div>
-                <div class="quick-links-grid">
-                    <a href="course-library.html" class="quick-link">
-                        <i class="fa-solid fa-play-circle"></i>
-                        <span>פורטל הקורסים</span>
-                    </a>
-                    <a href="course-library.html" class="quick-link">
-                        <i class="fa-solid fa-graduation-cap"></i>
-                        <span>כל הקורסים</span>
-                    </a>
-                    <a href="https://chat.whatsapp.com/EXAMPLE" target="_blank" class="quick-link" id="whatsapp-link" style="display:none;">
-                        <i class="fa-brands fa-whatsapp"></i>
-                        <span>קבוצת WhatsApp</span>
-                    </a>
-                    <a href="about.html" class="quick-link">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <span>אודות ויצירת קשר</span>
-                    </a>
-                </div>
-            </div>
 
             <!-- Profile Settings (Collapsible) -->
             <div class="section-card">
@@ -1021,8 +989,7 @@
             // Load all dashboard data in parallel
             await Promise.all([
                 loadProgressStats(),
-                loadNotebook(),
-                loadAiStats()
+                loadNotebook()
             ]);
 
             // Show content
@@ -1150,8 +1117,10 @@
                 document.getElementById('progress-rings-section').innerHTML = ringsHtml;
 
                 // Resume links
+                // Resume links + Resume Card
+                let lastWatched = null;
                 try {
-                    const lastWatched = await CourseProgress.getLastWatched('nlp-practitioner');
+                    lastWatched = await CourseProgress.getLastWatched('nlp-practitioner');
                     const resumeEl = document.getElementById('resume-nlp-practitioner');
                     if (lastWatched && resumeEl) {
                         resumeEl.innerHTML = `
@@ -1161,6 +1130,21 @@
                         `;
                     }
                 } catch (e) {}
+
+                // Populate resume card
+                if (!lastWatched) {
+                    try {
+                        lastWatched = JSON.parse(localStorage.getItem('lastWatched_nlp-practitioner') || 'null');
+                    } catch (e) {}
+                }
+                const resumeCard = document.getElementById('resumeCard');
+                if (lastWatched && resumeCard) {
+                    const m = lastWatched.moduleIndex;
+                    const l = lastWatched.lessonIndex;
+                    document.getElementById('resumeCardLesson').textContent = `שיעור ${l + 1}, מודול ${m + 1}`;
+                    document.getElementById('resumeCardBtn').href = `course-library.html#m${m}l${l}`;
+                    resumeCard.style.display = '';
+                }
 
                 // Streak: count consecutive recent days with progress
                 const streakDays = calculateStreak(actual);
@@ -1214,9 +1198,12 @@
                 if (!notes.length) {
                     container.innerHTML = `
                         <div class="empty-state">
-                            <i class="fa-solid fa-pen-nib"></i>
-                            <p>עדיין לא כתבת הערות</p>
-                            <a href="course-library.html">התחל ללמוד וכתוב הערות בכל שיעור</a>
+                            <i class="fa-solid fa-pen-nib" style="color: var(--t-gold-text, #8B6914); opacity: 0.6;"></i>
+                            <p>ההערות שלך יופיעו כאן</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem;">כתוב הערות בזמן הצפייה בשיעורים</p>
+                            <a href="course-library.html" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                <i class="fa-solid fa-play"></i> התחל ללמוד
+                            </a>
                         </div>
                     `;
                     return;
@@ -1276,38 +1263,6 @@
             return div.innerHTML;
         }
 
-        // ===== AI Stats =====
-        async function loadAiStats() {
-            try {
-                const { data, error } = await window.supabaseClient
-                    .from('ai_chat_usage')
-                    .select('messages_today, total_messages, created_at')
-                    .eq('user_id', currentUser.id);
-
-                if (error && error.code !== 'PGRST116') throw error;
-
-                if (data && data.length > 0) {
-                    // Sum up stats
-                    let todayTotal = 0;
-                    let allTimeTotal = 0;
-                    const uniqueDays = new Set();
-
-                    data.forEach(row => {
-                        todayTotal += row.messages_today || 0;
-                        allTimeTotal += row.total_messages || 0;
-                        if (row.created_at) {
-                            uniqueDays.add(new Date(row.created_at).toDateString());
-                        }
-                    });
-
-                    document.getElementById('ai-stat-today').textContent = todayTotal;
-                    document.getElementById('ai-stat-total').textContent = allTimeTotal;
-                    document.getElementById('ai-stat-days').textContent = uniqueDays.size;
-                }
-            } catch (err) {
-                console.error('AI stats load error:', err);
-            }
-        }
 
         // ===== Profile Form Toggle =====
         function toggleProfileForm() {

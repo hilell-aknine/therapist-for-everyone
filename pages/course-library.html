@@ -2564,6 +2564,64 @@
             .wd-banner h2 { font-size: 1.3rem; }
             .wd-content { padding: 0.8rem; gap: 0.8rem; }
         }
+
+        /* ===== Feedback FAB ===== */
+        .feedback-fab {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            z-index: 190;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            background: var(--gradient-gold);
+            color: var(--sidebar-dark);
+            border: none;
+            border-radius: 25px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 16px var(--gold-glow);
+            transition: all 0.3s;
+        }
+        .feedback-fab:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 24px var(--gold-glow);
+        }
+        .feedback-fab i { font-size: 1.1rem; }
+
+        @media (max-width: 1024px) {
+            .feedback-fab span { display: none; }
+            .feedback-fab {
+                width: 48px; height: 48px;
+                padding: 0;
+                border-radius: 50%;
+                justify-content: center;
+            }
+        }
+
+        /* Feedback modal textarea */
+        .feedback-form textarea {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+            text-align: right;
+            min-height: 120px;
+            resize: vertical;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .feedback-form textarea:focus {
+            outline: none;
+            border-color: var(--dusty-aqua);
+            box-shadow: 0 0 0 4px rgba(47, 133, 146, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -2985,6 +3043,45 @@
     <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="פתח/סגור תפריט שיעורים" aria-expanded="false" id="mobileSidebarToggle">
         <i class="fa-solid fa-list"></i>
     </button>
+
+    <!-- Feedback FAB -->
+    <button class="feedback-fab" id="feedbackFab" onclick="openFeedbackModal()" aria-label="משוב ורעיונות">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>משוב</span>
+    </button>
+
+    <!-- Feedback Modal -->
+    <div class="modal-overlay" id="feedbackModal" onclick="if(event.target===this)closeFeedbackModal()" role="dialog" aria-modal="true">
+        <div class="modal-box" style="max-width: 480px;" onclick="event.stopPropagation()">
+            <button class="video-modal-close" onclick="closeFeedbackModal()" aria-label="סגור">&times;</button>
+            <div class="modal-icon">
+                <i class="fa-solid fa-lightbulb"></i>
+            </div>
+            <h2 style="text-align: center;">נשמח לשמוע מכם!</h2>
+            <p class="lead-modal-desc">יש לכם רעיון לשיפור הפורטל? מצאתם תקלה? כתבו לנו.</p>
+
+            <form id="feedbackForm" class="feedback-form" onsubmit="return submitFeedback(event)">
+                <div class="form-group">
+                    <textarea id="feedbackMessage" placeholder="כתבו את ההצעה או התלונה שלכם כאן..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="feedbackEmail" placeholder="אימייל (אופציונלי, לקבלת מענה)" dir="ltr" style="text-align: left;">
+                </div>
+                <button type="submit" class="submit-btn" id="feedbackSubmitBtn">
+                    <i class="fa-solid fa-paper-plane" style="margin-left: 0.5rem;"></i>
+                    שליחת משוב
+                </button>
+            </form>
+
+            <div class="lead-success" id="feedbackSuccess">
+                <div class="lead-success-icon">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3>תודה!</h3>
+                <p>המשוב שלך עוזר לנו להשתפר</p>
+            </div>
+        </div>
+    </div>
     </div><!-- /playerView -->
 
     <!-- Auth Modal -->
@@ -4395,10 +4492,71 @@
             return false;
         }
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && document.getElementById('leadModal').classList.contains('active')) {
-                closeLeadModal();
+            if (e.key === 'Escape') {
+                if (document.getElementById('feedbackModal').classList.contains('active')) {
+                    closeFeedbackModal();
+                } else if (document.getElementById('leadModal').classList.contains('active')) {
+                    closeLeadModal();
+                }
             }
         });
+
+        // ===== Feedback Modal =====
+        function openFeedbackModal() {
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('feedbackForm').style.display = '';
+            document.getElementById('feedbackSuccess').classList.remove('show');
+            document.getElementById('feedbackForm').reset();
+            document.getElementById('feedbackSubmitBtn').disabled = false;
+            document.getElementById('feedbackSubmitBtn').innerHTML = '<i class="fa-solid fa-paper-plane" style="margin-left:0.5rem;"></i> שליחת משוב';
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedbackModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function submitFeedback(e) {
+            e.preventDefault();
+            const btn = document.getElementById('feedbackSubmitBtn');
+            const message = document.getElementById('feedbackMessage').value.trim();
+            const email = document.getElementById('feedbackEmail').value.trim();
+            if (!message) return false;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-left:0.5rem;"></i> שולח...';
+
+            const feedbackData = {
+                message: message,
+                email: email || null,
+                source: 'course-feedback',
+                page: 'course-library',
+                created_at: new Date().toISOString()
+            };
+
+            // Try Supabase, fallback to localStorage
+            const save = (window.ContactRequests)
+                ? ContactRequests.submit(feedbackData).catch(() => {
+                    const stored = JSON.parse(localStorage.getItem('pending_feedback') || '[]');
+                    stored.push(feedbackData);
+                    localStorage.setItem('pending_feedback', JSON.stringify(stored));
+                })
+                : Promise.resolve().then(() => {
+                    const stored = JSON.parse(localStorage.getItem('pending_feedback') || '[]');
+                    stored.push(feedbackData);
+                    localStorage.setItem('pending_feedback', JSON.stringify(stored));
+                });
+
+            save.then(() => {
+                document.getElementById('feedbackForm').style.display = 'none';
+                document.getElementById('feedbackSuccess').classList.add('show');
+                setTimeout(() => closeFeedbackModal(), 2000);
+            });
+
+            return false;
+        }
 
         // ===== Modal =====
         function openModal(isWall = false) {

@@ -1674,8 +1674,15 @@
         /* Typing indicator */
         .ai-typing-indicator .ai-message-bubble {
             display: flex;
+            align-items: center;
             gap: 4px;
             padding: 0.8rem 1.2rem;
+        }
+
+        .ai-typing-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-left: 8px;
         }
 
         .ai-typing-dot {
@@ -5227,15 +5234,15 @@
             aiChatHistory.push({ role: 'user', content: message });
             showTypingIndicator();
 
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 20000);
+
             try {
                 const session = await supabaseClient.auth.getSession();
                 const token = session?.data?.session?.access_token;
 
                 if (!token) {
-                    removeTypingIndicator();
                     appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
-                    input.disabled = false;
-                    sendBtn.disabled = false;
                     return;
                 }
 
@@ -5260,11 +5267,10 @@
                             message,
                             history: aiChatHistory.slice(-10),
                             lessonContext
-                        })
+                        }),
+                        signal: controller.signal
                     }
                 );
-
-                removeTypingIndicator();
 
                 const data = await response.json();
 
@@ -5282,13 +5288,18 @@
                     }
                 }
             } catch (err) {
+                if (err.name === 'AbortError') {
+                    appendAiMessage('bot', 'הבקשה ארכה יותר מדי זמן. אנא נסו שוב.');
+                } else {
+                    appendAiMessage('bot', 'המורה AI עמוס כרגע. אנא נסו לשלוח את השאלה שוב בעוד רגע.');
+                }
+            } finally {
+                clearTimeout(timeout);
                 removeTypingIndicator();
-                appendAiMessage('bot', 'שגיאה. נסו שוב.');
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
             }
-
-            input.disabled = false;
-            sendBtn.disabled = false;
-            input.focus();
         }
 
         let aiChatHistory = [];
@@ -5398,7 +5409,7 @@
 
             if (!message || sendBtn.disabled) return;
 
-            // Disable input
+            // Disable input immediately
             sendBtn.disabled = true;
             input.disabled = true;
             input.value = '';
@@ -5406,26 +5417,25 @@
 
             // Add user message
             appendAiMessage('user', message);
-
-            // Add to history
             aiChatHistory.push({ role: 'user', content: message });
 
             // Show typing indicator
             showTypingIndicator();
+
+            // Timeout protection
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 20000);
+            let keepDisabled = false;
 
             try {
                 const session = await supabaseClient.auth.getSession();
                 const token = session?.data?.session?.access_token;
 
                 if (!token) {
-                    removeTypingIndicator();
                     appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
-                    input.disabled = false;
-                    sendBtn.disabled = false;
                     return;
                 }
 
-                // Get current lesson context
                 const mod = modules[currentModuleIndex];
                 const lesson = mod?.lessons[currentLessonIndex];
                 const lessonContext = {
@@ -5445,35 +5455,30 @@
                         },
                         body: JSON.stringify({
                             message,
-                            history: aiChatHistory.slice(-10), // Last 10 messages for context
+                            history: aiChatHistory.slice(-10),
                             lessonContext
-                        })
+                        }),
+                        signal: controller.signal
                     }
                 );
-
-                removeTypingIndicator();
 
                 const data = await response.json();
 
                 if (data.rateLimited) {
                     appendRateLimitMessage();
-                    input.disabled = true;
-                    sendBtn.disabled = true;
+                    keepDisabled = true;
                     return;
                 }
 
                 if (data.error && response.status === 401) {
                     appendAiMessage('bot', data.error);
-                    input.disabled = false;
-                    sendBtn.disabled = false;
                     return;
                 }
 
-                const reply = data.reply || data.error || 'שגיאה. נסו שוב.';
+                const reply = data.reply || data.error || 'לא הצלחתי לענות. נסו שוב.';
                 appendAiMessage('bot', reply);
                 aiChatHistory.push({ role: 'model', content: reply });
 
-                // Update remaining counter
                 if (data.remaining !== undefined) {
                     aiRemainingMessages = data.remaining;
                     const remainEl = document.getElementById('aiRemaining');
@@ -5481,14 +5486,20 @@
                 }
 
             } catch (err) {
-                console.error('AI chat error:', err);
+                if (err.name === 'AbortError') {
+                    appendAiMessage('bot', 'הבקשה ארכה יותר מדי זמן. אנא נסו שוב.');
+                } else {
+                    appendAiMessage('bot', 'המורה AI עמוס כרגע. אנא נסו לשלוח את השאלה שוב בעוד רגע.');
+                }
+            } finally {
+                clearTimeout(timeout);
                 removeTypingIndicator();
-                appendAiMessage('bot', 'שגיאת תקשורת. בדקו את החיבור לאינטרנט ונסו שוב.');
+                if (!keepDisabled) {
+                    input.disabled = false;
+                    sendBtn.disabled = false;
+                    input.focus();
+                }
             }
-
-            input.disabled = false;
-            sendBtn.disabled = false;
-            input.focus();
         }
 
         let aiMessageCount = 0;
@@ -5530,6 +5541,7 @@
                     <div class="ai-typing-dot"></div>
                     <div class="ai-typing-dot"></div>
                     <div class="ai-typing-dot"></div>
+                    <span class="ai-typing-label">המורה מקליד...</span>
                 </div>
             `;
             container.appendChild(div);

@@ -272,85 +272,70 @@
             border-color: var(--dusty-aqua);
         }
 
-        /* ===== Intro Video Modal ===== */
-        .video-modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        .video-modal-overlay.active { display: flex; }
-
-        .video-modal-box {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            width: 100%;
-            max-width: 800px;
-            overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-            animation: modalSlideIn 0.3s ease;
-        }
-        @keyframes modalSlideIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .video-modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid var(--border-default);
-        }
-        .video-modal-header h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--deep-petrol);
-            margin: 0;
-        }
+        /* ===== Lead Generation Modal ===== */
         .video-modal-close {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
             background: none;
             border: none;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             color: var(--text-secondary);
             cursor: pointer;
-            padding: 0.3rem;
+            padding: 0.3rem 0.5rem;
             border-radius: 6px;
             transition: background 0.2s;
             line-height: 1;
+            z-index: 1;
         }
         .video-modal-close:hover { background: var(--bg-secondary); }
 
-        .video-modal-body {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%; /* 16:9 */
-            background: var(--t-bg, #000);
+        .header-lead-cta {
+            background: rgba(212, 175, 55, 0.08) !important;
+            border-color: var(--gold) !important;
+            color: var(--deep-petrol) !important;
         }
-        .video-modal-body iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
+        .header-lead-cta:hover {
+            background: rgba(212, 175, 55, 0.15) !important;
         }
-        .video-placeholder {
-            position: absolute;
-            inset: 0;
+        .header-lead-cta i { color: var(--gold) !important; }
+
+        .lead-modal-desc {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 1.8rem;
+            padding: 0 0.5rem;
+        }
+
+        .lead-success {
+            display: none;
+            text-align: center;
+            padding: 1.5rem 0 0.5rem;
+        }
+        .lead-success.show { display: block; }
+
+        .lead-success-icon {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: rgba(255,255,255,0.5);
-            gap: 1rem;
+            margin: 0 auto 1rem;
+            font-size: 1.8rem;
+            color: #fff;
         }
-        .video-placeholder i { font-size: 3rem; }
-        .video-placeholder span { font-size: 0.9rem; }
+        .lead-success h3 {
+            color: var(--deep-petrol);
+            font-size: 1.3rem;
+            margin-bottom: 0.4rem;
+        }
+        .lead-success p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
 
         .portal-view { font-family: 'Heebo', sans-serif; }
 
@@ -2551,9 +2536,9 @@
 
         <!-- LEFT GROUP: Actions + Auth -->
         <div class="header-left">
-            <button class="header-intro-btn" onclick="openVideoModal()">
-                <i class="fa-solid fa-circle-play"></i>
-                <span>איך זה עובד?</span>
+            <button class="header-intro-btn header-lead-cta" onclick="openLeadModal()">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>תוכנית ההכשרה</span>
             </button>
             <a href="../index.html" class="back-to-site">
                 <i class="fa-solid fa-arrow-right"></i>
@@ -2599,18 +2584,38 @@
         </div>
     </header>
 
-    <!-- Intro Video Modal -->
-    <div class="video-modal-overlay" id="videoModal" onclick="if(event.target===this)closeVideoModal()">
-        <div class="video-modal-box">
-            <div class="video-modal-header">
-                <h3>איך הפלטפורמה עובדת?</h3>
-                <button class="video-modal-close" onclick="closeVideoModal()" aria-label="סגור">&times;</button>
+    <!-- Lead Generation Modal -->
+    <div class="modal-overlay" id="leadModal" onclick="if(event.target===this)closeLeadModal()">
+        <div class="modal-box" style="max-width: 480px;">
+            <button class="video-modal-close" onclick="closeLeadModal()" aria-label="סגור">&times;</button>
+            <div class="modal-icon">
+                <i class="fa-solid fa-graduation-cap"></i>
             </div>
-            <div class="video-modal-body">
-                <div class="video-placeholder" id="videoPlaceholder">
-                    <i class="fa-solid fa-play-circle"></i>
-                    <span>סרטון הסבר יעלה כאן בקרוב</span>
+            <h2 style="text-align: center;">הסמכה בינלאומית ב-NLP</h2>
+            <p class="lead-modal-desc">רוצה להפוך את זה למקצוע, לקבל תעודה בינלאומית ולהתחיל לעזור לאנשים? תשאיר פרטים ונדאג שיחזרו אליך בהקדם.</p>
+
+            <form id="leadForm" onsubmit="return submitLeadForm(event)">
+                <div class="form-group">
+                    <input type="text" id="leadName" placeholder="שם מלא" required autocomplete="name">
                 </div>
+                <div class="form-group">
+                    <input type="tel" id="leadPhone" placeholder="מספר טלפון" required autocomplete="tel" dir="ltr" style="text-align: left;">
+                </div>
+                <div class="form-group">
+                    <input type="email" id="leadEmail" placeholder="כתובת אימייל" required autocomplete="email" dir="ltr" style="text-align: left;">
+                </div>
+                <button type="submit" class="submit-btn" id="leadSubmitBtn">
+                    <i class="fa-solid fa-paper-plane" style="margin-left: 0.5rem;"></i>
+                    שלחו לי פרטים
+                </button>
+            </form>
+
+            <div class="lead-success" id="leadSuccess">
+                <div class="lead-success-icon">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3>תודה! הפרטים התקבלו</h3>
+                <p>ניצור איתך קשר בהקדם</p>
             </div>
         </div>
     </div>
@@ -4241,18 +4246,38 @@
         // Alias for login button
         function openAuthModal() { openModal(false); }
 
-        // ===== Intro Video Modal =====
-        function openVideoModal() {
-            document.getElementById('videoModal').classList.add('active');
+        // ===== Lead Generation Modal =====
+        function openLeadModal() {
+            const modal = document.getElementById('leadModal');
+            modal.classList.add('active');
             document.body.style.overflow = 'hidden';
+            // Reset form state each time
+            document.getElementById('leadForm').style.display = '';
+            document.getElementById('leadSuccess').classList.remove('show');
+            document.getElementById('leadForm').reset();
+            document.getElementById('leadSubmitBtn').disabled = false;
         }
-        function closeVideoModal() {
-            document.getElementById('videoModal').classList.remove('active');
+        function closeLeadModal() {
+            document.getElementById('leadModal').classList.remove('active');
             document.body.style.overflow = '';
         }
+        function submitLeadForm(e) {
+            e.preventDefault();
+            const btn = document.getElementById('leadSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-left:0.5rem;"></i> שולח...';
+            // Simulate brief delay for UX
+            setTimeout(() => {
+                document.getElementById('leadForm').style.display = 'none';
+                document.getElementById('leadSuccess').classList.add('show');
+                // Auto-close after 2.5s
+                setTimeout(() => closeLeadModal(), 2500);
+            }, 600);
+            return false;
+        }
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && document.getElementById('videoModal').classList.contains('active')) {
-                closeVideoModal();
+            if (e.key === 'Escape' && document.getElementById('leadModal').classList.contains('active')) {
+                closeLeadModal();
             }
         });
 

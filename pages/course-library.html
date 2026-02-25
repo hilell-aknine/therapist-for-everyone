@@ -5307,8 +5307,11 @@
                     lessonTitle: lesson?.title || ''
                 };
 
+                const fetchUrl = `${SUPABASE_URL}/functions/v1/ai-chat`;
+                console.log('[AI Chat Direct] Fetching:', fetchUrl);
+
                 const response = await fetch(
-                    `${SUPABASE_URL}/functions/v1/ai-chat`,
+                    fetchUrl,
                     {
                         method: 'POST',
                         headers: {
@@ -5325,7 +5328,15 @@
                     }
                 );
 
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('[AI Chat Direct] HTTP Error:', response.status, errorText);
+                    appendAiMessage('bot', 'שגיאה בתקשורת עם המורה AI. נסו שוב.');
+                    return;
+                }
+
                 const data = await response.json();
+                console.log('[AI Chat Direct] Response OK, provider:', data.provider);
 
                 if (data.error) {
                     appendAiMessage('bot', data.error);
@@ -5342,8 +5353,10 @@
                 }
             } catch (err) {
                 if (err.name === 'AbortError') {
+                    console.error('[AI Chat Direct] Request timed out after 20s');
                     appendAiMessage('bot', 'הבקשה ארכה יותר מדי זמן. אנא נסו שוב.');
                 } else {
+                    console.error('[AI Chat Direct] Fetch error:', err.message, err);
                     appendAiMessage('bot', 'המורה AI עמוס כרגע. אנא נסו לשלוח את השאלה שוב בעוד רגע.');
                 }
             } finally {
@@ -5497,8 +5510,11 @@
                     lessonTitle: lesson?.title || ''
                 };
 
+                const fetchUrl = `${SUPABASE_URL}/functions/v1/ai-chat`;
+                console.log('[AI Chat] Fetching:', fetchUrl);
+
                 const response = await fetch(
-                    `${SUPABASE_URL}/functions/v1/ai-chat`,
+                    fetchUrl,
                     {
                         method: 'POST',
                         headers: {
@@ -5515,16 +5531,23 @@
                     }
                 );
 
+                if (!response.ok && response.status !== 429) {
+                    const errorText = await response.text();
+                    console.error('[AI Chat] HTTP Error:', response.status, errorText);
+                    if (response.status === 401) {
+                        appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
+                    } else {
+                        appendAiMessage('bot', 'שגיאה בתקשורת עם המורה AI. נסו שוב.');
+                    }
+                    return;
+                }
+
                 const data = await response.json();
+                console.log('[AI Chat] Response OK, provider:', data.provider, 'remaining:', data.remaining);
 
                 if (data.rateLimited) {
                     appendRateLimitMessage();
                     keepDisabled = true;
-                    return;
-                }
-
-                if (data.error && response.status === 401) {
-                    appendAiMessage('bot', data.error);
                     return;
                 }
 
@@ -5540,8 +5563,10 @@
 
             } catch (err) {
                 if (err.name === 'AbortError') {
+                    console.error('[AI Chat] Request timed out after 20s');
                     appendAiMessage('bot', 'הבקשה ארכה יותר מדי זמן. אנא נסו שוב.');
                 } else {
+                    console.error('[AI Chat] Fetch error:', err.message, err);
                     appendAiMessage('bot', 'המורה AI עמוס כרגע. אנא נסו לשלוח את השאלה שוב בעוד רגע.');
                 }
             } finally {

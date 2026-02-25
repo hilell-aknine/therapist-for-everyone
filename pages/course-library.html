@@ -1122,10 +1122,115 @@
         }
 
         /* Tabs Section */
+        /* Social Share Banner */
+        .share-banner {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.25rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #f8f0ff 0%, #fff0f5 40%, #fff5ee 100%);
+            border: 1px solid rgba(193, 53, 132, 0.12);
+            border-radius: var(--radius-md);
+            box-shadow: 0 2px 8px rgba(193, 53, 132, 0.06);
+        }
+
+        [data-theme="dark"] .share-banner {
+            background: linear-gradient(135deg, rgba(193, 53, 132, 0.1) 0%, rgba(131, 58, 180, 0.08) 100%);
+            border-color: rgba(193, 53, 132, 0.2);
+        }
+
+        .share-banner-icon {
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            flex-shrink: 0;
+        }
+
+        .share-banner-text {
+            flex: 1;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .share-banner-text {
+            color: #d1d5db;
+        }
+
+        .share-banner-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .share-btn-ig {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .share-btn-ig:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .share-btn-copy {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 0.8rem;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .share-btn-copy:hover {
+            background: var(--border-default);
+        }
+
+        [data-theme="dark"] .share-btn-copy {
+            color: #d1d5db;
+        }
+
+        @media (max-width: 600px) {
+            .share-banner {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.75rem;
+                padding: 1rem;
+            }
+            .share-banner-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
         .tabs-section {
             background: var(--bg-primary);
             border-radius: var(--radius-lg);
-            margin-top: 1.5rem;
+            margin-top: 1.25rem;
             border: 1px solid var(--border-default);
             box-shadow: var(--shadow-sm);
             overflow: hidden;
@@ -2932,6 +3037,22 @@
                             <span class="btn-sublabel" id="prevLessonName"></span>
                         </span>
                     </button>
+                </div>
+
+                <!-- Social Share Banner -->
+                <div class="share-banner">
+                    <i class="fa-brands fa-instagram share-banner-icon"></i>
+                    <div class="share-banner-text">אהבת את התוכן וקיבלת ערך? שתף בסטורי ותייג אותנו כדי שנוכל להגיע לעוד אנשים טובים!</div>
+                    <div class="share-banner-actions">
+                        <a class="share-btn-ig" href="https://instagram.com/therapist_for_everyone" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-instagram"></i>
+                            למעבר לאינסטגרם שלנו
+                        </a>
+                        <button class="share-btn-copy" onclick="copyPortalLink()">
+                            <i class="fa-solid fa-link"></i>
+                            העתק קישור
+                        </button>
+                    </div>
                 </div>
 
                 <div class="tabs-section">
@@ -5116,6 +5237,26 @@
         window.handleNotesInput = handleNotesInput;
         window.exportNotesToPDF = exportNotesToPDF;
         window.exportNotesToWord = exportNotesToWord;
+
+        // ===== Social Share =====
+        function copyPortalLink() {
+            const url = 'https://therapist-for-everyone.vercel.app/pages/course-library.html';
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('הקישור הועתק! מחכים לראות את הסטורי שלכם 💜', 'success');
+            }).catch(() => {
+                // Fallback for older browsers
+                const ta = document.createElement('textarea');
+                ta.value = url;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('הקישור הועתק! מחכים לראות את הסטורי שלכם 💜', 'success');
+            });
+        }
+        window.copyPortalLink = copyPortalLink;
 
         // ===== Questionnaire Functions =====
         function openQuestionnaireModal() {

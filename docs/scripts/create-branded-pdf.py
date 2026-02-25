@@ -207,7 +207,7 @@ html_template = '''<!DOCTYPE html>
         .chapter-number {
             font-size: 14pt;
             font-weight: 300;
-            color: var(--gold);
+            color: #D4AF37;
             margin-bottom: 10px;
         }
 
@@ -215,6 +215,14 @@ html_template = '''<!DOCTYPE html>
             font-size: 28pt;
             font-weight: 800;
             margin: 0;
+            color: #ffffff;
+        }
+
+        /* Ensure white text in dark containers */
+        .chapter-header h1,
+        .chapter-header .chapter-title {
+            color: #ffffff !important;
+            border-bottom: none !important;
         }
 
         .chapter-content {
@@ -292,14 +300,20 @@ html_template = '''<!DOCTYPE html>
 
         .tip-box {
             background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
-            color: white;
+            color: #ffffff;
             padding: 20px;
             border-radius: 12px;
             margin: 20px 0;
         }
 
+        .tip-box p,
+        .tip-box li,
+        .tip-box span {
+            color: #ffffff;
+        }
+
         .tip-box strong {
-            color: var(--gold);
+            color: #D4AF37;
         }
 
         /* Tables */
@@ -311,7 +325,7 @@ html_template = '''<!DOCTYPE html>
 
         th {
             background: var(--deep-petrol);
-            color: white;
+            color: #ffffff;
             padding: 12px;
             text-align: right;
             font-weight: 600;

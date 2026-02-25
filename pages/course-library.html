@@ -4904,8 +4904,11 @@
             const lesson = modules[currentModuleIndex]?.lessons[currentLessonIndex];
             const moduleName = modules[currentModuleIndex]?.title || '';
             const lessonTitle = lesson?.title || 'שיעור';
+            const lessonNum = currentLessonIndex + 1;
+            const totalInModule = modules[currentModuleIndex]?.lessons?.length || 0;
+            const duration = lesson?.duration || '';
             const date = new Date().toLocaleDateString('he-IL');
-            return { content, lessonTitle, moduleName, date };
+            return { content, lessonTitle, moduleName, lessonNum, totalInModule, duration, date };
         }
 
         function exportNotesToPDF() {
@@ -4914,21 +4917,30 @@
 
             const container = document.createElement('div');
             container.innerHTML = `
-                <div style="direction:rtl;font-family:'Heebo',sans-serif;padding:20px;color:#1a1a1a;">
-                    <div style="border-bottom:2px solid #003B46;padding-bottom:12px;margin-bottom:20px;">
-                        <h1 style="margin:0 0 4px;font-size:20px;color:#003B46;">📝 ${data.lessonTitle}</h1>
-                        <p style="margin:0;font-size:13px;color:#666;">${data.moduleName} · ${data.date}</p>
+                <div dir="rtl" style="font-family:system-ui,'Segoe UI','Heebo',Arial,sans-serif;padding:36px 40px;color:#4a4a4a;text-align:right;max-width:700px;margin:0 auto;">
+                    <!-- Header Bar -->
+                    <div style="background:linear-gradient(135deg,#00606B,#2F8592);border-radius:10px;padding:22px 28px;margin-bottom:28px;color:#fff;">
+                        <div style="font-size:11px;letter-spacing:1px;opacity:0.85;margin-bottom:6px;">בית המטפלים — סיכום שיעור</div>
+                        <h1 style="margin:0;font-size:22px;font-weight:700;line-height:1.4;">${data.lessonTitle}</h1>
                     </div>
-                    <div style="font-size:14px;line-height:2;white-space:pre-wrap;">${data.content}</div>
-                    <div style="margin-top:30px;padding-top:10px;border-top:1px solid #ddd;font-size:11px;color:#999;text-align:center;">
-                        מטפל לכל אחד — הערות אישיות
+                    <!-- Meta Row -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;margin-bottom:24px;border-bottom:1px solid #e0e0e0;font-size:12px;color:#888;">
+                        <span>${data.moduleName} · שיעור ${data.lessonNum} מתוך ${data.totalInModule}</span>
+                        <span>${data.date}${data.duration ? ' · ' + data.duration + ' דק׳' : ''}</span>
+                    </div>
+                    <!-- Content -->
+                    <div style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:#333333;">${data.content}</div>
+                    <!-- Footer -->
+                    <div style="margin-top:40px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#aaa;">
+                        <span>מטפל לכל אחד — פורטל הלמידה</span>
+                        <span>הערות אישיות</span>
                     </div>
                 </div>
             `;
 
             const filename = `הערות_${data.lessonTitle.replace(/[^\u0590-\u05FFa-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '_')}.pdf`;
             html2pdf().set({
-                margin: [10, 10, 10, 10],
+                margin: [8, 6, 8, 6],
                 filename,
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -4943,23 +4955,70 @@
             const data = getNotesExportData();
             if (!data) return;
 
+            const escapedContent = data.content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
             const html = `
                 <html xmlns:o="urn:schemas-microsoft-com:office:office"
                       xmlns:w="urn:schemas-microsoft-com:office:word"
                       xmlns="http://www.w3.org/TR/REC-html40">
                 <head><meta charset="utf-8">
                 <style>
-                    body { direction: rtl; font-family: 'David', 'Arial', sans-serif; padding: 40px; color: #1a1a1a; }
-                    h1 { font-size: 22px; color: #003B46; border-bottom: 2px solid #003B46; padding-bottom: 8px; }
-                    .meta { font-size: 13px; color: #666; margin-bottom: 24px; }
-                    .content { font-size: 14px; line-height: 2; white-space: pre-wrap; }
-                    .footer { margin-top: 40px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 11px; color: #999; text-align: center; }
+                    @page { margin: 2.5cm; }
+                    body {
+                        direction: rtl;
+                        text-align: right;
+                        font-family: 'Segoe UI', 'Arial', sans-serif;
+                        color: #4a4a4a;
+                        font-size: 13pt;
+                        line-height: 1.8;
+                    }
+                    .header-bar {
+                        background: #00606B;
+                        color: #ffffff;
+                        padding: 18px 24px;
+                        border-radius: 8px;
+                        margin-bottom: 24px;
+                    }
+                    .header-bar .subtitle {
+                        font-size: 9pt;
+                        opacity: 0.85;
+                        margin: 0 0 4px;
+                    }
+                    .header-bar h1 {
+                        margin: 0;
+                        font-size: 18pt;
+                        font-weight: bold;
+                        color: #ffffff;
+                    }
+                    .meta-row {
+                        font-size: 10pt;
+                        color: #888888;
+                        padding-bottom: 12px;
+                        margin-bottom: 20px;
+                        border-bottom: 1px solid #e0e0e0;
+                    }
+                    .content {
+                        font-size: 13pt;
+                        line-height: 1.8;
+                        color: #333333;
+                        white-space: pre-wrap;
+                    }
+                    .footer {
+                        margin-top: 40px;
+                        padding-top: 12px;
+                        border-top: 1px solid #e0e0e0;
+                        font-size: 9pt;
+                        color: #aaaaaa;
+                        text-align: center;
+                    }
                 </style></head>
-                <body>
-                    <h1>📝 ${data.lessonTitle}</h1>
-                    <p class="meta">${data.moduleName} · ${data.date}</p>
-                    <div class="content">${data.content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
-                    <div class="footer">מטפל לכל אחד — הערות אישיות</div>
+                <body dir="rtl">
+                    <div class="header-bar">
+                        <p class="subtitle">בית המטפלים — סיכום שיעור</p>
+                        <h1>${data.lessonTitle}</h1>
+                    </div>
+                    <div class="meta-row">${data.moduleName} · שיעור ${data.lessonNum} מתוך ${data.totalInModule} · ${data.date}${data.duration ? ' · ' + data.duration + ' דק׳' : ''}</div>
+                    <div class="content">${escapedContent}</div>
+                    <div class="footer">מטפל לכל אחד — פורטל הלמידה · הערות אישיות</div>
                 </body></html>
             `;
 

@@ -5417,8 +5417,10 @@
         }
 
         async function sendAiMessageDirect(message) {
+            if (aiIsSending) return; // Prevent double-sends
             const input = document.getElementById('aiInput');
             const sendBtn = document.getElementById('aiSendBtn');
+            aiIsSending = true;
             sendBtn.disabled = true;
             input.disabled = true;
 
@@ -5505,6 +5507,7 @@
             } finally {
                 clearTimeout(timeout);
                 removeTypingIndicator();
+                aiIsSending = false;
                 input.disabled = false;
                 sendBtn.disabled = false;
                 input.focus();
@@ -5514,6 +5517,7 @@
         let aiChatHistory = [];
         let aiChatInitialized = false;
         let aiRemainingMessages = null;
+        let aiIsSending = false; // Global guard against double-sends
 
         function initAiChat() {
             if (aiChatInitialized) return;
@@ -5612,13 +5616,15 @@
         }
 
         async function sendAiMessage() {
+            if (aiIsSending) return; // Prevent double-sends
             const input = document.getElementById('aiInput');
             const sendBtn = document.getElementById('aiSendBtn');
             const message = input.value.trim();
 
             if (!message || sendBtn.disabled) return;
 
-            // Disable input immediately
+            // Lock immediately
+            aiIsSending = true;
             sendBtn.disabled = true;
             input.disabled = true;
             input.value = '';
@@ -5715,6 +5721,7 @@
             } finally {
                 clearTimeout(timeout);
                 removeTypingIndicator();
+                aiIsSending = false;
                 if (!keepDisabled) {
                     input.disabled = false;
                     sendBtn.disabled = false;

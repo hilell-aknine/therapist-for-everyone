@@ -264,18 +264,7 @@ serve(async (req) => {
       )
     }
 
-    // Increment usage
-    if (usage) {
-      await supabaseAdmin
-        .from('ai_chat_usage')
-        .update({ message_count: currentCount + 1 })
-        .eq('user_id', user.id)
-        .eq('date', today)
-    } else {
-      await supabaseAdmin
-        .from('ai_chat_usage')
-        .insert({ user_id: user.id, message_count: 1, date: today })
-    }
+    // NOTE: Quota is incremented AFTER successful AI response (see below)
 
     // --- Check API keys ---
     if (!GEMINI_API_KEY && !GROQ_API_KEY && !ANTHROPIC_API_KEY) {
@@ -369,7 +358,21 @@ serve(async (req) => {
     }
 
     if (!reply) {
+      // DO NOT increment quota on failure
       throw new Error('All AI providers failed')
+    }
+
+    // ===== INCREMENT QUOTA ONLY AFTER SUCCESSFUL RESPONSE =====
+    if (usage) {
+      await supabaseAdmin
+        .from('ai_chat_usage')
+        .update({ message_count: currentCount + 1 })
+        .eq('user_id', user.id)
+        .eq('date', today)
+    } else {
+      await supabaseAdmin
+        .from('ai_chat_usage')
+        .insert({ user_id: user.id, message_count: 1, date: today })
     }
 
     console.log(`[Done] Provider: ${usedProvider}, Complexity: ${complexity}`)

@@ -387,8 +387,14 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Function error:', error)
+    const errMsg = error instanceof Error ? error.message : String(error)
+    console.error('Error details:', errMsg)
+    console.error('API keys present — Gemini:', !!GEMINI_API_KEY, 'Groq:', !!GROQ_API_KEY, 'Claude:', !!ANTHROPIC_API_KEY)
     return new Response(
-      JSON.stringify({ reply: 'שגיאה זמנית. נסו שוב בעוד כמה שניות.' }),
+      JSON.stringify({
+        reply: 'שגיאה זמנית. נסו שוב בעוד כמה שניות.',
+        debug: errMsg
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

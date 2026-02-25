@@ -4605,14 +4605,15 @@
             const feedbackData = {
                 message: message,
                 email: email || null,
-                source: 'course-feedback',
-                page: 'course-library',
-                created_at: new Date().toISOString()
+                request_type: 'course-feedback'
             };
 
-            // Try Supabase, fallback to localStorage
-            const save = (window.ContactRequests)
-                ? ContactRequests.submit(feedbackData).catch(() => {
+            // Save to Supabase directly (no dependency on supabase-client.js)
+            const save = supabaseClient
+                ? supabaseClient.from('contact_requests').insert(feedbackData).then(({ error }) => {
+                    if (error) throw error;
+                }).catch((err) => {
+                    console.warn('Feedback save to Supabase failed, using localStorage:', err);
                     const stored = JSON.parse(localStorage.getItem('pending_feedback') || '[]');
                     stored.push(feedbackData);
                     localStorage.setItem('pending_feedback', JSON.stringify(stored));

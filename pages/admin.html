@@ -1537,7 +1537,7 @@
             document.getElementById('stat-contact-total').textContent = contactLeads.length;
             document.getElementById('stat-contact-training').textContent = contactLeads.filter(l => l.request_type === 'training').length;
             document.getElementById('stat-contact-patient').textContent = contactLeads.filter(l => l.request_type === 'patient').length;
-            document.getElementById('stat-contact-feedback').textContent = contactLeads.filter(l => l.source === 'course-feedback').length;
+            document.getElementById('stat-contact-feedback').textContent = contactLeads.filter(l => l.request_type === 'course-feedback').length;
             renderContactLeads();
         }
 
@@ -1555,7 +1555,7 @@
             else if (currentContactFilter === 'training') filtered = filtered.filter(l => l.request_type === 'training');
             else if (currentContactFilter === 'patient') filtered = filtered.filter(l => l.request_type === 'patient');
             else if (currentContactFilter === 'contacted') filtered = filtered.filter(l => l.status === 'contacted' || l.status === 'converted');
-            else if (currentContactFilter === 'feedback') filtered = filtered.filter(l => l.source === 'course-feedback');
+            else if (currentContactFilter === 'feedback') filtered = filtered.filter(l => l.request_type === 'course-feedback');
             if (search) filtered = filtered.filter(l => (l.name || l.full_name || '').toLowerCase().includes(search) || (l.phone || '').includes(search));
 
             const tbody = document.getElementById('contact-leads-table');
@@ -1567,7 +1567,7 @@
                 <tr>
                     <td><strong>${l.name || l.full_name || 'אנונימי'}</strong></td>
                     <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;">${l.phone}</a>` : '-'}</td>
-                    <td><span class="stat-icon ${l.source === 'course-feedback' ? requestTypeClass('course-feedback') : requestTypeClass(l.request_type)}" style="width:auto;height:auto;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;display:inline-flex;">${l.source === 'course-feedback' ? requestTypeLabel('course-feedback') : requestTypeLabel(l.request_type)}</span></td>
+                    <td><span class="stat-icon ${requestTypeClass(l.request_type)}" style="width:auto;height:auto;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;display:inline-flex;">${requestTypeLabel(l.request_type)}</span></td>
                     <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(l.message || '').replace(/"/g, '&quot;')}">${l.message || '-'}</td>
                     <td><span class="status-badge status-${l.status}">${statusLabel(l.status)}</span></td>
                     <td>${formatDate(l.created_at)}</td>

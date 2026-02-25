@@ -299,10 +299,10 @@
                     window.location.href = 'patient-dashboard.html';
                     break;
                 case 'student_lead':
-                    window.location.href = 'pages/free-portal.html';
+                    window.location.href = 'pages/course-library.html';
                     break;
                 default:
-                    window.location.href = 'index.html';
+                    window.location.href = 'pages/course-library.html';
             }
         },
 

@@ -2,217 +2,41 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { NLP_KNOWLEDGE } from './knowledge.ts'
 
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')
-const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY')
-const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
+const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const DAILY_LIMIT = 200
+const MODEL = 'claude-3-5-haiku-latest'
 
-// ===== SYSTEM PROMPTS =====
+// ===== SYSTEM PROMPT =====
+const SYSTEM_PROMPT = `אתה מומחה עולמי ל-NLP (Neuro-Linguistic Programming) — העוזר הלימודי הרשמי של קורס NLP פרקטישנר ומאסטר פרקטישנר של בית הספר "מטפל לכל אחד".
 
-const SYSTEM_PROMPT = `אתה "המורה של NLP" — עוזר לימודי מקצועי של קורס NLP פרקטישנר ומאסטר פרקטישנר של בית הספר "מטפל לכל אחד".
-
-## תפקידך:
-- לענות על שאלות לגבי חומרי הקורס, טכניקות NLP, ותרגולים
-- להסביר מושגים בצורה ברורה ופשוטה בעברית
-- לעזור לתלמידים להבין טכניקות ולתרגל אותן
-- לתת דוגמאות מעשיות ליישום הטכניקות בחיי היומיום
-
-## בסיס הידע שלך (זו האמת היחידה שלך):
+## בסיס הידע שלך:
 ${NLP_KNOWLEDGE}
 
-## הוראה קריטית — איסור המצאה:
-אתה חייב לענות אך ורק על בסיס בסיס הידע שסופק למעלה. אם התשובה המדויקת, הדוגמה הספציפית, או הסיפור לא נמצאים בבסיס הידע — אסור לך בשום אופן להמציא או לנחש. במקום זאת, אמור בדיוק: "אין לי את המידע המדויק על כך בבסיס הנתונים של השיעור, נסה למקד את השאלה או להתייחס למושגים שנלמדו."
-לעולם אל תמציא שמות חוקרים, תאריכים, מחקרים, ציטוטים, או סיפורים שלא מופיעים במפורש בבסיס הידע.
-
-## כללים:
-- ענה תמיד בעברית
-- תשובות ממוקדות (3-6 משפטים). הרחב רק אם התלמיד מבקש
-- אם התלמיד שואל משהו מחוץ לנושאי הקורס, הפנה אותו בעדינות חזרה ל-NLP
-- כשמסביר טכניקה, תן את השלבים בצורה מסודרת (1, 2, 3...)
-- השתמש בדוגמאות מחיי היומיום כדי להמחיש מושגים — אבל הבהר שזו דוגמה ולא מהחומר
-- אם התלמיד לומד שיעור ספציפי, התמקד בנושא של אותו שיעור
-- כשאתה לא בטוח ב-100% — הודה בזה. עדיף לומר "לא בטוח" מאשר להמציא`
-
-// ===== ROUTER PROMPT (Layer A) =====
-const ROUTER_PROMPT = `You are a question classifier for an NLP (Neuro-Linguistic Programming) course.
-Classify the user's message into exactly one category. Reply with ONLY the category word, nothing else.
-
-Categories:
-- SIMPLE: Greetings, basic factual questions, course logistics, "what is X", definitions, yes/no questions
-- MEDIUM: Explain a technique step-by-step, compare two concepts, give examples, practice exercises, lesson summaries
-- COMPLEX: Deep psychological case analysis, therapeutic intervention planning, multi-layered NLP analysis of characters/relationships, questions requiring high empathy and nuanced psychological insight, creative role-play scenarios
-
-User message: `
+## כללים בלתי ניתנים לערעור:
+1. ענה אך ורק על בסיס בסיס הידע שלמעלה ותמלול השיעור הנוכחי (אם סופק).
+2. אם התשובה, הדוגמה, השם, התאריך או המחקר לא מופיעים במפורש בבסיס הידע — אמור: "אין לי את המידע המדויק על כך בחומרי הקורס. נסה למקד את השאלה או להתייחס למושגים שנלמדו."
+3. לעולם אל תמציא שמות חוקרים, ציטוטים, מחקרים, נתונים סטטיסטיים, או סיפורים.
+4. ענה תמיד בעברית, בשפה מקצועית וברורה.
+5. תשובות ממוקדות: 3-6 משפטים. הרחב רק כשהתלמיד מבקש במפורש.
+6. כשמסביר טכניקה — תן את השלבים בצורה ממוספרת.
+7. אם התלמיד שואל מחוץ לנושאי NLP — הפנה אותו בעדינות חזרה לחומר.
+8. כשאתה לא בטוח ב-100% — הודה בזה.`
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// ===== LAYER A: Router via Groq (fast small model) =====
-async function routeQuestion(message: string): Promise<'SIMPLE' | 'MEDIUM' | 'COMPLEX'> {
-  if (!GROQ_API_KEY) return 'MEDIUM' // Default if no router available
-
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: [
-          { role: 'user', content: ROUTER_PROMPT + message }
-        ],
-        max_tokens: 10,
-        temperature: 0
-      })
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      const classification = (data.choices?.[0]?.message?.content || '').trim().toUpperCase()
-      if (['SIMPLE', 'MEDIUM', 'COMPLEX'].includes(classification)) {
-        return classification as 'SIMPLE' | 'MEDIUM' | 'COMPLEX'
-      }
-    }
-  } catch (e) {
-    console.error('Router error:', e)
-  }
-
-  return 'MEDIUM' // Default fallback
-}
-
-// ===== LAYER B: Gemini Flash (workhorse) =====
-async function callGemini(
-  message: string,
-  history: Array<{ role: string; content: string }>,
-  systemPrompt: string
-): Promise<string | null> {
-  if (!GEMINI_API_KEY) return null
-
-  const geminiContents: Array<{ role: string; parts: Array<{ text: string }> }> = []
-  for (const m of history) {
-    if (m.role === 'user' || m.role === 'model') {
-      geminiContents.push({
-        role: m.role === 'assistant' ? 'model' : m.role,
-        parts: [{ text: m.content }]
-      })
-    }
-  }
-  geminiContents.push({ role: 'user', parts: [{ text: message }] })
-
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: geminiContents,
-          generationConfig: { maxOutputTokens: 1024, temperature: 0.3 }
-        })
-      }
-    )
-
-    if (response.ok) {
-      const data = await response.json()
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || null
-    }
-    console.error('Gemini failed, status:', response.status)
-  } catch (e) {
-    console.error('Gemini error:', e)
-  }
-  return null
-}
-
-// ===== LAYER B fallback: Groq LLaMA 70B =====
-async function callGroq(
-  chatMessages: Array<{ role: string; content: string }>
-): Promise<string | null> {
-  if (!GROQ_API_KEY) return null
-
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: chatMessages,
-        max_tokens: 1024,
-        temperature: 0.3
-      })
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      return data.choices?.[0]?.message?.content || null
-    }
-    const errText = await response.text()
-    console.error('Groq API error:', errText)
-  } catch (e) {
-    console.error('Groq error:', e)
-  }
-  return null
-}
-
-// ===== LAYER C: Claude Sonnet (specialist) =====
-async function callClaude(
-  chatMessages: Array<{ role: string; content: string }>
-): Promise<string | null> {
-  if (!ANTHROPIC_API_KEY) return null
-
-  // Extract system message and conversation messages
-  const systemMsg = chatMessages.find(m => m.role === 'system')?.content || ''
-  const conversationMsgs = chatMessages
-    .filter(m => m.role !== 'system')
-    .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 2048,
-        temperature: 0.3,
-        system: systemMsg,
-        messages: conversationMsgs
-      })
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      return data.content?.[0]?.text || null
-    }
-    const errText = await response.text()
-    console.error('Claude API error:', errText)
-  } catch (e) {
-    console.error('Claude error:', e)
-  }
-  return null
-}
-
-// ===== MAIN HANDLER =====
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // --- Auth verification ---
+    // --- Auth ---
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(
@@ -256,7 +80,7 @@ serve(async (req) => {
     if (currentCount >= DAILY_LIMIT) {
       return new Response(
         JSON.stringify({
-          error: `הגעת למגבלה היומית של ${DAILY_LIMIT} הודעות. חזור מחר! 😊`,
+          error: `הגעת למגבלה היומית של ${DAILY_LIMIT} הודעות. חזור מחר!`,
           rateLimited: true,
           remaining: 0
         }),
@@ -264,22 +88,12 @@ serve(async (req) => {
       )
     }
 
-    // NOTE: Quota is incremented AFTER successful AI response (see below)
-
-    // --- Check API keys ---
-    if (!GEMINI_API_KEY && !GROQ_API_KEY && !ANTHROPIC_API_KEY) {
-      return new Response(
-        JSON.stringify({ reply: 'העוזר הלימודי עדיין בהקמה. פנו אלינו ב-WhatsApp לכל שאלה.' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // --- Fetch student profile from questionnaire ---
+    // --- Student profile (personalization) ---
     let studentProfile = ''
     try {
       const { data: profile } = await supabaseAdmin
         .from('course_questionnaires')
-        .select('full_name, experience_level, motivation, preferred_learning, interest_certification')
+        .select('full_name, experience_level, motivation, preferred_learning')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -287,23 +101,21 @@ serve(async (req) => {
 
       if (profile) {
         const levelMap: Record<string, string> = {
-          'beginner': 'מתחיל — לא למד NLP בעבר. הסבר בפשטות, תן דוגמאות בסיסיות, אל תניח ידע מוקדם.',
-          'intermediate': 'בינוני — למד קורס בסיסי. אפשר להשתמש במונחים מקצועיים עם הסבר קצר.',
-          'advanced': 'מתקדם — בעל ניסיון וידע. אפשר להעמיק, להשוות בין גישות, ולתת אתגרים ברמה גבוהה.'
+          'beginner': 'מתחיל — הסבר בפשטות, אל תניח ידע מוקדם.',
+          'intermediate': 'בינוני — אפשר להשתמש במונחים מקצועיים עם הסבר קצר.',
+          'advanced': 'מתקדם — אפשר להעמיק ולאתגר.'
         }
         const parts: string[] = []
         if (profile.full_name) parts.push(`שם התלמיד: ${profile.full_name}`)
         if (profile.experience_level) parts.push(`רמה: ${levelMap[profile.experience_level] || profile.experience_level}`)
-        if (profile.motivation) parts.push(`מוטיבציה ללימודים: ${profile.motivation}`)
-        if (profile.preferred_learning === 'online') parts.push('מעדיף למידה אונליין')
-        else if (profile.preferred_learning === 'in_person') parts.push('מעדיף למידה פרונטלית')
+        if (profile.motivation) parts.push(`מוטיבציה: ${profile.motivation}`)
 
         if (parts.length > 0) {
-          studentProfile = `\n\n## פרופיל התלמיד (מותאם אישית):\n${parts.join('\n')}\n\nהתאם את רמת ההסבר, הדוגמאות והשפה לפרופיל התלמיד. אם הוא מתחיל — פשט. אם מתקדם — העמק.`
+          studentProfile = `\n\n## פרופיל התלמיד:\n${parts.join('\n')}\nהתאם את רמת ההסבר לפרופיל.`
         }
       }
-    } catch (e) {
-      console.log('No student profile found, using default')
+    } catch (_e) {
+      // No profile — use default
     }
 
     // --- Build context ---
@@ -313,56 +125,54 @@ serve(async (req) => {
 
     const fullSystemPrompt = SYSTEM_PROMPT + studentProfile + contextNote
 
-    // Build chat history (OpenAI-compatible format)
-    const chatMessages: Array<{ role: string; content: string }> = [
-      { role: 'system', content: fullSystemPrompt }
-    ]
+    // --- Build messages for Anthropic ---
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = []
     for (const m of history) {
-      if (m.role === 'user' || m.role === 'assistant' || m.role === 'model') {
-        chatMessages.push({
-          role: m.role === 'model' ? 'assistant' : m.role,
-          content: m.content
-        })
+      const role = (m.role === 'model' || m.role === 'assistant') ? 'assistant' : 'user'
+      if (role === 'user' || role === 'assistant') {
+        messages.push({ role, content: m.content })
       }
     }
-    chatMessages.push({ role: 'user', content: message })
+    messages.push({ role: 'user', content: message })
 
-    // ===== THREE-LAYER ROUTING =====
+    // --- Call Anthropic ---
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1024,
+        temperature: 0.3,
+        system: fullSystemPrompt,
+        messages
+      })
+    })
 
-    // Layer A: Route the question
-    const complexity = await routeQuestion(message)
-    console.log(`[Router] "${message.slice(0, 50)}..." → ${complexity}`)
-
-    let reply = ''
-    let usedProvider = 'none'
-
-    if (complexity === 'COMPLEX' && ANTHROPIC_API_KEY) {
-      // Layer C: Claude Sonnet for complex questions
-      console.log('[Layer C] Routing to Claude Sonnet')
-      reply = await callClaude(chatMessages) || ''
-      if (reply) usedProvider = 'claude'
+    if (!response.ok) {
+      const errBody = await response.text()
+      console.error(`[Anthropic] ${response.status}: ${errBody}`)
+      return new Response(
+        JSON.stringify({ reply: 'שגיאה זמנית בשירות ה-AI. נסו שוב בעוד כמה שניות.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
+
+    const data = await response.json()
+    const reply = data.content?.[0]?.text
 
     if (!reply) {
-      // Layer B: Gemini Flash for simple/medium (or Claude fallback)
-      console.log('[Layer B] Routing to Gemini Flash')
-      reply = await callGemini(message, history, fullSystemPrompt) || ''
-      if (reply) usedProvider = 'gemini'
+      console.error('[Anthropic] Empty response:', JSON.stringify(data))
+      return new Response(
+        JSON.stringify({ reply: 'לא התקבלה תשובה. נסו שוב.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    if (!reply) {
-      // Layer B fallback: Groq LLaMA 70B
-      console.log('[Layer B fallback] Routing to Groq')
-      reply = await callGroq(chatMessages) || ''
-      if (reply) usedProvider = 'groq'
-    }
-
-    if (!reply) {
-      // DO NOT increment quota on failure
-      throw new Error('All AI providers failed')
-    }
-
-    // ===== INCREMENT QUOTA ONLY AFTER SUCCESSFUL RESPONSE =====
+    // --- Increment quota ONLY after successful response ---
     if (usage) {
       await supabaseAdmin
         .from('ai_chat_usage')
@@ -375,14 +185,11 @@ serve(async (req) => {
         .insert({ user_id: user.id, message_count: 1, date: today })
     }
 
-    console.log(`[Done] Provider: ${usedProvider}, Complexity: ${complexity}`)
-
     return new Response(
       JSON.stringify({
         reply,
         remaining: DAILY_LIMIT - (currentCount + 1),
-        provider: usedProvider,
-        complexity,
+        provider: 'anthropic',
         personalized: studentProfile !== ''
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -390,14 +197,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Function error:', error)
-    const errMsg = error instanceof Error ? error.message : String(error)
-    console.error('Error details:', errMsg)
-    console.error('API keys present — Gemini:', !!GEMINI_API_KEY, 'Groq:', !!GROQ_API_KEY, 'Claude:', !!ANTHROPIC_API_KEY)
     return new Response(
-      JSON.stringify({
-        reply: 'שגיאה זמנית. נסו שוב בעוד כמה שניות.',
-        debug: errMsg
-      }),
+      JSON.stringify({ reply: 'שגיאה זמנית. נסו שוב בעוד כמה שניות.' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

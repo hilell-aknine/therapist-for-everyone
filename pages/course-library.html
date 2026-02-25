@@ -5254,6 +5254,30 @@
             sendAiMessageDirect(detailedPrompt);
         }
 
+        async function getAiAuthToken() {
+            if (!supabaseClient) return null;
+            // Try cached session first
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session?.access_token) {
+                // Check if token expires within 60s — force refresh if so
+                const expiresAt = session.expires_at || 0;
+                const nowSec = Math.floor(Date.now() / 1000);
+                if (expiresAt > 0 && expiresAt - nowSec < 60) {
+                    console.log('[AI Chat] Token expiring soon, refreshing...');
+                    const { data: { session: refreshed } } = await supabaseClient.auth.refreshSession();
+                    if (refreshed?.access_token) {
+                        console.log('[AI Chat] Token refreshed successfully');
+                        return refreshed.access_token;
+                    }
+                }
+                return session.access_token;
+            }
+            // No session — try refresh as last resort
+            console.log('[AI Chat] No session found, attempting refresh...');
+            const { data: { session: refreshed } } = await supabaseClient.auth.refreshSession();
+            return refreshed?.access_token || null;
+        }
+
         async function sendAiMessageDirect(message) {
             const input = document.getElementById('aiInput');
             const sendBtn = document.getElementById('aiSendBtn');
@@ -5267,8 +5291,8 @@
             const timeout = setTimeout(() => controller.abort(), 20000);
 
             try {
-                const session = await supabaseClient.auth.getSession();
-                const token = session?.data?.session?.access_token;
+                const token = await getAiAuthToken();
+                console.log('[AI Chat] Sending request, has token:', !!token);
 
                 if (!token) {
                     appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
@@ -5457,8 +5481,8 @@
             let keepDisabled = false;
 
             try {
-                const session = await supabaseClient.auth.getSession();
-                const token = session?.data?.session?.access_token;
+                const token = await getAiAuthToken();
+                console.log('[AI Chat] Sending request, has token:', !!token);
 
                 if (!token) {
                     appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');

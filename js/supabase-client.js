@@ -724,6 +724,8 @@
                 if (authButtons) authButtons.style.display = 'flex';
                 if (userMenu) userMenu.style.display = 'none';
             }
+            // Clear auth-pending state (prevents UI flicker)
+            document.querySelectorAll('[data-auth-pending]').forEach(el => el.removeAttribute('data-auth-pending'));
         }
     };
 

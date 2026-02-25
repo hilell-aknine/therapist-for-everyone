@@ -143,9 +143,14 @@
             const user = await this.getCurrentUser();
 
             if (requireAuth && !user) {
-                console.log('AuthGuard: User not logged in, redirecting to index');
+                console.log('AuthGuard: User not logged in, redirecting to login');
                 if (window.UI) UI.hideLoading();
-                await this._toastAndRedirect('יש להתחבר כדי לגשת לדף זה', 'index.html', 1500);
+                // Save current URL so user returns here after login
+                sessionStorage.setItem('returnUrl', window.location.href);
+                // Compute login path relative to current page depth
+                const inPagesDir = window.location.pathname.includes('/pages/');
+                const loginPath = inPagesDir ? 'login.html' : 'pages/login.html';
+                await this._toastAndRedirect('יש להתחבר כדי לגשת לדף זה', loginPath, 1500);
                 return null;
             }
 
@@ -192,7 +197,9 @@
 
             if (!user) {
                 console.log('AuthGuard: Not logged in');
-                window.location.href = 'index.html';
+                sessionStorage.setItem('returnUrl', window.location.href);
+                const inPagesDir = window.location.pathname.includes('/pages/');
+                window.location.href = inPagesDir ? 'login.html' : 'pages/login.html';
                 return false;
             }
 

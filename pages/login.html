@@ -402,8 +402,17 @@
             btnText.textContent = loading ? 'מתחבר...' : 'התחברות';
         }
 
-        // Redirect based on role
+        // Redirect based on role (or returnUrl if available)
         async function redirectLoggedInUser(user) {
+            // Check for returnUrl first — send user back where they came from
+            const returnUrl = sessionStorage.getItem('returnUrl');
+            if (returnUrl) {
+                sessionStorage.removeItem('returnUrl');
+                window.location.href = returnUrl;
+                return;
+            }
+
+            // Fallback: role-based routing
             try {
                 const { data: profile } = await supabaseClient
                     .from('profiles')

@@ -149,29 +149,91 @@
             gap: 0.6rem;
         }
 
-        .header-course-badge {
+        /* -- Course Switcher Dropdown -- */
+        .course-switcher { position: relative; }
+
+        .course-switcher-trigger {
             display: flex;
             align-items: center;
-            gap: 0.35rem;
-            padding: 0.3rem 0.75rem;
+            gap: 0.4rem;
+            padding: 0.3rem 0.7rem;
             border-radius: 20px;
             font-size: 0.78rem;
             font-weight: 600;
             white-space: nowrap;
-        }
-        .header-course-badge.active {
             background: rgba(0, 96, 107, 0.1);
             color: var(--muted-teal);
             border: 1px solid rgba(0, 96, 107, 0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Heebo', sans-serif;
         }
-        .header-course-badge.active i { color: var(--gold); font-size: 0.7rem; }
-        .header-course-badge.coming-soon {
-            background: var(--bg-secondary);
-            color: var(--text-muted);
+        .course-switcher-trigger:hover {
+            background: rgba(0, 96, 107, 0.15);
+            border-color: rgba(0, 96, 107, 0.35);
+        }
+        .course-switcher-dot { color: var(--gold); font-size: 0.5rem; }
+        .course-switcher-chevron {
+            font-size: 0.55rem;
+            color: var(--text-tertiary);
+            transition: transform 0.2s;
+            margin-right: 0.1rem;
+        }
+        .course-switcher-trigger.open .course-switcher-chevron {
+            transform: rotate(180deg);
+        }
+
+        .course-switcher-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: var(--bg-primary);
             border: 1px solid var(--border-default);
-            opacity: 0.7;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            min-width: 220px;
+            z-index: 300;
+            overflow: hidden;
+            padding: 0.4rem;
         }
-        .header-course-badge.coming-soon i { font-size: 0.65rem; }
+        .course-switcher-dropdown.open { display: block; }
+
+        .course-switcher-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.7rem 0.8rem;
+            border-radius: 8px;
+            transition: background 0.15s;
+            cursor: default;
+        }
+        .course-switcher-item.active {
+            background: rgba(0, 96, 107, 0.06);
+        }
+        .course-switcher-item.active > i {
+            color: var(--gold);
+            font-size: 1rem;
+        }
+        .course-switcher-item.disabled {
+            opacity: 0.5;
+        }
+        .course-switcher-item.disabled > i {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .course-switcher-name {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .course-switcher-meta {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--text-tertiary);
+            margin-top: 0.1rem;
+        }
 
         .header-center-sep {
             width: 1px;
@@ -472,6 +534,9 @@
             position: relative;
         }
 
+        /* Hide auth buttons until session check completes (prevents flicker) */
+        [data-auth-pending] { visibility: hidden !important; }
+
         /* Login button for non-authenticated */
         .header-login-btn {
             display: none;
@@ -503,10 +568,9 @@
             .header-separator { display: none; }
             .header-course-name { display: none; }
 
-            /* Center: compact badges, hide label + coming-soon */
+            /* Center: compact switcher, hide separator */
             .header-center { gap: 0.3rem; }
-            .header-course-badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
-            .header-course-badge.coming-soon { display: none; }
+            .course-switcher-trigger { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
             .header-center-sep { display: none; }
             .header-progress-pill { padding: 0.2rem 0.5rem; gap: 0.3rem; }
             .header-progress-label { display: none; }
@@ -2514,16 +2578,31 @@
             <span class="header-course-name">קורס NLP - יסודות ומעשה</span>
         </div>
 
-        <!-- CENTER GROUP: Course Badges + Progress -->
+        <!-- CENTER GROUP: Course Switcher + Progress -->
         <div class="header-center">
-            <span class="header-course-badge active">
-                <i class="fa-solid fa-circle"></i>
-                קורס NLP Practitioner
-            </span>
-            <span class="header-course-badge coming-soon">
-                <i class="fa-solid fa-lock"></i>
-                NLP Master - בקרוב
-            </span>
+            <div class="course-switcher">
+                <button class="course-switcher-trigger" id="courseSwitcherTrigger">
+                    <i class="fa-solid fa-circle course-switcher-dot"></i>
+                    <span>קורס NLP Practitioner</span>
+                    <i class="fa-solid fa-chevron-down course-switcher-chevron"></i>
+                </button>
+                <div class="course-switcher-dropdown" id="courseSwitcherDropdown">
+                    <div class="course-switcher-item active">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <div>
+                            <span class="course-switcher-name">NLP Practitioner</span>
+                            <span class="course-switcher-meta">51 שיעורים • פעיל</span>
+                        </div>
+                    </div>
+                    <div class="course-switcher-item disabled">
+                        <i class="fa-solid fa-lock"></i>
+                        <div>
+                            <span class="course-switcher-name">NLP Master</span>
+                            <span class="course-switcher-meta">בקרוב</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="header-center-sep"></div>
             <div class="header-progress-pill">
                 <span class="header-progress-label">התקדמות</span>
@@ -2546,13 +2625,13 @@
             </a>
 
             <!-- Login button (shown when NOT authenticated) -->
-            <button class="header-login-btn" id="headerLoginBtn" onclick="openAuthModal()">
+            <button class="header-login-btn" id="headerLoginBtn" data-auth-pending onclick="openAuthModal()">
                 <i class="fa-solid fa-user"></i>
                 <span>התחברות</span>
             </button>
 
             <!-- User menu (shown when authenticated) -->
-            <div class="header-user-menu" id="headerUserMenu">
+            <div class="header-user-menu" id="headerUserMenu" data-auth-pending>
                 <button class="header-notif-btn" id="headerNotifBtn" title="הודעות">
                     <i class="fa-solid fa-bell"></i>
                     <span class="header-notif-badge" id="headerNotifBadge"></span>
@@ -3229,6 +3308,11 @@
             updateProgress();
             updateUI();
 
+            // Fallback: reveal auth buttons after 500ms even if auth check is slow
+            setTimeout(() => {
+                document.querySelectorAll('[data-auth-pending]').forEach(el => el.removeAttribute('data-auth-pending'));
+            }, 500);
+
             // Open first module by default
             const firstModule = document.querySelector('.module');
             if (firstModule) firstModule.classList.add('open');
@@ -3273,6 +3357,8 @@
                 try {
                     // Check for existing session
                     await checkAuthSession();
+                    // Auth resolved — reveal auth buttons
+                    document.querySelectorAll('[data-auth-pending]').forEach(el => el.removeAttribute('data-auth-pending'));
 
                     // Listen for auth state changes (for OAuth redirect)
                     supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -3294,10 +3380,17 @@
                             currentUser = null;
                             updateUI();
                         }
+                        // Clear pending state on any auth event
+                        document.querySelectorAll('[data-auth-pending]').forEach(el => el.removeAttribute('data-auth-pending'));
                     });
                 } catch (authError) {
                     console.error('Auth setup error:', authError);
+                    // Auth failed — still reveal buttons (show login state)
+                    document.querySelectorAll('[data-auth-pending]').forEach(el => el.removeAttribute('data-auth-pending'));
                 }
+            } else {
+                // No supabase — reveal buttons immediately
+                document.querySelectorAll('[data-auth-pending]').forEach(el => el.removeAttribute('data-auth-pending'));
             }
 
             // Toast timer moved to playVideo() — only fires after user actually starts watching
@@ -4245,6 +4338,32 @@
 
         // Alias for login button
         function openAuthModal() { openModal(false); }
+
+        // ===== Course Switcher Dropdown =====
+        (function() {
+            const trigger = document.getElementById('courseSwitcherTrigger');
+            const dropdown = document.getElementById('courseSwitcherDropdown');
+            if (trigger && dropdown) {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    trigger.classList.toggle('open');
+                    dropdown.classList.toggle('open');
+                });
+                document.addEventListener('click', () => {
+                    trigger.classList.remove('open');
+                    dropdown.classList.remove('open');
+                });
+                dropdown.addEventListener('click', (e) => e.stopPropagation());
+                // Close on item click (active course)
+                dropdown.querySelectorAll('.course-switcher-item:not(.disabled)').forEach(item => {
+                    item.style.cursor = 'pointer';
+                    item.addEventListener('click', () => {
+                        trigger.classList.remove('open');
+                        dropdown.classList.remove('open');
+                    });
+                });
+            }
+        })();
 
         // ===== Lead Generation Modal =====
         function openLeadModal() {

@@ -870,7 +870,8 @@
         .lesson-duration {
             font-size: 0.72rem;
             color: var(--text-tertiary);
-            display: none; /* TODO: restore when real durations are added */
+            flex-shrink: 0;
+            margin-inline-start: auto;
         }
 
         /* ===== Main Content ===== */
@@ -3417,6 +3418,29 @@
             }
         ];
 
+        // ===== YouTube ID Extraction =====
+        function extractVideoId(raw) {
+            if (!raw) { console.warn('[VideoID] Empty video ID'); return null; }
+            // Already a clean ID (no slashes/dots)
+            if (/^[\w-]{11}$/.test(raw)) return raw;
+            // Full YouTube URL: extract v= param
+            try {
+                const url = new URL(raw);
+                const v = url.searchParams.get('v');
+                if (v) return v;
+                // youtu.be/ID format
+                if (url.hostname === 'youtu.be') return url.pathname.slice(1);
+                // /embed/ID format
+                const embedMatch = url.pathname.match(/\/embed\/([\w-]+)/);
+                if (embedMatch) return embedMatch[1];
+            } catch (_) {}
+            // Fallback: try regex on raw string
+            const match = raw.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/);
+            if (match) return match[1];
+            console.warn('[VideoID] Could not extract ID from:', raw);
+            return raw; // return as-is, let YouTube handle it
+        }
+
         // ===== State =====
         let currentModuleIndex = 0;
         let currentLessonIndex = 0;
@@ -4007,7 +4031,8 @@
             }
 
             const lesson = modules[moduleIndex].lessons[lessonIndex];
-            currentVideoId = lesson.id;
+            currentVideoId = extractVideoId(lesson.id);
+            console.log(`[Lesson] Module ${moduleIndex}, Lesson ${lessonIndex}: "${lesson.title}" → videoId: ${currentVideoId}`);
 
             const player = document.getElementById('videoPlayer');
             const placeholder = document.getElementById('videoPlaceholder');
@@ -4128,7 +4153,15 @@
             }
 
             // Load iframe
-            player.src = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1`;
+            const embedUrl = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1`;
+            console.log('[PlayVideo] Loading:', embedUrl);
+            player.src = embedUrl;
+
+            // Handle iframe load errors
+            player.onerror = () => {
+                console.error('[PlayVideo] iframe failed to load:', embedUrl);
+                loading.classList.remove('active');
+            };
 
             // When iframe loads, hide loading and show player
             player.onload = () => {

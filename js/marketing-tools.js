@@ -24,7 +24,7 @@
 
 const MARKETING_CONFIG = {
     // Google Analytics 4 Measurement ID
-    GA4_ID: 'G-XXXXXXXXXX',  // <-- Replace with your real GA4 ID
+    GA4_ID: 'G-6YN94QMSH1',
 
     // Meta (Facebook) Pixel ID
     META_PIXEL_ID: '1039436226809281',  // <-- Replace with your real Pixel ID

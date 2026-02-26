@@ -135,7 +135,7 @@
         <div class="page-header">
             <div class="page-icon"><i class="fa-solid fa-book"></i></div>
             <h2>חוברות הקורס</h2>
-            <span class="count">5 חוברות</span>
+            <span class="count">1 חוברת</span>
         </div>
         <div class="cards-grid" id="cardsGrid"></div>
     </main>
@@ -144,7 +144,7 @@
     <div class="modal-overlay" id="pdfModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="pdfModalTitle">צופה במסמך</h3>
+                <h3 id="pdfModalTitle">חוברת הקורס</h3>
                 <div class="modal-header-actions">
                     <a class="btn-modal-action" id="pdfDownloadLink" href="#" download><i class="fa-solid fa-download"></i> הורדה</a>
                     <button class="btn-close-modal" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -155,41 +155,40 @@
     </div>
 
     <script>
-        const items = [
-            { title: 'חוברת NLP – גרסה נקייה', description: 'החוברת המקורית של הקורס, 22 פרקים עם כל הטכניקות והתרגולים.', fileName: 'nlp-booklet-clean.pdf', path: '../docs/booklets/nlp-booklet-clean.pdf' },
-            { title: 'חוברת NLP – מאורגנת', description: 'גרסה מאורגנת עם חלוקה לפרקים ותוכן עניינים מסודר.', fileName: 'nlp-booklet-organized.pdf', path: '../docs/booklets/nlp-booklet-organized.pdf' },
-            { title: 'חוברת NLP – ממותגת', description: 'גרסה ממותגת עם עיצוב מקצועי ולוגו בית הספר.', fileName: 'חוברת-NLP-ממותגת.pdf', path: '../docs/booklets/חוברת-NLP-ממותגת.pdf' },
-            { title: 'חוברת NLP – עם אינפוגרפיקות', description: 'גרסה מועשרת עם אינפוגרפיקות לכל פרק — ויזואלי וקל להבנה.', fileName: 'חוברת-NLP-עם-אינפוגרפיקות.pdf', path: '../docs/booklets/חוברת-NLP-עם-אינפוגרפיקות.pdf' },
-            { title: 'חוברת NLP – דוגמת אינפוגרפיקה', description: 'דוגמת אינפוגרפיקה לבדיקה ולתצוגה מקדימה.', fileName: 'nlp-infographic-test.pdf', path: '../docs/booklets/nlp-infographic-test.pdf' }
-        ];
+        const booklet = {
+            title: 'חוברת NLP Practitioner – ממותגת',
+            description: 'חוברת הקורס המלאה — 7 שיעורים, 50 פרקים עם כל הטכניקות, התרגולים והעקרונות של NLP. מעוצבת בצבעי בית המטפלים.',
+            htmlPath: '../docs/booklets/nlp-booklet-branded.html',
+            pdfPath: '../docs/booklets/nlp-booklet-branded.pdf',
+            pdfFileName: 'NLP-Practitioner-חוברת-בית-המטפלים.pdf'
+        };
 
         (function initPage() {
             const grid = document.getElementById('cardsGrid');
-            grid.innerHTML = items.map((item, i) => `
-                <div class="content-card" onclick="openPdf(${i})">
+            grid.innerHTML = `
+                <div class="content-card" onclick="openBooklet()" style="max-width: 480px;">
                     <div class="card-top">
-                        <div class="card-icon"><i class="fa-solid fa-file-pdf"></i></div>
-                        <span class="card-badge">PDF</span>
+                        <div class="card-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <span class="card-badge">HTML + PDF</span>
                     </div>
-                    <div class="card-title">${esc(item.title)}</div>
-                    <div class="card-description">${esc(item.description)}</div>
+                    <div class="card-title">${esc(booklet.title)}</div>
+                    <div class="card-description">${esc(booklet.description)}</div>
                     <div class="card-actions" onclick="event.stopPropagation()">
-                        <button class="btn-view" onclick="openPdf(${i})"><i class="fa-solid fa-eye"></i> צפייה</button>
-                        <a class="btn-download" href="${item.path}" download="${item.fileName}"><i class="fa-solid fa-download"></i> הורדה</a>
+                        <button class="btn-view" onclick="openBooklet()"><i class="fa-solid fa-eye"></i> צפייה</button>
+                        <a class="btn-download" href="${booklet.pdfPath}" download="${booklet.pdfFileName}"><i class="fa-solid fa-download"></i> הורד PDF</a>
                     </div>
                 </div>
-            `).join('');
-
+            `;
             document.getElementById('loadingScreen').classList.add('hide');
         })();
 
         function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
-        function openPdf(i) {
-            const item = items[i];
-            document.getElementById('pdfModalTitle').textContent = item.title;
-            document.getElementById('pdfIframe').src = item.path;
-            document.getElementById('pdfDownloadLink').href = item.path;
+        function openBooklet() {
+            document.getElementById('pdfModalTitle').textContent = booklet.title;
+            document.getElementById('pdfIframe').src = booklet.htmlPath;
+            document.getElementById('pdfDownloadLink').href = booklet.pdfPath;
+            document.getElementById('pdfDownloadLink').setAttribute('download', booklet.pdfFileName);
             document.getElementById('pdfModal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }

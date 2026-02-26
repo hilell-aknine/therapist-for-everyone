@@ -136,9 +136,8 @@ function createConsentBanner() {
     const banner = document.createElement('div');
     banner.id = 'cookie-consent-banner';
     banner.innerHTML = `
-        <span class="cookie-text">אנחנו משתמשים בעוגיות כדי לשפר את החוויה שלך באתר.</span>
-        <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cookie-link">למידע נוסף</a>
-        <button id="cookie-accept-btn" class="cookie-btn">הבנתי, תודה</button>
+        <span class="cookie-text">אתר זה עושה שימוש בעוגיות (Cookies) ובכלי בינה מלאכותית כדי לשפר את חווית הלמידה. בהמשך הגלישה, הנך מסכים <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cookie-link">למדיניות הפרטיות</a> שלנו.</span>
+        <button id="cookie-accept-btn" class="cookie-btn">הבנתי ואני מסכים</button>
     `;
 
     // Add styles

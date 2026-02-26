@@ -700,6 +700,7 @@
         .sidebar-search input:focus {
             border-color: var(--dusty-aqua);
             background: var(--bg-primary);
+            box-shadow: 0 0 0 3px rgba(47, 133, 146, 0.15);
         }
 
         .sidebar-search-wrap {
@@ -2177,6 +2178,7 @@
         .questionnaire-modal input[type="tel"]:focus {
             outline: none;
             border-color: var(--dusty-aqua);
+            box-shadow: 0 0 0 3px rgba(47, 133, 146, 0.15);
         }
 
         .questionnaire-modal input[type="tel"] {
@@ -2914,7 +2916,7 @@
 
             <!-- User menu (shown when authenticated) -->
             <div class="header-user-menu" id="headerUserMenu" data-auth-pending>
-                <button class="header-notif-btn" id="headerNotifBtn" title="הודעות">
+                <button class="header-notif-btn" id="headerNotifBtn" title="הודעות" aria-label="הודעות">
                     <i class="fa-solid fa-bell"></i>
                     <span class="header-notif-badge" id="headerNotifBadge"></span>
                 </button>
@@ -3061,9 +3063,9 @@
                         <i class="fa-solid fa-play-circle"></i>
                         <p>בחרו שיעור מהתפריט כדי להתחיל</p>
                     </div>
-                    <div class="video-thumbnail" id="videoThumbnail" onclick="playVideo()">
-                        <img id="thumbnailImg" src="" alt="Video thumbnail">
-                        <div class="play-btn">
+                    <div class="video-thumbnail" id="videoThumbnail" onclick="playVideo()" role="button" tabindex="0" aria-label="הפעל וידאו">
+                        <img id="thumbnailImg" src="" alt="תמונת תצוגה של הסרטון">
+                        <div class="play-btn" aria-hidden="true">
                             <i class="fa-solid fa-play"></i>
                         </div>
                     </div>
@@ -3150,7 +3152,7 @@
                         <!-- Resources Tab -->
                         <div class="tab-panel" id="resourcesPanel" role="tabpanel" aria-labelledby="resourcesTab">
                             <div class="resources-grid">
-                                <div class="resource-card" id="workbookCard" onclick="handleResource('workbook')">
+                                <div class="resource-card" id="workbookCard" onclick="handleResource('workbook')" role="button" tabindex="0">
                                     <div class="resource-icon">
                                         <i class="fa-solid fa-file-pdf"></i>
                                     </div>
@@ -3159,7 +3161,7 @@
                                         <p>PDF מקיף עם תרגילים ושאלות</p>
                                     </div>
                                 </div>
-                                <div class="resource-card" id="summaryCard" onclick="handleResource('summary')">
+                                <div class="resource-card" id="summaryCard" onclick="handleResource('summary')" role="button" tabindex="0">
                                     <div class="resource-icon">
                                         <i class="fa-solid fa-list-check"></i>
                                     </div>
@@ -3248,7 +3250,7 @@
                                 </div>
                                 <div class="ai-chat-input-area">
                                     <textarea id="aiInput" placeholder="שאלו שאלה על NLP..." rows="1" maxlength="500"></textarea>
-                                    <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMessage()">
+                                    <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMessage()" aria-label="שלח הודעה">
                                         <i class="fa-solid fa-paper-plane"></i>
                                     </button>
                                 </div>
@@ -3664,6 +3666,14 @@
 
         // ===== Initialization =====
         document.addEventListener('DOMContentLoaded', async () => {
+            // A11y: allow Enter/Space to activate [role="button"] divs
+            document.addEventListener('keydown', (e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role="button"]')) {
+                    e.preventDefault();
+                    e.target.click();
+                }
+            });
+
             // CRITICAL: Always render course content first
             renderSyllabus();
             updateProgress();
@@ -4112,6 +4122,7 @@
                             return `
                                 <div class="lesson-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}"
                                      data-module="${mIndex}" data-lesson="${lIndex}"
+                                     role="button" tabindex="0"
                                      onclick="selectLesson(${mIndex}, ${lIndex}, true)">
                                     <div class="lesson-status">
                                         ${isCompleted ? '<i class="fa-solid fa-check"></i>' :

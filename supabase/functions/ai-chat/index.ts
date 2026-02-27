@@ -7,7 +7,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const DAILY_LIMIT = 200
-const MODEL = 'claude-sonnet-4-5-20241022'
+const MODEL = 'claude-sonnet-4-5-20250929'
 
 // ===== SYSTEM PROMPT =====
 const SYSTEM_PROMPT = `אתה רם — המורה הראשי של קורס NLP פרקטישנר ומאסטר פרקטישנר של בית הספר "בית המטפלים". אתה מומחה עולמי ל-NLP עם ניסיון של שנים בהכשרת מטפלים ומאמנים.

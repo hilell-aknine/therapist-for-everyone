@@ -5807,14 +5807,24 @@
             const container = document.getElementById('aiMessages');
             const div = document.createElement('div');
             div.className = 'ai-rate-limit-msg';
-            div.innerHTML = '😴 ניצלת את מכסת השאלות היומית שלך למורה ה-AI. המורה הלך לנוח, נתראה מחר להמשך למידה!';
+            div.innerHTML = `
+                <div style="text-align:center; padding:1.2rem;">
+                    <div style="font-size:2rem; margin-bottom:0.5rem;">😴</div>
+                    <div style="font-weight:600; margin-bottom:0.4rem;">ניצלת את מכסת השאלות היומית (200 הודעות)</div>
+                    <div style="margin-bottom:1rem; opacity:0.85;">המורה AI הלך לנוח — נתראה מחר!</div>
+                    <div style="margin-bottom:0.8rem; font-size:0.9rem;">בינתיים, אפשר להמשיך ללמוד עם העוזר החינמי שלנו:</div>
+                    <a href="gemini-chat.html" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.2rem; background:var(--gold); color:var(--deep-petrol); border-radius:8px; font-weight:600; text-decoration:none; transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                        <i class="fa-solid fa-robot"></i> המשך למידה עם העוזר החינמי
+                    </a>
+                </div>
+            `;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
 
             // Disable input for the rest of the session
             const input = document.getElementById('aiInput');
             const sendBtn = document.getElementById('aiSendBtn');
-            if (input) { input.disabled = true; input.placeholder = 'המורה חזר מחר 😴'; }
+            if (input) { input.disabled = true; input.placeholder = 'המכסה היומית נוצלה — נסו את העוזר החינמי 👆'; }
             if (sendBtn) sendBtn.disabled = true;
         }
 

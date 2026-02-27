@@ -87,7 +87,7 @@ serve(async (req) => {
     if (currentCount >= DAILY_LIMIT) {
       return new Response(
         JSON.stringify({
-          error: `הגעת למגבלה היומית של ${DAILY_LIMIT} הודעות. חזור מחר!`,
+          error: `הגעת למגבלה היומית של ${DAILY_LIMIT} הודעות. אפשר להמשיך עם העוזר החינמי, או לחזור מחר!`,
           rateLimited: true,
           remaining: 0
         }),

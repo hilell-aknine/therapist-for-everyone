@@ -8,7 +8,7 @@
     // Email notification configuration
     const SUPABASE_FUNCTIONS_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
-    const ADMIN_DASHBOARD_URL = 'https://therapist-for-everyone.vercel.app/pages/admin.html';
+    const ADMIN_DASHBOARD_URL = 'https://www.therapist-home.com/pages/admin.html';
 
     // Send admin notification for new patient registration
     async function sendAdminNotification(formData, userEmail = null) {
@@ -21,7 +21,7 @@
                 },
                 body: JSON.stringify({
                     type: 'new_patient_admin',
-                    to: 'admin@therapist-for-everyone.com', // Will be overridden by ADMIN_EMAIL env var
+                    to: 'admin@therapist-home.com', // Will be overridden by ADMIN_EMAIL env var
                     data: {
                         patientName: formData.full_name,
                         patientEmail: userEmail,

@@ -4,7 +4,7 @@
 ```
 Project: Therapists for Everyone (פורטל מטפלים לכולם)
 Stack: HTML, Vanilla JS, Tailwind CDN, Supabase
-Live: https://therapist-for-everyone.vercel.app/
+Live: https://www.therapist-home.com/
 Repo: https://github.com/hilell-aknine/therapist-for-everyone
 ```
 

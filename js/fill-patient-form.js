@@ -11,7 +11,7 @@ const puppeteer = require('puppeteer');
 
   // שלב 1 - פרטים אישיים
   console.log('שלב 1 - מילוי פרטים אישיים...');
-  await page.goto('https://therapist-for-everyone.vercel.app/pages/patient-step1.html');
+  await page.goto('https://www.therapist-home.com/pages/patient-step1.html');
   await page.waitForSelector('#full_name');
 
   await page.type('#full_name', 'ישראל ישראלי');

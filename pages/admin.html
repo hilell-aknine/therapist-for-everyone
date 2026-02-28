@@ -256,9 +256,9 @@
             color: white;
         }
 
-        /* Contact Leads Table — Custom Colors & Features */
-        #contact-leads-view th { background: #003B46; color: #fff; }
-        #contact-leads-view .status-new { background: rgba(223,183,75,0.15); color: #DFB74B; border-color: rgba(223,183,75,0.3); }
+        /* All Admin Tables — Custom Colors & Features */
+        th { background: #003B46 !important; color: #fff !important; }
+        .status-new { background: rgba(223,183,75,0.15); color: #DFB74B; border-color: rgba(223,183,75,0.3); }
         .date-group-row td {
             background: #003B46;
             color: #fff;
@@ -619,9 +619,16 @@
                                 <input type="text" placeholder="חיפוש..." id="patient-search" oninput="renderPatients()">
                             </div>
                         </div>
+                        <div class="bulk-bar" id="bulk-bar-patients">
+                            <span id="bulk-count-patients">0 נבחרו</span>
+                            <button class="btn btn-danger" onclick="bulkDeleteEntity('patients')">
+                                <i class="fa-solid fa-trash"></i> מחק נבחרים
+                            </button>
+                        </div>
                         <table>
                             <thead>
                                 <tr>
+                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-patients" onchange="toggleSelectAllFor('patients')" title="בחר הכל"></th>
                                     <th>שם</th>
                                     <th>טלפון</th>
                                     <th>עיר</th>
@@ -658,9 +665,16 @@
                                 <input type="text" placeholder="חיפוש..." id="therapist-search" oninput="renderTherapists()">
                             </div>
                         </div>
+                        <div class="bulk-bar" id="bulk-bar-therapists">
+                            <span id="bulk-count-therapists">0 נבחרו</span>
+                            <button class="btn btn-danger" onclick="bulkDeleteEntity('therapists')">
+                                <i class="fa-solid fa-trash"></i> מחק נבחרים
+                            </button>
+                        </div>
                         <table>
                             <thead>
                                 <tr>
+                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-therapists" onchange="toggleSelectAllFor('therapists')" title="בחר הכל"></th>
                                     <th>שם</th>
                                     <th>טלפון</th>
                                     <th>התמחות</th>
@@ -683,9 +697,16 @@
                         <div class="table-header">
                             <h3>רשימת שידוכים</h3>
                         </div>
+                        <div class="bulk-bar" id="bulk-bar-matches">
+                            <span id="bulk-count-matches">0 נבחרו</span>
+                            <button class="btn btn-danger" onclick="bulkDeleteEntity('matches')">
+                                <i class="fa-solid fa-trash"></i> מחק נבחרים
+                            </button>
+                        </div>
                         <table>
                             <thead>
                                 <tr>
+                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-matches" onchange="toggleSelectAllFor('matches')" title="בחר הכל"></th>
                                     <th>מטופל</th>
                                     <th>מטפל</th>
                                     <th>סטטוס</th>
@@ -729,13 +750,21 @@
                                 <input type="text" placeholder="חיפוש..." id="leads-search" oninput="renderLeads()">
                             </div>
                         </div>
+                        <div class="bulk-bar" id="bulk-bar-leads">
+                            <span id="bulk-count-leads">0 נבחרו</span>
+                            <button class="btn btn-danger" onclick="bulkDeleteEntity('leads')">
+                                <i class="fa-solid fa-trash"></i> מחק נבחרים
+                            </button>
+                        </div>
                         <table>
                             <thead>
                                 <tr>
+                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-leads-reg" onchange="toggleSelectAllFor('leads')" title="בחר הכל"></th>
                                     <th>שם</th>
                                     <th>אימייל</th>
                                     <th>תפקידים</th>
                                     <th>תאריך הרשמה</th>
+                                    <th>פעולות</th>
                                 </tr>
                             </thead>
                             <tbody id="leads-table"></tbody>
@@ -786,8 +815,8 @@
                                 <input type="text" placeholder="חיפוש..." id="contact-leads-search" oninput="renderContactLeads()">
                             </div>
                         </div>
-                        <div class="bulk-bar" id="bulk-bar">
-                            <span id="bulk-count">0 נבחרו</span>
+                        <div class="bulk-bar" id="bulk-bar-contact-leads">
+                            <span id="bulk-count-contact-leads">0 נבחרו</span>
                             <button class="btn btn-danger" onclick="bulkDeleteLeads()">
                                 <i class="fa-solid fa-trash"></i> מחק נבחרים
                             </button>
@@ -795,7 +824,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-leads" onchange="toggleSelectAll()" title="בחר הכל"></th>
+                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-contact-leads" onchange="toggleSelectAll()" title="בחר הכל"></th>
                                     <th>שם</th>
                                     <th>טלפון</th>
                                     <th>סוג פנייה</th>
@@ -1097,24 +1126,39 @@
             if (search) filtered = filtered.filter(p => p.full_name?.toLowerCase().includes(search) || p.phone?.includes(search));
 
             const tbody = document.getElementById('patients-table');
+            resetSelectAll('select-all-patients');
+            updateBulkBarFor('patients');
+
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטופלים</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטופלים</td></tr>';
                 return;
             }
-            tbody.innerHTML = filtered.map(p => `
-                <tr>
-                    <td><strong>${p.full_name}</strong></td>
-                    <td><a href="tel:${p.phone}" style="color:var(--info);text-decoration:none;">${p.phone || '-'}</a></td>
-                    <td>${p.city || '-'}</td>
-                    <td><span class="verified-badge ${p.id_verified ? 'yes' : 'no'}">
-                        <i class="fa-solid ${p.id_verified ? 'fa-check-circle' : 'fa-clock'}"></i>
-                        ${p.id_verified ? 'מאומת' : 'ממתין'}
-                    </span></td>
-                    <td><span class="status-badge status-${p.status}">${statusLabel(p.status)}</span></td>
-                    <td>${formatDate(p.created_at)}</td>
-                    <td class="action-btns"><button class="btn-icon" onclick="viewPatient('${p.id}')" title="צפייה"><i class="fa-solid fa-eye"></i></button></td>
-                </tr>
-            `).join('');
+
+            const groups = groupByDate(filtered);
+            let html = '';
+            for (const [group, items] of Object.entries(groups)) {
+                if (items.length === 0) continue;
+                html += `<tr class="date-group-row"><td colspan="8"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                html += items.map(p => `
+                    <tr>
+                        <td class="lead-checkbox"><input type="checkbox" value="${p.id}" onchange="updateBulkBarFor('patients')"></td>
+                        <td><strong>${p.full_name}</strong></td>
+                        <td><a href="tel:${p.phone}" style="color:var(--info);text-decoration:none;">${p.phone || '-'}</a></td>
+                        <td>${p.city || '-'}</td>
+                        <td><span class="verified-badge ${p.id_verified ? 'yes' : 'no'}">
+                            <i class="fa-solid ${p.id_verified ? 'fa-check-circle' : 'fa-clock'}"></i>
+                            ${p.id_verified ? 'מאומת' : 'ממתין'}
+                        </span></td>
+                        <td><span class="status-badge status-${p.status}">${statusLabel(p.status)}</span></td>
+                        <td>${formatDate(p.created_at)}</td>
+                        <td class="action-btns">
+                            <button class="btn-icon" onclick="viewPatient('${p.id}')" title="צפייה"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-icon danger" onclick="deleteEntity('patients','${p.id}','${(p.full_name||'').replace(/'/g,"\\'")}')" title="מחק"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            tbody.innerHTML = html;
         }
 
         function renderTherapists() {
@@ -1124,53 +1168,79 @@
             if (search) filtered = filtered.filter(t => t.full_name?.toLowerCase().includes(search) || t.phone?.includes(search));
 
             const tbody = document.getElementById('therapists-table');
+            resetSelectAll('select-all-therapists');
+            updateBulkBarFor('therapists');
+
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטפלים</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטפלים</td></tr>';
                 return;
             }
-            tbody.innerHTML = filtered.map(t => `
-                <tr>
-                    <td><strong>${t.full_name}</strong></td>
-                    <td><a href="tel:${t.phone}" style="color:var(--info);text-decoration:none;">${t.phone || '-'}</a></td>
-                    <td>${t.specialization || '-'}</td>
-                    <td style="text-align:center;">${t.experience_years || 0} שנים</td>
-                    <td><span class="verified-badge ${t.documents_verified ? 'yes' : 'no'}">
-                        <i class="fa-solid ${t.documents_verified ? 'fa-check-circle' : 'fa-clock'}"></i>
-                        ${t.documents_verified ? 'מאומת' : 'ממתין'}
-                    </span></td>
-                    <td><span class="status-badge status-${t.status}">${statusLabel(t.status)}</span></td>
-                    <td>${formatDate(t.created_at)}</td>
-                    <td class="action-btns">
-                        <button class="btn-icon" onclick="viewTherapist('${t.id}')" title="צפייה"><i class="fa-solid fa-eye"></i></button>
-                        ${t.status === 'new' ? `<button class="btn-icon" style="border-color:var(--success);color:var(--success);" onclick="approveTherapist('${t.id}')" title="אשר"><i class="fa-solid fa-check"></i></button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
+
+            const groups = groupByDate(filtered);
+            let html = '';
+            for (const [group, items] of Object.entries(groups)) {
+                if (items.length === 0) continue;
+                html += `<tr class="date-group-row"><td colspan="9"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                html += items.map(t => `
+                    <tr>
+                        <td class="lead-checkbox"><input type="checkbox" value="${t.id}" onchange="updateBulkBarFor('therapists')"></td>
+                        <td><strong>${t.full_name}</strong></td>
+                        <td><a href="tel:${t.phone}" style="color:var(--info);text-decoration:none;">${t.phone || '-'}</a></td>
+                        <td>${t.specialization || '-'}</td>
+                        <td style="text-align:center;">${t.experience_years || 0} שנים</td>
+                        <td><span class="verified-badge ${t.documents_verified ? 'yes' : 'no'}">
+                            <i class="fa-solid ${t.documents_verified ? 'fa-check-circle' : 'fa-clock'}"></i>
+                            ${t.documents_verified ? 'מאומת' : 'ממתין'}
+                        </span></td>
+                        <td><span class="status-badge status-${t.status}">${statusLabel(t.status)}</span></td>
+                        <td>${formatDate(t.created_at)}</td>
+                        <td class="action-btns">
+                            <button class="btn-icon" onclick="viewTherapist('${t.id}')" title="צפייה"><i class="fa-solid fa-eye"></i></button>
+                            ${t.status === 'new' ? `<button class="btn-icon" style="border-color:var(--success);color:var(--success);" onclick="approveTherapist('${t.id}')" title="אשר"><i class="fa-solid fa-check"></i></button>` : ''}
+                            <button class="btn-icon danger" onclick="deleteEntity('therapists','${t.id}','${(t.full_name||'').replace(/'/g,"\\'")}')" title="מחק"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            tbody.innerHTML = html;
         }
 
         function renderMatches() {
             const tbody = document.getElementById('matches-table');
+            resetSelectAll('select-all-matches');
+            updateBulkBarFor('matches');
+
             if (matches.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fa-solid fa-handshake"></i><br>אין שידוכים</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-handshake"></i><br>אין שידוכים</td></tr>';
                 return;
             }
-            tbody.innerHTML = matches.map(m => `
-                <tr>
-                    <td>${m.patients?.full_name || '-'}</td>
-                    <td>${m.therapists?.full_name || '-'}</td>
-                    <td><span class="status-badge status-${m.status}">${statusLabel(m.status)}</span></td>
-                    <td>${m.session_count || 0}</td>
-                    <td>${formatDate(m.created_at)}</td>
-                    <td>
-                        <select onchange="updateMatchStatus('${m.id}', this.value)" style="padding:0.3rem;font-size:0.8rem;">
-                            <option value="new" ${m.status === 'new' ? 'selected' : ''}>חדש</option>
-                            <option value="active" ${m.status === 'active' ? 'selected' : ''}>פעיל</option>
-                            <option value="completed" ${m.status === 'completed' ? 'selected' : ''}>הושלם</option>
-                            <option value="cancelled" ${m.status === 'cancelled' ? 'selected' : ''}>בוטל</option>
-                        </select>
-                    </td>
-                </tr>
-            `).join('');
+
+            const groups = groupByDate(matches);
+            let html = '';
+            for (const [group, items] of Object.entries(groups)) {
+                if (items.length === 0) continue;
+                html += `<tr class="date-group-row"><td colspan="7"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                html += items.map(m => `
+                    <tr>
+                        <td class="lead-checkbox"><input type="checkbox" value="${m.id}" onchange="updateBulkBarFor('matches')"></td>
+                        <td>${m.patients?.full_name || '-'}</td>
+                        <td>${m.therapists?.full_name || '-'}</td>
+                        <td><span class="status-badge status-${m.status}">${statusLabel(m.status)}</span></td>
+                        <td>${m.session_count || 0}</td>
+                        <td>${formatDate(m.created_at)}</td>
+                        <td class="action-btns">
+                            <select onchange="updateMatchStatus('${m.id}', this.value)" style="padding:0.3rem;font-size:0.8rem;">
+                                <option value="new" ${m.status === 'new' ? 'selected' : ''}>חדש</option>
+                                <option value="active" ${m.status === 'active' ? 'selected' : ''}>פעיל</option>
+                                <option value="completed" ${m.status === 'completed' ? 'selected' : ''}>הושלם</option>
+                                <option value="cancelled" ${m.status === 'cancelled' ? 'selected' : ''}>בוטל</option>
+                            </select>
+                            <button class="btn-icon danger" onclick="deleteEntity('appointments','${m.id}','שידוך')" title="מחק"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            tbody.innerHTML = html;
         }
 
         function renderLeads() {
@@ -1179,18 +1249,33 @@
             if (search) filtered = filtered.filter(l => l.full_name?.toLowerCase().includes(search) || l.email?.toLowerCase().includes(search));
 
             const tbody = document.getElementById('leads-table');
+            resetSelectAll('select-all-leads-reg');
+            updateBulkBarFor('leads');
+
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="fa-solid fa-user-plus"></i><br>אין נרשמים</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fa-solid fa-user-plus"></i><br>אין נרשמים</td></tr>';
                 return;
             }
-            tbody.innerHTML = filtered.map(l => `
-                <tr>
-                    <td><strong>${l.full_name || '-'}</strong></td>
-                    <td>${l.email || '-'}</td>
-                    <td>${(l.roles || []).map(r => `<span class="role-badge role-${r}">${roleLabel(r)}</span>`).join(' ')}</td>
-                    <td>${formatDate(l.created_at)}</td>
-                </tr>
-            `).join('');
+
+            const groups = groupByDate(filtered);
+            let html = '';
+            for (const [group, items] of Object.entries(groups)) {
+                if (items.length === 0) continue;
+                html += `<tr class="date-group-row"><td colspan="6"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                html += items.map(l => `
+                    <tr>
+                        <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('leads')"></td>
+                        <td><strong>${l.full_name || '-'}</strong></td>
+                        <td>${l.email || '-'}</td>
+                        <td>${(l.roles || []).map(r => `<span class="role-badge role-${r}">${roleLabel(r)}</span>`).join(' ')}</td>
+                        <td>${formatDate(l.created_at)}</td>
+                        <td class="action-btns">
+                            <button class="btn-icon danger" onclick="deleteEntity('profiles','${l.id}','${(l.full_name||'').replace(/'/g,"\\'")}')" title="מחק"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            tbody.innerHTML = html;
         }
 
         function exportLeadsCSV() {
@@ -1577,6 +1662,124 @@
         }
 
         // ===================
+        // SHARED: Date grouping, Select-all, Bulk delete, Single delete
+        // ===================
+
+        function getDateGroup(dateStr) {
+            if (!dateStr) return 'ישן יותר';
+            const d = new Date(dateStr).toDateString();
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            if (d === today) return 'היום';
+            if (d === yesterday) return 'אתמול';
+            return 'ישן יותר';
+        }
+
+        const dateGroupIcons = { 'היום': 'fa-calendar-day', 'אתמול': 'fa-calendar-minus', 'ישן יותר': 'fa-calendar-week' };
+
+        function groupByDate(items) {
+            const groups = { 'היום': [], 'אתמול': [], 'ישן יותר': [] };
+            items.forEach(item => groups[getDateGroup(item.created_at)].push(item));
+            return groups;
+        }
+
+        function resetSelectAll(checkboxId) {
+            const el = document.getElementById(checkboxId);
+            if (el) el.checked = false;
+        }
+
+        // Generic select-all for any table
+        function toggleSelectAllFor(tableKey) {
+            const tbodyMap = { leads: 'leads-table', 'contact-leads': 'contact-leads-table' };
+            const tbodyId = tbodyMap[tableKey] || tableKey + '-table';
+            const selectMap = { leads: 'select-all-leads-reg', 'contact-leads': 'select-all-contact-leads' };
+            const selectAllId = selectMap[tableKey] || 'select-all-' + tableKey;
+            const checked = document.getElementById(selectAllId).checked;
+            document.querySelectorAll(`#${tbodyId} .lead-checkbox input[type="checkbox"]`).forEach(cb => cb.checked = checked);
+            updateBulkBarFor(tableKey);
+        }
+
+        function updateBulkBarFor(tableKey) {
+            const tbodyMap = { leads: 'leads-table', 'contact-leads': 'contact-leads-table' };
+            const tbodyId = tbodyMap[tableKey] || tableKey + '-table';
+            const selected = document.querySelectorAll(`#${tbodyId} .lead-checkbox input[type="checkbox"]:checked`);
+            const bar = document.getElementById('bulk-bar-' + tableKey);
+            const count = document.getElementById('bulk-count-' + tableKey);
+            if (!bar || !count) return;
+            if (selected.length > 0) {
+                bar.classList.add('visible');
+                count.textContent = `${selected.length} נבחרו`;
+            } else {
+                bar.classList.remove('visible');
+            }
+        }
+
+        // DB table name mapping for delete operations
+        const entityDbTable = {
+            patients: 'patients',
+            therapists: 'therapists',
+            matches: 'appointments',
+            leads: 'profiles',
+            'contact-leads': 'contact_requests'
+        };
+
+        const entityReloadFn = {
+            patients: () => { loadPatients(); updateCounts(); },
+            therapists: () => { loadTherapists(); updateCounts(); },
+            matches: () => { loadMatches(); updateCounts(); },
+            leads: () => { loadLeads(); updateCounts(); },
+            'contact-leads': () => { loadContactLeads(); }
+        };
+
+        // Generic single delete — opens confirmation modal
+        let pendingDeleteAction = null;
+
+        function deleteEntity(dbTable, id, name) {
+            document.getElementById('delete-confirm-text').textContent = `האם למחוק את "${name}"?`;
+            pendingDeleteAction = async () => {
+                const { error } = await db.from(dbTable).delete().eq('id', id);
+                if (error) { showToast('שגיאה במחיקה', 'error'); console.error(error); return; }
+                showToast('נמחק בהצלחה', 'success');
+                // Reload appropriate table
+                for (const [key, table] of Object.entries(entityDbTable)) {
+                    if (table === dbTable) { entityReloadFn[key](); break; }
+                }
+            };
+            document.getElementById('delete-confirm-modal').classList.add('active');
+        }
+
+        // Generic bulk delete
+        function bulkDeleteEntity(tableKey) {
+            const tbodyMap = { leads: 'leads-table', 'contact-leads': 'contact-leads-table' };
+            const tbodyId = tbodyMap[tableKey] || tableKey + '-table';
+            const selected = document.querySelectorAll(`#${tbodyId} .lead-checkbox input[type="checkbox"]:checked`);
+            const ids = Array.from(selected).map(cb => cb.value);
+            if (ids.length === 0) return;
+            const dbTable = entityDbTable[tableKey];
+            document.getElementById('delete-confirm-text').textContent = `האם למחוק ${ids.length} פריטים?`;
+            pendingDeleteAction = async () => {
+                const { error } = await db.from(dbTable).delete().in('id', ids);
+                if (error) { showToast('שגיאה במחיקה', 'error'); console.error(error); return; }
+                showToast(`${ids.length} פריטים נמחקו`, 'success');
+                entityReloadFn[tableKey]();
+            };
+            document.getElementById('delete-confirm-modal').classList.add('active');
+        }
+
+        async function confirmDeleteAction() {
+            if (pendingDeleteAction) {
+                await pendingDeleteAction();
+                pendingDeleteAction = null;
+            }
+            closeDeleteModal();
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-confirm-modal').classList.remove('active');
+            pendingDeleteAction = null;
+        }
+
+        // ===================
         // CONTACT LEADS (contact_requests)
         // ===================
         let contactLeads = [];
@@ -1600,18 +1803,6 @@
             renderContactLeads();
         }
 
-        function getDateGroup(dateStr) {
-            if (!dateStr) return 'ישן יותר';
-            const d = new Date(dateStr).toDateString();
-            const today = new Date().toDateString();
-            const yesterday = new Date(Date.now() - 86400000).toDateString();
-            if (d === today) return 'היום';
-            if (d === yesterday) return 'אתמול';
-            return 'ישן יותר';
-        }
-
-        const dateGroupIcons = { 'היום': 'fa-calendar-day', 'אתמול': 'fa-calendar-minus', 'ישן יותר': 'fa-calendar-week' };
-
         function renderContactLeads() {
             const search = document.getElementById('contact-leads-search')?.value?.toLowerCase() || '';
             let filtered = contactLeads;
@@ -1623,27 +1814,22 @@
             if (search) filtered = filtered.filter(l => (l.name || l.full_name || '').toLowerCase().includes(search) || (l.phone || '').includes(search));
 
             const tbody = document.getElementById('contact-leads-table');
-            // Reset select-all
-            const selectAll = document.getElementById('select-all-leads');
-            if (selectAll) selectAll.checked = false;
-            updateBulkBar();
+            resetSelectAll('select-all-contact-leads');
+            updateBulkBarFor('contact-leads');
 
             if (filtered.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין לידים</td></tr>';
                 return;
             }
 
-            // Group by date
-            const groups = { 'היום': [], 'אתמול': [], 'ישן יותר': [] };
-            filtered.forEach(l => groups[getDateGroup(l.created_at)].push(l));
-
+            const groups = groupByDate(filtered);
             let html = '';
-            for (const [group, leads] of Object.entries(groups)) {
-                if (leads.length === 0) continue;
-                html += `<tr class="date-group-row"><td colspan="8"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${leads.length})</td></tr>`;
-                html += leads.map(l => `
+            for (const [group, items] of Object.entries(groups)) {
+                if (items.length === 0) continue;
+                html += `<tr class="date-group-row"><td colspan="8"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                html += items.map(l => `
                     <tr>
-                        <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBar()"></td>
+                        <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('contact-leads')"></td>
                         <td><strong>${l.name || l.full_name || 'אנונימי'}</strong></td>
                         <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;">${l.phone}</a>` : '-'}</td>
                         <td><span class="stat-icon ${requestTypeClass(l.request_type)}" style="width:auto;height:auto;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;display:inline-flex;">${requestTypeLabel(l.request_type)}</span></td>
@@ -1653,7 +1839,7 @@
                         <td class="action-btns">
                             ${l.phone ? `<a href="https://wa.me/${l.phone.replace(/^0/, '972')}" target="_blank" class="btn-icon" title="WhatsApp" style="border-color:var(--success);color:var(--success);"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
                             ${l.status === 'new' ? `<button class="btn-icon" onclick="markContactLeadContacted('${l.id}')" title="סמן כטופל"><i class="fa-solid fa-check"></i></button>` : ''}
-                            <button class="btn-icon danger" onclick="deleteContactLead('${l.id}')" title="מחק"><i class="fa-solid fa-trash"></i></button>
+                            <button class="btn-icon danger" onclick="deleteEntity('contact_requests','${l.id}','${(l.name || l.full_name || 'אנונימי').replace(/'/g,"\\'")}')" title="מחק"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `).join('');
@@ -1661,69 +1847,9 @@
             tbody.innerHTML = html;
         }
 
-        // Checkbox & Bulk Delete
-        function toggleSelectAll() {
-            const checked = document.getElementById('select-all-leads').checked;
-            document.querySelectorAll('#contact-leads-table .lead-checkbox input[type="checkbox"]').forEach(cb => cb.checked = checked);
-            updateBulkBar();
-        }
-
-        function updateBulkBar() {
-            const selected = document.querySelectorAll('#contact-leads-table .lead-checkbox input[type="checkbox"]:checked');
-            const bar = document.getElementById('bulk-bar');
-            const count = document.getElementById('bulk-count');
-            if (selected.length > 0) {
-                bar.classList.add('visible');
-                count.textContent = `${selected.length} נבחרו`;
-            } else {
-                bar.classList.remove('visible');
-            }
-        }
-
-        // Delete confirmation system
-        let pendingDeleteAction = null;
-
-        function deleteContactLead(id) {
-            const lead = contactLeads.find(l => l.id === id);
-            const name = lead ? (lead.name || lead.full_name || 'אנונימי') : '';
-            document.getElementById('delete-confirm-text').textContent = `האם למחוק את הליד "${name}"?`;
-            pendingDeleteAction = async () => {
-                const { error } = await db.from('contact_requests').delete().eq('id', id);
-                if (error) { showToast('שגיאה במחיקה', 'error'); return; }
-                showToast('הליד נמחק', 'success');
-                await loadContactLeads();
-                updateAllStats();
-            };
-            document.getElementById('delete-confirm-modal').classList.add('active');
-        }
-
-        function bulkDeleteLeads() {
-            const selected = document.querySelectorAll('#contact-leads-table .lead-checkbox input[type="checkbox"]:checked');
-            const ids = Array.from(selected).map(cb => cb.value);
-            if (ids.length === 0) return;
-            document.getElementById('delete-confirm-text').textContent = `האם למחוק ${ids.length} לידים?`;
-            pendingDeleteAction = async () => {
-                const { error } = await db.from('contact_requests').delete().in('id', ids);
-                if (error) { showToast('שגיאה במחיקה', 'error'); return; }
-                showToast(`${ids.length} לידים נמחקו`, 'success');
-                await loadContactLeads();
-                updateAllStats();
-            };
-            document.getElementById('delete-confirm-modal').classList.add('active');
-        }
-
-        async function confirmDeleteAction() {
-            if (pendingDeleteAction) {
-                await pendingDeleteAction();
-                pendingDeleteAction = null;
-            }
-            closeDeleteModal();
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('delete-confirm-modal').classList.remove('active');
-            pendingDeleteAction = null;
-        }
+        // Contact leads legacy wrappers for HTML onclick handlers
+        function toggleSelectAll() { toggleSelectAllFor('contact-leads'); }
+        function bulkDeleteLeads() { bulkDeleteEntity('contact-leads'); }
 
         async function markContactLeadContacted(id) {
             const { error } = await db.from('contact_requests').update({ status: 'contacted', last_contacted_at: new Date().toISOString() }).eq('id', id);

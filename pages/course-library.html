@@ -3134,14 +3134,33 @@
                                 <div style="width: 64px; height: 64px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem; font-size: 1.8rem; color: #fff;">
                                     <i class="fa-brands fa-whatsapp"></i>
                                 </div>
-                                <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--t-text, #111);">הצטרפו לקבוצת העדכונים השקטה שלנו</h3>
+                                <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: #003B46;">הצטרפו לקבוצת העדכונים השקטה שלנו</h3>
                                 <p style="color: var(--t-text-secondary, #6b7280); margin-bottom: 1.5rem; line-height: 1.7; max-width: 400px; margin-left: auto; margin-right: auto;">
                                     קבלו עדכונים על אירועים, הטבות בלעדיות, תכנים חדשים וטיפים מקצועיים
                                 </p>
-                                <a href="https://chat.whatsapp.com/Lp3MNZ7fmGu8dmUzaUluyx" id="whatsappGroupLink" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.6rem; background: #25D366; color: #fff; padding: 0.85rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1.05rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 10px rgba(37,211,102,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 15px rgba(37,211,102,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 10px rgba(37,211,102,0.3)'">
-                                    <i class="fa-brands fa-whatsapp"></i>
-                                    הצטרפו לקבוצה
-                                </a>
+
+                                <!-- Desktop: QR Code -->
+                                <div id="whatsappQrDesktop" style="display: none;">
+                                    <div style="display: inline-block; padding: 1.2rem; border: 3px solid #003B46; border-radius: 16px; background: #fff; box-shadow: 0 4px 20px rgba(0,59,70,0.1);">
+                                        <div id="whatsappQrCanvas"></div>
+                                    </div>
+                                    <p style="margin-top: 1rem; font-weight: 700; font-size: 1.05rem; color: #003B46;">
+                                        סרקו כדי להצטרף לקהילה השקטה שלנו
+                                    </p>
+                                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem;">
+                                        <span style="width: 28px; height: 2px; background: #DFB74B; display: inline-block;"></span>
+                                        <span style="color: #DFB74B; font-size: 0.85rem; font-weight: 600;">WhatsApp Community</span>
+                                        <span style="width: 28px; height: 2px; background: #DFB74B; display: inline-block;"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Mobile: Green Button -->
+                                <div id="whatsappBtnMobile" style="display: none;">
+                                    <a href="https://chat.whatsapp.com/Lp3MNZ7fmGu8dmUzaUluyx" id="whatsappGroupLink" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.6rem; background: #25D366; color: #fff; padding: 0.85rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1.05rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 10px rgba(37,211,102,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 15px rgba(37,211,102,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 10px rgba(37,211,102,0.3)'">
+                                        <i class="fa-brands fa-whatsapp"></i>
+                                        הצטרפו לקבוצה
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
@@ -3514,6 +3533,7 @@
     </div>
 
     <!-- Toast -->
+    <script src="https://cdn.jsdelivr.net/npm/davidshimjs-qrcodejs@0.0.2/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
     <script src="../js/marketing-tools.js"></script>
@@ -3686,6 +3706,29 @@
                     e.target.click();
                 }
             });
+
+            // WhatsApp QR: desktop shows QR, mobile shows button
+            (function initWhatsAppQR() {
+                const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+                const qrBox = document.getElementById('whatsappQrDesktop');
+                const btnBox = document.getElementById('whatsappBtnMobile');
+                if (isMobile) {
+                    if (btnBox) btnBox.style.display = 'block';
+                } else {
+                    if (qrBox) qrBox.style.display = 'block';
+                    const el = document.getElementById('whatsappQrCanvas');
+                    if (el && typeof QRCode !== 'undefined') {
+                        new QRCode(el, {
+                            text: 'https://chat.whatsapp.com/Lp3MNZ7fmGu8dmUzaUluyx',
+                            width: 200,
+                            height: 200,
+                            colorDark: '#003B46',
+                            colorLight: '#FFFFFF',
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+                    }
+                }
+            })();
 
             // CRITICAL: Always render course content first
             renderSyllabus();

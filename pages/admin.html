@@ -256,6 +256,32 @@
             color: white;
         }
 
+        /* Contact Leads Table — Custom Colors & Features */
+        #contact-leads-view th { background: #003B46; color: #fff; }
+        #contact-leads-view .status-new { background: rgba(223,183,75,0.15); color: #DFB74B; border-color: rgba(223,183,75,0.3); }
+        .date-group-row td {
+            background: #003B46;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 0.5rem 1.2rem;
+            border: none;
+        }
+        .date-group-row td i { margin-left: 0.5rem; }
+        .lead-checkbox { width: 40px; text-align: center !important; }
+        .lead-checkbox input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #003B46; }
+        .bulk-bar {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.7rem 1.5rem;
+            background: rgba(248,81,73,0.08);
+            border-bottom: 1px solid rgba(248,81,73,0.2);
+        }
+        .bulk-bar.visible { display: flex; }
+        .bulk-bar span { font-size: 0.85rem; color: var(--danger); font-weight: 600; }
+        .bulk-bar .btn-danger { font-size: 0.8rem; padding: 0.4rem 1rem; }
+
         .modal-overlay {
             display: none;
             position: fixed;
@@ -760,9 +786,16 @@
                                 <input type="text" placeholder="חיפוש..." id="contact-leads-search" oninput="renderContactLeads()">
                             </div>
                         </div>
+                        <div class="bulk-bar" id="bulk-bar">
+                            <span id="bulk-count">0 נבחרו</span>
+                            <button class="btn btn-danger" onclick="bulkDeleteLeads()">
+                                <i class="fa-solid fa-trash"></i> מחק נבחרים
+                            </button>
+                        </div>
                         <table>
                             <thead>
                                 <tr>
+                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-leads" onchange="toggleSelectAll()" title="בחר הכל"></th>
                                     <th>שם</th>
                                     <th>טלפון</th>
                                     <th>סוג פנייה</th>
@@ -816,6 +849,25 @@
     </div>
 
     <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-confirm-modal">
+        <div class="modal" style="max-width:420px;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger);"></i> אישור מחיקה</h2>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:1.5rem;text-align:center;">
+                <p id="delete-confirm-text" style="font-size:1rem;line-height:1.6;">האם למחוק את הליד הזה?</p>
+            </div>
+            <div class="modal-footer" style="display:flex;gap:0.8rem;justify-content:center;padding:1rem 1.5rem;">
+                <button class="btn btn-danger" id="delete-confirm-btn" onclick="confirmDeleteAction()">
+                    <i class="fa-solid fa-trash"></i> מחק
+                </button>
+                <button class="btn btn-outline" onclick="closeDeleteModal()">ביטול</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Export Modal -->
     <div class="modal-overlay" id="export-modal">
@@ -1548,6 +1600,18 @@
             renderContactLeads();
         }
 
+        function getDateGroup(dateStr) {
+            if (!dateStr) return 'ישן יותר';
+            const d = new Date(dateStr).toDateString();
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            if (d === today) return 'היום';
+            if (d === yesterday) return 'אתמול';
+            return 'ישן יותר';
+        }
+
+        const dateGroupIcons = { 'היום': 'fa-calendar-day', 'אתמול': 'fa-calendar-minus', 'ישן יותר': 'fa-calendar-week' };
+
         function renderContactLeads() {
             const search = document.getElementById('contact-leads-search')?.value?.toLowerCase() || '';
             let filtered = contactLeads;
@@ -1559,24 +1623,106 @@
             if (search) filtered = filtered.filter(l => (l.name || l.full_name || '').toLowerCase().includes(search) || (l.phone || '').includes(search));
 
             const tbody = document.getElementById('contact-leads-table');
+            // Reset select-all
+            const selectAll = document.getElementById('select-all-leads');
+            if (selectAll) selectAll.checked = false;
+            updateBulkBar();
+
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין לידים</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין לידים</td></tr>';
                 return;
             }
-            tbody.innerHTML = filtered.map(l => `
-                <tr>
-                    <td><strong>${l.name || l.full_name || 'אנונימי'}</strong></td>
-                    <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;">${l.phone}</a>` : '-'}</td>
-                    <td><span class="stat-icon ${requestTypeClass(l.request_type)}" style="width:auto;height:auto;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;display:inline-flex;">${requestTypeLabel(l.request_type)}</span></td>
-                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(l.message || '').replace(/"/g, '&quot;')}">${l.message || '-'}</td>
-                    <td><span class="status-badge status-${l.status}">${statusLabel(l.status)}</span></td>
-                    <td>${formatDate(l.created_at)}</td>
-                    <td class="action-btns">
-                        ${l.phone ? `<a href="https://wa.me/${l.phone.replace(/^0/, '972')}" target="_blank" class="btn-icon" title="WhatsApp" style="border-color:var(--success);color:var(--success);"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
-                        ${l.status === 'new' ? `<button class="btn-icon" onclick="markContactLeadContacted('${l.id}')" title="סמן כטופל"><i class="fa-solid fa-check"></i></button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
+
+            // Group by date
+            const groups = { 'היום': [], 'אתמול': [], 'ישן יותר': [] };
+            filtered.forEach(l => groups[getDateGroup(l.created_at)].push(l));
+
+            let html = '';
+            for (const [group, leads] of Object.entries(groups)) {
+                if (leads.length === 0) continue;
+                html += `<tr class="date-group-row"><td colspan="8"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${leads.length})</td></tr>`;
+                html += leads.map(l => `
+                    <tr>
+                        <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBar()"></td>
+                        <td><strong>${l.name || l.full_name || 'אנונימי'}</strong></td>
+                        <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;">${l.phone}</a>` : '-'}</td>
+                        <td><span class="stat-icon ${requestTypeClass(l.request_type)}" style="width:auto;height:auto;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;display:inline-flex;">${requestTypeLabel(l.request_type)}</span></td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(l.message || '').replace(/"/g, '&quot;')}">${l.message || '-'}</td>
+                        <td><span class="status-badge status-${l.status}">${statusLabel(l.status)}</span></td>
+                        <td>${formatDate(l.created_at)}</td>
+                        <td class="action-btns">
+                            ${l.phone ? `<a href="https://wa.me/${l.phone.replace(/^0/, '972')}" target="_blank" class="btn-icon" title="WhatsApp" style="border-color:var(--success);color:var(--success);"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                            ${l.status === 'new' ? `<button class="btn-icon" onclick="markContactLeadContacted('${l.id}')" title="סמן כטופל"><i class="fa-solid fa-check"></i></button>` : ''}
+                            <button class="btn-icon danger" onclick="deleteContactLead('${l.id}')" title="מחק"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            tbody.innerHTML = html;
+        }
+
+        // Checkbox & Bulk Delete
+        function toggleSelectAll() {
+            const checked = document.getElementById('select-all-leads').checked;
+            document.querySelectorAll('#contact-leads-table .lead-checkbox input[type="checkbox"]').forEach(cb => cb.checked = checked);
+            updateBulkBar();
+        }
+
+        function updateBulkBar() {
+            const selected = document.querySelectorAll('#contact-leads-table .lead-checkbox input[type="checkbox"]:checked');
+            const bar = document.getElementById('bulk-bar');
+            const count = document.getElementById('bulk-count');
+            if (selected.length > 0) {
+                bar.classList.add('visible');
+                count.textContent = `${selected.length} נבחרו`;
+            } else {
+                bar.classList.remove('visible');
+            }
+        }
+
+        // Delete confirmation system
+        let pendingDeleteAction = null;
+
+        function deleteContactLead(id) {
+            const lead = contactLeads.find(l => l.id === id);
+            const name = lead ? (lead.name || lead.full_name || 'אנונימי') : '';
+            document.getElementById('delete-confirm-text').textContent = `האם למחוק את הליד "${name}"?`;
+            pendingDeleteAction = async () => {
+                const { error } = await db.from('contact_requests').delete().eq('id', id);
+                if (error) { showToast('שגיאה במחיקה', 'error'); return; }
+                showToast('הליד נמחק', 'success');
+                await loadContactLeads();
+                updateAllStats();
+            };
+            document.getElementById('delete-confirm-modal').classList.add('active');
+        }
+
+        function bulkDeleteLeads() {
+            const selected = document.querySelectorAll('#contact-leads-table .lead-checkbox input[type="checkbox"]:checked');
+            const ids = Array.from(selected).map(cb => cb.value);
+            if (ids.length === 0) return;
+            document.getElementById('delete-confirm-text').textContent = `האם למחוק ${ids.length} לידים?`;
+            pendingDeleteAction = async () => {
+                const { error } = await db.from('contact_requests').delete().in('id', ids);
+                if (error) { showToast('שגיאה במחיקה', 'error'); return; }
+                showToast(`${ids.length} לידים נמחקו`, 'success');
+                await loadContactLeads();
+                updateAllStats();
+            };
+            document.getElementById('delete-confirm-modal').classList.add('active');
+        }
+
+        async function confirmDeleteAction() {
+            if (pendingDeleteAction) {
+                await pendingDeleteAction();
+                pendingDeleteAction = null;
+            }
+            closeDeleteModal();
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-confirm-modal').classList.remove('active');
+            pendingDeleteAction = null;
         }
 
         async function markContactLeadContacted(id) {
@@ -1604,7 +1750,7 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); closeModal('export-modal'); }
+            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); closeModal('export-modal'); closeDeleteModal(); }
         });
 
         // ===================

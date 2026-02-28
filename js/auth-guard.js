@@ -36,26 +36,15 @@
          */
         async getCurrentUser() {
             try {
-                console.log('[AuthGuard] getCurrentUser called');
-                console.log('[AuthGuard] URL:', window.location.href);
-                console.log('[AuthGuard] Hash present:', !!window.location.hash);
-                console.log('[AuthGuard] Hash contains access_token:', window.location.hash.includes('access_token'));
-
                 // If URL contains OAuth hash tokens, wait for Supabase to process them
                 // before checking auth — prevents race condition on redirect
                 if (window.location.hash && window.location.hash.includes('access_token')) {
-                    console.log('[AuthGuard] OAuth hash detected — waiting for Supabase to parse tokens...');
                     const user = await new Promise((resolve) => {
-                        const timeout = setTimeout(() => {
-                            console.warn('[AuthGuard] Timeout (5s) waiting for auth state change');
-                            resolve(null);
-                        }, 5000);
+                        const timeout = setTimeout(() => resolve(null), 5000);
                         const { data: { subscription } } = window.supabaseClient.auth.onAuthStateChange((event, session) => {
-                            console.log('[AuthGuard] onAuthStateChange event:', event, 'session:', !!session);
                             if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
                                 clearTimeout(timeout);
                                 subscription.unsubscribe();
-                                console.log('[AuthGuard] Auth resolved — user:', session?.user?.email || 'null');
                                 resolve(session?.user || null);
                             }
                         });
@@ -63,12 +52,10 @@
                     return user;
                 }
 
-                console.log('[AuthGuard] No OAuth hash — calling getUser()...');
                 const { data: { user } } = await window.supabaseClient.auth.getUser();
-                console.log('[AuthGuard] getUser result:', user?.email || 'null');
                 return user;
             } catch (error) {
-                console.error('[AuthGuard] Error getting current user:', error);
+                console.error('Error getting current user:', error);
                 return null;
             }
         },

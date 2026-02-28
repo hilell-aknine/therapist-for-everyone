@@ -49,7 +49,7 @@
         async signInWithGoogle() {
             const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: window.location.origin + '/pages/course-library.html' }
+                options: { redirectTo: 'https://www.therapist-home.com/pages/course-library.html' }
             });
             if (error) throw error;
             return data;
@@ -78,7 +78,7 @@
 
         async resetPassword(email) {
             const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/reset-password'
+                redirectTo: 'https://www.therapist-home.com/reset-password'
             });
             if (error) throw error;
             return data;

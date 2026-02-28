@@ -36,6 +36,22 @@
          */
         async getCurrentUser() {
             try {
+                // If URL contains OAuth hash tokens, wait for Supabase to process them
+                // before checking auth — prevents race condition on redirect
+                if (window.location.hash && window.location.hash.includes('access_token')) {
+                    const user = await new Promise((resolve) => {
+                        const timeout = setTimeout(() => resolve(null), 5000);
+                        const { data: { subscription } } = window.supabaseClient.auth.onAuthStateChange((event, session) => {
+                            if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                                clearTimeout(timeout);
+                                subscription.unsubscribe();
+                                resolve(session?.user || null);
+                            }
+                        });
+                    });
+                    return user;
+                }
+
                 const { data: { user } } = await window.supabaseClient.auth.getUser();
                 return user;
             } catch (error) {

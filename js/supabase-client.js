@@ -47,10 +47,9 @@
         },
 
         async signInWithGoogle() {
-            const basePath = window.location.pathname.replace(/\/[^/]*$/, '');
             const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: window.location.origin + basePath + '/login.html' }
+                options: { redirectTo: window.location.origin + '/pages/course-library.html' }
             });
             if (error) throw error;
             return data;

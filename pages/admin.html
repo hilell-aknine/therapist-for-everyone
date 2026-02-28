@@ -557,6 +557,90 @@
         }
         .tab:hover { border-color: var(--gold); color: var(--gold); }
         .tab.active { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+
+        /* === Bot CRM Tab === */
+        .bot-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .bot-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .bot-card-full { grid-column: 1 / -1; margin-bottom: 1.5rem; }
+        .bot-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.2rem;
+            background: #003B46;
+            color: #fff;
+        }
+        .bot-card-header h3 { margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; }
+        .bot-card-body { padding: 1.2rem; }
+
+        .bot-status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            text-align: center;
+        }
+        .bot-status-item { display: flex; flex-direction: column; gap: 0.3rem; }
+        .bot-status-item .label { font-size: 0.75rem; color: var(--text-secondary); }
+        .bot-status-item .value { font-size: 1rem; font-weight: 700; }
+        .bot-status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 0.4rem;
+        }
+        .bot-status-dot.online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+        .bot-status-dot.offline { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+        .bot-status-loading { text-align: center; padding: 1.5rem; color: var(--text-secondary); }
+
+        .bot-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .bot-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .bot-action-btn:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+        .bot-action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .bot-action-btn i { font-size: 1.3rem; color: var(--gold); }
+
+        .bot-input {
+            padding: 0.6rem 0.8rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .bot-input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 2px rgba(212,175,55,0.2); }
+
+        .action-label { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; }
+        .action-label.create { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .action-label.update { background: rgba(59,130,246,0.15); color: #3b82f6; }
+        .action-label.delete { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .action-label.broadcast { background: rgba(212,175,55,0.15); color: #D4AF37; }
+        .action-label.other { background: rgba(148,163,184,0.15); color: #94a3b8; }
+
+        @media (max-width: 768px) {
+            .bot-cards { grid-template-columns: 1fr; }
+            .bot-actions-grid { grid-template-columns: 1fr 1fr; }
+            .bot-status-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -603,6 +687,10 @@
                     <i class="fa-solid fa-phone-volume"></i>
                     <span>לידים</span>
                     <span class="badge" id="contact-leads-count">0</span>
+                </div>
+                <div class="nav-item" onclick="switchView('bot')">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>בוט CRM</span>
                 </div>
             </nav>
 
@@ -863,7 +951,154 @@
                     </div>
                 </div>
 
+                <!-- Bot CRM View -->
+                <div id="bot-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-robot"></i> בוט CRM</h1>
+
+                    <!-- Bot Status Card -->
+                    <div class="bot-cards">
+                        <div class="bot-card">
+                            <div class="bot-card-header">
+                                <h3><i class="fa-solid fa-heart-pulse"></i> סטטוס הבוט</h3>
+                                <button class="btn btn-icon" onclick="loadBotStatus()" title="רענן">
+                                    <i class="fa-solid fa-arrows-rotate"></i>
+                                </button>
+                            </div>
+                            <div class="bot-card-body" id="bot-status-content">
+                                <div class="bot-status-loading"><i class="fa-solid fa-spinner fa-spin"></i> בודק חיבור...</div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions Card -->
+                        <div class="bot-card">
+                            <div class="bot-card-header">
+                                <h3><i class="fa-solid fa-bolt"></i> פעולות מהירות</h3>
+                            </div>
+                            <div class="bot-card-body">
+                                <div class="bot-actions-grid">
+                                    <button class="bot-action-btn" onclick="triggerBotAction('/api/daily-summary', 'דוח יומי נשלח')" id="btn-daily">
+                                        <i class="fa-solid fa-chart-line"></i>
+                                        <span>שלח דוח יומי</span>
+                                    </button>
+                                    <button class="bot-action-btn" onclick="triggerBotAction('/api/alerts', 'התראות נשלחו')" id="btn-alerts">
+                                        <i class="fa-solid fa-bell"></i>
+                                        <span>שלח התראות</span>
+                                    </button>
+                                    <button class="bot-action-btn" onclick="triggerBotAction('/api/pipelines', 'אוטומציות הורצו')" id="btn-pipelines">
+                                        <i class="fa-solid fa-gears"></i>
+                                        <span>הרץ אוטומציות</span>
+                                    </button>
+                                    <button class="bot-action-btn" onclick="openBroadcastModal()" id="btn-broadcast">
+                                        <i class="fa-solid fa-bullhorn"></i>
+                                        <span>שלח ברודקאסט</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Log -->
+                    <div class="bot-card bot-card-full">
+                        <div class="bot-card-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> יומן פעילות</h3>
+                            <button class="btn btn-icon" onclick="loadActivityLog()" title="רענן">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                            </button>
+                        </div>
+                        <div class="bot-card-body">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>זמן</th>
+                                        <th>שחקן</th>
+                                        <th>פעולה</th>
+                                        <th>ישות</th>
+                                        <th>פרטים</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activity-log-table">
+                                    <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-secondary);">טוען...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- CRM Notes -->
+                    <div class="bot-card bot-card-full">
+                        <div class="bot-card-header">
+                            <h3><i class="fa-solid fa-sticky-note"></i> הערות CRM</h3>
+                            <button class="btn btn-gold" onclick="toggleNoteForm()" id="btn-add-note">
+                                <i class="fa-solid fa-plus"></i> הוסף הערה
+                            </button>
+                        </div>
+                        <div class="bot-card-body">
+                            <div id="note-form" class="hidden" style="margin-bottom:1rem;">
+                                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                                    <select id="note-entity-type" class="bot-input">
+                                        <option value="general">כללי</option>
+                                        <option value="patient">מטופל</option>
+                                        <option value="therapist">מטפל</option>
+                                        <option value="lead">ליד</option>
+                                    </select>
+                                    <input type="text" id="note-entity-id" class="bot-input" placeholder="מזהה ישות (אופציונלי)" style="flex:1;">
+                                </div>
+                                <textarea id="note-content" class="bot-input" rows="3" placeholder="תוכן ההערה..."></textarea>
+                                <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+                                    <button class="btn btn-gold" onclick="addCrmNote()">שמור</button>
+                                    <button class="btn btn-outline" onclick="toggleNoteForm()">ביטול</button>
+                                </div>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>תאריך</th>
+                                        <th>כותב</th>
+                                        <th>סוג ישות</th>
+                                        <th>תוכן</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="crm-notes-table">
+                                    <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-secondary);">טוען...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </main>
+        </div>
+    </div>
+
+    <!-- Broadcast Modal -->
+    <div class="modal-overlay" id="broadcast-modal">
+        <div class="modal" style="max-width:500px;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-bullhorn"></i> שליחת ברודקאסט</h2>
+                <button class="modal-close" onclick="closeModal('broadcast-modal')">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:1.5rem;">
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block;margin-bottom:0.5rem;font-weight:600;">קהל יעד</label>
+                    <select id="broadcast-filter" class="bot-input" style="width:100%;">
+                        <option value="all">כולם</option>
+                        <option value="therapists">מטפלים</option>
+                        <option value="patients">מטופלים</option>
+                        <option value="leads">לידים</option>
+                        <option value="course">לומדי קורס</option>
+                        <option value="active">פעילים (30 יום)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block;margin-bottom:0.5rem;font-weight:600;">הודעה</label>
+                    <textarea id="broadcast-message" class="bot-input" rows="5" placeholder="הקלד את ההודעה..." style="width:100%;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="sendBroadcast()" id="btn-send-broadcast">
+                    <i class="fa-solid fa-paper-plane"></i> שלח
+                </button>
+                <button class="btn btn-outline" onclick="closeModal('broadcast-modal')">ביטול</button>
+            </div>
         </div>
     </div>
 
@@ -1139,9 +1374,10 @@
         function switchView(view) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            ['patients','therapists','matches','leads','contact-leads'].forEach(v => {
+            ['patients','therapists','matches','leads','contact-leads','bot'].forEach(v => {
                 document.getElementById(v + '-view')?.classList.toggle('hidden', view !== v);
             });
+            if (view === 'bot') loadBotView();
         }
 
         function filterPatients(status) {
@@ -2054,7 +2290,7 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); closeModal('export-modal'); closeDeleteModal(); closeEditModal(); closeAllMenus(); }
+            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); closeModal('export-modal'); closeModal('broadcast-modal'); closeDeleteModal(); closeEditModal(); closeAllMenus(); }
         });
 
         // ===================
@@ -2626,6 +2862,239 @@
 </html>
             `);
             printWindow.document.close();
+        }
+
+        // ============================================================
+        // BOT CRM TAB
+        // ============================================================
+
+        const BOT_URL = 'https://crm-bot-hillel.fly.dev';
+
+        async function getBotHeaders(json) {
+            const { data: { session } } = await db.auth.getSession();
+            if (!session?.access_token) throw new Error('לא מחובר — נא להתחבר מחדש');
+            const headers = { 'Authorization': 'Bearer ' + session.access_token };
+            if (json) headers['Content-Type'] = 'application/json';
+            return headers;
+        }
+
+        const ACTION_LABELS = {
+            'lead_created': { text: 'ליד חדש', cls: 'create' },
+            'patient_created': { text: 'מטופל חדש', cls: 'create' },
+            'therapist_approved': { text: 'אישור מטפל', cls: 'update' },
+            'match_created': { text: 'שיבוץ', cls: 'create' },
+            'note_added': { text: 'הערה', cls: 'create' },
+            'payment_recorded': { text: 'תשלום', cls: 'create' },
+            'status_updated': { text: 'עדכון סטטוס', cls: 'update' },
+            'broadcast_sent': { text: 'ברודקאסט', cls: 'broadcast' },
+            'appointment_created': { text: 'פגישה חדשה', cls: 'create' },
+            'appointment_cancelled': { text: 'ביטול פגישה', cls: 'delete' },
+            'lead_converted': { text: 'המרת ליד', cls: 'update' },
+            'entity_deleted': { text: 'מחיקה', cls: 'delete' },
+        };
+
+        const ENTITY_LABELS = {
+            'patient': 'מטופל', 'therapist': 'מטפל', 'lead': 'ליד',
+            'appointment': 'פגישה', 'payment': 'תשלום', 'broadcast': 'ברודקאסט',
+            'contact_request': 'פנייה', 'general': 'כללי',
+        };
+
+        function loadBotView() {
+            loadBotStatus();
+            loadActivityLog();
+            loadCrmNotes();
+        }
+
+        async function loadBotStatus() {
+            const el = document.getElementById('bot-status-content');
+            el.innerHTML = '<div class="bot-status-loading"><i class="fa-solid fa-spinner fa-spin"></i> בודק חיבור...</div>';
+            try {
+                const res = await fetch(BOT_URL + '/', { signal: AbortSignal.timeout(8000) });
+                const data = await res.json();
+                const isOnline = data.whatsapp === 'authorized' || data.whatsapp === 'connected';
+                el.innerHTML = `
+                    <div class="bot-status-grid">
+                        <div class="bot-status-item">
+                            <span class="label">מצב</span>
+                            <span class="value">
+                                <span class="bot-status-dot ${isOnline ? 'online' : 'offline'}"></span>
+                                ${isOnline ? 'מחובר' : data.whatsapp || 'לא מחובר'}
+                            </span>
+                        </div>
+                        <div class="bot-status-item">
+                            <span class="label">גרסה</span>
+                            <span class="value">${data.version || '?'}</span>
+                        </div>
+                        <div class="bot-status-item">
+                            <span class="label">שלב</span>
+                            <span class="value">${data.phase || '?'}</span>
+                        </div>
+                    </div>`;
+            } catch (err) {
+                el.innerHTML = `
+                    <div style="text-align:center;padding:1.5rem;">
+                        <span class="bot-status-dot offline"></span>
+                        <span style="color:var(--danger);font-weight:600;">הבוט לא מגיב</span>
+                        <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.5rem;">${err.message}</div>
+                    </div>`;
+            }
+        }
+
+        async function loadActivityLog() {
+            const tbody = document.getElementById('activity-log-table');
+            try {
+                const { data, error } = await db
+                    .from('crm_activity_log')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-secondary);">אין פעילות עדיין</td></tr>';
+                    return;
+                }
+                const groups = groupByDate(data);
+                let html = '';
+                for (const [group, items] of Object.entries(groups)) {
+                    if (items.length === 0) continue;
+                    html += `<tr class="date-group-row"><td colspan="5"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                    html += items.map(row => {
+                        const time = new Date(row.created_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                        const actionInfo = ACTION_LABELS[row.action] || { text: row.action, cls: 'other' };
+                        const entity = ENTITY_LABELS[row.entity_type] || row.entity_type || '-';
+                        const details = row.details ? (typeof row.details === 'string' ? row.details : JSON.stringify(row.details)).substring(0, 80) : '-';
+                        return `<tr>
+                            <td>${time}</td>
+                            <td>${row.actor_name || row.actor_phone || '-'}</td>
+                            <td><span class="action-label ${actionInfo.cls}">${actionInfo.text}</span></td>
+                            <td>${entity}</td>
+                            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${details}">${details}</td>
+                        </tr>`;
+                    }).join('');
+                }
+                tbody.innerHTML = html;
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--danger);">שגיאה: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function loadCrmNotes() {
+            const tbody = document.getElementById('crm-notes-table');
+            try {
+                const { data, error } = await db
+                    .from('crm_notes')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-secondary);">אין הערות עדיין</td></tr>';
+                    return;
+                }
+                const groups = groupByDate(data);
+                let html = '';
+                for (const [group, items] of Object.entries(groups)) {
+                    if (items.length === 0) continue;
+                    html += `<tr class="date-group-row"><td colspan="4"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                    html += items.map(note => {
+                        const date = new Date(note.created_at).toLocaleString('he-IL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                        const entity = ENTITY_LABELS[note.entity_type] || note.entity_type || '-';
+                        return `<tr>
+                            <td>${date}</td>
+                            <td>${note.author_name || note.author_phone || '-'}</td>
+                            <td>${entity}</td>
+                            <td>${note.content || '-'}</td>
+                        </tr>`;
+                    }).join('');
+                }
+                tbody.innerHTML = html;
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--danger);">שגיאה: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function triggerBotAction(endpoint, successMsg) {
+            const btn = event.currentTarget;
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>מבצע...</span>';
+            try {
+                const res = await fetch(BOT_URL + endpoint, {
+                    headers: await getBotHeaders(),
+                    signal: AbortSignal.timeout(30000)
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                showToast(successMsg, 'success');
+            } catch (err) {
+                showToast('שגיאה: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        }
+
+        function toggleNoteForm() {
+            const form = document.getElementById('note-form');
+            form.classList.toggle('hidden');
+        }
+
+        async function addCrmNote() {
+            const entityType = document.getElementById('note-entity-type').value;
+            const entityId = document.getElementById('note-entity-id').value.trim() || null;
+            const content = document.getElementById('note-content').value.trim();
+            if (!content) { showToast('נא למלא תוכן', 'error'); return; }
+
+            const { data: { session } } = await db.auth.getSession();
+            const authorName = session?.user?.email || 'Admin Dashboard';
+
+            const { error } = await db.from('crm_notes').insert({
+                entity_type: entityType,
+                entity_id: entityId,
+                content: content,
+                author_phone: 'dashboard',
+                author_name: authorName
+            });
+            if (error) { showToast('שגיאה: ' + error.message, 'error'); return; }
+            showToast('הערה נוספה', 'success');
+            document.getElementById('note-content').value = '';
+            document.getElementById('note-entity-id').value = '';
+            toggleNoteForm();
+            loadCrmNotes();
+        }
+
+        function openBroadcastModal() {
+            document.getElementById('broadcast-filter').value = 'all';
+            document.getElementById('broadcast-message').value = '';
+            openModal('broadcast-modal');
+        }
+
+        async function sendBroadcast() {
+            const filter = document.getElementById('broadcast-filter').value;
+            const message = document.getElementById('broadcast-message').value.trim();
+            if (!message) { showToast('נא לכתוב הודעה', 'error'); return; }
+
+            const btn = document.getElementById('btn-send-broadcast');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
+
+            try {
+                const res = await fetch(BOT_URL + '/api/broadcast', {
+                    method: 'POST',
+                    headers: await getBotHeaders(true),
+                    body: JSON.stringify({ filter, message }),
+                    signal: AbortSignal.timeout(120000)
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const result = await res.json();
+                showToast(`ברודקאסט נשלח: ${result.sent}/${result.total} הצליחו`, 'success');
+                closeModal('broadcast-modal');
+                loadActivityLog();
+            } catch (err) {
+                showToast('שגיאת ברודקאסט: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שלח';
+            }
         }
     </script>
     <!-- Marketing & Analytics -->

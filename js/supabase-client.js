@@ -926,8 +926,6 @@
 
                 if (insertError) {
                     console.error('Profile create error:', insertError);
-                } else {
-                    console.log('Profile created for:', user.email);
                 }
             }
         } catch (err) {
@@ -937,7 +935,6 @@
 
     // Auth state change listener
     Auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth state changed:', event);
         UI.updateAuthUI(session?.user);
         if (event === 'SIGNED_IN' && session?.user) {
             await ensureProfile(session.user);
@@ -986,7 +983,5 @@
         UserNotes: UserNotes,
         UI: UI
     };
-
-    console.log('supabase-client.js loaded successfully');
 
 })();

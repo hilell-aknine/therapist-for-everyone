@@ -4254,7 +4254,6 @@
 
             const lesson = modules[moduleIndex].lessons[lessonIndex];
             currentVideoId = extractVideoId(lesson.id);
-            console.log(`[Lesson] Module ${moduleIndex}, Lesson ${lessonIndex}: "${lesson.title}" → videoId: ${currentVideoId}`);
 
             const player = document.getElementById('videoPlayer');
             const placeholder = document.getElementById('videoPlaceholder');
@@ -4376,7 +4375,6 @@
 
             // Load iframe
             const embedUrl = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1`;
-            console.log('[PlayVideo] Loading:', embedUrl);
             player.src = embedUrl;
 
             // Handle iframe load errors
@@ -5424,17 +5422,14 @@
                 const expiresAt = session.expires_at || 0;
                 const nowSec = Math.floor(Date.now() / 1000);
                 if (expiresAt > 0 && expiresAt - nowSec < 60) {
-                    console.log('[AI Chat] Token expiring soon, refreshing...');
                     const { data: { session: refreshed } } = await supabaseClient.auth.refreshSession();
                     if (refreshed?.access_token) {
-                        console.log('[AI Chat] Token refreshed successfully');
                         return refreshed.access_token;
                     }
                 }
                 return session.access_token;
             }
             // No session — try refresh as last resort
-            console.log('[AI Chat] No session found, attempting refresh...');
             const { data: { session: refreshed } } = await supabaseClient.auth.refreshSession();
             return refreshed?.access_token || null;
         }
@@ -5455,7 +5450,6 @@
 
             try {
                 const token = await getAiAuthToken();
-                console.log('[AI Chat] Sending request, has token:', !!token);
 
                 if (!token) {
                     appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
@@ -5471,7 +5465,6 @@
                 };
 
                 const fetchUrl = `${SUPABASE_URL}/functions/v1/ai-chat`;
-                console.log('[AI Chat Direct] Fetching:', fetchUrl);
 
                 const response = await fetch(
                     fetchUrl,
@@ -5499,8 +5492,6 @@
                 }
 
                 const data = await response.json();
-                console.log('[AI Chat Direct] Response OK, provider:', data.provider);
-
                 if (data.rateLimited) {
                     appendRateLimitMessage();
                     return;
@@ -5667,7 +5658,6 @@
 
             try {
                 const token = await getAiAuthToken();
-                console.log('[AI Chat] Sending request, has token:', !!token);
 
                 if (!token) {
                     appendAiMessage('bot', 'נראה שהחיבור נותק. נסו לרענן את הדף.');
@@ -5683,7 +5673,6 @@
                 };
 
                 const fetchUrl = `${SUPABASE_URL}/functions/v1/ai-chat`;
-                console.log('[AI Chat] Fetching:', fetchUrl);
 
                 const response = await fetch(
                     fetchUrl,
@@ -5715,7 +5704,6 @@
                 }
 
                 const data = await response.json();
-                console.log('[AI Chat] Response OK, provider:', data.provider, 'remaining:', data.remaining);
 
                 if (data.rateLimited) {
                     appendRateLimitMessage();

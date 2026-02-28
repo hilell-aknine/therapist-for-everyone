@@ -104,15 +104,11 @@
          */
         async getUserRole(userId) {
             try {
-                console.log('AuthGuard: Getting role for user:', userId);
-
                 const { data, error } = await window.supabaseClient
                     .from('profiles')
                     .select('role')
                     .eq('id', userId)
                     .single();
-
-                console.log('AuthGuard: Profile query result:', { data, error });
 
                 if (error) {
                     console.error('Error getting user role:', error);
@@ -120,7 +116,6 @@
                 }
 
                 const role = data?.role || 'student';
-                console.log('AuthGuard: User role is:', role);
                 return role;
             } catch (error) {
                 console.error('Error in getUserRole:', error);
@@ -170,7 +165,6 @@
             const user = await this.getCurrentUser();
 
             if (requireAuth && !user) {
-                console.log('AuthGuard: User not logged in, redirecting to login');
                 if (window.UI) UI.hideLoading();
                 // Save current URL so user returns here after login
                 sessionStorage.setItem('returnUrl', window.location.href);
@@ -191,7 +185,6 @@
                 const hasConsent = await this.hasLegalConsent(user.id);
 
                 if (!hasConsent) {
-                    console.log('AuthGuard: No legal consent, redirecting to legal-gate');
                     if (window.UI) UI.hideLoading();
                     await this._toastAndRedirect('יש לחתום על תנאי השימוש', 'legal-gate.html', 1500);
                     return null;
@@ -202,7 +195,6 @@
             const role = await this.getUserRole(user.id);
 
             if (requiredRole && role !== requiredRole) {
-                console.log(`AuthGuard: Role mismatch. Required: ${requiredRole}, Got: ${role}`);
                 if (window.UI) UI.hideLoading();
                 await this._toastAndRedirect('מעביר לאזור האישי שלך', null, 1000, role);
                 return null;
@@ -223,7 +215,6 @@
             const user = await this.getCurrentUser();
 
             if (!user) {
-                console.log('AuthGuard: Not logged in');
                 sessionStorage.setItem('returnUrl', window.location.href);
                 const inPagesDir = window.location.pathname.includes('/pages/');
                 window.location.href = inPagesDir ? 'login.html' : 'pages/login.html';
@@ -233,7 +224,6 @@
             const hasConsent = await this.hasLegalConsent(user.id);
 
             if (!hasConsent) {
-                console.log('AuthGuard: No legal consent found, redirecting...');
                 window.location.href = 'legal-gate.html';
                 return false;
             }
@@ -278,13 +268,11 @@
                 if (error) {
                     // Check if it's a duplicate (already signed)
                     if (error.code === '23505') {
-                        console.log('User already signed this version');
                         return { success: true, alreadySigned: true };
                     }
                     throw error;
                 }
 
-                console.log('Legal consent recorded:', data);
                 return { success: true, data };
 
             } catch (error) {
@@ -377,7 +365,5 @@
 
     // Convenience function for quick access
     window.checkLegalConsent = () => AuthGuard.checkLegalConsent();
-
-    console.log('auth-guard.js loaded successfully');
 
 })();

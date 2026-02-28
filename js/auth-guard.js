@@ -42,15 +42,26 @@
                     const user = await new Promise((resolve) => {
                         const timeout = setTimeout(() => resolve(null), 5000);
                         const { data: { subscription } } = window.supabaseClient.auth.onAuthStateChange((event, session) => {
-                            if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
                                 clearTimeout(timeout);
                                 subscription.unsubscribe();
-                                resolve(session?.user || null);
+                                resolve(session.user);
                             }
                         });
                     });
+
+                    // Fallback: hash has tokens but session parse failed — reload once
+                    if (!user && !sessionStorage.getItem('_oauth_reload')) {
+                        sessionStorage.setItem('_oauth_reload', '1');
+                        window.location.reload();
+                        return null;
+                    }
+                    sessionStorage.removeItem('_oauth_reload');
                     return user;
                 }
+
+                // Clean up reload flag on normal (non-OAuth) visits
+                sessionStorage.removeItem('_oauth_reload');
 
                 const { data: { user } } = await window.supabaseClient.auth.getUser();
                 return user;

@@ -21,9 +21,10 @@ CREATE TABLE IF NOT EXISTS user_notes (
 ALTER TABLE user_notes ENABLE ROW LEVEL SECURITY;
 
 -- Users can only read/write their own notes
+DROP POLICY IF EXISTS "Users manage own notes" ON user_notes;
 CREATE POLICY "Users manage own notes" ON user_notes
   FOR ALL USING (auth.uid() = user_id);
 
 -- Index for fast lookups
-CREATE INDEX idx_user_notes_user_id ON user_notes(user_id);
-CREATE INDEX idx_user_notes_updated ON user_notes(user_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_notes_user_id ON user_notes(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_notes_updated ON user_notes(user_id, updated_at DESC);

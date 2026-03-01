@@ -13,12 +13,18 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const GA4_PROPERTY_ID = Deno.env.get('GA4_PROPERTY_ID')!
 const GA4_SERVICE_ACCOUNT_JSON = Deno.env.get('GA4_SERVICE_ACCOUNT_JSON')!
 
-const ALLOWED_ORIGIN = 'https://www.therapist-home.com'
+const ALLOWED_ORIGINS = [
+  'https://www.therapist-home.com',
+  'https://therapist-for-everyone.vercel.app',
+]
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('origin') || ''
+  return {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  }
 }
 
 // ============================================================================
@@ -142,6 +148,8 @@ async function queryGA4(
 // ============================================================================
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   // CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })

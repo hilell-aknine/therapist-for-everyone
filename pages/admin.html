@@ -3473,8 +3473,8 @@
             }
 
             try {
-                const session = await window.supabaseClient.auth.getSession();
-                const token = session?.data?.session?.access_token;
+                const { data: { session } } = await db.auth.getSession();
+                const token = session?.access_token;
                 if (!token) {
                     showGA4Error('לא מחובר — יש להתחבר מחדש');
                     return;

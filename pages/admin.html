@@ -674,6 +674,59 @@
         /* 3-col grid for 6 action buttons */
         .bot-actions-grid-3x2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; }
 
+        /* === Settings View === */
+        .settings-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .settings-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 1rem 1.5rem;
+            background: #003B46;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .settings-section-header i { color: var(--gold); }
+        .settings-section-desc {
+            padding: 0.8rem 1.5rem;
+            background: rgba(212,175,55,0.05);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .settings-section-body { padding: 0.5rem 1.5rem 1rem; }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-label { flex: 1; }
+        .settings-label strong { display: block; font-size: 0.9rem; margin-bottom: 0.2rem; }
+        .settings-label span { display: block; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; }
+        .settings-input {
+            min-width: 200px;
+            max-width: 260px;
+            padding: 0.6rem 0.8rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .settings-input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 2px rgba(212,175,55,0.2); }
+
         @media (max-width: 768px) {
             .bot-cards { grid-template-columns: 1fr; }
             .bot-actions-grid { grid-template-columns: 1fr 1fr; }
@@ -681,6 +734,8 @@
             .bot-status-grid { grid-template-columns: 1fr; }
             #analytics-view .stats { grid-template-columns: 1fr 1fr; }
             #analytics-view > div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+            .settings-row { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+            .settings-input { max-width: 100%; min-width: unset; width: 100%; }
         }
     </style>
 </head>
@@ -736,6 +791,11 @@
                 <div class="nav-item" onclick="switchView('analytics')">
                     <i class="fa-solid fa-chart-line"></i>
                     <span>אנליטיקס</span>
+                </div>
+                <hr style="border:none;border-top:1px solid var(--border);margin:0.8rem 0;">
+                <div class="nav-item" onclick="switchView('settings')">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>הגדרות</span>
                 </div>
             </nav>
 
@@ -1322,6 +1382,239 @@
                     </div>
                 </div>
 
+                <!-- Settings View -->
+                <div id="settings-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-gear" style="color:var(--gold);margin-left:0.5rem;"></i> הגדרות דאשבורד</h1>
+                    <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">התאמה אישית של התצוגה, האנליטיקס, והטבלאות. ההגדרות נשמרות בדפדפן שלך.</p>
+
+                    <!-- Section: Analytics -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <i class="fa-solid fa-chart-line"></i> אנליטיקס — סטטיסטיקות האתר
+                        </div>
+                        <div class="settings-section-body">
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>טווח תאריכים</strong>
+                                    <span>הנתונים יוצגו לפי התקופה הנבחרת. ברירת מחדל: 30 יום.</span>
+                                </div>
+                                <select id="setting-date-range" class="settings-input">
+                                    <option value="7">7 ימים אחרונים</option>
+                                    <option value="14">14 ימים אחרונים</option>
+                                    <option value="30" selected>30 יום אחרונים</option>
+                                    <option value="60">60 יום אחרונים</option>
+                                    <option value="90">90 יום אחרונים</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>מספר דפים בטבלת "כל הדפים"</strong>
+                                    <span>כמה דפים להציג בטבלת הדפים הפופולריים. ברירת מחדל: 20.</span>
+                                </div>
+                                <select id="setting-max-pages" class="settings-input">
+                                    <option value="10">10 דפים</option>
+                                    <option value="20" selected>20 דפים</option>
+                                    <option value="50">50 דפים</option>
+                                    <option value="100">כל הדפים</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>ימים במגמה יומית</strong>
+                                    <span>כמה ימים להציג בטבלת "יום אחרי יום". ברירת מחדל: 7.</span>
+                                </div>
+                                <select id="setting-trend-days" class="settings-input">
+                                    <option value="7" selected>7 ימים</option>
+                                    <option value="14">14 ימים</option>
+                                    <option value="30">30 יום</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>רענון אוטומטי</strong>
+                                    <span>האם לטעון נתונים חדשים אוטומטית כשנכנסים ללשונית האנליטיקס, או להשתמש ב-cache.</span>
+                                </div>
+                                <select id="setting-auto-refresh" class="settings-input">
+                                    <option value="5" selected>כל 5 דקות (חיסכון)</option>
+                                    <option value="1">כל דקה (בזמן אמת)</option>
+                                    <option value="15">כל 15 דקות</option>
+                                    <option value="0">תמיד רענן (ללא cache)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Tables -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <i class="fa-solid fa-table"></i> טבלאות — מטופלים, מטפלים, לידים
+                        </div>
+                        <div class="settings-section-body">
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>תצוגה ראשונית</strong>
+                                    <span>איזו לשונית תיפתח כשנכנסים לדאשבורד. ברירת מחדל: מטופלים.</span>
+                                </div>
+                                <select id="setting-default-view" class="settings-input">
+                                    <option value="patients" selected>מטופלים</option>
+                                    <option value="therapists">מטפלים</option>
+                                    <option value="matches">שידוכים</option>
+                                    <option value="leads">נרשמים</option>
+                                    <option value="contact-leads">לידים</option>
+                                    <option value="analytics">אנליטיקס</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>קיבוץ לפי תאריך</strong>
+                                    <span>הצגת כותרות "היום / אתמול / ישן יותר" מעל השורות בטבלאות.</span>
+                                </div>
+                                <select id="setting-date-groups" class="settings-input">
+                                    <option value="true" selected>כן — הצג כותרות תאריך</option>
+                                    <option value="false">לא — רשימה רציפה</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>סינון ברירת מחדל — מטופלים</strong>
+                                    <span>איזה פילטר יהיה פעיל כשנכנסים ללשונית מטופלים.</span>
+                                </div>
+                                <select id="setting-patient-filter" class="settings-input">
+                                    <option value="all" selected>הכל</option>
+                                    <option value="new">חדשים</option>
+                                    <option value="waiting_for_match">ממתינים לשיבוץ</option>
+                                    <option value="in_treatment">בטיפול</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>סינון ברירת מחדל — מטפלים</strong>
+                                    <span>איזה פילטר יהיה פעיל כשנכנסים ללשונית מטפלים.</span>
+                                </div>
+                                <select id="setting-therapist-filter" class="settings-input">
+                                    <option value="all" selected>הכל</option>
+                                    <option value="new">חדשים</option>
+                                    <option value="approved">מאושרים</option>
+                                    <option value="active">פעילים</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Notifications -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <i class="fa-solid fa-bell"></i> התראות ותצוגה
+                        </div>
+                        <div class="settings-section-body">
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>הצגת בדג'ים בסיידבר</strong>
+                                    <span>מספרים צבעוניים ליד כל לשונית שמראים כמה רשומות יש.</span>
+                                </div>
+                                <select id="setting-show-badges" class="settings-input">
+                                    <option value="true" selected>כן — הצג מספרים</option>
+                                    <option value="false">לא — הסתר</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>אזהרת תנועה לא מזוהה</strong>
+                                    <span>הצגת ההתראה הכתומה כשרוב התנועה מגיעה כ"ישיר / לא ידוע".</span>
+                                </div>
+                                <select id="setting-direct-warning" class="settings-input">
+                                    <option value="50" selected>הצג כשמעל 50%</option>
+                                    <option value="30">הצג כשמעל 30%</option>
+                                    <option value="70">הצג כשמעל 70%</option>
+                                    <option value="0">הצג תמיד</option>
+                                    <option value="999">לעולם אל תציג</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>מצב כהה / בהיר</strong>
+                                    <span>המצב הנוכחי של התצוגה. אפשר גם לשנות מהכפתור בפינה.</span>
+                                </div>
+                                <select id="setting-theme" class="settings-input">
+                                    <option value="light">בהיר</option>
+                                    <option value="dark">כהה</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: UTM Builder -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <i class="fa-solid fa-link"></i> בונה קישורים מסומנים (UTM)
+                        </div>
+                        <div class="settings-section-desc">
+                            כדי לדעת מאיפה מגיעים הגולשים, צריך לסמן כל קישור שאתה שולח. בחר את הפרטים ותקבל קישור מוכן להעתקה.
+                        </div>
+                        <div class="settings-section-body">
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>דף יעד</strong>
+                                    <span>לאיזה דף באתר הקישור מפנה.</span>
+                                </div>
+                                <select id="utm-page" class="settings-input">
+                                    <option value="https://www.therapist-home.com/">דף הבית</option>
+                                    <option value="https://www.therapist-home.com/landing-therapist.html">הכשרת מטפלים</option>
+                                    <option value="https://www.therapist-home.com/landing-patient.html">מטופלים — נחיתה</option>
+                                    <option value="https://www.therapist-home.com/pages/course-library.html">ספריית הקורסים</option>
+                                    <option value="https://www.therapist-home.com/pages/about.html">המיזם החברתי</option>
+                                    <option value="https://www.therapist-home.com/pages/learning-master.html">פורטל הלמידה</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>מקור</strong>
+                                    <span>מאיפה שולחים את הקישור.</span>
+                                </div>
+                                <select id="utm-source" class="settings-input">
+                                    <option value="whatsapp">וואטסאפ</option>
+                                    <option value="facebook">פייסבוק</option>
+                                    <option value="instagram">אינסטגרם</option>
+                                    <option value="email">אימייל</option>
+                                    <option value="tiktok">טיקטוק</option>
+                                    <option value="sms">SMS</option>
+                                </select>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <strong>שם הקמפיין</strong>
+                                    <span>שם חופשי שיעזור לך לזהות את הקישור אחר כך (לדוגמה: "nlp-course" או "open-day").</span>
+                                </div>
+                                <input type="text" id="utm-campaign" class="settings-input" placeholder="לדוגמה: nlp-course" value="nlp-course" style="text-align:left;direction:ltr;">
+                            </div>
+                            <div class="settings-row" style="flex-direction:column;gap:0.5rem;">
+                                <div style="display:flex;align-items:center;gap:0.8rem;width:100%;">
+                                    <button class="btn btn-gold" onclick="generateUTM()" style="white-space:nowrap;">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> צור קישור
+                                    </button>
+                                    <button class="btn btn-outline" onclick="copyUTM()" id="btn-copy-utm" style="white-space:nowrap;display:none;">
+                                        <i class="fa-solid fa-copy"></i> העתק
+                                    </button>
+                                </div>
+                                <div id="utm-result" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.8rem 1rem;font-size:0.85rem;direction:ltr;text-align:left;word-break:break-all;font-family:monospace;width:100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div style="display:flex;gap:1rem;margin-top:1.5rem;align-items:center;">
+                        <button class="btn btn-gold" onclick="saveDashboardSettings()" style="padding:0.7rem 2rem;font-size:0.95rem;">
+                            <i class="fa-solid fa-floppy-disk"></i> שמור הגדרות
+                        </button>
+                        <button class="btn btn-outline" onclick="resetDashboardSettings()" style="font-size:0.85rem;">
+                            <i class="fa-solid fa-rotate-left"></i> איפוס לברירת מחדל
+                        </button>
+                        <span id="settings-saved-msg" style="color:var(--success);font-size:0.85rem;display:none;">
+                            <i class="fa-solid fa-check"></i> נשמר בהצלחה
+                        </span>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
@@ -1578,6 +1871,7 @@
         const BOT_URL = 'https://crm-bot-hillel.fly.dev';
 
         document.addEventListener('DOMContentLoaded', async () => {
+            applySettingsOnLoad();
             const { data: { session } } = await db.auth.getSession();
             if (session) {
                 document.getElementById('user-email').textContent = session.user.email;
@@ -1635,11 +1929,12 @@
         function switchView(view) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            ['patients','therapists','matches','leads','contact-leads','bot','analytics'].forEach(v => {
+            ['patients','therapists','matches','leads','contact-leads','bot','analytics','settings'].forEach(v => {
                 document.getElementById(v + '-view')?.classList.toggle('hidden', view !== v);
             });
             if (view === 'bot') loadBotView();
             if (view === 'analytics') loadGA4Analytics();
+            if (view === 'settings') loadSettingsView();
         }
 
         function filterPatients(status) {
@@ -3520,7 +3815,7 @@
 
         let ga4Cache = null;
         let ga4CacheTime = 0;
-        const GA4_CACHE_TTL = 5 * 60 * 1000; // 5 minute cache
+        // GA4_CACHE_TTL declared at bottom (mutable via settings)
 
         async function loadGA4Analytics() {
             // Use cache if fresh
@@ -3613,8 +3908,9 @@
                 const directPct = ts.channels
                     .filter(c => c.channel === 'Direct' || c.channel === 'Unassigned')
                     .reduce((sum, c) => sum + c.percentage, 0);
+                const directThreshold = parseInt(getDashboardSettings().directWarning) || 50;
                 const tipEl = document.getElementById('ga4-direct-tip');
-                if (tipEl) tipEl.style.display = directPct >= 50 ? 'block' : 'none';
+                if (tipEl) tipEl.style.display = directPct >= directThreshold ? 'block' : 'none';
             }
 
             // Page path → Hebrew name mapping
@@ -3672,7 +3968,8 @@
             if (allPages.pages.length === 0) {
                 allPagesTbody.innerHTML = '<tr><td colspan="4" class="empty-state">אין נתוני צפיות</td></tr>';
             } else {
-                allPagesTbody.innerHTML = allPages.pages.slice(0, 20).map(p => {
+                const maxPages = parseInt(getDashboardSettings().maxPages) || 20;
+                allPagesTbody.innerHTML = allPages.pages.slice(0, maxPages).map(p => {
                     const shortPath = p.path.length > 30 ? '...' + p.path.slice(-27) : p.path;
                     return `<tr>
                         <td><strong>${getPageHebrew(p.path, p.title)}</strong></td>
@@ -3685,7 +3982,8 @@
 
             // Daily trend table
             const dailyTbody = document.getElementById('ga4-daily-table');
-            const daily = u.daily || [];
+            const trendDays = parseInt(getDashboardSettings().trendDays) || 7;
+            const daily = (u.daily || []).slice(0, trendDays);
             if (daily.length === 0) {
                 dailyTbody.innerHTML = '<tr><td colspan="4" class="empty-state">אין נתונים יומיים</td></tr>';
             } else {
@@ -3724,6 +4022,139 @@
             const el = document.getElementById(id);
             if (el) el.textContent = val ?? '-';
         }
+
+        // ============ SETTINGS ============
+        const SETTINGS_KEY = 'admin_dashboard_settings';
+        const SETTINGS_DEFAULTS = {
+            dateRange: '30',
+            maxPages: '20',
+            trendDays: '7',
+            autoRefresh: '5',
+            defaultView: 'patients',
+            dateGroups: 'true',
+            patientFilter: 'all',
+            therapistFilter: 'all',
+            showBadges: 'true',
+            directWarning: '50',
+            theme: 'light',
+        };
+
+        function getDashboardSettings() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+                return { ...SETTINGS_DEFAULTS, ...saved };
+            } catch { return { ...SETTINGS_DEFAULTS }; }
+        }
+
+        function loadSettingsView() {
+            const s = getDashboardSettings();
+            document.getElementById('setting-date-range').value = s.dateRange;
+            document.getElementById('setting-max-pages').value = s.maxPages;
+            document.getElementById('setting-trend-days').value = s.trendDays;
+            document.getElementById('setting-auto-refresh').value = s.autoRefresh;
+            document.getElementById('setting-default-view').value = s.defaultView;
+            document.getElementById('setting-date-groups').value = s.dateGroups;
+            document.getElementById('setting-patient-filter').value = s.patientFilter;
+            document.getElementById('setting-therapist-filter').value = s.therapistFilter;
+            document.getElementById('setting-show-badges').value = s.showBadges;
+            document.getElementById('setting-direct-warning').value = s.directWarning;
+            // Sync theme select with actual theme
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            document.getElementById('setting-theme').value = currentTheme;
+        }
+
+        function saveDashboardSettings() {
+            const settings = {
+                dateRange: document.getElementById('setting-date-range').value,
+                maxPages: document.getElementById('setting-max-pages').value,
+                trendDays: document.getElementById('setting-trend-days').value,
+                autoRefresh: document.getElementById('setting-auto-refresh').value,
+                defaultView: document.getElementById('setting-default-view').value,
+                dateGroups: document.getElementById('setting-date-groups').value,
+                patientFilter: document.getElementById('setting-patient-filter').value,
+                therapistFilter: document.getElementById('setting-therapist-filter').value,
+                showBadges: document.getElementById('setting-show-badges').value,
+                directWarning: document.getElementById('setting-direct-warning').value,
+                theme: document.getElementById('setting-theme').value,
+            };
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+
+            // Apply theme immediately
+            const newTheme = settings.theme;
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('beit-theme', newTheme);
+
+            // Apply badge visibility
+            document.querySelectorAll('.nav-item .badge').forEach(b => {
+                b.style.display = settings.showBadges === 'true' ? '' : 'none';
+            });
+
+            // Update cache TTL
+            GA4_CACHE_TTL = parseInt(settings.autoRefresh) * 60 * 1000 || 0;
+
+            // Clear analytics cache so next load uses new settings
+            ga4Cache = null;
+            ga4CacheTime = 0;
+
+            // Show success message
+            const msg = document.getElementById('settings-saved-msg');
+            msg.style.display = 'inline';
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+
+            showToast('ההגדרות נשמרו בהצלחה', 'success');
+        }
+
+        function resetDashboardSettings() {
+            localStorage.removeItem(SETTINGS_KEY);
+            loadSettingsView();
+            ga4Cache = null;
+            ga4CacheTime = 0;
+            GA4_CACHE_TTL = 5 * 60 * 1000;
+            showToast('ההגדרות אופסו לברירת מחדל', 'success');
+        }
+
+        function generateUTM() {
+            const page = document.getElementById('utm-page').value;
+            const source = document.getElementById('utm-source').value;
+            const campaign = document.getElementById('utm-campaign').value.trim() || 'general';
+            const url = `${page}?utm_source=${source}&utm_medium=social&utm_campaign=${encodeURIComponent(campaign)}`;
+            const resultEl = document.getElementById('utm-result');
+            resultEl.textContent = url;
+            resultEl.style.display = 'block';
+            document.getElementById('btn-copy-utm').style.display = 'inline-flex';
+        }
+
+        function copyUTM() {
+            const url = document.getElementById('utm-result').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('הקישור הועתק!', 'success');
+            }).catch(() => {
+                // Fallback
+                const ta = document.createElement('textarea');
+                ta.value = url;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('הקישור הועתק!', 'success');
+            });
+        }
+
+        // Apply saved settings on page load
+        function applySettingsOnLoad() {
+            const s = getDashboardSettings();
+
+            // Badge visibility
+            if (s.showBadges === 'false') {
+                document.querySelectorAll('.nav-item .badge').forEach(b => { b.style.display = 'none'; });
+            }
+
+            // Cache TTL
+            GA4_CACHE_TTL = parseInt(s.autoRefresh) * 60 * 1000 || 0;
+        }
+
+        // Make GA4_CACHE_TTL mutable
+        var GA4_CACHE_TTL = 5 * 60 * 1000;
     </script>
     <!-- Marketing & Analytics -->
     <script src="../js/marketing-tools.js"></script>

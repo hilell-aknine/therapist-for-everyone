@@ -636,9 +636,48 @@
         .action-label.broadcast { background: rgba(212,175,55,0.15); color: #D4AF37; }
         .action-label.other { background: rgba(148,163,184,0.15); color: #94a3b8; }
 
+        /* Phones card */
+        .phone-list { list-style: none; padding: 0; margin: 0; }
+        .phone-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.5rem 0; border-bottom: 1px solid var(--border);
+        }
+        .phone-item:last-child { border-bottom: none; }
+        .phone-item .phone-info { display: flex; align-items: center; gap: 0.5rem; }
+        .phone-item .phone-number { font-family: monospace; font-size: 0.9rem; }
+        .phone-item .phone-label { font-size: 0.75rem; color: var(--text-secondary); }
+        .phone-item .btn-remove-phone {
+            background: none; border: none; color: var(--danger); cursor: pointer;
+            font-size: 0.85rem; padding: 0.3rem 0.5rem; border-radius: 6px; transition: background 0.2s;
+        }
+        .phone-item .btn-remove-phone:hover { background: rgba(239,68,68,0.1); }
+        .phone-add-row { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
+        .phone-add-row input { flex: 1; }
+
+        /* Filter chips */
+        .filter-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+        .filter-chip {
+            padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+            border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s; font-family: inherit;
+        }
+        .filter-chip.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+        .filter-chip:hover:not(.active) { border-color: var(--gold); color: var(--gold); }
+
+        /* Broadcast count badge */
+        .broadcast-count-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.3rem 0.7rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+            background: rgba(212,175,55,0.15); color: var(--gold); margin-top: 0.5rem;
+        }
+
+        /* 3-col grid for 6 action buttons */
+        .bot-actions-grid-3x2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; }
+
         @media (max-width: 768px) {
             .bot-cards { grid-template-columns: 1fr; }
             .bot-actions-grid { grid-template-columns: 1fr 1fr; }
+            .bot-actions-grid-3x2 { grid-template-columns: 1fr 1fr; }
             .bot-status-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -970,12 +1009,12 @@
                         </div>
 
                         <!-- Quick Actions Card -->
-                        <div class="bot-card">
+                        <div class="bot-card" data-bot-role="admin,manager">
                             <div class="bot-card-header">
                                 <h3><i class="fa-solid fa-bolt"></i> פעולות מהירות</h3>
                             </div>
                             <div class="bot-card-body">
-                                <div class="bot-actions-grid">
+                                <div class="bot-actions-grid-3x2">
                                     <button class="bot-action-btn" onclick="triggerBotAction('/api/daily-summary', 'דוח יומי נשלח')" id="btn-daily">
                                         <i class="fa-solid fa-chart-line"></i>
                                         <span>שלח דוח יומי</span>
@@ -988,11 +1027,39 @@
                                         <i class="fa-solid fa-gears"></i>
                                         <span>הרץ אוטומציות</span>
                                     </button>
-                                    <button class="bot-action-btn" onclick="openBroadcastModal()" id="btn-broadcast">
+                                    <button class="bot-action-btn" onclick="openBroadcastModal()" id="btn-broadcast" data-bot-role="admin,manager">
                                         <i class="fa-solid fa-bullhorn"></i>
                                         <span>שלח ברודקאסט</span>
                                     </button>
+                                    <button class="bot-action-btn" onclick="triggerBotAction('/api/followups', 'פולו-אפים הורצו')" id="btn-followups">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                        <span>פולו-אפים</span>
+                                    </button>
+                                    <button class="bot-action-btn" onclick="triggerBotAction('/api/export', 'ייצוא CSV הושלם')" id="btn-export-csv">
+                                        <i class="fa-solid fa-file-csv"></i>
+                                        <span>ייצא CSV</span>
+                                    </button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Authorized Phones Card (admin only) -->
+                    <div class="bot-card bot-card-full" id="phones-card" data-bot-role="admin">
+                        <div class="bot-card-header">
+                            <h3><i class="fa-solid fa-mobile-screen"></i> טלפונים מורשים</h3>
+                            <button class="btn btn-icon" onclick="loadBotPhones()" title="רענן">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                            </button>
+                        </div>
+                        <div class="bot-card-body">
+                            <ul class="phone-list" id="phone-list">
+                                <li style="text-align:center;padding:1rem;color:var(--text-secondary);">טוען...</li>
+                            </ul>
+                            <div class="phone-add-row">
+                                <input type="text" id="new-phone-number" class="bot-input" placeholder="מספר טלפון (למשל 972501234567)" dir="ltr">
+                                <input type="text" id="new-phone-label" class="bot-input" placeholder="שם" style="max-width:120px;">
+                                <button class="btn btn-gold" onclick="addBotPhone()"><i class="fa-solid fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
@@ -1006,6 +1073,13 @@
                             </button>
                         </div>
                         <div class="bot-card-body">
+                            <div class="filter-chips" id="activity-filter-chips">
+                                <button class="filter-chip active" data-filter="all" onclick="filterActivityLog('all', this)">הכל</button>
+                                <button class="filter-chip" data-filter="create" onclick="filterActivityLog('create', this)">יצירות</button>
+                                <button class="filter-chip" data-filter="update" onclick="filterActivityLog('update', this)">עדכונים</button>
+                                <button class="filter-chip" data-filter="delete" onclick="filterActivityLog('delete', this)">מחיקות</button>
+                                <button class="filter-chip" data-filter="broadcast" onclick="filterActivityLog('broadcast', this)">ברודקאסטים</button>
+                            </div>
                             <table>
                                 <thead>
                                     <tr>
@@ -1079,7 +1153,7 @@
             <div class="modal-body" style="padding:1.5rem;">
                 <div style="margin-bottom:1rem;">
                     <label style="display:block;margin-bottom:0.5rem;font-weight:600;">קהל יעד</label>
-                    <select id="broadcast-filter" class="bot-input" style="width:100%;">
+                    <select id="broadcast-filter" class="bot-input" style="width:100%;" onchange="updateBroadcastCount()">
                         <option value="all">כולם</option>
                         <option value="therapists">מטפלים</option>
                         <option value="patients">מטופלים</option>
@@ -1087,6 +1161,9 @@
                         <option value="course">לומדי קורס</option>
                         <option value="active">פעילים (30 יום)</option>
                     </select>
+                    <div class="broadcast-count-badge" id="broadcast-count-badge" style="display:none;">
+                        <i class="fa-solid fa-users"></i> <span id="broadcast-count-num">0</span> נמענים
+                    </div>
                 </div>
                 <div>
                     <label style="display:block;margin-bottom:0.5rem;font-weight:600;">הודעה</label>
@@ -2900,9 +2977,11 @@
         };
 
         function loadBotView() {
+            loadBotAccess();
             loadBotStatus();
             loadActivityLog();
             loadCrmNotes();
+            loadBotPhones();
         }
 
         async function loadBotStatus() {
@@ -2942,37 +3021,18 @@
 
         async function loadActivityLog() {
             const tbody = document.getElementById('activity-log-table');
+            // Reset filter chips
+            document.querySelectorAll('#activity-filter-chips .filter-chip').forEach(c => c.classList.remove('active'));
+            document.querySelector('#activity-filter-chips .filter-chip[data-filter="all"]').classList.add('active');
             try {
                 const { data, error } = await db
                     .from('crm_activity_log')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(50);
+                    .limit(200);
                 if (error) throw error;
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-secondary);">אין פעילות עדיין</td></tr>';
-                    return;
-                }
-                const groups = groupByDate(data);
-                let html = '';
-                for (const [group, items] of Object.entries(groups)) {
-                    if (items.length === 0) continue;
-                    html += `<tr class="date-group-row"><td colspan="5"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
-                    html += items.map(row => {
-                        const time = new Date(row.created_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                        const actionInfo = ACTION_LABELS[row.action] || { text: row.action, cls: 'other' };
-                        const entity = ENTITY_LABELS[row.entity_type] || row.entity_type || '-';
-                        const details = row.details ? (typeof row.details === 'string' ? row.details : JSON.stringify(row.details)).substring(0, 80) : '-';
-                        return `<tr>
-                            <td>${time}</td>
-                            <td>${row.actor_name || row.actor_phone || '-'}</td>
-                            <td><span class="action-label ${actionInfo.cls}">${actionInfo.text}</span></td>
-                            <td>${entity}</td>
-                            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${details}">${details}</td>
-                        </tr>`;
-                    }).join('');
-                }
-                tbody.innerHTML = html;
+                _activityData = data || [];
+                renderActivityRows(tbody, _activityData);
             } catch (err) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--danger);">שגיאה: ${err.message}</td></tr>`;
             }
@@ -3062,10 +3122,183 @@
             loadCrmNotes();
         }
 
+        // === Bot Access Role ===
+        let _botRole = 'admin'; // default until loaded
+
+        async function loadBotAccess() {
+            try {
+                const res = await fetch(BOT_URL + '/api/my-access', {
+                    headers: await getBotHeaders(),
+                    signal: AbortSignal.timeout(8000)
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    _botRole = data.role || 'admin';
+                }
+            } catch (e) {
+                _botRole = 'admin'; // fallback
+            }
+            applyBotRoleVisibility();
+        }
+
+        function applyBotRoleVisibility() {
+            document.querySelectorAll('[data-bot-role]').forEach(el => {
+                const allowed = el.getAttribute('data-bot-role').split(',');
+                el.style.display = allowed.includes(_botRole) ? '' : 'none';
+            });
+        }
+
+        // === Phones Management ===
+        async function loadBotPhones() {
+            const list = document.getElementById('phone-list');
+            list.innerHTML = '<li style="text-align:center;padding:1rem;color:var(--text-secondary);"><i class="fa-solid fa-spinner fa-spin"></i> טוען...</li>';
+            try {
+                const res = await fetch(BOT_URL + '/api/phones', {
+                    headers: await getBotHeaders(),
+                    signal: AbortSignal.timeout(8000)
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const phones = await res.json();
+                if (!phones.length) {
+                    list.innerHTML = '<li style="text-align:center;padding:1rem;color:var(--text-secondary);">אין טלפונים מורשים</li>';
+                    return;
+                }
+                list.innerHTML = phones.map(p => `
+                    <li class="phone-item">
+                        <div class="phone-info">
+                            <span class="phone-number">${p.phone}</span>
+                            ${p.label ? `<span class="phone-label">(${p.label})</span>` : ''}
+                        </div>
+                        <button class="btn-remove-phone" onclick="removeBotPhone('${p.phone}')" title="הסר">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </li>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = `<li style="text-align:center;padding:1rem;color:var(--danger);">שגיאה: ${err.message}</li>`;
+            }
+        }
+
+        async function addBotPhone() {
+            const phone = document.getElementById('new-phone-number').value.trim();
+            const label = document.getElementById('new-phone-label').value.trim();
+            if (!phone || !/^\d{10,15}$/.test(phone)) {
+                showToast('מספר טלפון לא תקין (10-15 ספרות)', 'error');
+                return;
+            }
+            try {
+                const res = await fetch(BOT_URL + '/api/phones', {
+                    method: 'POST',
+                    headers: await getBotHeaders(true),
+                    body: JSON.stringify({ phone, label })
+                });
+                if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+                showToast(`${phone} נוסף בהצלחה`, 'success');
+                document.getElementById('new-phone-number').value = '';
+                document.getElementById('new-phone-label').value = '';
+                loadBotPhones();
+            } catch (err) {
+                showToast('שגיאה: ' + err.message, 'error');
+            }
+        }
+
+        async function removeBotPhone(phone) {
+            if (!confirm(`להסיר את ${phone} מהרשימה?`)) return;
+            try {
+                const res = await fetch(BOT_URL + '/api/phones/' + phone, {
+                    method: 'DELETE',
+                    headers: await getBotHeaders()
+                });
+                if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+                showToast(`${phone} הוסר`, 'success');
+                loadBotPhones();
+            } catch (err) {
+                showToast('שגיאה: ' + err.message, 'error');
+            }
+        }
+
+        // === Activity Log Filters ===
+        let _activityData = []; // cached rows for client-side filtering
+
+        function filterActivityLog(filter, chipEl) {
+            // Update active chip
+            document.querySelectorAll('#activity-filter-chips .filter-chip').forEach(c => c.classList.remove('active'));
+            chipEl.classList.add('active');
+
+            const tbody = document.getElementById('activity-log-table');
+            let filtered = _activityData;
+
+            if (filter !== 'all') {
+                const FILTER_MAP = {
+                    'create': ['lead_created', 'patient_created', 'match_created', 'note_added', 'payment_recorded', 'appointment_created'],
+                    'update': ['therapist_approved', 'status_updated', 'lead_converted'],
+                    'delete': ['entity_deleted', 'appointment_cancelled'],
+                    'broadcast': ['broadcast_sent']
+                };
+                const actions = FILTER_MAP[filter] || [];
+                filtered = _activityData.filter(r => actions.includes(r.action));
+            }
+
+            renderActivityRows(tbody, filtered);
+        }
+
+        function renderActivityRows(tbody, data) {
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-secondary);">אין תוצאות</td></tr>';
+                return;
+            }
+            const groups = groupByDate(data);
+            let html = '';
+            for (const [group, items] of Object.entries(groups)) {
+                if (items.length === 0) continue;
+                html += `<tr class="date-group-row"><td colspan="5"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                html += items.map(row => {
+                    const time = new Date(row.created_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                    const actionInfo = ACTION_LABELS[row.action] || { text: row.action, cls: 'other' };
+                    const entity = ENTITY_LABELS[row.entity_type] || row.entity_type || '-';
+                    const details = row.details ? (typeof row.details === 'string' ? row.details : JSON.stringify(row.details)).substring(0, 80) : '-';
+                    return `<tr>
+                        <td>${time}</td>
+                        <td>${row.actor_name || row.actor_phone || '-'}</td>
+                        <td><span class="action-label ${actionInfo.cls}">${actionInfo.text}</span></td>
+                        <td>${entity}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${details}">${details}</td>
+                    </tr>`;
+                }).join('');
+            }
+            tbody.innerHTML = html;
+        }
+
+        // === Broadcast Count ===
+        let _broadcastCountTimer = null;
+
+        function updateBroadcastCount() {
+            clearTimeout(_broadcastCountTimer);
+            _broadcastCountTimer = setTimeout(async () => {
+                const badge = document.getElementById('broadcast-count-badge');
+                const numEl = document.getElementById('broadcast-count-num');
+                const filter = document.getElementById('broadcast-filter').value;
+                try {
+                    const res = await fetch(BOT_URL + '/api/broadcast/count?filter=' + filter, {
+                        headers: await getBotHeaders(),
+                        signal: AbortSignal.timeout(8000)
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    numEl.textContent = data.count;
+                    badge.style.display = 'inline-flex';
+                } catch (e) {
+                    badge.style.display = 'none';
+                }
+            }, 600);
+        }
+
         function openBroadcastModal() {
             document.getElementById('broadcast-filter').value = 'all';
             document.getElementById('broadcast-message').value = '';
+            document.getElementById('broadcast-count-badge').style.display = 'none';
             openModal('broadcast-modal');
+            updateBroadcastCount();
         }
 
         async function sendBroadcast() {

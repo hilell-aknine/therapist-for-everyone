@@ -1351,13 +1351,12 @@
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
     <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
     <script>
         // AUTH GUARD - Redirect if not authenticated or not admin
         (async function() {
-            const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
-            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
-            const tempClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const tempClient = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
             const { data: { session } } = await tempClient.auth.getSession();
             if (!session) {
                 window.location.href = 'login.html';
@@ -1379,9 +1378,9 @@
         // Theme toggle handled by shared js/theme-toggle.js
         // Old admin-theme key is auto-migrated to beit-theme
 
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+        // Supabase Configuration — from centralized supabase-config.js
+        const SUPABASE_URL = window.SUPABASE_CONFIG.url;
+        const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.anonKey;
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let patients = [];
@@ -3180,9 +3179,10 @@
         }
 
         async function addBotPhone() {
-            const phone = document.getElementById('new-phone-number').value.trim();
+            const raw = document.getElementById('new-phone-number').value.trim();
+            const phone = raw.replace(/[^0-9]/g, ''); // strip +, -, spaces
             const label = document.getElementById('new-phone-label').value.trim();
-            if (!phone || !/^\d{10,15}$/.test(phone)) {
+            if (!phone || phone.length < 10 || phone.length > 15) {
                 showToast('מספר טלפון לא תקין (10-15 ספרות)', 'error');
                 return;
             }

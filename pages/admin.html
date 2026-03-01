@@ -1253,6 +1253,31 @@
                         </div>
                     </div>
 
+                    <!-- All Pages Table -->
+                    <div class="table-container" style="margin-bottom:1.5rem;">
+                        <div class="table-header">
+                            <h3><i class="fa-solid fa-file-lines" style="color:var(--gold);margin-left:0.4rem;"></i> כל הדפים באתר — צפיות</h3>
+                        </div>
+                        <div style="padding:0.6rem 1.2rem;background:rgba(212,175,55,0.05);border-bottom:1px solid var(--border);font-size:0.78rem;color:var(--text-secondary);line-height:1.5;">
+                            כל הדפים באתר לפי פופולריות — כולל דף הבית, הכשרת מטפלים, המיזם החברתי, טפסים ועוד.
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>שם הדף</th>
+                                    <th>כתובת</th>
+                                    <th>פתיחות</th>
+                                    <th>גולשים</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ga4-all-pages-table">
+                                <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-secondary);">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> טוען...
+                                </td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
                     <!-- Daily Trend (last 7 days) -->
                     <div class="table-container">
                         <div class="table-header">
@@ -3592,15 +3617,66 @@
                 if (tipEl) tipEl.style.display = directPct >= 50 ? 'block' : 'none';
             }
 
+            // Page path → Hebrew name mapping
+            const pageNameMap = {
+                '/': 'דף הבית',
+                '/index.html': 'דף הבית',
+                '/landing-patient.html': 'נחיתה — מטופלים',
+                '/landing-therapist.html': 'נחיתה — הכשרת מטפלים',
+                '/patient-onboarding.html': 'הרשמת מטופל',
+                '/therapist-onboarding.html': 'הרשמת מטפל',
+                '/patient-dashboard.html': 'אזור אישי — מטופל',
+                '/therapist-dashboard.html': 'אזור אישי — מטפל',
+                '/legal-gate.html': 'שער משפטי',
+                '/thank-you.html': 'דף תודה',
+                '/privacy-policy.html': 'מדיניות פרטיות',
+                '/catalog.html': 'קטלוג',
+                '/pages/admin.html': 'פאנל ניהול',
+                '/pages/login.html': 'התחברות',
+                '/pages/course-library.html': 'ספריית הקורסים',
+                '/pages/free-portal.html': 'פורטל חינמי',
+                '/pages/learning-master.html': 'פורטל הלמידה',
+                '/pages/profile.html': 'אזור אישי',
+                '/pages/about.html': 'המיזם החברתי',
+                '/pages/patient-step1.html': 'הרשמת מטופל — שלב 1',
+                '/pages/patient-step2.html': 'הרשמת מטופל — שלב 2',
+                '/pages/patient-step3.html': 'הרשמת מטופל — שלב 3',
+                '/pages/patient-step4.html': 'הרשמת מטופל — שלב 4',
+                '/pages/therapist-step1.html': 'הרשמת מטפל — שלב 1',
+                '/pages/therapist-step2.html': 'הרשמת מטפל — שלב 2',
+                '/pages/therapist-step3.html': 'הרשמת מטפל — שלב 3',
+                '/pages/therapist-step4.html': 'הרשמת מטפל — שלב 4',
+            };
+
+            function getPageHebrew(path, title) {
+                return pageNameMap[path] || pageNameMap[path.replace(/\/$/, '')] || title || path;
+            }
+
             // Free content pages table
             const pagesTbody = document.getElementById('ga4-pages-table');
             if (fc.pages.length === 0) {
                 pagesTbody.innerHTML = '<tr><td colspan="3" class="empty-state">אין נתוני צפיות</td></tr>';
             } else {
                 pagesTbody.innerHTML = fc.pages.map(p => {
-                    const shortTitle = p.title.length > 40 ? p.title.slice(0, 40) + '...' : p.title;
                     return `<tr>
-                        <td title="${p.path}">${shortTitle}</td>
+                        <td title="${p.path}">${getPageHebrew(p.path, p.title)}</td>
+                        <td><strong>${p.views.toLocaleString()}</strong></td>
+                        <td>${p.users}</td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // All pages table
+            const allPages = data.all_pages || { pages: [] };
+            const allPagesTbody = document.getElementById('ga4-all-pages-table');
+            if (allPages.pages.length === 0) {
+                allPagesTbody.innerHTML = '<tr><td colspan="4" class="empty-state">אין נתוני צפיות</td></tr>';
+            } else {
+                allPagesTbody.innerHTML = allPages.pages.slice(0, 20).map(p => {
+                    const shortPath = p.path.length > 30 ? '...' + p.path.slice(-27) : p.path;
+                    return `<tr>
+                        <td><strong>${getPageHebrew(p.path, p.title)}</strong></td>
+                        <td style="font-size:0.8rem;color:var(--text-secondary);direction:ltr;text-align:right;" title="${p.path}">${shortPath}</td>
                         <td><strong>${p.views.toLocaleString()}</strong></td>
                         <td>${p.users}</td>
                     </tr>`;
@@ -3634,8 +3710,8 @@
         }
 
         function showGA4Error(msg) {
-            const tables = ['ga4-channels-table', 'ga4-pages-table', 'ga4-daily-table'];
-            const cols = [4, 3, 4];
+            const tables = ['ga4-channels-table', 'ga4-pages-table', 'ga4-all-pages-table', 'ga4-daily-table'];
+            const cols = [4, 3, 4, 4];
             tables.forEach((id, i) => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = `<tr><td colspan="${cols[i]}" style="text-align:center;padding:2rem;color:var(--danger);">

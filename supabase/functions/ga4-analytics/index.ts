@@ -195,8 +195,8 @@ serve(async (req) => {
     const accessToken = await getGoogleAccessToken(serviceAccount)
     const today = new Date().toISOString().split('T')[0]
 
-    // ---- Run 3 queries in parallel ----
-    const [usersReport, pagesReport, channelsReport] = await Promise.all([
+    // ---- Run 4 queries in parallel ----
+    const [usersReport, pagesReport, allPagesReport, channelsReport] = await Promise.all([
       // 1) Active users & new users — last 30 days, by date
       queryGA4(
         accessToken,
@@ -248,7 +248,16 @@ serve(async (req) => {
         }
       ),
 
-      // 3) Traffic sources — session primary channel group
+      // 3) ALL pages — top pages across entire site
+      queryGA4(
+        accessToken,
+        GA4_PROPERTY_ID,
+        { startDate: '30daysAgo', endDate: 'today' },
+        [{ name: 'pageTitle' }, { name: 'pagePath' }],
+        [{ name: 'screenPageViews' }, { name: 'activeUsers' }]
+      ),
+
+      // 4) Traffic sources — session primary channel group
       queryGA4(
         accessToken,
         GA4_PROPERTY_ID,
@@ -268,6 +277,9 @@ serve(async (req) => {
 
       // Free content pages
       free_content: formatPagesReport(pagesReport),
+
+      // All pages
+      all_pages: formatPagesReport(allPagesReport),
 
       // Traffic channels
       traffic_sources: formatChannelsReport(channelsReport),

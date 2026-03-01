@@ -13,9 +13,12 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const GA4_PROPERTY_ID = Deno.env.get('GA4_PROPERTY_ID')!
 const GA4_SERVICE_ACCOUNT_JSON = Deno.env.get('GA4_SERVICE_ACCOUNT_JSON')!
 
+const ALLOWED_ORIGIN = 'https://www.therapist-home.com'
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 // ============================================================================
@@ -268,7 +271,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('GA4 Analytics error:', error)
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal error' }),
+      JSON.stringify({ error: 'Unable to fetch analytics data' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

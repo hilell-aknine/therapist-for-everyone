@@ -831,49 +831,284 @@
             .utm-config-delete { grid-column: 3; }
             .utm-config-meta-pill { grid-column: 2; justify-self: start; }
             .utm-config-add-grid { grid-template-columns: 1fr; }
-            .auto-config-card { grid-template-columns: 44px 1fr; gap: 0.5rem; }
+            .auto-config-card { grid-template-columns: 40px 1fr; gap: 0.4rem; }
+            .auto-settings-btn span { display: none; }
+            .auto-modal { width: 96%; padding: 1.2rem; }
         }
 
-        /* Automation Config Manager */
-        .auto-config-category { margin-bottom: 1.2rem; }
-        .auto-config-category-header {
-            display: flex; align-items: center; gap: 0.5rem;
-            padding: 0.6rem 0; font-weight: 700; font-size: 0.88rem;
-            color: var(--gold); border-bottom: 1px solid var(--border); margin-bottom: 0.5rem;
+        /* Automation Config Manager — Accordion Layout */
+        .auto-accordion {
+            border: 1px solid var(--border); border-radius: 12px;
+            margin-bottom: 0.7rem; overflow: hidden; background: var(--card);
         }
+        .auto-accordion-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.75rem 1rem; cursor: pointer; user-select: none;
+            background: rgba(0,59,70,0.04); transition: background 0.2s;
+        }
+        .auto-accordion-header:hover { background: rgba(0,59,70,0.08); }
+        .auto-accordion-title {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-weight: 700; font-size: 0.9rem; color: var(--gold);
+        }
+        .auto-accordion-count {
+            background: var(--gold); color: #fff; font-size: 0.65rem;
+            padding: 0.1rem 0.45rem; border-radius: 10px; font-weight: 700;
+            min-width: 20px; text-align: center;
+        }
+        .auto-accordion-chevron {
+            transition: transform 0.3s ease; color: var(--text-secondary); font-size: 0.8rem;
+        }
+        .auto-accordion-chevron.collapsed { transform: rotate(-90deg); }
+        .auto-accordion-body {
+            max-height: 3000px; overflow: hidden; padding: 0 1rem 0.5rem;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+        }
+        .auto-accordion-body.collapsed { max-height: 0; padding: 0 1rem; }
+
+        /* Automation Cards */
         .auto-config-card {
             display: grid; grid-template-columns: 44px 1fr auto;
             align-items: start; gap: 0.8rem;
-            padding: 0.8rem 0; border-bottom: 1px solid var(--border);
+            padding: 0.7rem 0; border-bottom: 1px solid var(--border);
         }
         .auto-config-card:last-child { border-bottom: none; }
-        .auto-config-card.disabled { opacity: 0.45; }
+        .auto-config-card.disabled { opacity: 0.4; }
         .auto-config-card-body { display: flex; flex-direction: column; gap: 0.15rem; }
         .auto-config-card-title {
-            font-weight: 700; font-size: 0.9rem;
+            font-weight: 700; font-size: 0.88rem;
             display: flex; align-items: center; gap: 0.4rem;
         }
-        .auto-config-card-title i { color: var(--gold); font-size: 0.85rem; width: 20px; text-align: center; }
-        .auto-config-card-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; }
+        .auto-config-card-title i { color: var(--gold); font-size: 0.82rem; width: 20px; text-align: center; }
+        .auto-config-card-desc { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.5; }
+        .auto-config-meta {
+            display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem; flex-wrap: wrap;
+        }
         .auto-config-schedule-pill {
             display: inline-flex; align-items: center; gap: 0.3rem;
-            font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem;
+            font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.55rem;
             border-radius: 8px; background: rgba(47,133,146,0.12);
-            color: var(--dusty-aqua, #2F8592); margin-top: 0.3rem; width: fit-content;
+            color: var(--dusty-aqua, #2F8592); width: fit-content;
         }
-        .auto-config-params {
-            margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.6rem;
+        .auto-config-status-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--success); flex-shrink: 0;
         }
-        .auto-config-param {
-            display: flex; align-items: center; gap: 0.3rem; font-size: 0.78rem;
+        .auto-config-card.disabled .auto-config-status-dot { background: var(--text-secondary); }
+
+        /* Settings button */
+        .auto-settings-btn {
+            background: none; border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text-secondary); cursor: pointer; padding: 0.35rem 0.5rem;
+            font-size: 0.8rem; transition: all 0.2s; display: flex; align-items: center; gap: 0.3rem;
         }
-        .auto-config-param label { color: var(--text-secondary); white-space: nowrap; }
-        .auto-config-param input {
-            width: 60px; padding: 0.3rem 0.5rem; background: var(--bg);
-            border: 1px solid var(--border); border-radius: 6px;
-            color: var(--text); font-family: inherit; font-size: 0.8rem; text-align: center;
+        .auto-settings-btn:hover {
+            color: var(--gold); border-color: var(--gold); background: rgba(212,175,55,0.06);
         }
-        .auto-config-param input:focus { border-color: var(--gold); outline: none; }
+
+        /* Settings Modal Overlay */
+        .auto-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.25s, visibility 0.25s;
+            backdrop-filter: blur(2px);
+        }
+        .auto-modal-overlay.active { opacity: 1; visibility: visible; }
+        .auto-modal {
+            background: var(--card); border-radius: 16px; width: 92%; max-width: 460px;
+            max-height: 80vh; overflow-y: auto; padding: 1.5rem;
+            transform: translateY(16px) scale(0.97); transition: transform 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35); border: 1px solid var(--border);
+        }
+        .auto-modal-overlay.active .auto-modal { transform: translateY(0) scale(1); }
+        .auto-modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border);
+        }
+        .auto-modal-header h3 {
+            font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;
+            margin: 0; color: var(--text);
+        }
+        .auto-modal-close {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 1.1rem; cursor: pointer; padding: 0.3rem; border-radius: 6px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .auto-modal-close:hover { color: var(--danger); background: rgba(220,53,69,0.08); }
+        .auto-modal-field {
+            margin-bottom: 0.9rem;
+        }
+        .auto-modal-field label {
+            display: block; font-size: 0.8rem; font-weight: 600;
+            color: var(--text-secondary); margin-bottom: 0.3rem;
+        }
+        .auto-modal-field input, .auto-modal-field select {
+            width: 100%; padding: 0.5rem 0.7rem; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text); font-family: inherit; font-size: 0.85rem;
+            transition: border-color 0.2s;
+        }
+        .auto-modal-field input:focus, .auto-modal-field select:focus {
+            border-color: var(--gold); outline: none;
+        }
+        .auto-modal-field .field-hint {
+            font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.2rem; opacity: 0.7;
+        }
+        .auto-modal-actions {
+            display: flex; gap: 0.6rem; margin-top: 1.2rem; padding-top: 0.8rem;
+            border-top: 1px solid var(--border);
+        }
+        .auto-modal-actions .btn { flex: 1; padding: 0.55rem 1rem; font-size: 0.85rem; border-radius: 10px; }
+        .auto-run-btn {
+            background: var(--dusty-aqua, #2F8592) !important; color: #fff !important;
+            border: none !important; display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+            transition: opacity 0.2s;
+        }
+        .auto-run-btn:hover { opacity: 0.85; }
+        .auto-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .auto-run-btn.running { background: var(--text-secondary) !important; }
+        .auto-run-result {
+            margin-top: 0.6rem; padding: 0.5rem 0.8rem; border-radius: 8px;
+            font-size: 0.78rem; font-weight: 600; display: none;
+        }
+        .auto-run-result.success { display: block; background: rgba(40,167,69,0.1); color: var(--success); }
+        .auto-run-result.error { display: block; background: rgba(220,53,69,0.1); color: var(--danger); }
+
+        /* Recent Logs Section inside Modal */
+        .auto-logs-section {
+            margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border);
+        }
+        .auto-logs-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        .auto-logs-header h4 {
+            font-size: 0.82rem; font-weight: 700; margin: 0;
+            display: flex; align-items: center; gap: 0.4rem; color: var(--text);
+        }
+        .auto-logs-header .auto-logs-count {
+            font-size: 0.68rem; color: var(--text-secondary); font-weight: 400;
+        }
+        .auto-logs-list { list-style: none; padding: 0; margin: 0; }
+        .auto-log-item {
+            display: flex; align-items: flex-start; gap: 0.55rem;
+            padding: 0.45rem 0; border-bottom: 1px solid rgba(128,128,128,0.1);
+            font-size: 0.78rem;
+        }
+        .auto-log-item:last-child { border-bottom: none; }
+        .auto-log-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+            margin-top: 0.3rem;
+        }
+        .auto-log-dot.success { background: var(--success); }
+        .auto-log-dot.error {
+            background: var(--danger);
+            animation: pulseDot 1.5s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220,53,69,0.5); }
+            50% { box-shadow: 0 0 0 4px rgba(220,53,69,0); }
+        }
+        .auto-log-body { flex: 1; min-width: 0; }
+        .auto-log-time {
+            color: var(--text-secondary); font-size: 0.72rem; direction: ltr;
+            display: inline-block;
+        }
+        .auto-log-status {
+            font-weight: 600; margin-right: 0.3rem;
+        }
+        .auto-log-status.success { color: var(--success); }
+        .auto-log-status.error { color: var(--danger); }
+        .auto-log-details-btn {
+            background: none; border: 1px solid var(--border); border-radius: 6px;
+            color: var(--text-secondary); font-size: 0.68rem; padding: 0.15rem 0.4rem;
+            cursor: pointer; font-family: inherit; transition: all 0.2s;
+            white-space: nowrap; flex-shrink: 0; margin-top: 0.15rem;
+        }
+        .auto-log-details-btn:hover {
+            color: var(--gold); border-color: var(--gold);
+        }
+        .auto-log-detail-panel {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+            padding: 0.5rem 0.7rem; margin-top: 0.35rem;
+            font-size: 0.7rem; font-family: monospace; direction: ltr; text-align: left;
+            max-height: 160px; overflow-y: auto; word-break: break-all;
+            color: var(--text-secondary); line-height: 1.55;
+            display: none;
+        }
+        .auto-log-detail-panel.open { display: block; }
+        .auto-logs-empty {
+            text-align: center; padding: 1rem; color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+        .auto-logs-loading {
+            text-align: center; padding: 0.8rem; color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+
+        /* Permissions Manager */
+        .perm-user-card {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+            padding: 1rem 1.2rem; margin-bottom: 0.7rem;
+            transition: box-shadow 0.2s;
+        }
+        .perm-user-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .perm-user-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;
+        }
+        .perm-user-name {
+            font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 0.4rem;
+        }
+        .perm-user-role {
+            font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 8px;
+            font-weight: 700; text-transform: uppercase;
+        }
+        .perm-user-role.admin { background: rgba(212,175,55,0.15); color: var(--gold); }
+        .perm-user-role.manager { background: rgba(47,133,146,0.15); color: var(--dusty-aqua, #2F8592); }
+        .perm-user-role.viewer { background: rgba(150,150,150,0.15); color: var(--text-secondary); }
+        .perm-user-email { font-size: 0.78rem; color: var(--text-secondary); }
+        .perm-categories {
+            display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem;
+        }
+        .perm-cat-chip {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.72rem; padding: 0.25rem 0.55rem; border-radius: 8px;
+            border: 1px solid var(--border); cursor: pointer; user-select: none;
+            transition: all 0.2s; background: transparent; color: var(--text-secondary);
+        }
+        .perm-cat-chip.active {
+            background: rgba(212,175,55,0.12); border-color: var(--gold); color: var(--gold); font-weight: 600;
+        }
+        .perm-cat-chip:hover { border-color: var(--gold); }
+        .perm-save-row {
+            display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem;
+        }
+        .perm-save-btn {
+            background: var(--gold); color: #fff; border: none; border-radius: 8px;
+            padding: 0.35rem 0.9rem; font-size: 0.78rem; cursor: pointer;
+            font-family: inherit; font-weight: 600; transition: opacity 0.2s;
+            display: none;
+        }
+        .perm-save-btn.visible { display: inline-flex; }
+        .perm-save-btn:hover { opacity: 0.85; }
+        .perm-add-bar {
+            display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;
+        }
+        .perm-add-bar input, .perm-add-bar select {
+            padding: 0.45rem 0.7rem; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.82rem;
+        }
+        .perm-add-bar input { flex: 1; min-width: 180px; }
+        .perm-add-bar button {
+            background: var(--gold); color: #fff; border: none; border-radius: 8px;
+            padding: 0.45rem 1rem; cursor: pointer; font-family: inherit; font-weight: 600;
+            font-size: 0.82rem; white-space: nowrap;
+        }
+        .perm-add-bar button:hover { opacity: 0.85; }
+        .perm-empty {
+            text-align: center; padding: 2rem; color: var(--text-secondary); font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -1860,12 +2095,69 @@
                             <i class="fa-solid fa-robot"></i> אוטומציות הבוט — ניהול תהליכים אוטומטיים
                         </div>
                         <div class="settings-section-desc">
-                            הבוט מריץ <strong>14 תהליכים אוטומטיים</strong> ברקע: דוחות יומיים, מעקבי לידים, תזכורות פגישות ועוד.<br>
-                            כאן אפשר <strong>להפעיל או לכבות</strong> כל אוטומציה, ולשנות את הפרמטרים שלה (למשל: כמה שעות להמתין לפני תזכורת).<br>
-                            שינויים מתעדכנים בבוט <strong>אוטומטית תוך 5 דקות</strong>.
+                            הבוט מריץ <strong>34 תהליכים אוטומטיים</strong> ב-9 קטגוריות: ניהול לידים, בטיחות, תפעול, שימור ועוד.<br>
+                            כאן אפשר <strong>להפעיל או לכבות</strong> כל אוטומציה, וללחוץ על <strong>⚙ הגדרות</strong> לעריכת פרמטרים.<br>
+                            שינויים מתעדכנים בבוט <strong>מיידית (Realtime)</strong>.
                         </div>
                         <div class="settings-section-body" id="automation-config-container">
                             <div class="utm-config-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען אוטומציות...</div>
+                        </div>
+                    </div>
+
+                    <!-- Automation Settings Modal -->
+                    <div class="auto-modal-overlay" id="auto-settings-overlay" onclick="if(event.target===this)closeParamSettings()">
+                        <div class="auto-modal">
+                            <div class="auto-modal-header">
+                                <h3 id="auto-modal-title"><i class="fa-solid fa-gear"></i> הגדרות</h3>
+                                <button class="auto-modal-close" onclick="closeParamSettings()" title="סגור">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                            <div id="auto-modal-body"></div>
+                            <div class="auto-logs-section" id="auto-logs-section">
+                                <div class="auto-logs-header">
+                                    <h4><i class="fa-solid fa-clock-rotate-left"></i> לוגים אחרונים <span class="auto-logs-count" id="auto-logs-count"></span></h4>
+                                </div>
+                                <div id="auto-logs-container">
+                                    <div class="auto-logs-loading"><i class="fa-solid fa-spinner fa-spin"></i> טוען...</div>
+                                </div>
+                            </div>
+                            <div class="auto-modal-actions">
+                                <button class="btn btn-gold" id="auto-modal-save">
+                                    <i class="fa-solid fa-check"></i> שמור
+                                </button>
+                                <button class="btn btn-outline" onclick="closeParamSettings()">
+                                    <i class="fa-solid fa-xmark"></i> ביטול
+                                </button>
+                                <button class="btn auto-run-btn" id="auto-modal-run" title="הפעלה ידנית של האוטומציה">
+                                    <i class="fa-solid fa-play"></i> הפעל עכשיו
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Permissions Manager (SuperAdmin only) -->
+                    <div class="settings-section" id="permissions-section" style="display:none;">
+                        <div class="settings-section-header">
+                            <i class="fa-solid fa-user-shield"></i> ניהול הרשאות — קטגוריות לפי משתמש
+                        </div>
+                        <div class="settings-section-desc">
+                            קבע אילו <strong>קטגוריות אוטומציות</strong> כל משתמש יכול לראות ולנהל.<br>
+                            רק <strong>SuperAdmin</strong> (עם role = admin) רואה את הסעיף הזה.
+                        </div>
+                        <div class="settings-section-body">
+                            <div class="perm-add-bar">
+                                <input type="email" id="perm-add-email" placeholder="אימייל המשתמש להוספה...">
+                                <select id="perm-add-role">
+                                    <option value="admin">Admin</option>
+                                    <option value="manager" selected>Manager</option>
+                                    <option value="viewer">Viewer</option>
+                                </select>
+                                <button onclick="addPermUser()"><i class="fa-solid fa-user-plus"></i> הוסף</button>
+                            </div>
+                            <div id="permissions-container">
+                                <div class="perm-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען הרשאות...</div>
+                            </div>
                         </div>
                     </div>
 
@@ -2098,6 +2390,10 @@
     <script src="../js/supabase-config.js"></script>
     <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
     <script>
+        // Global permissions state
+        window._userCategoryAccess = null; // null = all access (superadmin / no row)
+        window._userBotRole = 'admin';
+
         // AUTH GUARD - Redirect if not authenticated or not admin
         (async function() {
             const tempClient = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
@@ -2115,6 +2411,16 @@
             if (!profile || profile.role !== 'admin') {
                 window.location.href = 'course-library.html';
                 return;
+            }
+            // Load category permissions
+            const { data: access } = await tempClient
+                .from('crm_bot_access')
+                .select('role, category_access')
+                .eq('user_id', session.user.id)
+                .single();
+            if (access) {
+                window._userBotRole = access.role || 'admin';
+                window._userCategoryAccess = access.category_access || null;
             }
         })();
     </script>
@@ -2202,7 +2508,7 @@
             });
             if (view === 'bot') loadBotView();
             if (view === 'analytics') loadGA4Analytics();
-            if (view === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); }
+            if (view === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); }
         }
 
         function filterPatients(status) {
@@ -4630,19 +4936,39 @@
         let automationConfigsCache = [];
 
         const AUTOMATION_CATEGORIES = {
-            reports:    { label: 'דוחות וסיכומים',    icon: 'fa-chart-pie' },
-            pipelines:  { label: 'תהליכי עבודה',      icon: 'fa-arrows-rotate' },
-            followups:  { label: 'מעקבים והודעות',     icon: 'fa-envelope-open-text' },
-            monitoring: { label: 'ניטור והתראות',      icon: 'fa-eye' },
-            export:     { label: 'ייצוא נתונים',       icon: 'fa-file-export' },
+            lead_lifecycle: { label: 'ניהול לידים',       icon: 'fa-user-clock' },
+            safety:         { label: 'בטיחות וחירום',      icon: 'fa-shield-halved' },
+            operations:     { label: 'תפעול שוטף',         icon: 'fa-gears' },
+            retention:      { label: 'שימור וקשר',         icon: 'fa-hand-holding-heart' },
+            reports:        { label: 'דוחות וסיכומים',     icon: 'fa-chart-pie' },
+            pipelines:      { label: 'תהליכי עבודה',       icon: 'fa-arrows-rotate' },
+            followups:      { label: 'מעקבים והודעות',      icon: 'fa-envelope-open-text' },
+            monitoring:     { label: 'ניטור והתראות',       icon: 'fa-eye' },
+            export:         { label: 'ייצוא נתונים',        icon: 'fa-file-export' },
         };
 
         const PARAM_LABELS = {
-            leadAutoContactHours:  'שעות לפני תזכורת ליד',
-            leadStaleHours:        'שעות להסלמת ליד ישן',
-            patientAutoMatchHours: 'שעות לפני הצעת שיבוץ',
-            postAppointmentHours:  'שעות אחרי פגישה למעקב',
-            overdueDays:           'ימים לתזכורת תשלום',
+            cron:                      'ביטוי תזמון (cron)',
+            leadAutoContactHours:      'שעות לפני תזכורת ליד',
+            leadStaleHours:            'שעות להסלמת ליד ישן',
+            patientAutoMatchHours:     'שעות לפני הצעת שיבוץ',
+            postAppointmentHours:      'שעות אחרי פגישה למעקב',
+            overdueDays:               'ימים לתזכורת תשלום',
+            maxResponseMinutes:        'דקות מקסימום לתגובה ראשונית',
+            escalateAfterHours:        'שעות להסלמה',
+            minScoreToAlert:           'ניקוד מינימלי להתראה',
+            inactiveDays:              'ימים ללא פעילות',
+            graceMinutes:              'דקות חסד לאי-הגעה',
+            expiryDays:                'ימים לפקיעת הסכמה',
+            minGapHours:               'שעות מינימום לפער בלו"ז',
+            maxWaitDays:               'ימים מקסימום בהמתנה',
+            alertAtSession:            'התראה בפגישה מספר',
+            maxSessions:               'מכסת פגישות מקסימלית',
+            maxPatientsPerTherapist:   'מטופלים מקסימום למטפל',
+            minPatientsPerTherapist:   'מטופלים מינימום למטפל',
+            sessionMilestones:         'אבני דרך (פגישות)',
+            dormantDays:               'ימים לחוסר פעילות',
+            afterSessions:             'סקר אחרי X פגישות',
         };
 
         async function loadAutomationConfigs() {
@@ -4673,22 +4999,36 @@
                 grouped[a.category].push(a);
             }
 
-            const categoryOrder = ['reports', 'pipelines', 'followups', 'monitoring', 'export'];
+            const categoryOrder = [
+                'lead_lifecycle', 'safety', 'operations', 'retention',
+                'reports', 'pipelines', 'followups', 'monitoring', 'export'
+            ];
+
+            // Filter by user's category_access permissions
+            const allowedCats = window._userCategoryAccess; // null = all allowed
             let html = '';
 
             for (const cat of categoryOrder) {
                 const items = grouped[cat];
                 if (!items) continue;
+                // Skip categories the user doesn't have access to
+                if (allowedCats && Array.isArray(allowedCats) && !allowedCats.includes(cat)) continue;
                 const catInfo = AUTOMATION_CATEGORIES[cat] || { label: cat, icon: 'fa-gear' };
+                const enabledCount = items.filter(i => i.is_enabled).length;
 
-                html += '<div class="auto-config-category">';
-                html += `<div class="auto-config-category-header">
-                    <i class="fa-solid ${catInfo.icon}"></i> ${catInfo.label}
+                html += `<div class="auto-accordion">`;
+                html += `<div class="auto-accordion-header" onclick="toggleAutoAccordion('${cat}')">
+                    <div class="auto-accordion-title">
+                        <i class="fa-solid ${catInfo.icon}"></i> ${catInfo.label}
+                        <span class="auto-accordion-count">${enabledCount}/${items.length}</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down auto-accordion-chevron" id="chevron-${cat}"></i>
                 </div>`;
+                html += `<div class="auto-accordion-body" id="accordion-${cat}">`;
 
                 for (const a of items) {
                     const params = a.params || {};
-                    const paramKeys = Object.keys(params);
+                    const visibleParams = Object.keys(params).filter(k => k !== 'cron');
 
                     html += `<div class="auto-config-card ${a.is_enabled ? '' : 'disabled'}">
                         <label class="utm-config-toggle" title="${a.is_enabled ? 'לחץ לכיבוי' : 'לחץ להפעלה'}">
@@ -4701,30 +5041,296 @@
                                 <i class="fa-solid ${a.icon || 'fa-robot'}"></i> ${a.label}
                             </div>
                             <div class="auto-config-card-desc">${a.description}</div>
-                            <div class="auto-config-schedule-pill">
-                                <i class="fa-regular fa-clock"></i> ${a.schedule}
-                            </div>`;
-
-                    if (paramKeys.length) {
-                        html += '<div class="auto-config-params">';
-                        for (const key of paramKeys) {
-                            const paramLabel = PARAM_LABELS[key] || key;
-                            html += `<div class="auto-config-param">
-                                <label>${paramLabel}:</label>
-                                <input type="number" value="${params[key]}" min="1"
-                                    onchange="updateAutomationParam('${a.id}', '${key}', this.value)">
-                            </div>`;
-                        }
-                        html += '</div>';
-                    }
-
-                    html += '</div></div>';
+                            <div class="auto-config-meta">
+                                <span class="auto-config-status-dot"></span>
+                                <span class="auto-config-schedule-pill">
+                                    <i class="fa-regular fa-clock"></i> ${a.schedule}
+                                </span>
+                            </div>
+                        </div>
+                        <button class="auto-settings-btn" onclick="openParamSettings('${a.id}')" title="הגדרות">
+                            <i class="fa-solid fa-gear"></i><span> הגדרות</span>
+                        </button>
+                    </div>`;
                 }
 
-                html += '</div>';
+                html += '</div></div>';
             }
 
             container.innerHTML = html;
+        }
+
+        function toggleAutoAccordion(cat) {
+            const body = document.getElementById('accordion-' + cat);
+            const chevron = document.getElementById('chevron-' + cat);
+            if (!body) return;
+            body.classList.toggle('collapsed');
+            chevron?.classList.toggle('collapsed');
+        }
+
+        function openParamSettings(automationId) {
+            const item = automationConfigsCache.find(a => a.id === automationId);
+            if (!item) return;
+
+            const titleEl = document.getElementById('auto-modal-title');
+            const bodyEl = document.getElementById('auto-modal-body');
+            const overlay = document.getElementById('auto-settings-overlay');
+
+            titleEl.innerHTML = `<i class="fa-solid ${item.icon || 'fa-gear'}"></i> ${item.label}`;
+
+            const params = item.params || {};
+            const keys = Object.keys(params);
+
+            if (!keys.length) {
+                bodyEl.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-secondary);font-size:0.85rem;"><i class="fa-solid fa-check-circle" style="color:var(--success);font-size:1.3rem;margin-bottom:0.5rem;display:block;"></i>אין פרמטרים לעריכה עבור אוטומציה זו</div>';
+            } else {
+                let fieldsHtml = '';
+                for (const key of keys) {
+                    const label = PARAM_LABELS[key] || key;
+                    const val = params[key];
+                    const inputType = (typeof val === 'number') ? 'number' : 'text';
+                    const hint = key === 'cron' ? 'תחביר cron: דקה שעה יום חודש יום-בשבוע' : '';
+
+                    fieldsHtml += `<div class="auto-modal-field">
+                        <label>${label}</label>
+                        <input type="${inputType}" value="${val}" data-param-key="${key}" ${inputType === 'number' ? 'min="0"' : ''}>
+                        ${hint ? '<div class="field-hint">' + hint + '</div>' : ''}
+                    </div>`;
+                }
+                bodyEl.innerHTML = fieldsHtml;
+            }
+
+            const saveBtn = document.getElementById('auto-modal-save');
+            saveBtn.onclick = () => saveParamSettings(automationId);
+
+            // Wire "Run Now" button
+            const runBtn = document.getElementById('auto-modal-run');
+            runBtn.onclick = () => triggerAutomation(automationId);
+            runBtn.disabled = false;
+            runBtn.classList.remove('running');
+            runBtn.innerHTML = '<i class="fa-solid fa-play"></i> הפעל עכשיו';
+
+            // Clear previous run result
+            const existingResult = bodyEl.parentElement.querySelector('.auto-run-result');
+            if (existingResult) existingResult.remove();
+
+            // Load recent logs for this automation
+            loadAutomationLogs(automationId);
+
+            overlay.classList.add('active');
+        }
+
+        function closeParamSettings() {
+            document.getElementById('auto-settings-overlay').classList.remove('active');
+        }
+
+        // ── Automation ID → activity log action name mapping ──
+        // Derived from actual logActivity() calls in automation-handlers.js,
+        // pipelines.js, followups.js, and export.js
+        const AUTO_ACTION_MAP = {
+            // 20 new automations (automation-handlers.js)
+            lead_first_response:         'auto_lead_first_response',
+            lead_escalation:              'auto_lead_escalation',
+            lead_scoring:                 'auto_lead_scoring',
+            lead_source_report:           'auto_lead_source_report',
+            lead_duplicate_detect:        'auto_lead_duplicate_detect',
+            emergency_keyword_scan:       'auto_emergency_keyword_scan',
+            inactive_patient_alert:       'auto_inactive_patient_alert',
+            therapist_no_show_alert:      'auto_therapist_no_show',
+            consent_expiry_check:         'auto_consent_expiry_check',
+            safety_daily_digest:          'auto_safety_daily_digest',
+            therapist_availability_check: 'auto_therapist_availability',
+            appointment_gap_alert:        'auto_appointment_gap_alert',
+            waitlist_processor:           'auto_waitlist_processor',
+            session_limit_alert:          'auto_session_limit_alert',
+            therapist_load_balance:       'auto_therapist_load_balance',
+            birthday_greeting:            'auto_birthday_greeting',
+            milestone_celebration:        'auto_milestone_celebration',
+            reactivation_outreach:        'auto_reactivation_outreach',
+            satisfaction_survey:           'auto_satisfaction_survey',
+            community_digest:             'auto_community_digest',
+            // Original 14 — actual action names from code
+            lead_nurture:          'auto_lead_nudge',
+            patient_auto_match:    'auto_match_suggestion',
+            post_appointment:      'auto_post_appointment',
+            patient_welcome:       'auto_welcome_patient',
+            therapist_welcome:     'auto_welcome_therapist',
+            post_treatment:        'auto_post_treatment_checkin',
+            payment_reminders:     'auto_payment_reminder',
+            monthly_export:        'monthly_export',
+        };
+
+        async function loadAutomationLogs(automationId) {
+            const container = document.getElementById('auto-logs-container');
+            const countEl = document.getElementById('auto-logs-count');
+            container.innerHTML = '<div class="auto-logs-loading"><i class="fa-solid fa-spinner fa-spin"></i> טוען...</div>';
+            countEl.textContent = '';
+
+            const actionName = AUTO_ACTION_MAP[automationId];
+
+            // No log mapping — this automation doesn't write to activity log
+            if (!actionName) {
+                container.innerHTML = '<div class="auto-logs-empty"><i class="fa-solid fa-info-circle" style="font-size:1.1rem;display:block;margin-bottom:0.3rem;color:var(--info);"></i>אוטומציה זו לא כותבת ללוג פעילות</div>';
+                countEl.textContent = '';
+                return;
+            }
+
+            try {
+                const { data, error } = await db.from('crm_activity_log')
+                    .select('id, action, details, created_at')
+                    .eq('action', actionName)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) throw error;
+
+                if (!data || !data.length) {
+                    container.innerHTML = '<div class="auto-logs-empty"><i class="fa-solid fa-inbox" style="font-size:1.1rem;display:block;margin-bottom:0.3rem;"></i>אין לוגים עדיין לאוטומציה זו</div>';
+                    countEl.textContent = '(0)';
+                    return;
+                }
+
+                countEl.textContent = `(${data.length})`;
+                renderAutomationLogs(data, container);
+            } catch (err) {
+                console.error('Logs load error:', err);
+                container.innerHTML = '<div class="auto-logs-empty">שגיאה בטעינת לוגים</div>';
+            }
+        }
+
+        function renderAutomationLogs(logs, container) {
+            let html = '<ul class="auto-logs-list">';
+
+            for (const log of logs) {
+                const details = log.details || {};
+                const isError = !!(details.error || details.status === 'error');
+                const statusClass = isError ? 'error' : 'success';
+                const statusLabel = isError ? 'שגיאה' : 'הצלחה';
+                const dotClass = isError ? 'error' : 'success';
+
+                // Format timestamp
+                const d = new Date(log.created_at);
+                const timeStr = d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' })
+                    + ' ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+
+                // Build summary line from details
+                let summary = '';
+                if (details.count !== undefined) summary = `${details.count} פריטים`;
+                else if (details.message) summary = details.message.substring(0, 60);
+                else if (details.error) summary = details.error.substring(0, 60);
+
+                const detailJson = JSON.stringify(details, null, 2);
+                const logId = 'log-detail-' + log.id;
+
+                html += `<li class="auto-log-item">
+                    <span class="auto-log-dot ${dotClass}"></span>
+                    <div class="auto-log-body">
+                        <div>
+                            <span class="auto-log-status ${statusClass}">${statusLabel}</span>
+                            <span class="auto-log-time">${timeStr}</span>
+                        </div>
+                        ${summary ? `<div style="font-size:0.72rem;color:var(--text-secondary);margin-top:0.1rem;">${summary}</div>` : ''}
+                        <pre class="auto-log-detail-panel" id="${logId}">${escapeHtml(detailJson)}</pre>
+                    </div>
+                    <button class="auto-log-details-btn" onclick="toggleLogDetail('${logId}')">
+                        <i class="fa-solid fa-code"></i> פרטים
+                    </button>
+                </li>`;
+            }
+
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+
+        function toggleLogDetail(logId) {
+            const panel = document.getElementById(logId);
+            if (panel) panel.classList.toggle('open');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        async function triggerAutomation(automationId) {
+            const runBtn = document.getElementById('auto-modal-run');
+            const modal = document.querySelector('.auto-modal');
+            runBtn.disabled = true;
+            runBtn.classList.add('running');
+            runBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> מריץ...';
+
+            // Remove previous result
+            const prev = modal.querySelector('.auto-run-result');
+            if (prev) prev.remove();
+
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                if (!session) throw new Error('לא מחובר');
+
+                const resp = await fetch(BOT_URL + '/api/admin/trigger-automation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + session.access_token,
+                    },
+                    body: JSON.stringify({ automationId }),
+                });
+
+                const data = await resp.json();
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'auto-run-result';
+
+                if (resp.ok && data.success) {
+                    resultDiv.classList.add('success');
+                    resultDiv.innerHTML = '<i class="fa-solid fa-check-circle"></i> האוטומציה הופעלה בהצלחה';
+                    runBtn.innerHTML = '<i class="fa-solid fa-check"></i> הושלם';
+                } else {
+                    resultDiv.classList.add('error');
+                    resultDiv.innerHTML = `<i class="fa-solid fa-exclamation-circle"></i> שגיאה: ${data.error || 'Unknown error'}`;
+                    runBtn.innerHTML = '<i class="fa-solid fa-play"></i> הפעל עכשיו';
+                    runBtn.disabled = false;
+                    runBtn.classList.remove('running');
+                }
+
+                modal.querySelector('.auto-modal-actions').insertAdjacentElement('afterend', resultDiv);
+            } catch (err) {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'auto-run-result error';
+                resultDiv.innerHTML = `<i class="fa-solid fa-exclamation-circle"></i> שגיאת חיבור: ${err.message}`;
+                modal.querySelector('.auto-modal-actions').insertAdjacentElement('afterend', resultDiv);
+                runBtn.innerHTML = '<i class="fa-solid fa-play"></i> הפעל עכשיו';
+                runBtn.disabled = false;
+                runBtn.classList.remove('running');
+            }
+        }
+
+        async function saveParamSettings(automationId) {
+            const item = automationConfigsCache.find(a => a.id === automationId);
+            if (!item) return;
+
+            const bodyEl = document.getElementById('auto-modal-body');
+            const inputs = bodyEl.querySelectorAll('input[data-param-key]');
+            const newParams = { ...item.params };
+
+            for (const input of inputs) {
+                const key = input.dataset.paramKey;
+                const raw = input.value;
+                newParams[key] = input.type === 'number' ? (parseFloat(raw) || 0) : raw;
+            }
+
+            try {
+                const { error } = await db.from('bot_automation_configs')
+                    .update({ params: newParams, updated_at: new Date().toISOString() })
+                    .eq('id', automationId);
+                if (error) throw error;
+                item.params = newParams;
+                renderAutomationConfigs();
+                closeParamSettings();
+                showToast('הגדרות נשמרו', 'success');
+            } catch (err) {
+                showToast('שגיאה בשמירה: ' + err.message, 'error');
+            }
         }
 
         async function toggleAutomation(id, isEnabled) {
@@ -4744,19 +5350,191 @@
             }
         }
 
-        async function updateAutomationParam(id, key, value) {
+        // Param editing handled by openParamSettings/saveParamSettings modal
+
+        // ============================================================
+        // PERMISSIONS MANAGER (SuperAdmin only)
+        // ============================================================
+        let permUsersCache = [];
+
+        const ALL_CATEGORIES = [
+            'reports', 'pipelines', 'followups', 'monitoring', 'export',
+            'lead_lifecycle', 'safety', 'operations', 'retention'
+        ];
+
+        async function loadPermissionsManager() {
+            const section = document.getElementById('permissions-section');
+            // Only show for SuperAdmin (role = admin and profiles.role = admin)
+            if (window._userBotRole !== 'admin') {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = '';
+
             try {
-                const item = automationConfigsCache.find(a => a.id === id);
-                if (!item) return;
-                const params = { ...item.params, [key]: parseInt(value) || 1 };
-                const { error } = await db.from('bot_automation_configs')
-                    .update({ params, updated_at: new Date().toISOString() })
-                    .eq('id', id);
+                // Fetch all users with access + their profile info
+                const { data, error } = await db.from('crm_bot_access')
+                    .select('user_id, role, category_access, profiles!inner(email, full_name, role)')
+                    .order('created_at', { ascending: true });
                 if (error) throw error;
-                item.params = params;
-                showToast('פרמטר עודכן', 'success');
+                permUsersCache = data || [];
+                renderPermissions();
             } catch (err) {
-                showToast('שגיאה בעדכון: ' + err.message, 'error');
+                console.error('Permissions load error:', err);
+                document.getElementById('permissions-container').innerHTML =
+                    '<div class="perm-empty">שגיאה בטעינת הרשאות</div>';
+            }
+        }
+
+        function renderPermissions() {
+            const container = document.getElementById('permissions-container');
+            if (!permUsersCache.length) {
+                container.innerHTML = '<div class="perm-empty"><i class="fa-solid fa-users-slash"></i><br>לא נמצאו משתמשים עם הרשאות CRM.<br>הוסף משתמש מלמעלה.</div>';
+                return;
+            }
+
+            let html = '';
+            for (const u of permUsersCache) {
+                const profile = u.profiles || {};
+                const email = profile.email || '—';
+                const name = profile.full_name || email.split('@')[0];
+                const role = u.role || 'viewer';
+                const cats = u.category_access || ALL_CATEGORIES;
+
+                html += `<div class="perm-user-card" data-uid="${u.user_id}">
+                    <div class="perm-user-header">
+                        <div>
+                            <div class="perm-user-name">
+                                <i class="fa-solid fa-user-circle" style="color:var(--gold);"></i>
+                                ${name}
+                                <span class="perm-user-role ${role}">${role}</span>
+                            </div>
+                            <div class="perm-user-email">${email}</div>
+                        </div>
+                        <select class="settings-input" style="width:auto;font-size:0.78rem;padding:0.3rem 0.5rem;"
+                            onchange="changePermRole('${u.user_id}', this.value)">
+                            <option value="admin" ${role === 'admin' ? 'selected' : ''}>Admin</option>
+                            <option value="manager" ${role === 'manager' ? 'selected' : ''}>Manager</option>
+                            <option value="viewer" ${role === 'viewer' ? 'selected' : ''}>Viewer</option>
+                        </select>
+                    </div>
+                    <div class="perm-categories" id="perm-cats-${u.user_id}">`;
+
+                for (const cat of ALL_CATEGORIES) {
+                    const catInfo = AUTOMATION_CATEGORIES[cat] || { label: cat, icon: 'fa-gear' };
+                    const isActive = Array.isArray(cats) ? cats.includes(cat) : true;
+                    html += `<label class="perm-cat-chip ${isActive ? 'active' : ''}"
+                        onclick="togglePermCat(this, '${u.user_id}', '${cat}')">
+                        <i class="fa-solid ${catInfo.icon}" style="font-size:0.68rem;"></i>
+                        ${catInfo.label}
+                    </label>`;
+                }
+
+                html += `</div>
+                    <div class="perm-save-row">
+                        <button class="perm-save-btn" id="perm-save-${u.user_id}"
+                            onclick="savePermUser('${u.user_id}')">
+                            <i class="fa-solid fa-check"></i>&nbsp;שמור
+                        </button>
+                    </div>
+                </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function togglePermCat(chip, userId, cat) {
+            chip.classList.toggle('active');
+            // Show save button
+            const saveBtn = document.getElementById('perm-save-' + userId);
+            if (saveBtn) saveBtn.classList.add('visible');
+        }
+
+        async function changePermRole(userId, newRole) {
+            try {
+                const { error } = await db.from('crm_bot_access')
+                    .update({ role: newRole })
+                    .eq('user_id', userId);
+                if (error) throw error;
+                const u = permUsersCache.find(x => x.user_id === userId);
+                if (u) u.role = newRole;
+                showToast('תפקיד עודכן', 'success');
+            } catch (err) {
+                showToast('שגיאה: ' + err.message, 'error');
+            }
+        }
+
+        async function savePermUser(userId) {
+            const catsContainer = document.getElementById('perm-cats-' + userId);
+            if (!catsContainer) return;
+
+            const activeChips = catsContainer.querySelectorAll('.perm-cat-chip.active');
+            const selectedCats = [];
+            for (const chip of activeChips) {
+                const catName = chip.getAttribute('onclick').match(/'([^']+)'\)$/)?.[1];
+                if (catName) selectedCats.push(catName);
+            }
+
+            try {
+                const { error } = await db.from('crm_bot_access')
+                    .update({ category_access: selectedCats })
+                    .eq('user_id', userId);
+                if (error) throw error;
+
+                const u = permUsersCache.find(x => x.user_id === userId);
+                if (u) u.category_access = selectedCats;
+
+                const saveBtn = document.getElementById('perm-save-' + userId);
+                if (saveBtn) saveBtn.classList.remove('visible');
+
+                showToast('הרשאות נשמרו', 'success');
+            } catch (err) {
+                showToast('שגיאה בשמירה: ' + err.message, 'error');
+            }
+        }
+
+        async function addPermUser() {
+            const emailInput = document.getElementById('perm-add-email');
+            const roleSelect = document.getElementById('perm-add-role');
+            const email = emailInput.value.trim();
+            const role = roleSelect.value;
+
+            if (!email) {
+                showToast('יש להזין אימייל', 'error');
+                return;
+            }
+
+            try {
+                // Find user by email in profiles
+                const { data: profile, error: profileErr } = await db.from('profiles')
+                    .select('id, email, full_name')
+                    .eq('email', email)
+                    .single();
+                if (profileErr || !profile) {
+                    showToast('משתמש לא נמצא — ודא שהאימייל רשום במערכת', 'error');
+                    return;
+                }
+
+                // Check if already exists
+                if (permUsersCache.find(u => u.user_id === profile.id)) {
+                    showToast('למשתמש כבר יש הרשאות CRM', 'error');
+                    return;
+                }
+
+                // Insert with all categories
+                const { error } = await db.from('crm_bot_access')
+                    .insert({
+                        user_id: profile.id,
+                        role: role,
+                        category_access: ALL_CATEGORIES
+                    });
+                if (error) throw error;
+
+                emailInput.value = '';
+                showToast('משתמש נוסף בהצלחה', 'success');
+                await loadPermissionsManager();
+            } catch (err) {
+                showToast('שגיאה: ' + err.message, 'error');
             }
         }
 

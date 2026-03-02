@@ -1,3 +1,61 @@
+// ============================================================================
+// UTM CAPTURE — Runs immediately on every page load
+// ============================================================================
+(function captureUtm() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const utm_source = params.get('utm_source');
+        const utm_medium = params.get('utm_medium');
+        const utm_campaign = params.get('utm_campaign');
+
+        if (utm_source || utm_medium || utm_campaign) {
+            // Store first-touch attribution (overwrite on new UTM visit)
+            localStorage.setItem('utm_data', JSON.stringify({
+                utm_source: utm_source || null,
+                utm_medium: utm_medium || null,
+                utm_campaign: utm_campaign || null,
+                captured_at: Date.now()
+            }));
+        } else {
+            // No UTM params — check for expiry of existing data (30 days)
+            const existing = localStorage.getItem('utm_data');
+            if (existing) {
+                const parsed = JSON.parse(existing);
+                const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+                if (Date.now() - parsed.captured_at > thirtyDays) {
+                    localStorage.removeItem('utm_data');
+                }
+            }
+        }
+    } catch (e) {
+        // Silent fail — UTM capture is non-critical
+    }
+})();
+
+/**
+ * Get stored UTM data for injecting into form submissions.
+ * Returns { utm_source, utm_medium, utm_campaign } or {}.
+ */
+window.getUtmData = function () {
+    try {
+        const raw = localStorage.getItem('utm_data');
+        if (!raw) return {};
+        const parsed = JSON.parse(raw);
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+        if (Date.now() - parsed.captured_at > thirtyDays) {
+            localStorage.removeItem('utm_data');
+            return {};
+        }
+        return {
+            utm_source: parsed.utm_source || null,
+            utm_medium: parsed.utm_medium || null,
+            utm_campaign: parsed.utm_campaign || null
+        };
+    } catch (e) {
+        return {};
+    }
+};
+
 /**
  * Marketing Tools - Central Management for Tracking & Legal Compliance
  * =====================================================================

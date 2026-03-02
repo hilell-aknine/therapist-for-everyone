@@ -14,8 +14,8 @@ let currentView = 'therapists';
 let currentTherapistFilter = 'all';
 let currentPatientFilter = 'waiting_for_match';
 
-// Email configuration
-const SUPABASE_FUNCTIONS_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+// Email configuration — reads from centralized supabase-config.js
+const SUPABASE_FUNCTIONS_URL = window.SUPABASE_CONFIG?.functionsUrl || 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
 const SITE_URL = 'https://www.therapist-home.com';
 
 // ============================================================================
@@ -1209,6 +1209,7 @@ function renderLeads() {
                     ${l.status === 'converted' ? 'הומר למטופל' : 'חדש'}
                 </span>
             </div>
+            ${l.utm_source ? `<span class="utm-badge">${l.utm_source}${l.utm_medium ? ' / ' + l.utm_medium : ''}</span>` : ''}
             ${l.message ? `<div class="lead-message">${l.message}</div>` : ''}
             <div class="lead-actions">
                 ${l.phone ? `<a href="tel:${l.phone}" class="btn btn-view"><i class="fa-solid fa-phone"></i> התקשר</a>` : ''}
@@ -1603,7 +1604,10 @@ function prepareLeadsData(data) {
         'עיר': l.city || '-',
         'הודעה': l.message || '-',
         'סטטוס': translateStatus(l.status, 'leads'),
-        'תאריך פנייה': formatDateHebrew(l.created_at)
+        'תאריך פנייה': formatDateHebrew(l.created_at),
+        'מקור': l.utm_source || '-',
+        'מדיום': l.utm_medium || '-',
+        'קמפיין': l.utm_campaign || '-'
     }));
 }
 

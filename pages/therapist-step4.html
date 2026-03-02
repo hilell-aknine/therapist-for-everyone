@@ -611,10 +611,11 @@
     <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
     <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+        // Supabase Configuration — from centralized supabase-config.js
+        const SUPABASE_URL = window.SUPABASE_CONFIG.url;
+        const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.anonKey;
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const termsBox = document.getElementById('terms-box');
@@ -851,6 +852,7 @@
                 const currentYear = new Date().getFullYear();
                 const experienceYears = practiceStartYear ? currentYear - practiceStartYear : 0;
 
+                const utm = window.getUtmData ? window.getUtmData() : {};
                 const data = {
                     full_name: formData.full_name,
                     email: formData.email || null,
@@ -877,7 +879,10 @@
                     age_confirmed: true,
                     terms_confirmed: true,
                     documents_verified: false,
-                    status: 'new'
+                    status: 'new',
+                    utm_source: utm.utm_source || null,
+                    utm_medium: utm.utm_medium || null,
+                    utm_campaign: utm.utm_campaign || null
                 };
 
                 const { error } = await db.from('therapists').insert(data);
@@ -885,6 +890,7 @@
 
                 // Clear localStorage
                 localStorage.removeItem('therapist_form_data');
+                localStorage.removeItem('utm_data');
 
                 // Show success
                 document.getElementById('form-container').classList.add('hidden');

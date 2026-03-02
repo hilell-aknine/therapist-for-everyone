@@ -142,6 +142,7 @@
         td strong { font-weight: 600; color: var(--text); }
 
         .status-badge { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; display: inline-block; border: 1px solid transparent; }
+        .utm-badge { display: inline-block; background: #2F8592; color: #fff; font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.55rem; border-radius: 12px; margin-top: 0.3rem; }
         .status-new { background: rgba(212, 175, 55, 0.12); color: var(--gold); border-color: rgba(212, 175, 55, 0.25); }
         .status-pending_review { background: rgba(210, 153, 34, 0.12); color: var(--warning); border-color: rgba(210, 153, 34, 0.25); }
         .status-waiting { background: rgba(88, 166, 255, 0.12); color: var(--info); border-color: rgba(88, 166, 255, 0.25); }
@@ -727,6 +728,77 @@
         }
         .settings-input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 2px rgba(212,175,55,0.2); }
 
+        /* UTM Config Manager */
+        .utm-config-list { list-style: none; padding: 0; margin: 0; }
+        .utm-config-item {
+            display: flex; align-items: center; gap: 0.8rem;
+            padding: 0.7rem 0; border-bottom: 1px solid var(--border);
+        }
+        .utm-config-item:last-child { border-bottom: none; }
+        .utm-config-value {
+            font-weight: 700; font-size: 0.88rem; min-width: 90px;
+            direction: ltr; text-align: left;
+        }
+        .utm-config-aliases {
+            flex: 1; font-size: 0.8rem; color: var(--text-secondary);
+        }
+        .utm-config-aliases span {
+            display: inline-block; background: rgba(47,133,146,0.12);
+            color: var(--dusty-aqua, #2F8592); padding: 0.15rem 0.5rem;
+            border-radius: 10px; font-size: 0.75rem; margin: 0.1rem 0.15rem;
+        }
+        .utm-config-meta {
+            font-size: 0.75rem; color: var(--text-secondary); min-width: 80px; text-align: center;
+        }
+        .utm-config-toggle {
+            position: relative; width: 40px; height: 22px; cursor: pointer;
+        }
+        .utm-config-toggle input { opacity: 0; width: 0; height: 0; }
+        .utm-config-toggle .slider {
+            position: absolute; inset: 0; background: #ccc; border-radius: 22px; transition: 0.3s;
+        }
+        .utm-config-toggle .slider:before {
+            content: ''; position: absolute; width: 16px; height: 16px;
+            left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s;
+        }
+        .utm-config-toggle input:checked + .slider { background: #2F8592; }
+        .utm-config-toggle input:checked + .slider:before { transform: translateX(18px); }
+        .utm-config-delete {
+            background: none; border: none; color: var(--text-secondary);
+            cursor: pointer; font-size: 0.9rem; padding: 0.3rem; border-radius: 4px; transition: 0.2s;
+        }
+        .utm-config-delete:hover { color: #c0392b; background: rgba(192,57,43,0.1); }
+        .utm-config-add-form {
+            display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem 0;
+            align-items: flex-end;
+        }
+        .utm-config-add-form input, .utm-config-add-form select {
+            padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.82rem;
+        }
+        .utm-config-add-form input:focus, .utm-config-add-form select:focus {
+            border-color: var(--gold); outline: none;
+        }
+        .utm-config-add-btn {
+            background: var(--gold, #D4AF37); color: #fff; border: none;
+            padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600;
+            font-size: 0.82rem; cursor: pointer; white-space: nowrap; transition: 0.2s;
+        }
+        .utm-config-add-btn:hover { filter: brightness(1.1); }
+        .utm-config-empty { text-align: center; padding: 1.5rem; color: var(--text-secondary); font-size: 0.85rem; }
+        .utm-config-tab-bar {
+            display: flex; gap: 0; margin-bottom: 0;
+        }
+        .utm-config-tab {
+            flex: 1; text-align: center; padding: 0.7rem 1rem; cursor: pointer;
+            font-weight: 600; font-size: 0.85rem; border-bottom: 3px solid transparent;
+            color: var(--text-secondary); transition: 0.2s;
+        }
+        .utm-config-tab.active {
+            color: var(--gold, #D4AF37); border-bottom-color: var(--gold, #D4AF37);
+        }
+        .utm-config-tab:hover { color: var(--text); }
+
         @media (max-width: 768px) {
             .bot-cards { grid-template-columns: 1fr; }
             .bot-actions-grid { grid-template-columns: 1fr 1fr; }
@@ -736,6 +808,9 @@
             #analytics-view > div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
             .settings-row { flex-direction: column; align-items: stretch; gap: 0.5rem; }
             .settings-input { max-width: 100%; min-width: unset; width: 100%; }
+            .utm-config-item { flex-wrap: wrap; gap: 0.5rem; }
+            .utm-config-value { min-width: auto; }
+            .utm-config-add-form input, .utm-config-add-form select { width: 100% !important; min-width: unset; }
         }
     </style>
 </head>
@@ -1543,6 +1618,68 @@
                         </div>
                     </div>
 
+                    <!-- Section: UTM Config Manager -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <i class="fa-solid fa-sliders"></i> הגדרות בוט — מקורות ויעדים (UTM)
+                        </div>
+                        <div class="settings-section-desc">
+                            ניהול הרשימות שהבוט משתמש בהן ליצירת קישורים מסומנים. שינויים כאן מתעדכנים בבוט תוך 5 דקות.
+                        </div>
+                        <div class="settings-section-body" style="padding:0;">
+                            <!-- Tab bar -->
+                            <div class="utm-config-tab-bar" style="border-bottom:1px solid var(--border);">
+                                <div class="utm-config-tab active" onclick="switchUtmConfigTab('destination')" id="utm-tab-destination">
+                                    <i class="fa-solid fa-location-dot"></i> יעדים (דפי אתר)
+                                </div>
+                                <div class="utm-config-tab" onclick="switchUtmConfigTab('source')" id="utm-tab-source">
+                                    <i class="fa-solid fa-share-nodes"></i> מקורות (פלטפורמות)
+                                </div>
+                            </div>
+
+                            <!-- Destinations panel -->
+                            <div id="utm-panel-destination" style="padding:0.5rem 1.5rem 1rem;">
+                                <div id="utm-list-destination" class="utm-config-list">
+                                    <div class="utm-config-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען...</div>
+                                </div>
+                                <div class="utm-config-add-form" style="border-top:1px solid var(--border);margin-top:0.5rem;padding-top:0.8rem;">
+                                    <input type="text" id="utm-add-dest-value" placeholder="ערך (אנגלית)" style="width:100px;direction:ltr;text-align:left;">
+                                    <input type="text" id="utm-add-dest-label" placeholder="שם תצוגה (עברית)" style="width:120px;">
+                                    <input type="text" id="utm-add-dest-path" placeholder="נתיב באתר, למשל /pages/about.html" style="width:200px;direction:ltr;text-align:left;">
+                                    <input type="text" id="utm-add-dest-campaign" placeholder="campaign slug" style="width:120px;direction:ltr;text-align:left;">
+                                    <input type="text" id="utm-add-dest-aliases" placeholder="כינויים בעברית (פסיק)" style="width:160px;">
+                                    <button class="utm-config-add-btn" onclick="addUtmConfig('destination')">
+                                        <i class="fa-solid fa-plus"></i> הוסף יעד
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Sources panel -->
+                            <div id="utm-panel-source" style="padding:0.5rem 1.5rem 1rem;display:none;">
+                                <div id="utm-list-source" class="utm-config-list">
+                                    <div class="utm-config-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען...</div>
+                                </div>
+                                <div class="utm-config-add-form" style="border-top:1px solid var(--border);margin-top:0.5rem;padding-top:0.8rem;">
+                                    <input type="text" id="utm-add-src-value" placeholder="ערך (אנגלית)" style="width:100px;direction:ltr;text-align:left;">
+                                    <input type="text" id="utm-add-src-label" placeholder="שם תצוגה (עברית)" style="width:120px;">
+                                    <select id="utm-add-src-medium" style="width:110px;">
+                                        <option value="social">social</option>
+                                        <option value="video">video</option>
+                                        <option value="email">email</option>
+                                        <option value="sms">sms</option>
+                                        <option value="organic">organic</option>
+                                        <option value="paid">paid</option>
+                                        <option value="referral">referral</option>
+                                    </select>
+                                    <input type="text" id="utm-add-src-aliases" placeholder="כינויים בעברית (פסיק)" style="width:160px;">
+                                    <button class="utm-config-add-btn" onclick="addUtmConfig('source')">
+                                        <i class="fa-solid fa-plus"></i> הוסף מקור
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Section: UTM Builder -->
                     <div class="settings-section">
                         <div class="settings-section-header">
@@ -1934,7 +2071,7 @@
             });
             if (view === 'bot') loadBotView();
             if (view === 'analytics') loadGA4Analytics();
-            if (view === 'settings') loadSettingsView();
+            if (view === 'settings') { loadSettingsView(); loadUtmConfigs(); }
         }
 
         function filterPatients(status) {
@@ -4138,6 +4275,203 @@
                 document.body.removeChild(ta);
                 showToast('הקישור הועתק!', 'success');
             });
+        }
+
+        // ============================================================
+        // UTM CONFIG MANAGER — CRUD for bot_utm_configs table
+        // ============================================================
+        let utmConfigsCache = { destination: [], source: [] };
+
+        function switchUtmConfigTab(type) {
+            document.getElementById('utm-tab-destination').classList.toggle('active', type === 'destination');
+            document.getElementById('utm-tab-source').classList.toggle('active', type === 'source');
+            document.getElementById('utm-panel-destination').style.display = type === 'destination' ? '' : 'none';
+            document.getElementById('utm-panel-source').style.display = type === 'source' ? '' : 'none';
+        }
+
+        async function loadUtmConfigs() {
+            try {
+                const { data, error } = await db.from('bot_utm_configs')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+                if (error) throw error;
+
+                utmConfigsCache.destination = (data || []).filter(c => c.config_type === 'destination');
+                utmConfigsCache.source = (data || []).filter(c => c.config_type === 'source');
+
+                renderUtmConfigList('destination');
+                renderUtmConfigList('source');
+
+                // Also update UTM Builder dropdowns dynamically
+                populateUtmBuilderDropdowns();
+            } catch (err) {
+                console.error('UTM config load error:', err);
+                document.getElementById('utm-list-destination').innerHTML = '<div class="utm-config-empty">שגיאה בטעינת הנתונים</div>';
+                document.getElementById('utm-list-source').innerHTML = '<div class="utm-config-empty">שגיאה בטעינת הנתונים</div>';
+            }
+        }
+
+        function renderUtmConfigList(type) {
+            const container = document.getElementById(`utm-list-${type}`);
+            const items = utmConfigsCache[type];
+
+            if (!items.length) {
+                container.innerHTML = '<div class="utm-config-empty">אין רשומות. הוסף באמצעות הטופס למטה.</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(c => `
+                <div class="utm-config-item" data-id="${c.id}">
+                    <label class="utm-config-toggle" title="${c.is_active ? 'פעיל' : 'מושבת'}">
+                        <input type="checkbox" ${c.is_active ? 'checked' : ''} onchange="toggleUtmConfig('${c.id}', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                    <div class="utm-config-value">${c.value}</div>
+                    <div style="flex:1;">
+                        <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.15rem;">${c.label || '-'}</div>
+                        <div class="utm-config-aliases">
+                            ${(c.hebrew_aliases || []).map(a => `<span>${a}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="utm-config-meta">
+                        ${type === 'destination' ? (c.campaign_slug || '') : (c.utm_medium || '')}
+                    </div>
+                    <button class="utm-config-delete" onclick="deleteUtmConfig('${c.id}')" title="מחק">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function toggleUtmConfig(id, isActive) {
+            try {
+                const { error } = await db.from('bot_utm_configs')
+                    .update({ is_active: isActive })
+                    .eq('id', id);
+                if (error) throw error;
+
+                // Update local cache
+                for (const type of ['destination', 'source']) {
+                    const item = utmConfigsCache[type].find(c => c.id === id);
+                    if (item) item.is_active = isActive;
+                }
+                showToast(isActive ? 'הופעל' : 'הושבת', 'success');
+            } catch (err) {
+                showToast('שגיאה בעדכון: ' + err.message, 'error');
+                await loadUtmConfigs();
+            }
+        }
+
+        async function deleteUtmConfig(id) {
+            if (!confirm('למחוק את הרשומה הזו?')) return;
+            try {
+                const { error } = await db.from('bot_utm_configs')
+                    .delete()
+                    .eq('id', id);
+                if (error) throw error;
+                showToast('נמחק', 'success');
+                await loadUtmConfigs();
+            } catch (err) {
+                showToast('שגיאה במחיקה: ' + err.message, 'error');
+            }
+        }
+
+        async function addUtmConfig(type) {
+            try {
+                let row;
+                if (type === 'destination') {
+                    const value = document.getElementById('utm-add-dest-value').value.trim().toLowerCase();
+                    const label = document.getElementById('utm-add-dest-label').value.trim();
+                    const url_path = document.getElementById('utm-add-dest-path').value.trim();
+                    const campaign_slug = document.getElementById('utm-add-dest-campaign').value.trim().toLowerCase();
+                    const aliasStr = document.getElementById('utm-add-dest-aliases').value.trim();
+
+                    if (!value || !label || !url_path) {
+                        showToast('חובה למלא: ערך, שם תצוגה, ונתיב', 'error');
+                        return;
+                    }
+
+                    row = {
+                        config_type: 'destination',
+                        value,
+                        label,
+                        url_path,
+                        campaign_slug: campaign_slug || value,
+                        hebrew_aliases: aliasStr ? aliasStr.split(',').map(s => s.trim()).filter(Boolean) : [],
+                        is_active: true
+                    };
+                } else {
+                    const value = document.getElementById('utm-add-src-value').value.trim().toLowerCase();
+                    const label = document.getElementById('utm-add-src-label').value.trim();
+                    const utm_medium = document.getElementById('utm-add-src-medium').value;
+                    const aliasStr = document.getElementById('utm-add-src-aliases').value.trim();
+
+                    if (!value || !label) {
+                        showToast('חובה למלא: ערך ושם תצוגה', 'error');
+                        return;
+                    }
+
+                    row = {
+                        config_type: 'source',
+                        value,
+                        label,
+                        utm_medium,
+                        hebrew_aliases: aliasStr ? aliasStr.split(',').map(s => s.trim()).filter(Boolean) : [],
+                        is_active: true
+                    };
+                }
+
+                const { error } = await db.from('bot_utm_configs').insert(row);
+                if (error) {
+                    if (error.message && error.message.includes('duplicate')) {
+                        showToast('ערך זה כבר קיים', 'error');
+                    } else {
+                        throw error;
+                    }
+                    return;
+                }
+
+                showToast('נוסף בהצלחה!', 'success');
+
+                // Clear form
+                if (type === 'destination') {
+                    document.getElementById('utm-add-dest-value').value = '';
+                    document.getElementById('utm-add-dest-label').value = '';
+                    document.getElementById('utm-add-dest-path').value = '';
+                    document.getElementById('utm-add-dest-campaign').value = '';
+                    document.getElementById('utm-add-dest-aliases').value = '';
+                } else {
+                    document.getElementById('utm-add-src-value').value = '';
+                    document.getElementById('utm-add-src-label').value = '';
+                    document.getElementById('utm-add-src-aliases').value = '';
+                }
+
+                await loadUtmConfigs();
+            } catch (err) {
+                showToast('שגיאה בהוספה: ' + err.message, 'error');
+            }
+        }
+
+        function populateUtmBuilderDropdowns() {
+            // Update the UTM Builder's page dropdown from DB destinations
+            const pageSelect = document.getElementById('utm-page');
+            const sourceSelect = document.getElementById('utm-source');
+            if (!pageSelect || !sourceSelect) return;
+
+            const activeDests = utmConfigsCache.destination.filter(c => c.is_active);
+            const activeSources = utmConfigsCache.source.filter(c => c.is_active);
+
+            if (activeDests.length) {
+                pageSelect.innerHTML = activeDests.map(d =>
+                    `<option value="https://www.therapist-home.com${d.url_path}">${d.label}</option>`
+                ).join('');
+            }
+
+            if (activeSources.length) {
+                sourceSelect.innerHTML = activeSources.map(s =>
+                    `<option value="${s.value}">${s.label}</option>`
+                ).join('');
+            }
         }
 
         // Apply saved settings on page load

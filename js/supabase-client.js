@@ -12,8 +12,8 @@
     }
     window._supabaseClientInitialized = true;
 
-    const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+    const SUPABASE_URL = window.SUPABASE_CONFIG?.url || 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+    const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG?.anonKey || '';
 
     // Initialize Supabase client (use existing or create new)
     // Note: window.supabase comes from the CDN script
@@ -543,8 +543,37 @@
     // ============================================================================
 
     const ContactRequests = {
-        async submit(requestData) {
-            // Note: No .select() - anon users can INSERT but not SELECT
+        /**
+         * Submit a lead via the Turnstile-protected Edge Function.
+         * Falls back to direct insert for authenticated users if Edge Function is unreachable.
+         * @param {object} requestData - The lead data to insert
+         * @param {string} [turnstileToken] - Cloudflare Turnstile token from the DOM widget
+         * @param {string} [table='contact_requests'] - Target table
+         */
+        async submit(requestData, turnstileToken = null, table = 'contact_requests') {
+            // If Turnstile token is provided, route through the Edge Function
+            if (turnstileToken) {
+                const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl ||
+                    'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+
+                const res = await fetch(`${functionsUrl}/submit-lead`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        table: table,
+                        data: requestData,
+                        turnstileToken: turnstileToken
+                    })
+                });
+
+                const result = await res.json();
+                if (!res.ok) {
+                    throw new Error(result.error || 'שגיאה בשליחת הטופס');
+                }
+                return { success: true };
+            }
+
+            // Fallback: direct insert (only works for authenticated users after migration 017)
             const { error } = await supabaseClient
                 .from('contact_requests')
                 .insert(requestData);

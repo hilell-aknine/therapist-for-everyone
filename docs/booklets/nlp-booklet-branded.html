@@ -330,6 +330,133 @@
             color: rgba(255,255,255,0.5);
         }
 
+        /* ===== DIAGRAM CONTAINERS ===== */
+        .diagram-container {
+            margin: 30px 0;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #f8fbfc 0%, #eef5f7 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(0,59,70,0.12);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .diagram-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--gold));
+            border-radius: 16px 16px 0 0;
+        }
+        .diagram-title {
+            font-size: 14pt;
+            font-weight: 700;
+            color: var(--deep-petrol);
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+        .diagram-subtitle {
+            font-size: 10pt;
+            color: #5a7a80;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+        .diagram-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ===== MICRO-LEARNING CALLOUT BOXES ===== */
+        .micro-learning {
+            margin: 25px 0;
+            padding: 24px 28px 24px 28px;
+            background: linear-gradient(135deg, #fffdf5 0%, #fef9e7 100%);
+            border-radius: 14px;
+            border: 1px solid rgba(212,175,55,0.25);
+            border-right: 5px solid var(--gold);
+            position: relative;
+        }
+        .micro-learning::after {
+            content: '⏱ 5 דקות';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: linear-gradient(135deg, var(--gold), #e6c65a);
+            color: var(--deep-petrol);
+            font-size: 9pt;
+            font-weight: 700;
+            padding: 3px 14px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(212,175,55,0.3);
+        }
+        .micro-learning-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-top: 4px;
+        }
+        .micro-learning-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--deep-petrol), var(--muted-teal));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .micro-learning-label {
+            font-size: 12pt;
+            font-weight: 700;
+            color: var(--deep-petrol);
+        }
+        .micro-learning p {
+            font-size: 10.5pt;
+            line-height: 1.7;
+            color: #2a4a50;
+            margin: 6px 0;
+        }
+        .micro-learning ol, .micro-learning ul {
+            padding-right: 20px;
+            margin: 8px 0;
+        }
+        .micro-learning li {
+            font-size: 10.5pt;
+            line-height: 1.8;
+            color: #2a4a50;
+            margin-bottom: 4px;
+        }
+        .micro-learning .exercise-prompt {
+            font-weight: 600;
+            color: var(--deep-petrol);
+        }
+
+        /* ===== DIAGRAM LEGEND ===== */
+        .diagram-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 16px;
+            font-size: 9pt;
+            color: #5a7a80;
+        }
+        .diagram-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .diagram-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
         /* ===== PRINT ===== */
         @media print {
             body { background: #fff; }
@@ -808,6 +935,184 @@
             <p>לשפר את ההחלטות, שלנו ולהשתמש בכוחו של הדמיון כדי ליצור שינוי. חיובי עם כלים כמו</p>
             <p>מודל, התקשורת אנו יכולים להבין טוב יותר את עצמנו ואת הדרך שבה אנו תופסים את</p>
             <p>,העולם וכך להתקדם בצורה אפקטיבית יותר לעבר המטרות. שלנו</p>
+
+            <!-- DIAGRAM: Conscious vs Unconscious Mind - Iceberg -->
+            <div class="diagram-container">
+                <div class="diagram-title">המודע והלא מודע — מודל הקרחון</div>
+                <div class="diagram-subtitle">5% מודע מעל פני השטח, 95% לא מודע מתחת</div>
+                <svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="max-width:540px;">
+                    <defs>
+                        <linearGradient id="iceSky" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#e8f4f8"/>
+                            <stop offset="100%" style="stop-color:#c5e4ed"/>
+                        </linearGradient>
+                        <linearGradient id="iceWater" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#005f6b"/>
+                            <stop offset="100%" style="stop-color:#002b33"/>
+                        </linearGradient>
+                        <linearGradient id="iceTop" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffffff"/>
+                            <stop offset="100%" style="stop-color:#d4eef4"/>
+                        </linearGradient>
+                        <linearGradient id="iceBottom" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8ec5d6"/>
+                            <stop offset="50%" style="stop-color:#5ba3b7"/>
+                            <stop offset="100%" style="stop-color:#2f8592"/>
+                        </linearGradient>
+                        <filter id="iceSh"><feDropShadow dx="2" dy="3" stdDeviation="3" flood-opacity="0.15"/></filter>
+                    </defs>
+                    <!-- Sky background -->
+                    <rect x="0" y="0" width="600" height="120" fill="url(#iceSky)"/>
+                    <!-- Water background -->
+                    <rect x="0" y="120" width="600" height="300" fill="url(#iceWater)"/>
+                    <!-- Water line -->
+                    <line x1="0" y1="120" x2="600" y2="120" stroke="#DFB74B" stroke-width="2.5" stroke-dasharray="8,4"/>
+                    <rect x="230" y="110" width="140" height="20" rx="10" fill="#DFB74B"/>
+                    <text x="300" y="124" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="11">קו המודעות</text>
+                    <!-- Iceberg top (above water) -->
+                    <polygon points="300,25 230,118 370,118" fill="url(#iceTop)" stroke="#a0d2e0" stroke-width="1.5" filter="url(#iceSh)"/>
+                    <!-- Iceberg bottom (below water) -->
+                    <polygon points="230,122 370,122 420,250 380,370 220,370 180,250" fill="url(#iceBottom)" stroke="#4a99ad" stroke-width="1.5" opacity="0.85"/>
+                    <!-- Top label - Conscious -->
+                    <text x="300" y="60" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="14">מודע</text>
+                    <text x="300" y="78" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="400" font-size="10">5-9 פריטים בו-זמנית</text>
+                    <text x="300" y="93" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="400" font-size="10">חשיבה לוגית, החלטות</text>
+                    <!-- Bottom labels - Unconscious -->
+                    <text x="300" y="170" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="800" font-size="16">לא מודע</text>
+                    <text x="300" y="200" text-anchor="middle" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="400" font-size="11">60,000 החלטות אוטומטיות ביום</text>
+                    <text x="300" y="225" text-anchor="middle" fill="#d4eef4" font-family="Heebo,sans-serif" font-weight="600" font-size="10">🔹 זיכרונות ורגשות</text>
+                    <text x="300" y="248" text-anchor="middle" fill="#d4eef4" font-family="Heebo,sans-serif" font-weight="600" font-size="10">🔹 אמונות והרגלים</text>
+                    <text x="300" y="271" text-anchor="middle" fill="#d4eef4" font-family="Heebo,sans-serif" font-weight="600" font-size="10">🔹 תגובות אוטומטיות</text>
+                    <text x="300" y="294" text-anchor="middle" fill="#d4eef4" font-family="Heebo,sans-serif" font-weight="600" font-size="10">🔹 שלושת החוקים:</text>
+                    <text x="300" y="315" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="9">אין הבדל דמיון/מציאות • אין שלילה • ספציפיות = תוצאות</text>
+                    <!-- Percentage labels -->
+                    <text x="505" y="75" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="26">5%</text>
+                    <text x="505" y="250" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="26">95%</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Iceberg -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🧊</div>
+                    <div class="micro-learning-label">תרגול מהיר: גלו את הלא מודע שלכם</div>
+                </div>
+                <p class="exercise-prompt">נסו את ניסוי הלימון המפורסם:</p>
+                <ol>
+                    <li><strong>עצמו עיניים</strong> ודמיינו שאתם מחזיקים לימון צהוב וחמוץ</li>
+                    <li><strong>חתכו אותו בדמיון</strong> — הריחו את הריח, ראו את הטיפות</li>
+                    <li><strong>סחטו טיפה על הלשון</strong> — שימו לב: הפה מתחיל להפריש רוק!</li>
+                </ol>
+                <p>💡 <strong>תובנה:</strong> המוח שלכם הגיב כאילו הלימון אמיתי — זה בדיוק חוק #1 של הלא מודע.</p>
+            </div>
+
+            <!-- DIAGRAM: NLP Communication Model Flowchart -->
+            <div class="diagram-container">
+                <div class="diagram-title">מודל התקשורת של NLP</div>
+                <div class="diagram-subtitle">כיצד אנו קולטים, מסננים ומגיבים למציאות</div>
+                <svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" style="max-width:620px;">
+                    <defs>
+                        <linearGradient id="cmTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#003B46"/>
+                            <stop offset="100%" style="stop-color:#00606B"/>
+                        </linearGradient>
+                        <linearGradient id="cmGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#DFB74B"/>
+                            <stop offset="100%" style="stop-color:#c9a035"/>
+                        </linearGradient>
+                        <linearGradient id="cmNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#142841"/>
+                            <stop offset="100%" style="stop-color:#1e3a5c"/>
+                        </linearGradient>
+                        <filter id="cmSh"><feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-opacity="0.12"/></filter>
+                    </defs>
+
+                    <!-- Step 1: External Reality -->
+                    <rect x="555" y="20" width="130" height="60" rx="12" fill="url(#cmTeal)" filter="url(#cmSh)"/>
+                    <text x="620" y="47" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="13">מציאות</text>
+                    <text x="620" y="65" text-anchor="middle" fill="#fff" font-family="Heebo,sans-serif" font-weight="400" font-size="11">חיצונית</text>
+
+                    <!-- Arrow 1 -->
+                    <line x1="555" y1="50" x2="480" y2="50" stroke="#003B46" stroke-width="2.5" marker-end="url(#arrowCM)"/>
+                    <defs><marker id="arrowCM" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#003B46"/></marker></defs>
+
+                    <!-- Step 2: Five Senses -->
+                    <rect x="340" y="15" width="135" height="70" rx="12" fill="url(#cmNavy)" filter="url(#cmSh)"/>
+                    <text x="407" y="40" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="12">5 חושים</text>
+                    <text x="407" y="58" text-anchor="middle" fill="#ccc" font-family="Heebo,sans-serif" font-weight="400" font-size="9.5">ראייה | שמיעה | מישוש</text>
+                    <text x="407" y="73" text-anchor="middle" fill="#ccc" font-family="Heebo,sans-serif" font-weight="400" font-size="9.5">טעם | ריח</text>
+
+                    <!-- Arrow 2 -->
+                    <line x1="407" y1="85" x2="407" y2="120" stroke="#003B46" stroke-width="2.5" marker-end="url(#arrowCM)"/>
+
+                    <!-- Step 3: Filters (3 boxes) -->
+                    <rect x="50" y="125" width="145" height="55" rx="10" fill="url(#cmGold)" filter="url(#cmSh)"/>
+                    <text x="122" y="150" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="13">השמטות</text>
+                    <text x="122" y="168" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="400" font-size="9">Deletions</text>
+
+                    <rect x="215" y="125" width="145" height="55" rx="10" fill="url(#cmGold)" filter="url(#cmSh)"/>
+                    <text x="287" y="150" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="13">הכללות</text>
+                    <text x="287" y="168" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="400" font-size="9">Generalizations</text>
+
+                    <rect x="380" y="125" width="145" height="55" rx="10" fill="url(#cmGold)" filter="url(#cmSh)"/>
+                    <text x="452" y="150" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="13">עיוותים</text>
+                    <text x="452" y="168" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="400" font-size="9">Distortions</text>
+
+                    <!-- Filter label -->
+                    <rect x="545" y="132" width="100" height="40" rx="8" fill="none" stroke="#DFB74B" stroke-width="1.5" stroke-dasharray="4,3"/>
+                    <text x="595" y="148" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="600" font-size="10">מסננים</text>
+                    <text x="595" y="162" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="600" font-size="10">Filters</text>
+
+                    <!-- Arrow 3 -->
+                    <line x1="287" y1="180" x2="287" y2="220" stroke="#003B46" stroke-width="2.5" marker-end="url(#arrowCM)"/>
+
+                    <!-- Step 4: Internal Map -->
+                    <rect x="195" y="225" width="185" height="55" rx="12" fill="url(#cmNavy)" filter="url(#cmSh)"/>
+                    <text x="287" y="250" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="13">מפה פנימית</text>
+                    <text x="287" y="268" text-anchor="middle" fill="#ccc" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Internal Representation</text>
+
+                    <!-- Arrow 4: splits to two -->
+                    <line x1="230" y1="280" x2="160" y2="315" stroke="#003B46" stroke-width="2" marker-end="url(#arrowCM)"/>
+                    <line x1="345" y1="280" x2="415" y2="315" stroke="#003B46" stroke-width="2" marker-end="url(#arrowCM)"/>
+
+                    <!-- Step 5a: Emotions -->
+                    <rect x="65" y="320" width="140" height="55" rx="12" fill="url(#cmTeal)" filter="url(#cmSh)"/>
+                    <text x="135" y="345" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="13">רגשות</text>
+                    <text x="135" y="363" text-anchor="middle" fill="#fff" font-family="Heebo,sans-serif" font-weight="400" font-size="10">State / Emotions</text>
+
+                    <!-- Step 5b: Physiology -->
+                    <rect x="345" y="320" width="140" height="55" rx="12" fill="url(#cmTeal)" filter="url(#cmSh)"/>
+                    <text x="415" y="345" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="13">פיזיולוגיה</text>
+                    <text x="415" y="363" text-anchor="middle" fill="#fff" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Physiology</text>
+
+                    <!-- Arrow to Behavior -->
+                    <line x1="205" y1="375" x2="250" y2="390" stroke="#003B46" stroke-width="2"/>
+                    <line x1="345" y1="375" x2="300" y2="390" stroke="#003B46" stroke-width="2"/>
+
+                    <!-- Step 6: Behavior -->
+                    <rect x="230" y="375" width="90" height="20" rx="4" fill="#003B46"/>
+                    <text x="275" y="390" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="10">→ התנהגות</text>
+
+                    <!-- Big bracket annotation -->
+                    <text x="660" y="155" text-anchor="middle" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="400" font-size="9" transform="rotate(-90,660,155)">תהליך לא מודע</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Communication Model -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🧠</div>
+                    <div class="micro-learning-label">תרגול מהיר: זהה את המסננים שלך</div>
+                </div>
+                <p class="exercise-prompt">חשבו על אירוע אחד מהשבוע האחרון שעורר בכם תגובה רגשית חזקה:</p>
+                <ol>
+                    <li><strong>מה השמטתי?</strong> האם היו פרטים שהתעלמתי מהם?</li>
+                    <li><strong>מה הכללתי?</strong> האם הסקתי מסקנה רחבה מדי מאירוע בודד?</li>
+                    <li><strong>מה עיוותתי?</strong> האם פירשתי את המצב בצורה שתואמת אמונה קיימת?</li>
+                </ol>
+                <p>💡 <strong>תובנה:</strong> "המפה אינה השטח" — התפיסה שלנו אינה המציאות עצמה.</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -828,6 +1133,77 @@
             <p>הגוף והטונציה, שלנו גם אם הם לא מודעים לכך. בעצמם לעיתים, קרובות הם יגיבו לאותם</p>
             <p>מסרים לא מילוליים יותר מאשר למילים, עצמן ולכן חשוב להיות מודעים למה שהגוף שלנו</p>
             <p>משדר ולוודא שהוא תואם את מה שאנחנו רוצים. להעביר</p>
+            <!-- DIAGRAM: 7-38-55 Communication Rule -->
+            <div class="diagram-container">
+                <div class="diagram-title">כלל 7-38-55 — מהרביאן</div>
+                <div class="diagram-subtitle">חלוקת ההשפעה בתקשורת אנושית</div>
+                <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" style="max-width:540px;">
+                    <defs>
+                        <linearGradient id="rule55" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#003B46"/>
+                            <stop offset="100%" style="stop-color:#005f6b"/>
+                        </linearGradient>
+                        <linearGradient id="rule38" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#DFB74B"/>
+                            <stop offset="100%" style="stop-color:#c9a035"/>
+                        </linearGradient>
+                        <linearGradient id="rule7" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#142841"/>
+                            <stop offset="100%" style="stop-color:#1e3a5c"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Donut chart -->
+                    <g transform="translate(190,160)">
+                        <!-- 55% body language: 0 to 198 degrees -->
+                        <circle r="110" fill="none" stroke="url(#rule55)" stroke-width="50" stroke-dasharray="380.13 311.02" stroke-dashoffset="0" transform="rotate(-90)"/>
+                        <!-- 38% tone: 198 to 334.8 degrees -->
+                        <circle r="110" fill="none" stroke="url(#rule38)" stroke-width="50" stroke-dasharray="262.45 428.7" stroke-dashoffset="-380.13" transform="rotate(-90)"/>
+                        <!-- 7% words: 334.8 to 360 degrees -->
+                        <circle r="110" fill="none" stroke="url(#rule7)" stroke-width="50" stroke-dasharray="48.38 642.77" stroke-dashoffset="-642.58" transform="rotate(-90)"/>
+                        <!-- Center circle -->
+                        <circle r="60" fill="white"/>
+                        <text x="0" y="-8" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="14">תקשורת</text>
+                        <text x="0" y="12" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="400" font-size="10">אנושית</text>
+                    </g>
+                    <!-- Legend cards -->
+                    <g transform="translate(350,50)">
+                        <!-- Body language 55% -->
+                        <rect x="0" y="0" width="220" height="70" rx="12" fill="#003B46"/>
+                        <circle cx="30" cy="35" r="18" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                        <text x="30" y="40" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">55%</text>
+                        <text x="135" y="28" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="14">שפת הגוף</text>
+                        <text x="135" y="50" text-anchor="middle" fill="#a0d2e0" font-family="Heebo,sans-serif" font-weight="400" font-size="10">יציבה, מחוות, הבעות פנים</text>
+                        <!-- Tone 38% -->
+                        <rect x="0" y="85" width="220" height="70" rx="12" fill="#DFB74B"/>
+                        <circle cx="30" cy="120" r="18" fill="none" stroke="#003B46" stroke-width="2"/>
+                        <text x="30" y="125" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="14">38%</text>
+                        <text x="135" y="113" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="14">טונציה</text>
+                        <text x="135" y="135" text-anchor="middle" fill="#5a4a00" font-family="Heebo,sans-serif" font-weight="400" font-size="10">גובה קול, קצב, עוצמה</text>
+                        <!-- Words 7% -->
+                        <rect x="0" y="170" width="220" height="70" rx="12" fill="#142841"/>
+                        <circle cx="30" cy="205" r="18" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                        <text x="30" y="210" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">7%</text>
+                        <text x="135" y="198" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="14">מילים</text>
+                        <text x="135" y="220" text-anchor="middle" fill="#8899aa" font-family="Heebo,sans-serif" font-weight="400" font-size="10">תוכן מילולי בלבד</text>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: 7-38-55 -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🎭</div>
+                    <div class="micro-learning-label">תרגול מהיר: בדקו את ההלימה שלכם</div>
+                </div>
+                <p class="exercise-prompt">בשיחה הבאה שלכם, שימו לב לשלושת הערוצים:</p>
+                <ol>
+                    <li><strong>מילים:</strong> מה אני אומר? (7%)</li>
+                    <li><strong>טון:</strong> איך אני נשמע? האם הטון תואם את המסר? (38%)</li>
+                    <li><strong>גוף:</strong> מה שפת הגוף שלי משדרת? (55%)</li>
+                </ol>
+                <p>💡 <strong>מבחן:</strong> אמרו "אני ממש שמח" בטון עצוב — שימו לב איך אנשים מגיבים לטון ולא למילים!</p>
+            </div>
+
             <h4 class="section-title"><span class="section-num">2.</span> קליברציה וחדות חושים-להבין את התקשורת הלא מילולית:</h4>
             <p>בפרק זה נעמיק בנושאים מרכזיים של עולםה-NLP -קליברציה וחדות. חושים אלו מיומנויות</p>
             <p>שיכולות לשנות את הדרך שבה אנו מתקשרים ומבינים את הסביבה, שלנו ולא פחות חשוב-</p>
@@ -992,6 +1368,80 @@
             <p>יכול לשפר משמעותית את היכולת שלנו, לתקשר ליצור קשרים ולהוביל. אחרים כמו בכל</p>
             <p>מיומנות, אחרת גם כאן התרגול הוא המפתח. להצלחה אז צאו, לדרך שימו לב לשפת, הגוף</p>
             <p>לטונציה ולמילים של האנשים, סביבכם ונסו ליצור את הראפור-כי הקסם מתחיל בחיבור.</p>
+
+            <!-- DIAGRAM: Rapport - Matching & Leading -->
+            <div class="diagram-container">
+                <div class="diagram-title">ראפור — הצטרפות והובלה</div>
+                <div class="diagram-subtitle">שני שלבים ליצירת חיבור עמוק ואמיתי</div>
+                <svg viewBox="0 0 650 300" xmlns="http://www.w3.org/2000/svg" style="max-width:580px;">
+                    <defs>
+                        <linearGradient id="rapTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#003B46"/>
+                            <stop offset="100%" style="stop-color:#00606B"/>
+                        </linearGradient>
+                        <linearGradient id="rapGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#DFB74B"/>
+                            <stop offset="100%" style="stop-color:#c9a035"/>
+                        </linearGradient>
+                        <filter id="rapSh"><feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-opacity="0.12"/></filter>
+                    </defs>
+                    <!-- Phase 1: Matching -->
+                    <rect x="30" y="30" width="240" height="230" rx="16" fill="url(#rapTeal)" filter="url(#rapSh)"/>
+                    <rect x="30" y="30" width="240" height="4" rx="2" fill="#DFB74B"/>
+                    <text x="150" y="68" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="11">שלב 1</text>
+                    <text x="150" y="95" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="800" font-size="18">הצטרפות</text>
+                    <text x="150" y="115" text-anchor="middle" fill="#a0d2e0" font-family="Heebo,sans-serif" font-weight="400" font-size="11">Matching</text>
+                    <line x1="80" y1="128" x2="220" y2="128" stroke="#DFB74B" stroke-width="1" opacity="0.4"/>
+                    <!-- Matching items -->
+                    <circle cx="195" cy="153" r="5" fill="#DFB74B"/>
+                    <text x="185" y="157" text-anchor="end" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="11">שיקוף שפת גוף</text>
+                    <circle cx="195" cy="178" r="5" fill="#DFB74B"/>
+                    <text x="185" y="182" text-anchor="end" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="11">התאמת טונציה</text>
+                    <circle cx="195" cy="203" r="5" fill="#DFB74B"/>
+                    <text x="185" y="207" text-anchor="end" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="11">התאמת קצב נשימה</text>
+                    <circle cx="195" cy="228" r="5" fill="#DFB74B"/>
+                    <text x="185" y="232" text-anchor="end" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="11">שימוש במילים דומות</text>
+                    <!-- Arrow between phases -->
+                    <polygon points="285,145 320,130 320,140 370,140 370,150 320,150 320,160" fill="#DFB74B"/>
+                    <text x="330" y="175" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="9">חיבור</text>
+                    <text x="330" y="188" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="9">נוצר ←</text>
+                    <!-- Phase 2: Leading -->
+                    <rect x="380" y="30" width="240" height="230" rx="16" fill="url(#rapGold)" filter="url(#rapSh)"/>
+                    <rect x="380" y="30" width="240" height="4" rx="2" fill="#003B46"/>
+                    <text x="500" y="68" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="11">שלב 2</text>
+                    <text x="500" y="95" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="18">הובלה</text>
+                    <text x="500" y="115" text-anchor="middle" fill="#5a4a00" font-family="Heebo,sans-serif" font-weight="400" font-size="11">Leading</text>
+                    <line x1="430" y1="128" x2="570" y2="128" stroke="#003B46" stroke-width="1" opacity="0.4"/>
+                    <!-- Leading items -->
+                    <circle cx="545" cy="153" r="5" fill="#003B46"/>
+                    <text x="535" y="157" text-anchor="end" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="600" font-size="11">שינוי תנוחה הדרגתי</text>
+                    <circle cx="545" cy="178" r="5" fill="#003B46"/>
+                    <text x="535" y="182" text-anchor="end" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="600" font-size="11">הרמת אנרגיה</text>
+                    <circle cx="545" cy="203" r="5" fill="#003B46"/>
+                    <text x="535" y="207" text-anchor="end" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="600" font-size="11">כיוון השיחה</text>
+                    <circle cx="545" cy="228" r="5" fill="#003B46"/>
+                    <text x="535" y="232" text-anchor="end" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="600" font-size="11">בדיקה: האם עוקב?</text>
+                    <!-- Bottom principle -->
+                    <rect x="150" y="272" width="350" height="24" rx="12" fill="#003B46"/>
+                    <text x="325" y="289" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">🔑 עיקרון: "דומה מושך דומה" — קודם מצטרפים, אחר כך מובילים</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Rapport -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🤝</div>
+                    <div class="micro-learning-label">תרגול מהיר: יצירת ראפור בשיחה</div>
+                </div>
+                <p class="exercise-prompt">בשיחה הבאה עם חבר או בן משפחה, נסו את התהליך:</p>
+                <ol>
+                    <li><strong>דקה 1 — שיקוף:</strong> שקפו בעדינות את תנוחת הגוף של הצד השני</li>
+                    <li><strong>דקה 2 — התאמה:</strong> התאימו את קצב הדיבור ועוצמת הקול שלכם</li>
+                    <li><strong>דקה 3 — הובלה:</strong> שנו לאט את התנוחה שלכם — האם הצד השני עוקב?</li>
+                </ol>
+                <p>💡 <strong>סימן הצלחה:</strong> אם הצד השני שינה תנוחה בעקבותיכם — יצרתם ראפור חזק!</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -1149,6 +1599,112 @@
             <p>המודל מאפשר לנו להבין שהשינוי אינו בהכרח, ליניארי וניתן להתחיל אותו מכל אחת</p>
             <p>מהרמות בהתאם לצורך שלנו ולנסיבות. החיים המפתח להצלחה הוא הבנה מעמיקה של מה</p>
             <p>מניע, אותנו והיכולת להשתמש במודל כדי ליצור מסלול ברור לשיפור ושינוי. בחיינו</p>
+
+            <!-- DIAGRAM: Dilts' Logical Levels Pyramid -->
+            <div class="diagram-container">
+                <div class="diagram-title">מודל הרמות הלוגיות של דילטס</div>
+                <div class="diagram-subtitle">שינוי מלמעלה למטה = עמוק ומהיר יותר | שינוי מלמטה למעלה = הדרגתי</div>
+                <svg viewBox="0 0 600 520" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;">
+                    <defs>
+                        <linearGradient id="pyGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#DFB74B"/>
+                            <stop offset="100%" style="stop-color:#c9a035"/>
+                        </linearGradient>
+                        <linearGradient id="pyTeal1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#003B46"/>
+                            <stop offset="100%" style="stop-color:#005060"/>
+                        </linearGradient>
+                        <linearGradient id="pyTeal2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#005060"/>
+                            <stop offset="100%" style="stop-color:#00606B"/>
+                        </linearGradient>
+                        <linearGradient id="pyTeal3" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00606B"/>
+                            <stop offset="100%" style="stop-color:#1a7a85"/>
+                        </linearGradient>
+                        <linearGradient id="pyTeal4" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1a7a85"/>
+                            <stop offset="100%" style="stop-color:#2F8592"/>
+                        </linearGradient>
+                        <linearGradient id="pyTeal5" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#2F8592"/>
+                            <stop offset="100%" style="stop-color:#4aa0ad"/>
+                        </linearGradient>
+                        <linearGradient id="pyLight" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4aa0ad"/>
+                            <stop offset="100%" style="stop-color:#6dbac5"/>
+                        </linearGradient>
+                        <filter id="pyShadow">
+                            <feDropShadow dx="3" dy="4" stdDeviation="3" flood-opacity="0.15"/>
+                        </filter>
+                    </defs>
+
+                    <!-- 3D Pyramid - front faces -->
+                    <!-- Level 6 (top): חזון -->
+                    <polygon points="300,30 250,105 350,105" fill="url(#pyGold)" filter="url(#pyShadow)"/>
+                    <polygon points="300,30 350,105 370,95" fill="#c9a035" opacity="0.85"/>
+                    <text x="300" y="82" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="15">חזון</text>
+
+                    <!-- Level 5: זהות -->
+                    <polygon points="250,110 210,185 390,185 350,110" fill="url(#pyTeal1)" filter="url(#pyShadow)"/>
+                    <polygon points="350,110 390,185 415,170" fill="#002A32" opacity="0.75"/>
+                    <text x="300" y="158" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="16">זהות</text>
+
+                    <!-- Level 4: אמונות וערכים -->
+                    <polygon points="210,190 170,265 430,265 390,190" fill="url(#pyTeal2)" filter="url(#pyShadow)"/>
+                    <polygon points="390,190 430,265 460,248" fill="#004a55" opacity="0.75"/>
+                    <text x="300" y="238" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="16">אמונות וערכים</text>
+
+                    <!-- Level 3: מיומנויות -->
+                    <polygon points="170,270 130,345 470,345 430,270" fill="url(#pyTeal3)" filter="url(#pyShadow)"/>
+                    <polygon points="430,270 470,345 505,325" fill="#005c67" opacity="0.75"/>
+                    <text x="300" y="318" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="16">מיומנויות</text>
+
+                    <!-- Level 2: התנהגות -->
+                    <polygon points="130,350 90,425 510,425 470,350" fill="url(#pyTeal4)" filter="url(#pyShadow)"/>
+                    <polygon points="470,350 510,425 548,402" fill="#1a6e78" opacity="0.75"/>
+                    <text x="300" y="398" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="16">התנהגות</text>
+
+                    <!-- Level 1 (base): סביבה -->
+                    <polygon points="90,430 50,505 550,505 510,430" fill="url(#pyTeal5)" filter="url(#pyShadow)"/>
+                    <polygon points="510,430 550,505 590,480" fill="#2a8e9a" opacity="0.75"/>
+                    <text x="300" y="478" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="16">סביבה</text>
+
+                    <!-- Arrows on right side -->
+                    <line x1="575" y1="470" x2="575" y2="90" stroke="#DFB74B" stroke-width="2.5" stroke-dasharray="6,4"/>
+                    <polygon points="575,80 569,100 581,100" fill="#DFB74B"/>
+                    <text x="580" y="280" text-anchor="start" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="11" transform="rotate(-90,580,280)">שינוי מלמטה למעלה ▲</text>
+
+                    <!-- Arrow on left side -->
+                    <line x1="25" y1="90" x2="25" y2="470" stroke="#003B46" stroke-width="2.5" stroke-dasharray="6,4"/>
+                    <polygon points="25,480 19,460 31,460" fill="#003B46"/>
+                    <text x="20" y="280" text-anchor="start" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="11" transform="rotate(90,20,280)">▼ שינוי מלמעלה למטה</text>
+                </svg>
+                <div class="diagram-legend">
+                    <div class="diagram-legend-item"><div class="diagram-legend-dot" style="background:#DFB74B;"></div>רמה גבוהה — שינוי עמוק</div>
+                    <div class="diagram-legend-item"><div class="diagram-legend-dot" style="background:#003B46;"></div>רמות ביניים — אמונות ומיומנויות</div>
+                    <div class="diagram-legend-item"><div class="diagram-legend-dot" style="background:#2F8592;"></div>רמה בסיסית — סביבה והתנהגות</div>
+                </div>
+            </div>
+
+            <!-- MICRO-LEARNING: Logical Levels -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🎯</div>
+                    <div class="micro-learning-label">תרגול מהיר: מיפוי הרמות הלוגיות שלך</div>
+                </div>
+                <p class="exercise-prompt">קחו דף וכתבו תשובה קצרה לכל רמה:</p>
+                <ol>
+                    <li><strong>סביבה:</strong> איפה אני נמצא/ת כרגע בחיים? מה הסביבה שלי?</li>
+                    <li><strong>התנהגות:</strong> מה אני עושה ביום-יום? אילו פעולות חוזרות?</li>
+                    <li><strong>מיומנויות:</strong> מה אני יודע/ת לעשות טוב? מה אני רוצה ללמוד?</li>
+                    <li><strong>אמונות:</strong> מה אני מאמין/ה על עצמי? איזו אמונה מגבילה אותי?</li>
+                    <li><strong>זהות:</strong> מי אני? איך אני מגדיר/ה את עצמי?</li>
+                    <li><strong>חזון:</strong> מה המטרה הגדולה שלי? למה אני כאן?</li>
+                </ol>
+                <p>💡 <strong>טיפ:</strong> זהו את הרמה שבה אתם חשים "תקועים" — שם נמצא המפתח לשינוי.</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -1438,6 +1994,74 @@
             <p>ויסות רגשי חוסר חיבור לאנשים</p>
             <p>הבנת המערכת הכוללת קושי בקבלת החלטות</p>
             <p>מבוססות רגש</p>
+
+            <!-- DIAGRAM: 3 Perceptual Positions -->
+            <div class="diagram-container">
+                <div class="diagram-title">שלוש עמדות התפיסה</div>
+                <div class="diagram-subtitle">שלוש נקודות מבט לפתרון קונפליקטים והבנת מצבים</div>
+                <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" style="max-width:540px;">
+                    <defs>
+                        <filter id="posSh"><feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-opacity="0.12"/></filter>
+                    </defs>
+                    <!-- Triangle connecting lines -->
+                    <line x1="300" y1="55" x2="105" y2="285" stroke="#DFB74B" stroke-width="2" stroke-dasharray="6,3"/>
+                    <line x1="300" y1="55" x2="495" y2="285" stroke="#DFB74B" stroke-width="2" stroke-dasharray="6,3"/>
+                    <line x1="105" y1="285" x2="495" y2="285" stroke="#DFB74B" stroke-width="2" stroke-dasharray="6,3"/>
+                    <!-- Center label -->
+                    <circle cx="300" cy="200" r="38" fill="#DFB74B" opacity="0.15"/>
+                    <text x="300" y="196" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="11">ברייק</text>
+                    <text x="300" y="212" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="11">סטייט</text>
+                    <!-- Position 1 - Top (Self) -->
+                    <circle cx="300" cy="50" r="42" fill="#003B46" filter="url(#posSh)"/>
+                    <circle cx="300" cy="50" r="42" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="300" y="40" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="11">עמדה 1</text>
+                    <text x="300" y="58" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="13">אני</text>
+                    <!-- Position 1 details -->
+                    <rect x="370" y="20" width="150" height="55" rx="10" fill="#f0f8fa" stroke="#003B46" stroke-width="1"/>
+                    <text x="445" y="40" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="9">✅ חיבור לעצמי</text>
+                    <text x="445" y="55" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="9">✅ התמקדות במטרה</text>
+                    <text x="445" y="70" text-anchor="middle" fill="#c0392b" font-family="Heebo,sans-serif" font-weight="600" font-size="9">⚠ הסתכלות צרה</text>
+                    <!-- Position 2 - Bottom Left (Other) -->
+                    <circle cx="105" cy="285" r="42" fill="#142841" filter="url(#posSh)"/>
+                    <circle cx="105" cy="285" r="42" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="105" y="275" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="11">עמדה 2</text>
+                    <text x="105" y="293" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="13">האחר</text>
+                    <!-- Position 2 details -->
+                    <rect x="10" y="335" width="190" height="40" rx="10" fill="#f0f8fa" stroke="#142841" stroke-width="1"/>
+                    <text x="105" y="353" text-anchor="middle" fill="#142841" font-family="Heebo,sans-serif" font-weight="600" font-size="9">✅ אמפתיה | ⚠ ביטול עצמי</text>
+                    <text x="105" y="368" text-anchor="middle" fill="#142841" font-family="Heebo,sans-serif" font-weight="600" font-size="9">נכנסים לנעליים של הצד השני</text>
+                    <!-- Position 3 - Bottom Right (Observer) -->
+                    <circle cx="495" cy="285" r="42" fill="#2F8592" filter="url(#posSh)"/>
+                    <circle cx="495" cy="285" r="42" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="495" y="275" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="11">עמדה 3</text>
+                    <text x="495" y="293" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="13">המציאות</text>
+                    <!-- Position 3 details -->
+                    <rect x="400" y="335" width="190" height="40" rx="10" fill="#f0f8fa" stroke="#2F8592" stroke-width="1"/>
+                    <text x="495" y="353" text-anchor="middle" fill="#2F8592" font-family="Heebo,sans-serif" font-weight="600" font-size="9">✅ אובייקטיביות | ⚠ ניתוק רגשי</text>
+                    <text x="495" y="368" text-anchor="middle" fill="#2F8592" font-family="Heebo,sans-serif" font-weight="600" font-size="9">"זבוב על הקיר" — צופה מהצד</text>
+                    <!-- Arrow labels on triangle edges -->
+                    <text x="185" y="158" text-anchor="middle" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="600" font-size="9" transform="rotate(-52,185,158)">אמפתיה</text>
+                    <text x="415" y="158" text-anchor="middle" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="600" font-size="9" transform="rotate(52,415,158)">אובייקטיביות</text>
+                    <text x="300" y="306" text-anchor="middle" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="600" font-size="9">הבנת המערכת</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Perceptual Positions -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">👁️</div>
+                    <div class="micro-learning-label">תרגול מהיר: טיול בין עמדות</div>
+                </div>
+                <p class="exercise-prompt">חשבו על קונפליקט קטן שחוויתם לאחרונה:</p>
+                <ol>
+                    <li><strong>עמדה 1 (1 דקה):</strong> מה אני מרגיש? מה אני רוצה? מה פוגע בי?</li>
+                    <li><strong>ברייק סטייט:</strong> עצמו עיניים, נשמו עמוק 3 פעמים</li>
+                    <li><strong>עמדה 2 (1 דקה):</strong> מה הצד השני מרגיש? למה הוא פועל ככה?</li>
+                    <li><strong>עמדה 3 (1 דקה):</strong> מה "זבוב על הקיר" היה רואה? מה הפתרון?</li>
+                </ol>
+                <p>💡 <strong>תובנה:</strong> ברוב המקרים, עמדה 3 חושפת פתרון שלא נראה מהעמדות הרגשיות.</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -1846,6 +2470,75 @@
             <p>מודל SMART הוא כלי רב עוצמה להצבת, מטרות שמסייע לנו להגדיר מטרות מדויקות</p>
             <p>,וברורות להבטיח שהן ברות השגה, ורלוונטיות ולתכנן את הדרך להשגתן בזמן. מוגדר בעזרת</p>
             <p>שימוש נכון במודל, זה ניתן להבטיח שהמטרות שלנו יובילו אותנו להצלחה ולצמיחה. אישית</p>
+
+            <!-- DIAGRAM: SMART Model -->
+            <div class="diagram-container">
+                <div class="diagram-title">מודל SMART להצבת מטרות</div>
+                <div class="diagram-subtitle">5 עקרונות למטרה ברורה, ברת השגה ומדידה</div>
+                <svg viewBox="0 0 650 170" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
+                    <defs>
+                        <filter id="smSh"><feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.1"/></filter>
+                    </defs>
+
+                    <!-- S -->
+                    <rect x="10" y="15" width="118" height="140" rx="14" fill="#003B46" filter="url(#smSh)"/>
+                    <circle cx="69" cy="50" r="20" fill="rgba(223,183,75,0.2)" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="69" y="57" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="20">S</text>
+                    <text x="69" y="90" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">ספציפי</text>
+                    <text x="69" y="108" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="8.5">Specific</text>
+                    <text x="69" y="125" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">מה בדיוק רוצים</text>
+                    <text x="69" y="140" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">להשיג?</text>
+
+                    <!-- M -->
+                    <rect x="140" y="15" width="118" height="140" rx="14" fill="#142841" filter="url(#smSh)"/>
+                    <circle cx="199" cy="50" r="20" fill="rgba(223,183,75,0.2)" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="199" y="57" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="20">M</text>
+                    <text x="199" y="90" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">מדיד</text>
+                    <text x="199" y="108" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="8.5">Measurable</text>
+                    <text x="199" y="125" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">איך נדע</text>
+                    <text x="199" y="140" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">שהגענו?</text>
+
+                    <!-- A -->
+                    <rect x="270" y="15" width="118" height="140" rx="14" fill="#003B46" filter="url(#smSh)"/>
+                    <circle cx="329" cy="50" r="20" fill="rgba(223,183,75,0.2)" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="329" y="57" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="20">A</text>
+                    <text x="329" y="90" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">בר השגה</text>
+                    <text x="329" y="108" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="8.5">Achievable</text>
+                    <text x="329" y="125" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">האם זה</text>
+                    <text x="329" y="140" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">ריאלי?</text>
+
+                    <!-- R -->
+                    <rect x="400" y="15" width="118" height="140" rx="14" fill="#142841" filter="url(#smSh)"/>
+                    <circle cx="459" cy="50" r="20" fill="rgba(223,183,75,0.2)" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="459" y="57" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="20">R</text>
+                    <text x="459" y="90" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">רלוונטי</text>
+                    <text x="459" y="108" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="8.5">Relevant</text>
+                    <text x="459" y="125" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">למה זה חשוב</text>
+                    <text x="459" y="140" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">לי?</text>
+
+                    <!-- T -->
+                    <rect x="530" y="15" width="118" height="140" rx="14" fill="#003B46" filter="url(#smSh)"/>
+                    <circle cx="589" cy="50" r="20" fill="rgba(223,183,75,0.2)" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="589" y="57" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="20">T</text>
+                    <text x="589" y="90" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">תחום בזמן</text>
+                    <text x="589" y="108" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="8.5">Time-bound</text>
+                    <text x="589" y="125" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">עד מתי</text>
+                    <text x="589" y="140" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">נשיג?</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: SMART -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🎯</div>
+                    <div class="micro-learning-label">תרגול מהיר: כתבו מטרה SMART</div>
+                </div>
+                <p class="exercise-prompt">קחו מטרה כללית שלכם והפכו אותה ל-SMART:</p>
+                <p>❌ "אני רוצה להיות בריא יותר"</p>
+                <p>✅ "אני רוצה לרוץ 5 ק"מ תוך 30 דקות, 3 פעמים בשבוע, עד סוף חודש יוני"</p>
+                <p>💡 <strong>המטרה שלכם:</strong> ________________________________</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -1900,6 +2593,79 @@
             <p>,פרקטי ולוודא שהתוכנית שלנו ריאלית ועמידה בפני. אתגרים בעזרת המודל ניתן לעבור</p>
             <p>מתהליך של חלום למציאות בצורה מסודרת, וממוקדת ולוודא שהמטרות שלנו יובילו אותנו</p>
             <p>להצלחה. והגשמה</p>
+
+            <!-- DIAGRAM: Walt Disney Model -->
+            <div class="diagram-container">
+                <div class="diagram-title">מודל וולט דיסני — שלושת הסטייטים</div>
+                <div class="diagram-subtitle">"אם אתה יכול לחלום את זה, אתה יכול לעשות את זה"</div>
+                <svg viewBox="0 0 600 310" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;">
+                    <defs>
+                        <filter id="diSh"><feDropShadow dx="2" dy="3" stdDeviation="3" flood-opacity="0.12"/></filter>
+                        <marker id="arrDi" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                            <polygon points="0,0 10,3.5 0,7" fill="#DFB74B"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Phase 1: Dreamer -->
+                    <rect x="30" y="50" width="160" height="200" rx="16" fill="#003B46" filter="url(#diSh)"/>
+                    <rect x="30" y="50" width="160" height="4" rx="2" fill="#DFB74B"/>
+                    <circle cx="110" cy="105" r="32" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="110" y="113" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="26">💭</text>
+                    <text x="110" y="158" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="16">החולם</text>
+                    <text x="110" y="178" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Dreamer</text>
+                    <text x="110" y="200" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">הכל אפשרי!</text>
+                    <text x="110" y="216" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">חלומות ללא</text>
+                    <text x="110" y="232" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">מגבלות</text>
+
+                    <!-- Arrow 1→2 -->
+                    <line x1="190" y1="150" x2="215" y2="150" stroke="#DFB74B" stroke-width="2.5" marker-end="url(#arrDi)"/>
+
+                    <!-- Phase 2: Planner -->
+                    <rect x="220" y="50" width="160" height="200" rx="16" fill="#142841" filter="url(#diSh)"/>
+                    <rect x="220" y="50" width="160" height="4" rx="2" fill="#DFB74B"/>
+                    <circle cx="300" cy="105" r="32" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="300" y="113" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="26">📋</text>
+                    <text x="300" y="158" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="16">המתכנן</text>
+                    <text x="300" y="178" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Planner</text>
+                    <text x="300" y="200" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">איך מגשימים?</text>
+                    <text x="300" y="216" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">שלבים, לוחות</text>
+                    <text x="300" y="232" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">זמנים, משאבים</text>
+
+                    <!-- Arrow 2→3 -->
+                    <line x1="380" y1="150" x2="405" y2="150" stroke="#DFB74B" stroke-width="2.5" marker-end="url(#arrDi)"/>
+
+                    <!-- Phase 3: Critic -->
+                    <rect x="410" y="50" width="160" height="200" rx="16" fill="#003B46" filter="url(#diSh)"/>
+                    <rect x="410" y="50" width="160" height="4" rx="2" fill="#DFB74B"/>
+                    <circle cx="490" cy="105" r="32" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="490" y="113" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="26">🔍</text>
+                    <text x="490" y="158" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="16">הביקורתי</text>
+                    <text x="490" y="178" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Critic</text>
+                    <text x="490" y="200" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">מה יכול להשתבש?</text>
+                    <text x="490" y="216" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">בדיקת סיכונים</text>
+                    <text x="490" y="232" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">ופערים</text>
+
+                    <!-- Return arrow (cycle) -->
+                    <path d="M490,260 C490,290 110,290 110,260" stroke="#DFB74B" stroke-width="2" fill="none" stroke-dasharray="6,3" marker-end="url(#arrDi)"/>
+                    <text x="300" y="295" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="600" font-size="10">חזרה לדיוק ← חולם → מתכנן → ביקורתי</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Disney -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🏰</div>
+                    <div class="micro-learning-label">תרגול מהיר: שלושת הכובעים של דיסני</div>
+                </div>
+                <p class="exercise-prompt">חשבו על מטרה אחת שאתם רוצים להשיג. עברו על כל שלב:</p>
+                <ol>
+                    <li><strong>כובע החולם (2 דקות):</strong> תארו את החלום בצבעים — איך זה ייראה כשתגיעו לשם?</li>
+                    <li><strong>כובע המתכנן (2 דקות):</strong> מה הצעדים הראשונים? מה צריך ללמוד? מי יכול לעזור?</li>
+                    <li><strong>כובע הביקורתי (1 דקה):</strong> מה יכול להשתבש? מה הפתרון לכל מכשול?</li>
+                </ol>
+                <p>💡 <strong>כלל חשוב:</strong> אסור לערבב כובעים! כשאתם חולמים — אל תבקרו. כשאתם מבקרים — אל תחלמו.</p>
+            </div>
+
         </div>
     </div>
     <div class="lesson-divider">
@@ -1966,6 +2732,63 @@
             <p>הבנת השפה של המוח מאפשרת לנו לקחת שליטה על התהליכים הלא, מודעים לשנות דפוסים</p>
             <p>,שליליים וליצור הרגלים חיוביים שמקדמים. אותנו המפתח הוא לזהות את הטריגרים ולפעול</p>
             <p>לשינוי התבניות לפני שהן מתפתחות לדפוסים שליליים עמוקים. יותר</p>
+
+            <!-- DIAGRAM: Habit Loop -->
+            <div class="diagram-container">
+                <div class="diagram-title">לולאת ההרגלים — טריגר, פעולה, תגמול</div>
+                <div class="diagram-subtitle">כל הרגל הוא לולאה שאפשר לשנות</div>
+                <svg viewBox="0 0 500 340" xmlns="http://www.w3.org/2000/svg" style="max-width:460px;">
+                    <defs>
+                        <filter id="habSh"><feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-opacity="0.12"/></filter>
+                    </defs>
+                    <!-- Circular arrows (the loop) -->
+                    <path d="M 250,60 A 130,130 0 0,1 370,215" fill="none" stroke="#DFB74B" stroke-width="3" stroke-dasharray="8,4"/>
+                    <path d="M 360,225 A 130,130 0 0,1 140,225" fill="none" stroke="#DFB74B" stroke-width="3" stroke-dasharray="8,4"/>
+                    <path d="M 130,215 A 130,130 0 0,1 250,60" fill="none" stroke="#DFB74B" stroke-width="3" stroke-dasharray="8,4"/>
+                    <!-- Arrowheads -->
+                    <polygon points="370,220 380,205 360,210" fill="#DFB74B"/>
+                    <polygon points="135,220 125,205 145,210" fill="#DFB74B"/>
+                    <polygon points="250,55 240,70 260,70" fill="#DFB74B"/>
+                    <!-- Node 1: Trigger -->
+                    <circle cx="250" cy="42" r="40" fill="#003B46" filter="url(#habSh)"/>
+                    <circle cx="250" cy="42" r="40" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="250" y="35" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="10">⚡</text>
+                    <text x="250" y="52" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="13">טריגר</text>
+                    <!-- Node 2: Action -->
+                    <circle cx="385" cy="240" r="40" fill="#142841" filter="url(#habSh)"/>
+                    <circle cx="385" cy="240" r="40" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="385" y="233" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="10">🔄</text>
+                    <text x="385" y="250" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="13">פעולה</text>
+                    <!-- Node 3: Reward -->
+                    <circle cx="115" cy="240" r="40" fill="#DFB74B" filter="url(#habSh)"/>
+                    <circle cx="115" cy="240" r="40" fill="none" stroke="#003B46" stroke-width="2"/>
+                    <text x="115" y="233" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="10">🏆</text>
+                    <text x="115" y="250" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="13">תגמול</text>
+                    <!-- Center text -->
+                    <text x="250" y="170" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="12">לולאת</text>
+                    <text x="250" y="188" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="12">ההרגל</text>
+                    <!-- Example at bottom -->
+                    <rect x="70" y="296" width="360" height="34" rx="10" fill="#f0f8fa" stroke="#003B46" stroke-width="1"/>
+                    <text x="250" y="318" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="10">📌 דוגמה: שעמום (טריגר) → אכילה (פעולה) → נוחות (תגמול)</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Habit Loop -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🔄</div>
+                    <div class="micro-learning-label">תרגול מהיר: פרקו הרגל אחד</div>
+                </div>
+                <p class="exercise-prompt">בחרו הרגל אחד שתרצו לשנות ומלאו:</p>
+                <ol>
+                    <li><strong>מה הטריגר?</strong> מה בדיוק מתחיל את הלולאה? (רגש? זמן? מקום?)</li>
+                    <li><strong>מה הפעולה?</strong> מה אני עושה אוטומטית?</li>
+                    <li><strong>מה התגמול?</strong> מה הרגש שאני מקבל מזה?</li>
+                    <li><strong>החלפה:</strong> איזו פעולה אחרת תיתן אותו תגמול?</li>
+                </ol>
+                <p>💡 <strong>המפתח:</strong> "הרגו את המפלצת כשהיא קטנה" — תפסו את הטריגר לפני שהלולאה מתחילה.</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -2072,6 +2895,77 @@
             <p>ייצוג עיקרית שמשפיעה על הדרך שבה הוא, לומד מתקשר ומבין את. העולם על ידי הבנת</p>
             <p>מערכות הייצוג של עצמנו ושל, אחרים נוכל לשפר את היכולת שלנו, לתקשר, להבין</p>
             <p>ולהתחבר לאחרים בצורה עמוקה. יותר</p>
+
+            <!-- DIAGRAM: VAK Representation Systems -->
+            <div class="diagram-container">
+                <div class="diagram-title">מערכות ייצוג — VAK</div>
+                <div class="diagram-subtitle">התפלגות מערכות הייצוג באוכלוסייה</div>
+                <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;">
+                    <defs>
+                        <filter id="vakSh"><feDropShadow dx="2" dy="3" stdDeviation="3" flood-opacity="0.12"/></filter>
+                    </defs>
+
+                    <!-- Donut chart -->
+                    <!-- Visual 40% = 144deg (starts at top, goes clockwise) -->
+                    <circle cx="200" cy="160" r="110" fill="none" stroke="#003B46" stroke-width="45"
+                        stroke-dasharray="276.46 414.69" stroke-dashoffset="173" filter="url(#vakSh)"/>
+                    <!-- Auditory 20% = 72deg -->
+                    <circle cx="200" cy="160" r="110" fill="none" stroke="#DFB74B" stroke-width="45"
+                        stroke-dasharray="138.23 552.92" stroke-dashoffset="-103.46"/>
+                    <!-- Kinesthetic 40% = 144deg -->
+                    <circle cx="200" cy="160" r="110" fill="none" stroke="#2F8592" stroke-width="45"
+                        stroke-dasharray="276.46 414.69" stroke-dashoffset="-241.69"/>
+
+                    <!-- Center circle -->
+                    <circle cx="200" cy="160" r="70" fill="#fff"/>
+                    <text x="200" y="152" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="16">VAK</text>
+                    <text x="200" y="175" text-anchor="middle" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="400" font-size="10">מערכות ייצוג</text>
+
+                    <!-- Labels right side -->
+                    <!-- Visual -->
+                    <rect x="355" y="55" width="220" height="65" rx="12" fill="#f0f7f8" stroke="#003B46" stroke-width="1.5" filter="url(#vakSh)"/>
+                    <circle cx="545" cy="87" r="22" fill="#003B46"/>
+                    <text x="545" y="84" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">40%</text>
+                    <text x="545" y="99" text-anchor="middle" fill="#fff" font-family="Heebo,sans-serif" font-weight="400" font-size="8">V</text>
+                    <text x="520" y="77" text-anchor="end" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="13">ויזואלי 👁</text>
+                    <text x="520" y="97" text-anchor="end" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="400" font-size="9.5">"אני רואה מה אתה אומר"</text>
+                    <text x="520" y="112" text-anchor="end" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="400" font-size="9">תמונות, צבעים, דימויים</text>
+
+                    <!-- Auditory -->
+                    <rect x="355" y="135" width="220" height="65" rx="12" fill="#fefbf0" stroke="#DFB74B" stroke-width="1.5" filter="url(#vakSh)"/>
+                    <circle cx="545" cy="167" r="22" fill="#DFB74B"/>
+                    <text x="545" y="164" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="14">20%</text>
+                    <text x="545" y="179" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="400" font-size="8">A</text>
+                    <text x="520" y="157" text-anchor="end" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="13">אודיטורי 👂</text>
+                    <text x="520" y="177" text-anchor="end" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="400" font-size="9.5">"זה נשמע לי הגיוני"</text>
+                    <text x="520" y="192" text-anchor="end" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="400" font-size="9">קולות, צלילים, שפה</text>
+
+                    <!-- Kinesthetic -->
+                    <rect x="355" y="215" width="220" height="65" rx="12" fill="#f0f7f8" stroke="#2F8592" stroke-width="1.5" filter="url(#vakSh)"/>
+                    <circle cx="545" cy="247" r="22" fill="#2F8592"/>
+                    <text x="545" y="244" text-anchor="middle" fill="#fff" font-family="Heebo,sans-serif" font-weight="800" font-size="14">40%</text>
+                    <text x="545" y="259" text-anchor="middle" fill="#d0ecf0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">K</text>
+                    <text x="520" y="237" text-anchor="end" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="13">קינסתטי ✋</text>
+                    <text x="520" y="257" text-anchor="end" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="400" font-size="9.5">"אני מרגיש שזה נכון"</text>
+                    <text x="520" y="272" text-anchor="end" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="400" font-size="9">תחושות, מגע, רגשות</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: VAK -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">👁</div>
+                    <div class="micro-learning-label">תרגול מהיר: גלה את מערכת הייצוג שלך</div>
+                </div>
+                <p class="exercise-prompt">עצמו עיניים ודמיינו חוף ים. מה הדבר הראשון שעלה?</p>
+                <ul>
+                    <li>ראיתי תמונה של הים והשקיעה? → <strong>ויזואלי</strong></li>
+                    <li>שמעתי קול הגלים והרוח? → <strong>אודיטורי</strong></li>
+                    <li>הרגשתי את החול בין האצבעות? → <strong>קינסתטי</strong></li>
+                </ul>
+                <p>💡 <strong>יישום:</strong> בפגישה הבאה, שימו לב לשפה שהאדם שמולכם משתמש בה — "אני רואה", "זה נשמע" או "אני מרגיש" — והתאימו את השפה שלכם בהתאם.</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -2194,6 +3088,77 @@
             <p>העולם ואת הרגשות. שלנו על ידי שינוי, הסמ"דים אנחנו יכולים לשנות את החוויה הרגשית</p>
             <p>שלנו ולהשפיע על התחושות שלנו בצורה. משמעותית זהו אחד הכלים המרכזיים בשיטת</p>
             <p>ה-NLP ,שמאפשר לנו להשיג שליטה רבה יותר על חוויותינו ועל עוצמת הרגשות שאנו. חווים</p>
+
+            <!-- DIAGRAM: Submodalities Matrix -->
+            <div class="diagram-container">
+                <div class="diagram-title">סמ"דים — שפת המוח הפנימית</div>
+                <div class="diagram-subtitle">המרכיבים הדקים שמשנים את עוצמת החוויה הרגשית</div>
+                <svg viewBox="0 0 650 320" xmlns="http://www.w3.org/2000/svg" style="max-width:590px;">
+                    <defs>
+                        <filter id="subSh"><feDropShadow dx="2" dy="3" stdDeviation="2" flood-opacity="0.1"/></filter>
+                    </defs>
+                    <!-- Column 1: Visual -->
+                    <rect x="20" y="10" width="195" height="300" rx="14" fill="#003B46" filter="url(#subSh)"/>
+                    <rect x="20" y="10" width="195" height="4" rx="2" fill="#DFB74B"/>
+                    <circle cx="117" cy="48" r="22" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="117" y="46" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="16">👁</text>
+                    <text x="117" y="88" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">ויזואלי</text>
+                    <text x="117" y="105" text-anchor="middle" fill="#a0d2e0" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Visual</text>
+                    <line x1="50" y1="115" x2="185" y2="115" stroke="#DFB74B" stroke-width="0.5" opacity="0.3"/>
+                    <text x="117" y="138" text-anchor="middle" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="10">גודל • מרחק • בהירות</text>
+                    <text x="117" y="160" text-anchor="middle" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="10">מיקום • צבע • מסגור</text>
+                    <text x="117" y="182" text-anchor="middle" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="10">פוקוס • 2D/3D</text>
+                    <line x1="50" y1="198" x2="185" y2="198" stroke="#DFB74B" stroke-width="0.5" opacity="0.3"/>
+                    <text x="117" y="220" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="9">ניסוי: הגדילו תמונה</text>
+                    <text x="117" y="238" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="9">בראש → הרגש מתחזק</text>
+                    <text x="117" y="256" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="9">הקטינו → הרגש נחלש</text>
+                    <!-- Column 2: Auditory -->
+                    <rect x="228" y="10" width="195" height="300" rx="14" fill="#DFB74B" filter="url(#subSh)"/>
+                    <rect x="228" y="10" width="195" height="4" rx="2" fill="#003B46"/>
+                    <circle cx="325" cy="48" r="22" fill="none" stroke="#003B46" stroke-width="2"/>
+                    <text x="325" y="46" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="16">👂</text>
+                    <text x="325" y="88" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="14">אודיטורי</text>
+                    <text x="325" y="105" text-anchor="middle" fill="#5a4a00" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Auditory</text>
+                    <line x1="258" y1="115" x2="393" y2="115" stroke="#003B46" stroke-width="0.5" opacity="0.3"/>
+                    <text x="325" y="138" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="600" font-size="10">ווליום • קצב • טון</text>
+                    <text x="325" y="160" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="600" font-size="10">מיקום • סטריאו/מונו</text>
+                    <line x1="258" y1="178" x2="393" y2="178" stroke="#003B46" stroke-width="0.5" opacity="0.3"/>
+                    <text x="325" y="200" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="9">ניסוי: שנו קול פנימי</text>
+                    <text x="325" y="218" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="9">שלילי לקול של</text>
+                    <text x="325" y="236" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="9">יובל המבולבל 🎭</text>
+                    <!-- Column 3: Kinesthetic -->
+                    <rect x="436" y="10" width="195" height="300" rx="14" fill="#142841" filter="url(#subSh)"/>
+                    <rect x="436" y="10" width="195" height="4" rx="2" fill="#DFB74B"/>
+                    <circle cx="533" cy="48" r="22" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="533" y="46" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="16">✋</text>
+                    <text x="533" y="88" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">קינסתטי</text>
+                    <text x="533" y="105" text-anchor="middle" fill="#8899aa" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Kinesthetic</text>
+                    <line x1="466" y1="115" x2="601" y2="115" stroke="#DFB74B" stroke-width="0.5" opacity="0.3"/>
+                    <text x="533" y="138" text-anchor="middle" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="10">מיקום בגוף • גודל</text>
+                    <text x="533" y="160" text-anchor="middle" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="10">מרקם • תנועה • עוצמה</text>
+                    <text x="533" y="182" text-anchor="middle" fill="#e0f0f5" font-family="Heebo,sans-serif" font-weight="600" font-size="10">טמפרטורה • צבע</text>
+                    <line x1="466" y1="198" x2="601" y2="198" stroke="#DFB74B" stroke-width="0.5" opacity="0.3"/>
+                    <text x="533" y="220" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="9">ניסוי: הזיזו תחושה</text>
+                    <text x="533" y="238" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="9">מבטן → כף רגל</text>
+                    <text x="533" y="256" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="9">ושימו לב לשינוי</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Submodalities -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🎛️</div>
+                    <div class="micro-learning-label">תרגול מהיר: שנו סמ"ד אחד</div>
+                </div>
+                <p class="exercise-prompt">חשבו על זיכרון שלילי קל ונסו:</p>
+                <ol>
+                    <li><strong>ויזואלי:</strong> הקטינו את התמונה בראש, הפכו אותה לשחור-לבן, הרחיקו אותה</li>
+                    <li><strong>אודיטורי:</strong> שנו את הקול הפנימי לקול מצחיק או איטי מאוד</li>
+                    <li><strong>קינסתטי:</strong> הזיזו את התחושה ממרכז הגוף לקצות האצבעות</li>
+                </ol>
+                <p>💡 <strong>תוצאה:</strong> שימו לב — עוצמת הרגש השלילי נחלשת! זו השפה של המוח.</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -2291,6 +3256,66 @@
             <p>לנו לשלוט בצורה ישירה יותר על התחושות והמחשבות, שלנו ולבצע שינויים עמוקים</p>
             <p>בהרגלים. ובהתנהגויות הטכניקות הללו מדגימות עד כמה המוח שלנו גמיש וכיצד ניתן לנצל</p>
             <p>את היכולת הזו כדי לשפר את. חיינו</p>
+
+            <!-- DIAGRAM: Swish Pattern -->
+            <div class="diagram-container">
+                <div class="diagram-title">טכניקת סוויש — החלפת דימויים</div>
+                <div class="diagram-subtitle">החלפה מהירה של תמונה לא רצויה בתמונה אידיאלית</div>
+                <svg viewBox="0 0 650 280" xmlns="http://www.w3.org/2000/svg" style="max-width:590px;">
+                    <defs>
+                        <filter id="swSh"><feDropShadow dx="2" dy="3" stdDeviation="2" flood-opacity="0.1"/></filter>
+                    </defs>
+                    <!-- Step 1: Unwanted image (big) -->
+                    <rect x="30" y="30" width="180" height="140" rx="14" fill="#8B3A3A" filter="url(#swSh)"/>
+                    <rect x="30" y="30" width="180" height="4" rx="2" fill="#c0392b"/>
+                    <text x="120" y="70" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="800" font-size="30">😰</text>
+                    <text x="120" y="100" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="13">תמונה לא רצויה</text>
+                    <text x="120" y="120" text-anchor="middle" fill="#e0b0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="10">גדולה, בהירה, צבעונית</text>
+                    <text x="120" y="138" text-anchor="middle" fill="#e0b0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="10">קרובה, מלא מסך</text>
+                    <!-- Small desired in corner of step 1 -->
+                    <rect x="155" y="120" width="50" height="42" rx="6" fill="#27ae60" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="180" y="140" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="800" font-size="10">😊</text>
+                    <text x="180" y="155" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="600" font-size="6">קטנה בפינה</text>
+                    <!-- SWISH arrow -->
+                    <g transform="translate(240,80)">
+                        <rect x="0" y="0" width="170" height="50" rx="25" fill="#DFB74B" filter="url(#swSh)"/>
+                        <text x="85" y="22" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="900" font-size="18">⚡ סוויש! ⚡</text>
+                        <text x="85" y="40" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="9">החלפה מהירה וחזקה</text>
+                    </g>
+                    <!-- Step 2: Desired image (big) -->
+                    <rect x="440" y="30" width="180" height="140" rx="14" fill="#1e8449" filter="url(#swSh)"/>
+                    <rect x="440" y="30" width="180" height="4" rx="2" fill="#DFB74B"/>
+                    <text x="530" y="70" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="800" font-size="30">😊</text>
+                    <text x="530" y="100" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="13">תמונה אידיאלית</text>
+                    <text x="530" y="120" text-anchor="middle" fill="#a0e0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="10">גדולה, בהירה, צבעונית</text>
+                    <text x="530" y="138" text-anchor="middle" fill="#a0e0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="10">קרובה, ברורה</text>
+                    <!-- Faded old image in corner -->
+                    <rect x="445" y="120" width="40" height="35" rx="6" fill="#8B3A3A" opacity="0.3"/>
+                    <text x="465" y="140" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="800" font-size="8" opacity="0.5">😰</text>
+                    <!-- Bottom: Repeat instruction -->
+                    <rect x="100" y="195" width="450" height="70" rx="14" fill="#003B46"/>
+                    <text x="325" y="218" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="12">חזרו על התהליך 5-7 פעמים</text>
+                    <text x="325" y="240" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="400" font-size="10">1. דמיינו תמונה לא רצויה גדולה, עם התמונה הרצויה קטנה בפינה</text>
+                    <text x="325" y="256" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="400" font-size="10">2. בבת אחת: הלא רצויה מתכווצת ← הרצויה מתפוצצת למסך מלא!</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Swish -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">⚡</div>
+                    <div class="micro-learning-label">תרגול מהיר: סוויש על הרגל קטן</div>
+                </div>
+                <p class="exercise-prompt">בחרו הרגל קטן (כמו בדיקת טלפון בבוקר) ונסו:</p>
+                <ol>
+                    <li><strong>תמונה 1:</strong> דמיינו בגדול את הרגע שאתם בודקים את הטלפון (צבעוני, גדול, קרוב)</li>
+                    <li><strong>תמונה 2:</strong> דמיינו בקטן בפינה: אתם קמים עם חיוך, עושים מתיחות, מלאי אנרגיה</li>
+                    <li><strong>סוויש!:</strong> בבת אחת — תמונה 1 מתנפצת, תמונה 2 עולה בגדול ובבהירות!</li>
+                    <li><strong>חזרו 5 פעמים</strong> — בין כל חזרה, עצמו עיניים ופתחו (ברייק סטייט)</li>
+                </ol>
+                <p>💡 <strong>מבחן הצלחה:</strong> אחרי 5 חזרות, נסו לדמיין את תמונה 1 — אם היא מטושטשת, הצלחתם!</p>
+            </div>
+
         </div>
     </div>
     <div class="lesson-divider">
@@ -2447,6 +3472,96 @@
             <p>מסוימות ולמצוא דרכים יצירתיות ואפקטיביות למלא את הצרכים שלנו ושל האנשים. סביבנו</p>
             <p>באמצעות מודל, זה ניתן לשפר את איכות, החיים לפתח קשרים משמעותיים, יותר ולחוות</p>
             <p>תחושת מימוש עצמי. ואושר</p>
+
+            <!-- DIAGRAM: Six Human Needs -->
+            <div class="diagram-container">
+                <div class="diagram-title">מודל ששת הצרכים — טוני רובינס</div>
+                <div class="diagram-subtitle">4 צרכים הישרדותיים + 2 צרכים רוחניים</div>
+                <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" style="max-width:540px;">
+                    <defs>
+                        <filter id="needSh"><feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-opacity="0.12"/></filter>
+                    </defs>
+
+                    <!-- Survival needs row (4 boxes) -->
+                    <text x="300" y="25" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="12">צרכים הישרדותיים</text>
+                    <line x1="140" y1="32" x2="460" y2="32" stroke="#003B46" stroke-width="1" opacity="0.3"/>
+
+                    <!-- Need 1: ביטחון -->
+                    <rect x="15" y="45" width="130" height="120" rx="14" fill="#003B46" filter="url(#needSh)"/>
+                    <circle cx="80" cy="80" r="22" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="80" y="86" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="18">🛡</text>
+                    <text x="80" y="117" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="12">ביטחון</text>
+                    <text x="80" y="135" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">וודאות, יציבות</text>
+                    <text x="80" y="150" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">ומוגנות</text>
+
+                    <!-- Need 2: גיוון -->
+                    <rect x="160" y="45" width="130" height="120" rx="14" fill="#142841" filter="url(#needSh)"/>
+                    <circle cx="225" cy="80" r="22" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="225" y="86" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="18">🎲</text>
+                    <text x="225" y="117" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="12">גיוון</text>
+                    <text x="225" y="135" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">חוסר ודאות</text>
+                    <text x="225" y="150" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">והרפתקאות</text>
+
+                    <!-- Need 3: אהבה -->
+                    <rect x="305" y="45" width="130" height="120" rx="14" fill="#003B46" filter="url(#needSh)"/>
+                    <circle cx="370" cy="80" r="22" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="370" y="86" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="18">❤</text>
+                    <text x="370" y="117" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="12">אהבה ושייכות</text>
+                    <text x="370" y="135" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">חיבור, קהילה</text>
+                    <text x="370" y="150" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">ומשפחה</text>
+
+                    <!-- Need 4: מיוחדות -->
+                    <rect x="450" y="45" width="130" height="120" rx="14" fill="#142841" filter="url(#needSh)"/>
+                    <circle cx="515" cy="80" r="22" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="515" y="86" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="18">⭐</text>
+                    <text x="515" y="117" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="12">מיוחדות</text>
+                    <text x="515" y="135" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">משמעות וייחוד</text>
+                    <text x="515" y="150" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">בעולם</text>
+
+                    <!-- Divider -->
+                    <line x1="50" y1="190" x2="550" y2="190" stroke="#DFB74B" stroke-width="2" stroke-dasharray="8,4"/>
+                    <rect x="230" y="180" width="140" height="22" rx="11" fill="#fff"/>
+                    <text x="300" y="195" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="10">▲ הישרדותיים | רוחניים ▼</text>
+
+                    <!-- Spiritual needs (2 wider boxes) -->
+                    <text x="300" y="225" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="700" font-size="12">צרכים רוחניים</text>
+
+                    <!-- Need 5: צמיחה -->
+                    <rect x="80" y="240" width="195" height="110" rx="14" fill="url(#cmGold)" filter="url(#needSh)"/>
+                    <circle cx="177" cy="275" r="24" fill="rgba(0,59,70,0.15)" stroke="#003B46" stroke-width="1.5"/>
+                    <text x="177" y="282" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-size="20">🌱</text>
+                    <text x="177" y="310" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="14">צמיחה</text>
+                    <text x="177" y="330" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="400" font-size="10">התפתחות, למידה</text>
+                    <text x="177" y="345" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="400" font-size="10">ומימוש עצמי</text>
+
+                    <!-- Need 6: נתינה -->
+                    <rect x="320" y="240" width="195" height="110" rx="14" fill="url(#cmGold)" filter="url(#needSh)"/>
+                    <circle cx="417" cy="275" r="24" fill="rgba(0,59,70,0.15)" stroke="#003B46" stroke-width="1.5"/>
+                    <text x="417" y="282" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-size="20">🤝</text>
+                    <text x="417" y="310" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="14">נתינה ותרומה</text>
+                    <text x="417" y="330" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="400" font-size="10">עזרה לאחרים</text>
+                    <text x="417" y="345" text-anchor="middle" fill="#3a2a00" font-family="Heebo,sans-serif" font-weight="400" font-size="10">והותרת חותם</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Needs -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">💡</div>
+                    <div class="micro-learning-label">תרגול מהיר: מה מניע אותך?</div>
+                </div>
+                <p class="exercise-prompt">דרגו כל צורך מ-1 (נמוך) עד 10 (גבוה) — מה הצורך הדומיננטי שלכם?</p>
+                <ol>
+                    <li>ביטחון וודאות: ___/10</li>
+                    <li>גיוון והרפתקאות: ___/10</li>
+                    <li>אהבה ושייכות: ___/10</li>
+                    <li>מיוחדות ומשמעות: ___/10</li>
+                    <li>צמיחה: ___/10</li>
+                    <li>נתינה ותרומה: ___/10</li>
+                </ol>
+                <p>💡 <strong>תובנה:</strong> שני הצרכים הגבוהים ביותר הם המניעים המרכזיים של ההתנהגות שלכם.</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -2727,6 +3842,64 @@
             <p>והכוונה החיובית בכל, התנהגות ולהפוך את הקושי להזדמנות לצמיחה והתפתחות. אישית</p>
             <p>באמצעות, ריפריימינג אנו יכולים לשנות אמונות ישנות ולהתמודד עם אתגרים בצורה</p>
             <p>אפקטיבית ומעצימה. יותר</p>
+
+            <!-- DIAGRAM: Reframing -->
+            <div class="diagram-container">
+                <div class="diagram-title">ריפריימינג — שינוי מסגרת</div>
+                <div class="diagram-subtitle">שני סוגי ריפריים: שינוי משמעות ושינוי הקשר</div>
+                <svg viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;">
+                    <defs>
+                        <filter id="rfSh"><feDropShadow dx="2" dy="2" stdDeviation="2" flood-opacity="0.1"/></filter>
+                        <marker id="arrRf" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0,0 8,3 0,6" fill="#DFB74B"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Original statement -->
+                    <rect x="220" y="15" width="180" height="50" rx="12" fill="#8b2020" filter="url(#rfSh)"/>
+                    <text x="310" y="37" text-anchor="middle" fill="#fff" font-family="Heebo,sans-serif" font-weight="700" font-size="12">"אני בכיין"</text>
+                    <text x="310" y="55" text-anchor="middle" fill="#ffcccc" font-family="Heebo,sans-serif" font-weight="400" font-size="9">אמירה שלילית</text>
+
+                    <!-- Split arrows -->
+                    <line x1="260" y1="65" x2="150" y2="105" stroke="#DFB74B" stroke-width="2" marker-end="url(#arrRf)"/>
+                    <line x1="360" y1="65" x2="470" y2="105" stroke="#DFB74B" stroke-width="2" marker-end="url(#arrRf)"/>
+
+                    <!-- Meaning Reframe -->
+                    <rect x="25" y="110" width="250" height="130" rx="14" fill="#003B46" filter="url(#rfSh)"/>
+                    <rect x="25" y="110" width="250" height="4" rx="2" fill="#DFB74B"/>
+                    <text x="150" y="140" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="13">ריפריים של משמעות</text>
+                    <text x="150" y="160" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Meaning Reframe</text>
+                    <line x1="55" y1="170" x2="245" y2="170" stroke="#2F8592" stroke-width="1" opacity="0.3"/>
+                    <text x="150" y="192" text-anchor="middle" fill="#3fb950" font-family="Heebo,sans-serif" font-weight="700" font-size="12">"אתה רגיש ובעל</text>
+                    <text x="150" y="210" text-anchor="middle" fill="#3fb950" font-family="Heebo,sans-serif" font-weight="700" font-size="12">אינטליגנציה רגשית גבוהה"</text>
+                    <text x="150" y="232" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">↑ שינוי הפרשנות של ההתנהגות</text>
+
+                    <!-- Context Reframe -->
+                    <rect x="345" y="110" width="250" height="130" rx="14" fill="#142841" filter="url(#rfSh)"/>
+                    <rect x="345" y="110" width="250" height="4" rx="2" fill="#DFB74B"/>
+                    <text x="470" y="140" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="13">ריפריים של הקשר</text>
+                    <text x="470" y="160" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="10">Context Reframe</text>
+                    <line x1="375" y1="170" x2="565" y2="170" stroke="#2F8592" stroke-width="1" opacity="0.3"/>
+                    <text x="470" y="192" text-anchor="middle" fill="#3fb950" font-family="Heebo,sans-serif" font-weight="700" font-size="12">"זו הדרך שלך לפרוק רגשות</text>
+                    <text x="470" y="210" text-anchor="middle" fill="#3fb950" font-family="Heebo,sans-serif" font-weight="700" font-size="12">ולתת לאחרים לשתף"</text>
+                    <text x="470" y="232" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="9">↑ מציאת הקשר חיובי להתנהגות</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Reframing -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🖼</div>
+                    <div class="micro-learning-label">תרגול מהיר: שנה את המסגרת</div>
+                </div>
+                <p class="exercise-prompt">קחו תכונה שלכם שאתם רואים כ"שלילית" ותרגלו את שני סוגי הריפריים:</p>
+                <ol>
+                    <li><strong>האמירה שלי:</strong> "אני ______" (למשל: עקשן, ביישן, שתלטן)</li>
+                    <li><strong>ריפריים משמעות:</strong> "אני בעצם ______" (הפכו לתכונה חיובית)</li>
+                    <li><strong>ריפריים הקשר:</strong> "במצב של ______ זה בעצם יתרון כי ______"</li>
+                </ol>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -2883,6 +4056,73 @@
             <p>,זקופים, חייכו והפעילו את. הגוף, בנוסף השתדלו לשים לב למילים שבהן אתם משתמשים</p>
             <p>לתיאור התחושות, שלכם ולבחור במילים שמעצימות. אתכם התנסו בשינוי קטן זה במשך</p>
             <p>שבוע וראו כיצד הוא משפיע על הסטייט היומיומי. שלכם</p>
+
+            <!-- DIAGRAM: State - 3 Parameters Triangle -->
+            <div class="diagram-container">
+                <div class="diagram-title">סטייט — שלושה פרמטרים</div>
+                <div class="diagram-subtitle">שלושה מנופים שמשנים את המצב הרגשי שלנו</div>
+                <svg viewBox="0 0 550 380" xmlns="http://www.w3.org/2000/svg" style="max-width:500px;">
+                    <defs>
+                        <filter id="stSh"><feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-opacity="0.12"/></filter>
+                        <linearGradient id="stCenter" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#DFB74B"/>
+                            <stop offset="100%" style="stop-color:#c9a035"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Triangle lines -->
+                    <polygon points="275,40 80,310 470,310" fill="none" stroke="#DFB74B" stroke-width="2" stroke-dasharray="6,3"/>
+                    <!-- Center: STATE -->
+                    <circle cx="275" cy="215" r="50" fill="url(#stCenter)" filter="url(#stSh)"/>
+                    <circle cx="275" cy="215" r="50" fill="none" stroke="#003B46" stroke-width="2"/>
+                    <text x="275" y="208" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="900" font-size="16">סטייט</text>
+                    <text x="275" y="228" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="10">מצב רגשי</text>
+                    <!-- Vertex 1: Physiology (top) -->
+                    <circle cx="275" cy="40" r="38" fill="#003B46" filter="url(#stSh)"/>
+                    <circle cx="275" cy="40" r="38" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="275" y="35" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="18">🏋️</text>
+                    <text x="275" y="54" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="11">פיזיולוגיה</text>
+                    <!-- Physiology details -->
+                    <rect x="350" y="15" width="170" height="50" rx="10" fill="#f0f8fa" stroke="#003B46" stroke-width="1"/>
+                    <text x="435" y="35" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="9">יציבה, שפת גוף, נשימה</text>
+                    <text x="435" y="52" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="9">💪 עמידת סופרמן = ביטחון</text>
+                    <!-- Vertex 2: Focus (bottom left) -->
+                    <circle cx="80" cy="310" r="38" fill="#003B46" filter="url(#stSh)"/>
+                    <circle cx="80" cy="310" r="38" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="80" y="305" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="18">🎯</text>
+                    <text x="80" y="324" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="11">פוקוס</text>
+                    <!-- Focus details -->
+                    <rect x="10" y="356" width="190" height="22" rx="8" fill="#f0f8fa" stroke="#003B46" stroke-width="1"/>
+                    <text x="105" y="372" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="9">על מה אני שם את תשומת הלב?</text>
+                    <!-- Vertex 3: Meaning (bottom right) -->
+                    <circle cx="470" cy="310" r="38" fill="#003B46" filter="url(#stSh)"/>
+                    <circle cx="470" cy="310" r="38" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="470" y="305" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="18">💬</text>
+                    <text x="470" y="324" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="11">משמעות</text>
+                    <!-- Meaning details -->
+                    <rect x="350" y="356" width="190" height="22" rx="8" fill="#f0f8fa" stroke="#003B46" stroke-width="1"/>
+                    <text x="445" y="372" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="9">איזה סיפור אני מספר לעצמי?</text>
+                    <!-- Edge labels -->
+                    <text x="168" y="168" text-anchor="middle" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="600" font-size="9" transform="rotate(-55,168,168)">תנועה → מיקוד</text>
+                    <text x="382" y="168" text-anchor="middle" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="600" font-size="9" transform="rotate(55,382,168)">עמידה → פרשנות</text>
+                    <text x="275" y="330" text-anchor="middle" fill="#5a7a80" font-family="Heebo,sans-serif" font-weight="600" font-size="9">שנה אחד → הכל משתנה</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: State -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">⚡</div>
+                    <div class="micro-learning-label">תרגול מהיר: שנו סטייט ב-60 שניות</div>
+                </div>
+                <p class="exercise-prompt">כשאתם מרגישים "למטה", שנו פרמטר אחד:</p>
+                <ol>
+                    <li><strong>פיזיולוגיה (20 שניות):</strong> קומו, עמדו זקוף, חייכו, הכו באוויר 3 פעמים!</li>
+                    <li><strong>פוקוס (20 שניות):</strong> חשבו על 3 דברים שאתם אסירי תודה עליהם</li>
+                    <li><strong>משמעות (20 שניות):</strong> החליפו "למה זה קורה לי?" ב-"מה אני לומד מזה?"</li>
+                </ol>
+                <p>💡 <strong>כלל הזהב:</strong> "החיים לא קורים לי — הם קורים עבורי."</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -2981,6 +4221,86 @@
             <p>עוגנים הם כלי עוצמתי שמאפשר לנו להפעיל רגשות חיוביים או להיכנס לסטייט מתאים בכל</p>
             <p>רגע. שנרצה בעזרת טכניקה, זו אפשר לשפר את היכולת שלנו להתמודד עם אתגרים ולשמור</p>
             <p>על מצב רגשי חיובי לאורך. זמן</p>
+
+            <!-- DIAGRAM: Anchoring Process -->
+            <div class="diagram-container">
+                <div class="diagram-title">תהליך יצירת עוגן — 4 שלבים</div>
+                <div class="diagram-subtitle">מבוסס על ניסוי פבלוב: גירוי → תגובה → קיבוע</div>
+                <svg viewBox="0 0 650 200" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
+                    <defs>
+                        <filter id="anSh"><feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.1"/></filter>
+                        <marker id="arrAn" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0,0 8,3 0,6" fill="#DFB74B"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Step 1 -->
+                    <rect x="10" y="25" width="140" height="150" rx="14" fill="#003B46" filter="url(#anSh)"/>
+                    <circle cx="80" cy="62" r="22" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="80" y="50" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">1</text>
+                    <text x="80" y="72" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="14">💫</text>
+                    <text x="80" y="100" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">בחרו זיכרון</text>
+                    <text x="80" y="118" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">זיכרון חזק ו"נקי"</text>
+                    <text x="80" y="134" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">עם רגש חיובי</text>
+                    <text x="80" y="150" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">(אומץ, שמחה, הצלחה)</text>
+
+                    <!-- Arrow -->
+                    <line x1="150" y1="100" x2="170" y2="100" stroke="#DFB74B" stroke-width="2.5" marker-end="url(#arrAn)"/>
+
+                    <!-- Step 2 -->
+                    <rect x="175" y="25" width="140" height="150" rx="14" fill="#142841" filter="url(#anSh)"/>
+                    <circle cx="245" cy="62" r="22" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="245" y="50" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">2</text>
+                    <text x="245" y="72" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="14">🎬</text>
+                    <text x="245" y="100" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">היכנסו לרגש</text>
+                    <text x="245" y="118" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">דמיינו את הזיכרון</text>
+                    <text x="245" y="134" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">בכל החושים</text>
+                    <text x="245" y="150" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">(ראו, שמעו, הרגישו)</text>
+
+                    <!-- Arrow -->
+                    <line x1="315" y1="100" x2="335" y2="100" stroke="#DFB74B" stroke-width="2.5" marker-end="url(#arrAn)"/>
+
+                    <!-- Step 3 -->
+                    <rect x="340" y="25" width="140" height="150" rx="14" fill="#003B46" filter="url(#anSh)"/>
+                    <circle cx="410" cy="62" r="22" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="410" y="50" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">3</text>
+                    <text x="410" y="72" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="14">⚓</text>
+                    <text x="410" y="100" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">קבעו עוגן</text>
+                    <text x="410" y="118" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">בשיא הרגש —</text>
+                    <text x="410" y="134" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">בצעו פעולה פיזית</text>
+                    <text x="410" y="150" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">(לחיצת אגרוף, מגע ביד)</text>
+
+                    <!-- Arrow -->
+                    <line x1="480" y1="100" x2="500" y2="100" stroke="#DFB74B" stroke-width="2.5" marker-end="url(#arrAn)"/>
+
+                    <!-- Step 4 -->
+                    <rect x="505" y="25" width="140" height="150" rx="14" fill="#142841" filter="url(#anSh)"/>
+                    <circle cx="575" cy="62" r="22" fill="rgba(223,183,75,0.15)" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="575" y="50" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">4</text>
+                    <text x="575" y="72" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-size="14">🔁</text>
+                    <text x="575" y="100" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="11">חזרו וחזקו</text>
+                    <text x="575" y="118" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">חזרו על התהליך</text>
+                    <text x="575" y="134" text-anchor="middle" fill="#8bb" font-family="Heebo,sans-serif" font-weight="400" font-size="9">3-5 פעמים</text>
+                    <text x="575" y="150" text-anchor="middle" fill="#6a9aa0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">(לחיזוק הקשר)</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Anchoring -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">⚓</div>
+                    <div class="micro-learning-label">תרגול מהיר: צרו עוגן ביטחון</div>
+                </div>
+                <p class="exercise-prompt">עקבו אחר 4 הצעדים ליצירת עוגן ביטחון אישי:</p>
+                <ol>
+                    <li>עצמו עיניים ונשמו עמוק 3 פעמים</li>
+                    <li>חשבו על רגע שבו הרגשתם ביטחון עצמי מלא — חיו אותו מחדש</li>
+                    <li>כשהרגש בשיאו — לחצו אגרוף חזק ביד ימין למשך 5 שניות</li>
+                    <li>שחררו, ופתחו עיניים. חזרו עוד 3 פעמים</li>
+                </ol>
+                <p>💡 <strong>שימוש:</strong> לפני הרצאה, ראיון עבודה או כל מצב מאתגר — לחצו את האגרוף ותרגישו את הביטחון חוזר!</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -3364,6 +4684,84 @@
             <p>מספרים. לעצמנו כדי לשבור אמונה, מגבילה יש ליצור מוטיבציה חזקה, לשינוי לערער את</p>
             <p>הבסיס של, האמונה לבסס אמונה חדשה ולבסוף לפעול על. פיה רק דרך פעולה נוכל לחזק</p>
             <p>אמונה חדשה ולשחרר את עצמנו מהמגבלות הפנימיות שמנעו מאיתנו. להתקדם</p>
+
+            <!-- DIAGRAM: 5 Steps to Break Limiting Beliefs -->
+            <div class="diagram-container">
+                <div class="diagram-title">חמישה שלבים לשבירת אמונה מגבילה</div>
+                <div class="diagram-subtitle">מסלול עלייה: מזיהוי האמונה ועד ביסוס אמונה חדשה</div>
+                <svg viewBox="0 0 650 330" xmlns="http://www.w3.org/2000/svg" style="max-width:590px;">
+                    <defs>
+                        <filter id="beSh"><feDropShadow dx="2" dy="3" stdDeviation="2" flood-opacity="0.1"/></filter>
+                        <linearGradient id="beStair" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#8B3A3A"/>
+                            <stop offset="50%" style="stop-color:#003B46"/>
+                            <stop offset="100%" style="stop-color:#1e8449"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Staircase line -->
+                    <polyline points="50,280 50,240 165,240 165,195 290,195 290,150 415,150 415,105 540,105 540,50 620,50" fill="none" stroke="#DFB74B" stroke-width="3"/>
+                    <!-- Step 1: Pain -->
+                    <rect x="15" y="242" width="120" height="68" rx="12" fill="#8B3A3A" filter="url(#beSh)"/>
+                    <circle cx="40" cy="260" r="12" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="40" y="265" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="12">1</text>
+                    <text x="90" y="265" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="10">מוטיבציית כאב</text>
+                    <text x="75" y="285" text-anchor="middle" fill="#e0b0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">כמה האמונה פוגעת?</text>
+                    <text x="75" y="300" text-anchor="middle" fill="#e0b0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">מה המחיר שאני משלם?</text>
+                    <!-- Step 2: Pleasure -->
+                    <rect x="135" y="197" width="126" height="68" rx="12" fill="#6B3A3A" filter="url(#beSh)"/>
+                    <circle cx="160" cy="215" r="12" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="160" y="220" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="12">2</text>
+                    <text x="212" y="220" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="10">מוטיבציית עונג</text>
+                    <text x="198" y="240" text-anchor="middle" fill="#d0a0a0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">איך החיים ייראו בלעדיה?</text>
+                    <text x="198" y="255" text-anchor="middle" fill="#d0a0a0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">מה יהיה אפשרי?</text>
+                    <!-- Step 3: Challenge -->
+                    <rect x="260" y="152" width="126" height="68" rx="12" fill="#003B46" filter="url(#beSh)"/>
+                    <circle cx="285" cy="170" r="12" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="285" y="175" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="12">3</text>
+                    <text x="337" y="175" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="10">ערעור האמונה</text>
+                    <text x="323" y="195" text-anchor="middle" fill="#a0d2e0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">מצאו הוכחות נגד!</text>
+                    <text x="323" y="210" text-anchor="middle" fill="#a0d2e0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">מתי דווקא הצלחתם?</text>
+                    <!-- Step 4: New belief -->
+                    <rect x="385" y="107" width="126" height="68" rx="12" fill="#146641" filter="url(#beSh)"/>
+                    <circle cx="410" cy="125" r="12" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="410" y="130" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="12">4</text>
+                    <text x="462" y="130" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="10">ביסוס אמונה חדשה</text>
+                    <text x="448" y="150" text-anchor="middle" fill="#a0e0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">מצאו הוכחות בעד!</text>
+                    <text x="448" y="165" text-anchor="middle" fill="#a0e0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">חפשו אפילו דוגמאות קטנות</text>
+                    <!-- Step 5: Action -->
+                    <rect x="510" y="52" width="126" height="68" rx="12" fill="#1e8449" filter="url(#beSh)"/>
+                    <rect x="510" y="52" width="126" height="4" rx="2" fill="#DFB74B"/>
+                    <circle cx="535" cy="75" r="12" fill="none" stroke="#DFB74B" stroke-width="2"/>
+                    <text x="535" y="80" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="12">5</text>
+                    <text x="587" y="80" text-anchor="middle" fill="#ffffff" font-family="Heebo,sans-serif" font-weight="700" font-size="10">פעולה!</text>
+                    <text x="573" y="100" text-anchor="middle" fill="#a0e0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">עשו צעד אחד קטן</text>
+                    <text x="573" y="112" text-anchor="middle" fill="#a0e0b0" font-family="Heebo,sans-serif" font-weight="400" font-size="8">שמאמת את האמונה החדשה</text>
+                    <!-- Bottom: Before/After -->
+                    <rect x="30" y="318" width="180" height="8" rx="4" fill="#8B3A3A"/>
+                    <text x="120" y="315" text-anchor="middle" fill="#8B3A3A" font-family="Heebo,sans-serif" font-weight="700" font-size="9">❌ "אני לא מספיק טוב"</text>
+                    <text x="325" y="318" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="800" font-size="14">→</text>
+                    <rect x="440" y="318" width="180" height="8" rx="4" fill="#1e8449"/>
+                    <text x="530" y="315" text-anchor="middle" fill="#1e8449" font-family="Heebo,sans-serif" font-weight="700" font-size="9">✅ "אני מסוגל ללמוד ולהצליח"</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Breaking Beliefs -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">🔨</div>
+                    <div class="micro-learning-label">תרגול מהיר: שברו אמונה אחת</div>
+                </div>
+                <p class="exercise-prompt">בחרו אמונה מגבילה אחת שמלווה אתכם ועברו על 5 השלבים:</p>
+                <ol>
+                    <li><strong>כאב:</strong> כתבו 3 דרכים שהאמונה הזו פגעה בכם השנה</li>
+                    <li><strong>עונג:</strong> דמיינו: איך ייראו החיים ב-5 שנים בלי האמונה הזו?</li>
+                    <li><strong>ערעור:</strong> מצאו 3 רגעים שבהם דווקא הצלחתם (גם קטנים!)</li>
+                    <li><strong>חיזוק:</strong> כתבו את האמונה החדשה במילה אחת: "אני ______"</li>
+                    <li><strong>פעולה:</strong> מה הצעד הקטן ביותר שתעשו מחר בבוקר?</li>
+                </ol>
+                <p>💡 <strong>זכרו:</strong> רק דרך פעולה — אפילו קטנה — אמונה חדשה מתחזקת ונהפכת לאמת.</p>
+            </div>
+
         </div>
     </div>
     <div class="chapter">
@@ -3414,6 +4812,84 @@
             <p>ולשנות את הפרשנות, שלהם ובכך לשחרר אמונות מגבילות ולהשפיע באופן חיובי על. חיינו</p>
             <p>שינוי המשמעות של זיכרונות מהעבר יכול להיות כלי רב עוצמה לשיפור החוויה הרגשית</p>
             <p>שלנו ולהעצמת היכולת שלנו להתמודד עם האתגרים בהווה. ובעתיד</p>
+
+            <!-- DIAGRAM: Timeline -->
+            <div class="diagram-container">
+                <div class="diagram-title">טכניקת ציר הזמן — NLP Timeline</div>
+                <div class="diagram-subtitle">הזיכרון מאורגן לפי רגשות, לא לפי תאריכים</div>
+                <svg viewBox="0 0 650 230" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
+                    <defs>
+                        <filter id="tlSh"><feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.1"/></filter>
+                        <marker id="arrTl" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                            <polygon points="0,0 10,3.5 0,7" fill="#003B46"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Main timeline line -->
+                    <line x1="60" y1="110" x2="590" y2="110" stroke="#003B46" stroke-width="3" marker-end="url(#arrTl)"/>
+
+                    <!-- Past zone -->
+                    <rect x="40" y="85" width="180" height="50" rx="6" fill="rgba(139,32,32,0.08)" stroke="#8b2020" stroke-width="1" stroke-dasharray="4,3"/>
+                    <text x="130" y="78" text-anchor="middle" fill="#8b2020" font-family="Heebo,sans-serif" font-weight="700" font-size="12">עבר</text>
+
+                    <!-- Present zone -->
+                    <rect x="250" y="85" width="120" height="50" rx="6" fill="rgba(223,183,75,0.12)" stroke="#DFB74B" stroke-width="1.5"/>
+                    <text x="310" y="78" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="700" font-size="12">הווה</text>
+
+                    <!-- Future zone -->
+                    <rect x="400" y="85" width="180" height="50" rx="6" fill="rgba(63,185,80,0.08)" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,3"/>
+                    <text x="490" y="78" text-anchor="middle" fill="#3fb950" font-family="Heebo,sans-serif" font-weight="700" font-size="12">עתיד</text>
+
+                    <!-- Past event dot -->
+                    <circle cx="100" cy="110" r="10" fill="#8b2020" filter="url(#tlSh)"/>
+                    <text x="100" y="114" text-anchor="middle" fill="#fff" font-family="Heebo,sans-serif" font-weight="700" font-size="9">!</text>
+                    <text x="100" y="160" text-anchor="middle" fill="#8b2020" font-family="Heebo,sans-serif" font-weight="600" font-size="9">אירוע מקורי</text>
+                    <text x="100" y="175" text-anchor="middle" fill="#8b2020" font-family="Heebo,sans-serif" font-weight="400" font-size="8">(אמונה מגבילה</text>
+                    <text x="100" y="188" text-anchor="middle" fill="#8b2020" font-family="Heebo,sans-serif" font-weight="400" font-size="8">נוצרה כאן)</text>
+
+                    <!-- Regression arrow -->
+                    <path d="M310,90 C310,30 100,30 100,85" stroke="#DFB74B" stroke-width="2" fill="none" stroke-dasharray="6,3"/>
+                    <text x="205" y="28" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="600" font-size="10">רגרסיה ←</text>
+
+                    <!-- Present dot -->
+                    <circle cx="310" cy="110" r="12" fill="#DFB74B" filter="url(#tlSh)"/>
+                    <text x="310" y="114" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="800" font-size="10">⬤</text>
+                    <text x="310" y="160" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="600" font-size="9">גירוי בהווה</text>
+                    <text x="310" y="175" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="400" font-size="8">(מפעיל את</text>
+                    <text x="310" y="188" text-anchor="middle" fill="#003B46" font-family="Heebo,sans-serif" font-weight="400" font-size="8">הזיכרון הישן)</text>
+
+                    <!-- Reframe arrow -->
+                    <path d="M100,95 C100,50 180,10 310,50" stroke="#3fb950" stroke-width="2.5" fill="none"/>
+                    <text x="195" y="52" text-anchor="middle" fill="#3fb950" font-family="Heebo,sans-serif" font-weight="700" font-size="10">→ שינוי פרשנות</text>
+
+                    <!-- Future dot -->
+                    <circle cx="490" cy="110" r="10" fill="#3fb950" filter="url(#tlSh)"/>
+                    <text x="490" y="114" text-anchor="middle" fill="#fff" font-family="Heebo,sans-serif" font-weight="700" font-size="10">✓</text>
+                    <text x="490" y="160" text-anchor="middle" fill="#3fb950" font-family="Heebo,sans-serif" font-weight="600" font-size="9">חוויה משוחררת</text>
+                    <text x="490" y="175" text-anchor="middle" fill="#3fb950" font-family="Heebo,sans-serif" font-weight="400" font-size="8">(פרשנות חדשה</text>
+                    <text x="490" y="188" text-anchor="middle" fill="#3fb950" font-family="Heebo,sans-serif" font-weight="400" font-size="8">ומעצימה)</text>
+
+                    <!-- Process label -->
+                    <rect x="160" y="205" width="330" height="22" rx="6" fill="#003B46"/>
+                    <text x="325" y="220" text-anchor="middle" fill="#DFB74B" font-family="Heebo,sans-serif" font-weight="600" font-size="10">חזרה לאירוע → שינוי משמעות → שחרור האמונה המגבילה</text>
+                </svg>
+            </div>
+
+            <!-- MICRO-LEARNING: Timeline -->
+            <div class="micro-learning">
+                <div class="micro-learning-header">
+                    <div class="micro-learning-icon">⏰</div>
+                    <div class="micro-learning-label">תרגול מהיר: זהה דפוס חוזר</div>
+                </div>
+                <p class="exercise-prompt">חשבו על תגובה רגשית חזקה שחוזרת אצלכם:</p>
+                <ol>
+                    <li><strong>זהו את הגירוי:</strong> מה בדיוק גורם לתגובה? (ביקורת? דחייה? לחץ?)</li>
+                    <li><strong>חזרו לאחור:</strong> מתי הפעם הראשונה שחוויתם תגובה דומה? מה קרה?</li>
+                    <li><strong>שאלו:</strong> "מה הייתי אומר היום לעצמי הקטן/ה באותו רגע?"</li>
+                </ol>
+                <p>💡 <strong>עיקרון מפתח:</strong> המוח לא מבדיל בין זיכרון למציאות — שינוי הפרשנות של העבר משנה את החוויה בהווה.</p>
+            </div>
+
         </div>
     </div>
 

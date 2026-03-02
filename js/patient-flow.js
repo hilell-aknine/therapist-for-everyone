@@ -5,9 +5,9 @@
 (function() {
     'use strict';
 
-    // Email notification configuration
-    const SUPABASE_FUNCTIONS_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw';
+    // Email notification configuration — reads from centralized supabase-config.js
+    const SUPABASE_FUNCTIONS_URL = window.SUPABASE_CONFIG?.functionsUrl || 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+    const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG?.anonKey || '';
     const ADMIN_DASHBOARD_URL = 'https://www.therapist-home.com/pages/admin.html';
 
     // Send admin notification for new patient registration
@@ -174,6 +174,21 @@
         form.addEventListener('submit', handleFormSubmit);
     }
 
+    /**
+     * Get the Turnstile token from the page widget.
+     * Returns null if no widget exists (e.g., authenticated flow).
+     */
+    function getTurnstileToken() {
+        // turnstile global is injected by the Cloudflare script
+        if (typeof turnstile !== 'undefined') {
+            const widget = document.querySelector('.cf-turnstile');
+            if (widget) {
+                return turnstile.getResponse(widget);
+            }
+        }
+        return null;
+    }
+
     async function handleFormSubmit(e) {
         e.preventDefault();
 
@@ -198,7 +213,7 @@
             const user = window.AuthGuard ? await AuthGuard.getCurrentUser() : null;
 
             if (user) {
-                // Logged in user - save to patients table
+                // Logged in user - save to patients table (direct insert, auth required by RLS)
                 await insertPatientRecord(user.id, formData);
                 await updateProfileRole(user.id, 'patient');
                 await updateProfileDetails(user.id, formData);
@@ -211,8 +226,14 @@
                     window.location.href = 'patient-dashboard.html';
                 }, 2000);
             } else {
-                // Anonymous user - save as lead to contact_requests
-                await insertContactRequest(formData);
+                // Anonymous user — must pass Turnstile verification
+                const turnstileToken = getTurnstileToken();
+                if (!turnstileToken) {
+                    throw new Error('אנא אשר שאתה לא רובוט');
+                }
+
+                // Route through the Turnstile-protected Edge Function
+                await insertContactRequest(formData, turnstileToken);
 
                 // Send admin notification (background)
                 sendAdminNotification(formData);
@@ -228,6 +249,12 @@
             showToast(error.message || 'שגיאה בשליחת הטופס', 'error');
             submitBtn.classList.remove('loading');
             submitBtn.disabled = false;
+
+            // Reset Turnstile widget so user can retry
+            if (typeof turnstile !== 'undefined') {
+                const widget = document.querySelector('.cf-turnstile');
+                if (widget) turnstile.reset(widget);
+            }
         }
     }
 
@@ -309,9 +336,9 @@
     // Database Operations
     // ============================================================================
 
-    // Insert anonymous patient to patients table + contact_requests for CRM
-    async function insertContactRequest(formData) {
-        // Save to patients table
+    // Insert anonymous patient via Turnstile-protected Edge Function
+    async function insertContactRequest(formData, turnstileToken) {
+        // Save to patients table via Edge Function
         const patientData = {
             full_name: formData.full_name,
             phone: formData.phone,
@@ -321,14 +348,7 @@
             status: 'new'
         };
 
-        const { error } = await window.supabaseClient
-            .from('patients')
-            .insert(patientData);
-
-        if (error) {
-            console.error('Error inserting patient:', error);
-            throw new Error('שגיאה בשמירת הפרטים');
-        }
+        await window.ContactRequests.submit(patientData, turnstileToken, 'patients');
 
         // Also save to contact_requests so CRM bot can track leads
         try {
@@ -341,12 +361,12 @@
                 message: formData.main_concern,
                 request_type: 'patient',
                 status: 'new'
-            });
+            }, turnstileToken, 'contact_requests');
         } catch (e) {
             console.warn('Could not save to contact_requests:', e);
         }
 
-        console.log('Anonymous patient created + lead saved');
+        console.log('Anonymous patient created + lead saved (via Edge Function)');
         return { success: true };
     }
 

@@ -87,9 +87,7 @@ class SoundManager {
 // ═══════════════════════════════════════
 class GeminiMentor {
     constructor() {
-        this.apiKey = 'AIzaSyDGVrc0sqFrsx7k5UZmMbNKZ6An813KEBw';
-        this.model = 'gemini-2.0-flash';
-        this.endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+        this.endpoint = `${window.SUPABASE_CONFIG?.url || 'https://eimcudmlfjlyxjyrdcgc.supabase.co'}/functions/v1/gemini-mentor`;
         this.systemPrompt = `אתה רם, מנטור NLP חם, מעודד וידידותי במשחק לימודי בעברית.
 הנחיות:
 - דבר בעברית בלבד, בגובה העיניים, בגוף שני (את/ה)
@@ -112,24 +110,25 @@ class GeminiMentor {
             }
             messages.push({ role: 'user', parts: [{ text: userMessage }] });
 
+            const anonKey = window.SUPABASE_CONFIG?.anonKey || '';
             const res = await fetch(this.endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': anonKey,
+                    'Authorization': `Bearer ${anonKey}`
+                },
                 body: JSON.stringify({
-                    contents: messages,
-                    generationConfig: {
-                        temperature: 0.8,
-                        maxOutputTokens: 200,
-                        topP: 0.9
-                    }
+                    messages,
+                    systemPrompt: this.systemPrompt
                 })
             });
 
             if (!res.ok) return null;
             const data = await res.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+            return data.text || null;
         } catch (e) {
-            console.warn('Gemini API error:', e);
+            console.warn('Gemini Mentor error:', e);
             return null;
         }
     }

@@ -831,7 +831,49 @@
             .utm-config-delete { grid-column: 3; }
             .utm-config-meta-pill { grid-column: 2; justify-self: start; }
             .utm-config-add-grid { grid-template-columns: 1fr; }
+            .auto-config-card { grid-template-columns: 44px 1fr; gap: 0.5rem; }
         }
+
+        /* Automation Config Manager */
+        .auto-config-category { margin-bottom: 1.2rem; }
+        .auto-config-category-header {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.6rem 0; font-weight: 700; font-size: 0.88rem;
+            color: var(--gold); border-bottom: 1px solid var(--border); margin-bottom: 0.5rem;
+        }
+        .auto-config-card {
+            display: grid; grid-template-columns: 44px 1fr auto;
+            align-items: start; gap: 0.8rem;
+            padding: 0.8rem 0; border-bottom: 1px solid var(--border);
+        }
+        .auto-config-card:last-child { border-bottom: none; }
+        .auto-config-card.disabled { opacity: 0.45; }
+        .auto-config-card-body { display: flex; flex-direction: column; gap: 0.15rem; }
+        .auto-config-card-title {
+            font-weight: 700; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .auto-config-card-title i { color: var(--gold); font-size: 0.85rem; width: 20px; text-align: center; }
+        .auto-config-card-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; }
+        .auto-config-schedule-pill {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem;
+            border-radius: 8px; background: rgba(47,133,146,0.12);
+            color: var(--dusty-aqua, #2F8592); margin-top: 0.3rem; width: fit-content;
+        }
+        .auto-config-params {
+            margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.6rem;
+        }
+        .auto-config-param {
+            display: flex; align-items: center; gap: 0.3rem; font-size: 0.78rem;
+        }
+        .auto-config-param label { color: var(--text-secondary); white-space: nowrap; }
+        .auto-config-param input {
+            width: 60px; padding: 0.3rem 0.5rem; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 6px;
+            color: var(--text); font-family: inherit; font-size: 0.8rem; text-align: center;
+        }
+        .auto-config-param input:focus { border-color: var(--gold); outline: none; }
     </style>
 </head>
 <body>
@@ -1812,6 +1854,21 @@
                         </div>
                     </div>
 
+                    <!-- Section: CRM Bot Automations -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <i class="fa-solid fa-robot"></i> אוטומציות הבוט — ניהול תהליכים אוטומטיים
+                        </div>
+                        <div class="settings-section-desc">
+                            הבוט מריץ <strong>14 תהליכים אוטומטיים</strong> ברקע: דוחות יומיים, מעקבי לידים, תזכורות פגישות ועוד.<br>
+                            כאן אפשר <strong>להפעיל או לכבות</strong> כל אוטומציה, ולשנות את הפרמטרים שלה (למשל: כמה שעות להמתין לפני תזכורת).<br>
+                            שינויים מתעדכנים בבוט <strong>אוטומטית תוך 5 דקות</strong>.
+                        </div>
+                        <div class="settings-section-body" id="automation-config-container">
+                            <div class="utm-config-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען אוטומציות...</div>
+                        </div>
+                    </div>
+
                     <!-- Save Button -->
                     <div style="display:flex;gap:1rem;margin-top:1.5rem;align-items:center;">
                         <button class="btn btn-gold" onclick="saveDashboardSettings()" style="padding:0.7rem 2rem;font-size:0.95rem;">
@@ -2145,7 +2202,7 @@
             });
             if (view === 'bot') loadBotView();
             if (view === 'analytics') loadGA4Analytics();
-            if (view === 'settings') { loadSettingsView(); loadUtmConfigs(); }
+            if (view === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); }
         }
 
         function filterPatients(status) {
@@ -4564,6 +4621,142 @@
                 sourceSelect.innerHTML = activeSources.map(s =>
                     `<option value="${s.value}">${s.label}</option>`
                 ).join('');
+            }
+        }
+
+        // ============================================================
+        // AUTOMATION CONFIG MANAGER
+        // ============================================================
+        let automationConfigsCache = [];
+
+        const AUTOMATION_CATEGORIES = {
+            reports:    { label: 'דוחות וסיכומים',    icon: 'fa-chart-pie' },
+            pipelines:  { label: 'תהליכי עבודה',      icon: 'fa-arrows-rotate' },
+            followups:  { label: 'מעקבים והודעות',     icon: 'fa-envelope-open-text' },
+            monitoring: { label: 'ניטור והתראות',      icon: 'fa-eye' },
+            export:     { label: 'ייצוא נתונים',       icon: 'fa-file-export' },
+        };
+
+        const PARAM_LABELS = {
+            leadAutoContactHours:  'שעות לפני תזכורת ליד',
+            leadStaleHours:        'שעות להסלמת ליד ישן',
+            patientAutoMatchHours: 'שעות לפני הצעת שיבוץ',
+            postAppointmentHours:  'שעות אחרי פגישה למעקב',
+            overdueDays:           'ימים לתזכורת תשלום',
+        };
+
+        async function loadAutomationConfigs() {
+            try {
+                const { data, error } = await db.from('bot_automation_configs')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+                if (error) throw error;
+                automationConfigsCache = data || [];
+                renderAutomationConfigs();
+            } catch (err) {
+                console.error('Automation config load error:', err);
+                document.getElementById('automation-config-container').innerHTML =
+                    '<div class="utm-config-empty">שגיאה בטעינת האוטומציות</div>';
+            }
+        }
+
+        function renderAutomationConfigs() {
+            const container = document.getElementById('automation-config-container');
+            if (!automationConfigsCache.length) {
+                container.innerHTML = '<div class="utm-config-empty">לא נמצאו אוטומציות</div>';
+                return;
+            }
+
+            const grouped = {};
+            for (const a of automationConfigsCache) {
+                if (!grouped[a.category]) grouped[a.category] = [];
+                grouped[a.category].push(a);
+            }
+
+            const categoryOrder = ['reports', 'pipelines', 'followups', 'monitoring', 'export'];
+            let html = '';
+
+            for (const cat of categoryOrder) {
+                const items = grouped[cat];
+                if (!items) continue;
+                const catInfo = AUTOMATION_CATEGORIES[cat] || { label: cat, icon: 'fa-gear' };
+
+                html += '<div class="auto-config-category">';
+                html += `<div class="auto-config-category-header">
+                    <i class="fa-solid ${catInfo.icon}"></i> ${catInfo.label}
+                </div>`;
+
+                for (const a of items) {
+                    const params = a.params || {};
+                    const paramKeys = Object.keys(params);
+
+                    html += `<div class="auto-config-card ${a.is_enabled ? '' : 'disabled'}">
+                        <label class="utm-config-toggle" title="${a.is_enabled ? 'לחץ לכיבוי' : 'לחץ להפעלה'}">
+                            <input type="checkbox" ${a.is_enabled ? 'checked' : ''}
+                                onchange="toggleAutomation('${a.id}', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                        <div class="auto-config-card-body">
+                            <div class="auto-config-card-title">
+                                <i class="fa-solid ${a.icon || 'fa-robot'}"></i> ${a.label}
+                            </div>
+                            <div class="auto-config-card-desc">${a.description}</div>
+                            <div class="auto-config-schedule-pill">
+                                <i class="fa-regular fa-clock"></i> ${a.schedule}
+                            </div>`;
+
+                    if (paramKeys.length) {
+                        html += '<div class="auto-config-params">';
+                        for (const key of paramKeys) {
+                            const paramLabel = PARAM_LABELS[key] || key;
+                            html += `<div class="auto-config-param">
+                                <label>${paramLabel}:</label>
+                                <input type="number" value="${params[key]}" min="1"
+                                    onchange="updateAutomationParam('${a.id}', '${key}', this.value)">
+                            </div>`;
+                        }
+                        html += '</div>';
+                    }
+
+                    html += '</div></div>';
+                }
+
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        async function toggleAutomation(id, isEnabled) {
+            try {
+                const { error } = await db.from('bot_automation_configs')
+                    .update({ is_enabled: isEnabled, updated_at: new Date().toISOString() })
+                    .eq('id', id);
+                if (error) throw error;
+
+                const item = automationConfigsCache.find(a => a.id === id);
+                if (item) item.is_enabled = isEnabled;
+                renderAutomationConfigs();
+                showToast(isEnabled ? 'אוטומציה הופעלה' : 'אוטומציה כובתה', 'success');
+            } catch (err) {
+                showToast('שגיאה בעדכון: ' + err.message, 'error');
+                await loadAutomationConfigs();
+            }
+        }
+
+        async function updateAutomationParam(id, key, value) {
+            try {
+                const item = automationConfigsCache.find(a => a.id === id);
+                if (!item) return;
+                const params = { ...item.params, [key]: parseInt(value) || 1 };
+                const { error } = await db.from('bot_automation_configs')
+                    .update({ params, updated_at: new Date().toISOString() })
+                    .eq('id', id);
+                if (error) throw error;
+                item.params = params;
+                showToast('פרמטר עודכן', 'success');
+            } catch (err) {
+                showToast('שגיאה בעדכון: ' + err.message, 'error');
             }
         }
 

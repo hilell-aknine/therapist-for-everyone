@@ -731,27 +731,27 @@
         /* UTM Config Manager */
         .utm-config-list { list-style: none; padding: 0; margin: 0; }
         .utm-config-item {
-            display: flex; align-items: center; gap: 0.8rem;
-            padding: 0.7rem 0; border-bottom: 1px solid var(--border);
+            display: grid; grid-template-columns: 44px 1fr auto auto; align-items: center; gap: 0.8rem;
+            padding: 0.8rem 0; border-bottom: 1px solid var(--border);
         }
         .utm-config-item:last-child { border-bottom: none; }
-        .utm-config-value {
-            font-weight: 700; font-size: 0.88rem; min-width: 90px;
-            direction: ltr; text-align: left;
-        }
-        .utm-config-aliases {
-            flex: 1; font-size: 0.8rem; color: var(--text-secondary);
-        }
+        .utm-config-item.inactive { opacity: 0.45; }
+        .utm-config-card-body { display: flex; flex-direction: column; gap: 0.2rem; }
+        .utm-config-card-title { font-weight: 700; font-size: 0.9rem; }
+        .utm-config-card-sub { font-size: 0.78rem; color: var(--text-secondary); direction: ltr; text-align: left; }
+        .utm-config-aliases { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.2rem; }
         .utm-config-aliases span {
             display: inline-block; background: rgba(47,133,146,0.12);
-            color: var(--dusty-aqua, #2F8592); padding: 0.15rem 0.5rem;
-            border-radius: 10px; font-size: 0.75rem; margin: 0.1rem 0.15rem;
+            color: var(--dusty-aqua, #2F8592); padding: 0.15rem 0.55rem;
+            border-radius: 10px; font-size: 0.75rem;
         }
-        .utm-config-meta {
-            font-size: 0.75rem; color: var(--text-secondary); min-width: 80px; text-align: center;
+        .utm-config-meta-pill {
+            font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem;
+            border-radius: 10px; background: rgba(212,175,55,0.12); color: #8B6914;
+            white-space: nowrap; direction: ltr;
         }
         .utm-config-toggle {
-            position: relative; width: 40px; height: 22px; cursor: pointer;
+            position: relative; width: 40px; height: 22px; cursor: pointer; flex-shrink: 0;
         }
         .utm-config-toggle input { opacity: 0; width: 0; height: 0; }
         .utm-config-toggle .slider {
@@ -765,39 +765,58 @@
         .utm-config-toggle input:checked + .slider:before { transform: translateX(18px); }
         .utm-config-delete {
             background: none; border: none; color: var(--text-secondary);
-            cursor: pointer; font-size: 0.9rem; padding: 0.3rem; border-radius: 4px; transition: 0.2s;
+            cursor: pointer; font-size: 0.85rem; padding: 0.4rem; border-radius: 6px; transition: 0.2s;
         }
         .utm-config-delete:hover { color: #c0392b; background: rgba(192,57,43,0.1); }
-        .utm-config-add-form {
-            display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem 0;
-            align-items: flex-end;
+        .utm-config-add-section {
+            border-top: 2px dashed var(--border); margin-top: 0.8rem; padding-top: 1rem;
         }
-        .utm-config-add-form input, .utm-config-add-form select {
-            padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: 8px;
-            background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.82rem;
+        .utm-config-add-title {
+            font-weight: 700; font-size: 0.88rem; margin-bottom: 0.8rem;
+            display: flex; align-items: center; gap: 0.4rem;
         }
-        .utm-config-add-form input:focus, .utm-config-add-form select:focus {
-            border-color: var(--gold); outline: none;
+        .utm-config-add-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+        }
+        .utm-config-field { display: flex; flex-direction: column; gap: 0.25rem; }
+        .utm-config-field.full { grid-column: 1 / -1; }
+        .utm-config-field label {
+            font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);
+        }
+        .utm-config-field input, .utm-config-field select {
+            padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.85rem;
+            width: 100%; box-sizing: border-box;
+        }
+        .utm-config-field input:focus, .utm-config-field select:focus {
+            border-color: var(--gold); outline: none; box-shadow: 0 0 0 2px rgba(212,175,55,0.15);
+        }
+        .utm-config-field .field-hint {
+            font-size: 0.72rem; color: var(--text-secondary); line-height: 1.4;
         }
         .utm-config-add-btn {
             background: var(--gold, #D4AF37); color: #fff; border: none;
-            padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600;
-            font-size: 0.82rem; cursor: pointer; white-space: nowrap; transition: 0.2s;
+            padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600;
+            font-size: 0.88rem; cursor: pointer; white-space: nowrap; transition: 0.2s;
+            margin-top: 0.6rem;
         }
         .utm-config-add-btn:hover { filter: brightness(1.1); }
-        .utm-config-empty { text-align: center; padding: 1.5rem; color: var(--text-secondary); font-size: 0.85rem; }
-        .utm-config-tab-bar {
-            display: flex; gap: 0; margin-bottom: 0;
-        }
+        .utm-config-empty { text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.88rem; }
+        .utm-config-tab-bar { display: flex; gap: 0; margin-bottom: 0; }
         .utm-config-tab {
-            flex: 1; text-align: center; padding: 0.7rem 1rem; cursor: pointer;
-            font-weight: 600; font-size: 0.85rem; border-bottom: 3px solid transparent;
+            flex: 1; text-align: center; padding: 0.8rem 1rem; cursor: pointer;
+            font-weight: 600; font-size: 0.88rem; border-bottom: 3px solid transparent;
             color: var(--text-secondary); transition: 0.2s;
         }
         .utm-config-tab.active {
             color: var(--gold, #D4AF37); border-bottom-color: var(--gold, #D4AF37);
         }
         .utm-config-tab:hover { color: var(--text); }
+        .utm-config-explainer {
+            background: rgba(47,133,146,0.06); border-radius: 8px; padding: 0.8rem 1rem;
+            margin-bottom: 0.8rem; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.7;
+        }
+        .utm-config-explainer strong { color: var(--text); }
 
         @media (max-width: 768px) {
             .bot-cards { grid-template-columns: 1fr; }
@@ -808,9 +827,10 @@
             #analytics-view > div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
             .settings-row { flex-direction: column; align-items: stretch; gap: 0.5rem; }
             .settings-input { max-width: 100%; min-width: unset; width: 100%; }
-            .utm-config-item { flex-wrap: wrap; gap: 0.5rem; }
-            .utm-config-value { min-width: auto; }
-            .utm-config-add-form input, .utm-config-add-form select { width: 100% !important; min-width: unset; }
+            .utm-config-item { grid-template-columns: 44px 1fr auto; gap: 0.5rem; }
+            .utm-config-delete { grid-column: 3; }
+            .utm-config-meta-pill { grid-column: 2; justify-self: start; }
+            .utm-config-add-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -1621,59 +1641,113 @@
                     <!-- Section: UTM Config Manager -->
                     <div class="settings-section">
                         <div class="settings-section-header">
-                            <i class="fa-solid fa-sliders"></i> הגדרות בוט — מקורות ויעדים (UTM)
+                            <i class="fa-solid fa-sliders"></i> קישורים מסומנים — ניהול יעדים ומקורות
                         </div>
                         <div class="settings-section-desc">
-                            ניהול הרשימות שהבוט משתמש בהן ליצירת קישורים מסומנים. שינויים כאן מתעדכנים בבוט תוך 5 דקות.
+                            כשאתה שולח קישור לאתר דרך וואטסאפ, אינסטגרם וכו' — צריך "לסמן" אותו כדי לדעת מאיפה הגיעו הגולשים.<br>
+                            כאן אתה מנהל את <strong>רשימת הדפים</strong> ואת <strong>רשימת הפלטפורמות</strong> שהבוט יודע לזהות.<br>
+                            שינויים מתעדכנים בבוט אוטומטית תוך 5 דקות.
                         </div>
                         <div class="settings-section-body" style="padding:0;">
                             <!-- Tab bar -->
                             <div class="utm-config-tab-bar" style="border-bottom:1px solid var(--border);">
                                 <div class="utm-config-tab active" onclick="switchUtmConfigTab('destination')" id="utm-tab-destination">
-                                    <i class="fa-solid fa-location-dot"></i> יעדים (דפי אתר)
+                                    <i class="fa-solid fa-location-dot"></i> לאן — דפים באתר
                                 </div>
                                 <div class="utm-config-tab" onclick="switchUtmConfigTab('source')" id="utm-tab-source">
-                                    <i class="fa-solid fa-share-nodes"></i> מקורות (פלטפורמות)
+                                    <i class="fa-solid fa-share-nodes"></i> מאיפה — פלטפורמות
                                 </div>
                             </div>
 
                             <!-- Destinations panel -->
-                            <div id="utm-panel-destination" style="padding:0.5rem 1.5rem 1rem;">
+                            <div id="utm-panel-destination" style="padding:1rem 1.5rem 1.2rem;">
+                                <div class="utm-config-explainer">
+                                    <strong>מה זה "יעד"?</strong> הדף באתר שאליו הקישור מפנה.<br>
+                                    כשתכתוב לבוט <strong>"צור קישור מטופלים"</strong>, הוא ישתמש במילה "מטופלים" כדי למצוא את הדף הנכון מהרשימה.<br>
+                                    המתג משמאל מפעיל/מכבה כל יעד. כשיעד כבוי — הבוט לא יציע אותו.
+                                </div>
                                 <div id="utm-list-destination" class="utm-config-list">
                                     <div class="utm-config-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען...</div>
                                 </div>
-                                <div class="utm-config-add-form" style="border-top:1px solid var(--border);margin-top:0.5rem;padding-top:0.8rem;">
-                                    <input type="text" id="utm-add-dest-value" placeholder="ערך (אנגלית)" style="width:100px;direction:ltr;text-align:left;">
-                                    <input type="text" id="utm-add-dest-label" placeholder="שם תצוגה (עברית)" style="width:120px;">
-                                    <input type="text" id="utm-add-dest-path" placeholder="נתיב באתר, למשל /pages/about.html" style="width:200px;direction:ltr;text-align:left;">
-                                    <input type="text" id="utm-add-dest-campaign" placeholder="campaign slug" style="width:120px;direction:ltr;text-align:left;">
-                                    <input type="text" id="utm-add-dest-aliases" placeholder="כינויים בעברית (פסיק)" style="width:160px;">
+
+                                <div class="utm-config-add-section">
+                                    <div class="utm-config-add-title"><i class="fa-solid fa-plus-circle" style="color:var(--gold);"></i> הוספת דף חדש</div>
+                                    <div class="utm-config-add-grid">
+                                        <div class="utm-config-field">
+                                            <label>שם בעברית</label>
+                                            <input type="text" id="utm-add-dest-label" placeholder="למשל: ספריית קורסים">
+                                            <div class="field-hint">השם שיוצג ברשימה למעלה ובבוט</div>
+                                        </div>
+                                        <div class="utm-config-field">
+                                            <label>מילים לזיהוי בבוט</label>
+                                            <input type="text" id="utm-add-dest-aliases" placeholder="למשל: פורטל, קורסים">
+                                            <div class="field-hint">מילים בעברית שהבוט יזהה, מופרדות בפסיק</div>
+                                        </div>
+                                        <div class="utm-config-field">
+                                            <label>כתובת הדף באתר</label>
+                                            <input type="text" id="utm-add-dest-path" placeholder="למשל: /pages/course-library.html" style="direction:ltr;text-align:left;">
+                                            <div class="field-hint">הנתיב אחרי therapist-home.com. מתחיל ב-/</div>
+                                        </div>
+                                        <div class="utm-config-field">
+                                            <label>מזהה קמפיין (אנגלית)</label>
+                                            <input type="text" id="utm-add-dest-campaign" placeholder="למשל: portal" style="direction:ltr;text-align:left;">
+                                            <div class="field-hint">שם קצר באנגלית שיופיע בדוחות האנליטיקס</div>
+                                        </div>
+                                        <div class="utm-config-field full" style="display:none;">
+                                            <input type="text" id="utm-add-dest-value" placeholder="auto">
+                                        </div>
+                                    </div>
                                     <button class="utm-config-add-btn" onclick="addUtmConfig('destination')">
-                                        <i class="fa-solid fa-plus"></i> הוסף יעד
+                                        <i class="fa-solid fa-plus"></i> הוסף דף
                                     </button>
                                 </div>
                             </div>
 
                             <!-- Sources panel -->
-                            <div id="utm-panel-source" style="padding:0.5rem 1.5rem 1rem;display:none;">
+                            <div id="utm-panel-source" style="padding:1rem 1.5rem 1.2rem;display:none;">
+                                <div class="utm-config-explainer">
+                                    <strong>מה זה "מקור"?</strong> הפלטפורמה שממנה שלחת את הקישור (וואטסאפ, אינסטגרם, מייל וכו').<br>
+                                    כשתכתוב לבוט <strong>"צור קישור מטופלים אינסטגרם"</strong>, המילה "אינסטגרם" תזוהה כמקור.<br>
+                                    אם לא תציין מקור, ברירת המחדל היא "וואטסאפ".
+                                </div>
                                 <div id="utm-list-source" class="utm-config-list">
                                     <div class="utm-config-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען...</div>
                                 </div>
-                                <div class="utm-config-add-form" style="border-top:1px solid var(--border);margin-top:0.5rem;padding-top:0.8rem;">
-                                    <input type="text" id="utm-add-src-value" placeholder="ערך (אנגלית)" style="width:100px;direction:ltr;text-align:left;">
-                                    <input type="text" id="utm-add-src-label" placeholder="שם תצוגה (עברית)" style="width:120px;">
-                                    <select id="utm-add-src-medium" style="width:110px;">
-                                        <option value="social">social</option>
-                                        <option value="video">video</option>
-                                        <option value="email">email</option>
-                                        <option value="sms">sms</option>
-                                        <option value="organic">organic</option>
-                                        <option value="paid">paid</option>
-                                        <option value="referral">referral</option>
-                                    </select>
-                                    <input type="text" id="utm-add-src-aliases" placeholder="כינויים בעברית (פסיק)" style="width:160px;">
+
+                                <div class="utm-config-add-section">
+                                    <div class="utm-config-add-title"><i class="fa-solid fa-plus-circle" style="color:var(--gold);"></i> הוספת פלטפורמה חדשה</div>
+                                    <div class="utm-config-add-grid">
+                                        <div class="utm-config-field">
+                                            <label>שם בעברית</label>
+                                            <input type="text" id="utm-add-src-label" placeholder="למשל: לינקדאין">
+                                            <div class="field-hint">השם שיוצג ברשימה למעלה ובבוט</div>
+                                        </div>
+                                        <div class="utm-config-field">
+                                            <label>מילים לזיהוי בבוט</label>
+                                            <input type="text" id="utm-add-src-aliases" placeholder="למשל: לינקדאין, לינקד">
+                                            <div class="field-hint">מילים בעברית שהבוט יזהה, מופרדות בפסיק</div>
+                                        </div>
+                                        <div class="utm-config-field">
+                                            <label>מזהה המקור (אנגלית)</label>
+                                            <input type="text" id="utm-add-src-value" placeholder="למשל: linkedin" style="direction:ltr;text-align:left;">
+                                            <div class="field-hint">שם קצר באנגלית שיופיע בקישור וב-Analytics</div>
+                                        </div>
+                                        <div class="utm-config-field">
+                                            <label>סוג הפלטפורמה</label>
+                                            <select id="utm-add-src-medium">
+                                                <option value="social">רשת חברתית (social)</option>
+                                                <option value="video">וידאו (video)</option>
+                                                <option value="email">אימייל (email)</option>
+                                                <option value="sms">הודעת טקסט (sms)</option>
+                                                <option value="organic">חיפוש אורגני (organic)</option>
+                                                <option value="paid">פרסום ממומן (paid)</option>
+                                                <option value="referral">הפניה מאתר אחר (referral)</option>
+                                            </select>
+                                            <div class="field-hint">קטגוריה כללית — עוזרת לקבץ מקורות דומים בדוחות</div>
+                                        </div>
+                                    </div>
                                     <button class="utm-config-add-btn" onclick="addUtmConfig('source')">
-                                        <i class="fa-solid fa-plus"></i> הוסף מקור
+                                        <i class="fa-solid fa-plus"></i> הוסף פלטפורמה
                                     </button>
                                 </div>
                             </div>
@@ -4316,31 +4390,39 @@
             const items = utmConfigsCache[type];
 
             if (!items.length) {
-                container.innerHTML = '<div class="utm-config-empty">אין רשומות. הוסף באמצעות הטופס למטה.</div>';
+                const what = type === 'destination' ? 'דפים' : 'פלטפורמות';
+                container.innerHTML = `<div class="utm-config-empty"><i class="fa-solid fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;opacity:0.4;"></i>אין ${what} עדיין. הוסף באמצעות הטופס למטה.</div>`;
                 return;
             }
 
-            container.innerHTML = items.map(c => `
-                <div class="utm-config-item" data-id="${c.id}">
-                    <label class="utm-config-toggle" title="${c.is_active ? 'פעיל' : 'מושבת'}">
+            container.innerHTML = items.map(c => {
+                const isDest = type === 'destination';
+                const subtitle = isDest
+                    ? `<span style="color:var(--text-secondary);">נתיב:</span> ${c.url_path || '/'}`
+                    : `<span style="color:var(--text-secondary);">מזהה:</span> ${c.value}`;
+                const metaLabel = isDest ? (c.campaign_slug || c.value) : (c.utm_medium || 'organic');
+                const metaIcon = isDest ? 'fa-tag' : 'fa-layer-group';
+                const metaTitle = isDest ? 'שם הקמפיין בדוחות' : 'סוג הפלטפורמה';
+
+                return `
+                <div class="utm-config-item ${c.is_active ? '' : 'inactive'}" data-id="${c.id}">
+                    <label class="utm-config-toggle" title="${c.is_active ? 'לחץ לכיבוי' : 'לחץ להפעלה'}">
                         <input type="checkbox" ${c.is_active ? 'checked' : ''} onchange="toggleUtmConfig('${c.id}', this.checked)">
                         <span class="slider"></span>
                     </label>
-                    <div class="utm-config-value">${c.value}</div>
-                    <div style="flex:1;">
-                        <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.15rem;">${c.label || '-'}</div>
+                    <div class="utm-config-card-body">
+                        <div class="utm-config-card-title">${c.label || c.value}</div>
+                        <div class="utm-config-card-sub">${subtitle}</div>
                         <div class="utm-config-aliases">
                             ${(c.hebrew_aliases || []).map(a => `<span>${a}</span>`).join('')}
                         </div>
                     </div>
-                    <div class="utm-config-meta">
-                        ${type === 'destination' ? (c.campaign_slug || '') : (c.utm_medium || '')}
-                    </div>
+                    <span class="utm-config-meta-pill" title="${metaTitle}"><i class="fa-solid ${metaIcon}" style="margin-left:0.3rem;font-size:0.65rem;"></i> ${metaLabel}</span>
                     <button class="utm-config-delete" onclick="deleteUtmConfig('${c.id}')" title="מחק">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         async function toggleUtmConfig(id, isActive) {
@@ -4355,7 +4437,9 @@
                     const item = utmConfigsCache[type].find(c => c.id === id);
                     if (item) item.is_active = isActive;
                 }
-                showToast(isActive ? 'הופעל' : 'הושבת', 'success');
+                showToast(isActive ? 'הופעל — הבוט ישתמש בזה' : 'הושבת — הבוט יתעלם מזה', 'success');
+                renderUtmConfigList('destination');
+                renderUtmConfigList('source');
             } catch (err) {
                 showToast('שגיאה בעדכון: ' + err.message, 'error');
                 await loadUtmConfigs();
@@ -4380,16 +4464,22 @@
             try {
                 let row;
                 if (type === 'destination') {
-                    const value = document.getElementById('utm-add-dest-value').value.trim().toLowerCase();
                     const label = document.getElementById('utm-add-dest-label').value.trim();
                     const url_path = document.getElementById('utm-add-dest-path').value.trim();
                     const campaign_slug = document.getElementById('utm-add-dest-campaign').value.trim().toLowerCase();
                     const aliasStr = document.getElementById('utm-add-dest-aliases').value.trim();
 
-                    if (!value || !label || !url_path) {
-                        showToast('חובה למלא: ערך, שם תצוגה, ונתיב', 'error');
+                    if (!label || !url_path) {
+                        showToast('חובה למלא: שם בעברית וכתובת הדף', 'error');
                         return;
                     }
+                    if (!url_path.startsWith('/')) {
+                        showToast('כתובת הדף חייבת להתחיל ב-/ (למשל: /pages/about.html)', 'error');
+                        return;
+                    }
+
+                    // Auto-generate value from campaign_slug or path
+                    const value = (campaign_slug || url_path.split('/').pop().replace('.html', '') || 'page').toLowerCase().replace(/[^a-z0-9-]/g, '-');
 
                     row = {
                         config_type: 'destination',
@@ -4407,7 +4497,11 @@
                     const aliasStr = document.getElementById('utm-add-src-aliases').value.trim();
 
                     if (!value || !label) {
-                        showToast('חובה למלא: ערך ושם תצוגה', 'error');
+                        showToast('חובה למלא: שם בעברית ומזהה באנגלית', 'error');
+                        return;
+                    }
+                    if (!/^[a-z0-9_-]+$/.test(value)) {
+                        showToast('מזהה המקור חייב להיות באנגלית קטנה בלבד (אותיות, מספרים, מקף)', 'error');
                         return;
                     }
 
@@ -4424,7 +4518,7 @@
                 const { error } = await db.from('bot_utm_configs').insert(row);
                 if (error) {
                     if (error.message && error.message.includes('duplicate')) {
-                        showToast('ערך זה כבר קיים', 'error');
+                        showToast('כבר קיים רשומה עם אותו מזהה. בחר שם אחר.', 'error');
                     } else {
                         throw error;
                     }
@@ -4435,7 +4529,6 @@
 
                 // Clear form
                 if (type === 'destination') {
-                    document.getElementById('utm-add-dest-value').value = '';
                     document.getElementById('utm-add-dest-label').value = '';
                     document.getElementById('utm-add-dest-path').value = '';
                     document.getElementById('utm-add-dest-campaign').value = '';

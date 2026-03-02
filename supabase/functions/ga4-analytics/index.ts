@@ -103,6 +103,20 @@ async function getGoogleAccessToken(serviceAccount: {
 }
 
 // ============================================================================
+// TIMEZONE HELPER — Israel time (Asia/Jerusalem)
+// GA4 property uses Asia/Jerusalem, so all date comparisons must match
+// ============================================================================
+
+function getIsraelDateString(): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jerusalem',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date()) // en-CA gives YYYY-MM-DD format
+}
+
+// ============================================================================
 // GA4 DATA API QUERY
 // ============================================================================
 
@@ -116,8 +130,11 @@ async function queryGA4(
 ): Promise<Record<string, unknown>> {
   const body: Record<string, unknown> = {
     dateRanges: [dateRange],
-    dimensions,
     metrics,
+  }
+  // Only include dimensions if non-empty (aggregate queries omit dimensions)
+  if (dimensions.length > 0) {
+    body.dimensions = dimensions
   }
   if (dimensionFilter) {
     body.dimensionFilter = dimensionFilter
@@ -193,11 +210,10 @@ serve(async (req) => {
     // ---- Parse service account & get token ----
     const serviceAccount = JSON.parse(GA4_SERVICE_ACCOUNT_JSON)
     const accessToken = await getGoogleAccessToken(serviceAccount)
-    const today = new Date().toISOString().split('T')[0]
 
-    // ---- Run 4 queries in parallel ----
-    const [usersReport, pagesReport, allPagesReport, channelsReport] = await Promise.all([
-      // 1) Active users & new users — last 30 days, by date
+    // ---- Run 5 queries in parallel ----
+    const [usersReport, pagesReport, allPagesReport, channelsReport, aggregateReport] = await Promise.all([
+      // 1) Active users & new users — last 30 days, broken down by date (for daily trend)
       queryGA4(
         accessToken,
         GA4_PROPERTY_ID,
@@ -265,6 +281,17 @@ serve(async (req) => {
         [{ name: 'sessionDefaultChannelGroup' }],
         [{ name: 'sessions' }, { name: 'activeUsers' }, { name: 'newUsers' }]
       ),
+
+      // 5) Aggregate 30-day totals — NO dimensions = single de-duplicated row
+      // This gives the TRUE 30-day activeUsers count (same user visiting 10 days = 1)
+      // Matches what GA4 UI shows in the "Users" summary
+      queryGA4(
+        accessToken,
+        GA4_PROPERTY_ID,
+        { startDate: '30daysAgo', endDate: 'today' },
+        [],
+        [{ name: 'activeUsers' }, { name: 'newUsers' }, { name: 'sessions' }]
+      ),
     ])
 
     // ---- Format response ----
@@ -272,8 +299,8 @@ serve(async (req) => {
       generated_at: new Date().toISOString(),
       period: '30 days',
 
-      // Summary: sum of last 30 days
-      users: formatUsersReport(usersReport),
+      // Summary: de-duplicated 30-day totals from aggregate query
+      users: formatUsersReport(usersReport, aggregateReport),
 
       // Free content pages
       free_content: formatPagesReport(pagesReport),
@@ -304,19 +331,21 @@ serve(async (req) => {
 // FORMATTERS
 // ============================================================================
 
-function formatUsersReport(report: Record<string, unknown>): Record<string, unknown> {
-  const rows = (report as { rows?: { dimensionValues: { value: string }[]; metricValues: { value: string }[] }[] }).rows || []
+type GA4Row = { dimensionValues?: { value: string }[]; metricValues: { value: string }[] }
+type GA4Report = { rows?: GA4Row[] }
 
-  let totalActive = 0
-  let totalNew = 0
+function formatUsersReport(
+  dailyReport: Record<string, unknown>,
+  aggregateReport: Record<string, unknown>
+): Record<string, unknown> {
+  const rows = (dailyReport as GA4Report).rows || []
+
   const daily: { date: string; activeUsers: number; newUsers: number }[] = []
 
   for (const row of rows) {
-    const date = row.dimensionValues[0].value // YYYYMMDD
+    const date = row.dimensionValues![0].value // YYYYMMDD
     const active = parseInt(row.metricValues[0].value) || 0
     const newU = parseInt(row.metricValues[1].value) || 0
-    totalActive += active
-    totalNew += newU
     daily.push({
       date: `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`,
       activeUsers: active,
@@ -327,14 +356,22 @@ function formatUsersReport(report: Record<string, unknown>): Record<string, unkn
   // Sort by date descending
   daily.sort((a, b) => b.date.localeCompare(a.date))
 
-  // Today's numbers (first entry if today's date matches)
-  const todayStr = new Date().toISOString().split('T')[0]
+  // Use Israel timezone (Asia/Jerusalem) for "today" — matches GA4 property timezone
+  const todayStr = getIsraelDateString()
   const todayData = daily.find(d => d.date === todayStr) || { activeUsers: 0, newUsers: 0 }
+
+  // 30-day totals from the AGGREGATE query (no dimensions = properly de-duplicated)
+  // Old code summed daily activeUsers which inflates the number:
+  // a user visiting 10 days was counted 10 times instead of 1
+  const aggRows = (aggregateReport as GA4Report).rows || []
+  const aggRow = aggRows[0]
+  const totalActive = aggRow ? parseInt(aggRow.metricValues[0].value) || 0 : 0
+  const totalNew = aggRow ? parseInt(aggRow.metricValues[1].value) || 0 : 0
 
   return {
     today: { activeUsers: todayData.activeUsers, newUsers: todayData.newUsers },
     last30days: { activeUsers: totalActive, newUsers: totalNew },
-    daily: daily.slice(0, 7), // last 7 days for sparkline
+    daily: daily.slice(0, 7), // last 7 days for trend
   }
 }
 

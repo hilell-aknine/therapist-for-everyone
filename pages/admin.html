@@ -5124,41 +5124,12 @@
             document.getElementById('auto-settings-overlay').classList.remove('active');
         }
 
-        // ── Automation ID → activity log action name mapping ──
-        // Derived from actual logActivity() calls in automation-handlers.js,
-        // pipelines.js, followups.js, and export.js
-        const AUTO_ACTION_MAP = {
-            // 20 new automations (automation-handlers.js)
-            lead_first_response:         'auto_lead_first_response',
-            lead_escalation:              'auto_lead_escalation',
-            lead_scoring:                 'auto_lead_scoring',
-            lead_source_report:           'auto_lead_source_report',
-            lead_duplicate_detect:        'auto_lead_duplicate_detect',
-            emergency_keyword_scan:       'auto_emergency_keyword_scan',
-            inactive_patient_alert:       'auto_inactive_patient_alert',
-            therapist_no_show_alert:      'auto_therapist_no_show',
-            consent_expiry_check:         'auto_consent_expiry_check',
-            safety_daily_digest:          'auto_safety_daily_digest',
-            therapist_availability_check: 'auto_therapist_availability',
-            appointment_gap_alert:        'auto_appointment_gap_alert',
-            waitlist_processor:           'auto_waitlist_processor',
-            session_limit_alert:          'auto_session_limit_alert',
-            therapist_load_balance:       'auto_therapist_load_balance',
-            birthday_greeting:            'auto_birthday_greeting',
-            milestone_celebration:        'auto_milestone_celebration',
-            reactivation_outreach:        'auto_reactivation_outreach',
-            satisfaction_survey:           'auto_satisfaction_survey',
-            community_digest:             'auto_community_digest',
-            // Original 14 — actual action names from code
-            lead_nurture:          'auto_lead_nudge',
-            patient_auto_match:    'auto_match_suggestion',
-            post_appointment:      'auto_post_appointment',
-            patient_welcome:       'auto_welcome_patient',
-            therapist_welcome:     'auto_welcome_therapist',
-            post_treatment:        'auto_post_treatment_checkin',
-            payment_reminders:     'auto_payment_reminder',
-            monthly_export:        'monthly_export',
-        };
+        // ── Automation ID → activity log action name ──
+        // The instrumented() wrapper in cron.js writes `auto_${id}` for ALL automations.
+        // Manual triggers in server.js also use `auto_${id}`. Consistent naming.
+        function getAutoActionName(automationId) {
+            return `auto_${automationId}`;
+        }
 
         async function loadAutomationLogs(automationId) {
             const container = document.getElementById('auto-logs-container');
@@ -5166,14 +5137,7 @@
             container.innerHTML = '<div class="auto-logs-loading"><i class="fa-solid fa-spinner fa-spin"></i> טוען...</div>';
             countEl.textContent = '';
 
-            const actionName = AUTO_ACTION_MAP[automationId];
-
-            // No log mapping — this automation doesn't write to activity log
-            if (!actionName) {
-                container.innerHTML = '<div class="auto-logs-empty"><i class="fa-solid fa-info-circle" style="font-size:1.1rem;display:block;margin-bottom:0.3rem;color:var(--info);"></i>אוטומציה זו לא כותבת ללוג פעילות</div>';
-                countEl.textContent = '';
-                return;
-            }
+            const actionName = getAutoActionName(automationId);
 
             try {
                 const { data, error } = await db.from('crm_activity_log')

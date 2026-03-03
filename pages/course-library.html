@@ -4825,15 +4825,28 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-left:0.5rem;"></i> שולח...';
             try {
-                await window.ContactRequests.submit({
-                    name: name,
-                    full_name: name,
-                    phone: phone,
-                    email: email,
-                    request_type: 'training',
-                    message: 'הרשמה להכשרה מתוך פורטל הלמידה',
-                    status: 'new'
+                const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl ||
+                    'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+                const res = await fetch(`${functionsUrl}/submit-lead`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        table: 'contact_requests',
+                        data: {
+                            name: name,
+                            full_name: name,
+                            phone: phone,
+                            email: email,
+                            request_type: 'training',
+                            message: 'הרשמה להכשרה מתוך פורטל הלמידה',
+                            status: 'new'
+                        }
+                    })
                 });
+                if (!res.ok) {
+                    const result = await res.json();
+                    throw new Error(result.error || 'שגיאה בשליחה');
+                }
                 document.getElementById('leadForm').style.display = 'none';
                 document.getElementById('leadSuccess').classList.add('show');
                 setTimeout(() => closeLeadModal(), 2500);

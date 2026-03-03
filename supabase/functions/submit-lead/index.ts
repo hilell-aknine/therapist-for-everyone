@@ -9,7 +9,11 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const TURNSTILE_SECRET_KEY = Deno.env.get('TURNSTILE_SECRET_KEY')!
+const TURNSTILE_SECRET_KEY = Deno.env.get('TURNSTILE_SECRET_KEY') || ''
+
+// When TURNSTILE_SECRET_KEY is empty, Turnstile verification is skipped.
+// This allows forms to work before Turnstile is configured.
+const TURNSTILE_ENABLED = TURNSTILE_SECRET_KEY.length > 0
 
 const ALLOWED_TABLES = ['patients', 'therapists', 'contact_requests']
 
@@ -109,18 +113,10 @@ serve(async (req) => {
     const { table, data, turnstileToken } = body
 
     // ---- Validate required fields ----
-    if (!table || !data || !turnstileToken) {
+    if (!table || !data) {
       return new Response(
-        JSON.stringify({ error: 'חסרים שדות חובה: table, data, turnstileToken' }),
+        JSON.stringify({ error: 'חסרים שדות חובה: table, data' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // ---- Strict token validation ----
-    if (typeof turnstileToken !== 'string' || turnstileToken.trim().length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'טוקן Turnstile לא תקין.' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -132,20 +128,29 @@ serve(async (req) => {
       )
     }
 
-    // ---- Verify Turnstile token ----
-    const clientIp = req.headers.get('cf-connecting-ip') ||
-                     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                     null
+    // ---- Turnstile verification (when enabled) ----
+    if (TURNSTILE_ENABLED) {
+      if (!turnstileToken || typeof turnstileToken !== 'string' || turnstileToken.trim().length === 0) {
+        return new Response(
+          JSON.stringify({ error: 'טוקן Turnstile לא תקין.' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
 
-    const verification = await verifyTurnstileToken(turnstileToken, clientIp)
-    if (!verification.success) {
-      return new Response(
-        JSON.stringify({
-          error: 'אימות Turnstile נכשל. רענן את הדף ונסה שוב.',
-          codes: verification.errorCodes,
-        }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      const clientIp = req.headers.get('cf-connecting-ip') ||
+                       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                       null
+
+      const verification = await verifyTurnstileToken(turnstileToken, clientIp)
+      if (!verification.success) {
+        return new Response(
+          JSON.stringify({
+            error: 'אימות Turnstile נכשל. רענן את הדף ונסה שוב.',
+            codes: verification.errorCodes,
+          }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
     // ---- Sanitize input data ----

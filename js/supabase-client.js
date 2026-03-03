@@ -551,18 +551,19 @@
          * @param {string} [table='contact_requests'] - Target table
          */
         async submit(requestData, turnstileToken = null, table = 'contact_requests') {
-            // If Turnstile token is provided, route through the Edge Function
-            if (turnstileToken) {
-                const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl ||
-                    'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+            const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl ||
+                'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
 
+            // Always route through Edge Function (uses service_role, bypasses RLS)
+            // Turnstile token is optional — Edge Function skips verification when not configured
+            try {
                 const res = await fetch(`${functionsUrl}/submit-lead`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         table: table,
                         data: requestData,
-                        turnstileToken: turnstileToken
+                        turnstileToken: turnstileToken || undefined
                     })
                 });
 
@@ -571,14 +572,14 @@
                     throw new Error(result.error || 'שגיאה בשליחת הטופס');
                 }
                 return { success: true };
+            } catch (fetchErr) {
+                // Fallback: direct insert (only works for authenticated users)
+                const { error } = await supabaseClient
+                    .from(table)
+                    .insert(requestData);
+                if (error) throw error;
+                return { success: true };
             }
-
-            // Fallback: direct insert (only works for authenticated users after migration 017)
-            const { error } = await supabaseClient
-                .from('contact_requests')
-                .insert(requestData);
-            if (error) throw error;
-            return { success: true };
         }
     };
 

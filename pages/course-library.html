@@ -4816,18 +4816,32 @@
             document.getElementById('leadModal').classList.remove('active');
             document.body.style.overflow = '';
         }
-        function submitLeadForm(e) {
+        async function submitLeadForm(e) {
             e.preventDefault();
             const btn = document.getElementById('leadSubmitBtn');
+            const name = document.getElementById('leadName').value.trim();
+            const phone = document.getElementById('leadPhone').value.trim();
+            const email = document.getElementById('leadEmail').value.trim();
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-left:0.5rem;"></i> שולח...';
-            // Simulate brief delay for UX
-            setTimeout(() => {
+            try {
+                await window.ContactRequests.submit({
+                    name: name,
+                    full_name: name,
+                    phone: phone,
+                    email: email,
+                    request_type: 'training',
+                    message: 'הרשמה להכשרה מתוך פורטל הלמידה',
+                    status: 'new'
+                });
                 document.getElementById('leadForm').style.display = 'none';
                 document.getElementById('leadSuccess').classList.add('show');
-                // Auto-close after 2.5s
                 setTimeout(() => closeLeadModal(), 2500);
-            }, 600);
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane" style="margin-left:0.5rem;"></i> שלחו לי פרטים';
+                alert('אירעה שגיאה, נסו שוב מאוחר יותר.');
+            }
             return false;
         }
         document.addEventListener('keydown', (e) => {

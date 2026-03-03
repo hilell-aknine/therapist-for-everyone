@@ -3486,11 +3486,13 @@
         async function loadContactLeads() {
             const { data } = await db.from('contact_requests').select('*').order('created_at', { ascending: false });
             contactLeads = data || [];
-            document.getElementById('contact-leads-count').textContent = contactLeads.length;
-            document.getElementById('stat-contact-total').textContent = contactLeads.length;
+            const realLeads = contactLeads.filter(l => l.request_type !== 'course-feedback');
+            const feedbackCount = contactLeads.length - realLeads.length;
+            document.getElementById('contact-leads-count').textContent = realLeads.length;
+            document.getElementById('stat-contact-total').textContent = realLeads.length;
             document.getElementById('stat-contact-training').textContent = contactLeads.filter(l => l.request_type === 'training').length;
             document.getElementById('stat-contact-patient').textContent = contactLeads.filter(l => l.request_type === 'patient').length;
-            document.getElementById('stat-contact-feedback').textContent = contactLeads.filter(l => l.request_type === 'course-feedback').length;
+            document.getElementById('stat-contact-feedback').textContent = feedbackCount;
             renderContactLeads();
         }
 
@@ -3504,10 +3506,11 @@
         function renderContactLeads() {
             const search = document.getElementById('contact-leads-search')?.value?.toLowerCase() || '';
             let filtered = contactLeads;
-            if (currentContactFilter === 'new') filtered = filtered.filter(l => l.status === 'new');
+            if (currentContactFilter === 'all') filtered = filtered.filter(l => l.request_type !== 'course-feedback');
+            else if (currentContactFilter === 'new') filtered = filtered.filter(l => l.status === 'new' && l.request_type !== 'course-feedback');
             else if (currentContactFilter === 'training') filtered = filtered.filter(l => l.request_type === 'training');
             else if (currentContactFilter === 'patient') filtered = filtered.filter(l => l.request_type === 'patient');
-            else if (currentContactFilter === 'contacted') filtered = filtered.filter(l => l.status === 'contacted' || l.status === 'converted');
+            else if (currentContactFilter === 'contacted') filtered = filtered.filter(l => (l.status === 'contacted' || l.status === 'converted') && l.request_type !== 'course-feedback');
             else if (currentContactFilter === 'feedback') filtered = filtered.filter(l => l.request_type === 'course-feedback');
             if (search) filtered = filtered.filter(l => (l.name || l.full_name || '').toLowerCase().includes(search) || (l.phone || '').includes(search));
 

@@ -163,7 +163,7 @@
         var path = window.location.pathname.toLowerCase();
         var learningPages = [
             'course-library', 'learning-summaries', 'learning-booklets',
-            'learning-master', 'profile', 'login'
+            'learning-master', 'profile', 'login', 'admin'
         ];
         return learningPages.some(function (p) { return path.indexOf(p) !== -1; });
     }

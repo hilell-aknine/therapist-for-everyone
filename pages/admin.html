@@ -139,6 +139,18 @@
         [data-theme="dark"] tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
         tbody tr:hover { background: rgba(212, 175, 55, 0.06); }
         [data-theme="dark"] tbody tr:hover { background: rgba(212, 175, 55, 0.08); }
+
+        /* Dark mode — automation section tweaks */
+        [data-theme="dark"] .auto-config-card { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        [data-theme="dark"] .auto-config-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+        [data-theme="dark"] .auto-filter-pill { border-color: rgba(59,160,172,0.2); }
+        [data-theme="dark"] .auto-search-input { background: var(--card); }
+        [data-theme="dark"] .auto-modal { box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+        [data-theme="dark"] .auto-modal-field input,
+        [data-theme="dark"] .auto-modal-field textarea,
+        [data-theme="dark"] .auto-modal-field select { background: var(--bg); }
+        [data-theme="dark"] .auto-backup-btn { border-color: rgba(59,160,172,0.2); }
+        [data-theme="dark"] .auto-backup-btn:hover { background: rgba(212,175,55,0.08); }
         td strong { font-weight: 600; color: var(--text); }
 
         .status-badge { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; display: inline-block; border: 1px solid transparent; }
@@ -831,70 +843,156 @@
             .utm-config-delete { grid-column: 3; }
             .utm-config-meta-pill { grid-column: 2; justify-self: start; }
             .utm-config-add-grid { grid-template-columns: 1fr; }
-            .auto-config-card { grid-template-columns: 40px 1fr; gap: 0.4rem; }
             .auto-settings-btn span { display: none; }
             .auto-modal { width: 96%; padding: 1.2rem; }
         }
 
-        /* Automation Config Manager — Accordion Layout */
-        .auto-accordion {
-            border: 1px solid var(--border); border-radius: 12px;
-            margin-bottom: 0.7rem; overflow: hidden; background: var(--card);
+        /* Automation Stats Grid */
+        .auto-stats-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 1rem; margin-bottom: 1.2rem;
         }
-        .auto-accordion-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0.75rem 1rem; cursor: pointer; user-select: none;
-            background: rgba(0,59,70,0.04); transition: background 0.2s;
-        }
-        .auto-accordion-header:hover { background: rgba(0,59,70,0.08); }
-        .auto-accordion-title {
-            display: flex; align-items: center; gap: 0.5rem;
-            font-weight: 700; font-size: 0.9rem; color: var(--gold);
-        }
-        .auto-accordion-count {
-            background: var(--gold); color: #fff; font-size: 0.65rem;
-            padding: 0.1rem 0.45rem; border-radius: 10px; font-weight: 700;
-            min-width: 20px; text-align: center;
-        }
-        .auto-accordion-chevron {
-            transition: transform 0.3s ease; color: var(--text-secondary); font-size: 0.8rem;
-        }
-        .auto-accordion-chevron.collapsed { transform: rotate(-90deg); }
-        .auto-accordion-body {
-            max-height: 3000px; overflow: hidden; padding: 0 1rem 0.5rem;
-            transition: max-height 0.4s ease, padding 0.3s ease;
-        }
-        .auto-accordion-body.collapsed { max-height: 0; padding: 0 1rem; }
 
-        /* Automation Cards */
-        .auto-config-card {
-            display: grid; grid-template-columns: 44px 1fr auto;
-            align-items: start; gap: 0.8rem;
-            padding: 0.7rem 0; border-bottom: 1px solid var(--border);
+        /* Automation Search Bar */
+        .auto-search-bar {
+            position: sticky; top: 0; z-index: 5;
+            margin-bottom: 1rem; position: relative;
         }
-        .auto-config-card:last-child { border-bottom: none; }
-        .auto-config-card.disabled { opacity: 0.4; }
-        .auto-config-card-body { display: flex; flex-direction: column; gap: 0.15rem; }
+        .auto-search-input {
+            width: 100%; padding: 0.6rem 2.5rem 0.6rem 1rem;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text);
+            font-family: inherit; font-size: 0.88rem;
+            transition: border-color 0.2s; direction: rtl;
+        }
+        .auto-search-input:focus { border-color: var(--gold); outline: none; }
+        .auto-search-bar > i {
+            position: absolute; right: 0.8rem; top: 50%;
+            transform: translateY(-50%); color: var(--text-secondary);
+            font-size: 0.85rem; pointer-events: none;
+        }
+
+        /* Category Filter Pills */
+        .auto-filter-pills {
+            display: flex; flex-wrap: wrap; gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+        .auto-filter-pill {
+            padding: 0.3rem 0.7rem; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 600; cursor: pointer;
+            border: 1px solid var(--border); background: var(--bg);
+            color: var(--text-secondary); transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            user-select: none;
+        }
+        .auto-filter-pill:hover {
+            border-color: var(--gold); color: var(--gold);
+        }
+        .auto-filter-pill.active {
+            background: var(--gold); color: #fff;
+            border-color: var(--gold);
+        }
+        .auto-filter-pill .pill-count {
+            font-size: 0.6rem; opacity: 0.8;
+        }
+
+        /* Backup Buttons */
+        .auto-backup-btn {
+            background: none; border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text-secondary); cursor: pointer; padding: 0.4rem 0.7rem;
+            font-size: 0.78rem; font-family: inherit; font-weight: 600;
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.3rem;
+            white-space: nowrap;
+        }
+        .auto-backup-btn:hover {
+            color: var(--gold); border-color: var(--gold);
+            background: rgba(212,175,55,0.06);
+        }
+
+        /* Automation Card Grid */
+        .auto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Redesigned Automation Cards */
+        .auto-config-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; border-right: 4px solid var(--text-secondary);
+            padding: 1rem 1.2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .auto-config-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .auto-config-card.disabled { opacity: 0.5; }
+
+        /* Category border colors */
+        .auto-config-card[data-category="safety"] { border-right-color: #dc3545; }
+        .auto-config-card[data-category="lead_lifecycle"] { border-right-color: #28a745; }
+        .auto-config-card[data-category="operations"] { border-right-color: #58a6ff; }
+        .auto-config-card[data-category="retention"] { border-right-color: var(--gold); }
+        .auto-config-card[data-category="reports"] { border-right-color: #8b5cf6; }
+        .auto-config-card[data-category="pipelines"] { border-right-color: #2F8592; }
+        .auto-config-card[data-category="followups"] { border-right-color: #f59e0b; }
+        .auto-config-card[data-category="monitoring"] { border-right-color: #ec4899; }
+        .auto-config-card[data-category="export"] { border-right-color: #6b7280; }
+
+        .auto-config-card-header {
+            display: flex; align-items: center; gap: 0.6rem;
+            margin-bottom: 0.5rem;
+        }
         .auto-config-card-title {
-            font-weight: 700; font-size: 0.88rem;
+            font-weight: 700; font-size: 0.88rem; flex: 1;
             display: flex; align-items: center; gap: 0.4rem;
         }
-        .auto-config-card-title i { color: var(--gold); font-size: 0.82rem; width: 20px; text-align: center; }
-        .auto-config-card-desc { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.5; }
-        .auto-config-meta {
-            display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem; flex-wrap: wrap;
+        .auto-config-card-title i { color: var(--gold); font-size: 0.82rem; }
+        .auto-config-card-desc {
+            font-size: 0.76rem; color: var(--text-secondary);
+            line-height: 1.5; margin-bottom: 0.5rem;
         }
+        .auto-config-card-footer {
+            display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+        }
+
+        /* Category Badge */
+        .auto-category-badge {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            font-size: 0.65rem; font-weight: 600;
+            padding: 0.15rem 0.5rem; border-radius: 8px;
+        }
+
+        /* Schedule Pill */
         .auto-config-schedule-pill {
             display: inline-flex; align-items: center; gap: 0.3rem;
             font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.55rem;
             border-radius: 8px; background: rgba(47,133,146,0.12);
             color: var(--dusty-aqua, #2F8592); width: fit-content;
         }
+
+        /* Status Dot with animations */
         .auto-config-status-dot {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: var(--success); flex-shrink: 0;
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
         }
-        .auto-config-card.disabled .auto-config-status-dot { background: var(--text-secondary); }
+        .auto-config-status-dot.active {
+            background: var(--success);
+            animation: pulseGreen 2s ease-in-out infinite;
+        }
+        .auto-config-status-dot.inactive { background: var(--text-secondary); }
+        .auto-config-status-dot.error {
+            background: var(--danger);
+            animation: pulseRed 1.5s ease-in-out infinite;
+        }
+        @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(40,167,69,0.5); }
+            50% { box-shadow: 0 0 0 4px rgba(40,167,69,0); }
+        }
+        @keyframes pulseRed {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220,53,69,0.5); }
+            50% { box-shadow: 0 0 0 4px rgba(220,53,69,0); }
+        }
 
         /* Settings button */
         .auto-settings-btn {
@@ -1044,6 +1142,27 @@
         .auto-logs-loading {
             text-align: center; padding: 0.8rem; color: var(--text-secondary);
             font-size: 0.78rem;
+        }
+
+        /* Textarea in automation modal */
+        .auto-modal-field textarea {
+            width: 100%; padding: 0.5rem 0.7rem; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text); font-family: inherit; font-size: 0.85rem;
+            transition: border-color 0.2s; resize: vertical; min-height: 60px;
+        }
+        .auto-modal-field textarea:focus {
+            border-color: var(--gold); outline: none;
+        }
+
+        /* Automation section mobile breakpoints */
+        @media (max-width: 768px) {
+            .auto-stats-grid { grid-template-columns: 1fr 1fr; }
+            .auto-grid { grid-template-columns: 1fr; }
+            .auto-modal { width: 98%; max-height: 90vh; }
+        }
+        @media (max-width: 480px) {
+            .auto-stats-grid { grid-template-columns: 1fr; }
         }
 
         /* Permissions Manager */
@@ -2094,13 +2213,53 @@
                         <div class="settings-section-header">
                             <i class="fa-solid fa-robot"></i> אוטומציות הבוט — ניהול תהליכים אוטומטיים
                         </div>
-                        <div class="settings-section-desc">
-                            הבוט מריץ <strong>34 תהליכים אוטומטיים</strong> ב-9 קטגוריות: ניהול לידים, בטיחות, תפעול, שימור ועוד.<br>
-                            כאן אפשר <strong>להפעיל או לכבות</strong> כל אוטומציה, וללחוץ על <strong>⚙ הגדרות</strong> לעריכת פרמטרים.<br>
-                            שינויים מתעדכנים בבוט <strong>מיידית (Realtime)</strong>.
+                        <div class="settings-section-desc" style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+                            <div>
+                                הבוט מריץ <strong>34 תהליכים אוטומטיים</strong> ב-9 קטגוריות: ניהול לידים, בטיחות, תפעול, שימור ועוד.<br>
+                                כאן אפשר <strong>להפעיל או לכבות</strong> כל אוטומציה, וללחוץ על <strong>⚙ הגדרות</strong> לעריכת פרמטרים.<br>
+                                שינויים מתעדכנים בבוט <strong>מיידית (Realtime)</strong>.
+                            </div>
+                            <div style="display:flex;gap:0.5rem;flex-shrink:0;">
+                                <button class="auto-backup-btn" onclick="exportAutomationConfigs()" title="ייצוא הגדרות לקובץ JSON">
+                                    <i class="fa-solid fa-download"></i> ייצוא
+                                </button>
+                                <button class="auto-backup-btn" onclick="document.getElementById('auto-import-file').click()" title="ייבוא הגדרות מקובץ JSON">
+                                    <i class="fa-solid fa-upload"></i> ייבוא
+                                </button>
+                                <input type="file" id="auto-import-file" accept=".json" style="display:none;" onchange="importAutomationConfigs(this)">
+                            </div>
                         </div>
-                        <div class="settings-section-body" id="automation-config-container">
-                            <div class="utm-config-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען אוטומציות...</div>
+                        <div class="settings-section-body">
+                            <!-- Automation Stats -->
+                            <div class="auto-stats-grid">
+                                <div class="stat-card" id="auto-stat-active">
+                                    <div class="stat-icon green"><i class="fa-solid fa-toggle-on"></i></div>
+                                    <div><div class="stat-value">–</div><div class="stat-label">אוטומציות פעילות</div></div>
+                                </div>
+                                <div class="stat-card" id="auto-stat-leads">
+                                    <div class="stat-icon gold"><i class="fa-solid fa-user-plus"></i></div>
+                                    <div><div class="stat-value">–</div><div class="stat-label">לידים היום</div></div>
+                                </div>
+                                <div class="stat-card" id="auto-stat-health">
+                                    <div class="stat-icon blue"><i class="fa-solid fa-heart-pulse"></i></div>
+                                    <div><div class="stat-value">–</div><div class="stat-label">בריאות הבוט</div></div>
+                                </div>
+                                <div class="stat-card" id="auto-stat-alerts">
+                                    <div class="stat-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                    <div><div class="stat-value">–</div><div class="stat-label">התראות 24 שעות</div></div>
+                                </div>
+                            </div>
+                            <!-- Search Bar -->
+                            <div class="auto-search-bar">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input class="auto-search-input" id="auto-search" type="text" placeholder="חיפוש אוטומציה..." oninput="filterAutomations()">
+                            </div>
+                            <!-- Category Filter Pills -->
+                            <div class="auto-filter-pills" id="auto-filter-pills"></div>
+                            <!-- Automation Cards Container -->
+                            <div id="automation-config-container">
+                                <div class="utm-config-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען אוטומציות...</div>
+                            </div>
                         </div>
                     </div>
 
@@ -3168,7 +3327,7 @@
             document.getElementById('delete-confirm-text').textContent = `האם למחוק את "${name}"?`;
             pendingDeleteAction = async () => {
                 const { error } = await db.from(dbTable).delete().eq('id', id);
-                if (error) { showToast('שגיאה במחיקה', 'error'); console.error(error); return; }
+                if (error) { showToast('שגיאה במחיקה', 'error'); return; }
                 showToast('נמחק בהצלחה', 'success');
                 // Reload appropriate table
                 for (const [key, table] of Object.entries(entityDbTable)) {
@@ -3189,7 +3348,7 @@
             document.getElementById('delete-confirm-text').textContent = `האם למחוק ${ids.length} פריטים?`;
             pendingDeleteAction = async () => {
                 const { error } = await db.from(dbTable).delete().in('id', ids);
-                if (error) { showToast('שגיאה במחיקה', 'error'); console.error(error); return; }
+                if (error) { showToast('שגיאה במחיקה', 'error'); return; }
                 showToast(`${ids.length} פריטים נמחקו`, 'success');
                 entityReloadFn[tableKey]();
             };
@@ -3301,7 +3460,7 @@
             });
 
             const { error } = await db.from(editingTable).update(updates).eq('id', editingId);
-            if (error) { showToast('שגיאה בשמירה', 'error'); console.error(error); return; }
+            if (error) { showToast('שגיאה בשמירה', 'error'); return; }
 
             showToast('נשמר בהצלחה', 'success');
             closeEditModal();
@@ -4425,7 +4584,7 @@
                 ga4CacheTime = Date.now();
                 renderGA4Data(data);
             } catch (err) {
-                console.error('GA4 load error:', err);
+                /* GA4 load error handled by UI */
                 showGA4Error(err.message);
             }
         }
@@ -4742,7 +4901,7 @@
                 // Also update UTM Builder dropdowns dynamically
                 populateUtmBuilderDropdowns();
             } catch (err) {
-                console.error('UTM config load error:', err);
+                /* UTM load error handled by UI */
                 document.getElementById('utm-list-destination').innerHTML = '<div class="utm-config-empty">שגיאה בטעינת הנתונים</div>';
                 document.getElementById('utm-list-source').innerHTML = '<div class="utm-config-empty">שגיאה בטעינת הנתונים</div>';
             }
@@ -4947,6 +5106,80 @@
             export:         { label: 'ייצוא נתונים',        icon: 'fa-file-export' },
         };
 
+        const CATEGORY_COLORS = {
+            safety:         { bg: 'rgba(220,53,69,0.1)',  text: '#dc3545' },
+            lead_lifecycle: { bg: 'rgba(40,167,69,0.1)',  text: '#28a745' },
+            operations:     { bg: 'rgba(88,166,255,0.1)', text: '#58a6ff' },
+            retention:      { bg: 'rgba(212,175,55,0.1)', text: '#D4AF37' },
+            reports:        { bg: 'rgba(139,92,246,0.1)', text: '#8b5cf6' },
+            pipelines:      { bg: 'rgba(47,133,146,0.1)', text: '#2F8592' },
+            followups:      { bg: 'rgba(245,158,11,0.1)', text: '#f59e0b' },
+            monitoring:     { bg: 'rgba(236,72,153,0.1)', text: '#ec4899' },
+            export:         { bg: 'rgba(107,114,128,0.1)', text: '#6b7280' },
+        };
+
+        const PARAM_INPUT_TYPES = {
+            cron: 'hidden',
+            leadAutoContactHours: 'number', leadStaleHours: 'number',
+            patientAutoMatchHours: 'number', postAppointmentHours: 'number',
+            overdueDays: 'number', maxResponseMinutes: 'number',
+            escalateAfterHours: 'number', minScoreToAlert: 'number',
+            inactiveDays: 'number', graceMinutes: 'number',
+            expiryDays: 'number', minGapHours: 'number',
+            maxWaitDays: 'number', alertAtSession: 'number',
+            maxSessions: 'number', maxPatientsPerTherapist: 'number',
+            minPatientsPerTherapist: 'number', dormantDays: 'number',
+            afterSessions: 'number',
+        };
+
+        const AUTOMATION_DESCRIPTIONS = {
+            // reports
+            morning_briefing:          'שולח תקציר בוקר עם לידים חדשים ופגישות היום',
+            daily_summary:             'מסכם את הפעילות היומית — לידים, פגישות ושיבוצים',
+            weekly_report:             'מפיק דוח שבועי מקיף עם מגמות וסטטיסטיקות',
+            lead_source_report:        'מנתח מאיפה מגיעים הלידים ומה המקורות החזקים',
+            safety_daily_digest:       'מפיק סיכום יומי של כל אירועי הבטיחות',
+            // pipelines
+            lead_nurture:              'שומר על קשר אוטומטי עם לידים שטרם הומרו',
+            patient_auto_match:        'מציע שיבוץ אוטומטי של מטופל למטפל מתאים',
+            post_appointment:          'שולח מעקב אוטומטי אחרי כל פגישת טיפול',
+            // followups
+            patient_welcome:           'שולח הודעת ברוכים הבאים למטופל שנרשם',
+            therapist_welcome:         'שולח הודעת ברוכים הבאים למטפל שאושר',
+            post_treatment:            'מתעד ומעקב אחרי סיום סדרת טיפולים',
+            payment_reminders:         'שולח תזכורות תשלום למטופלים עם חוב פתוח',
+            // monitoring
+            appointment_reminders:     'מתזכר מטופלים ומטפלים לקראת פגישות קרובות',
+            new_lead_polling:          'סורק לידים חדשים שנכנסו ומתריע מיידית',
+            proactive_alerts:          'מזהה מגמות חריגות ושולח התראות עסקיות יזומות',
+            // export
+            monthly_export:            'מייצא נתונים חודשיים לגיבוי או ניתוח חיצוני',
+            // lead_lifecycle
+            lead_first_response:       'מתריע אם ליד לא קיבל מענה תוך זמן מוגדר',
+            lead_escalation:           'מסלים לידים ישנים שלא טופלו לדרג בכיר',
+            lead_scoring:              'מדרג לידים אוטומטית לפי פוטנציאל המרה',
+            lead_duplicate_detect:     'מזהה לידים כפולים לפי טלפון או אימייל',
+            // safety
+            emergency_keyword_scan:    'סורק הודעות בחיפוש מילות מצוקה או חירום',
+            inactive_patient_alert:    'מתריע על מטופל שלא היה פעיל תקופה ארוכה',
+            therapist_no_show_alert:   'מתריע כאשר מטפל לא הגיע לפגישה מתוכננת',
+            consent_expiry_check:      'בודק תוקף הסכמות ומתריע לפני פקיעה',
+            // operations
+            therapist_availability_check: 'בודק זמינות מטפלים ומתריע על חוסרים',
+            appointment_gap_alert:     'מזהה פערים בלוח זמנים של מטפלים',
+            waitlist_processor:        'מנהל רשימת המתנה ומציע שיבוצים כשמתפנה מקום',
+            session_limit_alert:       'מתריע כשמטופל מתקרב למכסת הטיפולים המקסימלית',
+            therapist_load_balance:    'מאזן עומס בין מטפלים למניעת עומס יתר',
+            // retention
+            birthday_greeting:         'שולח ברכת יום הולדת אוטומטית למטופלים',
+            milestone_celebration:     'מציין אבני דרך בטיפול — 5, 10, 15 פגישות',
+            reactivation_outreach:     'פונה למטופלים שנשרו לחידוש קשר',
+            satisfaction_survey:       'שולח סקר שביעות רצון אחרי מספר פגישות',
+            community_digest:          'שולח עדכון קהילתי תקופתי למטופלים ומטפלים',
+        };
+
+        let _activeCategoryFilter = null; // null = show all
+
         const PARAM_LABELS = {
             cron:                      'ביטוי תזמון (cron)',
             leadAutoContactHours:      'שעות לפני תזכורת ליד',
@@ -4979,8 +5212,8 @@
                 if (error) throw error;
                 automationConfigsCache = data || [];
                 renderAutomationConfigs();
+                updateAutoStats();
             } catch (err) {
-                console.error('Automation config load error:', err);
                 document.getElementById('automation-config-container').innerHTML =
                     '<div class="utm-config-empty">שגיאה בטעינת האוטומציות</div>';
             }
@@ -4990,82 +5223,75 @@
             const container = document.getElementById('automation-config-container');
             if (!automationConfigsCache.length) {
                 container.innerHTML = '<div class="utm-config-empty">לא נמצאו אוטומציות</div>';
+                renderFilterPills();
                 return;
             }
 
-            const grouped = {};
-            for (const a of automationConfigsCache) {
-                if (!grouped[a.category]) grouped[a.category] = [];
-                grouped[a.category].push(a);
+            const searchVal = (document.getElementById('auto-search')?.value || '').trim().toLowerCase();
+            const allowedCats = window._userCategoryAccess; // null = all allowed
+
+            const filtered = automationConfigsCache.filter(a => {
+                if (allowedCats && Array.isArray(allowedCats) && !allowedCats.includes(a.category)) return false;
+                if (_activeCategoryFilter && a.category !== _activeCategoryFilter) return false;
+                if (searchVal) {
+                    const catInfo = AUTOMATION_CATEGORIES[a.category] || { label: '' };
+                    const desc = AUTOMATION_DESCRIPTIONS[a.id] || a.description || '';
+                    const text = `${a.label} ${desc} ${catInfo.label}`.toLowerCase();
+                    if (!text.includes(searchVal)) return false;
+                }
+                return true;
+            });
+
+            renderFilterPills();
+
+            if (!filtered.length) {
+                container.innerHTML = `<div class="utm-config-empty" style="padding:2rem;text-align:center;">
+                    <i class="fa-solid fa-filter-circle-xmark" style="font-size:1.5rem;color:var(--text-secondary);display:block;margin-bottom:0.5rem;"></i>
+                    לא נמצאו אוטומציות התואמות לחיפוש
+                    <div style="margin-top:0.5rem;">
+                        <button class="auto-filter-pill" onclick="clearAutoFilters()" style="font-size:0.75rem;cursor:pointer;">
+                            <i class="fa-solid fa-rotate-left"></i> אפס סינון
+                        </button>
+                    </div>
+                </div>`;
+                return;
             }
 
-            const categoryOrder = [
-                'lead_lifecycle', 'safety', 'operations', 'retention',
-                'reports', 'pipelines', 'followups', 'monitoring', 'export'
-            ];
-
-            // Filter by user's category_access permissions
-            const allowedCats = window._userCategoryAccess; // null = all allowed
-            let html = '';
-
-            for (const cat of categoryOrder) {
-                const items = grouped[cat];
-                if (!items) continue;
-                // Skip categories the user doesn't have access to
-                if (allowedCats && Array.isArray(allowedCats) && !allowedCats.includes(cat)) continue;
+            let html = '<div class="auto-grid">';
+            for (const a of filtered) {
+                const cat = a.category;
                 const catInfo = AUTOMATION_CATEGORIES[cat] || { label: cat, icon: 'fa-gear' };
-                const enabledCount = items.filter(i => i.is_enabled).length;
+                const catColor = CATEGORY_COLORS[cat] || { bg: 'rgba(107,114,128,0.12)', text: '#6b7280' };
+                const desc = AUTOMATION_DESCRIPTIONS[a.id] || a.description || '';
 
-                html += `<div class="auto-accordion">`;
-                html += `<div class="auto-accordion-header" onclick="toggleAutoAccordion('${cat}')">
-                    <div class="auto-accordion-title">
-                        <i class="fa-solid ${catInfo.icon}"></i> ${catInfo.label}
-                        <span class="auto-accordion-count">${enabledCount}/${items.length}</span>
-                    </div>
-                    <i class="fa-solid fa-chevron-down auto-accordion-chevron" id="chevron-${cat}"></i>
-                </div>`;
-                html += `<div class="auto-accordion-body" id="accordion-${cat}">`;
-
-                for (const a of items) {
-                    const params = a.params || {};
-                    const visibleParams = Object.keys(params).filter(k => k !== 'cron');
-
-                    html += `<div class="auto-config-card ${a.is_enabled ? '' : 'disabled'}">
+                html += `<div class="auto-config-card ${a.is_enabled ? '' : 'disabled'}" data-category="${cat}">
+                    <div class="auto-config-card-header">
+                        <span class="auto-config-status-dot ${a.is_enabled ? 'active' : 'inactive'}"></span>
                         <label class="utm-config-toggle" title="${a.is_enabled ? 'לחץ לכיבוי' : 'לחץ להפעלה'}">
                             <input type="checkbox" ${a.is_enabled ? 'checked' : ''}
                                 onchange="toggleAutomation('${a.id}', this.checked)">
                             <span class="slider"></span>
                         </label>
-                        <div class="auto-config-card-body">
-                            <div class="auto-config-card-title">
-                                <i class="fa-solid ${a.icon || 'fa-robot'}"></i> ${a.label}
-                            </div>
-                            <div class="auto-config-card-desc">${a.description}</div>
-                            <div class="auto-config-meta">
-                                <span class="auto-config-status-dot"></span>
-                                <span class="auto-config-schedule-pill">
-                                    <i class="fa-regular fa-clock"></i> ${a.schedule}
-                                </span>
-                            </div>
+                        <div class="auto-config-card-title">
+                            <i class="fa-solid ${a.icon || 'fa-robot'}"></i> ${a.label}
                         </div>
                         <button class="auto-settings-btn" onclick="openParamSettings('${a.id}')" title="הגדרות">
                             <i class="fa-solid fa-gear"></i><span> הגדרות</span>
                         </button>
-                    </div>`;
-                }
-
-                html += '</div></div>';
+                    </div>
+                    <div class="auto-config-card-desc">${desc}</div>
+                    <div class="auto-config-card-footer">
+                        <span class="auto-category-badge" style="background:${catColor.bg};color:${catColor.text};">
+                            <i class="fa-solid ${catInfo.icon}" style="font-size:0.6rem;"></i> ${catInfo.label}
+                        </span>
+                        <span class="auto-config-schedule-pill">
+                            <i class="fa-regular fa-clock"></i> ${a.schedule}
+                        </span>
+                    </div>
+                </div>`;
             }
-
+            html += '</div>';
             container.innerHTML = html;
-        }
-
-        function toggleAutoAccordion(cat) {
-            const body = document.getElementById('accordion-' + cat);
-            const chevron = document.getElementById('chevron-' + cat);
-            if (!body) return;
-            body.classList.toggle('collapsed');
-            chevron?.classList.toggle('collapsed');
         }
 
         function openParamSettings(automationId) {
@@ -5079,7 +5305,8 @@
             titleEl.innerHTML = `<i class="fa-solid ${item.icon || 'fa-gear'}"></i> ${item.label}`;
 
             const params = item.params || {};
-            const keys = Object.keys(params);
+            // Filter out hidden params (e.g. cron)
+            const keys = Object.keys(params).filter(k => PARAM_INPUT_TYPES[k] !== 'hidden');
 
             if (!keys.length) {
                 bodyEl.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-secondary);font-size:0.85rem;"><i class="fa-solid fa-check-circle" style="color:var(--success);font-size:1.3rem;margin-bottom:0.5rem;display:block;"></i>אין פרמטרים לעריכה עבור אוטומציה זו</div>';
@@ -5088,14 +5315,25 @@
                 for (const key of keys) {
                     const label = PARAM_LABELS[key] || key;
                     const val = params[key];
-                    const inputType = (typeof val === 'number') ? 'number' : 'text';
-                    const hint = key === 'cron' ? 'תחביר cron: דקה שעה יום חודש יום-בשבוע' : '';
+                    // Determine input type from map, then fallback
+                    let inputType = PARAM_INPUT_TYPES[key];
+                    if (!inputType) {
+                        if (typeof val === 'number') inputType = 'number';
+                        else if (typeof val === 'string' && val.length > 60) inputType = 'textarea';
+                        else inputType = 'text';
+                    }
 
-                    fieldsHtml += `<div class="auto-modal-field">
-                        <label>${label}</label>
-                        <input type="${inputType}" value="${val}" data-param-key="${key}" ${inputType === 'number' ? 'min="0"' : ''}>
-                        ${hint ? '<div class="field-hint">' + hint + '</div>' : ''}
-                    </div>`;
+                    if (inputType === 'textarea') {
+                        fieldsHtml += `<div class="auto-modal-field">
+                            <label>${label}</label>
+                            <textarea data-param-key="${key}" rows="3">${val}</textarea>
+                        </div>`;
+                    } else {
+                        fieldsHtml += `<div class="auto-modal-field">
+                            <label>${label}</label>
+                            <input type="${inputType}" value="${val}" data-param-key="${key}" ${inputType === 'number' ? 'min="0"' : ''}>
+                        </div>`;
+                    }
                 }
                 bodyEl.innerHTML = fieldsHtml;
             }
@@ -5122,6 +5360,184 @@
 
         function closeParamSettings() {
             document.getElementById('auto-settings-overlay').classList.remove('active');
+        }
+
+        // ── Search filter (debounced) ──
+        let _filterTimeout;
+        function filterAutomations() {
+            clearTimeout(_filterTimeout);
+            _filterTimeout = setTimeout(() => renderAutomationConfigs(), 150);
+        }
+
+        // ── Category filter pills ──
+        function renderFilterPills() {
+            const pillsContainer = document.getElementById('auto-filter-pills');
+            if (!pillsContainer) return;
+            const allowedCats = window._userCategoryAccess;
+            const categoryOrder = [
+                'lead_lifecycle', 'safety', 'operations', 'retention',
+                'reports', 'pipelines', 'followups', 'monitoring', 'export'
+            ];
+
+            // Count items per category
+            const counts = {};
+            for (const a of automationConfigsCache) {
+                if (allowedCats && Array.isArray(allowedCats) && !allowedCats.includes(a.category)) continue;
+                counts[a.category] = (counts[a.category] || 0) + 1;
+            }
+            const totalCount = Object.values(counts).reduce((s, c) => s + c, 0);
+
+            let html = `<button class="auto-filter-pill ${!_activeCategoryFilter ? 'active' : ''}" onclick="setAutoFilter(null)">
+                הכל <span class="pill-count">(${totalCount})</span>
+            </button>`;
+            for (const cat of categoryOrder) {
+                if (!counts[cat]) continue;
+                const catInfo = AUTOMATION_CATEGORIES[cat] || { label: cat, icon: 'fa-gear' };
+                const isActive = _activeCategoryFilter === cat;
+                html += `<button class="auto-filter-pill ${isActive ? 'active' : ''}" onclick="setAutoFilter('${cat}')">
+                    <i class="fa-solid ${catInfo.icon}" style="font-size:0.65rem;"></i> ${catInfo.label}
+                    <span class="pill-count">(${counts[cat]})</span>
+                </button>`;
+            }
+            pillsContainer.innerHTML = html;
+        }
+
+        function setAutoFilter(category) {
+            _activeCategoryFilter = category;
+            renderAutomationConfigs();
+        }
+
+        function clearAutoFilters() {
+            _activeCategoryFilter = null;
+            const searchEl = document.getElementById('auto-search');
+            if (searchEl) searchEl.value = '';
+            renderAutomationConfigs();
+        }
+
+        // ── Backup & Recovery ──
+        function exportAutomationConfigs() {
+            if (!automationConfigsCache.length) {
+                showToast('אין הגדרות לייצוא', 'error');
+                return;
+            }
+            const exportData = {
+                version: 1,
+                exported_at: new Date().toISOString(),
+                configs: automationConfigsCache.map(a => ({
+                    id: a.id,
+                    category: a.category,
+                    label: a.label,
+                    is_enabled: a.is_enabled,
+                    params: a.params,
+                    schedule: a.schedule,
+                })),
+            };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+            a.download = `automation-configs-${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('הגדרות יוצאו בהצלחה', 'success');
+        }
+
+        async function importAutomationConfigs(fileInput) {
+            const file = fileInput.files[0];
+            if (!file) return;
+            fileInput.value = '';
+
+            try {
+                const text = await file.text();
+                const importData = JSON.parse(text);
+
+                if (!importData.configs || !Array.isArray(importData.configs)) {
+                    showToast('קובץ לא תקין — מבנה JSON שגוי', 'error');
+                    return;
+                }
+
+                if (!confirm(`לייבא ${importData.configs.length} הגדרות אוטומציה?\nהפעולה תדרוס את ההגדרות הנוכחיות.`)) return;
+
+                let updated = 0;
+                let errors = 0;
+                for (const cfg of importData.configs) {
+                    if (!cfg.id) { errors++; continue; }
+                    const updateObj = {};
+                    if (typeof cfg.is_enabled === 'boolean') updateObj.is_enabled = cfg.is_enabled;
+                    if (cfg.params && typeof cfg.params === 'object') updateObj.params = cfg.params;
+                    if (Object.keys(updateObj).length === 0) continue;
+                    updateObj.updated_at = new Date().toISOString();
+
+                    const { error } = await db.from('bot_automation_configs')
+                        .update(updateObj)
+                        .eq('id', cfg.id);
+                    if (error) { errors++; } else { updated++; }
+                }
+
+                await loadAutomationConfigs();
+                showToast(`יובאו ${updated} הגדרות בהצלחה${errors ? ` (${errors} שגיאות)` : ''}`, errors ? 'warning' : 'success');
+            } catch (e) {
+                showToast('שגיאה בקריאת הקובץ: ' + e.message, 'error');
+            }
+        }
+
+        // ── Live stats for automation header ──
+        async function updateAutoStats() {
+            // 1. Active count (sync from cache)
+            const activeCount = automationConfigsCache.filter(a => a.is_enabled).length;
+            const totalCount = automationConfigsCache.length;
+            const activeEl = document.getElementById('auto-stat-active');
+            if (activeEl) activeEl.querySelector('.stat-value').textContent = `${activeCount}/${totalCount}`;
+
+            // 2. Leads today
+            try {
+                const todayISO = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date()) + 'T00:00:00';
+                const { count } = await db.from('contact_requests')
+                    .select('*', { count: 'exact', head: true })
+                    .gte('created_at', todayISO);
+                const leadsEl = document.getElementById('auto-stat-leads');
+                if (leadsEl) leadsEl.querySelector('.stat-value').textContent = count ?? 0;
+            } catch (e) { /* leads stat unavailable */ }
+
+            // 3. Bot health
+            try {
+                const res = await fetch(BOT_URL + '/', { signal: AbortSignal.timeout(5000) });
+                const data = await res.json();
+                const isOnline = data.whatsapp === 'authorized' || data.whatsapp === 'connected';
+                const healthEl = document.getElementById('auto-stat-health');
+                if (healthEl) {
+                    healthEl.querySelector('.stat-value').textContent = isOnline ? 'תקין' : 'לא זמין';
+                    healthEl.querySelector('.stat-value').style.color = isOnline ? 'var(--success)' : 'var(--danger)';
+                }
+            } catch (e) {
+                const healthEl = document.getElementById('auto-stat-health');
+                if (healthEl) {
+                    healthEl.querySelector('.stat-value').textContent = 'לא זמין';
+                    healthEl.querySelector('.stat-value').style.color = 'var(--danger)';
+                }
+            }
+
+            // 4. Critical alerts (last 24h automation errors)
+            try {
+                const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+                const { data: logs } = await db.from('crm_activity_log')
+                    .select('details')
+                    .like('action', 'auto_%')
+                    .gte('created_at', since)
+                    .limit(200);
+                const errorCount = (logs || []).filter(l => l.details?.error || l.details?.status === 'error').length;
+                const alertsEl = document.getElementById('auto-stat-alerts');
+                if (alertsEl) {
+                    alertsEl.querySelector('.stat-value').textContent = errorCount;
+                    alertsEl.querySelector('.stat-value').style.color = errorCount > 0 ? 'var(--danger)' : 'var(--success)';
+                }
+            } catch (e) {
+                const alertsEl = document.getElementById('auto-stat-alerts');
+                if (alertsEl) alertsEl.querySelector('.stat-value').textContent = '–';
+            }
         }
 
         // ── Automation ID → activity log action name ──
@@ -5157,7 +5573,6 @@
                 countEl.textContent = `(${data.length})`;
                 renderAutomationLogs(data, container);
             } catch (err) {
-                console.error('Logs load error:', err);
                 container.innerHTML = '<div class="auto-logs-empty">שגיאה בטעינת לוגים</div>';
             }
         }
@@ -5218,6 +5633,8 @@
         }
 
         async function triggerAutomation(automationId) {
+            if (!confirm('האם אתה בטוח שברצונך להריץ את האוטומציה ידנית עכשיו?')) return;
+
             const runBtn = document.getElementById('auto-modal-run');
             const modal = document.querySelector('.auto-modal');
             runBtn.disabled = true;
@@ -5274,7 +5691,7 @@
             if (!item) return;
 
             const bodyEl = document.getElementById('auto-modal-body');
-            const inputs = bodyEl.querySelectorAll('input[data-param-key]');
+            const inputs = bodyEl.querySelectorAll('[data-param-key]');
             const newParams = { ...item.params };
 
             for (const input of inputs) {
@@ -5344,7 +5761,7 @@
                 permUsersCache = data || [];
                 renderPermissions();
             } catch (err) {
-                console.error('Permissions load error:', err);
+                /* Permissions load error handled by UI */
                 document.getElementById('permissions-container').innerHTML =
                     '<div class="perm-empty">שגיאה בטעינת הרשאות</div>';
             }

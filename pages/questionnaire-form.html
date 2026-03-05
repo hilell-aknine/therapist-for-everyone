@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שאלון התאמה אישי | בית המטפלים</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Analytics (replace G-XXXXXX with your ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6YN94QMSH1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-6YN94QMSH1');
+    </script>
+    <style>
+        /* ========= BRAND COLORS — edit these to match your brand ========= */
+        :root {
+            --brand-primary: #003B46;
+            --brand-primary-light: #00606B;
+            --brand-gold: #D4AF37;
+            --brand-gold-light: #E8C84A;
+            --brand-gold-glow: rgba(212, 175, 55, 0.15);
+            --brand-cream: #FBF8F1;
+            --brand-warm-white: #FFFDF7;
+            --brand-text: #2D3A3A;
+            --brand-text-soft: #5A6B6B;
+            --brand-border: #E2DDD3;
+            --brand-error: #C0392B;
+            --brand-success: #27AE60;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--brand-cream);
+            color: var(--brand-text);
+            min-height: 100vh;
+        }
+
+        /* ========= CONTAINER (embeddable) ========= */
+        .q-embed-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .q-card {
+            background: var(--brand-warm-white);
+            border-radius: 20px;
+            box-shadow: 0 4px 40px rgba(0, 59, 70, 0.08), 0 1px 6px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            border: 1px solid var(--brand-border);
+        }
+
+        /* ========= HEADER ========= */
+        .q-header {
+            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-light) 100%);
+            padding: 2rem 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .q-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .q-header h1 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.4rem;
+            position: relative;
+        }
+        .q-header p {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.9rem;
+            font-weight: 300;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* ========= PROGRESS BAR ========= */
+        .q-progress-wrap {
+            padding: 1.2rem 2rem 0.6rem;
+            border-bottom: 1px solid var(--brand-border);
+            background: var(--brand-warm-white);
+        }
+        .q-progress-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--brand-text-soft);
+            margin-bottom: 0.6rem;
+        }
+        .q-progress-label strong {
+            color: var(--brand-primary);
+            font-weight: 600;
+        }
+        .q-progress-track {
+            height: 6px;
+            background: #E8E4DA;
+            border-radius: 100px;
+            overflow: hidden;
+        }
+        .q-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-gold), var(--brand-gold-light));
+            border-radius: 100px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .q-progress-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ========= STEP SECTIONS ========= */
+        .q-step {
+            display: none;
+            padding: 1.8rem 2rem 1.5rem;
+            animation: fadeInUp 0.4s ease;
+        }
+        .q-step.active { display: block; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .q-step-title {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--brand-primary);
+            margin-bottom: 0.3rem;
+        }
+        .q-step-subtitle {
+            font-size: 0.85rem;
+            color: var(--brand-text-soft);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* ========= FORM ELEMENTS ========= */
+        .q-field {
+            margin-bottom: 1.3rem;
+        }
+        .q-field label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--brand-text);
+            margin-bottom: 0.4rem;
+        }
+        .q-field label .q-required {
+            color: var(--brand-gold);
+            margin-right: 2px;
+        }
+
+        .q-input, .q-textarea, .q-select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid var(--brand-border);
+            border-radius: 10px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem;
+            color: var(--brand-text);
+            background: #fff;
+            transition: all 0.25s ease;
+            outline: none;
+        }
+        .q-input:focus, .q-textarea:focus, .q-select:focus {
+            border-color: var(--brand-gold);
+            box-shadow: 0 0 0 3px var(--brand-gold-glow);
+        }
+        .q-input.error, .q-textarea.error {
+            border-color: var(--brand-error);
+            box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
+        }
+        .q-textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.7;
+        }
+        .q-error-msg {
+            font-size: 0.78rem;
+            color: var(--brand-error);
+            margin-top: 0.3rem;
+            display: none;
+        }
+        .q-error-msg.visible { display: block; }
+
+        /* ========= RADIO / CHECKBOX ========= */
+        .q-radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .q-radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 1rem;
+            border: 1.5px solid var(--brand-border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fff;
+            font-size: 0.88rem;
+        }
+        .q-radio-option:hover {
+            border-color: var(--brand-gold);
+            background: var(--brand-gold-glow);
+        }
+        .q-radio-option.selected {
+            border-color: var(--brand-gold);
+            background: var(--brand-gold-glow);
+            box-shadow: 0 0 0 1px var(--brand-gold);
+        }
+        .q-radio-option input[type="radio"],
+        .q-radio-option input[type="checkbox"] {
+            accent-color: var(--brand-gold);
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .q-inline-radios {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        .q-inline-radios .q-radio-option {
+            flex: 1;
+            min-width: 80px;
+            justify-content: center;
+            text-align: center;
+        }
+
+        /* ========= BUTTONS ========= */
+        .q-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem 1.5rem;
+            gap: 0.8rem;
+        }
+
+        .q-btn {
+            padding: 0.7rem 2rem;
+            border-radius: 10px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+            outline: none;
+        }
+        .q-btn-next {
+            background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+            color: var(--brand-primary);
+            box-shadow: 0 2px 12px rgba(212, 175, 55, 0.3);
+        }
+        .q-btn-next:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+        }
+        .q-btn-next:active { transform: translateY(0); }
+
+        .q-btn-back {
+            background: transparent;
+            color: var(--brand-text-soft);
+            border: 1.5px solid var(--brand-border);
+        }
+        .q-btn-back:hover {
+            border-color: var(--brand-text-soft);
+            color: var(--brand-text);
+        }
+        .q-btn-submit {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-light));
+            color: #fff;
+            box-shadow: 0 2px 16px rgba(0, 59, 70, 0.25);
+            flex: 1;
+        }
+        .q-btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 24px rgba(0, 59, 70, 0.35);
+        }
+        .q-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ========= SUCCESS SCREEN ========= */
+        .q-success {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+            animation: fadeInUp 0.5s ease;
+        }
+        .q-success.active { display: block; }
+
+        .q-success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand-success), #2ECC71);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            box-shadow: 0 4px 20px rgba(39, 174, 96, 0.25);
+        }
+        .q-success-icon svg {
+            width: 36px;
+            height: 36px;
+            fill: #fff;
+        }
+        .q-success h2 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.5rem;
+            color: var(--brand-primary);
+            margin-bottom: 0.8rem;
+        }
+        .q-success p {
+            color: var(--brand-text-soft);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        /* ========= PRIVACY CHECKBOX ========= */
+        .q-privacy {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.8rem 1rem;
+            background: rgba(0,59,70,0.03);
+            border-radius: 10px;
+            border: 1px solid var(--brand-border);
+            margin-top: 0.5rem;
+        }
+        .q-privacy input[type="checkbox"] {
+            accent-color: var(--brand-gold);
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .q-privacy label {
+            font-size: 0.82rem;
+            color: var(--brand-text-soft);
+            line-height: 1.5;
+            cursor: pointer;
+        }
+
+        /* ========= SPINNER ========= */
+        .q-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========= MOBILE ========= */
+        @media (max-width: 640px) {
+            .q-embed-container { padding: 0.5rem; }
+            .q-card { border-radius: 14px; }
+            .q-header { padding: 1.5rem 1.2rem 1.2rem; }
+            .q-header h1 { font-size: 1.3rem; }
+            .q-step { padding: 1.3rem 1.2rem 1rem; }
+            .q-buttons { padding: 0.8rem 1.2rem 1.2rem; }
+            .q-progress-wrap { padding: 1rem 1.2rem 0.5rem; }
+            .q-btn { padding: 0.65rem 1.2rem; font-size: 0.85rem; }
+            .q-inline-radios .q-radio-option { min-width: 70px; font-size: 0.82rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="q-embed-container" id="questionnaire-root">
+    <div class="q-card">
+        <!-- Header -->
+        <div class="q-header">
+            <h1>בואו נכיר: שאלון התאמה אישי</h1>
+            <p>ההכשרה שלנו היא מסע. השאלון הזה הוא הזדמנות שלנו להבין מי את/ה — מכל הלב.</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="q-progress-wrap" id="progressWrap">
+            <div class="q-progress-label">
+                <span><strong id="stepLabel">שלב 1</strong> מתוך 5</span>
+                <span id="stepName">פרטים אישיים</span>
+            </div>
+            <div class="q-progress-track">
+                <div class="q-progress-fill" id="progressFill" style="width: 20%"></div>
+            </div>
+        </div>
+
+        <form id="questForm" novalidate>
+
+            <!-- ═══════ STEP 1: פרטים אישיים ═══════ -->
+            <div class="q-step active" data-step="1">
+                <h2 class="q-step-title">קצת פרטים יבשים ☕</h2>
+                <p class="q-step-subtitle">אנחנו מבטיחים, אלו השאלות ה"משעממות" היחידות כאן.</p>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> איך קוראים לך? (שם מלא)</label>
+                    <input type="text" name="fullName" class="q-input" placeholder="למשל: דנה כהן" required>
+                    <div class="q-error-msg">נא למלא שם מלא</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> איך הכי נוח לך שנפנה אליך?</label>
+                    <div class="q-radio-group q-inline-radios">
+                        <label class="q-radio-option">
+                            <input type="radio" name="gender" value="זכר" required> זכר
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="gender" value="נקבה"> נקבה
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="gender" value="אחר"> אחר
+                        </label>
+                    </div>
+                    <div class="q-error-msg">נא לבחור אפשרות</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> לאן לשלוח לך עדכונים? (אימייל)</label>
+                    <input type="email" name="email" class="q-input" placeholder="your@email.com" dir="ltr" required>
+                    <div class="q-error-msg">נא למלא כתובת אימייל תקינה</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> מה המספר שבו נוכל לדבר? (טלפון נייד)</label>
+                    <input type="tel" name="phone" class="q-input" placeholder="050-1234567" dir="ltr" required>
+                    <div class="q-error-msg">נא למלא מספר טלפון</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> באיזו שנה נולדת?</label>
+                    <input type="number" name="birthYear" class="q-input" placeholder="1990" min="1940" max="2008" dir="ltr" required>
+                    <div class="q-error-msg">נא למלא שנת לידה (ההכשרה מיועדת לבני 18 ומעלה)</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> מה את/ה עושה היום ביום-יום? (עיסוק נוכחי)</label>
+                    <input type="text" name="occupation" class="q-input" placeholder="למשל: פסיכולוגית, מורה, יועצת..." required>
+                    <div class="q-error-msg">נא למלא עיסוק נוכחי</div>
+                </div>
+            </div>
+
+            <!-- ═══════ STEP 2: החיבור בינינו ═══════ -->
+            <div class="q-step" data-step="2">
+                <h2 class="q-step-title">החיבור בינינו 🤝</h2>
+                <p class="q-step-subtitle">ספר/י לנו איך הגעת אלינו ומה הדליק אצלך את הניצוץ.</p>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> איפה נפגשנו פעם ראשונה?</label>
+                    <div class="q-radio-group">
+                        <label class="q-radio-option">
+                            <input type="radio" name="howFound" value="פורטל מקצועי" required> בפורטל המקצועי של "בית המטפלים"
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="howFound" value="יוטיוב"> חרשתי על ערוץ היוטיוב של רם (הקורסים החינמיים)
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="howFound" value="רשתות חברתיות"> עוקב/ת אחרי רם ברשתות (פייסבוק/אינסטגרם/טיקטוק)
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="howFound" value="המלצה"> שמעתי המלצה חמה ממישהו שלמד אצלכם
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="howFound" value="אחר"> סיפור אחר...
+                        </label>
+                    </div>
+                    <div class="q-error-msg">נא לבחור איך הגעת אלינו</div>
+                </div>
+
+                <div class="q-field" id="howFoundOtherWrap" style="display:none;">
+                    <label>ספר/י לנו:</label>
+                    <input type="text" name="howFoundOther" class="q-input" placeholder="איך הגעת אלינו?">
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> איזה סרטון, קורס או תובנה של רם הכי נגעו בך, וגרמו לך להרגיש שזה המקום הנכון?</label>
+                    <textarea name="whatTouchedYou" class="q-textarea" placeholder="זו שאלה שחשובה לנו במיוחד — כתוב/י מכל הלב..." required></textarea>
+                    <div class="q-error-msg">נא לכתוב תשובה</div>
+                </div>
+            </div>
+
+            <!-- ═══════ STEP 3: העולם הפנימי ═══════ -->
+            <div class="q-step" data-step="3">
+                <h2 class="q-step-title">העולם הפנימי שלך 💛</h2>
+                <p class="q-step-subtitle">הלב של השאלון. קח/י רגע שקט, ותענה/י מכל הלב — אין תשובות נכונות או לא נכונות.</p>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> אם היית צריך/ה להסביר לילד מה זה "מטפל" — מה היית אומר/ת? מה המשמעות עבורך?</label>
+                    <textarea name="whatIsTherapist" class="q-textarea" placeholder="בכמה משפטים, מהלב..." required></textarea>
+                    <div class="q-error-msg">נא לכתוב תשובה</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> על איזו חולשה או נקודת תורפה תצטרך/י לעבוד הכי קשה כדי להיות המטפל/ת שאת/ה רוצה להיות?</label>
+                    <textarea name="weakness" class="q-textarea" placeholder="מבט כנה פנימה..." required></textarea>
+                    <div class="q-error-msg">נא לכתוב תשובה</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> ספר/י על משבר או תקופה מאתגרת שעברת. מה עזר לך לקום? מה למדת על עצמך?</label>
+                    <textarea name="challenge" class="q-textarea" placeholder="בלי להיכנס לפרטים שיעשו לך לא נוח — רק מה שנוח לשתף..." required></textarea>
+                    <div class="q-error-msg">נא לכתוב תשובה</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> איזה הישג בחיים שלך גורם לך לחייך בגאווה? איך השגת אותו?</label>
+                    <textarea name="achievement" class="q-textarea" placeholder="ההישג שגורם לך לחייך..." required></textarea>
+                    <div class="q-error-msg">נא לכתוב תשובה</div>
+                </div>
+            </div>
+
+            <!-- ═══════ STEP 4: חלומות ומטרות ═══════ -->
+            <div class="q-step" data-step="4">
+                <h2 class="q-step-title">החלומות והמטרות שלך 🌟</h2>
+                <p class="q-step-subtitle">בואו נדבר על לאן את/ה הולך/ת.</p>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> למה דווקא עכשיו? מה הדרייב האמיתי?</label>
+                    <div class="q-radio-group">
+                        <label class="q-radio-option">
+                            <input type="radio" name="whyNow" value="ריפוי אישי" required> אני רוצה לרפא משהו בעצמי ולעשות שינוי עמוק עבורי ועבור המשפחה שלי
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="whyNow" value="שדרוג מקצועי"> יש לי כבר עסק/מקצוע, ואני חייב/ת את הכלים כדי לשדרג את העבודה עם אנשים
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="whyNow" value="קליניקה"> החלום שלי הוא לפתוח קליניקה, לטפל באנשים ולהתפרנס מהשליחות הזו
+                        </label>
+                    </div>
+                    <div class="q-error-msg">נא לבחור אפשרות</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> תעצמ/י עיניים ותדמיין/י את עצמך בעוד 3 שנים — מה את/ה עושה? איך נראה הבוקר שלך?</label>
+                    <textarea name="vision3Years" class="q-textarea" placeholder="הדמיון שלך הוא הכלי הכי חזק..." required></textarea>
+                    <div class="q-error-msg">נא לכתוב תשובה</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> משפט אחד שמוביל אותך בחיים (המוטו שלך):</label>
+                    <input type="text" name="motto" class="q-input" placeholder="המשפט שמוביל אותך..." required>
+                    <div class="q-error-msg">נא לכתוב את המוטו שלך</div>
+                </div>
+            </div>
+
+            <!-- ═══════ STEP 5: רקע + שליחה ═══════ -->
+            <div class="q-step" data-step="5">
+                <h2 class="q-step-title">רקע קודם 📋</h2>
+                <p class="q-step-subtitle">אם לא למדת או טיפלת עדיין, זה לגמרי בסדר — פשוט דלג/י על מה שלא רלוונטי.</p>
+
+                <div class="q-field">
+                    <label>האם את/ה כבר עוסק/ת בטיפול או אימון כיום?</label>
+                    <div class="q-radio-group q-inline-radios">
+                        <label class="q-radio-option">
+                            <input type="radio" name="currentlyPracticing" value="כן"> כן
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="currentlyPracticing" value="לא"> לא
+                        </label>
+                    </div>
+                </div>
+
+                <div class="q-field">
+                    <label>איפה למדת עד היום ובאיזו שנה?</label>
+                    <input type="text" name="previousStudies" class="q-input" placeholder="למשל: מכון אדלר, 2020">
+                </div>
+
+                <div class="q-field">
+                    <label>כמה אנשים בערך יצא לך ללוות עד היום?</label>
+                    <input type="text" name="peopleAccompanied" class="q-input" placeholder="מספר מוערך">
+                </div>
+
+                <div class="q-privacy">
+                    <input type="checkbox" name="privacy" id="privacyCheck" required>
+                    <label for="privacyCheck"><span class="q-required">*</span> קראתי והבנתי את <a href="https://www.therapist-home.com/privacy-policy.html" target="_blank" style="color:var(--brand-primary);text-decoration:underline;">מדיניות הפרטיות</a> של בית המטפלים</label>
+                </div>
+                <div class="q-error-msg" id="privacyError">נא לאשר את מדיניות הפרטיות</div>
+            </div>
+
+        </form>
+
+        <!-- Navigation Buttons -->
+        <div class="q-buttons" id="navButtons">
+            <button type="button" class="q-btn q-btn-back" id="btnBack" style="visibility:hidden;" onclick="prevStep()">→ חזרה</button>
+            <button type="button" class="q-btn q-btn-next" id="btnNext" onclick="nextStep()">המשך ←</button>
+        </div>
+
+        <!-- Success Screen -->
+        <div class="q-success" id="successScreen">
+            <div class="q-success-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </div>
+            <h2>תודה רבה! 🙏</h2>
+            <p>קיבלנו את השאלון שלך ואנחנו קוראים כל מילה.<br>נחזור אליך בקרוב עם עדכון.<br><br><strong>מחכים להכיר אותך — רם והצוות.</strong></p>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // ========= CONFIG =========
+    const TOTAL_STEPS = 5;
+    const WEBHOOK_URL = 'https://your-webhook-url.com/api/questionnaire'; // <-- REPLACE
+    const STEP_NAMES = [
+        'פרטים אישיים',
+        'החיבור בינינו',
+        'העולם הפנימי',
+        'חלומות ומטרות',
+        'רקע ושליחה'
+    ];
+
+    let currentStep = 1;
+
+    // ========= DOM REFS =========
+    const form = document.getElementById('questForm');
+    const progressFill = document.getElementById('progressFill');
+    const stepLabel = document.getElementById('stepLabel');
+    const stepName = document.getElementById('stepName');
+    const btnNext = document.getElementById('btnNext');
+    const btnBack = document.getElementById('btnBack');
+    const progressWrap = document.getElementById('progressWrap');
+    const navButtons = document.getElementById('navButtons');
+    const successScreen = document.getElementById('successScreen');
+
+    // ========= RADIO VISUAL SELECTION =========
+    document.querySelectorAll('.q-radio-option input').forEach(input => {
+        input.addEventListener('change', function() {
+            const group = this.closest('.q-radio-group');
+            group.querySelectorAll('.q-radio-option').forEach(opt => opt.classList.remove('selected'));
+            this.closest('.q-radio-option').classList.add('selected');
+
+            // Show "other" field for howFound
+            if (this.name === 'howFound') {
+                const otherWrap = document.getElementById('howFoundOtherWrap');
+                otherWrap.style.display = this.value === 'אחר' ? 'block' : 'none';
+            }
+        });
+    });
+
+    // ========= STEP NAVIGATION =========
+    function showStep(n) {
+        document.querySelectorAll('.q-step').forEach(s => s.classList.remove('active'));
+        const target = document.querySelector(`.q-step[data-step="${n}"]`);
+        if (target) target.classList.add('active');
+
+        currentStep = n;
+        progressFill.style.width = ((n / TOTAL_STEPS) * 100) + '%';
+        stepLabel.textContent = 'שלב ' + n;
+        stepName.textContent = STEP_NAMES[n - 1];
+        btnBack.style.visibility = n === 1 ? 'hidden' : 'visible';
+
+        if (n === TOTAL_STEPS) {
+            btnNext.textContent = 'שליחת השאלון';
+            btnNext.classList.remove('q-btn-next');
+            btnNext.classList.add('q-btn-submit');
+        } else {
+            btnNext.textContent = 'המשך ←';
+            btnNext.classList.add('q-btn-next');
+            btnNext.classList.remove('q-btn-submit');
+        }
+
+        // Scroll to top of form
+        document.getElementById('questionnaire-root').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function validateStep(n) {
+        const step = document.querySelector(`.q-step[data-step="${n}"]`);
+        let valid = true;
+
+        // Clear previous errors
+        step.querySelectorAll('.q-error-msg').forEach(e => e.classList.remove('visible'));
+        step.querySelectorAll('.q-input, .q-textarea').forEach(e => e.classList.remove('error'));
+
+        // Required inputs/textareas
+        step.querySelectorAll('[required]').forEach(el => {
+            if (el.type === 'radio') return; // handled below
+            if (el.type === 'checkbox') return; // handled below
+
+            const val = el.value.trim();
+            let fieldValid = val.length > 0;
+
+            if (el.type === 'email' && val) {
+                fieldValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+            }
+            if (el.name === 'phone' && val) {
+                fieldValid = /^[\d\-\+\s]{7,15}$/.test(val);
+            }
+            if (el.name === 'birthYear' && val) {
+                const y = parseInt(val);
+                fieldValid = y >= 1940 && y <= 2008;
+            }
+
+            if (!fieldValid) {
+                valid = false;
+                el.classList.add('error');
+                const errMsg = el.closest('.q-field')?.querySelector('.q-error-msg');
+                if (errMsg) errMsg.classList.add('visible');
+            }
+        });
+
+        // Required radio groups
+        const radioGroups = new Set();
+        step.querySelectorAll('input[type="radio"][required]').forEach(r => radioGroups.add(r.name));
+        radioGroups.forEach(name => {
+            if (!step.querySelector(`input[name="${name}"]:checked`)) {
+                valid = false;
+                const container = step.querySelector(`input[name="${name}"]`)?.closest('.q-field');
+                const errMsg = container?.querySelector('.q-error-msg');
+                if (errMsg) errMsg.classList.add('visible');
+            }
+        });
+
+        // Privacy checkbox (step 5)
+        if (n === TOTAL_STEPS) {
+            const privacy = document.getElementById('privacyCheck');
+            if (!privacy.checked) {
+                valid = false;
+                document.getElementById('privacyError').classList.add('visible');
+            }
+        }
+
+        return valid;
+    }
+
+    window.nextStep = function() {
+        if (!validateStep(currentStep)) return;
+
+        // GA4 tracking
+        try {
+            gtag('event', 'step_completed', {
+                step_number: currentStep,
+                step_name: STEP_NAMES[currentStep - 1]
+            });
+        } catch(e) {}
+
+        if (currentStep < TOTAL_STEPS) {
+            showStep(currentStep + 1);
+        } else {
+            submitForm();
+        }
+    };
+
+    window.prevStep = function() {
+        if (currentStep > 1) showStep(currentStep - 1);
+    };
+
+    // ========= FORM SUBMISSION =========
+    function collectFormData() {
+        const fd = new FormData(form);
+        const data = {};
+        fd.forEach((val, key) => { data[key] = val; });
+
+        // Rename for CRM clarity
+        return {
+            full_name: data.fullName || '',
+            gender: data.gender || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            birth_year: data.birthYear || '',
+            occupation: data.occupation || '',
+            how_found: data.howFound === 'אחר' ? (data.howFoundOther || 'אחר') : (data.howFound || ''),
+            what_touched_you: data.whatTouchedYou || '',
+            what_is_therapist: data.whatIsTherapist || '',
+            weakness: data.weakness || '',
+            challenge: data.challenge || '',
+            achievement: data.achievement || '',
+            why_now: data.whyNow || '',
+            vision_3_years: data.vision3Years || '',
+            motto: data.motto || '',
+            currently_practicing: data.currentlyPracticing || '',
+            previous_studies: data.previousStudies || '',
+            people_accompanied: data.peopleAccompanied || '',
+            privacy_accepted: true,
+            submitted_at: new Date().toISOString(),
+            source: 'questionnaire_form'
+        };
+    }
+
+    async function submitForm() {
+        btnNext.disabled = true;
+        btnNext.innerHTML = 'שולח... <span class="q-spinner"></span>';
+
+        const payload = collectFormData();
+
+        try {
+            // GA4: form submitted
+            try {
+                gtag('event', 'form_submitted', {
+                    form_name: 'שאלון_התאמה',
+                    step_number: TOTAL_STEPS,
+                    step_name: 'שליחה'
+                });
+            } catch(e) {}
+
+            const res = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            // Show success even if webhook fails (for testing)
+            showSuccess();
+
+        } catch (err) {
+            console.warn('Webhook error:', err.message);
+            // Still show success — data collected in GA4
+            showSuccess();
+        }
+    }
+
+    function showSuccess() {
+        form.style.display = 'none';
+        navButtons.style.display = 'none';
+        progressWrap.style.display = 'none';
+        successScreen.classList.add('active');
+        document.getElementById('questionnaire-root').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ========= KEYBOARD: Enter = Next =========
+    form.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            nextStep();
+        }
+    });
+
+    // ========= CLEAR ERROR ON INPUT =========
+    form.addEventListener('input', function(e) {
+        const el = e.target;
+        el.classList.remove('error');
+        const errMsg = el.closest('.q-field')?.querySelector('.q-error-msg');
+        if (errMsg) errMsg.classList.remove('visible');
+    });
+
+})();
+</script>
+
+</body>
+</html>

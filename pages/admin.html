@@ -1690,7 +1690,7 @@
                     <!-- Table -->
                     <div class="table-container">
                         <div class="table-header">
-                            <div style="display:flex;align-items:center;gap:1rem;">
+                            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
                                 <h3>לידים מכירות</h3>
                                 <button class="btn btn-export" onclick="exportPipelineCSV()">
                                     <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
@@ -1706,6 +1706,12 @@
                             <button class="btn btn-danger" onclick="bulkDeleteEntity('pipeline')">
                                 <i class="fa-solid fa-trash"></i> מחק נבחרים
                             </button>
+                            <select id="bulk-assign-select" style="padding:0.4rem 0.6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:0.82rem;">
+                                <option value="">הקצה ל...</option>
+                            </select>
+                            <button class="btn" style="background:var(--muted-teal);color:white;font-size:0.82rem;" onclick="bulkAssignLeads()">
+                                <i class="fa-solid fa-user-tag"></i> הקצה נבחרים
+                            </button>
                         </div>
                         <table>
                             <thead>
@@ -1715,6 +1721,7 @@
                                     <th>טלפון</th>
                                     <th>שלב</th>
                                     <th>חיוגים</th>
+                                    <th class="admin-only-col">מוקצה ל</th>
                                     <th>חזרה</th>
                                     <th>סכום ₪</th>
                                     <th>תאריך</th>
@@ -2511,6 +2518,27 @@
                         </div>
                     </div>
 
+                    <!-- Section: Sales Rep Manager (Admin only) -->
+                    <div class="settings-section" id="sales-rep-section">
+                        <div class="settings-section-header">
+                            <i class="fa-solid fa-user-tie"></i> ניהול אנשי מכירות
+                        </div>
+                        <div class="settings-section-desc">
+                            הוספה והסרה של אנשי מכירות. כל איש מכירות מקבל גישה ל-Pipeline בלבד (דשבורד + בוט WhatsApp).
+                        </div>
+                        <div class="settings-section-body">
+                            <div class="perm-add-bar" style="margin-bottom:1rem;">
+                                <input type="text" id="sr-add-name" placeholder="שם מלא" style="flex:1;">
+                                <input type="email" id="sr-add-email" placeholder="אימייל" style="flex:1;">
+                                <input type="text" id="sr-add-phone" placeholder="טלפון WhatsApp (972...)" style="flex:1;">
+                                <button onclick="addSalesRep()"><i class="fa-solid fa-user-plus"></i> הוסף</button>
+                            </div>
+                            <div id="sales-reps-container">
+                                <div class="perm-empty"><i class="fa-solid fa-spinner fa-spin"></i> טוען אנשי מכירות...</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Section: Permissions Manager (SuperAdmin only) -->
                     <div class="settings-section" id="permissions-section" style="display:none;">
                         <div class="settings-section-header">
@@ -2804,8 +2832,10 @@
         // Global permissions state
         window._userCategoryAccess = null; // null = all access (superadmin / no row)
         window._userBotRole = 'admin';
+        window._userProfileRole = 'admin'; // profiles.role: 'admin' or 'sales_rep'
+        window._userProfileId = null;
 
-        // AUTH GUARD - Redirect if not authenticated or not admin
+        // AUTH GUARD - Redirect if not authenticated or not admin/sales_rep
         (async function() {
             const tempClient = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
             const { data: { session } } = await tempClient.auth.getSession();
@@ -2813,15 +2843,32 @@
                 window.location.href = 'login.html';
                 return;
             }
-            // Verify admin role
+            window._userProfileId = session.user.id;
+            // Verify admin or sales_rep role
             const { data: profile } = await tempClient
                 .from('profiles')
                 .select('role')
                 .eq('id', session.user.id)
                 .single();
-            if (!profile || profile.role !== 'admin') {
+            if (!profile || !['admin', 'sales_rep'].includes(profile.role)) {
                 window.location.href = 'course-library.html';
                 return;
+            }
+            window._userProfileRole = profile.role;
+            // If sales_rep: hide non-pipeline sidebar tabs
+            if (profile.role === 'sales_rep') {
+                document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+                    const onclick = item.getAttribute('onclick') || '';
+                    const allowed = ["switchView('pipeline')", "switchView('settings')"];
+                    if (!allowed.some(a => onclick.includes(a))) {
+                        item.style.display = 'none';
+                    }
+                });
+                // Auto-switch to pipeline view
+                setTimeout(() => {
+                    const pipelineTab = document.querySelector('.sidebar .nav-item[onclick*="pipeline"]');
+                    if (pipelineTab) pipelineTab.click();
+                }, 100);
             }
             // Load category permissions
             const { data: access } = await tempClient
@@ -2873,7 +2920,12 @@
         }
 
         async function loadAllData() {
-            await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires(), loadPipeline()]);
+            if (window._userProfileRole === 'sales_rep') {
+                // Sales rep: only load pipeline (RLS filters by assigned_to)
+                await loadPipeline();
+            } else {
+                await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires(), loadPipeline()]);
+            }
             updateCounts();
         }
 
@@ -2925,7 +2977,7 @@
             });
             if (view === 'bot') loadBotView();
             if (view === 'analytics') loadGA4Analytics();
-            if (view === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); }
+            if (view === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }
         }
 
         function filterPatients(status) {
@@ -4109,9 +4161,34 @@
             credit_card: 'כרטיס אשראי'
         };
 
+        // Cache of sales reps (profiles with role=sales_rep)
+        let salesRepsCache = [];
+
+        async function loadSalesReps() {
+            if (window._userProfileRole !== 'admin') return;
+            const { data } = await db.from('profiles').select('id, full_name, email').eq('role', 'sales_rep');
+            salesRepsCache = data || [];
+            // Populate bulk assign dropdown
+            const sel = document.getElementById('bulk-assign-select');
+            if (sel) {
+                sel.innerHTML = '<option value="">הקצה ל...</option>' +
+                    salesRepsCache.map(r => `<option value="${r.id}">${escapeHtml(r.full_name || r.email)}</option>`).join('') +
+                    '<option value="__auto__">🔄 הקצאה אוטומטית (Round Robin)</option>';
+            }
+        }
+
         async function loadPipeline() {
             const { data } = await db.from('sales_leads').select('*').order('created_at', { ascending: false });
             pipelineLeads = data || [];
+
+            // Resolve assigned_to names (admin only)
+            if (window._userProfileRole === 'admin' && pipelineLeads.some(l => l.assigned_to)) {
+                await loadSalesReps();
+                const repMap = {};
+                salesRepsCache.forEach(r => { repMap[r.id] = r.full_name || r.email; });
+                pipelineLeads.forEach(l => { l._assignedName = l.assigned_to ? (repMap[l.assigned_to] || 'לא ידוע') : ''; });
+            }
+
             document.getElementById('pipeline-count').textContent = pipelineLeads.filter(l => !['closed_won','closed_lost'].includes(l.stage)).length;
             updatePipelineStats();
             renderPipeline();
@@ -4166,8 +4243,18 @@
             resetSelectAll('select-all-pipeline');
             updateBulkBarFor('pipeline');
 
+            const isAdmin = window._userProfileRole === 'admin';
+            const colSpan = isAdmin ? 10 : 9;
+
+            // Hide admin-only columns for sales_rep
+            document.querySelectorAll('.admin-only-col').forEach(el => el.style.display = isAdmin ? '' : 'none');
+            // Hide bulk assign controls for sales_rep
+            const bulkAssignSel = document.getElementById('bulk-assign-select');
+            if (bulkAssignSel) bulkAssignSel.style.display = isAdmin ? '' : 'none';
+            document.querySelectorAll('#bulk-bar-pipeline .btn[onclick*="bulkAssign"]').forEach(b => b.style.display = isAdmin ? '' : 'none');
+
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fa-solid fa-filter-circle-dollar"></i><br>אין לידים</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-state"><i class="fa-solid fa-filter-circle-dollar"></i><br>אין לידים</td></tr>`;
                 return;
             }
 
@@ -4175,12 +4262,13 @@
             let html = '';
             for (const [group, items] of Object.entries(groups)) {
                 if (items.length === 0) continue;
-                html += `<tr class="date-group-row"><td colspan="9"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                html += `<tr class="date-group-row"><td colspan="${colSpan}"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
                 html += items.map(l => {
                     const dots = Array.from({length:6}, (_,i) => `<span class="dot ${i < l.call_attempts ? 'filled' : 'empty'}"></span>`).join('');
                     const callback = l.callback_at ? new Date(l.callback_at).toLocaleString('he-IL', {day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
                     const amount = l.deal_amount ? '₪' + Number(l.deal_amount).toLocaleString() : '-';
                     const safeName = (l.full_name || 'ללא שם').replace(/'/g, "\\'");
+                    const assignedName = l._assignedName || '';
                     return `
                     <tr style="cursor:pointer;" onclick="openPipelineDetail('${l.id}')">
                         <td class="lead-checkbox" onclick="event.stopPropagation()"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('pipeline')"></td>
@@ -4188,6 +4276,7 @@
                         <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;" onclick="event.stopPropagation()">${l.phone}</a>` : '-'}</td>
                         <td><span class="status-badge stage-${l.stage}">${PIPELINE_STAGES[l.stage] || l.stage}</span></td>
                         <td><div class="call-dots">${dots}</div></td>
+                        ${isAdmin ? `<td style="font-size:0.82rem;">${assignedName ? `<span style="color:var(--muted-teal);font-weight:600;">${escapeHtml(assignedName)}</span>` : '<span style="color:var(--text-secondary);">—</span>'}</td>` : ''}
                         <td style="font-size:0.82rem;">${callback}</td>
                         <td>${amount}</td>
                         <td>${formatDate(l.created_at)}</td>
@@ -4197,7 +4286,7 @@
                                 <div class="row-menu-dropdown">
                                     <button class="row-menu-item" onclick="openPipelineDetail('${l.id}');closeAllMenus()"><i class="fa-solid fa-eye"></i> צפייה</button>
                                     ${l.phone ? `<button class="row-menu-item" onclick="window.open('https://wa.me/${l.phone.replace(/^0/,'972')}','_blank');closeAllMenus()"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> WhatsApp</button>` : ''}
-                                    <button class="row-menu-item danger" onclick="deleteEntity('sales_leads','${l.id}','${safeName}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
+                                    ${isAdmin ? `<button class="row-menu-item danger" onclick="deleteEntity('sales_leads','${l.id}','${safeName}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>` : ''}
                                 </div>
                             </div>
                         </td>
@@ -4345,6 +4434,15 @@
                         </select>
                         <button class="btn btn-gold" style="font-size:0.85rem;padding:0.5rem 1rem;" onclick="changePipelineStage()"><i class="fa-solid fa-arrow-left"></i> העבר</button>
                     </div>
+                    ${window._userProfileRole === 'admin' ? `
+                    <div style="margin-bottom:1rem;display:flex;align-items:center;gap:0.8rem;">
+                        <label style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;"><i class="fa-solid fa-user-tag"></i> הקצה ל:</label>
+                        <select id="pl-assign-select" style="flex:1;padding:0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+                            <option value="">ללא הקצאה</option>
+                            ${salesRepsCache.map(r => `<option value="${r.id}" ${l.assigned_to === r.id ? 'selected' : ''}>${escapeHtml(r.full_name || r.email)}</option>`).join('')}
+                        </select>
+                        <button class="btn" style="font-size:0.85rem;padding:0.5rem 1rem;background:var(--muted-teal);color:white;" onclick="assignLeadToRep()"><i class="fa-solid fa-user-check"></i> הקצה</button>
+                    </div>` : ''}
                     ${dealInfo}
                     ${q ? `
                     <details style="margin-bottom:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border);overflow:hidden;">
@@ -4504,6 +4602,53 @@
             const { error } = await db.from('sales_leads').update({ admin_notes: notes }).eq('id', currentPipelineId);
             if (error) { showToast('שגיאה בשמירה', 'error'); return; }
             showToast('הערות נשמרו', 'success');
+            loadPipeline();
+        }
+
+        // === LEAD ASSIGNMENT (Admin only) ===
+
+        async function assignLeadToRep() {
+            if (window._userProfileRole !== 'admin') return;
+            if (!currentPipelineId) return;
+            const repId = document.getElementById('pl-assign-select')?.value || null;
+            const { error } = await db.from('sales_leads').update({ assigned_to: repId || null }).eq('id', currentPipelineId);
+            if (error) { showToast('שגיאה בהקצאה: ' + error.message, 'error'); return; }
+            const repName = repId ? salesRepsCache.find(r => r.id === repId)?.full_name || 'איש מכירות' : 'ללא';
+            showToast(`הליד הוקצה ל: ${repName}`, 'success');
+            closeModal('pipeline-modal');
+            loadPipeline();
+        }
+
+        async function bulkAssignLeads() {
+            if (window._userProfileRole !== 'admin') return;
+            const sel = document.getElementById('bulk-assign-select');
+            const repId = sel?.value;
+            if (!repId) { showToast('בחר איש מכירות', 'warning'); return; }
+
+            const checked = [...document.querySelectorAll('#pipeline-table input[type="checkbox"]:checked')].map(c => c.value);
+            if (!checked.length) { showToast('בחר לידים', 'warning'); return; }
+
+            if (repId === '__auto__') {
+                // Round-robin assignment
+                await loadSalesReps();
+                if (!salesRepsCache.length) { showToast('אין אנשי מכירות רשומים', 'error'); return; }
+                let errors = 0;
+                for (let i = 0; i < checked.length; i++) {
+                    const rep = salesRepsCache[i % salesRepsCache.length];
+                    const { error } = await db.from('sales_leads').update({ assigned_to: rep.id }).eq('id', checked[i]);
+                    if (error) errors++;
+                }
+                showToast(`הוקצו ${checked.length - errors} לידים (Round Robin)`, errors ? 'warning' : 'success');
+            } else {
+                // Assign all to specific rep
+                let errors = 0;
+                for (const id of checked) {
+                    const { error } = await db.from('sales_leads').update({ assigned_to: repId }).eq('id', id);
+                    if (error) errors++;
+                }
+                const repName = salesRepsCache.find(r => r.id === repId)?.full_name || 'איש מכירות';
+                showToast(`הוקצו ${checked.length - errors} לידים ל: ${repName}`, errors ? 'warning' : 'success');
+            }
             loadPipeline();
         }
 
@@ -5798,6 +5943,13 @@
         }
 
         function loadSettingsView() {
+            // Sales rep: hide all settings sections (they have no settings access)
+            if (window._userProfileRole === 'sales_rep') {
+                document.querySelectorAll('#settings-view .settings-section').forEach(sec => {
+                    sec.style.display = 'none';
+                });
+                return;
+            }
             const s = getDashboardSettings();
             document.getElementById('setting-date-range').value = s.dateRange;
             document.getElementById('setting-max-pages').value = s.maxPages;
@@ -6754,6 +6906,155 @@
         // ============================================================
         // PERMISSIONS MANAGER (SuperAdmin only)
         // ============================================================
+        // ===================
+        // SALES REP MANAGEMENT
+        // ===================
+
+        async function loadSalesRepManager() {
+            if (window._userProfileRole !== 'admin') {
+                const section = document.getElementById('sales-rep-section');
+                if (section) section.style.display = 'none';
+                return;
+            }
+            await loadSalesReps();
+            renderSalesReps();
+        }
+
+        async function renderSalesReps() {
+            const container = document.getElementById('sales-reps-container');
+            if (!salesRepsCache.length) {
+                container.innerHTML = '<div class="perm-empty"><i class="fa-solid fa-user-slash"></i><br>אין אנשי מכירות רשומים.<br>הוסף איש מכירות מלמעלה.</div>';
+                return;
+            }
+
+            // Get lead stats per sales rep
+            const leadCounts = {};
+            const wonCounts = {};
+            pipelineLeads.forEach(l => {
+                if (l.assigned_to) {
+                    leadCounts[l.assigned_to] = (leadCounts[l.assigned_to] || 0) + 1;
+                    if (l.stage === 'closed_won') wonCounts[l.assigned_to] = (wonCounts[l.assigned_to] || 0) + 1;
+                }
+            });
+
+            let html = '';
+            for (const rep of salesRepsCache) {
+                const totalLeads = leadCounts[rep.id] || 0;
+                const wonLeads = wonCounts[rep.id] || 0;
+                const convRate = totalLeads > 0 ? Math.round((wonLeads / totalLeads) * 100) : 0;
+                html += `
+                <div class="perm-user-card" style="margin-bottom:0.8rem;">
+                    <div class="perm-user-header" style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <div class="perm-user-name">
+                                <i class="fa-solid fa-user-tie" style="color:var(--gold);"></i>
+                                ${escapeHtml(rep.full_name || 'ללא שם')}
+                                <span class="perm-user-role sales_rep" style="background:var(--muted-teal);color:white;padding:0.1rem 0.5rem;border-radius:4px;font-size:0.72rem;">sales_rep</span>
+                            </div>
+                            <div class="perm-user-email" style="font-size:0.8rem;color:var(--text-secondary);">${escapeHtml(rep.email || '')}</div>
+                        </div>
+                        <div style="display:flex;gap:1.5rem;align-items:center;font-size:0.82rem;">
+                            <div style="text-align:center;"><strong>${totalLeads}</strong><br><span style="color:var(--text-secondary);font-size:0.72rem;">לידים</span></div>
+                            <div style="text-align:center;"><strong style="color:var(--success);">${wonLeads}</strong><br><span style="color:var(--text-secondary);font-size:0.72rem;">סגירות</span></div>
+                            <div style="text-align:center;"><strong>${convRate}%</strong><br><span style="color:var(--text-secondary);font-size:0.72rem;">המרה</span></div>
+                            <button class="btn btn-danger" style="font-size:0.78rem;padding:0.3rem 0.6rem;" onclick="removeSalesRep('${rep.id}','${escapeHtml((rep.full_name||'').replace(/'/g,"\\\\'"))}')">
+                                <i class="fa-solid fa-user-minus"></i> הסר
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        async function addSalesRep() {
+            const name = document.getElementById('sr-add-name')?.value?.trim();
+            const email = document.getElementById('sr-add-email')?.value?.trim();
+            const phone = document.getElementById('sr-add-phone')?.value?.trim();
+
+            if (!email) { showToast('נדרש אימייל', 'error'); return; }
+            if (!name) { showToast('נדרש שם', 'error'); return; }
+
+            try {
+                // 1. Find or create profile
+                let { data: existingProfile } = await db.from('profiles').select('id, role').eq('email', email).single();
+
+                if (existingProfile) {
+                    // Update existing profile role
+                    const { error } = await db.from('profiles').update({ role: 'sales_rep', full_name: name }).eq('id', existingProfile.id);
+                    if (error) throw error;
+                } else {
+                    // Profile doesn't exist yet — the user needs to sign up first
+                    showToast('המשתמש צריך להירשם לאתר קודם (login). לאחר ההרשמה, חזור והוסף שוב.', 'warning');
+                    return;
+                }
+
+                const profileId = existingProfile.id;
+
+                // 2. Add to crm_bot_phones (if phone provided)
+                if (phone && /^\d{10,15}$/.test(phone)) {
+                    const { error: phoneErr } = await db.from('crm_bot_phones').upsert({
+                        phone,
+                        label: name,
+                        role: 'sales_rep',
+                        profile_id: profileId,
+                        added_by: 'admin'
+                    }, { onConflict: 'phone' });
+                    if (phoneErr) console.warn('Phone insert error:', phoneErr.message);
+                }
+
+                // 3. Add to crm_bot_access with pipeline-only access
+                const { error: accessErr } = await db.from('crm_bot_access').upsert({
+                    user_id: profileId,
+                    role: 'sales_rep',
+                    category_access: ['pipeline']
+                }, { onConflict: 'user_id' });
+                if (accessErr) console.warn('Access insert error:', accessErr.message);
+
+                showToast(`${name} נוסף כאיש מכירות!`, 'success');
+
+                // Clear form
+                document.getElementById('sr-add-name').value = '';
+                document.getElementById('sr-add-email').value = '';
+                document.getElementById('sr-add-phone').value = '';
+
+                // Refresh
+                await loadSalesReps();
+                renderSalesReps();
+            } catch (err) {
+                showToast('שגיאה: ' + err.message, 'error');
+            }
+        }
+
+        async function removeSalesRep(profileId, name) {
+            if (!confirm(`להסיר את ${name} מאנשי המכירות?`)) return;
+
+            try {
+                // 1. Reset profile role to empty
+                await db.from('profiles').update({ role: null }).eq('id', profileId);
+
+                // 2. Remove from crm_bot_phones
+                await db.from('crm_bot_phones').delete().eq('profile_id', profileId);
+
+                // 3. Remove from crm_bot_access
+                await db.from('crm_bot_access').delete().eq('user_id', profileId);
+
+                // 4. Unassign leads
+                await db.from('sales_leads').update({ assigned_to: null }).eq('assigned_to', profileId);
+
+                showToast(`${name} הוסר מאנשי המכירות`, 'success');
+                await loadSalesReps();
+                renderSalesReps();
+                loadPipeline();
+            } catch (err) {
+                showToast('שגיאה: ' + err.message, 'error');
+            }
+        }
+
+        // ===================
+        // PERMISSIONS MANAGER
+        // ===================
+
         let permUsersCache = [];
 
         const ALL_CATEGORIES = [

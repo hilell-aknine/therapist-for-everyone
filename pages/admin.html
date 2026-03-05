@@ -1275,11 +1275,6 @@
                     <span>לידים</span>
                     <span class="badge" id="contact-leads-count">0</span>
                 </div>
-                <div class="nav-item" onclick="switchView('questionnaires')">
-                    <i class="fa-solid fa-clipboard-question"></i>
-                    <span>שאלונים</span>
-                    <span class="badge" id="questionnaires-count">0</span>
-                </div>
                 <div class="nav-item" onclick="switchView('pipeline')">
                     <i class="fa-solid fa-filter-circle-dollar"></i>
                     <span>Pipeline מכירות</span>
@@ -4212,10 +4207,17 @@
             tbody.innerHTML = html;
         }
 
-        function openPipelineDetail(id) {
+        async function openPipelineDetail(id) {
             const l = pipelineLeads.find(x => x.id === id);
             if (!l) return;
             currentPipelineId = id;
+
+            // Fetch questionnaire answers if linked
+            let q = null;
+            if (l.questionnaire_id) {
+                const { data } = await db.from('questionnaire_submissions').select('*').eq('id', l.questionnaire_id).single();
+                q = data;
+            }
 
             document.getElementById('pipeline-modal-title').textContent = `Pipeline — ${l.full_name || 'ללא שם'}`;
 
@@ -4337,6 +4339,26 @@
                         ${l.last_call_at ? `<span style="font-size:0.8rem;color:var(--text-secondary);margin-right:0.5rem;">אחרון: ${new Date(l.last_call_at).toLocaleString('he-IL')}</span>` : ''}
                     </div>
                     ${dealInfo}
+                    ${q ? `
+                    <details style="margin-bottom:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border);overflow:hidden;">
+                        <summary style="padding:0.8rem 1rem;cursor:pointer;font-weight:600;font-size:0.9rem;color:var(--gold);user-select:none;">
+                            <i class="fa-solid fa-clipboard-question"></i> תשובות השאלון
+                        </summary>
+                        <div style="padding:0 1rem 1rem;font-size:0.85rem;line-height:1.7;">
+                            ${q.how_found ? `<div style="margin-top:0.5rem;"><strong>איך הגיע:</strong> ${escapeHtml(q.how_found)}</div>` : ''}
+                            ${q.what_touched_you ? `<div style="margin-top:0.5rem;"><strong>מה נגע בו:</strong> ${escapeHtml(q.what_touched_you)}</div>` : ''}
+                            ${q.what_is_therapist ? `<div style="margin-top:0.5rem;"><strong>מה זה "מטפל" עבורו:</strong> ${escapeHtml(q.what_is_therapist)}</div>` : ''}
+                            ${q.weakness ? `<div style="margin-top:0.5rem;"><strong>חולשה:</strong> ${escapeHtml(q.weakness)}</div>` : ''}
+                            ${q.challenge ? `<div style="margin-top:0.5rem;"><strong>אתגר/משבר:</strong> ${escapeHtml(q.challenge)}</div>` : ''}
+                            ${q.achievement ? `<div style="margin-top:0.5rem;"><strong>הישג:</strong> ${escapeHtml(q.achievement)}</div>` : ''}
+                            ${q.why_now ? `<div style="margin-top:0.5rem;"><strong>למה עכשיו:</strong> ${escapeHtml(q.why_now)}</div>` : ''}
+                            ${q.vision_3_years ? `<div style="margin-top:0.5rem;"><strong>חזון 3 שנים:</strong> ${escapeHtml(q.vision_3_years)}</div>` : ''}
+                            ${q.motto ? `<div style="margin-top:0.5rem;"><strong>מוטו:</strong> ${escapeHtml(q.motto)}</div>` : ''}
+                            ${q.currently_practicing ? `<div style="margin-top:0.5rem;"><strong>עוסק בטיפול:</strong> ${escapeHtml(q.currently_practicing)}</div>` : ''}
+                            ${q.previous_studies ? `<div style="margin-top:0.5rem;"><strong>לימודים קודמים:</strong> ${escapeHtml(q.previous_studies)}</div>` : ''}
+                            ${q.people_accompanied ? `<div style="margin-top:0.5rem;"><strong>אנשים שליווה:</strong> ${escapeHtml(q.people_accompanied)}</div>` : ''}
+                        </div>
+                    </details>` : ''}
                     ${formHtml}
                     <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">
                         <label style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.3rem;">הערות</label>

@@ -4338,6 +4338,13 @@
                         <span style="font-size:0.85rem;">${l.call_attempts}/6</span>
                         ${l.last_call_at ? `<span style="font-size:0.8rem;color:var(--text-secondary);margin-right:0.5rem;">אחרון: ${new Date(l.last_call_at).toLocaleString('he-IL')}</span>` : ''}
                     </div>
+                    <div style="margin-bottom:1rem;display:flex;align-items:center;gap:0.8rem;">
+                        <label style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;">העבר שלב:</label>
+                        <select id="pl-stage-select" style="flex:1;padding:0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+                            ${Object.entries(PIPELINE_STAGES).map(([k,v]) => `<option value="${k}" ${k === l.stage ? 'selected' : ''}>${v}</option>`).join('')}
+                        </select>
+                        <button class="btn btn-gold" style="font-size:0.85rem;padding:0.5rem 1rem;" onclick="changePipelineStage()"><i class="fa-solid fa-arrow-left"></i> העבר</button>
+                    </div>
                     ${dealInfo}
                     ${q ? `
                     <details style="margin-bottom:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border);overflow:hidden;">
@@ -4435,6 +4442,25 @@
             const { error } = await db.from('sales_leads').update({ stage: newStage }).eq('id', currentPipelineId);
             if (error) { showToast('שגיאה בעדכון', 'error'); return; }
             showToast('שלב עודכן', 'success');
+            closeModal('pipeline-modal');
+            loadPipeline();
+            updateCounts();
+        }
+
+        async function changePipelineStage() {
+            if (!currentPipelineId) return;
+            const newStage = document.getElementById('pl-stage-select')?.value;
+            if (!newStage) return;
+            const lead = pipelineLeads.find(l => l.id === currentPipelineId);
+            if (lead && lead.stage === newStage) { showToast('הליד כבר בשלב הזה', 'warning'); return; }
+
+            const updates = { stage: newStage };
+            if (newStage === 'closed_won') updates.is_bought = true;
+            if (newStage === 'closed_lost') updates.is_bought = false;
+
+            const { error } = await db.from('sales_leads').update(updates).eq('id', currentPipelineId);
+            if (error) { showToast('שגיאה בעדכון', 'error'); return; }
+            showToast(`שלב עודכן ל: ${PIPELINE_STAGES[newStage]}`, 'success');
             closeModal('pipeline-modal');
             loadPipeline();
             updateCounts();

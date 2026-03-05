@@ -212,7 +212,7 @@ serve(async (req) => {
     const accessToken = await getGoogleAccessToken(serviceAccount)
 
     // ---- Run 5 queries in parallel ----
-    const [usersReport, pagesReport, allPagesReport, channelsReport, aggregateReport] = await Promise.all([
+    const [usersReport, pagesReport, allPagesReport, channelsReport, aggregateReport, sourcesReport] = await Promise.all([
       // 1) Active users & new users — last 30 days, broken down by date (for daily trend)
       queryGA4(
         accessToken,
@@ -292,6 +292,15 @@ serve(async (req) => {
         [],
         [{ name: 'activeUsers' }, { name: 'newUsers' }, { name: 'sessions' }]
       ),
+
+      // 6) Detailed traffic sources — individual sources (youtube, google, facebook, etc.)
+      queryGA4(
+        accessToken,
+        GA4_PROPERTY_ID,
+        { startDate: '30daysAgo', endDate: 'today' },
+        [{ name: 'sessionSource' }, { name: 'sessionMedium' }],
+        [{ name: 'sessions' }, { name: 'activeUsers' }]
+      ),
     ])
 
     // ---- Format response ----
@@ -310,6 +319,9 @@ serve(async (req) => {
 
       // Traffic channels
       traffic_sources: formatChannelsReport(channelsReport),
+
+      // Detailed sources (youtube, google, facebook, etc.)
+      detailed_sources: formatSourcesReport(sourcesReport),
     }
 
     return new Response(JSON.stringify(response), {
@@ -432,4 +444,22 @@ function formatChannelsReport(report: Record<string, unknown>): Record<string, u
     totalSessions,
     channels,
   }
+}
+
+function formatSourcesReport(report: Record<string, unknown>): Record<string, unknown> {
+  const rows = (report as { rows?: { dimensionValues: { value: string }[]; metricValues: { value: string }[] }[] }).rows || []
+
+  const sources: { source: string; medium: string; sessions: number; users: number }[] = []
+
+  for (const row of rows) {
+    const source = row.dimensionValues[0].value
+    const medium = row.dimensionValues[1].value
+    const sessions = parseInt(row.metricValues[0].value) || 0
+    const users = parseInt(row.metricValues[1].value) || 0
+    sources.push({ source, medium, sessions, users })
+  }
+
+  sources.sort((a, b) => b.sessions - a.sessions)
+
+  return { sources: sources.slice(0, 15) }
 }

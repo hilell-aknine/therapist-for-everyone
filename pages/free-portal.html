@@ -485,6 +485,20 @@
             btn.innerHTML = isOpen ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
         }
 
+        // Pass UTM params from landing URL to all course-library links
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+            const utmParams = new URLSearchParams();
+            utmKeys.forEach(k => { if (params.get(k)) utmParams.set(k, params.get(k)); });
+            if (utmParams.toString()) {
+                document.querySelectorAll('a[href*="course-library"]').forEach(a => {
+                    const sep = a.href.includes('?') ? '&' : '?';
+                    a.href = a.href + sep + utmParams.toString();
+                });
+            }
+        })();
+
         // Scroll reveal
         const revealEls = document.querySelectorAll('[data-reveal]');
         if (revealEls.length) {

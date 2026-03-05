@@ -637,7 +637,7 @@
 (function() {
     // ========= CONFIG =========
     const TOTAL_STEPS = 5;
-    const WEBHOOK_URL = 'https://your-webhook-url.com/api/questionnaire'; // <-- REPLACE
+    const SUPABASE_FUNCTIONS_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
     const STEP_NAMES = [
         'פרטים אישיים',
         'החיבור בינינו',
@@ -829,19 +829,27 @@
                 });
             } catch(e) {}
 
-            const res = await fetch(WEBHOOK_URL, {
+            const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/submit-lead`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    table: 'questionnaire_submissions',
+                    data: payload
+                })
             });
 
-            // Show success even if webhook fails (for testing)
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'שגיאה בשמירה');
+            }
+
             showSuccess();
 
         } catch (err) {
-            console.warn('Webhook error:', err.message);
-            // Still show success — data collected in GA4
-            showSuccess();
+            console.error('Submit error:', err.message);
+            alert('אירעה שגיאה בשליחת השאלון. אנא נסה/י שוב.');
+            btnNext.disabled = false;
+            btnNext.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שליחה';
         }
     }
 

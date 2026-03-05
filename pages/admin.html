@@ -1275,6 +1275,11 @@
                     <span>לידים</span>
                     <span class="badge" id="contact-leads-count">0</span>
                 </div>
+                <div class="nav-item" onclick="switchView('questionnaires')">
+                    <i class="fa-solid fa-clipboard-question"></i>
+                    <span>שאלונים</span>
+                    <span class="badge" id="questionnaires-count">0</span>
+                </div>
                 <div class="nav-item" onclick="switchView('bot')">
                     <i class="fa-solid fa-robot"></i>
                     <span>בוט CRM</span>
@@ -1544,6 +1549,90 @@
                             </thead>
                             <tbody id="contact-leads-table"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Questionnaires View -->
+                <div id="questionnaires-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-clipboard-question"></i> שאלוני התאמה להכשרה</h1>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon gold"><i class="fa-solid fa-clipboard-list"></i></div>
+                            <div><div class="stat-value" id="stat-q-total">0</div><div class="stat-label">סה"כ שאלונים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-sparkles"></i></div>
+                            <div><div class="stat-value" id="stat-q-new">0</div><div class="stat-label">חדשים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fa-solid fa-eye"></i></div>
+                            <div><div class="stat-value" id="stat-q-reviewed">0</div><div class="stat-label">נקראו</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(40,167,69,0.15);color:#28a745;">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div><div class="stat-value" id="stat-q-approved">0</div><div class="stat-label">אושרו</div></div>
+                        </div>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab active" onclick="filterQuestionnaires('all')">הכל</button>
+                        <button class="tab" onclick="filterQuestionnaires('new')">חדשים</button>
+                        <button class="tab" onclick="filterQuestionnaires('reviewed')">נקראו</button>
+                        <button class="tab" onclick="filterQuestionnaires('approved')">אושרו</button>
+                        <button class="tab" onclick="filterQuestionnaires('rejected')">נדחו</button>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div style="display:flex;align-items:center;gap:1rem;">
+                                <h3>שאלוני מועמדים</h3>
+                                <button class="btn btn-export" onclick="exportQuestionnairesCSV()">
+                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
+                                </button>
+                            </div>
+                            <div class="search-box">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" placeholder="חיפוש לפי שם, טלפון, אימייל..." id="questionnaires-search" oninput="renderQuestionnaires()">
+                            </div>
+                        </div>
+                        <div class="bulk-bar" id="bulk-bar-questionnaires">
+                            <span id="bulk-count-questionnaires">0 נבחרו</span>
+                            <button class="btn btn-danger" onclick="bulkDeleteQuestionnaires()">
+                                <i class="fa-solid fa-trash"></i> מחק נבחרים
+                            </button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-questionnaires" onchange="toggleSelectAllQ()" title="בחר הכל"></th>
+                                    <th>שם</th>
+                                    <th>טלפון</th>
+                                    <th>אימייל</th>
+                                    <th>עיסוק</th>
+                                    <th>סטטוס</th>
+                                    <th>תאריך</th>
+                                    <th>פעולות</th>
+                                </tr>
+                            </thead>
+                            <tbody id="questionnaires-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Questionnaire Detail Modal -->
+                <div class="modal-overlay" id="questionnaire-modal" onclick="if(event.target===this)closeModal('questionnaire-modal')">
+                    <div class="modal-content" style="max-width:700px;max-height:90vh;overflow-y:auto;">
+                        <div class="modal-header">
+                            <h2 id="q-modal-title">שאלון התאמה</h2>
+                            <button onclick="closeModal('questionnaire-modal')" class="modal-close">&times;</button>
+                        </div>
+                        <div id="q-modal-body"></div>
+                        <div style="display:flex;gap:0.5rem;padding:1.5rem;border-top:1px solid var(--border);flex-wrap:wrap;">
+                            <button class="btn btn-success" id="q-btn-approve" onclick="updateQStatus('approved')"><i class="fa-solid fa-check"></i> אשר מועמד</button>
+                            <button class="btn btn-warning" id="q-btn-review" onclick="updateQStatus('reviewed')"><i class="fa-solid fa-eye"></i> סמן כנקרא</button>
+                            <button class="btn btn-danger" id="q-btn-reject" onclick="updateQStatus('rejected')"><i class="fa-solid fa-xmark"></i> דחה</button>
+                            <a id="q-btn-whatsapp" href="#" target="_blank" class="btn" style="background:#25D366;color:white;margin-right:auto;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                        </div>
                     </div>
                 </div>
 
@@ -2643,7 +2732,7 @@
         }
 
         async function loadAllData() {
-            await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads()]);
+            await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires()]);
             updateCounts();
         }
 
@@ -2687,7 +2776,7 @@
         function switchView(view) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            ['patients','therapists','matches','leads','contact-leads','bot','analytics','settings'].forEach(v => {
+            ['patients','therapists','matches','leads','contact-leads','questionnaires','bot','analytics','settings'].forEach(v => {
                 document.getElementById(v + '-view')?.classList.toggle('hidden', view !== v);
             });
             if (view === 'bot') loadBotView();
@@ -3334,7 +3423,8 @@
             therapists: 'therapists',
             matches: 'appointments',
             leads: 'profiles',
-            'contact-leads': 'contact_requests'
+            'contact-leads': 'contact_requests',
+            'questionnaires': 'questionnaire_submissions'
         };
 
         const entityReloadFn = {
@@ -3342,7 +3432,8 @@
             therapists: () => { loadTherapists(); updateCounts(); },
             matches: () => { loadMatches(); updateCounts(); },
             leads: () => { loadLeads(); updateCounts(); },
-            'contact-leads': () => { loadContactLeads(); }
+            'contact-leads': () => { loadContactLeads(); },
+            'questionnaires': () => { loadQuestionnaires(); }
         };
 
         // Generic single delete — opens confirmation modal
@@ -3608,8 +3699,241 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); closeModal('export-modal'); closeModal('broadcast-modal'); closeDeleteModal(); closeEditModal(); closeAllMenus(); }
+            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); closeModal('export-modal'); closeModal('broadcast-modal'); closeModal('questionnaire-modal'); closeDeleteModal(); closeEditModal(); closeAllMenus(); }
         });
+
+        // ===================
+        // QUESTIONNAIRE SUBMISSIONS
+        // ===================
+        let questionnaires = [];
+        let currentQFilter = 'all';
+        let currentQId = null;
+
+        async function loadQuestionnaires() {
+            const { data } = await db.from('questionnaire_submissions').select('*').order('created_at', { ascending: false });
+            questionnaires = data || [];
+            document.getElementById('questionnaires-count').textContent = questionnaires.length;
+            document.getElementById('stat-q-total').textContent = questionnaires.length;
+            document.getElementById('stat-q-new').textContent = questionnaires.filter(q => q.status === 'new').length;
+            document.getElementById('stat-q-reviewed').textContent = questionnaires.filter(q => q.status === 'reviewed').length;
+            document.getElementById('stat-q-approved').textContent = questionnaires.filter(q => q.status === 'approved').length;
+            renderQuestionnaires();
+        }
+
+        function filterQuestionnaires(filter) {
+            currentQFilter = filter;
+            document.querySelectorAll('#questionnaires-view .tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            renderQuestionnaires();
+        }
+
+        function qStatusLabel(s) {
+            const m = { 'new': 'חדש', 'reviewed': 'נקרא', 'approved': 'אושר', 'rejected': 'נדחה' };
+            return m[s] || s || 'חדש';
+        }
+
+        function qStatusClass(s) {
+            const m = { 'new': 'status-new', 'reviewed': 'status-contacted', 'approved': 'status-approved', 'rejected': 'status-rejected' };
+            return m[s] || 'status-new';
+        }
+
+        function renderQuestionnaires() {
+            const search = document.getElementById('questionnaires-search')?.value?.toLowerCase() || '';
+            let filtered = questionnaires;
+            if (currentQFilter !== 'all') filtered = filtered.filter(q => q.status === currentQFilter);
+            if (search) filtered = filtered.filter(q =>
+                (q.full_name || '').toLowerCase().includes(search) ||
+                (q.phone || '').includes(search) ||
+                (q.email || '').toLowerCase().includes(search) ||
+                (q.occupation || '').toLowerCase().includes(search)
+            );
+
+            const tbody = document.getElementById('questionnaires-table');
+            resetSelectAll('select-all-questionnaires');
+            updateBulkBarFor('questionnaires');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-clipboard-question"></i><br>אין שאלונים</td></tr>';
+                return;
+            }
+
+            const groups = groupByDate(filtered);
+            let html = '';
+            for (const [group, items] of Object.entries(groups)) {
+                if (items.length === 0) continue;
+                html += `<tr class="date-group-row"><td colspan="8"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                html += items.map(q => `
+                    <tr style="cursor:pointer;" onclick="openQuestionnaireDetail('${q.id}')">
+                        <td class="lead-checkbox" onclick="event.stopPropagation()"><input type="checkbox" value="${q.id}" onchange="updateBulkBarFor('questionnaires')"></td>
+                        <td><strong>${q.full_name || 'אנונימי'}</strong></td>
+                        <td>${q.phone ? `<a href="tel:${q.phone}" style="color:var(--info);text-decoration:none;" onclick="event.stopPropagation()">${q.phone}</a>` : '-'}</td>
+                        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.email || '-'}</td>
+                        <td>${q.occupation || '-'}</td>
+                        <td><span class="status-badge ${qStatusClass(q.status)}">${qStatusLabel(q.status)}</span></td>
+                        <td>${formatDate(q.created_at)}</td>
+                        <td class="action-btns" onclick="event.stopPropagation()">
+                            <div class="row-menu" id="menu-q-${q.id}">
+                                <button class="row-menu-btn" onclick="toggleRowMenu('menu-q-${q.id}')">⋮</button>
+                                <div class="row-menu-dropdown">
+                                    <button class="row-menu-item" onclick="openQuestionnaireDetail('${q.id}');closeAllMenus()"><i class="fa-solid fa-eye"></i> צפייה</button>
+                                    ${q.phone ? `<button class="row-menu-item" onclick="window.open('https://wa.me/${q.phone.replace(/^0/,'972')}','_blank');closeAllMenus()"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> WhatsApp</button>` : ''}
+                                    <button class="row-menu-item danger" onclick="deleteEntity('questionnaire_submissions','${q.id}','${(q.full_name || 'אנונימי').replace(/'/g,"\\'")}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            tbody.innerHTML = html;
+        }
+
+        function toggleSelectAllQ() { toggleSelectAllFor('questionnaires'); }
+        function bulkDeleteQuestionnaires() { bulkDeleteEntity('questionnaires'); }
+
+        function openQuestionnaireDetail(id) {
+            const q = questionnaires.find(x => x.id === id);
+            if (!q) return;
+            currentQId = id;
+
+            document.getElementById('q-modal-title').textContent = `שאלון התאמה — ${q.full_name || 'ללא שם'}`;
+
+            const waPhone = (q.phone || '').replace(/^0/, '972').replace(/[^0-9]/g, '');
+            const waBtn = document.getElementById('q-btn-whatsapp');
+            if (waPhone) {
+                waBtn.href = `https://wa.me/${waPhone}`;
+                waBtn.style.display = '';
+            } else {
+                waBtn.style.display = 'none';
+            }
+
+            const section = (icon, title, content) => content ? `
+                <div class="detail-section">
+                    <h4><i class="fa-solid ${icon}"></i> ${title}</h4>
+                    <div class="questionnaire-answer">${escapeHtml(content)}</div>
+                </div>` : '';
+
+            const detailRow = (label, val) => val ? `
+                <div class="detail-row">
+                    <span class="detail-label">${label}</span>
+                    <span class="detail-value">${escapeHtml(val)}</span>
+                </div>` : '';
+
+            const genderLabel = { 'זכר': 'זכר', 'נקבה': 'נקבה', 'אחר': 'אחר' };
+
+            const html = `
+                <div style="padding:1.5rem;">
+                    <!-- Personal Info Card -->
+                    <div style="background:var(--bg);border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;border-right:4px solid var(--gold);">
+                        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+                            <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#c9a227);display:flex;align-items:center;justify-content:center;color:white;font-size:1.3rem;font-weight:700;">
+                                ${(q.full_name || '?')[0]}
+                            </div>
+                            <div>
+                                <h3 style="margin:0;color:var(--text-primary);font-size:1.1rem;">${escapeHtml(q.full_name || 'ללא שם')}</h3>
+                                <span class="status-badge ${qStatusClass(q.status)}" style="margin-top:4px;">${qStatusLabel(q.status)}</span>
+                            </div>
+                            <div style="margin-right:auto;text-align:left;font-size:0.85rem;color:var(--text-secondary);">
+                                ${formatDate(q.created_at)}
+                            </div>
+                        </div>
+                        ${detailRow('מגדר', genderLabel[q.gender] || q.gender)}
+                        ${detailRow('אימייל', q.email)}
+                        ${detailRow('טלפון', q.phone)}
+                        ${detailRow('שנת לידה', q.birth_year)}
+                        ${detailRow('עיסוק', q.occupation)}
+                    </div>
+
+                    <!-- Connection -->
+                    <div class="detail-section">
+                        <h4><i class="fa-solid fa-link" style="color:var(--info);"></i> החיבור בינינו</h4>
+                    </div>
+                    ${detailRow('איך הגיע אלינו', q.how_found)}
+                    ${section('fa-heart', 'מה נגע בך מהתוכן שלנו?', q.what_touched_you)}
+
+                    <!-- Inner World -->
+                    ${section('fa-child-reaching', 'מה זה "מטפל" עבורך?', q.what_is_therapist)}
+                    ${section('fa-shield-halved', 'חולשה או נקודת תורפה', q.weakness)}
+                    ${section('fa-mountain-sun', 'משבר או תקופה מאתגרת', q.challenge)}
+                    ${section('fa-trophy', 'הישג שגורם לך לחייך', q.achievement)}
+
+                    <!-- Dreams & Goals -->
+                    ${section('fa-rocket', 'למה דווקא עכשיו?', q.why_now)}
+                    ${section('fa-crystal-ball', 'איך אתה רואה את עצמך בעוד 3 שנים?', q.vision_3_years)}
+                    ${section('fa-quote-right', 'המוטו שלך', q.motto)}
+
+                    <!-- Background -->
+                    ${(q.currently_practicing || q.previous_studies || q.people_accompanied) ? `
+                        <div class="detail-section">
+                            <h4><i class="fa-solid fa-briefcase" style="color:var(--muted-teal);"></i> רקע מקצועי</h4>
+                        </div>
+                        ${detailRow('עוסק/ת בטיפול כיום?', q.currently_practicing)}
+                        ${detailRow('לימודים קודמים', q.previous_studies)}
+                        ${detailRow('אנשים שליוויתי', q.people_accompanied)}
+                    ` : ''}
+
+                    <!-- Admin Notes -->
+                    <div class="detail-section" style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);">
+                        <h4><i class="fa-solid fa-sticky-note" style="color:var(--gold);"></i> הערות אדמין</h4>
+                        <textarea id="q-admin-notes" style="width:100%;min-height:80px;border-radius:8px;border:1px solid var(--border);padding:0.8rem;font-family:inherit;font-size:0.9rem;resize:vertical;background:var(--bg);" placeholder="הוסף הערות פנימיות...">${escapeHtml(q.notes || '')}</textarea>
+                        <button class="btn" style="margin-top:0.5rem;background:var(--muted-teal);color:white;" onclick="saveQNotes()"><i class="fa-solid fa-save"></i> שמור הערות</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('q-modal-body').innerHTML = html;
+            document.getElementById('questionnaire-modal').classList.add('active');
+
+            // Auto-mark as reviewed if new
+            if (q.status === 'new') {
+                updateQStatus('reviewed', true);
+            }
+        }
+
+        async function updateQStatus(status, silent) {
+            if (!currentQId) return;
+            const { error } = await db.from('questionnaire_submissions')
+                .update({ status, updated_at: new Date().toISOString() })
+                .eq('id', currentQId);
+            if (error) { showToast('שגיאה בעדכון', 'error'); return; }
+            if (!silent) {
+                const labels = { 'approved': 'המועמד אושר', 'reviewed': 'סומן כנקרא', 'rejected': 'המועמד נדחה' };
+                showToast(labels[status] || 'עודכן', 'success');
+                closeModal('questionnaire-modal');
+            }
+            loadQuestionnaires();
+        }
+
+        async function saveQNotes() {
+            if (!currentQId) return;
+            const notes = document.getElementById('q-admin-notes')?.value || '';
+            const { error } = await db.from('questionnaire_submissions')
+                .update({ notes, updated_at: new Date().toISOString() })
+                .eq('id', currentQId);
+            if (error) { showToast('שגיאה בשמירה', 'error'); return; }
+            const q = questionnaires.find(x => x.id === currentQId);
+            if (q) q.notes = notes;
+            showToast('ההערות נשמרו', 'success');
+        }
+
+        function exportQuestionnairesCSV() {
+            if (questionnaires.length === 0) { showToast('אין נתונים לייצוא', 'warning'); return; }
+            const headers = ['שם', 'מגדר', 'אימייל', 'טלפון', 'שנת לידה', 'עיסוק', 'איך הגיע', 'מה נגע בך', 'מה זה מטפל', 'חולשה', 'אתגר', 'הישג', 'למה עכשיו', 'חזון 3 שנים', 'מוטו', 'עוסק בטיפול', 'לימודים', 'אנשים שליוויתי', 'סטטוס', 'הערות', 'תאריך'];
+            const rows = questionnaires.map(q => [
+                q.full_name || '', q.gender || '', q.email || '', q.phone || '', q.birth_year || '', q.occupation || '',
+                q.how_found || '', q.what_touched_you || '', q.what_is_therapist || '', q.weakness || '', q.challenge || '',
+                q.achievement || '', q.why_now || '', q.vision_3_years || '', q.motto || '',
+                q.currently_practicing || '', q.previous_studies || '', q.people_accompanied || '',
+                qStatusLabel(q.status), q.notes || '', formatDate(q.created_at)
+            ]);
+            const bom = '\uFEFF';
+            const csv = bom + [headers, ...rows].map(r => r.map(c => `"${(c+'').replace(/"/g,'""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `questionnaires_${getDateString()}.csv`;
+            link.click();
+            showToast('הקובץ הורד בהצלחה!', 'success');
+        }
 
         // ===================
         // CSV EXPORT FUNCTIONS

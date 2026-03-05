@@ -15,7 +15,7 @@ const TURNSTILE_SECRET_KEY = Deno.env.get('TURNSTILE_SECRET_KEY') || ''
 // This allows forms to work before Turnstile is configured.
 const TURNSTILE_ENABLED = TURNSTILE_SECRET_KEY.length > 0
 
-const ALLOWED_TABLES = ['patients', 'therapists', 'contact_requests']
+const ALLOWED_TABLES = ['patients', 'therapists', 'contact_requests', 'questionnaire_submissions']
 
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 

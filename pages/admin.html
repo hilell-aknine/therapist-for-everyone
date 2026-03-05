@@ -1280,6 +1280,11 @@
                     <span>שאלונים</span>
                     <span class="badge" id="questionnaires-count">0</span>
                 </div>
+                <div class="nav-item" onclick="switchView('pipeline')">
+                    <i class="fa-solid fa-filter-circle-dollar"></i>
+                    <span>Pipeline מכירות</span>
+                    <span class="badge" id="pipeline-count">0</span>
+                </div>
                 <div class="nav-item" onclick="switchView('bot')">
                     <i class="fa-solid fa-robot"></i>
                     <span>בוט CRM</span>
@@ -1631,8 +1636,110 @@
                             <button class="btn btn-success" id="q-btn-approve" onclick="updateQStatus('approved')"><i class="fa-solid fa-check"></i> אשר מועמד</button>
                             <button class="btn btn-warning" id="q-btn-review" onclick="updateQStatus('reviewed')"><i class="fa-solid fa-eye"></i> סמן כנקרא</button>
                             <button class="btn btn-danger" id="q-btn-reject" onclick="updateQStatus('rejected')"><i class="fa-solid fa-xmark"></i> דחה</button>
+                            <button class="btn" id="q-btn-pipeline" onclick="moveQToPipeline()" style="background:linear-gradient(135deg,var(--gold),#c9a227);color:white;"><i class="fa-solid fa-filter-circle-dollar"></i> העבר ל-Pipeline</button>
                             <a id="q-btn-whatsapp" href="#" target="_blank" class="btn" style="background:#25D366;color:white;margin-right:auto;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Pipeline View -->
+                <div id="pipeline-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-filter-circle-dollar"></i> Pipeline מכירות — הכשרת NLP</h1>
+
+                    <!-- Stat Cards -->
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon gold"><i class="fa-solid fa-users"></i></div>
+                            <div><div class="stat-value" id="stat-p-total">0</div><div class="stat-label">סה"כ לידים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fa-solid fa-phone-volume"></i></div>
+                            <div><div class="stat-value" id="stat-p-calling">0</div><div class="stat-label">בחיוגים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(136,87,229,0.12);color:#8857e5;"><i class="fa-solid fa-presentation-screen"></i></div>
+                            <div><div class="stat-value" id="stat-p-presentation">0</div><div class="stat-label">הצגת מוצר</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-trophy"></i></div>
+                            <div><div class="stat-value" id="stat-p-won">0</div><div class="stat-label">קנו</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red"><i class="fa-solid fa-xmark"></i></div>
+                            <div><div class="stat-value" id="stat-p-lost">0</div><div class="stat-label">לא קנו</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon gold"><i class="fa-solid fa-shekel-sign"></i></div>
+                            <div><div class="stat-value" id="stat-p-revenue">0</div><div class="stat-label">הכנסות ₪</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Conversion Rate Bar -->
+                    <div class="conversion-bar">
+                        <span class="conversion-bar-label">יחס המרה:</span>
+                        <div class="conversion-bar-track"><div class="conversion-bar-fill" id="conversion-bar-fill" style="width:0%"></div></div>
+                        <span class="conversion-bar-value" id="conversion-rate-value">0%</span>
+                    </div>
+
+                    <!-- Stage Filter Tabs -->
+                    <div class="tabs">
+                        <button class="tab active" onclick="filterPipeline('all')">הכל</button>
+                        <button class="tab" onclick="filterPipeline('new_lead')">🆕 חדשים</button>
+                        <button class="tab" onclick="filterPipeline('calling')">📞 בחיוגים</button>
+                        <button class="tab" onclick="filterPipeline('answered')">✅ ענו</button>
+                        <button class="tab" onclick="filterPipeline('presentation')">🎯 הצגה</button>
+                        <button class="tab" onclick="filterPipeline('closed_won')">🏆 קנו</button>
+                        <button class="tab" onclick="filterPipeline('closed_lost')">❌ לא קנו</button>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div style="display:flex;align-items:center;gap:1rem;">
+                                <h3>לידים מכירות</h3>
+                                <button class="btn btn-export" onclick="exportPipelineCSV()">
+                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
+                                </button>
+                            </div>
+                            <div class="search-box">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" placeholder="חיפוש לפי שם, טלפון, אימייל..." id="pipeline-search" oninput="renderPipeline()">
+                            </div>
+                        </div>
+                        <div class="bulk-bar" id="bulk-bar-pipeline">
+                            <span id="bulk-count-pipeline">0 נבחרו</span>
+                            <button class="btn btn-danger" onclick="bulkDeleteEntity('pipeline')">
+                                <i class="fa-solid fa-trash"></i> מחק נבחרים
+                            </button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-pipeline" onchange="toggleSelectAllFor('pipeline')" title="בחר הכל"></th>
+                                    <th>שם</th>
+                                    <th>טלפון</th>
+                                    <th>שלב</th>
+                                    <th>חיוגים</th>
+                                    <th>חזרה</th>
+                                    <th>סכום ₪</th>
+                                    <th>תאריך</th>
+                                    <th>פעולות</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pipeline-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pipeline Detail Modal -->
+                <div class="modal-overlay" id="pipeline-modal" onclick="if(event.target===this)closeModal('pipeline-modal')">
+                    <div class="modal-content" style="max-width:550px;max-height:90vh;overflow-y:auto;">
+                        <div class="modal-header">
+                            <h2 id="pipeline-modal-title">ליד מכירות</h2>
+                            <button onclick="closeModal('pipeline-modal')" class="modal-close">&times;</button>
+                        </div>
+                        <div id="pipeline-modal-body"></div>
+                        <div id="pipeline-modal-footer" style="display:flex;gap:0.5rem;padding:1.5rem;border-top:1px solid var(--border);flex-wrap:wrap;"></div>
                     </div>
                 </div>
 
@@ -2657,6 +2764,42 @@
             border-radius: 10px; color: var(--gold); font-weight: 600;
         }
         .export-preview span { font-size: 1.3rem; }
+
+        /* Pipeline Stages */
+        .stage-new_lead { background: rgba(212, 175, 55, 0.12); color: var(--gold); border-color: rgba(212, 175, 55, 0.25); }
+        .stage-call_attempts { background: rgba(88, 166, 255, 0.12); color: var(--info); border-color: rgba(88, 166, 255, 0.25); }
+        .stage-no_answer_callback { background: rgba(210, 153, 34, 0.12); color: var(--warning); border-color: rgba(210, 153, 34, 0.25); }
+        .stage-answered { background: rgba(63, 185, 80, 0.12); color: var(--success); border-color: rgba(63, 185, 80, 0.25); }
+        .stage-presentation { background: rgba(136, 87, 229, 0.12); color: #8857e5; border-color: rgba(136, 87, 229, 0.25); }
+        .stage-closed_won { background: rgba(40, 167, 69, 0.15); color: #28a745; border-color: rgba(40, 167, 69, 0.3); }
+        .stage-closed_lost { background: rgba(248, 81, 73, 0.12); color: var(--danger); border-color: rgba(248, 81, 73, 0.25); }
+
+        /* Call dots */
+        .call-dots { display: inline-flex; gap: 3px; align-items: center; }
+        .call-dots .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .call-dots .dot.filled { background: var(--gold); }
+        .call-dots .dot.empty { background: var(--border); }
+
+        /* Conversion bar */
+        .conversion-bar { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1.2rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1.5rem; }
+        .conversion-bar-label { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
+        .conversion-bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+        .conversion-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #28a745); border-radius: 4px; transition: width 0.5s ease; }
+        .conversion-bar-value { font-weight: 700; color: var(--gold); font-size: 1.1rem; min-width: 45px; text-align: left; }
+
+        /* Pipeline modal form */
+        .pipeline-form-group { margin-bottom: 1rem; }
+        .pipeline-form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.3rem; font-weight: 600; }
+        .pipeline-form-group select,
+        .pipeline-form-group input,
+        .pipeline-form-group textarea { width: 100%; padding: 0.6rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 0.9rem; }
+        .pipeline-form-group select:focus,
+        .pipeline-form-group input:focus,
+        .pipeline-form-group textarea:focus { border-color: var(--gold); outline: none; }
+        .pipeline-radio-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .pipeline-radio-group label { display: flex; align-items: center; gap: 0.3rem; padding: 0.4rem 0.8rem; background: var(--bg); border-radius: 20px; cursor: pointer; font-size: 0.85rem; border: 1px solid var(--border); transition: all 0.2s; }
+        .pipeline-radio-group label:hover { border-color: var(--gold); }
+        .pipeline-radio-group input[type="radio"] { accent-color: var(--gold); }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -2710,6 +2853,9 @@
         let therapists = [];
         let matches = [];
         let leads = [];
+        let pipelineLeads = [];
+        let currentPipelineFilter = 'all';
+        let currentPipelineId = null;
         let currentPatientFilter = 'all';
         let currentTherapistFilter = 'all';
         let currentViewedPatient = null;
@@ -2732,7 +2878,7 @@
         }
 
         async function loadAllData() {
-            await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires()]);
+            await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires(), loadPipeline()]);
             updateCounts();
         }
 
@@ -2771,12 +2917,15 @@
             document.getElementById('stat-total-leads').textContent = leads.length;
             document.getElementById('stat-google-leads').textContent = leads.filter(l => !l.email || l.full_name !== l.email?.split('@')[0]).length;
             document.getElementById('stat-email-leads').textContent = leads.filter(l => l.full_name === l.email?.split('@')[0]).length;
+            // Pipeline counts
+            const pActive = pipelineLeads.filter(l => !['closed_won','closed_lost'].includes(l.stage));
+            document.getElementById('pipeline-count').textContent = pActive.length;
         }
 
         function switchView(view) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            ['patients','therapists','matches','leads','contact-leads','questionnaires','bot','analytics','settings'].forEach(v => {
+            ['patients','therapists','matches','leads','contact-leads','questionnaires','pipeline','bot','analytics','settings'].forEach(v => {
                 document.getElementById(v + '-view')?.classList.toggle('hidden', view !== v);
             });
             if (view === 'bot') loadBotView();
@@ -3424,7 +3573,8 @@
             matches: 'appointments',
             leads: 'profiles',
             'contact-leads': 'contact_requests',
-            'questionnaires': 'questionnaire_submissions'
+            'questionnaires': 'questionnaire_submissions',
+            'pipeline': 'sales_leads'
         };
 
         const entityReloadFn = {
@@ -3433,7 +3583,8 @@
             matches: () => { loadMatches(); updateCounts(); },
             leads: () => { loadLeads(); updateCounts(); },
             'contact-leads': () => { loadContactLeads(); },
-            'questionnaires': () => { loadQuestionnaires(); }
+            'questionnaires': () => { loadQuestionnaires(); },
+            'pipeline': () => { loadPipeline(); updateCounts(); }
         };
 
         // Generic single delete — opens confirmation modal
@@ -3699,7 +3850,7 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); closeModal('export-modal'); closeModal('broadcast-modal'); closeModal('questionnaire-modal'); closeDeleteModal(); closeEditModal(); closeAllMenus(); }
+            if (e.key === 'Escape') { closeModal('patient-modal'); closeModal('therapist-modal'); closeModal('export-modal'); closeModal('broadcast-modal'); closeModal('questionnaire-modal'); closeModal('pipeline-modal'); closeDeleteModal(); closeEditModal(); closeAllMenus(); }
         });
 
         // ===================
@@ -3931,6 +4082,429 @@
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = `questionnaires_${getDateString()}.csv`;
+            link.click();
+            showToast('הקובץ הורד בהצלחה!', 'success');
+        }
+
+        // ===================
+        // PIPELINE (sales_leads)
+        // ===================
+
+        const PIPELINE_STAGES = {
+            new_lead: 'ליד חדש',
+            call_attempts: 'ניסיונות חיוג',
+            no_answer_callback: 'לא ענה',
+            answered: 'ענה',
+            presentation: 'הצגת מוצר',
+            closed_won: 'קנה',
+            closed_lost: 'לא קנה'
+        };
+
+        const PIPELINE_LOST_REASONS = {
+            money: 'כסף / יקר',
+            unsupportive_env: 'סביבה לא תומכת',
+            fear: 'פחד / חשש',
+            other_college: 'מכללה אחרת',
+            other: 'אחר'
+        };
+
+        const PIPELINE_PAYMENT_METHODS = {
+            bank_transfer: 'העברה בנקאית',
+            bank_transfer_and_credit: 'העברה + אשראי',
+            credit_card: 'כרטיס אשראי'
+        };
+
+        async function loadPipeline() {
+            const { data } = await db.from('sales_leads').select('*').order('created_at', { ascending: false });
+            pipelineLeads = data || [];
+            document.getElementById('pipeline-count').textContent = pipelineLeads.filter(l => !['closed_won','closed_lost'].includes(l.stage)).length;
+            updatePipelineStats();
+            renderPipeline();
+        }
+
+        function updatePipelineStats() {
+            const total = pipelineLeads.length;
+            const calling = pipelineLeads.filter(l => ['call_attempts','no_answer_callback'].includes(l.stage)).length;
+            const presentation = pipelineLeads.filter(l => l.stage === 'presentation').length;
+            const won = pipelineLeads.filter(l => l.stage === 'closed_won').length;
+            const lost = pipelineLeads.filter(l => l.stage === 'closed_lost').length;
+            const revenue = pipelineLeads.filter(l => l.stage === 'closed_won' && l.deal_amount).reduce((s, l) => s + Number(l.deal_amount), 0);
+            const closed = won + lost;
+            const rate = closed > 0 ? Math.round((won / closed) * 100) : 0;
+
+            document.getElementById('stat-p-total').textContent = total;
+            document.getElementById('stat-p-calling').textContent = calling;
+            document.getElementById('stat-p-presentation').textContent = presentation;
+            document.getElementById('stat-p-won').textContent = won;
+            document.getElementById('stat-p-lost').textContent = lost;
+            document.getElementById('stat-p-revenue').textContent = revenue.toLocaleString();
+            document.getElementById('conversion-bar-fill').style.width = rate + '%';
+            document.getElementById('conversion-rate-value').textContent = rate + '%';
+        }
+
+        function filterPipeline(filter) {
+            currentPipelineFilter = filter;
+            document.querySelectorAll('#pipeline-view .tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            renderPipeline();
+        }
+
+        function renderPipeline() {
+            const search = document.getElementById('pipeline-search')?.value?.toLowerCase() || '';
+            let filtered = pipelineLeads;
+
+            if (currentPipelineFilter !== 'all') {
+                if (currentPipelineFilter === 'calling') {
+                    filtered = filtered.filter(l => ['call_attempts','no_answer_callback'].includes(l.stage));
+                } else {
+                    filtered = filtered.filter(l => l.stage === currentPipelineFilter);
+                }
+            }
+
+            if (search) filtered = filtered.filter(l =>
+                (l.full_name || '').toLowerCase().includes(search) ||
+                (l.phone || '').includes(search) ||
+                (l.email || '').toLowerCase().includes(search)
+            );
+
+            const tbody = document.getElementById('pipeline-table');
+            resetSelectAll('select-all-pipeline');
+            updateBulkBarFor('pipeline');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fa-solid fa-filter-circle-dollar"></i><br>אין לידים</td></tr>';
+                return;
+            }
+
+            const groups = groupByDate(filtered);
+            let html = '';
+            for (const [group, items] of Object.entries(groups)) {
+                if (items.length === 0) continue;
+                html += `<tr class="date-group-row"><td colspan="9"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+                html += items.map(l => {
+                    const dots = Array.from({length:6}, (_,i) => `<span class="dot ${i < l.call_attempts ? 'filled' : 'empty'}"></span>`).join('');
+                    const callback = l.callback_at ? new Date(l.callback_at).toLocaleString('he-IL', {day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
+                    const amount = l.deal_amount ? '₪' + Number(l.deal_amount).toLocaleString() : '-';
+                    const safeName = (l.full_name || 'ללא שם').replace(/'/g, "\\'");
+                    return `
+                    <tr style="cursor:pointer;" onclick="openPipelineDetail('${l.id}')">
+                        <td class="lead-checkbox" onclick="event.stopPropagation()"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('pipeline')"></td>
+                        <td><strong>${escapeHtml(l.full_name || 'ללא שם')}</strong></td>
+                        <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;" onclick="event.stopPropagation()">${l.phone}</a>` : '-'}</td>
+                        <td><span class="status-badge stage-${l.stage}">${PIPELINE_STAGES[l.stage] || l.stage}</span></td>
+                        <td><div class="call-dots">${dots}</div></td>
+                        <td style="font-size:0.82rem;">${callback}</td>
+                        <td>${amount}</td>
+                        <td>${formatDate(l.created_at)}</td>
+                        <td class="action-btns" onclick="event.stopPropagation()">
+                            <div class="row-menu" id="menu-pl-${l.id}">
+                                <button class="row-menu-btn" onclick="toggleRowMenu('menu-pl-${l.id}')">⋮</button>
+                                <div class="row-menu-dropdown">
+                                    <button class="row-menu-item" onclick="openPipelineDetail('${l.id}');closeAllMenus()"><i class="fa-solid fa-eye"></i> צפייה</button>
+                                    ${l.phone ? `<button class="row-menu-item" onclick="window.open('https://wa.me/${l.phone.replace(/^0/,'972')}','_blank');closeAllMenus()"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> WhatsApp</button>` : ''}
+                                    <button class="row-menu-item danger" onclick="deleteEntity('sales_leads','${l.id}','${safeName}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+            tbody.innerHTML = html;
+        }
+
+        function openPipelineDetail(id) {
+            const l = pipelineLeads.find(x => x.id === id);
+            if (!l) return;
+            currentPipelineId = id;
+
+            document.getElementById('pipeline-modal-title').textContent = `Pipeline — ${l.full_name || 'ללא שם'}`;
+
+            const dots = Array.from({length:6}, (_,i) => `<span class="dot ${i < l.call_attempts ? 'filled' : 'empty'}"></span>`).join('');
+            const stageName = PIPELINE_STAGES[l.stage] || l.stage;
+
+            let formHtml = '';
+            // Stage-specific form
+            if (['new_lead','call_attempts','no_answer_callback'].includes(l.stage)) {
+                formHtml = `
+                    <div class="pipeline-form-group">
+                        <label>תוצאת שיחה</label>
+                        <select id="pl-call-result">
+                            <option value="">בחר...</option>
+                            <option value="no_answer">לא ענה</option>
+                            <option value="answered">ענה</option>
+                        </select>
+                    </div>
+                    <div class="pipeline-form-group" id="pl-callback-group" style="display:none;">
+                        <label>מתי לחזור?</label>
+                        <input type="datetime-local" id="pl-callback-time">
+                    </div>
+                    <button class="btn btn-gold" onclick="savePipelineCallResult()" style="width:100%;margin-top:0.5rem;">
+                        <i class="fa-solid fa-phone"></i> רשום חיוג #${l.call_attempts + 1}
+                    </button>`;
+            } else if (l.stage === 'answered') {
+                formHtml = `
+                    <button class="btn" onclick="advancePipelineStage('presentation')" style="width:100%;background:#8857e5;color:white;">
+                        <i class="fa-solid fa-presentation-screen"></i> קדם להצגת מוצר
+                    </button>`;
+            } else if (l.stage === 'presentation') {
+                formHtml = `
+                    <div class="pipeline-form-group">
+                        <label>תוצאה</label>
+                        <div class="pipeline-radio-group">
+                            <label><input type="radio" name="pl-outcome" value="won"> קנה</label>
+                            <label><input type="radio" name="pl-outcome" value="lost"> לא קנה</label>
+                        </div>
+                    </div>
+                    <div id="pl-won-fields" style="display:none;">
+                        <div class="pipeline-form-group">
+                            <label>סכום עסקה (₪)</label>
+                            <input type="number" id="pl-deal-amount" placeholder="3500">
+                        </div>
+                        <div class="pipeline-form-group">
+                            <label>צורת תשלום</label>
+                            <select id="pl-payment-method">
+                                <option value="">בחר...</option>
+                                <option value="bank_transfer">העברה בנקאית</option>
+                                <option value="bank_transfer_and_credit">העברה + אשראי</option>
+                                <option value="credit_card">כרטיס אשראי</option>
+                            </select>
+                        </div>
+                        <div class="pipeline-form-group">
+                            <label><input type="checkbox" id="pl-contract-signed"> חוזה נחתם</label>
+                        </div>
+                        <div class="pipeline-form-group">
+                            <label>סיבת רכישה</label>
+                            <textarea id="pl-won-reason" rows="2" placeholder="למה קנה..."></textarea>
+                        </div>
+                    </div>
+                    <div id="pl-lost-fields" style="display:none;">
+                        <div class="pipeline-form-group">
+                            <label>סיבה</label>
+                            <select id="pl-lost-reason">
+                                <option value="money">כסף / יקר</option>
+                                <option value="unsupportive_env">סביבה לא תומכת</option>
+                                <option value="fear">פחד / חשש</option>
+                                <option value="other_college">מכללה אחרת</option>
+                                <option value="other">אחר</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-gold" onclick="savePipelineOutcome()" style="width:100%;margin-top:0.5rem;">
+                        <i class="fa-solid fa-check"></i> שמור תוצאה
+                    </button>`;
+            }
+
+            // Deal info for closed leads
+            let dealInfo = '';
+            if (l.stage === 'closed_won') {
+                dealInfo = `
+                    <div style="background:rgba(40,167,69,0.08);border-radius:10px;padding:1rem;margin-bottom:1rem;border-right:3px solid #28a745;">
+                        <strong style="color:#28a745;">עסקה סגורה</strong><br>
+                        ${l.deal_amount ? `💰 ₪${Number(l.deal_amount).toLocaleString()}<br>` : ''}
+                        ${l.payment_method ? `💳 ${PIPELINE_PAYMENT_METHODS[l.payment_method] || l.payment_method}<br>` : ''}
+                        ${l.contract_signed ? '✍️ חוזה נחתם<br>' : ''}
+                        ${l.won_reason ? `📝 ${escapeHtml(l.won_reason)}` : ''}
+                    </div>`;
+            } else if (l.stage === 'closed_lost') {
+                dealInfo = `
+                    <div style="background:rgba(248,81,73,0.08);border-radius:10px;padding:1rem;margin-bottom:1rem;border-right:3px solid var(--danger);">
+                        <strong style="color:var(--danger);">לא קנה</strong><br>
+                        ${l.lost_reason ? `סיבה: ${PIPELINE_LOST_REASONS[l.lost_reason] || l.lost_reason}` : ''}
+                    </div>`;
+            }
+
+            const html = `
+                <div style="padding:1.5rem;">
+                    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+                        <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#c9a227);display:flex;align-items:center;justify-content:center;color:white;font-size:1.3rem;font-weight:700;">
+                            ${(l.full_name || '?')[0]}
+                        </div>
+                        <div>
+                            <h3 style="margin:0;">${escapeHtml(l.full_name || 'ללא שם')}</h3>
+                            <span class="status-badge stage-${l.stage}">${stageName}</span>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.5rem;margin-bottom:1rem;font-size:0.9rem;">
+                        ${l.phone ? `<div>📱 <a href="tel:${l.phone}" style="color:var(--info);">${l.phone}</a></div>` : ''}
+                        ${l.email ? `<div>📧 ${escapeHtml(l.email)}</div>` : ''}
+                        ${l.occupation ? `<div>💼 ${escapeHtml(l.occupation)}</div>` : ''}
+                        <div>📅 ${formatDate(l.created_at)}</div>
+                    </div>
+                    <div style="margin-bottom:1rem;">
+                        <span style="font-size:0.85rem;color:var(--text-secondary);">חיוגים:</span>
+                        <div class="call-dots" style="display:inline-flex;margin-right:0.5rem;">${dots}</div>
+                        <span style="font-size:0.85rem;">${l.call_attempts}/6</span>
+                        ${l.last_call_at ? `<span style="font-size:0.8rem;color:var(--text-secondary);margin-right:0.5rem;">אחרון: ${new Date(l.last_call_at).toLocaleString('he-IL')}</span>` : ''}
+                    </div>
+                    ${dealInfo}
+                    ${formHtml}
+                    <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">
+                        <label style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.3rem;">הערות</label>
+                        <textarea id="pl-admin-notes" style="width:100%;min-height:60px;border-radius:8px;border:1px solid var(--border);padding:0.6rem;font-family:inherit;font-size:0.85rem;resize:vertical;background:var(--bg);" placeholder="הערות...">${escapeHtml(l.admin_notes || '')}</textarea>
+                        <button class="btn" style="margin-top:0.3rem;background:var(--muted-teal);color:white;font-size:0.85rem;" onclick="savePipelineNotes()"><i class="fa-solid fa-save"></i> שמור</button>
+                    </div>
+                </div>`;
+
+            document.getElementById('pipeline-modal-body').innerHTML = html;
+
+            // Footer buttons
+            const waPhone = (l.phone || '').replace(/^0/, '972').replace(/[^0-9]/g, '');
+            document.getElementById('pipeline-modal-footer').innerHTML = `
+                ${waPhone ? `<a href="https://wa.me/${waPhone}" target="_blank" class="btn" style="background:#25D366;color:white;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>` : ''}
+                <button class="btn btn-outline" onclick="closeModal('pipeline-modal')">סגור</button>
+            `;
+
+            document.getElementById('pipeline-modal').classList.add('active');
+
+            // Event listeners for dynamic form
+            setTimeout(() => {
+                const callResult = document.getElementById('pl-call-result');
+                if (callResult) {
+                    callResult.addEventListener('change', () => {
+                        const cbGroup = document.getElementById('pl-callback-group');
+                        if (cbGroup) cbGroup.style.display = callResult.value === 'no_answer' ? '' : 'none';
+                    });
+                }
+                document.querySelectorAll('input[name="pl-outcome"]').forEach(r => {
+                    r.addEventListener('change', () => {
+                        const v = document.querySelector('input[name="pl-outcome"]:checked')?.value;
+                        const wonF = document.getElementById('pl-won-fields');
+                        const lostF = document.getElementById('pl-lost-fields');
+                        if (wonF) wonF.style.display = v === 'won' ? '' : 'none';
+                        if (lostF) lostF.style.display = v === 'lost' ? '' : 'none';
+                    });
+                });
+            }, 50);
+        }
+
+        async function savePipelineCallResult() {
+            if (!currentPipelineId) return;
+            const result = document.getElementById('pl-call-result')?.value;
+            const callbackTime = document.getElementById('pl-callback-time')?.value;
+
+            // Always increment call attempt
+            const lead = pipelineLeads.find(l => l.id === currentPipelineId);
+            const newAttempts = Math.min((lead?.call_attempts || 0) + 1, 6);
+            const updates = {
+                call_attempts: newAttempts,
+                last_call_at: new Date().toISOString()
+            };
+
+            if (result === 'answered') {
+                updates.stage = 'answered';
+            } else if (result === 'no_answer') {
+                updates.stage = 'no_answer_callback';
+                if (callbackTime) updates.callback_at = new Date(callbackTime).toISOString();
+            } else {
+                // Just log call, advance to call_attempts if new
+                if (lead?.stage === 'new_lead') updates.stage = 'call_attempts';
+            }
+
+            const { error } = await db.from('sales_leads').update(updates).eq('id', currentPipelineId);
+            if (error) { showToast('שגיאה בעדכון', 'error'); return; }
+            showToast('חיוג נרשם', 'success');
+            closeModal('pipeline-modal');
+            loadPipeline();
+            updateCounts();
+        }
+
+        async function advancePipelineStage(newStage) {
+            if (!currentPipelineId) return;
+            const { error } = await db.from('sales_leads').update({ stage: newStage }).eq('id', currentPipelineId);
+            if (error) { showToast('שגיאה בעדכון', 'error'); return; }
+            showToast('שלב עודכן', 'success');
+            closeModal('pipeline-modal');
+            loadPipeline();
+            updateCounts();
+        }
+
+        async function savePipelineOutcome() {
+            if (!currentPipelineId) return;
+            const outcome = document.querySelector('input[name="pl-outcome"]:checked')?.value;
+            if (!outcome) { showToast('בחר תוצאה', 'error'); return; }
+
+            let updates = {};
+            if (outcome === 'won') {
+                updates = {
+                    stage: 'closed_won',
+                    is_bought: true,
+                    deal_amount: document.getElementById('pl-deal-amount')?.value || null,
+                    payment_method: document.getElementById('pl-payment-method')?.value || null,
+                    contract_signed: document.getElementById('pl-contract-signed')?.checked || false,
+                    won_reason: document.getElementById('pl-won-reason')?.value || null
+                };
+                if (updates.contract_signed) updates.contract_signed_at = new Date().toISOString();
+            } else {
+                updates = {
+                    stage: 'closed_lost',
+                    is_bought: false,
+                    lost_reason: document.getElementById('pl-lost-reason')?.value || 'other'
+                };
+            }
+
+            const { error } = await db.from('sales_leads').update(updates).eq('id', currentPipelineId);
+            if (error) { showToast('שגיאה בעדכון', 'error'); return; }
+            showToast(outcome === 'won' ? 'סגירה מוצלחת!' : 'ליד סגור', 'success');
+            closeModal('pipeline-modal');
+            loadPipeline();
+            updateCounts();
+        }
+
+        async function savePipelineNotes() {
+            if (!currentPipelineId) return;
+            const notes = document.getElementById('pl-admin-notes')?.value || '';
+            const { error } = await db.from('sales_leads').update({ admin_notes: notes }).eq('id', currentPipelineId);
+            if (error) { showToast('שגיאה בשמירה', 'error'); return; }
+            showToast('הערות נשמרו', 'success');
+            loadPipeline();
+        }
+
+        async function moveQToPipeline() {
+            if (!currentQId) return;
+            const q = questionnaires.find(x => x.id === currentQId);
+            if (!q) return;
+
+            // Check if already in pipeline
+            const existing = pipelineLeads.find(l => l.questionnaire_id === currentQId);
+            if (existing) { showToast('הליד כבר קיים ב-Pipeline', 'warning'); return; }
+
+            const { data, error } = await db.from('sales_leads').insert({
+                questionnaire_id: currentQId,
+                full_name: q.full_name,
+                phone: q.phone,
+                email: q.email,
+                occupation: q.occupation,
+                stage: 'new_lead',
+                call_attempts: 0
+            }).select().single();
+
+            if (error) { showToast('שגיאה: ' + error.message, 'error'); return; }
+
+            showToast('הליד הועבר ל-Pipeline!', 'success');
+            closeModal('questionnaire-modal');
+            await loadPipeline();
+            updateCounts();
+        }
+
+        function exportPipelineCSV() {
+            if (pipelineLeads.length === 0) { showToast('אין נתונים לייצוא', 'warning'); return; }
+            const headers = ['שם', 'טלפון', 'אימייל', 'עיסוק', 'שלב', 'ניסיונות חיוג', 'חזרה', 'קנה', 'סכום', 'תשלום', 'חוזה', 'סיבת רכישה', 'סיבת אי-רכישה', 'הערות', 'תאריך'];
+            const rows = pipelineLeads.map(l => [
+                l.full_name || '', l.phone || '', l.email || '', l.occupation || '',
+                PIPELINE_STAGES[l.stage] || l.stage, l.call_attempts,
+                l.callback_at ? new Date(l.callback_at).toLocaleString('he-IL') : '',
+                l.is_bought === true ? 'כן' : l.is_bought === false ? 'לא' : '',
+                l.deal_amount || '', PIPELINE_PAYMENT_METHODS[l.payment_method] || '',
+                l.contract_signed ? 'כן' : '', l.won_reason || '',
+                PIPELINE_LOST_REASONS[l.lost_reason] || '', l.admin_notes || '',
+                formatDate(l.created_at)
+            ]);
+            const bom = '\uFEFF';
+            const csv = bom + [headers, ...rows].map(r => r.map(c => `"${(c+'').replace(/"/g,'""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `pipeline_${getDateString()}.csv`;
             link.click();
             showToast('הקובץ הורד בהצלחה!', 'success');
         }

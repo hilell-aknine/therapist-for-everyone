@@ -1692,7 +1692,7 @@
                         <div class="table-header">
                             <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
                                 <h3>לידים מכירות</h3>
-                                <button class="btn btn-export" onclick="exportPipelineCSV()">
+                                <button class="btn btn-export" onclick="exportPipelineCSV()" id="btn-export-pipeline" data-admin-only>
                                     <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
                                 </button>
                             </div>
@@ -2864,6 +2864,8 @@
                         item.style.display = 'none';
                     }
                 });
+                // Hide admin-only elements
+                document.querySelectorAll('[data-admin-only]').forEach(el => el.style.display = 'none');
                 // Auto-switch to pipeline view
                 setTimeout(() => {
                     const pipelineTab = document.querySelector('.sidebar .nav-item[onclick*="pipeline"]');
@@ -4607,6 +4609,17 @@
 
         // === LEAD ASSIGNMENT (Admin only) ===
 
+        async function notifyRepAssignment(repProfileId, leadCount, leadNames) {
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                await fetch(`${BOT_URL}/api/notify-assignment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+                    body: JSON.stringify({ repProfileId, leadCount, leadNames })
+                });
+            } catch (e) { console.warn('Notification failed:', e.message); }
+        }
+
         async function assignLeadToRep() {
             if (window._userProfileRole !== 'admin') return;
             if (!currentPipelineId) return;
@@ -4615,6 +4628,13 @@
             if (error) { showToast('שגיאה בהקצאה: ' + error.message, 'error'); return; }
             const repName = repId ? salesRepsCache.find(r => r.id === repId)?.full_name || 'איש מכירות' : 'ללא';
             showToast(`הליד הוקצה ל: ${repName}`, 'success');
+
+            // Send WhatsApp notification to sales rep
+            if (repId) {
+                const lead = pipelineLeads.find(l => l.id === currentPipelineId);
+                notifyRepAssignment(repId, 1, [lead?.full_name || 'ליד']).catch(() => {});
+            }
+
             closeModal('pipeline-modal');
             loadPipeline();
         }
@@ -4633,21 +4653,36 @@
                 await loadSalesReps();
                 if (!salesRepsCache.length) { showToast('אין אנשי מכירות רשומים', 'error'); return; }
                 let errors = 0;
+                const assignmentsByRep = {};
                 for (let i = 0; i < checked.length; i++) {
                     const rep = salesRepsCache[i % salesRepsCache.length];
                     const { error } = await db.from('sales_leads').update({ assigned_to: rep.id }).eq('id', checked[i]);
-                    if (error) errors++;
+                    if (error) { errors++; } else {
+                        if (!assignmentsByRep[rep.id]) assignmentsByRep[rep.id] = [];
+                        const lead = pipelineLeads.find(l => l.id === checked[i]);
+                        assignmentsByRep[rep.id].push(lead?.full_name || 'ליד');
+                    }
                 }
                 showToast(`הוקצו ${checked.length - errors} לידים (Round Robin)`, errors ? 'warning' : 'success');
+                // Notify each rep
+                for (const [rId, names] of Object.entries(assignmentsByRep)) {
+                    notifyRepAssignment(rId, names.length, names).catch(() => {});
+                }
             } else {
                 // Assign all to specific rep
                 let errors = 0;
+                const assignedNames = [];
                 for (const id of checked) {
                     const { error } = await db.from('sales_leads').update({ assigned_to: repId }).eq('id', id);
-                    if (error) errors++;
+                    if (error) { errors++; } else {
+                        const lead = pipelineLeads.find(l => l.id === id);
+                        assignedNames.push(lead?.full_name || 'ליד');
+                    }
                 }
                 const repName = salesRepsCache.find(r => r.id === repId)?.full_name || 'איש מכירות';
                 showToast(`הוקצו ${checked.length - errors} לידים ל: ${repName}`, errors ? 'warning' : 'success');
+                // Notify rep
+                if (assignedNames.length) notifyRepAssignment(repId, assignedNames.length, assignedNames).catch(() => {});
             }
             loadPipeline();
         }
@@ -6976,42 +7011,17 @@
             if (!name) { showToast('נדרש שם', 'error'); return; }
 
             try {
-                // 1. Find or create profile
-                let { data: existingProfile } = await db.from('profiles').select('id, role').eq('email', email).single();
+                // Use CRM bot API to create user account + setup (handles Supabase Admin API)
+                const { data: { session } } = await db.auth.getSession();
+                const res = await fetch(`${BOT_URL}/api/sales-rep`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+                    body: JSON.stringify({ name, email, phone })
+                });
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'שגיאה ביצירת איש מכירות');
 
-                if (existingProfile) {
-                    // Update existing profile role
-                    const { error } = await db.from('profiles').update({ role: 'sales_rep', full_name: name }).eq('id', existingProfile.id);
-                    if (error) throw error;
-                } else {
-                    // Profile doesn't exist yet — the user needs to sign up first
-                    showToast('המשתמש צריך להירשם לאתר קודם (login). לאחר ההרשמה, חזור והוסף שוב.', 'warning');
-                    return;
-                }
-
-                const profileId = existingProfile.id;
-
-                // 2. Add to crm_bot_phones (if phone provided)
-                if (phone && /^\d{10,15}$/.test(phone)) {
-                    const { error: phoneErr } = await db.from('crm_bot_phones').upsert({
-                        phone,
-                        label: name,
-                        role: 'sales_rep',
-                        profile_id: profileId,
-                        added_by: 'admin'
-                    }, { onConflict: 'phone' });
-                    if (phoneErr) console.warn('Phone insert error:', phoneErr.message);
-                }
-
-                // 3. Add to crm_bot_access with pipeline-only access
-                const { error: accessErr } = await db.from('crm_bot_access').upsert({
-                    user_id: profileId,
-                    role: 'sales_rep',
-                    category_access: ['pipeline']
-                }, { onConflict: 'user_id' });
-                if (accessErr) console.warn('Access insert error:', accessErr.message);
-
-                showToast(`${name} נוסף כאיש מכירות!`, 'success');
+                showToast(`${name} נוסף כאיש מכירות!${result.created ? ' (חשבון חדש נוצר)' : ''}`, 'success');
 
                 // Clear form
                 document.getElementById('sr-add-name').value = '';
@@ -7030,17 +7040,13 @@
             if (!confirm(`להסיר את ${name} מאנשי המכירות?`)) return;
 
             try {
-                // 1. Reset profile role to empty
-                await db.from('profiles').update({ role: null }).eq('id', profileId);
-
-                // 2. Remove from crm_bot_phones
-                await db.from('crm_bot_phones').delete().eq('profile_id', profileId);
-
-                // 3. Remove from crm_bot_access
-                await db.from('crm_bot_access').delete().eq('user_id', profileId);
-
-                // 4. Unassign leads
-                await db.from('sales_leads').update({ assigned_to: null }).eq('assigned_to', profileId);
+                const { data: { session } } = await db.auth.getSession();
+                const res = await fetch(`${BOT_URL}/api/sales-rep/${profileId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                });
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'שגיאה בהסרה');
 
                 showToast(`${name} הוסר מאנשי המכירות`, 'success');
                 await loadSalesReps();

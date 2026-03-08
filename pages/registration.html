@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#003B46">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="../assets/icon-192.svg">
+    <title>הרשמה | בית המטפלים</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="../css/accessibility.css">
+    <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+    <link rel="stylesheet" href="../css/theme.css">
+    <script src="../js/theme-toggle.js" defer></script>
+    <style>
+        :root {
+            --primary: #2F8592;
+            --primary-dark: #003B46;
+            --gold: #D4AF37;
+            --gold-light: #e6c65a;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #1a1a2e;
+            --text-light: #6c757d;
+            --border: #e0e0e0;
+            --success: #28a745;
+            --error: #dc3545;
+
+            --gold: var(--t-gold);
+            --gold-light: var(--t-gold-light);
+            --gold-glow: var(--t-gold-glow);
+            --deep-petrol: var(--t-deep-petrol);
+            --muted-teal: var(--t-muted-teal);
+            --dusty-aqua: var(--t-dusty-aqua);
+            --frost-white: var(--t-frost-white);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+        .header p { opacity: 0.9; font-size: 0.95rem; }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Progress indicator */
+        .progress-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        .progress-segment {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            transition: background 0.5s;
+        }
+        .progress-segment.active {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+        }
+
+        .form-card {
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        .step-icon i { font-size: 1.5rem; color: white; }
+        .step-header h2 { color: var(--primary-dark); margin-bottom: 0.5rem; }
+        .step-header p { color: var(--text-light); font-size: 0.95rem; }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin: 1.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title i { color: var(--gold); }
+
+        .form-group { margin-bottom: 1.2rem; }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+        .required { color: var(--error); }
+        .label-hint { font-size: 0.85rem; color: var(--text-light); font-weight: 400; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(47, 133, 146, 0.1);
+        }
+        input:read-only {
+            background: #f0f0f0;
+            color: var(--text-light);
+            cursor: default;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 0.82rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+        .error-msg.show { display: block; }
+        .field-error { border-color: var(--error) !important; }
+        .field-success { border-color: var(--success) !important; }
+
+        /* Auth notice */
+        .auth-notice {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.95rem;
+        }
+        .auth-notice i { color: var(--success); font-size: 1.3rem; }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.9rem;
+            color: var(--primary-dark);
+        }
+        .info-box i { color: var(--gold); font-size: 1.2rem; }
+
+        /* Checkbox options (for goals) */
+        .option-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-card:hover {
+            border-color: var(--primary);
+            background: rgba(47, 133, 146, 0.03);
+        }
+        .option-card.selected {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+        }
+        .option-card input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            accent-color: var(--gold);
+            cursor: pointer;
+        }
+        .option-card label {
+            cursor: pointer;
+            line-height: 1.5;
+            margin-bottom: 0;
+            font-weight: 400;
+        }
+
+        /* Radio options (for ram content) */
+        .radio-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .radio-option {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .radio-option:hover {
+            border-color: var(--primary);
+        }
+        .radio-option.selected {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+            color: var(--primary-dark);
+        }
+        .radio-option input[type="radio"] {
+            accent-color: var(--gold);
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), #c9a227);
+            color: var(--primary-dark);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #20c997);
+            color: white;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        .btn-success:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Sections visibility */
+        .section-hidden {
+            display: none;
+        }
+        .section-visible {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Success View */
+        .success-container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--success), #20c997);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            animation: successPop 0.5s ease;
+        }
+        .success-icon i { font-size: 3rem; color: white; }
+        @keyframes successPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .success-container h2 { color: var(--primary-dark); margin-bottom: 1rem; }
+        .success-container p { color: var(--text-light); line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.05rem; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            background: var(--error);
+            color: white;
+            max-width: 90%;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { background: var(--success); }
+
+        /* Lead saved badge */
+        .lead-saved-badge {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .header { padding: 1.2rem; }
+            .header h1 { font-size: 1.3rem; }
+            .container { padding: 1rem; }
+            .form-card { padding: 1.5rem; border-radius: 16px; }
+            .form-row { grid-template-columns: 1fr; }
+            .radio-row { flex-direction: row; }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
+    <nav class="form-nav">
+        <a href="course-library.html" class="form-nav-logo"><img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle"> בית המטפלים</a>
+        <a href="course-library.html"><i class="fa-solid fa-arrow-right"></i> חזרה לפורטל</a>
+    </nav>
+
+    <div class="header">
+        <h1><img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle"> הרשמה לבית המטפלים</h1>
+        <p>מילוי קצר — פחות מ-3 דקות</p>
+    </div>
+
+    <main id="main-content" class="container">
+        <!-- Progress Bar -->
+        <div class="progress-bar" id="progress-bar">
+            <div class="progress-segment active" id="seg-1"></div>
+            <div class="progress-segment" id="seg-2"></div>
+        </div>
+
+        <!-- ============ SECTION 1: Lead Capture ============ -->
+        <div id="lead-section" class="section-visible">
+            <div class="form-card">
+                <div class="step-header">
+                    <div class="step-icon"><i class="fa-solid fa-user-plus"></i></div>
+                    <h2>פרטי התקשרות</h2>
+                    <p>נשמח לחזור אליך בהקדם</p>
+                </div>
+
+                <!-- Auth notice - shown only for logged-in users -->
+                <div class="auth-notice section-hidden" id="auth-notice">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>זיהינו שיש לך חשבון — מלא רק שם וטלפון</span>
+                </div>
+
+                <form id="lead-form">
+                    <div class="form-group">
+                        <label for="lead_name">שם מלא <span class="required">*</span></label>
+                        <input type="text" name="lead_name" id="lead_name" required placeholder="שם פרטי ומשפחה" autocomplete="name">
+                        <div class="error-msg" id="lead_name-error">יש להזין שם מלא</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lead_phone">טלפון <span class="required">*</span></label>
+                        <input type="tel" name="lead_phone" id="lead_phone" required placeholder="050-0000000" autocomplete="tel">
+                        <div class="error-msg" id="lead_phone-error">מספר טלפון לא תקין</div>
+                    </div>
+
+                    <!-- Email - hidden for logged-in users -->
+                    <div class="form-group" id="lead-email-group">
+                        <label for="lead_email">אימייל <span class="required">*</span></label>
+                        <input type="email" name="lead_email" id="lead_email" required placeholder="your@email.com" autocomplete="email">
+                        <div class="error-msg" id="lead_email-error">כתובת אימייל לא תקינה</div>
+                    </div>
+
+                    <div class="info-box">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>הפרטים שלך בטוחים איתנו ולא יועברו לצד שלישי</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="lead-submit-btn">
+                        המשך למילוי השאלון
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============ SECTION 2: Questionnaire ============ -->
+        <div id="questionnaire-section" class="section-hidden">
+            <div class="lead-saved-badge">
+                <i class="fa-solid fa-check-circle"></i>
+                <span>הפרטים נשמרו — עכשיו נכיר אותך קצת יותר</span>
+            </div>
+
+            <div class="form-card">
+                <div class="step-header">
+                    <div class="step-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <h2>שאלון היכרות</h2>
+                    <p>עזור לנו להבין מה מתאים לך</p>
+                </div>
+
+                <form id="questionnaire-form">
+                    <!-- Basic Info Section -->
+                    <h3 class="section-title"><i class="fa-solid fa-id-card"></i> פרטים אישיים</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="q_name">שם מלא</label>
+                            <input type="text" id="q_name" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="q_phone">טלפון</label>
+                            <input type="tel" id="q_phone" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="q-email-group">
+                        <label for="q_email">אימייל</label>
+                        <input type="email" id="q_email" readonly>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="q_gender">מין</label>
+                            <select name="q_gender" id="q_gender">
+                                <option value="">בחר/י</option>
+                                <option value="male">זכר</option>
+                                <option value="female">נקבה</option>
+                                <option value="other">אחר</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="q_birth_date">תאריך לידה</label>
+                            <input type="date" name="q_birth_date" id="q_birth_date" autocomplete="bday">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="q_occupation">עיסוק</label>
+                            <input type="text" name="q_occupation" id="q_occupation" placeholder="מקצוע / תפקיד" autocomplete="organization-title">
+                        </div>
+                        <div class="form-group">
+                            <label for="q_city">עיר מגורים</label>
+                            <input type="text" name="q_city" id="q_city" placeholder="תל אביב" autocomplete="address-level2">
+                        </div>
+                    </div>
+
+                    <!-- Questions Section -->
+                    <h3 class="section-title"><i class="fa-solid fa-comment-dots"></i> שאלות היכרות</h3>
+
+                    <!-- Question 1: Ram's content -->
+                    <div class="form-group">
+                        <label>האם נחשפת לתכנים של רם?</label>
+                        <div class="radio-row">
+                            <label class="radio-option" id="ram-yes">
+                                <input type="radio" name="ram_content" value="yes">
+                                <span>כן</span>
+                            </label>
+                            <label class="radio-option" id="ram-no">
+                                <input type="radio" name="ram_content" value="no">
+                                <span>לא</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 2: Therapy knowledge -->
+                    <div class="form-group">
+                        <label for="q_therapy_knowledge">מה אתה יודע על טיפול?</label>
+                        <textarea name="q_therapy_knowledge" id="q_therapy_knowledge" placeholder="ספר/י לנו מה ידוע לך על טיפול רגשי..."></textarea>
+                    </div>
+
+                    <!-- Question 3: What made you register -->
+                    <div class="form-group">
+                        <label for="q_motivation">מה גרם לך להשאיר פרטים?</label>
+                        <textarea name="q_motivation" id="q_motivation" placeholder="מה הניע אותך לפנות אלינו..."></textarea>
+                    </div>
+
+                    <!-- Question 4: Goals (multiple choice) -->
+                    <div class="form-group">
+                        <label>מה אתה רוצה להשיג? <span class="label-hint">(ניתן לבחור יותר מאחד)</span></label>
+
+                        <div class="option-card" data-value="open_clinic">
+                            <input type="checkbox" name="goals" value="open_clinic" id="goal-1">
+                            <label for="goal-1">לפתוח קליניקה, לטפל באנשים ולהתפרנס מהשליחות שלי בעולם</label>
+                        </div>
+
+                        <div class="option-card" data-value="personal_change">
+                            <input type="checkbox" name="goals" value="personal_change" id="goal-2">
+                            <label for="goal-2">לעשות שינוי אישי בחיים שלי</label>
+                        </div>
+
+                        <div class="option-card" data-value="business_tools">
+                            <input type="checkbox" name="goals" value="business_tools" id="goal-3">
+                            <label for="goal-3">להכניס לעסק הקיים שלי כלים בשיטת טיפול מסודרת</label>
+                        </div>
+                    </div>
+
+                    <!-- Question 5: Where do you see yourself -->
+                    <div class="form-group">
+                        <label for="q_future_vision">איפה אתה רואה את עצמך עוד שנה בחיים ובקרירה?</label>
+                        <textarea name="q_future_vision" id="q_future_vision" placeholder="תאר/י את החזון שלך..."></textarea>
+                    </div>
+
+                    <!-- Turnstile -->
+                    <div id="turnstile-container" style="display: flex; justify-content: center; margin: 1rem 0;"></div>
+
+                    <button type="submit" class="btn btn-success" id="questionnaire-submit-btn">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        שליחת השאלון
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============ SUCCESS VIEW ============ -->
+        <div id="success-view" class="section-hidden">
+            <div class="form-card">
+                <div class="success-container">
+                    <div class="success-icon">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h2>תודה רבה! קיבלנו את הפרטים</h2>
+                    <p>
+                        ניצור איתך קשר בהקדם.
+                        <br>בינתיים, אתה מוזמן להמשיך לצפות בתכנים שלנו.
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+                        <a href="https://wa.me/972549116092?text=%D7%94%D7%99%D7%99%20%D7%94%D7%99%D7%9C%D7%9C%2C%20%D7%9E%D7%99%D7%9C%D7%90%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%A9%D7%90%D7%9C%D7%95%D7%9F%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%AA%D7%97%D7%99%D7%9C%20%F0%9F%92%9A" target="_blank" class="btn" style="background: #25D366; color: white; display: inline-flex; padding: 1rem 2rem;">
+                            <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i>
+                            שלח הודעה להילל בוואטסאפ
+                        </a>
+                        <a href="course-library.html" class="btn" style="background: var(--primary); color: white; display: inline-flex; padding: 1rem 2rem;">
+                            <i class="fa-solid fa-home"></i>
+                            חזרה לפורטל
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
+    <script src="../js/registration.js"></script>
+    <script src="../js/marketing-tools.js"></script>
+</body>
+</html>

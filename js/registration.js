@@ -100,7 +100,7 @@
 
         const btn = document.getElementById('lead-submit-btn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שומר...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
 
         try {
             // Save lead data
@@ -154,16 +154,12 @@
         document.getElementById('questionnaire-section').classList.remove('section-hidden');
         document.getElementById('questionnaire-section').classList.add('section-visible');
 
-        // Update progress bar
-        document.getElementById('seg-2').classList.add('active');
-
         // Pre-fill readonly fields from lead data
         document.getElementById('q_name').value = leadData.full_name || '';
         document.getElementById('q_phone').value = leadData.phone || '';
         if (leadData.email) {
             document.getElementById('q_email').value = leadData.email;
         } else {
-            // Hide email in questionnaire too if user is logged in without email
             document.getElementById('q-email-group').style.display = 'none';
         }
 
@@ -277,7 +273,6 @@
             // Show success
             document.getElementById('questionnaire-section').classList.remove('section-visible');
             document.getElementById('questionnaire-section').classList.add('section-hidden');
-            document.getElementById('progress-bar').style.display = 'none';
             document.getElementById('success-view').classList.remove('section-hidden');
             document.getElementById('success-view').classList.add('section-visible');
 

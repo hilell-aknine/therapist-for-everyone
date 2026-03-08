@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>מדריך איש מכירות — בית ומטפלים</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Frank+Ruhl+Libre:wght@400;500;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Heebo', sans-serif;
+    background: #fff;
+    color: #1a1a1a;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+/* === COVER PAGE === */
+.cover {
+    height: 100vh;
+    background: linear-gradient(135deg, #003B46 0%, #00606B 40%, #2F8592 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+}
+.cover::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: rgba(212,175,55,0.08);
+}
+.cover::after {
+    content: '';
+    position: absolute;
+    bottom: -150px;
+    left: -150px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: rgba(212,175,55,0.05);
+}
+.cover-logo {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #D4AF37;
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
+}
+.cover h1 {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 42px;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
+.cover h2 {
+    font-size: 20px;
+    font-weight: 300;
+    opacity: 0.9;
+    margin-bottom: 3rem;
+}
+.cover-badge {
+    background: rgba(212,175,55,0.2);
+    border: 1px solid rgba(212,175,55,0.4);
+    padding: 0.6rem 2rem;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #D4AF37;
+}
+.cover-version {
+    position: absolute;
+    bottom: 2rem;
+    font-size: 12px;
+    opacity: 0.5;
+}
+
+/* === LAYOUT === */
+.page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2.5rem 3rem;
+    page-break-after: always;
+}
+.page:last-child { page-break-after: auto; }
+
+/* === TOC === */
+.toc {
+    padding: 3rem;
+    max-width: 800px;
+    margin: 0 auto;
+    page-break-after: always;
+}
+.toc h2 {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 28px;
+    color: #003B46;
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #D4AF37;
+    display: inline-block;
+}
+.toc-section {
+    display: flex;
+    align-items: baseline;
+    padding: 0.8rem 0;
+    border-bottom: 1px dashed #ddd;
+    font-size: 15px;
+}
+.toc-section .num {
+    background: #003B46;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    margin-left: 1rem;
+    flex-shrink: 0;
+}
+.toc-section .title { font-weight: 600; color: #003B46; }
+.toc-section .dots { flex: 1; border-bottom: 1px dotted #ccc; margin: 0 0.5rem; min-width: 30px; }
+.toc-section .page-num { color: #D4AF37; font-weight: 700; }
+
+/* === HEADINGS === */
+h2.section-title {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 26px;
+    color: #003B46;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #D4AF37;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+h2.section-title .section-num {
+    background: linear-gradient(135deg, #003B46, #00606B);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+h3 {
+    font-size: 17px;
+    color: #00606B;
+    margin: 1.5rem 0 0.7rem;
+    font-weight: 700;
+}
+h4 {
+    font-size: 15px;
+    color: #2F8592;
+    margin: 1rem 0 0.5rem;
+    font-weight: 600;
+}
+
+/* === CONTENT BLOCKS === */
+p { margin-bottom: 0.8rem; }
+
+.info-box {
+    background: #f0f9fa;
+    border-right: 4px solid #2F8592;
+    padding: 1rem 1.2rem;
+    border-radius: 0 8px 8px 0;
+    margin: 1rem 0;
+    font-size: 13.5px;
+}
+.info-box.gold {
+    background: #fdf8ec;
+    border-right-color: #D4AF37;
+}
+.info-box.danger {
+    background: #fef2f2;
+    border-right-color: #dc3545;
+}
+.info-box.success {
+    background: #f0fdf4;
+    border-right-color: #28a745;
+}
+.info-box strong { color: #003B46; }
+
+.step-list {
+    list-style: none;
+    counter-reset: step;
+    padding: 0;
+    margin: 1rem 0;
+}
+.step-list li {
+    counter-increment: step;
+    padding: 0.8rem 1rem 0.8rem 0;
+    margin-right: 2.5rem;
+    position: relative;
+    border-bottom: 1px solid #f0f0f0;
+}
+.step-list li::before {
+    content: counter(step);
+    position: absolute;
+    right: -2.5rem;
+    top: 0.7rem;
+    background: linear-gradient(135deg, #D4AF37, #c9a227);
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+.step-list li:last-child { border-bottom: none; }
+
+ul.bullet {
+    padding-right: 1.5rem;
+    margin: 0.5rem 0;
+}
+ul.bullet li {
+    margin-bottom: 0.4rem;
+}
+
+/* === TABLES === */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 13px;
+}
+th {
+    background: #003B46;
+    color: white;
+    padding: 0.6rem 0.8rem;
+    text-align: right;
+    font-weight: 600;
+}
+td {
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid #eee;
+}
+tr:nth-child(even) td { background: #f8fafb; }
+
+/* === COMMAND BOX === */
+.cmd-box {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    padding: 1rem 1.2rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    margin: 0.8rem 0;
+    direction: ltr;
+    text-align: left;
+    line-height: 1.8;
+    overflow-x: auto;
+}
+.cmd-box .comment { color: #6b7280; }
+.cmd-box .highlight { color: #D4AF37; font-weight: 700; }
+
+/* === FLOW DIAGRAM === */
+.flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+.flow-step {
+    background: linear-gradient(135deg, #003B46, #00606B);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 80px;
+}
+.flow-step.gold { background: linear-gradient(135deg, #D4AF37, #c9a227); }
+.flow-step.green { background: linear-gradient(135deg, #28a745, #218838); }
+.flow-step.red { background: linear-gradient(135deg, #dc3545, #c82333); }
+.flow-arrow {
+    font-size: 18px;
+    color: #D4AF37;
+    margin: 0 0.3rem;
+    font-weight: 900;
+}
+
+/* === SCREENSHOT PLACEHOLDER === */
+.screenshot {
+    background: #f5f5f5;
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    margin: 1rem 0;
+}
+
+/* === FOOTER === */
+.page-footer {
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+    margin-top: 2rem;
+}
+
+/* === PRINT === */
+@media print {
+    body { font-size: 12px; }
+    .page { padding: 1.5rem 2rem; }
+    .cover { height: 100vh; }
+}
+
+/* === DIVIDER === */
+.divider {
+    height: 1px;
+    background: linear-gradient(to left, transparent, #D4AF37, transparent);
+    margin: 2rem 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== COVER ===================== -->
+<div class="cover">
+    <div class="cover-logo">בית ומטפלים</div>
+    <h1>מדריך איש מכירות</h1>
+    <h2>הרשמה, דשבורד CRM ובוט WhatsApp</h2>
+    <div class="cover-badge">גרסה 1.0 | מרץ 2026</div>
+    <div class="cover-version">www.therapist-home.com | מסמך פנימי</div>
+</div>
+
+<!-- ===================== TOC ===================== -->
+<div class="toc">
+    <h2>תוכן עניינים</h2>
+    <div class="toc-section"><span class="num">1</span><span class="title">סקירה כללית — מה זה Pipeline מכירות?</span><span class="dots"></span><span class="page-num">3</span></div>
+    <div class="toc-section"><span class="num">2</span><span class="title">למנהל: הוספת איש מכירות למערכת</span><span class="dots"></span><span class="page-num">4</span></div>
+    <div class="toc-section"><span class="num">3</span><span class="title">למנהל: הקצאת לידים לאיש מכירות</span><span class="dots"></span><span class="page-num">5</span></div>
+    <div class="toc-section"><span class="num">4</span><span class="title">לאיש מכירות: כניסה ראשונה לדשבורד</span><span class="dots"></span><span class="page-num">6</span></div>
+    <div class="toc-section"><span class="num">5</span><span class="title">לאיש מכירות: עבודה עם ה-Pipeline בדשבורד</span><span class="dots"></span><span class="page-num">7</span></div>
+    <div class="toc-section"><span class="num">6</span><span class="title">לאיש מכירות: שימוש בבוט WhatsApp</span><span class="dots"></span><span class="page-num">9</span></div>
+    <div class="toc-section"><span class="num">7</span><span class="title">שלבי ה-Pipeline — מהליד ועד לסגירה</span><span class="dots"></span><span class="page-num">11</span></div>
+    <div class="toc-section"><span class="num">8</span><span class="title">שאלות נפוצות (FAQ)</span><span class="dots"></span><span class="page-num">12</span></div>
+</div>
+
+<!-- ===================== SECTION 1 ===================== -->
+<div class="page">
+    <h2 class="section-title"><span class="section-num">1</span> סקירה כללית — מה זה Pipeline מכירות?</h2>
+
+    <p>ה-Pipeline הוא מערכת מעקב אחר לידים (מועמדים פוטנציאליים) לתוכנית ההכשרה שלנו ב-NLP. כל ליד עובר דרך שלבים מוגדרים — מרגע שנכנס כ"ליד חדש" ועד שקונה את ההכשרה או שהתהליך נסגר.</p>
+
+    <h3>שלבי ה-Pipeline</h3>
+
+    <div class="flow">
+        <div class="flow-step">ליד חדש</div>
+        <span class="flow-arrow">&larr;</span>
+        <div class="flow-step">ניסיונות חיוג</div>
+        <span class="flow-arrow">&larr;</span>
+        <div class="flow-step">ענה</div>
+        <span class="flow-arrow">&larr;</span>
+        <div class="flow-step gold">הצגת מוצר</div>
+        <span class="flow-arrow">&larr;</span>
+        <div class="flow-step green">קנה</div>
+    </div>
+    <div style="text-align:center;margin-top:-0.5rem;margin-bottom:1rem;">
+        <span style="color:#dc3545;font-size:12px;">* בכל שלב הליד יכול לצאת ל"לא קנה" עם סיבה</span>
+    </div>
+
+    <h3>מה יש לאיש המכירות?</h3>
+
+    <table>
+        <tr><th>יכולת</th><th>דשבורד</th><th>בוט WhatsApp</th></tr>
+        <tr><td>צפייה בלידים המוקצים לי</td><td>&#10003;</td><td>&#10003;</td></tr>
+        <tr><td>רישום חיוגים ותוצאות</td><td>&#10003;</td><td>&#10003;</td></tr>
+        <tr><td>קידום ליד בשלבים</td><td>&#10003;</td><td>&#10003;</td></tr>
+        <tr><td>סגירת עסקה (קנה/לא קנה)</td><td>&#10003;</td><td>&#10003;</td></tr>
+        <tr><td>הוספת הערות</td><td>&#10003;</td><td>&#10003;</td></tr>
+        <tr><td>סטטיסטיקות Pipeline</td><td>&#10003;</td><td>&#10003;</td></tr>
+        <tr><td>גישה למטופלים / מטפלים / כספים</td><td style="color:#dc3545;">&#10007;</td><td style="color:#dc3545;">&#10007;</td></tr>
+    </table>
+
+    <div class="info-box gold">
+        <strong>עיקרון מפתח:</strong> איש מכירות רואה <strong>רק את הלידים שהוקצו לו</strong>. המנהל (Admin) רואה הכל ומקצה לידים.
+    </div>
+</div>
+
+<!-- ===================== SECTION 2 ===================== -->
+<div class="page">
+    <h2 class="section-title"><span class="section-num">2</span> למנהל: הוספת איש מכירות למערכת</h2>
+
+    <div class="info-box">
+        <strong>דרישת קדם:</strong> איש המכירות חייב <strong>להירשם לאתר</strong> (therapist-home.com) לפני ההוספה. ניתן להירשם עם אימייל או חשבון גוגל.
+    </div>
+
+    <h3>שלב א' — הרשמת איש המכירות לאתר</h3>
+    <ol class="step-list">
+        <li>שלח לאיש המכירות את הלינק: <strong>www.therapist-home.com/pages/login.html</strong></li>
+        <li>איש המכירות נרשם עם <strong>אימייל וסיסמה</strong> או <strong>חשבון גוגל</strong></li>
+        <li>לאחר ההרשמה — פרופיל נוצר אוטומטית במערכת</li>
+    </ol>
+
+    <h3>שלב ב' — הוספה דרך הדשבורד</h3>
+    <ol class="step-list">
+        <li>היכנס לדשבורד: <strong>www.therapist-home.com/pages/admin.html</strong></li>
+        <li>לחץ על <strong>"הגדרות"</strong> בסיידבר (הטאב האחרון)</li>
+        <li>גלול למטה לסקשן <strong>"ניהול אנשי מכירות"</strong></li>
+        <li>
+            מלא את הפרטים:
+            <ul class="bullet">
+                <li><strong>שם מלא</strong> — השם שיופיע בדשבורד</li>
+                <li><strong>אימייל</strong> — חייב להיות <strong>אותו אימייל</strong> שאיש המכירות נרשם איתו</li>
+                <li><strong>טלפון WhatsApp</strong> — בפורמט בינלאומי (לדוגמה: 972501234567)</li>
+            </ul>
+        </li>
+        <li>לחץ <strong>"הוסף"</strong></li>
+    </ol>
+
+    <div class="info-box success">
+        <strong>מה קורה מאחורי הקלעים:</strong><br>
+        &#8226; הפרופיל מקבל תפקיד <code>sales_rep</code><br>
+        &#8226; הטלפון נוסף לרשימת הטלפונים המורשים של הבוט<br>
+        &#8226; ההרשאות מוגדרות ל-Pipeline בלבד
+    </div>
+
+    <h3>הסרת איש מכירות</h3>
+    <p>באותו סקשן "ניהול אנשי מכירות", ליד כל איש מכירות יש כפתור <strong>"הסר"</strong>. ההסרה:</p>
+    <ul class="bullet">
+        <li>מסירה את הגישה לדשבורד ולבוט</li>
+        <li>משחררת את כל הלידים שהיו מוקצים לו (חוזרים ל"ללא הקצאה")</li>
+    </ul>
+
+    <div class="page-footer">בית ומטפלים — מדריך איש מכירות | עמוד 4</div>
+</div>
+
+<!-- ===================== SECTION 3 ===================== -->
+<div class="page">
+    <h2 class="section-title"><span class="section-num">3</span> למנהל: הקצאת לידים לאיש מכירות</h2>
+
+    <p>לאחר שהוספת איש מכירות, צריך להקצות לו לידים. יש שלוש דרכים:</p>
+
+    <h3>א. הקצאה בודדת (מתוך מודאל הליד)</h3>
+    <ol class="step-list">
+        <li>עבור לטאב <strong>"Pipeline מכירות"</strong></li>
+        <li>לחץ על שורת הליד לפתיחת המודאל</li>
+        <li>במודאל, מצא את שדה <strong>"הקצה ל:"</strong> עם dropdown של אנשי מכירות</li>
+        <li>בחר את איש המכירות הרצוי ולחץ <strong>"הקצה"</strong></li>
+    </ol>
+
+    <h3>ב. הקצאה מרובה (Bulk Assign)</h3>
+    <ol class="step-list">
+        <li>בטבלת Pipeline, סמן את ה-checkboxes של הלידים הרצויים</li>
+        <li>בסרגל שמופיע למעלה, בחר איש מכירות מהרשימה הנפתחת</li>
+        <li>לחץ <strong>"הקצה נבחרים"</strong></li>
+    </ol>
+
+    <h3>ג. הקצאה אוטומטית (Round Robin)</h3>
+    <ol class="step-list">
+        <li>סמן מספר לידים בטבלה</li>
+        <li>ברשימה הנפתחת, בחר <strong>"הקצאה אוטומטית (Round Robin)"</strong></li>
+        <li>לחץ <strong>"הקצה נבחרים"</strong></li>
+    </ol>
+
+    <div class="info-box gold">
+        <strong>Round Robin:</strong> המערכת מחלקת את הלידים באופן שווה בין כל אנשי המכירות הפעילים. לדוגמה: אם יש 2 אנשי מכירות ו-10 לידים — כל אחד יקבל 5.
+    </div>
+
+    <h3>עמודת "מוקצה ל" בטבלה</h3>
+    <p>כמנהל, תראה עמודה נוספת בטבלת Pipeline עם שם איש המכירות שמוקצה לכל ליד. לידים ללא הקצאה יראו "—".</p>
+
+    <div class="info-box">
+        <strong>טיפ:</strong> ניתן להחליף הקצאה בכל עת — פשוט פתח את המודאל ובחר איש מכירות אחר.
+    </div>
+
+    <div class="page-footer">בית ומטפלים — מדריך איש מכירות | עמוד 5</div>
+</div>
+
+<!-- ===================== SECTION 4 ===================== -->
+<div class="page">
+    <h2 class="section-title"><span class="section-num">4</span> לאיש מכירות: כניסה ראשונה לדשבורד</h2>
+
+    <h3>שלב 1: הרשמה לאתר</h3>
+    <ol class="step-list">
+        <li>פתח בדפדפן: <strong>www.therapist-home.com/pages/login.html</strong></li>
+        <li>הירשם עם <strong>אימייל וסיסמה</strong> או לחץ <strong>"התחבר עם גוגל"</strong></li>
+        <li>ודא שהאימייל זהה למה שהמנהל הזין במערכת</li>
+    </ol>
+
+    <h3>שלב 2: כניסה לדשבורד</h3>
+    <ol class="step-list">
+        <li>לאחר שהמנהל הוסיף אותך, גש ישירות ל: <strong>www.therapist-home.com/pages/admin.html</strong></li>
+        <li>התחבר עם האימייל והסיסמה שלך</li>
+        <li>תראה את הדשבורד עם <strong>טאב Pipeline בלבד</strong></li>
+    </ol>
+
+    <div class="info-box gold">
+        <strong>מה תראה:</strong> בסיידבר יהיו רק שני טאבים — <strong>"Pipeline מכירות"</strong> ו-<strong>"הגדרות"</strong>. כל שאר הטאבים (מטופלים, מטפלים, לידים, וכו') מוסתרים.
+    </div>
+
+    <h3>מה אני רואה בדשבורד?</h3>
+    <table>
+        <tr><th>אזור</th><th>תיאור</th></tr>
+        <tr><td><strong>כרטיסי סטטיסטיקה</strong></td><td>סה"כ לידים, בחיוגים, הצגת מוצר, קנו, לא קנו, הכנסות ₪</td></tr>
+        <tr><td><strong>יחס המרה</strong></td><td>אחוז ההמרה (קנו מתוך סך הסגורים)</td></tr>
+        <tr><td><strong>טאבים לסינון</strong></td><td>הכל / חדשים / בחיוגים / ענו / הצגה / קנו / לא קנו</td></tr>
+        <tr><td><strong>טבלת לידים</strong></td><td>שם, טלפון, שלב, חיוגים, חזרה, סכום, תאריך</td></tr>
+        <tr><td><strong>חיפוש</strong></td><td>חיפוש חופשי לפי שם, טלפון, או אימייל</td></tr>
+    </table>
+
+    <div class="info-box danger">
+        <strong>חשוב:</strong> אתה רואה <strong>רק את הלידים שהוקצו לך</strong>. אם הרשימה ריקה — פנה למנהל שיקצה לך לידים.
+    </div>
+
+    <div class="page-footer">בית ומטפלים — מדריך איש מכירות | עמוד 6</div>
+</div>
+
+<!-- ===================== SECTION 5 ===================== -->
+<div class="page">
+    <h2 class="section-title"><span class="section-num">5</span> לאיש מכירות: עבודה עם ה-Pipeline בדשבורד</h2>
+
+    <h3>פתיחת ליד</h3>
+    <p>לחץ על שורת הליד בטבלה כדי לפתוח את <strong>מודאל הפירוט</strong>. תראה:</p>
+    <ul class="bullet">
+        <li>פרטי קשר: טלפון, אימייל, מקצוע</li>
+        <li>חיוגים: 6 נקודות — כל חיוג ממלא נקודה</li>
+        <li>תשובות השאלון (אם הליד מילא שאלון באתר)</li>
+        <li>טופס פעולה (משתנה לפי השלב)</li>
+        <li>שדה הערות</li>
+    </ul>
+
+    <h3>רישום חיוג</h3>
+    <p>כשהליד בשלב "חדש" / "ניסיונות חיוג" / "לא ענה":</p>
+    <ol class="step-list">
+        <li>פתח את המודאל</li>
+        <li>בשדה <strong>"תוצאת שיחה"</strong> בחר: <strong>לא ענה</strong> או <strong>ענה</strong></li>
+        <li>אם "לא ענה" — הגדר מועד חזרה (אופציונלי)</li>
+        <li>לחץ <strong>"רשום חיוג"</strong></li>
+    </ol>
+
+    <h3>קידום שלב</h3>
+    <p>כשהליד ענה, תראה כפתור <strong>"קדם להצגת מוצר"</strong>. לאחר ההצגה:</p>
+    <ol class="step-list">
+        <li>בחר תוצאה: <strong>"קנה"</strong> או <strong>"לא קנה"</strong></li>
+        <li>
+            <strong>אם קנה:</strong>
+            <ul class="bullet">
+                <li>הזן סכום עסקה (₪)</li>
+                <li>בחר צורת תשלום (העברה / אשראי / שניהם)</li>
+                <li>סמן אם חוזה נחתם</li>
+                <li>כתוב סיבת רכישה (אופציונלי)</li>
+            </ul>
+        </li>
+        <li>
+            <strong>אם לא קנה:</strong>
+            <ul class="bullet">
+                <li>בחר סיבה: כסף / סביבה לא תומכת / פחד / מכללה אחרת / אחר</li>
+            </ul>
+        </li>
+        <li>לחץ <strong>"שמור תוצאה"</strong></li>
+    </ol>
+
+    <h3>העברת שלב ידנית</h3>
+    <p>בכל מודאל ליד, יש dropdown <strong>"העבר שלב"</strong> שמאפשר לדלג או לחזור לשלב קודם.</p>
+
+    <h3>הוספת הערות</h3>
+    <p>בתחתית המודאל יש שדה <strong>"הערות"</strong>. כתוב הערה ולחץ <strong>"שמור"</strong>. ההערות נשמרות ונראות גם למנהל.</p>
+
+    <h3>פתיחת WhatsApp</h3>
+    <p>בתחתית המודאל (ובתפריט ⋮ בטבלה) יש כפתור <strong>WhatsApp</strong> ירוק — לחיצה פותחת שיחה עם הליד.</p>
+
+    <div class="page-footer">בית ומטפלים — מדריך איש מכירות | עמוד 7-8</div>
+</div>
+
+<!-- ===================== SECTION 6 ===================== -->
+<div class="page">
+    <h2 class="section-title"><span class="section-num">6</span> לאיש מכירות: שימוש בבוט WhatsApp</h2>
+
+    <p>בנוסף לדשבורד, ניתן לנהל את ה-Pipeline ישירות דרך <strong>בוט WhatsApp</strong>. שלח הודעה למספר הבוט ותקבל תגובה מיידית.</p>
+
+    <div class="info-box gold">
+        <strong>תנאי:</strong> הטלפון שלך חייב להיות רשום במערכת (המנהל הזין אותו בעת ההוספה). אם הבוט לא מגיב — פנה למנהל.
+    </div>
+
+    <h3>פקודות Pipeline</h3>
+    <table>
+        <tr><th style="width:35%">פקודה</th><th>מה עושה</th><th style="width:25%">דוגמה</th></tr>
+        <tr><td><strong>פייפליין</strong></td><td>רשימת הלידים הפעילים שלך</td><td><code>פייפליין</code></td></tr>
+        <tr><td><strong>סטטיסטיקות פייפליין</strong></td><td>סיכום: כמה בכל שלב, יחס המרה, הכנסות</td><td><code>סטטיסטיקות פייפליין</code></td></tr>
+        <tr><td><strong>רשום חיוג [מספר]</strong></td><td>רושם חיוג לליד לפי מספר בנוי</td><td><code>רשום חיוג 3</code></td></tr>
+        <tr><td><strong>לא ענה [מספר]</strong></td><td>מסמן "לא ענה" + מועד חזרה אופציונלי</td><td><code>לא ענה 3 מחר 14:00</code></td></tr>
+        <tr><td><strong>ענה [מספר]</strong></td><td>מקדם ליד לשלב "ענה"</td><td><code>ענה 3</code></td></tr>
+        <tr><td><strong>הצגה ל [מספר]</strong></td><td>מקדם ליד לשלב "הצגת מוצר"</td><td><code>הצגה ל 3</code></td></tr>
+        <tr><td><strong>קנה ל [מספר]: [סכום]</strong></td><td>סוגר עסקה עם סכום + שיטת תשלום</td><td><code>קנה ל 3: 3500 אשראי</code></td></tr>
+        <tr><td><strong>לא קנה [מספר]: [סיבה]</strong></td><td>סוגר ליד כ"לא קנה" עם סיבה</td><td><code>לא קנה 3: כסף</code></td></tr>
+        <tr><td><strong>הערה פייפליין [מספר]: [טקסט]</strong></td><td>מוסיף הערה לליד</td><td><code>הערה פייפליין 3: מעוניינת מאוד</code></td></tr>
+    </table>
+
+    <h3>איך עובדים עם מספרי שורות?</h3>
+    <ol class="step-list">
+        <li>שלח <strong>"פייפליין"</strong> לקבלת הרשימה</li>
+        <li>כל ליד מקבל <strong>מספר שורה</strong> (1, 2, 3...)</li>
+        <li>השתמש במספר הזה בפקודות הבאות</li>
+    </ol>
+
+    <div class="info-box">
+        <strong>דוגמה לזרימת עבודה:</strong><br>
+        <code>פייפליין</code> &rarr; רואה שליד #3 הוא "דנה כהן"<br>
+        <code>רשום חיוג 3</code> &rarr; מרשם חיוג (דנה לא ענתה)<br>
+        <code>לא ענה 3 מחר 10:00</code> &rarr; מגדיר תזכורת חזרה<br>
+        <em>...למחרת...</em><br>
+        <code>ענה 3</code> &rarr; דנה ענתה! מקדמים לשלב "ענה"<br>
+        <code>הצגה ל 3</code> &rarr; הצגנו לה את ההכשרה<br>
+        <code>קנה ל 3: 3500 העברה</code> &rarr; דנה קנתה! 3,500 ₪ בהעברה
+    </div>
+
+    <h3>פקודות חסומות</h3>
+    <p>כאיש מכירות, אם תנסה לשלוח פקודות שאינן קשורות ל-Pipeline (כמו "מטופלים", "הכנסות החודש", "סיכום היום"), תקבל הודעה:</p>
+    <div class="info-box danger">
+        "אין לך הרשאה לפעולה זו. כאיש מכירות, יש לך גישה לפקודות Pipeline בלבד."
+    </div>
+
+    <div class="page-footer">בית ומטפלים — מדריך איש מכירות | עמוד 9-10</div>
+</div>
+
+<!-- ===================== SECTION 7 ===================== -->
+<div class="page">
+    <h2 class="section-title"><span class="section-num">7</span> שלבי ה-Pipeline — מהליד ועד לסגירה</h2>
+
+    <table>
+        <tr><th style="width:20%">שלב</th><th style="width:10%">סימון</th><th>מה קורה</th><th style="width:25%">פעולות</th></tr>
+        <tr>
+            <td><strong>ליד חדש</strong></td>
+            <td>&#x1F195;</td>
+            <td>ליד שנכנס מהשאלון או שהוזן ידנית. לא נוצר איתו קשר.</td>
+            <td>רשום חיוג ראשון</td>
+        </tr>
+        <tr>
+            <td><strong>ניסיונות חיוג</strong></td>
+            <td>&#x1F4DE;</td>
+            <td>מנסים להתקשר. עד 6 ניסיונות (6 נקודות).</td>
+            <td>רשום חיוג / לא ענה / ענה</td>
+        </tr>
+        <tr>
+            <td><strong>לא ענה — חזרה</strong></td>
+            <td>&#x1F504;</td>
+            <td>לא ענה, צריך לחזור. ניתן להגדיר מועד חזרה.</td>
+            <td>רשום חיוג / ענה</td>
+        </tr>
+        <tr>
+            <td><strong>ענה</strong></td>
+            <td>&#x2705;</td>
+            <td>הליד ענה לטלפון. שיחה ראשונית.</td>
+            <td>קדם להצגת מוצר</td>
+        </tr>
+        <tr>
+            <td><strong>הצגת מוצר</strong></td>
+            <td>&#x1F3AF;</td>
+            <td>הצגנו את תוכנית ההכשרה. ממתינים לתשובה.</td>
+            <td>סגור: קנה / לא קנה</td>
+        </tr>
+        <tr>
+            <td><strong>קנה</strong></td>
+            <td>&#x1F3C6;</td>
+            <td>עסקה סגורה! נרשם סכום, תשלום, חוזה.</td>
+            <td>—</td>
+        </tr>
+        <tr>
+            <td><strong>לא קנה</strong></td>
+            <td>&#x274C;</td>
+            <td>הליד החליט שלא. נרשמת סיבה.</td>
+            <td>—</td>
+        </tr>
+    </table>
+
+    <h3>סיבות "לא קנה"</h3>
+    <table>
+        <tr><th>סיבה</th><th>הסבר</th><th>מילת מפתח בבוט</th></tr>
+        <tr><td>כסף / יקר</td><td>אין תקציב או המחיר גבוה</td><td><code>כסף</code> / <code>יקר</code> / <code>מחיר</code></td></tr>
+        <tr><td>סביבה לא תומכת</td><td>בן/בת זוג, משפחה לא מאשרים</td><td><code>סביבה</code> / <code>משפחה</code> / <code>בן זוג</code></td></tr>
+        <tr><td>פחד / חשש</td><td>חשש מההכשרה או מהתחום</td><td><code>פחד</code> / <code>חשש</code></td></tr>
+        <tr><td>מכללה אחרת</td><td>בחר ללמוד במקום אחר</td><td><code>מכללה</code></td></tr>
+        <tr><td>אחר</td><td>סיבה אחרת</td><td><code>אחר</code></td></tr>
+    </table>
+
+    <h3>שיטות תשלום (לסגירת "קנה")</h3>
+    <table>
+        <tr><th>שיטה</th><th>מילת מפתח בבוט</th></tr>
+        <tr><td>העברה בנקאית</td><td><code>העברה</code></td></tr>
+        <tr><td>כרטיס אשראי</td><td><code>אשראי</code></td></tr>
+        <tr><td>העברה + אשראי</td><td>הקלד <code>העברה</code> ו-<code>אשראי</code> יחד</td></tr>
+    </table>
+
+    <div class="page-footer">בית ומטפלים — מדריך איש מכירות | עמוד 11</div>
+</div>
+
+<!-- ===================== SECTION 8 ===================== -->
+<div class="page">
+    <h2 class="section-title"><span class="section-num">8</span> שאלות נפוצות (FAQ)</h2>
+
+    <h4>ש: אני לא רואה לידים בדשבורד / בבוט — למה?</h4>
+    <p><strong>ת:</strong> כנראה שהמנהל עדיין לא הקצה לך לידים. פנה אליו ובקש שיקצה.</p>
+
+    <div class="divider"></div>
+
+    <h4>ש: הבוט לא מגיב לי בוואטסאפ — מה לעשות?</h4>
+    <p><strong>ת:</strong> ודא שהמנהל הזין את מספר הטלפון שלך (בפורמט 972...) בעת ההוספה. אם המספר לא רשום — הבוט מתעלם מההודעות.</p>
+
+    <div class="divider"></div>
+
+    <h4>ש: אני יכול למחוק ליד?</h4>
+    <p><strong>ת:</strong> לא. רק המנהל יכול למחוק לידים. אתה יכול רק לעדכן שלב, לרשום חיוגים, ולהוסיף הערות.</p>
+
+    <div class="divider"></div>
+
+    <h4>ש: אפשר לראות ליד של איש מכירות אחר?</h4>
+    <p><strong>ת:</strong> לא. המערכת מסננת אוטומטית — אתה רואה רק את מה שהוקצה לך.</p>
+
+    <div class="divider"></div>
+
+    <h4>ש: מה זה "6 נקודות" בחיוגים?</h4>
+    <p><strong>ת:</strong> מקסימום 6 ניסיונות חיוג לליד. כל חיוג ממלא נקודה. אחרי 6 ניסיונות כושלים — שקול לסגור כ"לא קנה".</p>
+
+    <div class="divider"></div>
+
+    <h4>ש: איך אני מחליף שלב ידנית?</h4>
+    <p><strong>ת:</strong> במודאל הליד בדשבורד, יש dropdown "העבר שלב" שמאפשר לדלג לכל שלב. בבוט, השתמש בפקודות ספציפיות (ענה, הצגה, קנה...).</p>
+
+    <div class="divider"></div>
+
+    <h4>ש: האם שינויים שלי נראים למנהל?</h4>
+    <p><strong>ת:</strong> כן. כל פעולה נרשמת בלוג הפעילות. המנהל רואה את כל העדכונים בזמן אמת.</p>
+
+    <div class="divider"></div>
+
+    <h4>ש: אפשר לשלוח הודעות קוליות לבוט?</h4>
+    <p><strong>ת:</strong> כן! הבוט מתמלל הודעות קוליות ומעבד אותן כהודעות טקסט רגילות.</p>
+
+    <div class="divider"></div>
+
+    <div class="info-box gold" style="margin-top:2rem;">
+        <strong>צריך עזרה?</strong> פנה למנהל המערכת או שלח "עזרה" לבוט WhatsApp.
+    </div>
+
+    <div class="page-footer" style="margin-top:3rem;">
+        <div style="font-size:14px;color:#003B46;font-weight:700;margin-bottom:0.3rem;">בית ומטפלים — ריפוי הנפש לכל אדם</div>
+        www.therapist-home.com<br>
+        מסמך פנימי | מרץ 2026 | גרסה 1.0
+    </div>
+</div>
+
+</body>
+</html>

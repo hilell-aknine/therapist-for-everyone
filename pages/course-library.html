@@ -4433,32 +4433,43 @@
             const loginNotice = document.getElementById('ambassadorLoginNotice');
             const loginNoticeText = loginNotice?.querySelector('p');
 
-            // Use getUser() — authoritative server check, not cached getSession()
-            let user = null;
-            try {
-                user = await window.Auth?.getCurrentUser();
-                console.log('Ambassador: Auth session resolved, user:', user?.id || 'null');
-            } catch (e) {
-                console.warn('Ambassador: Auth check failed:', e.message);
+            // Use the page-level currentUser (already resolved by checkAuthSession)
+            // This avoids dual-client mismatch with window.Auth
+            let user = currentUser;
+            console.log('Ambassador: isAuthenticated =', isAuthenticated, ', user =', user?.id || 'null');
+
+            // If page auth hasn't resolved yet, try a direct session check
+            if (!user && supabaseClient) {
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session?.user) {
+                        user = session.user;
+                        console.log('Ambassador: Fallback session resolved, user:', user.id);
+                    }
+                } catch (e) {
+                    console.warn('Ambassador: Session fallback failed:', e.message);
+                }
             }
 
             if (user && linkCard) {
                 linkCard.style.display = '';
                 if (loginNotice) loginNotice.style.display = 'none';
                 // Generate referral link
-                const link = window.Referrals?.getLink(user.id) || '';
+                const link = 'https://www.therapist-home.com/pages/registration.html?ref=' + user.id;
                 document.getElementById('ambassadorLinkInput').value = link;
                 // Load my referral count
-                const count = await window.Referrals?.getMyCount(user.id) || 0;
-                document.getElementById('ambassadorMyCount').textContent = count;
+                try {
+                    const count = await window.Referrals?.getMyCount(user.id) || 0;
+                    document.getElementById('ambassadorMyCount').textContent = count;
+                } catch (e) { /* leaderboard non-critical */ }
             } else {
                 if (linkCard) linkCard.style.display = 'none';
                 if (loginNotice) loginNotice.style.display = '';
-                // Check if session expired vs never logged in
-                const session = await window.Auth?.getSession();
-                if (session && !user && loginNoticeText) {
-                    // Had a session but getUser() failed = expired token
-                    loginNoticeText.textContent = 'פג תוקף החיבור, אנא התחברו מחדש';
+                // Expired session vs never logged in
+                if (loginNoticeText) {
+                    loginNoticeText.textContent = isAuthenticated
+                        ? 'פג תוקף החיבור, אנא התחברו מחדש'
+                        : 'התחברו כדי לקבל קישור הפניה אישי';
                 }
             }
 

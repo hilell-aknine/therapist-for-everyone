@@ -1021,7 +1021,7 @@
     const Referrals = {
         /** Get referral link for the current user */
         getLink(userId) {
-            return `https://www.therapist-home.com/pages/registration.html?ref=${userId}`;
+            return `https://www.therapist-home.com/pages/course-library.html?ref=${userId}`;
         },
 
         /** Get current user's referral count (last 30 days) */

@@ -1,15 +1,113 @@
 // admin-utils.js — Shared utility functions
 
+// View groups: each main sidebar item maps to sub-views
+const VIEW_GROUPS = {
+    'overview': { views: ['overview'], header: null, default: 'overview' },
+    'mizum':    { views: ['patients', 'therapists', 'matches'], header: 'mizum-header', default: 'patients' },
+    'sales':    { views: ['contact-leads', 'questionnaires', 'pipeline'], header: 'sales-header', default: 'contact-leads' },
+    'learning': { views: ['leads', 'learners'], header: 'learning-header', default: 'leads' },
+    'bot':      { views: ['bot'], header: null, default: 'bot' },
+    'analytics':{ views: ['analytics'], header: null, default: 'analytics' },
+    'settings': { views: ['settings'], header: null, default: 'settings' },
+};
+
+// All individual view IDs (flat list)
+const ALL_VIEWS = Object.values(VIEW_GROUPS).flatMap(g => g.views);
+const ALL_HEADERS = Object.values(VIEW_GROUPS).map(g => g.header).filter(Boolean);
+
+// Track current active group for sub-tab switching
+let _currentGroup = 'overview';
+
 function switchView(view) {
+    // Update sidebar active state
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    ['patients','therapists','matches','leads','learners','contact-leads','questionnaires','pipeline','bot','analytics','settings'].forEach(v => {
-        document.getElementById(v + '-view')?.classList.toggle('hidden', view !== v);
-    });
-    if (view === 'learners') loadLearnersView();
-    if (view === 'bot') loadBotView();
-    if (view === 'analytics') loadGA4Analytics();
-    if (view === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }
+    if (event && event.currentTarget) event.currentTarget.classList.add('active');
+
+    // Hide all views and headers
+    ALL_VIEWS.forEach(v => document.getElementById(v + '-view')?.classList.add('hidden'));
+    ALL_HEADERS.forEach(h => document.getElementById(h)?.classList.add('hidden'));
+
+    const group = VIEW_GROUPS[view];
+    if (!group) return;
+
+    _currentGroup = view;
+
+    // Show group header if exists
+    if (group.header) {
+        document.getElementById(group.header)?.classList.remove('hidden');
+    }
+
+    // Show default sub-view
+    document.getElementById(group.default + '-view')?.classList.remove('hidden');
+
+    // Reset sub-tab active states
+    if (group.header) {
+        const headerEl = document.getElementById(group.header);
+        headerEl?.querySelectorAll('.sub-tab').forEach((tab, i) => {
+            tab.classList.toggle('active', group.views[i] === group.default);
+        });
+    }
+
+    // Lazy-load hooks
+    if (view === 'learning' || group.default === 'learners') loadLearnersView();
+    if (view === 'bot' || group.default === 'bot') loadBotView();
+    if (view === 'analytics' || group.default === 'analytics') loadGA4Analytics();
+    if (view === 'settings' || group.default === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }
+
+    // Update overview if navigating to it
+    if (view === 'overview') updateOverview();
+}
+
+function switchSubView(groupName, subView) {
+    const group = VIEW_GROUPS[groupName];
+    if (!group) return;
+
+    // Hide all views in this group
+    group.views.forEach(v => document.getElementById(v + '-view')?.classList.add('hidden'));
+
+    // Show selected sub-view
+    document.getElementById(subView + '-view')?.classList.remove('hidden');
+
+    // Update sub-tab active states
+    const headerEl = document.getElementById(group.header);
+    if (headerEl) {
+        headerEl.querySelectorAll('.sub-tab').forEach((tab, i) => {
+            tab.classList.toggle('active', group.views[i] === subView);
+        });
+    }
+
+    // Lazy-load hooks for sub-views
+    if (subView === 'learners') loadLearnersView();
+}
+
+function updateOverview() {
+    setText('ov-patients', patients.length);
+    setText('ov-therapists', therapists.length);
+    setText('ov-matches', matches.length);
+    setText('ov-leads', leads.length);
+    setText('ov-learners', learnersData?.length || 0);
+    setText('ov-pipeline', pipelineLeads.length);
+
+    // Contact leads + questionnaires counts
+    const clCount = typeof contactLeads !== 'undefined' ? contactLeads.length : 0;
+    const qCount = typeof questionnaires !== 'undefined' ? questionnaires.length : 0;
+    setText('ov-contact-leads', clCount);
+    setText('ov-questionnaires', qCount);
+
+    // Recent activity summary
+    const recentEl = document.getElementById('overview-recent-list');
+    if (!recentEl) return;
+
+    const recentItems = [];
+    const newPatients = patients.filter(p => p.status === 'new').length;
+    const newTherapists = therapists.filter(t => t.status === 'new').length;
+    if (newPatients > 0) recentItems.push(`<i class="fa-solid fa-user-injured" style="color:var(--gold);"></i> ${newPatients} מטופלים חדשים ממתינים לטיפול`);
+    if (newTherapists > 0) recentItems.push(`<i class="fa-solid fa-user-doctor" style="color:var(--muted-teal);"></i> ${newTherapists} מטפלים חדשים ממתינים לאישור`);
+    const activePipeline = pipelineLeads.filter(l => !['closed_won','closed_lost'].includes(l.stage)).length;
+    if (activePipeline > 0) recentItems.push(`<i class="fa-solid fa-filter-circle-dollar" style="color:var(--gold);"></i> ${activePipeline} לידים פעילים ב-Pipeline`);
+    if (recentItems.length === 0) recentItems.push('אין פעילות חדשה');
+
+    recentEl.innerHTML = recentItems.map(item => `<div style="padding:0.5rem 0;border-bottom:1px solid var(--border);">${item}</div>`).join('');
 }
 
 function filterPatients(status) {

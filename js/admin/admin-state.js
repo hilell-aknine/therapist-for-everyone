@@ -47,19 +47,31 @@ async function loadAllData() {
 }
 
 function updateCounts() {
-    document.getElementById('patients-count').textContent = patients.length;
-    document.getElementById('therapists-count').textContent = therapists.length;
-    document.getElementById('matches-count').textContent = matches.length;
-    document.getElementById('leads-count').textContent = leads.length;
-    document.getElementById('stat-new').textContent = patients.filter(p => p.status === 'new').length;
-    document.getElementById('stat-waiting').textContent = patients.filter(p => p.status === 'waiting').length;
-    document.getElementById('stat-in-treatment').textContent = patients.filter(p => p.status === 'in_treatment').length;
-    document.getElementById('stat-total-leads').textContent = leads.length;
-    document.getElementById('stat-google-leads').textContent = leads.filter(l => !l.email || l.full_name !== l.email?.split('@')[0]).length;
-    document.getElementById('stat-email-leads').textContent = leads.filter(l => l.full_name === l.email?.split('@')[0]).length;
-    // Pipeline counts
+    // Sub-tab badges
+    setText('patients-count', patients.length);
+    setText('therapists-count', therapists.length);
+    setText('matches-count', matches.length);
+    setText('leads-count', leads.length);
+
+    // Sidebar combined badges
+    setText('mizum-count', patients.length + therapists.length + matches.length);
+    const clLen = typeof contactLeads !== 'undefined' ? contactLeads.length : 0;
+    const qLen = typeof questionnaires !== 'undefined' ? questionnaires.length : 0;
     const pActive = pipelineLeads.filter(l => !['closed_won','closed_lost'].includes(l.stage));
-    document.getElementById('pipeline-count').textContent = pActive.length;
+    setText('sales-count', clLen + qLen + pActive.length);
+    setText('learning-count', leads.length);
+    setText('pipeline-count', pActive.length);
+
+    // Stat cards
+    setText('stat-new', patients.filter(p => p.status === 'new').length);
+    setText('stat-waiting', patients.filter(p => p.status === 'waiting').length);
+    setText('stat-in-treatment', patients.filter(p => p.status === 'in_treatment').length);
+    setText('stat-total-leads', leads.length);
+    setText('stat-google-leads', leads.filter(l => !l.email || l.full_name !== l.email?.split('@')[0]).length);
+    setText('stat-email-leads', leads.filter(l => l.full_name === l.email?.split('@')[0]).length);
+
+    // Update overview if visible
+    if (typeof updateOverview === 'function') updateOverview();
 }
 
 // GA4 cache TTL — declared as var so admin-settings.js can reassign

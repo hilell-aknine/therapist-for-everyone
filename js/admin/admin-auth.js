@@ -29,17 +29,18 @@ window._userProfileId = null;
     if (profile.role === 'sales_rep') {
         document.querySelectorAll('.sidebar .nav-item').forEach(item => {
             const onclick = item.getAttribute('onclick') || '';
-            const allowed = ["switchView('pipeline')", "switchView('settings')"];
+            const allowed = ["switchView('sales')", "switchView('settings')"];
             if (!allowed.some(a => onclick.includes(a))) {
                 item.style.display = 'none';
             }
         });
+        document.querySelectorAll('.sidebar .nav-section').forEach(sec => sec.style.display = 'none');
         // Hide admin-only elements
         document.querySelectorAll('[data-admin-only]').forEach(el => el.style.display = 'none');
-        // Auto-switch to pipeline view
+        // Auto-switch to sales view (pipeline)
         setTimeout(() => {
-            const pipelineTab = document.querySelector('.sidebar .nav-item[onclick*="pipeline"]');
-            if (pipelineTab) pipelineTab.click();
+            const salesTab = document.querySelector('.sidebar .nav-item[onclick*="sales"]');
+            if (salesTab) salesTab.click();
         }, 100);
     }
     // Load category permissions

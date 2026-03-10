@@ -1,5 +1,20 @@
 // admin-settings.js — Settings, UTM, automations, permissions, sales rep manager
 
+const SETTINGS_KEY = 'admin_dashboard_settings';
+const SETTINGS_DEFAULTS = {
+    dateRange: '30',
+    maxPages: '20',
+    trendDays: '7',
+    autoRefresh: '5',
+    defaultView: 'overview',
+    dateGroups: 'true',
+    patientFilter: 'all',
+    therapistFilter: 'all',
+    showBadges: 'true',
+    directWarning: '50',
+    theme: 'light',
+};
+
 function getDashboardSettings() {
     try {
         const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));

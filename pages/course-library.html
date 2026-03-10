@@ -4431,8 +4431,16 @@
         async function initAmbassadorDashboard() {
             const linkCard = document.getElementById('ambassadorLinkCard');
             const loginNotice = document.getElementById('ambassadorLoginNotice');
-            const session = await window.Auth?.getSession();
-            const user = session?.user;
+            const loginNoticeText = loginNotice?.querySelector('p');
+
+            // Use getUser() — authoritative server check, not cached getSession()
+            let user = null;
+            try {
+                user = await window.Auth?.getCurrentUser();
+                console.log('Ambassador: Auth session resolved, user:', user?.id || 'null');
+            } catch (e) {
+                console.warn('Ambassador: Auth check failed:', e.message);
+            }
 
             if (user && linkCard) {
                 linkCard.style.display = '';
@@ -4446,6 +4454,12 @@
             } else {
                 if (linkCard) linkCard.style.display = 'none';
                 if (loginNotice) loginNotice.style.display = '';
+                // Check if session expired vs never logged in
+                const session = await window.Auth?.getSession();
+                if (session && !user && loginNoticeText) {
+                    // Had a session but getUser() failed = expired token
+                    loginNoticeText.textContent = 'פג תוקף החיבור, אנא התחברו מחדש';
+                }
             }
 
             // Load leaderboard

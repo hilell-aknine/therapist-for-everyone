@@ -322,6 +322,146 @@
             .features-section { padding: 3.5rem 1.5rem; }
             .cta-section { padding: 3.5rem 1.5rem; }
         }
+
+        /* ====== Auth Modal ====== */
+        .auth-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .auth-overlay.visible { opacity: 1; }
+
+        .auth-modal {
+            background: #1a2a2e;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            padding: 2.5rem 2rem 2rem;
+            position: relative;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transform: translateY(30px);
+            transition: transform 0.3s ease;
+        }
+        .auth-overlay.visible .auth-modal { transform: translateY(0); }
+
+        .auth-close {
+            position: absolute; top: 14px; left: 14px;
+            background: none; border: none;
+            color: rgba(255,255,255,0.5); font-size: 1.4rem;
+            cursor: pointer; transition: color 0.2s;
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-close:hover { color: #fff; }
+
+        .auth-icon {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, #1a5c5e, #2F8592);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.2rem;
+            font-size: 1.6rem; color: #fff;
+        }
+
+        .auth-modal h2 {
+            font-family: var(--font-display, 'Frank Ruhl Libre', serif);
+            font-size: 1.6rem; font-weight: 800;
+            margin-bottom: 0.3rem; color: #fff;
+        }
+        .auth-modal .auth-sub {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1.8rem;
+        }
+
+        .auth-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.6rem; width: 100%;
+            padding: 0.85rem 1.2rem;
+            border-radius: 12px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .auth-btn-google {
+            background: #fff; color: #333;
+            margin-bottom: 0.75rem;
+        }
+        .auth-btn-google:hover { background: #f5f5f5; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+        .auth-btn-google img { width: 20px; height: 20px; }
+
+        .auth-btn-email {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.2);
+            color: #fff; margin-bottom: 0.75rem;
+        }
+        .auth-btn-email:hover { background: rgba(255,255,255,0.14); }
+
+        .auth-divider {
+            display: flex; align-items: center; gap: 1rem;
+            margin: 0.5rem 0;
+            color: rgba(255,255,255,0.35); font-size: 0.85rem;
+        }
+        .auth-divider::before, .auth-divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: rgba(255,255,255,0.12);
+        }
+
+        .auth-btn-guest {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.2);
+            color: #fff; margin-top: 0.5rem;
+        }
+        .auth-btn-guest:hover { background: rgba(255,255,255,0.14); }
+
+        /* Email form inside modal */
+        .auth-email-form { display: none; margin-top: 1rem; }
+        .auth-email-form.show { display: block; }
+        .auth-input {
+            width: 100%; padding: 0.75rem 1rem;
+            border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.06); color: #fff;
+            font-family: 'Heebo', sans-serif; font-size: 0.95rem;
+            margin-bottom: 0.6rem; outline: none;
+            transition: border-color 0.2s;
+        }
+        .auth-input::placeholder { color: rgba(255,255,255,0.35); }
+        .auth-input:focus { border-color: var(--dusty-aqua, #2F8592); }
+        .auth-submit {
+            width: 100%; padding: 0.8rem;
+            border-radius: 10px; border: none;
+            background: linear-gradient(135deg, #D4AF37, #c4a030);
+            color: #1a1a1a; font-weight: 700; font-size: 1rem;
+            font-family: 'Heebo', sans-serif;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .auth-submit:hover { box-shadow: 0 4px 16px rgba(212,175,55,0.4); }
+        .auth-error {
+            color: #ff6b6b; font-size: 0.85rem;
+            margin-bottom: 0.5rem; display: none;
+        }
+        .auth-error.show { display: block; }
+        .auth-back {
+            background: none; border: none; color: rgba(255,255,255,0.5);
+            font-size: 0.85rem; cursor: pointer; margin-top: 0.8rem;
+            font-family: 'Heebo', sans-serif;
+        }
+        .auth-back:hover { color: #fff; }
+
+        @media (max-width: 480px) {
+            .auth-modal { padding: 2rem 1.5rem 1.5rem; }
+            .auth-modal h2 { font-size: 1.4rem; }
+        }
     </style>
 </head>
 <body>
@@ -475,6 +615,44 @@
         </div>
     </footer>
 
+    <!-- Auth Modal -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-modal">
+            <button class="auth-close" onclick="closeAuthModal()" aria-label="סגור">&times;</button>
+            <div class="auth-icon"><i class="fa-solid fa-brain"></i></div>
+            <h2>ברוך הבא</h2>
+            <p class="auth-sub">התחבר כדי להתחיל ללמוד</p>
+
+            <!-- Main buttons -->
+            <div id="authButtons">
+                <button class="auth-btn auth-btn-google" onclick="authGoogle()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    התחבר עם Google
+                </button>
+                <button class="auth-btn auth-btn-email" onclick="showEmailForm()">
+                    <i class="fa-solid fa-envelope"></i>
+                    התחבר עם אימייל
+                </button>
+                <div class="auth-divider">או</div>
+                <a class="auth-btn auth-btn-guest" id="guestBtn" href="course-library.html">
+                    <i class="fa-solid fa-user"></i>
+                    המשך כאורח
+                </a>
+            </div>
+
+            <!-- Email form (hidden by default) -->
+            <div class="auth-email-form" id="emailForm">
+                <div class="auth-error" id="authError"></div>
+                <input class="auth-input" type="email" id="authEmail" placeholder="אימייל" autocomplete="email" dir="ltr">
+                <input class="auth-input" type="password" id="authPassword" placeholder="סיסמה" autocomplete="current-password" dir="ltr">
+                <button class="auth-submit" onclick="authEmail()">התחבר</button>
+                <button class="auth-back" onclick="hideEmailForm()"><i class="fa-solid fa-arrow-right"></i> חזרה</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/supabase-client.js"></script>
     <script src="../js/marketing-tools.js" defer></script>
     <script>
         function toggleMobileMenu() {
@@ -513,6 +691,112 @@
                 });
             }, { threshold: 0.15 });
             revealEls.forEach(el => obs.observe(el));
+        }
+
+        // ====== Auth Modal Logic ======
+        const overlay = document.getElementById('authOverlay');
+        const refParam = new URLSearchParams(window.location.search).get('ref');
+
+        // Show modal automatically when ?ref= is present
+        async function initAuthModal() {
+            if (!refParam) return;
+
+            // Check if already logged in
+            if (typeof supabaseClient !== 'undefined') {
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session?.user) {
+                        // Already logged in — go straight to portal
+                        window.location.href = 'course-library.html';
+                        return;
+                    }
+                } catch (e) { /* continue to show modal */ }
+            }
+
+            // Show modal with animation
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => overlay.classList.add('visible'));
+        }
+
+        function closeAuthModal() {
+            overlay.classList.remove('visible');
+            setTimeout(() => { overlay.style.display = 'none'; }, 300);
+        }
+
+        // Close on overlay click (not modal itself)
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeAuthModal();
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && overlay.style.display === 'flex') closeAuthModal();
+        });
+
+        // Google OAuth
+        async function authGoogle() {
+            if (typeof supabaseClient === 'undefined') return;
+            try {
+                const { error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: 'https://www.therapist-home.com/pages/course-library.html'
+                    }
+                });
+                if (error) throw error;
+            } catch (err) {
+                showAuthError('שגיאה בהתחברות עם Google — נסו שוב');
+            }
+        }
+
+        // Email / Password
+        async function authEmail() {
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            if (!email || !password) { showAuthError('יש למלא אימייל וסיסמה'); return; }
+            if (typeof supabaseClient === 'undefined') return;
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                window.location.href = 'course-library.html';
+            } catch (err) {
+                if (err.message.includes('Invalid login credentials')) {
+                    showAuthError('פרטי התחברות שגויים');
+                } else if (err.message.includes('Email not confirmed')) {
+                    showAuthError('האימייל לא אומת — בדקו את תיבת הדואר');
+                } else {
+                    showAuthError('שגיאה בהתחברות — נסו שוב');
+                }
+            }
+        }
+
+        function showEmailForm() {
+            document.getElementById('authButtons').style.display = 'none';
+            document.getElementById('emailForm').classList.add('show');
+            document.getElementById('authEmail').focus();
+        }
+        function hideEmailForm() {
+            document.getElementById('emailForm').classList.remove('show');
+            document.getElementById('authButtons').style.display = '';
+            document.getElementById('authError').classList.remove('show');
+        }
+        function showAuthError(msg) {
+            const el = document.getElementById('authError');
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        // Enter key in password field
+        document.getElementById('authPassword')?.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') authEmail();
+        });
+
+        // Init on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAuthModal);
+        } else {
+            initAuthModal();
         }
     </script>
 </body>

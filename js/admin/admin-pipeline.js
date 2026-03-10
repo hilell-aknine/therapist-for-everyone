@@ -1,5 +1,15 @@
 // admin-pipeline.js — Pipeline: 7 stages, modal, assign, bulk assign, salesRepsCache
 
+const PIPELINE_STAGES = {
+    'new_lead': 'ליד חדש',
+    'call_attempts': 'בחיוגים',
+    'no_answer_callback': 'לא ענה — חזרה',
+    'answered': 'ענה',
+    'presentation': 'הצגת מוצר',
+    'closed_won': 'קנה',
+    'closed_lost': 'לא קנה'
+};
+
 let salesRepsCache = [];
 
 async function loadSalesReps() {

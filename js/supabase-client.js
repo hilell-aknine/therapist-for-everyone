@@ -961,8 +961,9 @@
                 }
             }
 
-            // Ambassador Program: save referral attribution for new signups
-            if (isNewProfile && typeof window.getReferrerId === 'function') {
+            // Ambassador Program: save referral for any user with pending ref data
+            // (not just new profiles — existing users clicking a ref link also count)
+            if (typeof window.getReferrerId === 'function') {
                 const referrerId = window.getReferrerId();
                 if (referrerId && referrerId !== user.id) {
                     const saved = await saveReferral(referrerId, user.id);

@@ -2541,6 +2541,31 @@
             box-shadow: 0 0 8px rgba(216, 175, 71, 0.15);
         }
         .welcome-sidebar-item i { font-size: 1rem; }
+        .ambassador-sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 1rem;
+            margin: 0 0.5rem 0.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(212, 175, 55, 0.06);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            color: var(--t-gold, #D4AF37);
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .ambassador-sidebar-item:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: rgba(212, 175, 55, 0.4);
+        }
+        .ambassador-sidebar-item.active {
+            background: rgba(212, 175, 55, 0.18);
+            border-color: var(--t-gold, #D4AF37);
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.15);
+        }
+        .ambassador-sidebar-item i { font-size: 0.9rem; }
         .welcome-sidebar-sep {
             border: none;
             border-top: 1px solid var(--t-border, rgba(255,255,255,0.08));
@@ -2599,13 +2624,24 @@
             align-items: center;
             gap: 0.5rem;
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease;
             font-size: 0.88rem;
             color: var(--t-text, #2d3436);
             line-height: 1.5;
         }
         .wd-bulletin-msg.active { opacity: 1; }
         .wd-bulletin-msg i { color: var(--t-dusty-aqua, #2A727C); font-size: 0.75rem; flex-shrink: 0; }
+        .wd-bulletin-msg.gold-highlight {
+            background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(212,175,55,0.04));
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 8px;
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            transition: opacity 0.8s ease, border-color 0.3s ease;
+        }
+        .wd-bulletin-msg.gold-highlight:hover { border-color: rgba(212,175,55,0.5); }
+        .wd-bulletin-msg.gold-highlight i { color: #D4AF37; }
+        .wd-bulletin-msg.gold-highlight span { color: #8B6914; font-weight: 600; }
         .wd-bulletin-dots {
             display: flex;
             justify-content: center;
@@ -2621,6 +2657,7 @@
             padding: 0;
         }
         .wd-bulletin-dot.active { background: var(--t-dusty-aqua, #2A727C); transform: scale(1.2); }
+        .wd-bulletin-dot.gold-dot.active { background: #D4AF37; }
 
         /* Video placeholder */
         .wd-video-container {
@@ -3047,6 +3084,91 @@
                         </div>
                         <div class="wd-video-container" style="background: none; padding: 0;">
                             <iframe width="100%" style="aspect-ratio: 16/9; border-radius: 8px;" src="https://www.youtube.com/embed/y5YBOZS-soI?rel=0" title="איך הפלטפורמה עובדת" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Ambassador Program (shown when "תוכנית השליחים" sidebar item is selected) -->
+            <div id="ambassadorDashboard" style="display:none;">
+                <div class="wd-banner" style="background: linear-gradient(135deg, #003B46, #00606B); border-bottom: 3px solid #D4AF37;">
+                    <h2 style="display:flex; align-items:center; gap:0.5rem;">🚀 תוכנית השליחים</h2>
+                    <p>עזרו לנו להפיץ את הטוב הלאה — והרוויחו הכרה, כלים בלעדיים וגישה מוקדמת</p>
+                </div>
+                <div class="wd-content">
+
+                    <!-- Referral Link Card (visible only when logged in) -->
+                    <div class="wd-card" id="ambassadorLinkCard" style="display:none;">
+                        <div class="wd-card-header">
+                            <div class="wd-card-icon gold"><i class="fa-solid fa-link"></i></div>
+                            <h3>הקישור האישי שלך</h3>
+                        </div>
+                        <p style="font-size:0.85rem; color:var(--t-text-muted, #636e72); margin-bottom:0.6rem;">
+                            שתפו את הקישור הזה עם חברים — כל מי שנרשם דרכו מיוחס אליכם
+                        </p>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <input type="text" id="ambassadorLinkInput" readonly
+                                style="flex:1; padding:0.6rem 0.8rem; border:1px solid var(--t-border, #e5e7eb); border-radius:8px; font-size:0.82rem; direction:ltr; text-align:left; background:var(--t-bg-alt, #f8f9fa); color:var(--t-text, #2d3436);">
+                            <button onclick="copyAmbassadorLink()" id="ambassadorCopyBtn"
+                                style="padding:0.6rem 1rem; background:#D4AF37; color:#003B46; border:none; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer; white-space:nowrap; transition:all 0.2s;">
+                                <i class="fa-solid fa-copy"></i> העתק
+                            </button>
+                        </div>
+                        <div style="display:flex; gap:1rem; margin-top:0.8rem; justify-content:center;">
+                            <span style="font-size:0.82rem; color:var(--t-text-muted, #636e72);">
+                                הפניות החודש: <strong id="ambassadorMyCount" style="color:#D4AF37;">0</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Not logged in notice -->
+                    <div class="wd-card" id="ambassadorLoginNotice" style="display:none; text-align:center;">
+                        <div class="wd-card-icon gold" style="margin:0 auto 0.8rem;"><i class="fa-solid fa-lock"></i></div>
+                        <p style="font-size:0.9rem; font-weight:600; color:var(--t-text, #2d3436); margin-bottom:0.5rem;">
+                            התחברו כדי לקבל קישור הפניה אישי
+                        </p>
+                        <a href="login.html" style="color:#D4AF37; font-size:0.85rem; text-decoration:underline;">
+                            התחברות →
+                        </a>
+                    </div>
+
+                    <!-- What is it -->
+                    <div class="wd-card">
+                        <div class="wd-card-header">
+                            <div class="wd-card-icon gold"><i class="fa-solid fa-handshake-angle"></i></div>
+                            <h3>מה זה תוכנית השליחים?</h3>
+                        </div>
+                        <p style="font-size:0.9rem; line-height:1.7; color:var(--t-text, #2d3436);">
+                            אנחנו מחפשים אנשים שמאמינים שריפוי נפשי צריך להיות נגיש לכולם.<br>
+                            בתור שליח/ה, תוכלו לשתף את התוכן שלנו, להזמין חברים לפורטל, ולעזור לנו להגיע לעוד אנשים שצריכים את זה.
+                        </p>
+                    </div>
+
+                    <!-- Benefits -->
+                    <div class="wd-card">
+                        <div class="wd-card-header">
+                            <div class="wd-card-icon teal"><i class="fa-solid fa-gift"></i></div>
+                            <h3>מה מקבלים?</h3>
+                        </div>
+                        <ul style="font-size:0.88rem; line-height:1.8; color:var(--t-text, #2d3436); padding-right:1.2rem; margin:0;">
+                            <li>תג "שליח/ה" מיוחד בפרופיל</li>
+                            <li>גישה מוקדמת לתכנים חדשים</li>
+                            <li>הזמנה לאירועים סגורים</li>
+                            <li>הכרה בדף השליחים באתר</li>
+                        </ul>
+                    </div>
+
+                    <!-- Monthly Leaderboard -->
+                    <div class="wd-card" id="ambassadorLeaderboardCard">
+                        <div class="wd-card-header">
+                            <div class="wd-card-icon gold"><i class="fa-solid fa-trophy"></i></div>
+                            <h3>מובילי החודש</h3>
+                        </div>
+                        <div id="ambassadorLeaderboard" style="min-height:40px;">
+                            <p style="font-size:0.85rem; color:var(--t-text-muted, #636e72); text-align:center;">
+                                טוען...
+                            </p>
                         </div>
                     </div>
 
@@ -3745,21 +3867,28 @@
             const firstModule = document.querySelector('.module');
             if (firstModule) firstModule.classList.add('open');
 
-            // Routing: hash → lesson, no hash → welcome dashboard
-            const hashMatch = location.hash.match(/^#m(\d+)l(\d+)$/);
-            if (hashMatch) {
-                const m = parseInt(hashMatch[1]), l = parseInt(hashMatch[2]);
-                _skipPushState = true;
-                if (modules[m] && modules[m].lessons[l]) selectLesson(m, l);
-                else selectLesson(0, 0);
-                _skipPushState = false;
-                history.replaceState({ m: currentModuleIndex, l: currentLessonIndex }, '', `#m${currentModuleIndex}l${currentLessonIndex}`);
-            } else {
-                // Pre-select first lesson silently, keep welcome dashboard showing
+            // Routing: hash → lesson, #ambassador → ambassador tab, no hash → welcome dashboard
+            if (location.hash === '#ambassador') {
                 _skipPushState = true;
                 selectLesson(0, 0);
                 _skipPushState = false;
-                showWelcomeDashboard();
+                showAmbassadorProgram();
+            } else {
+                const hashMatch = location.hash.match(/^#m(\d+)l(\d+)$/);
+                if (hashMatch) {
+                    const m = parseInt(hashMatch[1]), l = parseInt(hashMatch[2]);
+                    _skipPushState = true;
+                    if (modules[m] && modules[m].lessons[l]) selectLesson(m, l);
+                    else selectLesson(0, 0);
+                    _skipPushState = false;
+                    history.replaceState({ m: currentModuleIndex, l: currentLessonIndex }, '', `#m${currentModuleIndex}l${currentLessonIndex}`);
+                } else {
+                    // Pre-select first lesson silently, keep welcome dashboard showing
+                    _skipPushState = true;
+                    selectLesson(0, 0);
+                    _skipPushState = false;
+                    showWelcomeDashboard();
+                }
             }
 
             // Handle browser back/forward
@@ -4155,6 +4284,10 @@
                     <i class="fa-solid fa-home"></i>
                     <span>ברוך הבא לפורטל</span>
                 </div>
+                <div class="ambassador-sidebar-item" id="ambassadorSidebarItem" onclick="showAmbassadorProgram()">
+                    <i class="fa-solid fa-rocket"></i>
+                    <span>תוכנית השליחים</span>
+                </div>
                 <hr class="welcome-sidebar-sep">
             `;
             syllabus.innerHTML = welcomeItem + modules.map((module, mIndex) => {
@@ -4213,29 +4346,32 @@
             { icon: 'fa-solid fa-star', text: 'חדש! קורס NLP Practitioner מלא — 51 שיעורים בחינם' },
             { icon: 'fa-solid fa-robot', text: 'מורה AI אישי זמין עכשיו בתוך הפורטל' },
             { icon: 'fa-solid fa-download', text: 'חוברות עבודה וסיכומי שיעורים — להורדה חינם' },
-            { icon: 'fa-solid fa-gamepad', text: 'משחק תרגול מקצועי חדש — XP, רמות והישגים' }
+            { icon: 'fa-solid fa-gamepad', text: 'משחק תרגול מקצועי חדש — XP, רמות והישגים' },
+            { icon: 'fa-solid fa-rocket', text: 'אוהבים את התכנים? הצטרפו לתוכנית השליחים ועזרו לנו להפיץ את הטוב הלאה 🚀', gold: true, onclick: 'showAmbassadorProgram()' }
         ];
 
         function initWdBulletin() {
             const container = document.getElementById('wdBulletinMessages');
             const dotsContainer = document.getElementById('wdBulletinDots');
             if (!container) return;
-            container.innerHTML = wdBulletinData.map((msg, i) =>
-                '<div class="wd-bulletin-msg' + (i === 0 ? ' active' : '') + '">' +
-                '<i class="' + msg.icon + '"></i><span>' + msg.text + '</span></div>'
-            ).join('');
-            dotsContainer.innerHTML = wdBulletinData.map((_, i) =>
-                '<button class="wd-bulletin-dot' + (i === 0 ? ' active' : '') + '" role="tab" aria-label="הודעה ' + (i + 1) + '" onclick="wdGoToMsg(' + i + ')"></button>'
+            container.innerHTML = wdBulletinData.map((msg, i) => {
+                const goldClass = msg.gold ? ' gold-highlight' : '';
+                const clickAttr = msg.onclick ? ' onclick="' + msg.onclick + '" role="link" tabindex="0"' : '';
+                return '<div class="wd-bulletin-msg' + (i === 0 ? ' active' : '') + goldClass + '"' + clickAttr + '>' +
+                    '<i class="' + msg.icon + '"></i><span>' + msg.text + '</span></div>';
+            }).join('');
+            dotsContainer.innerHTML = wdBulletinData.map((msg, i) =>
+                '<button class="wd-bulletin-dot' + (i === 0 ? ' active' : '') + (msg.gold ? ' gold-dot' : '') + '" role="tab" aria-label="הודעה ' + (i + 1) + '" onclick="wdGoToMsg(' + i + ')"></button>'
             ).join('');
             wdCurrentMsg = 0;
             clearInterval(wdBulletinInterval);
-            wdBulletinInterval = setInterval(wdNextMsg, 5000);
+            wdBulletinInterval = setInterval(wdNextMsg, 6000);
         }
         function wdNextMsg() { wdShowMsg((wdCurrentMsg + 1) % wdBulletinData.length); }
         function wdGoToMsg(idx) {
             clearInterval(wdBulletinInterval);
             wdShowMsg(idx);
-            wdBulletinInterval = setInterval(wdNextMsg, 5000);
+            wdBulletinInterval = setInterval(wdNextMsg, 6000);
         }
         function wdShowMsg(idx) {
             const msgs = document.querySelectorAll('.wd-bulletin-msg');
@@ -4249,13 +4385,16 @@
         }
 
         function showWelcomeDashboard() {
-            // Hide video section, show welcome dashboard
+            // Hide video section + ambassador, show welcome dashboard
             document.querySelector('.video-section').style.display = 'none';
+            document.getElementById('ambassadorDashboard').style.display = 'none';
             document.getElementById('welcomeDashboard').style.display = '';
             // Update sidebar: deselect all lessons, highlight welcome item
             document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
             const welcomeItem = document.getElementById('welcomeSidebarItem');
             if (welcomeItem) welcomeItem.classList.add('active');
+            const ambassadorItem = document.getElementById('ambassadorSidebarItem');
+            if (ambassadorItem) ambassadorItem.classList.remove('active');
             // Hide video nav bar
             const navBar = document.getElementById('videoNavBar');
             if (navBar) navBar.style.display = 'none';
@@ -4266,11 +4405,107 @@
             if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
         }
 
+        function showAmbassadorProgram() {
+            // Hide video section + welcome, show ambassador
+            document.querySelector('.video-section').style.display = 'none';
+            document.getElementById('welcomeDashboard').style.display = 'none';
+            document.getElementById('ambassadorDashboard').style.display = '';
+            // Update sidebar highlights
+            document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
+            const welcomeItem = document.getElementById('welcomeSidebarItem');
+            if (welcomeItem) welcomeItem.classList.remove('active');
+            const ambassadorItem = document.getElementById('ambassadorSidebarItem');
+            if (ambassadorItem) ambassadorItem.classList.add('active');
+            // Hide video nav bar
+            const navBar = document.getElementById('videoNavBar');
+            if (navBar) navBar.style.display = 'none';
+            clearInterval(wdBulletinInterval);
+            // Close mobile sidebar if open
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
+            // Load ambassador data
+            initAmbassadorDashboard();
+        }
+
+        // Ambassador Program: init link + leaderboard
+        async function initAmbassadorDashboard() {
+            const linkCard = document.getElementById('ambassadorLinkCard');
+            const loginNotice = document.getElementById('ambassadorLoginNotice');
+            const session = await window.Auth?.getSession();
+            const user = session?.user;
+
+            if (user && linkCard) {
+                linkCard.style.display = '';
+                if (loginNotice) loginNotice.style.display = 'none';
+                // Generate referral link
+                const link = window.Referrals?.getLink(user.id) || '';
+                document.getElementById('ambassadorLinkInput').value = link;
+                // Load my referral count
+                const count = await window.Referrals?.getMyCount(user.id) || 0;
+                document.getElementById('ambassadorMyCount').textContent = count;
+            } else {
+                if (linkCard) linkCard.style.display = 'none';
+                if (loginNotice) loginNotice.style.display = '';
+            }
+
+            // Load leaderboard
+            loadAmbassadorLeaderboard();
+        }
+
+        async function loadAmbassadorLeaderboard() {
+            const container = document.getElementById('ambassadorLeaderboard');
+            if (!container) return;
+            try {
+                const data = await window.Referrals?.getLeaderboard(5) || [];
+                if (data.length === 0) {
+                    container.innerHTML = '<p style="font-size:0.85rem; color:var(--t-text-muted, #636e72); text-align:center;">עדיין אין נתונים — היו הראשונים!</p>';
+                    return;
+                }
+                const medals = ['🥇', '🥈', '🥉'];
+                container.innerHTML = '<div style="display:flex; flex-direction:column; gap:0.5rem;">' +
+                    data.map((row, i) => {
+                        const medal = medals[i] || `<span style="color:var(--t-text-muted, #636e72); font-size:0.8rem;">${i + 1}.</span>`;
+                        const isTop3 = i < 3;
+                        const nameStyle = isTop3 ? 'font-weight:700; color:var(--t-text, #2d3436);' : 'color:var(--t-text-muted, #636e72);';
+                        const countColor = isTop3 ? '#D4AF37' : 'var(--t-text-muted, #636e72)';
+                        return `<div style="display:flex; align-items:center; gap:0.6rem; padding:0.4rem 0.5rem; border-radius:6px; ${isTop3 ? 'background:rgba(212,175,55,0.06);' : ''}">
+                            <span style="font-size:1.1rem; min-width:1.5rem; text-align:center;">${medal}</span>
+                            <span style="flex:1; font-size:0.88rem; ${nameStyle}">${row.referrer_name || 'משתמש'}</span>
+                            <span style="font-size:0.85rem; font-weight:700; color:${countColor};">${row.referral_count}</span>
+                        </div>`;
+                    }).join('') + '</div>';
+            } catch (err) {
+                container.innerHTML = '<p style="font-size:0.85rem; color:#e74c3c; text-align:center;">שגיאה בטעינת נתונים</p>';
+            }
+        }
+
+        function copyAmbassadorLink() {
+            const input = document.getElementById('ambassadorLinkInput');
+            const btn = document.getElementById('ambassadorCopyBtn');
+            if (!input || !input.value) return;
+            navigator.clipboard.writeText(input.value).then(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> הועתק!';
+                btn.style.background = '#2F8592';
+                btn.style.color = '#fff';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-copy"></i> העתק';
+                    btn.style.background = '#D4AF37';
+                    btn.style.color = '#003B46';
+                }, 2000);
+            }).catch(() => {
+                input.select();
+                document.execCommand('copy');
+            });
+        }
+
         function hideWelcomeDashboard() {
             document.getElementById('welcomeDashboard').style.display = 'none';
+            document.getElementById('ambassadorDashboard').style.display = 'none';
             document.querySelector('.video-section').style.display = '';
             const welcomeItem = document.getElementById('welcomeSidebarItem');
             if (welcomeItem) welcomeItem.classList.remove('active');
+            const ambassadorItem = document.getElementById('ambassadorSidebarItem');
+            if (ambassadorItem) ambassadorItem.classList.remove('active');
             clearInterval(wdBulletinInterval);
         }
 

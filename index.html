@@ -581,6 +581,168 @@
             .cta-buttons .btn { width: 100%; }
         }
 
+        /* ===== Ambassador Podium ===== */
+        .podium-section {
+            padding: 4rem 2rem 3rem;
+            background: linear-gradient(180deg, #002a32 0%, #003B46 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .podium-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 200px; height: 2px;
+            background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+        }
+        .podium-eyebrow {
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #D4AF37;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .podium-title {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #E8F1F2;
+            margin-bottom: 2.5rem;
+        }
+        .podium-stage {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 1rem;
+            max-width: 640px;
+            margin: 0 auto;
+            min-height: 200px;
+        }
+        .podium-place {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: podiumReveal 0.6s ease-out forwards;
+        }
+        .podium-place:nth-child(1) { animation-delay: 0.3s; }
+        .podium-place:nth-child(2) { animation-delay: 0.1s; }
+        .podium-place:nth-child(3) { animation-delay: 0.5s; }
+        @keyframes podiumReveal {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .podium-avatar {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        .podium-place.gold .podium-avatar {
+            width: 64px; height: 64px;
+            font-size: 1.8rem;
+            border-color: #D4AF37;
+            box-shadow: 0 0 20px rgba(212,175,55,0.2);
+        }
+        .podium-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #E8F1F2;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .podium-place.gold .podium-name {
+            color: #D4AF37;
+            font-size: 0.95rem;
+        }
+        .podium-count {
+            font-size: 0.75rem;
+            color: rgba(232,241,242,0.5);
+        }
+        .podium-count strong {
+            color: rgba(232,241,242,0.8);
+        }
+        .podium-place.gold .podium-count strong {
+            color: #D4AF37;
+        }
+        .podium-bar {
+            width: 100%;
+            min-width: 100px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 0.8rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.15);
+        }
+        .podium-place.gold .podium-bar {
+            height: 100px;
+            background: linear-gradient(180deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-bottom: none;
+            color: rgba(212,175,55,0.3);
+        }
+        .podium-place.silver .podium-bar {
+            height: 72px;
+            background: linear-gradient(180deg, rgba(192,192,192,0.12) 0%, rgba(192,192,192,0.03) 100%);
+            border: 1px solid rgba(192,192,192,0.15);
+            border-bottom: none;
+        }
+        .podium-place.bronze .podium-bar {
+            height: 52px;
+            background: linear-gradient(180deg, rgba(205,127,50,0.12) 0%, rgba(205,127,50,0.03) 100%);
+            border: 1px solid rgba(205,127,50,0.15);
+            border-bottom: none;
+        }
+        .podium-empty {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 2rem;
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 12px;
+            background: rgba(212,175,55,0.04);
+        }
+        .podium-empty p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: rgba(232,241,242,0.6);
+        }
+        .podium-cta {
+            margin-top: 2rem;
+        }
+        .podium-cta a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            color: #D4AF37;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            padding-bottom: 2px;
+            transition: border-color 0.2s;
+        }
+        .podium-cta a:hover { border-color: #D4AF37; }
+
+        @media (max-width: 600px) {
+            .podium-section { padding: 3rem 1rem 2rem; }
+            .podium-stage { gap: 0.5rem; }
+            .podium-bar { min-width: 80px; }
+            .podium-place.gold .podium-avatar { width: 56px; height: 56px; }
+            .podium-name { font-size: 0.78rem; max-width: 90px; }
+        }
+
     </style>
 </head>
 <body>
@@ -662,6 +824,18 @@
         </div>
     </section>
 
+
+    <!-- Ambassador Podium -->
+    <section class="podium-section" id="podiumSection" style="display:none;" data-reveal>
+        <div class="podium-eyebrow">תוכנית השליחים</div>
+        <h2 class="podium-title">מובילי החודש 🏆</h2>
+        <div id="podiumContent"></div>
+        <div class="podium-cta">
+            <a href="pages/course-library.html#ambassador">
+                <i class="fa-solid fa-rocket"></i> הצטרפו לתוכנית השליחים
+            </a>
+        </div>
+    </section>
 
     <!-- About -->
     <section class="about-section">
@@ -924,6 +1098,55 @@
                 }
             } catch (e) {
                 // Not logged in — keep default CTA
+            }
+        })();
+
+        // ===== Ambassador Podium =====
+        (async function initPodium() {
+            const section = document.getElementById('podiumSection');
+            const container = document.getElementById('podiumContent');
+            if (!section || !container) return;
+
+            try {
+                const data = await window.Referrals?.getLeaderboard(3);
+                section.style.display = '';
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div class="podium-empty">' +
+                        '<p>החודש רק התחיל, מי יהיו השליחים שיובילו את הטבלה החודש?</p>' +
+                        '</div>';
+                    return;
+                }
+
+                // Arrange: [2nd, 1st, 3rd] for visual podium layout
+                const medals = ['🥇', '🥈', '🥉'];
+                const classes = ['gold', 'silver', 'bronze'];
+                const ranks = ['1', '2', '3'];
+                const ordered = [];
+
+                if (data[1]) ordered.push({ ...data[1], rank: 1 }); // 2nd place on left
+                if (data[0]) ordered.push({ ...data[0], rank: 0 }); // 1st place center
+                if (data[2]) ordered.push({ ...data[2], rank: 2 }); // 3rd place on right
+
+                container.innerHTML = '<div class="podium-stage">' +
+                    ordered.map(user => {
+                        const i = user.rank;
+                        const cls = classes[i];
+                        const medal = medals[i];
+                        const name = user.referrer_name || 'שליח/ה';
+                        const count = user.referral_count || 0;
+                        return '<div class="podium-place ' + cls + '">' +
+                            '<div class="podium-avatar">' + medal + '</div>' +
+                            '<div class="podium-name" title="' + name + '">' + name + '</div>' +
+                            '<div class="podium-count"><strong>' + count + '</strong> הפניות</div>' +
+                            '<div class="podium-bar">' + ranks[i] + '</div>' +
+                            '</div>';
+                    }).join('') +
+                    '</div>';
+
+            } catch (err) {
+                // Podium is non-critical — fail silently, keep section hidden
+                section.style.display = 'none';
             }
         })();
     </script>

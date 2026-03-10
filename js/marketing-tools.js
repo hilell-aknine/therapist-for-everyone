@@ -27,10 +27,45 @@
                 }
             }
         }
+        // Capture referral param (?ref=USER_ID) for Ambassador Program
+        const refParam = params.get('ref');
+        if (refParam && refParam.length > 10) {
+            localStorage.setItem('referrer_data', JSON.stringify({
+                referrer_id: refParam,
+                captured_at: Date.now()
+            }));
+        }
     } catch (e) {
         // Silent fail — UTM capture is non-critical
     }
 })();
+
+/**
+ * Get stored referrer ID from Ambassador Program link.
+ * Returns referrer UUID string or null. Returns null if older than 30 days.
+ */
+window.getReferrerId = function () {
+    try {
+        const raw = localStorage.getItem('referrer_data');
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+        if (Date.now() - parsed.captured_at > thirtyDays) {
+            localStorage.removeItem('referrer_data');
+            return null;
+        }
+        return parsed.referrer_id || null;
+    } catch (e) {
+        return null;
+    }
+};
+
+/**
+ * Clear referrer data after successful insertion into referrals table.
+ */
+window.clearReferrerId = function () {
+    try { localStorage.removeItem('referrer_data'); } catch (e) { /* silent */ }
+};
 
 /**
  * Get stored UTM data for injecting into form submissions.

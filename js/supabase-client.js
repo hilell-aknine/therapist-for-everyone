@@ -938,7 +938,9 @@
                 return;
             }
 
+            let isNewProfile = false;
             if (!existing) {
+                isNewProfile = true;
                 const fullName = user.user_metadata?.full_name ||
                                 user.user_metadata?.name ||
                                 user.email?.split('@')[0] ||
@@ -958,8 +960,40 @@
                     console.error('Profile create error:', insertError);
                 }
             }
+
+            // Ambassador Program: save referral attribution for new signups
+            if (isNewProfile && typeof window.getReferrerId === 'function') {
+                const referrerId = window.getReferrerId();
+                if (referrerId && referrerId !== user.id) {
+                    const saved = await saveReferral(referrerId, user.id);
+                    if (saved && typeof window.clearReferrerId === 'function') {
+                        window.clearReferrerId();
+                    }
+                }
+            }
         } catch (err) {
             console.error('ensureProfile error:', err);
+        }
+    }
+
+    // Save referral record (Ambassador Program). Returns true on success.
+    async function saveReferral(referrerId, referredUserId) {
+        try {
+            const { error } = await supabaseClient
+                .from('referrals')
+                .insert([{
+                    referrer_id: referrerId,
+                    referred_user_id: referredUserId
+                }]);
+            if (error) {
+                // Duplicate or invalid referrer — silent fail (constraint handles it)
+                console.warn('Referral save skipped:', error.message);
+                return false;
+            }
+            return true;
+        } catch (err) {
+            console.error('saveReferral error:', err);
+            return false;
         }
     }
 
@@ -981,6 +1015,52 @@
     });
 
     // ============================================================================
+    // Referrals Module (Ambassador Program)
+    // ============================================================================
+
+    const Referrals = {
+        /** Get referral link for the current user */
+        getLink(userId) {
+            return `https://www.therapist-home.com/pages/registration.html?ref=${userId}`;
+        },
+
+        /** Get current user's referral count (last 30 days) */
+        async getMyCount(userId) {
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+            const { count, error } = await supabaseClient
+                .from('referrals')
+                .select('*', { count: 'exact', head: true })
+                .eq('referrer_id', userId)
+                .gte('created_at', thirtyDaysAgo);
+            if (error) { console.error('Referral count error:', error); return 0; }
+            return count || 0;
+        },
+
+        /** Get leaderboard: top referrers in the last 30 days */
+        async getLeaderboard(limit = 10) {
+            const { data, error } = await supabaseClient
+                .from('referral_leaderboard')
+                .select('*')
+                .limit(limit);
+            if (error) { console.error('Leaderboard error:', error); return []; }
+            return data || [];
+        },
+
+        /** Get all referrals made by a user (last 30 days) */
+        async getMyReferrals(userId) {
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+            const { data, error } = await supabaseClient
+                .from('referrals')
+                .select('referred_user_id, created_at')
+                .eq('referrer_id', userId)
+                .gte('created_at', thirtyDaysAgo)
+                .order('created_at', { ascending: false });
+            if (error) { console.error('My referrals error:', error); return []; }
+            return data || [];
+        }
+    };
+
+    // ============================================================================
     // EXPORT TO WINDOW - Make all helpers globally accessible
     // ============================================================================
 
@@ -994,6 +1074,7 @@
     window.ContactRequests = ContactRequests;
     window.Certifications = Certifications;
     window.UserNotes = UserNotes;
+    window.Referrals = Referrals;
     window.UI = UI;
     window.translateError = translateError;
     window.FormAutosave = FormAutosave;
@@ -1011,6 +1092,7 @@
         ContactRequests: ContactRequests,
         Certifications: Certifications,
         UserNotes: UserNotes,
+        Referrals: Referrals,
         UI: UI
     };
 

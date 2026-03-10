@@ -142,6 +142,28 @@
                 throw new Error(result.error || 'שגיאה בשמירת הפרטים');
             }
 
+            // If training program intent, also create a sales_leads record
+            if (intent === 'training_program') {
+                try {
+                    await fetch(`${functionsUrl}/submit-lead`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            table: 'sales_leads',
+                            data: {
+                                full_name: leadData.full_name,
+                                phone: leadData.phone,
+                                email: leadData.email,
+                                stage: 'new_lead',
+                                call_attempts: 0
+                            }
+                        })
+                    });
+                } catch (e) {
+                    console.warn('sales_leads insert skipped:', e.message);
+                }
+            }
+
             // Success - show questionnaire
             showQuestionnaire();
 

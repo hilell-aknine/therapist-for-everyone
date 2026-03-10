@@ -171,7 +171,7 @@
         }
         const container = document.getElementById('turnstile-container');
         if (container) {
-            turnstile.render(container, { sitekey: siteKey, theme: 'light' });
+            turnstile.render(container, { sitekey: siteKey, appearance: 'interaction-only', theme: 'light' });
         }
     };
 

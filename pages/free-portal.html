@@ -328,7 +328,8 @@
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.7);
             backdrop-filter: blur(6px);
-            z-index: 10001;
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 99999;
             display: flex; align-items: center; justify-content: center;
             padding: 1rem;
             opacity: 0;
@@ -714,14 +715,20 @@
                 } catch (e) { /* continue to show modal */ }
             }
 
-            // Show modal with animation
+            // Show modal with animation — hide grain to prevent z-index conflict
+            const grain = document.querySelector('.grain');
+            if (grain) grain.style.display = 'none';
             overlay.style.display = 'flex';
             requestAnimationFrame(() => overlay.classList.add('visible'));
         }
 
         function closeAuthModal() {
             overlay.classList.remove('visible');
-            setTimeout(() => { overlay.style.display = 'none'; }, 300);
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                const grain = document.querySelector('.grain');
+                if (grain) grain.style.display = '';
+            }, 300);
         }
 
         // Close on overlay click (not modal itself)

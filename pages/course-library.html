@@ -3278,6 +3278,20 @@
                         </div>
                     </div>
 
+                    <!-- Ambassador Leaderboard -->
+                    <div class="wd-card" id="wdLeaderboardCard" style="display:none;">
+                        <div class="wd-card-header">
+                            <div class="wd-card-icon gold"><i class="fa-solid fa-trophy"></i></div>
+                            <h3>מובילי השליחים החודש 🏆</h3>
+                        </div>
+                        <div id="wdLeaderboardContent" style="min-height:40px;"></div>
+                        <div style="text-align:center;margin-top:0.8rem;">
+                            <a href="#ambassador" onclick="showAmbassadorProgram();return false;" style="font-size:0.82rem;color:#D4AF37;text-decoration:none;border-bottom:1px solid rgba(212,175,55,0.3);padding-bottom:2px;">
+                                <i class="fa-solid fa-rocket"></i> לתוכנית השליחים
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -4585,6 +4599,40 @@
             dots[wdCurrentMsg].classList.add('active');
         }
 
+        let wdLeaderboardLoaded = false;
+        async function initWdLeaderboard() {
+            if (wdLeaderboardLoaded) return;
+            const card = document.getElementById('wdLeaderboardCard');
+            const container = document.getElementById('wdLeaderboardContent');
+            if (!card || !container) return;
+            try {
+                const data = await window.Referrals?.getLeaderboard(3);
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;font-size:0.9rem;color:var(--t-text-muted,#888);padding:1rem 0;">החודש רק התחיל — מי יוביל את הטבלה?</p>';
+                    card.style.display = '';
+                    wdLeaderboardLoaded = true;
+                    return;
+                }
+                const medals = ['🥇', '🥈', '🥉'];
+                container.innerHTML = data.map(function(user, i) {
+                    var name = user.referrer_name || 'שליח/ה';
+                    var count = user.referral_count || 0;
+                    var isFirst = i === 0;
+                    return '<div style="display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0.4rem;' +
+                        (i < data.length - 1 ? 'border-bottom:1px solid var(--t-border,#e5e7eb);' : '') +
+                        (isFirst ? 'background:rgba(212,175,55,0.06);border-radius:8px;margin:-0.2rem -0.4rem;padding:0.8rem;' : '') + '">' +
+                        '<span style="font-size:1.3rem;">' + medals[i] + '</span>' +
+                        '<span style="flex:1;font-weight:' + (isFirst ? '700' : '500') + ';font-size:0.9rem;color:' + (isFirst ? '#8B6914' : 'var(--t-text,#333)') + ';">' + name + '</span>' +
+                        '<span style="font-size:0.82rem;color:var(--t-text-muted,#888);"><strong style="color:' + (isFirst ? '#D4AF37' : 'var(--t-text,#333)') + ';">' + count + '</strong> הפניות</span>' +
+                        '</div>';
+                }).join('');
+                card.style.display = '';
+                wdLeaderboardLoaded = true;
+            } catch (e) {
+                // Non-critical — keep hidden
+            }
+        }
+
         function showWelcomeDashboard() {
             // Hide video section + ambassador, show welcome dashboard
             document.querySelector('.video-section').style.display = 'none';
@@ -4601,6 +4649,8 @@
             if (navBar) navBar.style.display = 'none';
             // Init bulletin board
             initWdBulletin();
+            // Init leaderboard
+            initWdLeaderboard();
             // Close mobile sidebar if open
             const sidebar = document.getElementById('sidebar');
             if (sidebar && sidebar.classList.contains('active')) toggleSidebar();

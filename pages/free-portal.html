@@ -509,7 +509,7 @@
             <p class="hero-subtitle">
                 קורסי NLP מלאים, כלים ליישום ואזור אישי עם מעקב התקדמות — הכל במקום אחד, בחינם ופתוח לכולם
             </p>
-            <a href="course-library.html" class="hero-cta">
+            <a href="#" class="hero-cta" onclick="openAuthModal(); return false;">
                 <i class="fa-solid fa-play"></i>
                 כניסה לפורטל
             </a>
@@ -569,7 +569,7 @@
         <div class="cta-inner">
             <h2>מוכנים להתחיל?</h2>
             <p>הפורטל פתוח לכולם — בחרו קורס, התחילו לצפות, ותנו לתהליך לעשות את שלו</p>
-            <a href="course-library.html" class="cta-btn">
+            <a href="#" class="cta-btn" onclick="openAuthModal(); return false;">
                 <i class="fa-solid fa-rocket"></i>
                 התחילו ללמוד עכשיו
             </a>
@@ -697,25 +697,23 @@
 
         // ====== Auth Modal Logic ======
         const overlay = document.getElementById('authOverlay');
-        const refParam = new URLSearchParams(window.location.search).get('ref');
 
-        // Show modal automatically when ?ref= is present
-        async function initAuthModal() {
-            if (!refParam) return;
-
-            // Check if already logged in
+        function openAuthModal() {
+            // If already logged in — go straight to portal
             if (typeof supabaseClient !== 'undefined') {
-                try {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
+                supabaseClient.auth.getSession().then(({ data: { session } }) => {
                     if (session?.user) {
-                        // Already logged in — go straight to portal
                         window.location.href = 'course-library.html';
                         return;
                     }
-                } catch (e) { /* continue to show modal */ }
+                    showModal();
+                }).catch(() => showModal());
+            } else {
+                showModal();
             }
+        }
 
-            // Show modal with animation — hide grain to prevent z-index conflict
+        function showModal() {
             const grain = document.querySelector('.grain');
             if (grain) grain.style.display = 'none';
             overlay.style.display = 'flex';
@@ -800,12 +798,6 @@
             if (e.key === 'Enter') authEmail();
         });
 
-        // Init on DOM ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initAuthModal);
-        } else {
-            initAuthModal();
-        }
     </script>
 </body>
 </html>

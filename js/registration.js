@@ -17,6 +17,15 @@
     let userEmail = '';
     let leadData = {};
 
+    // ========== Intent Detection ==========
+    const urlParams = new URLSearchParams(window.location.search);
+    const intent = urlParams.get('intent');
+
+    if (intent === 'training_program') {
+        const heading = document.querySelector('#lead-section .step-header h2');
+        if (heading) heading.textContent = 'השאירו פרטים לבדיקת התאמה להכשרה';
+    }
+
     // ========== Auth Detection ==========
     async function checkAuth() {
         try {
@@ -270,13 +279,19 @@
             const result = await res.json();
             if (!res.ok) throw new Error(result.error || 'שגיאה בשליחת השאלון');
 
-            // Show success
-            document.getElementById('questionnaire-section').classList.remove('section-visible');
-            document.getElementById('questionnaire-section').classList.add('section-hidden');
-            document.getElementById('success-view').classList.remove('section-hidden');
-            document.getElementById('success-view').classList.add('section-visible');
-
-            showToast('השאלון נשלח בהצלחה!', 'success');
+            // Show success or redirect based on intent
+            if (intent === 'training_program') {
+                showToast('הפרטים נשלחו! מעבר לשאלון ההתאמה...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'questionnaire.html';
+                }, 1500);
+            } else {
+                document.getElementById('questionnaire-section').classList.remove('section-visible');
+                document.getElementById('questionnaire-section').classList.add('section-hidden');
+                document.getElementById('success-view').classList.remove('section-hidden');
+                document.getElementById('success-view').classList.add('section-visible');
+                showToast('השאלון נשלח בהצלחה!', 'success');
+            }
 
         } catch (error) {
             console.error('Questionnaire submit error:', error);

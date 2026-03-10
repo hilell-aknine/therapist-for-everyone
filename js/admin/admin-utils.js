@@ -3,9 +3,10 @@
 function switchView(view) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     event.currentTarget.classList.add('active');
-    ['patients','therapists','matches','leads','contact-leads','questionnaires','pipeline','bot','analytics','settings'].forEach(v => {
+    ['patients','therapists','matches','leads','learners','contact-leads','questionnaires','pipeline','bot','analytics','settings'].forEach(v => {
         document.getElementById(v + '-view')?.classList.toggle('hidden', view !== v);
     });
+    if (view === 'learners') loadLearnersView();
     if (view === 'bot') loadBotView();
     if (view === 'analytics') loadGA4Analytics();
     if (view === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }

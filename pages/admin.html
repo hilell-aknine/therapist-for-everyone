@@ -37,6 +37,8 @@
 
         <div class="main">
             <nav class="sidebar">
+                <!-- מיזם חברתי -->
+                <div class="nav-section"><i class="fa-solid fa-hand-holding-heart"></i> מיזם חברתי</div>
                 <div class="nav-item active" onclick="switchView('patients')">
                     <i class="fa-solid fa-user-injured"></i>
                     <span>מטופלים</span>
@@ -52,21 +54,40 @@
                     <span>שידוכים</span>
                     <span class="badge" id="matches-count">0</span>
                 </div>
+
+                <!-- למידה -->
+                <div class="nav-section"><i class="fa-solid fa-graduation-cap"></i> למידה</div>
                 <div class="nav-item" onclick="switchView('leads')">
                     <i class="fa-solid fa-user-plus"></i>
                     <span>נרשמים</span>
                     <span class="badge" id="leads-count">0</span>
                 </div>
+                <div class="nav-item" onclick="switchView('learners')">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                    <span>לומדים</span>
+                    <span class="badge" id="learners-count">0</span>
+                </div>
+
+                <!-- עסקי -->
+                <div class="nav-section"><i class="fa-solid fa-briefcase"></i> עסקי</div>
                 <div class="nav-item" onclick="switchView('contact-leads')">
                     <i class="fa-solid fa-phone-volume"></i>
                     <span>לידים</span>
                     <span class="badge" id="contact-leads-count">0</span>
+                </div>
+                <div class="nav-item" onclick="switchView('questionnaires')">
+                    <i class="fa-solid fa-clipboard-question"></i>
+                    <span>שאלונים</span>
+                    <span class="badge" id="questionnaires-count">0</span>
                 </div>
                 <div class="nav-item" onclick="switchView('pipeline')">
                     <i class="fa-solid fa-filter-circle-dollar"></i>
                     <span>Pipeline מכירות</span>
                     <span class="badge" id="pipeline-count">0</span>
                 </div>
+
+                <!-- כלים -->
+                <div class="nav-section"><i class="fa-solid fa-wrench"></i> כלים</div>
                 <div class="nav-item" onclick="switchView('bot')">
                     <i class="fa-solid fa-robot"></i>
                     <span>בוט CRM</span>
@@ -75,7 +96,6 @@
                     <i class="fa-solid fa-chart-line"></i>
                     <span>אנליטיקס</span>
                 </div>
-                <hr style="border:none;border-top:1px solid var(--border);margin:0.8rem 0;">
                 <div class="nav-item" onclick="switchView('settings')">
                     <i class="fa-solid fa-gear"></i>
                     <span>הגדרות</span>
@@ -271,6 +291,58 @@
                         </table>
                     </div>
                 </div>
+                <!-- Learners View -->
+                <div id="learners-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-graduation-cap" style="color:var(--gold);margin-left:0.5rem;"></i> לומדים בפורטל</h1>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon gold"><i class="fa-solid fa-users"></i></div>
+                            <div><div class="stat-value" id="stat-learners-total">0</div><div class="stat-label">סה"כ לומדים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-check-double"></i></div>
+                            <div><div class="stat-value" id="stat-learners-completed">0</div><div class="stat-label">השלימו שיעור+</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fa-solid fa-clock"></i></div>
+                            <div><div class="stat-value" id="stat-learners-active7d">0</div><div class="stat-label">פעילים 7 ימים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red"><i class="fa-solid fa-fire"></i></div>
+                            <div><div class="stat-value" id="stat-learners-hours">0</div><div class="stat-label">שעות צפייה</div></div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div style="display:flex;align-items:center;gap:1rem;">
+                                <h3>רשימת לומדים</h3>
+                                <button class="btn btn-export" onclick="exportLearnersCSV()">
+                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
+                                </button>
+                            </div>
+                            <div class="search-box">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" placeholder="חיפוש לפי שם או אימייל..." id="learners-search" oninput="renderLearners()">
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>משתמש</th>
+                                    <th>אימייל</th>
+                                    <th>שיעורים שהושלמו</th>
+                                    <th>זמן צפייה</th>
+                                    <th>קורס</th>
+                                    <th>פעילות אחרונה</th>
+                                </tr>
+                            </thead>
+                            <tbody id="learners-table">
+                                <tr><td colspan="6" class="empty-state"><i class="fa-solid fa-graduation-cap"></i><br>טוען נתוני למידה...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Contact Leads (Form Submissions) View -->
                 <div id="contact-leads-view" class="hidden">
                     <h1 class="page-title">לידים מטפסי האתר</h1>
@@ -961,7 +1033,10 @@
                                     <option value="therapists">מטפלים</option>
                                     <option value="matches">שידוכים</option>
                                     <option value="leads">נרשמים</option>
+                                    <option value="learners">לומדים</option>
                                     <option value="contact-leads">לידים</option>
+                                    <option value="questionnaires">שאלונים</option>
+                                    <option value="pipeline">Pipeline מכירות</option>
                                     <option value="analytics">אנליטיקס</option>
                                 </select>
                             </div>
@@ -1552,6 +1627,7 @@
     <script src="../js/admin/admin-patients.js"></script>
     <script src="../js/admin/admin-therapists.js"></script>
     <script src="../js/admin/admin-leads.js"></script>
+    <script src="../js/admin/admin-learners.js"></script>
     <script src="../js/admin/admin-pipeline.js"></script>
     <script src="../js/admin/admin-bot.js"></script>
     <script src="../js/admin/admin-analytics.js"></script>

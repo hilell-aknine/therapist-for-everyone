@@ -234,10 +234,15 @@
     };
 
     function getTurnstileToken() {
-        if (typeof turnstile === 'undefined') return null;
-        const container = document.getElementById('turnstile-container');
-        if (!container) return null;
-        return turnstile.getResponse(container);
+        try {
+            if (typeof turnstile === 'undefined') return null;
+            const container = document.getElementById('turnstile-container');
+            if (!container) return null;
+            return turnstile.getResponse(container);
+        } catch (e) {
+            console.warn('Turnstile getResponse failed:', e.message);
+            return null;
+        }
     }
 
     // ========== Questionnaire Submission ==========
@@ -322,9 +327,13 @@
             btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שליחת השאלון';
 
             // Reset Turnstile for retry
-            if (typeof turnstile !== 'undefined') {
-                const container = document.getElementById('turnstile-container');
-                if (container) turnstile.reset(container);
+            try {
+                if (typeof turnstile !== 'undefined') {
+                    const container = document.getElementById('turnstile-container');
+                    if (container) turnstile.reset(container);
+                }
+            } catch (e) {
+                console.warn('Turnstile reset failed:', e.message);
             }
         }
     });

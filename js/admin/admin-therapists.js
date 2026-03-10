@@ -31,7 +31,7 @@ function renderTherapists() {
                 <td class="lead-checkbox"><input type="checkbox" value="${t.id}" onchange="updateBulkBarFor('therapists')"></td>
                 <td><strong>${t.full_name}</strong></td>
                 <td><a href="tel:${t.phone}" style="color:var(--info);text-decoration:none;">${t.phone || '-'}</a></td>
-                <td>${t.specialization || '-'}</td>
+                <td>${(Array.isArray(t.specializations) ? t.specializations.join(', ') : t.specialization) || '-'}</td>
                 <td style="text-align:center;">${t.experience_years || 0} שנים</td>
                 <td><span class="verified-badge ${t.documents_verified ? 'yes' : 'no'}">
                     <i class="fa-solid ${t.documents_verified ? 'fa-check-circle' : 'fa-clock'}"></i>
@@ -65,32 +65,50 @@ function viewTherapist(id) {
     const health = q.health || {};
     const commitment = q.commitment || {};
     const practice = q.practice || {};
+    const legal = q.legal || {};
 
-    // Format treatment methods as tags
-    const methods = practice.treatment_methods || [];
-    const methodTags = Array.isArray(methods) && methods.length > 0
-        ? `<div class="method-tags">${methods.map(m => `<span class="method-tag">${m}</span>`).join('')}</div>`
-        : '-';
+    // Format arrays as tags
+    const specLabels = { 'trauma': 'טראומה', 'anxiety': 'חרדה', 'depression': 'דיכאון', 'relationships': 'זוגיות', 'grief': 'אבל', 'stress': 'לחץ', 'self_esteem': 'דימוי עצמי', 'life_transitions': 'מעברי חיים' };
+    const popLabels = { 'soldiers': 'חיילים', 'reservists': 'מילואימניקים', 'families': 'משפחות', 'bereaved': 'שכולים', 'youth': 'בני נוער', 'general': 'כללי' };
+    const degreeLabels = { 'psychology_ba': 'BA פסיכולוגיה', 'psychology_ma': 'MA פסיכולוגיה', 'social_work_ba': 'BA עבודה סוציאלית', 'social_work_ma': 'MA עבודה סוציאלית', 'clinical_psychologist': 'פסיכולוג קליני', 'psychiatrist': 'פסיכיאטר', 'other_academic': 'אחר', 'no_academic': 'ללא תואר אקדמי' };
+    const methodLabels = { 'cbt': 'CBT', 'psychodynamic': 'פסיכודינמי', 'emdr': 'EMDR', 'dbt': 'DBT', 'gestalt': 'גשטלט', 'existential': 'אקזיסטנציאלי', 'family_therapy': 'טיפול משפחתי', 'art_therapy': 'טיפול באמנות', 'psychodrama': 'פסיכודרמה', 'trauma_focused': 'ממוקד טראומה', 'coaching': 'אימון', 'nlp': 'NLP', 'mindfulness': 'מיינדפולנס', 'rebirthing': 'ריבירסינג', 'sound_healing': 'ריפוי בצליל', 'somatic': 'סומטי', 'yoga_therapy': 'יוגה טיפולית', 'other_holistic': 'הוליסטי אחר' };
+    const durationLabels = { '6': '6 חודשים', '12': 'שנה', '24': 'שנתיים', 'unlimited': 'ללא הגבלה' };
 
-    // Format therapy mode
-    const therapyModeLabels = { 'zoom': 'זום בלבד', 'clinic': 'קליניקה בלבד', 'hybrid': 'משולב' };
+    const makeTags = (arr, labels) => {
+        const items = Array.isArray(arr) ? arr : [];
+        return items.length > 0
+            ? `<div class="method-tags">${items.map(m => `<span class="method-tag">${escapeHtml(labels[m] || m)}</span>`).join('')}</div>`
+            : '-';
+    };
+
+    // Specializations — handle both old (singular) and new (array) formats
+    const specs = t.specializations || (t.specialization ? [t.specialization] : []);
+    const populations = t.target_populations || [];
+    const degrees = t.academic_degrees || [];
+    const methods = t.therapy_methods || [];
+
+    // Therapy mode
+    const therapyModeLabels = { 'zoom': 'זום בלבד', 'clinic': 'קליניקה בלבד', 'hybrid': 'משולב (זום + קליניקה)' };
     const therapyMode = therapyModeLabels[commitment.therapy_mode] || commitment.therapy_mode || '-';
 
     document.getElementById('therapist-modal-body').innerHTML = `
         <!-- BASIC INFO -->
         <div class="modal-section-divider"><i class="fa-solid fa-user"></i> פרטים אישיים</div>
-        <div class="detail-row"><div class="detail-label">טלפון</div><div class="detail-value"><a href="tel:${t.phone}" style="color:var(--info);">${t.phone || '-'}</a></div></div>
-        <div class="detail-row"><div class="detail-label">אימייל</div><div class="detail-value">${t.email || '-'}</div></div>
-        <div class="detail-row"><div class="detail-label">עיר</div><div class="detail-value">${t.city || '-'}</div></div>
+        <div class="detail-row"><div class="detail-label">טלפון</div><div class="detail-value"><a href="tel:${t.phone}" style="color:var(--info);">${escapeHtml(t.phone || '-')}</a></div></div>
+        <div class="detail-row"><div class="detail-label">אימייל</div><div class="detail-value">${escapeHtml(t.email || '-')}</div></div>
+        <div class="detail-row"><div class="detail-label">עיר</div><div class="detail-value">${escapeHtml(t.city || '-')}</div></div>
         <div class="detail-row"><div class="detail-label">מגדר</div><div class="detail-value">${genderDisplayLabel(t.gender)}</div></div>
+        ${t.birth_date ? `<div class="detail-row"><div class="detail-label">תאריך לידה</div><div class="detail-value">${formatDate(t.birth_date)}</div></div>` : ''}
         ${t.social_link ? `<div class="detail-row"><div class="detail-label">קישור חיצוני</div><div class="detail-value"><a href="${t.social_link}" target="_blank" class="social-link-btn"><i class="fa-solid fa-external-link"></i> פתח פרופיל</a></div></div>` : ''}
 
         <!-- PROFESSIONAL INFO -->
         <div class="modal-section-divider"><i class="fa-solid fa-briefcase-medical"></i> מידע מקצועי</div>
-        <div class="detail-row"><div class="detail-label">התמחות</div><div class="detail-value">${t.specialization || '-'}</div></div>
-        <div class="detail-row"><div class="detail-label">שיטות טיפול</div><div class="detail-value">${methodTags}</div></div>
-        <div class="detail-row"><div class="detail-label">רישיון</div><div class="detail-value">${t.license_number || '-'}</div></div>
-        ${t.education ? `<div class="detail-row"><div class="detail-label">השכלה</div><div class="detail-value" style="white-space:pre-wrap;">${t.education}</div></div>` : ''}
+        <div class="detail-row"><div class="detail-label">תחומי התמחות</div><div class="detail-value">${makeTags(specs, specLabels)}</div></div>
+        ${populations.length > 0 ? `<div class="detail-row"><div class="detail-label">אוכלוסיות יעד</div><div class="detail-value">${makeTags(populations, popLabels)}</div></div>` : ''}
+        ${degrees.length > 0 ? `<div class="detail-row"><div class="detail-label">תארים אקדמיים</div><div class="detail-value">${makeTags(degrees, degreeLabels)}</div></div>` : ''}
+        <div class="detail-row"><div class="detail-label">שיטות טיפול</div><div class="detail-value">${makeTags(methods, methodLabels)}</div></div>
+        <div class="detail-row"><div class="detail-label">רישיון</div><div class="detail-value">${escapeHtml(t.license_number || '-')}</div></div>
+        ${t.education_details || t.education ? `<div class="detail-row"><div class="detail-label">השכלה</div><div class="detail-value" style="white-space:pre-wrap;">${escapeHtml(t.education_details || t.education || '')}</div></div>` : ''}
 
         <!-- STATS -->
         <div class="stats-grid">
@@ -110,11 +128,11 @@ function viewTherapist(id) {
 
         <!-- WORK MODE & COMMITMENT -->
         <div class="modal-section-divider"><i class="fa-solid fa-calendar-check"></i> התחייבות ואופן עבודה</div>
-        <div class="detail-row"><div class="detail-label">עבודה בזום</div><div class="detail-value">${t.works_online ? '<span style="color:var(--success);">✓ כן</span>' : 'לא'}</div></div>
-        <div class="detail-row"><div class="detail-label">עבודה פרונטלית</div><div class="detail-value">${t.works_in_person ? '<span style="color:var(--success);">✓ כן</span>' : 'לא'}</div></div>
+        <div class="detail-row"><div class="detail-label">עבודה בזום</div><div class="detail-value">${t.works_online ? '<span style="color:var(--success);"><i class="fa-solid fa-check"></i> כן</span>' : '<span style="color:var(--text-secondary);">לא</span>'}</div></div>
+        <div class="detail-row"><div class="detail-label">עבודה פרונטלית</div><div class="detail-value">${t.works_in_person ? '<span style="color:var(--success);"><i class="fa-solid fa-check"></i> כן</span>' : '<span style="color:var(--text-secondary);">לא</span>'}</div></div>
         <div class="detail-row"><div class="detail-label">אופן מועדף</div><div class="detail-value">${therapyMode}</div></div>
-        <div class="detail-row"><div class="detail-label">שעות בחודש</div><div class="detail-value">${commitment.monthly_hours || t.available_hours_per_week * 4 || '-'}</div></div>
-        <div class="detail-row"><div class="detail-label">תקופת התחייבות</div><div class="detail-value">${commitment.duration_months || '-'}</div></div>
+        <div class="detail-row"><div class="detail-label">שעות בחודש</div><div class="detail-value">${commitment.monthly_hours || (t.available_hours_per_week ? t.available_hours_per_week * 4 : '-')}</div></div>
+        <div class="detail-row"><div class="detail-label">תקופת התחייבות</div><div class="detail-value">${durationLabels[commitment.duration_months] || commitment.duration_months || '-'}</div></div>
 
         <!-- HEALTH DECLARATION -->
         <div class="modal-section-divider"><i class="fa-solid fa-heart-pulse"></i> הצהרת בריאות</div>
@@ -127,7 +145,7 @@ function viewTherapist(id) {
                 </span>
             </div>
         </div>
-        ${health.has_medical_issues && health.medical_issues_details ? `<div class="questionnaire-answer" style="margin-top:0.5rem;">${health.medical_issues_details}</div>` : ''}
+        ${health.has_medical_issues && health.medical_issues_details ? `<div class="questionnaire-answer" style="margin-top:0.5rem;">${escapeHtml(health.medical_issues_details)}</div>` : ''}
         <div class="detail-row">
             <div class="detail-label">תרופות פסיכיאטריות</div>
             <div class="detail-value">
@@ -139,7 +157,7 @@ function viewTherapist(id) {
         <div class="detail-row">
             <div class="detail-label">בטיפול אישי</div>
             <div class="detail-value">
-                <span class="health-indicator no">
+                <span class="health-indicator ${health.in_personal_therapy ? 'yes' : 'no'}">
                     ${health.in_personal_therapy ? 'כן' : 'לא'}
                 </span>
             </div>
@@ -147,11 +165,19 @@ function viewTherapist(id) {
 
         <!-- DEEP PROFILE -->
         <div class="modal-section-divider"><i class="fa-solid fa-heart"></i> פרופיל עומק</div>
-        ${q.why_profession ? `<div class="detail-section"><h4><i class="fa-solid fa-lightbulb"></i> למה בחרת במקצוע הטיפול?</h4><div class="questionnaire-answer">${q.why_profession}</div></div>` : ''}
-        ${q.why_join ? `<div class="detail-section"><h4><i class="fa-solid fa-handshake-angle"></i> למה הצטרפת לפרויקט?</h4><div class="questionnaire-answer">${q.why_join}</div></div>` : ''}
-        ${q.experience ? `<div class="detail-section"><h4><i class="fa-solid fa-briefcase"></i> ניסיון מעשי</h4><div class="questionnaire-answer">${q.experience}</div></div>` : ''}
-        ${q.case_study ? `<div class="detail-section"><h4><i class="fa-solid fa-brain"></i> מקרה מורכב (Case Study)</h4><div class="questionnaire-answer">${q.case_study}</div></div>` : ''}
-        ${q.challenges ? `<div class="detail-section"><h4><i class="fa-solid fa-mountain"></i> אתגרים</h4><div class="questionnaire-answer">${q.challenges}</div></div>` : ''}
+        ${q.why_profession ? `<div class="detail-section"><h4><i class="fa-solid fa-lightbulb"></i> למה בחרת במקצוע הטיפול?</h4><div class="questionnaire-answer">${escapeHtml(q.why_profession)}</div></div>` : ''}
+        ${q.why_join ? `<div class="detail-section"><h4><i class="fa-solid fa-handshake-angle"></i> למה הצטרפת לפרויקט?</h4><div class="questionnaire-answer">${escapeHtml(q.why_join)}</div></div>` : ''}
+        ${q.experience ? `<div class="detail-section"><h4><i class="fa-solid fa-briefcase"></i> ניסיון מעשי</h4><div class="questionnaire-answer">${escapeHtml(q.experience)}</div></div>` : ''}
+        ${q.case_study ? `<div class="detail-section"><h4><i class="fa-solid fa-brain"></i> מקרה מורכב (Case Study)</h4><div class="questionnaire-answer">${escapeHtml(q.case_study)}</div></div>` : ''}
+        ${q.challenges ? `<div class="detail-section"><h4><i class="fa-solid fa-mountain"></i> אתגרים</h4><div class="questionnaire-answer">${escapeHtml(q.challenges)}</div></div>` : ''}
+
+        <!-- LEGAL CONFIRMATIONS -->
+        ${(legal.has_insurance !== undefined) ? `
+        <div class="modal-section-divider"><i class="fa-solid fa-scale-balanced"></i> אישורים משפטיים</div>
+        <div class="detail-row"><div class="detail-label">ביטוח מקצועי</div><div class="detail-value"><span class="health-indicator ${legal.has_insurance ? 'no' : 'yes'}">${legal.has_insurance ? '<i class="fa-solid fa-check-circle"></i> יש' : '<i class="fa-solid fa-exclamation-circle"></i> אין'}</span></div></div>
+        <div class="detail-row"><div class="detail-label">קבלת אחריות</div><div class="detail-value"><span class="health-indicator ${legal.accepts_responsibility ? 'no' : 'yes'}">${legal.accepts_responsibility ? '<i class="fa-solid fa-check-circle"></i> אישר' : 'לא אישר'}</span></div></div>
+        <div class="detail-row"><div class="detail-label">שחרור מאחריות</div><div class="detail-value"><span class="health-indicator ${legal.waiver_confirmed ? 'no' : 'yes'}">${legal.waiver_confirmed ? '<i class="fa-solid fa-check-circle"></i> אישר' : 'לא אישר'}</span></div></div>
+        ` : ''}
 
         <!-- ADMIN SECTION -->
         <div class="modal-section-divider"><i class="fa-solid fa-cog"></i> ניהול</div>
@@ -181,7 +207,7 @@ function viewTherapist(id) {
 
         <div class="detail-row" style="margin-top:1rem;">
             <div class="detail-label">תאריך הרשמה</div>
-            <div class="detail-value">${formatDate(t.created_at)}</div>
+            <div class="detail-value">${formatDateTime(t.created_at)}</div>
         </div>
 
         <!-- DIGITAL SIGNATURE -->

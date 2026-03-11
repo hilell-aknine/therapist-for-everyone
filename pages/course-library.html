@@ -4034,6 +4034,46 @@
             console.error('Supabase init error:', e);
         }
 
+        // ===== Referrals Module (Ambassador Program) =====
+        // Local implementation using page's own supabaseClient
+        const Referrals = {
+            getLink(userId) {
+                return `https://www.therapist-home.com/pages/free-portal.html?ref=${userId}`;
+            },
+            async getMyCount(userId) {
+                if (!supabaseClient) return 0;
+                const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+                const { count, error } = await supabaseClient
+                    .from('referrals')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('referrer_id', userId)
+                    .gte('created_at', thirtyDaysAgo);
+                if (error) { console.error('Referral count error:', error); return 0; }
+                return count || 0;
+            },
+            async getLeaderboard(limit = 10) {
+                if (!supabaseClient) return [];
+                const { data, error } = await supabaseClient
+                    .from('referral_leaderboard')
+                    .select('*')
+                    .limit(limit);
+                if (error) { console.error('Leaderboard error:', error); return []; }
+                return data || [];
+            },
+            async getMyReferrals(userId) {
+                if (!supabaseClient) return [];
+                const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+                const { data, error } = await supabaseClient
+                    .from('referrals')
+                    .select('referred_user_id, created_at')
+                    .eq('referrer_id', userId)
+                    .gte('created_at', thirtyDaysAgo)
+                    .order('created_at', { ascending: false });
+                if (error) { console.error('My referrals error:', error); return []; }
+                return data || [];
+            }
+        };
+        window.Referrals = Referrals;
 
         // ===== Initialization =====
         document.addEventListener('DOMContentLoaded', async () => {
@@ -4562,7 +4602,7 @@
             { icon: 'fa-solid fa-robot', text: 'מורה AI אישי זמין עכשיו בתוך הפורטל' },
             { icon: 'fa-solid fa-download', text: 'חוברות עבודה וסיכומי שיעורים — להורדה חינם' },
             { icon: 'fa-solid fa-gamepad', text: 'משחק תרגול מקצועי חדש — XP, רמות והישגים' },
-            { icon: 'fa-solid fa-rocket', text: 'קיבלת טוב? תחזיר טוב! הצטרפו לתוכנית השותפים שלנו 🚀', gold: true, onclick: 'showAmbassadorProgram()' }
+            { icon: 'fa-solid fa-rocket', text: 'קיבלת טוב? תחזיר טוב 🤍 הצטרפו לתוכנית השותפים שלנו', gold: true, onclick: 'showAmbassadorProgram()' }
         ];
 
         function initWdBulletin() {

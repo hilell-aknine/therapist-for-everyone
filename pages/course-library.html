@@ -4238,14 +4238,125 @@
                     } catch (e) {
                         console.error('Post-auth setup error:', e);
                     }
-                    // Phone gate removed — grandfathering existing users
+                    // Phone gate — block content until phone is provided
+                    await checkPhoneGate(session.user);
                 }
             } catch (error) {
                 console.error('Session check error:', error);
             }
         }
 
-        // Phone gate removed — existing users grandfathered (no forced phone collection)
+        // ===== Phone Gate — blocks content for users without phone =====
+        async function checkPhoneGate(user) {
+            try {
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('phone')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile?.phone && profile.phone.trim() !== '') return; // Phone exists, all good
+
+                // No phone — show non-dismissible modal
+                showPhoneGateModal(user.id);
+            } catch (e) {
+                console.error('Phone gate check error:', e);
+            }
+        }
+
+        function showPhoneGateModal(userId) {
+            // Prevent duplicate
+            if (document.getElementById('phone-gate-overlay')) return;
+
+            const overlay = document.createElement('div');
+            overlay.id = 'phone-gate-overlay';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,30,36,0.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);';
+            overlay.addEventListener('click', (e) => e.stopPropagation());
+
+            overlay.innerHTML = `
+                <div style="background:#003B46;border:1px solid rgba(212,175,55,0.2);border-radius:20px;padding:3rem 2.5rem;max-width:420px;width:100%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.5),0 0 0 1px rgba(212,175,55,0.08);position:relative;overflow:hidden;font-family:'Heebo',sans-serif;">
+                    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(135deg,#D4AF37,#c4a030,#D4AF37);"></div>
+                    <div style="width:64px;height:64px;background:linear-gradient(135deg,#D4AF37,#c4a030);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;box-shadow:0 8px 24px rgba(212,175,55,0.25);">
+                        <i class="fa-solid fa-phone" style="font-size:1.4rem;color:#003B46;"></i>
+                    </div>
+                    <h2 style="font-size:1.35rem;margin-bottom:0.5rem;color:#fff;font-weight:700;">השלמת פרופיל</h2>
+                    <p style="color:#E8F1F2;opacity:0.7;font-size:0.9rem;margin-bottom:1.8rem;line-height:1.6;">כדי לגשת לקורס, נא להזין את מספר הטלפון שלך. פעולה חד-פעמית בלבד.</p>
+                    <div id="phone-gate-error" style="display:none;background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.4);color:#ff8a80;padding:0.7rem 1rem;border-radius:10px;margin-bottom:1rem;font-size:0.85rem;">
+                        <i class="fa-solid fa-circle-exclamation" style="margin-left:0.4rem;"></i>
+                        <span id="phone-gate-error-text"></span>
+                    </div>
+                    <input type="tel" id="phone-gate-input" placeholder="05X-XXXXXXX" dir="ltr" autocomplete="tel"
+                        style="width:100%;padding:0.95rem 1rem;background:rgba(0,0,0,0.25);border:1px solid rgba(232,241,242,0.15);border-radius:10px;color:#fff;font-family:'Heebo',sans-serif;font-size:1rem;margin-bottom:1.2rem;outline:none;transition:border-color 0.2s;"
+                        onfocus="this.style.borderColor='#D4AF37'"
+                        onblur="this.style.borderColor='rgba(232,241,242,0.15)'"
+                    >
+                    <button id="phone-gate-btn" onclick="submitPhoneGate('${userId}')"
+                        style="width:100%;padding:1rem;background:linear-gradient(135deg,#D4AF37,#c4a030);border:none;border-radius:10px;color:#003B46;font-family:'Heebo',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 4px 16px rgba(212,175,55,0.3);"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(212,175,55,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(212,175,55,0.3)'"
+                    >
+                        <span class="btn-text">שמור והמשך לקורס</span>
+                        <div class="spinner" id="phone-gate-spinner" style="display:none;width:20px;height:20px;border:2px solid transparent;border-top-color:#003B46;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            // Block Escape key
+            window._phoneGateEscHandler = (e) => {
+                if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); }
+            };
+            document.addEventListener('keydown', window._phoneGateEscHandler, true);
+
+            // Block browser back
+            history.pushState(null, '', location.href);
+            window._phoneGatePopHandler = () => history.pushState(null, '', location.href);
+            window.addEventListener('popstate', window._phoneGatePopHandler);
+
+            document.getElementById('phone-gate-input').focus();
+        }
+
+        async function submitPhoneGate(userId) {
+            const input = document.getElementById('phone-gate-input');
+            const phone = input.value.trim().replace(/[-\s]/g, '');
+            const errorEl = document.getElementById('phone-gate-error');
+            const errorText = document.getElementById('phone-gate-error-text');
+
+            if (!/^0[2-9]\d{7,8}$/.test(phone)) {
+                errorText.textContent = 'נא להזין מספר טלפון ישראלי תקין (למשל: 0541234567)';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const btn = document.getElementById('phone-gate-btn');
+            const spinner = document.getElementById('phone-gate-spinner');
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btn.querySelector('.btn-text').textContent = 'שומר...';
+
+            try {
+                const { error } = await supabaseClient
+                    .from('profiles')
+                    .update({ phone: phone })
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                // Clean up modal + event handlers
+                document.removeEventListener('keydown', window._phoneGateEscHandler, true);
+                window.removeEventListener('popstate', window._phoneGatePopHandler);
+                document.getElementById('phone-gate-overlay').remove();
+
+                // CRM webhook fires automatically via DB trigger (migration 032)
+            } catch (err) {
+                errorText.textContent = 'שגיאה בשמירה — נסו שוב';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btn.querySelector('.btn-text').textContent = 'שמור והמשך לקורס';
+            }
+        }
 
         // ===== Handle Successful Authentication =====
         async function handleSuccessfulAuth(user) {

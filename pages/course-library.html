@@ -3888,12 +3888,12 @@
                 // Allow OAuth redirect tokens to be processed
                 if (!session && !window.location.hash.includes('access_token')) {
                     sessionStorage.setItem('returnUrl', window.location.href);
-                    window.location.replace('login.html');
+                    window.location.replace('free-portal.html');
                     return;
                 }
             } catch (e) {
                 sessionStorage.setItem('returnUrl', window.location.href);
-                window.location.replace('login.html');
+                window.location.replace('free-portal.html');
             }
         })();
 
@@ -4238,151 +4238,14 @@
                     } catch (e) {
                         console.error('Post-auth setup error:', e);
                     }
-                    // Phone gate — existing users must have a phone number
-                    await checkPhoneGate(session.user);
+                    // Phone gate removed — grandfathering existing users
                 }
             } catch (error) {
                 console.error('Session check error:', error);
             }
         }
 
-        // ===== Phone Gate — show non-dismissible modal if phone is missing =====
-        async function checkPhoneGate(user) {
-            if (!supabaseClient) return;
-            try {
-                const { data: profile } = await supabaseClient
-                    .from('profiles')
-                    .select('phone')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profile && profile.phone) return; // Phone exists, all good
-
-                // Show non-dismissible phone modal (Quiet Luxury design)
-                const overlay = document.createElement('div');
-                overlay.id = 'phone-gate-overlay';
-                overlay.style.cssText = `
-                    position:fixed;inset:0;z-index:99999;
-                    display:flex;align-items:center;justify-content:center;padding:1rem;
-                    background:rgba(0,30,36,0.92);
-                    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-                `;
-                // Block clicks on overlay
-                overlay.addEventListener('click', (e) => e.stopPropagation());
-
-                overlay.innerHTML = `
-                    <div style="
-                        background:#003B46;
-                        border:1px solid rgba(212,175,55,0.2);
-                        border-radius:20px;
-                        padding:3rem 2.5rem;
-                        max-width:420px;width:100%;
-                        text-align:center;
-                        box-shadow:0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.08);
-                        position:relative;overflow:hidden;
-                        font-family:'Heebo',sans-serif;
-                    ">
-                        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(135deg,#D4AF37,#c4a030,#D4AF37);"></div>
-                        <div style="
-                            width:64px;height:64px;
-                            background:linear-gradient(135deg,#D4AF37,#c4a030);
-                            border-radius:50%;
-                            display:flex;align-items:center;justify-content:center;
-                            margin:0 auto 1.2rem;
-                            box-shadow:0 8px 24px rgba(212,175,55,0.25);
-                        ">
-                            <i class="fa-solid fa-phone" style="font-size:1.4rem;color:#003B46;"></i>
-                        </div>
-                        <h2 style="font-size:1.35rem;margin-bottom:0.5rem;color:#fff;font-weight:700;">עדכון מספר טלפון</h2>
-                        <p style="color:#E8F1F2;opacity:0.7;font-size:0.9rem;margin-bottom:1.8rem;line-height:1.6;">כדי להמשיך ללמוד, נא להזין את מספר הטלפון שלך</p>
-                        <div id="phone-gate-error" style="display:none;background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.4);color:#ff8a80;padding:0.7rem 1rem;border-radius:10px;margin-bottom:1rem;font-size:0.85rem;">
-                            <i class="fa-solid fa-circle-exclamation" style="margin-left:0.4rem;"></i>
-                            <span id="phone-gate-error-text"></span>
-                        </div>
-                        <input type="tel" id="phone-gate-input" placeholder="05X-XXXXXXX" dir="ltr" autocomplete="tel"
-                            style="
-                                width:100%;padding:0.95rem 1rem;
-                                background:rgba(0,0,0,0.25);
-                                border:1px solid rgba(232,241,242,0.15);
-                                border-radius:10px;
-                                color:#fff;font-family:'Heebo',sans-serif;font-size:1rem;
-                                margin-bottom:1.2rem;outline:none;
-                                transition:border-color 0.2s;
-                            "
-                            onfocus="this.style.borderColor='#D4AF37'"
-                            onblur="this.style.borderColor='rgba(232,241,242,0.15)'"
-                        >
-                        <button id="phone-gate-btn" onclick="submitPhoneGate('${user.id}')"
-                            style="
-                                width:100%;padding:1rem;
-                                background:linear-gradient(135deg,#D4AF37,#c4a030);
-                                border:none;border-radius:10px;
-                                color:#003B46;font-family:'Heebo',sans-serif;
-                                font-size:1rem;font-weight:700;cursor:pointer;
-                                display:flex;align-items:center;justify-content:center;gap:0.5rem;
-                                transition:transform 0.2s,box-shadow 0.2s;
-                                box-shadow:0 4px 16px rgba(212,175,55,0.3);
-                            "
-                            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(212,175,55,0.4)'"
-                            onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(212,175,55,0.3)'"
-                        >
-                            שמור והמשך ללמוד
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(overlay);
-
-                // Bulletproof: block Escape key globally (capture phase)
-                window._phoneGateEscHandler = (e) => {
-                    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); }
-                };
-                document.addEventListener('keydown', window._phoneGateEscHandler, true);
-
-                document.getElementById('phone-gate-input').focus();
-
-            } catch (e) {
-                console.error('Phone gate check error:', e);
-            }
-        }
-
-        async function submitPhoneGate(userId) {
-            const input = document.getElementById('phone-gate-input');
-            const phone = input.value.trim().replace(/[-\s]/g, '');
-            const errorEl = document.getElementById('phone-gate-error');
-            const errorText = document.getElementById('phone-gate-error-text');
-
-            if (!/^0[2-9]\d{7,8}$/.test(phone)) {
-                if (errorText) errorText.textContent = 'נא להזין מספר טלפון ישראלי תקין (למשל: 0541234567)';
-                else errorEl.textContent = 'נא להזין מספר טלפון ישראלי תקין (למשל: 0541234567)';
-                errorEl.style.display = 'block';
-                return;
-            }
-
-            const btn = document.getElementById('phone-gate-btn');
-            btn.disabled = true;
-            btn.textContent = 'שומר...';
-            btn.style.opacity = '0.7';
-
-            try {
-                const { error } = await supabaseClient
-                    .from('profiles')
-                    .update({ phone: phone })
-                    .eq('id', userId);
-
-                if (error) throw error;
-
-                // Remove modal + escape blocker — user can now use the portal
-                document.removeEventListener('keydown', window._phoneGateEscHandler, true);
-                document.getElementById('phone-gate-overlay').remove();
-            } catch (err) {
-                if (errorText) errorText.textContent = 'שגיאה בשמירה — נסו שוב';
-                else errorEl.textContent = 'שגיאה בשמירה — נסו שוב';
-                errorEl.style.display = 'block';
-                btn.disabled = false;
-                btn.textContent = 'שמור והמשך ללמוד';
-                btn.style.opacity = '1';
-            }
-        }
+        // Phone gate removed — existing users grandfathered (no forced phone collection)
 
         // ===== Handle Successful Authentication =====
         async function handleSuccessfulAuth(user) {

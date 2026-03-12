@@ -450,14 +450,14 @@
             await new Promise(r => setTimeout(r, 300));
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                await checkPhoneAndRedirect(session.user);
+                await redirectLoggedInUser(session.user, null);
             }
         })();
 
         // Safety net: catch OAuth redirect that the IIFE might miss
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
-                await checkPhoneAndRedirect(session.user);
+                await redirectLoggedInUser(session.user, null);
             }
         });
 
@@ -486,162 +486,6 @@
             btn.disabled = loading;
             spinner.style.display = loading ? 'block' : 'none';
             btnText.textContent = loading ? (loadingText || 'מתחבר...') : (defaultText || 'התחברות');
-        }
-
-        // Check if user has phone number, show modal if not, then redirect
-        async function checkPhoneAndRedirect(user) {
-            try {
-                const { data: profile } = await supabaseClient
-                    .from('profiles')
-                    .select('role, phone')
-                    .eq('id', user.id)
-                    .single();
-
-                // If phone is missing — show mandatory phone modal
-                if (!profile?.phone) {
-                    showPhoneModal(user.id, profile?.role);
-                    return;
-                }
-
-                // Phone exists — redirect normally
-                await redirectLoggedInUser(user, profile?.role);
-            } catch (err) {
-                // Profile might not exist yet (new user) — redirect, ensureProfile will handle it
-                await redirectLoggedInUser(user, null);
-            }
-        }
-
-        // ===== Phone Modal (non-dismissible, Quiet Luxury design) =====
-        function showPhoneModal(userId, role) {
-            const overlay = document.createElement('div');
-            overlay.id = 'phone-modal-overlay';
-            overlay.style.cssText = `
-                position:fixed;inset:0;z-index:9999;
-                display:flex;align-items:center;justify-content:center;padding:1rem;
-                background:rgba(0,30,36,0.92);
-                backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-            `;
-
-            // Block clicks on the overlay itself
-            overlay.addEventListener('click', (e) => e.stopPropagation());
-
-            overlay.innerHTML = `
-                <div style="
-                    background:#003B46;
-                    border:1px solid rgba(212,175,55,0.2);
-                    border-radius:20px;
-                    padding:3rem 2.5rem;
-                    max-width:420px;width:100%;
-                    text-align:center;
-                    box-shadow:0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.08);
-                    position:relative;
-                    overflow:hidden;
-                    font-family:'Heebo',sans-serif;
-                ">
-                    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(135deg,#D4AF37,#c4a030,#D4AF37);"></div>
-                    <div style="
-                        width:64px;height:64px;
-                        background:linear-gradient(135deg,#D4AF37,#c4a030);
-                        border-radius:50%;
-                        display:flex;align-items:center;justify-content:center;
-                        margin:0 auto 1.2rem;
-                        box-shadow:0 8px 24px rgba(212,175,55,0.25);
-                    ">
-                        <i class="fa-solid fa-phone" style="font-size:1.4rem;color:#003B46;"></i>
-                    </div>
-                    <h2 style="font-size:1.35rem;margin-bottom:0.5rem;color:#fff;font-weight:700;">עדכון מספר טלפון</h2>
-                    <p style="color:#E8F1F2;opacity:0.7;font-size:0.9rem;margin-bottom:1.8rem;line-height:1.6;">כדי להמשיך לפורטל הלמידה, נא להזין את מספר הטלפון שלך</p>
-                    <div id="phone-error" style="display:none;background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.4);color:#ff8a80;padding:0.7rem 1rem;border-radius:10px;margin-bottom:1rem;font-size:0.85rem;">
-                        <i class="fa-solid fa-circle-exclamation" style="margin-left:0.4rem;"></i>
-                        <span id="phone-error-text"></span>
-                    </div>
-                    <input type="tel" id="phone-modal-input" placeholder="05X-XXXXXXX" dir="ltr" autocomplete="tel"
-                        style="
-                            width:100%;padding:0.95rem 1rem;
-                            background:rgba(0,0,0,0.25);
-                            border:1px solid rgba(232,241,242,0.15);
-                            border-radius:10px;
-                            color:#fff;font-family:'Heebo',sans-serif;font-size:1rem;
-                            margin-bottom:1.2rem;
-                            outline:none;
-                            transition:border-color 0.2s;
-                        "
-                        onfocus="this.style.borderColor='#D4AF37'"
-                        onblur="this.style.borderColor='rgba(232,241,242,0.15)'"
-                    >
-                    <button id="phone-modal-btn" onclick="submitPhoneModal('${userId}', '${role || ''}')"
-                        style="
-                            width:100%;padding:1rem;
-                            background:linear-gradient(135deg,#D4AF37,#c4a030);
-                            border:none;border-radius:10px;
-                            color:#003B46;font-family:'Heebo',sans-serif;
-                            font-size:1rem;font-weight:700;
-                            cursor:pointer;
-                            display:flex;align-items:center;justify-content:center;gap:0.5rem;
-                            transition:transform 0.2s,box-shadow 0.2s;
-                            box-shadow:0 4px 16px rgba(212,175,55,0.3);
-                        "
-                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(212,175,55,0.4)'"
-                        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(212,175,55,0.3)'"
-                    >
-                        <span class="btn-text">שמור והמשך</span>
-                        <div class="spinner" id="phone-modal-spinner" style="display:none;width:20px;height:20px;border:2px solid transparent;border-top-color:#003B46;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-                    </button>
-                </div>
-            `;
-
-            document.body.appendChild(overlay);
-
-            // Bulletproof: block Escape key globally while modal is open
-            window._phoneModalEscHandler = (e) => {
-                if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); }
-            };
-            document.addEventListener('keydown', window._phoneModalEscHandler, true);
-
-            document.getElementById('phone-modal-input').focus();
-        }
-
-        async function submitPhoneModal(userId, role) {
-            const input = document.getElementById('phone-modal-input');
-            const phone = input.value.trim().replace(/[-\s]/g, '');
-            const errorEl = document.getElementById('phone-error');
-            const errorText = document.getElementById('phone-error-text');
-
-            // Validate Israeli phone
-            if (!/^0[2-9]\d{7,8}$/.test(phone)) {
-                errorText.textContent = 'נא להזין מספר טלפון ישראלי תקין (למשל: 0541234567)';
-                errorEl.style.display = 'block';
-                return;
-            }
-
-            const btn = document.getElementById('phone-modal-btn');
-            const spinner = document.getElementById('phone-modal-spinner');
-            btn.disabled = true;
-            spinner.style.display = 'block';
-            btn.querySelector('.btn-text').textContent = 'שומר...';
-
-            try {
-                const { error } = await supabaseClient
-                    .from('profiles')
-                    .update({ phone: phone })
-                    .eq('id', userId);
-
-                if (error) throw error;
-
-                // Remove modal + escape blocker
-                document.removeEventListener('keydown', window._phoneModalEscHandler, true);
-                document.getElementById('phone-modal-overlay').remove();
-
-                // Now redirect
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                await redirectLoggedInUser(user, role || null);
-            } catch (err) {
-                errorText.textContent = 'שגיאה בשמירה — נסו שוב';
-                errorEl.style.display = 'block';
-                btn.disabled = false;
-                spinner.style.display = 'none';
-                btn.querySelector('.btn-text').textContent = 'שמור והמשך';
-            }
         }
 
         // Redirect based on role (or returnUrl if available)
@@ -703,7 +547,7 @@
 
                 if (error) throw error;
 
-                await checkPhoneAndRedirect(data.user);
+                await redirectLoggedInUser(data.user, null);
 
             } catch (error) {
                 console.error('Login error:', error);

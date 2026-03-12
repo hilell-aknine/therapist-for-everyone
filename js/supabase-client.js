@@ -945,16 +945,20 @@
                                 user.user_metadata?.name ||
                                 user.email?.split('@')[0] ||
                                 'משתמש חדש';
+                const phone = user.user_metadata?.phone || null;
+
+                const profileData = {
+                    id: user.id,
+                    email: user.email,
+                    full_name: fullName,
+                    roles: ['student_lead'],
+                    created_at: new Date().toISOString()
+                };
+                if (phone) profileData.phone = phone;
 
                 const { error: insertError } = await supabaseClient
                     .from('profiles')
-                    .insert([{
-                        id: user.id,
-                        email: user.email,
-                        full_name: fullName,
-                        roles: ['student_lead'],
-                        created_at: new Date().toISOString()
-                    }]);
+                    .insert([profileData]);
 
                 if (insertError) {
                     console.error('Profile create error:', insertError);

@@ -285,13 +285,42 @@
             margin-bottom: 0.3rem;
         }
         .login-brand i { font-size: 1.2rem; }
+
+        /* Tabs */
+        .auth-tabs {
+            display: flex;
+            background: rgba(255,255,255,0.06);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 0.7rem;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .auth-tab.active {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--bg);
+            border-radius: 8px;
+        }
+        .auth-form-panel { display: none; }
+        .auth-form-panel.active { display: block; }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <a href="course-library.html" class="back-to-portal">
+        <a href="../index.html" class="back-to-portal">
             <i class="fa-solid fa-arrow-right"></i>
-            חזרה לפורטל הלמידה
+            חזרה לאתר הראשי
         </a>
         <div class="login-card">
             <div class="login-header">
@@ -306,6 +335,12 @@
                 <p>מערכת הלמידה - בית המטפלים</p>
             </div>
 
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">התחברות</button>
+                <button class="auth-tab" onclick="switchAuthTab('signup')">הרשמה</button>
+            </div>
+
             <!-- Error/Success Messages -->
             <div class="error-message" id="error-message">
                 <i class="fa-solid fa-circle-exclamation"></i>
@@ -318,22 +353,54 @@
             </div>
 
             <!-- LOGIN FORM -->
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="login-email">אימייל</label>
-                    <input type="email" id="login-email" name="email" required placeholder="example@email.com" autocomplete="email">
-                </div>
+            <div class="auth-form-panel active" id="login-panel">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">אימייל</label>
+                        <input type="email" id="login-email" name="email" required placeholder="example@email.com" autocomplete="email">
+                    </div>
 
-                <div class="form-group">
-                    <label for="login-password">סיסמה</label>
-                    <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
-                </div>
+                    <div class="form-group">
+                        <label for="login-password">סיסמה</label>
+                        <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
+                    </div>
 
-                <button type="submit" class="btn-login" id="login-btn">
-                    <span class="btn-text">התחברות</span>
-                    <div class="spinner" id="login-spinner"></div>
-                </button>
-            </form>
+                    <button type="submit" class="btn-login" id="login-btn">
+                        <span class="btn-text">התחברות</span>
+                        <div class="spinner" id="login-spinner"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- SIGNUP FORM -->
+            <div class="auth-form-panel" id="signup-panel">
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-name">שם מלא *</label>
+                        <input type="text" id="signup-name" name="full_name" required placeholder="השם המלא שלך" autocomplete="name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-email">אימייל *</label>
+                        <input type="email" id="signup-email" name="email" required placeholder="example@email.com" autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-phone">טלפון *</label>
+                        <input type="tel" id="signup-phone" name="phone" required placeholder="05X-XXXXXXX" autocomplete="tel" dir="ltr" pattern="^0[2-9]\d{7,8}$" title="מספר טלפון ישראלי תקין">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-password">סיסמה *</label>
+                        <input type="password" id="signup-password" name="password" required placeholder="לפחות 6 תווים" autocomplete="new-password" minlength="6">
+                    </div>
+
+                    <button type="submit" class="btn-login" id="signup-btn">
+                        <span class="btn-text">הרשמה</span>
+                        <div class="spinner" id="signup-spinner"></div>
+                    </button>
+                </form>
+            </div>
 
             <!-- Divider -->
             <div class="divider">
@@ -351,9 +418,9 @@
                 כניסה עם Google
             </button>
 
-            <a href="course-library.html" class="back-link">
+            <a href="../index.html" class="back-link">
                 <i class="fa-solid fa-arrow-right"></i>
-                חזרה לפורטל
+                חזרה לאתר הראשי
             </a>
         </div>
     </div>
@@ -362,19 +429,35 @@
     <script src="../js/supabase-config.js"></script>
     <script src="../js/supabase-client.js"></script>
     <script>
+        // ===== Tab Switching =====
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('error-message').classList.remove('show');
+            document.getElementById('success-message').classList.remove('show');
+
+            if (tab === 'login') {
+                document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
+                document.getElementById('login-panel').classList.add('active');
+            } else {
+                document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
+                document.getElementById('signup-panel').classList.add('active');
+            }
+        }
+
         // Check if already logged in (with delay for OAuth token parsing)
         (async function() {
             await new Promise(r => setTimeout(r, 300));
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                redirectLoggedInUser(session.user);
+                await checkPhoneAndRedirect(session.user);
             }
         })();
 
         // Safety net: catch OAuth redirect that the IIFE might miss
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
-                redirectLoggedInUser(session.user);
+                await checkPhoneAndRedirect(session.user);
             }
         });
 
@@ -395,18 +478,174 @@
         }
 
         // Set loading state
-        function setLoading(btnId, spinnerId, loading) {
+        function setLoading(btnId, spinnerId, loading, loadingText, defaultText) {
             const btn = document.getElementById(btnId);
             const spinner = document.getElementById(spinnerId);
             const btnText = btn.querySelector('.btn-text');
 
             btn.disabled = loading;
             spinner.style.display = loading ? 'block' : 'none';
-            btnText.textContent = loading ? 'מתחבר...' : 'התחברות';
+            btnText.textContent = loading ? (loadingText || 'מתחבר...') : (defaultText || 'התחברות');
+        }
+
+        // Check if user has phone number, show modal if not, then redirect
+        async function checkPhoneAndRedirect(user) {
+            try {
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('role, phone')
+                    .eq('id', user.id)
+                    .single();
+
+                // If phone is missing — show mandatory phone modal
+                if (!profile?.phone) {
+                    showPhoneModal(user.id, profile?.role);
+                    return;
+                }
+
+                // Phone exists — redirect normally
+                await redirectLoggedInUser(user, profile?.role);
+            } catch (err) {
+                // Profile might not exist yet (new user) — redirect, ensureProfile will handle it
+                await redirectLoggedInUser(user, null);
+            }
+        }
+
+        // ===== Phone Modal (non-dismissible, Quiet Luxury design) =====
+        function showPhoneModal(userId, role) {
+            const overlay = document.createElement('div');
+            overlay.id = 'phone-modal-overlay';
+            overlay.style.cssText = `
+                position:fixed;inset:0;z-index:9999;
+                display:flex;align-items:center;justify-content:center;padding:1rem;
+                background:rgba(0,30,36,0.92);
+                backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+            `;
+
+            // Block clicks on the overlay itself
+            overlay.addEventListener('click', (e) => e.stopPropagation());
+
+            overlay.innerHTML = `
+                <div style="
+                    background:#003B46;
+                    border:1px solid rgba(212,175,55,0.2);
+                    border-radius:20px;
+                    padding:3rem 2.5rem;
+                    max-width:420px;width:100%;
+                    text-align:center;
+                    box-shadow:0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.08);
+                    position:relative;
+                    overflow:hidden;
+                    font-family:'Heebo',sans-serif;
+                ">
+                    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(135deg,#D4AF37,#c4a030,#D4AF37);"></div>
+                    <div style="
+                        width:64px;height:64px;
+                        background:linear-gradient(135deg,#D4AF37,#c4a030);
+                        border-radius:50%;
+                        display:flex;align-items:center;justify-content:center;
+                        margin:0 auto 1.2rem;
+                        box-shadow:0 8px 24px rgba(212,175,55,0.25);
+                    ">
+                        <i class="fa-solid fa-phone" style="font-size:1.4rem;color:#003B46;"></i>
+                    </div>
+                    <h2 style="font-size:1.35rem;margin-bottom:0.5rem;color:#fff;font-weight:700;">עדכון מספר טלפון</h2>
+                    <p style="color:#E8F1F2;opacity:0.7;font-size:0.9rem;margin-bottom:1.8rem;line-height:1.6;">כדי להמשיך לפורטל הלמידה, נא להזין את מספר הטלפון שלך</p>
+                    <div id="phone-error" style="display:none;background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.4);color:#ff8a80;padding:0.7rem 1rem;border-radius:10px;margin-bottom:1rem;font-size:0.85rem;">
+                        <i class="fa-solid fa-circle-exclamation" style="margin-left:0.4rem;"></i>
+                        <span id="phone-error-text"></span>
+                    </div>
+                    <input type="tel" id="phone-modal-input" placeholder="05X-XXXXXXX" dir="ltr" autocomplete="tel"
+                        style="
+                            width:100%;padding:0.95rem 1rem;
+                            background:rgba(0,0,0,0.25);
+                            border:1px solid rgba(232,241,242,0.15);
+                            border-radius:10px;
+                            color:#fff;font-family:'Heebo',sans-serif;font-size:1rem;
+                            margin-bottom:1.2rem;
+                            outline:none;
+                            transition:border-color 0.2s;
+                        "
+                        onfocus="this.style.borderColor='#D4AF37'"
+                        onblur="this.style.borderColor='rgba(232,241,242,0.15)'"
+                    >
+                    <button id="phone-modal-btn" onclick="submitPhoneModal('${userId}', '${role || ''}')"
+                        style="
+                            width:100%;padding:1rem;
+                            background:linear-gradient(135deg,#D4AF37,#c4a030);
+                            border:none;border-radius:10px;
+                            color:#003B46;font-family:'Heebo',sans-serif;
+                            font-size:1rem;font-weight:700;
+                            cursor:pointer;
+                            display:flex;align-items:center;justify-content:center;gap:0.5rem;
+                            transition:transform 0.2s,box-shadow 0.2s;
+                            box-shadow:0 4px 16px rgba(212,175,55,0.3);
+                        "
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(212,175,55,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(212,175,55,0.3)'"
+                    >
+                        <span class="btn-text">שמור והמשך</span>
+                        <div class="spinner" id="phone-modal-spinner" style="display:none;width:20px;height:20px;border:2px solid transparent;border-top-color:#003B46;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            // Bulletproof: block Escape key globally while modal is open
+            window._phoneModalEscHandler = (e) => {
+                if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); }
+            };
+            document.addEventListener('keydown', window._phoneModalEscHandler, true);
+
+            document.getElementById('phone-modal-input').focus();
+        }
+
+        async function submitPhoneModal(userId, role) {
+            const input = document.getElementById('phone-modal-input');
+            const phone = input.value.trim().replace(/[-\s]/g, '');
+            const errorEl = document.getElementById('phone-error');
+            const errorText = document.getElementById('phone-error-text');
+
+            // Validate Israeli phone
+            if (!/^0[2-9]\d{7,8}$/.test(phone)) {
+                errorText.textContent = 'נא להזין מספר טלפון ישראלי תקין (למשל: 0541234567)';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const btn = document.getElementById('phone-modal-btn');
+            const spinner = document.getElementById('phone-modal-spinner');
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btn.querySelector('.btn-text').textContent = 'שומר...';
+
+            try {
+                const { error } = await supabaseClient
+                    .from('profiles')
+                    .update({ phone: phone })
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                // Remove modal + escape blocker
+                document.removeEventListener('keydown', window._phoneModalEscHandler, true);
+                document.getElementById('phone-modal-overlay').remove();
+
+                // Now redirect
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                await redirectLoggedInUser(user, role || null);
+            } catch (err) {
+                errorText.textContent = 'שגיאה בשמירה — נסו שוב';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btn.querySelector('.btn-text').textContent = 'שמור והמשך';
+            }
         }
 
         // Redirect based on role (or returnUrl if available)
-        async function redirectLoggedInUser(user) {
+        async function redirectLoggedInUser(user, role) {
             // Check for returnUrl first — send user back where they came from
             const returnUrl = sessionStorage.getItem('returnUrl');
             if (returnUrl) {
@@ -415,33 +654,34 @@
                 return;
             }
 
-            // Fallback: role-based routing
-            try {
-                const { data: profile } = await supabaseClient
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
-
-                const role = profile?.role || 'student_lead';
-
-                switch (role) {
-                    case 'admin':
-                        window.location.href = 'admin.html';
-                        break;
-                    case 'therapist':
-                        window.location.href = '../therapist-dashboard.html';
-                        break;
-                    case 'patient':
-                        window.location.href = '../patient-dashboard.html';
-                        break;
-                    case 'student_lead':
-                    default:
-                        window.location.href = 'course-library.html';
-                        break;
+            // If role not passed, fetch it
+            if (!role) {
+                try {
+                    const { data: profile } = await supabaseClient
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single();
+                    role = profile?.role || 'student_lead';
+                } catch (err) {
+                    role = 'student_lead';
                 }
-            } catch (err) {
-                window.location.href = 'course-library.html';
+            }
+
+            switch (role) {
+                case 'admin':
+                    window.location.href = 'admin.html';
+                    break;
+                case 'therapist':
+                    window.location.href = '../therapist-dashboard.html';
+                    break;
+                case 'patient':
+                    window.location.href = '../patient-dashboard.html';
+                    break;
+                case 'student_lead':
+                default:
+                    window.location.href = 'course-library.html';
+                    break;
             }
         }
 
@@ -453,7 +693,7 @@
             const password = document.getElementById('login-password').value;
 
             document.getElementById('error-message').classList.remove('show');
-            setLoading('login-btn', 'login-spinner', true);
+            setLoading('login-btn', 'login-spinner', true, 'מתחבר...', 'התחברות');
 
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -463,7 +703,7 @@
 
                 if (error) throw error;
 
-                await redirectLoggedInUser(data.user);
+                await checkPhoneAndRedirect(data.user);
 
             } catch (error) {
                 console.error('Login error:', error);
@@ -476,7 +716,83 @@
                     showError('שגיאה בהתחברות - נסו שוב');
                 }
 
-                setLoading('login-btn', 'login-spinner', false);
+                setLoading('login-btn', 'login-spinner', false, null, 'התחברות');
+            }
+        });
+
+        // Handle SIGNUP form
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const phone = document.getElementById('signup-phone').value.trim().replace(/[-\s]/g, '');
+            const password = document.getElementById('signup-password').value;
+
+            if (!fullName || !email || !phone || !password) {
+                showError('נא למלא את כל השדות');
+                return;
+            }
+
+            // Validate Israeli phone
+            if (!/^0[2-9]\d{7,8}$/.test(phone)) {
+                showError('נא להזין מספר טלפון ישראלי תקין');
+                return;
+            }
+
+            document.getElementById('error-message').classList.remove('show');
+            setLoading('signup-btn', 'signup-spinner', true, 'נרשם...', 'הרשמה');
+
+            try {
+                // 1. Create auth user with metadata
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: fullName, phone: phone }
+                    }
+                });
+
+                if (error) throw error;
+
+                // 2. If user was created successfully, update profile with phone
+                if (data.user) {
+                    // Wait briefly for the profile trigger to create the row
+                    await new Promise(r => setTimeout(r, 500));
+
+                    await supabaseClient
+                        .from('profiles')
+                        .upsert({
+                            id: data.user.id,
+                            email: email,
+                            full_name: fullName,
+                            phone: phone,
+                            roles: ['student_lead']
+                        }, { onConflict: 'id' });
+                }
+
+                // 3. Check if email confirmation is required
+                if (data.session) {
+                    // Auto-confirmed — redirect
+                    await redirectLoggedInUser(data.user, 'student_lead');
+                } else {
+                    // Email confirmation needed
+                    showSuccess('נרשמת בהצלחה! בדקו את תיבת האימייל לאישור');
+                    setLoading('signup-btn', 'signup-spinner', false, null, 'הרשמה');
+                }
+
+            } catch (error) {
+                console.error('Signup error:', error);
+
+                if (error.message.includes('already registered')) {
+                    showError('כתובת האימייל כבר רשומה — נסו להתחבר');
+                } else if (error.message.includes('at least 6 characters')) {
+                    showError('הסיסמה חייבת להכיל לפחות 6 תווים');
+                } else {
+                    showError('שגיאה בהרשמה — נסו שוב');
+                }
+
+                setLoading('signup-btn', 'signup-spinner', false, null, 'הרשמה');
             }
         });
 
@@ -486,7 +802,7 @@
                 const { data, error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: 'https://www.therapist-home.com/pages/course-library.html'
+                        redirectTo: 'https://www.therapist-home.com/pages/login.html'
                     }
                 });
 

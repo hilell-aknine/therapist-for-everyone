@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#003B46">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
-    <title>חוברות הקורס | קורסים מקצועיים בחינם</title>
+    <title>חוברות הקורס | NLP Practitioner — בית המטפלים</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <!-- No auth needed - public page -->
@@ -154,7 +154,24 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
     <script>
+        // Auth gate — redirect to login if no session
+        (async function() {
+            try {
+                const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) {
+                    sessionStorage.setItem('returnUrl', window.location.href);
+                    window.location.replace('login.html');
+                }
+            } catch (e) {
+                sessionStorage.setItem('returnUrl', window.location.href);
+                window.location.replace('login.html');
+            }
+        })();
+
         const booklet = {
             title: 'חוברת NLP Practitioner – ממותגת',
             description: 'חוברת הקורס המלאה — 7 שיעורים, 50 פרקים עם כל הטכניקות, התרגולים והעקרונות של NLP. מעוצבת בצבעי בית המטפלים.',

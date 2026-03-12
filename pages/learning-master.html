@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#003B46">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/icon-192.svg">
-    <title>תמלולי קורס מאסטר | קורסים מקצועיים בחינם</title>
+    <title>תמלולי קורס מאסטר | תוכנית הכשרה מתקדמת</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <!-- No auth needed - public page -->
@@ -159,7 +159,24 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
     <script>
+        // Auth gate — redirect to login if no session
+        (async function() {
+            try {
+                const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) {
+                    sessionStorage.setItem('returnUrl', window.location.href);
+                    window.location.replace('login.html');
+                }
+            } catch (e) {
+                sessionStorage.setItem('returnUrl', window.location.href);
+                window.location.replace('login.html');
+            }
+        })();
+
         const items = [
             { title: 'קורס מאסטר – שיעור 1', description: 'תמלול מלא של השיעור הראשון בקורס מאסטר פרקטישנר.', fileName: 'קורס מאסטר שיעור 1.txt', path: '../docs/master-course/קורס מאסטר שיעור 1.txt' },
             { title: 'קורס מאסטר – שיעור 2', description: 'תמלול מלא של השיעור השני בקורס מאסטר פרקטישנר.', fileName: 'קורס מאסטר שיעור 2.txt', path: '../docs/master-course/קורס מאסטר שיעור 2.txt' },

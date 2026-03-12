@@ -8,6 +8,23 @@
     <link rel="stylesheet" href="../../css/theme.css">
     <script src="../../js/theme-toggle.js" defer></script>
     <link rel="stylesheet" href="summaries.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/supabase-config.js"></script>
+    <script>
+        (async function() {
+            try {
+                const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) {
+                    sessionStorage.setItem('returnUrl', window.location.href);
+                    window.location.replace('../login.html');
+                }
+            } catch (e) {
+                sessionStorage.setItem('returnUrl', window.location.href);
+                window.location.replace('../login.html');
+            }
+        })();
+    </script>
 </head>
 <body class="index-page">
     <div class="hero">

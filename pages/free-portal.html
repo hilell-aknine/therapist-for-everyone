@@ -222,6 +222,109 @@
             line-height: 1.7;
         }
 
+        /* Who Is This For Section */
+        .audience-section {
+            padding: 5rem 2rem;
+            background: var(--deep-petrol);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .audience-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: var(--gradient-gold);
+            border-radius: 3px;
+        }
+
+        .audience-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .audience-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .audience-header h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 4vw, 2.4rem);
+            font-weight: 800;
+            color: var(--frost-white);
+        }
+
+        .audience-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .audience-card {
+            background: rgba(0, 30, 36, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 16px;
+            padding: 2rem 1.8rem;
+            text-align: center;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .audience-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #D4AF37, #c4a030, #D4AF37);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .audience-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-color: rgba(212, 175, 55, 0.35);
+        }
+
+        .audience-card:hover::before {
+            opacity: 1;
+        }
+
+        .audience-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin: 0 auto 1.2rem;
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--gold);
+        }
+
+        .audience-card h3 {
+            font-family: var(--font-body);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--frost-white);
+            margin-bottom: 0.8rem;
+        }
+
+        .audience-card p {
+            font-size: 0.95rem;
+            color: rgba(232, 241, 242, 0.75);
+            line-height: 1.7;
+        }
+
         /* Dark mode adjustments */
         [data-theme="dark"] .features-section {
             background: var(--t-bg);
@@ -277,6 +380,10 @@
             .features-section { padding: 3rem 1.5rem; }
             .feature-card { padding: 1.5rem; }
             .features-header { margin-bottom: 2rem; }
+            .audience-section { padding: 3rem 1.5rem; }
+            .audience-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+            .audience-header { margin-bottom: 2rem; }
+            .audience-card { padding: 1.5rem; }
         }
 
         /* Mobile — Small phones */
@@ -308,6 +415,11 @@
             }
             .feature-card h3 { font-size: 1.05rem; }
             .feature-card p { font-size: 0.9rem; }
+            .audience-section { padding: 2.5rem 1rem; }
+            .audience-card { padding: 1.3rem; }
+            .audience-icon { width: 48px; height: 48px; font-size: 1.2rem; margin-bottom: 1rem; }
+            .audience-card h3 { font-size: 1.05rem; }
+            .audience-card p { font-size: 0.9rem; }
         }
 
         /* ====== Registration Section ====== */
@@ -709,6 +821,41 @@
                     </div>
                     <h3>ניהול למידה חכם</h3>
                     <p>מערכת הערות מובנית המאפשרת לך לשמור תובנות אישיות ודגשים קריטיים תוך כדי צפייה, בסינכרון מלא מכל מכשיר.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Who Is This For -->
+    <section class="audience-section">
+        <div class="audience-inner">
+            <div class="audience-header" data-reveal>
+                <h2>למי פורטל הלמידה מתאים?</h2>
+            </div>
+
+            <div class="audience-grid">
+                <div class="audience-card" data-reveal data-reveal-delay="1">
+                    <div class="audience-icon">
+                        <i class="fa-solid fa-seedling"></i>
+                    </div>
+                    <h3>להתפתחות וצמיחה אישית</h3>
+                    <p>הבנה עמוקה של דפוסי החשיבה, בניית ביטחון עצמי ויצירת שינוי משמעותי ובר-קיימא באיכות החיים.</p>
+                </div>
+
+                <div class="audience-card" data-reveal data-reveal-delay="2">
+                    <div class="audience-icon">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                    <h3>להצלחה עסקית ומקצועית</h3>
+                    <p>שדרוג יכולות ההשפעה והשכנוע, ניהול משא ומתן חכם ושיפור דרמטי בביצועים העסקיים והניהוליים.</p>
+                </div>
+
+                <div class="audience-card" data-reveal data-reveal-delay="3">
+                    <div class="audience-icon">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <h3>למטפלים ומאמנים</h3>
+                    <p>הוספת ארגז כלים יישומי ומוכח להובלת תהליכי שינוי מהירים, ליווי לקוחות לתוצאות והעמקת ההשפעה המקצועית.</p>
                 </div>
             </div>
         </div>

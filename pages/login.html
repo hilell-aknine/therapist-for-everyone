@@ -3,7 +3,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
 
     <meta name="theme-color" content="#003B46">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,6 +29,28 @@
             --gold-light: var(--t-gold-light);
             --danger: var(--t-danger);
             --success: var(--t-success);
+        }
+
+        /* iOS / Safari Optimization */
+        html { -webkit-text-size-adjust: 100%; }
+
+        input, button, select, textarea {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            font-size: 16px;
+            touch-action: manipulation;
+        }
+
+        button {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            body {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
         }
 
         * {
@@ -387,7 +409,7 @@
 
                     <div class="form-group">
                         <label for="signup-phone">טלפון *</label>
-                        <input type="tel" id="signup-phone" name="phone" required placeholder="05X-XXXXXXX" autocomplete="tel" dir="ltr" pattern="^0[2-9]\d{7,8}$" title="מספר טלפון ישראלי תקין">
+                        <input type="tel" id="signup-phone" name="phone" required placeholder="05X-XXXXXXX" autocomplete="tel" dir="ltr" inputmode="tel" pattern="^0[2-9]\d{7,8}$" title="מספר טלפון ישראלי תקין">
                     </div>
 
                     <div class="form-group">

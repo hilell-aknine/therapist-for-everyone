@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -39,6 +39,34 @@
     <link rel="stylesheet" href="../css/theme.css">
     <link rel="stylesheet" href="../css/components.css">
     <style>
+        /* iOS / Safari Optimization */
+        html { -webkit-text-size-adjust: 100%; }
+
+        input, button, select, textarea {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border-radius: 10px;
+            font-size: 16px; /* prevents Safari auto-zoom on focus */
+            touch-action: manipulation; /* eliminates 300ms tap delay */
+        }
+
+        button {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Safe area insets for notch / home bar */
+        body {
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .footer-bottom {
+                padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+            }
+        }
+
         /* Hero */
         .hero {
             min-height: 85vh;
@@ -876,7 +904,7 @@
 
                     <div class="reg-form-group">
                         <label for="reg-phone">טלפון</label>
-                        <input type="tel" id="reg-phone" name="phone" required placeholder="05X-XXXXXXX" autocomplete="tel" dir="ltr" pattern="^0[2-9]\d{7,8}$" title="מספר טלפון ישראלי תקין">
+                        <input type="tel" id="reg-phone" name="phone" required placeholder="05X-XXXXXXX" autocomplete="tel" dir="ltr" inputmode="tel" pattern="^0[2-9]\d{7,8}$" title="מספר טלפון ישראלי תקין">
                     </div>
 
                     <button type="submit" class="reg-submit" id="regSubmitBtn">

@@ -21,6 +21,20 @@
     <meta name="description" content="שילוב עוצמתי של ידע מקצועי, טכנולוגיית AI מתקדמת וחוויית למידה משחקית. הירשמו בחינם">
     <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <!-- Early auth redirect — runs before page renders -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script>
+        (async function() {
+            try {
+                const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+                const { data: { session } } = await sb.auth.getSession();
+                if (session?.user) {
+                    window.location.replace('course-library.html');
+                }
+            } catch (e) { /* not logged in — show page */ }
+        })();
+    </script>
     <link rel="stylesheet" href="../css/accessibility.css">
     <link rel="stylesheet" href="../css/theme.css">
     <link rel="stylesheet" href="../css/components.css">
@@ -620,66 +634,26 @@
             to { transform: rotate(360deg); }
         }
 
-        .reg-divider {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 1rem 0;
-            color: rgba(232, 241, 242, 0.35);
-            font-size: 0.85rem;
-        }
-
-        .reg-divider::before,
-        .reg-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: rgba(232, 241, 242, 0.12);
-        }
-
-        .reg-google {
-            width: 100%;
-            padding: 0.85rem 1rem;
-            background: #fff;
-            border: none;
-            border-radius: 10px;
-            color: #333;
-            font-family: 'Heebo', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-            transition: all 0.2s;
-        }
-
-        .reg-google:hover {
-            background: #f5f5f5;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .reg-google img {
-            width: 20px;
-            height: 20px;
-        }
-
         .reg-login-link {
             text-align: center;
-            margin-top: 1rem;
-            font-size: 0.85rem;
-            color: rgba(232, 241, 242, 0.5);
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid rgba(232, 241, 242, 0.08);
+            font-size: 0.9rem;
+            color: var(--frost-white);
+            opacity: 0.75;
         }
 
         .reg-login-link a {
             color: var(--gold);
             text-decoration: none;
             font-weight: 600;
+            transition: color 0.2s, opacity 0.2s;
         }
 
         .reg-login-link a:hover {
-            text-decoration: underline;
+            color: #e6c65a;
+            opacity: 1;
         }
 
         @media (max-width: 768px) {
@@ -911,19 +885,8 @@
                     </button>
                 </form>
 
-                <div class="reg-divider"><span>או</span></div>
-
-                <button class="reg-google" onclick="regGoogle()">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-                    התחברות עם Google
-                </button>
-                <p style="color:rgba(232,241,242,0.45);font-size:0.78rem;text-align:center;margin-top:0.5rem;line-height:1.5;">
-                    <i class="fa-solid fa-info-circle" style="margin-left:0.3rem;"></i>
-                    התחברות עם גוגל דורשת אימות טלפוני חד-פעמי בשלב הבא
-                </p>
-
                 <div class="reg-login-link">
-                    כבר נרשמת? <a href="login.html">התחבר כאן</a>
+                    כבר יש לך גישה לפורטל? <a href="login.html">התחבר כאן</a>
                 </div>
             </div>
         </div>
@@ -969,8 +932,7 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/supabase-config.js"></script>
+    <!-- supabase-js + config already loaded in <head> for early auth redirect -->
     <script src="../js/supabase-client.js"></script>
     <script src="../js/marketing-tools.js" defer></script>
     <script>
@@ -981,19 +943,6 @@
             btn.setAttribute('aria-expanded', isOpen);
             btn.innerHTML = isOpen ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
         }
-
-        // If already logged in — redirect to course-library
-        (async function() {
-            if (typeof supabaseClient !== 'undefined') {
-                try {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (session?.user) {
-                        window.location.replace('course-library.html');
-                        return;
-                    }
-                } catch (e) { /* not logged in */ }
-            }
-        })();
 
         // Pass UTM params from landing URL to all course-library links
         (function() {
@@ -1116,27 +1065,11 @@
             } catch (err) {
                 console.error('Registration error:', err);
                 if (err.message.includes('already registered')) {
-                    showRegError('כתובת האימייל כבר רשומה במערכת — נסו להתחבר עם Google או דרך דף ההתחברות');
+                    showRegError('כתובת האימייל כבר רשומה במערכת — נסו להתחבר דרך דף ההתחברות');
                 } else {
                     showRegError('שגיאה בהרשמה — נסו שוב');
                 }
                 setRegLoading(false);
-            }
-        }
-
-        // Google OAuth registration
-        async function regGoogle() {
-            if (typeof supabaseClient === 'undefined') return;
-            try {
-                const { error } = await supabaseClient.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: 'https://www.therapist-home.com/pages/course-library.html'
-                    }
-                });
-                if (error) throw error;
-            } catch (err) {
-                showRegError('שגיאה בהתחברות עם Google — נסו שוב');
             }
         }
 

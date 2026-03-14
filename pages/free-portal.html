@@ -1081,6 +1081,17 @@
                         }, { onConflict: 'id' });
                 }
 
+                // GA4: track new registration conversion
+                if (typeof gtag === 'function') {
+                    gtag('event', 'generate_lead', {
+                        event_category: 'registration',
+                        event_label: 'free_portal_signup',
+                        method: 'email_form',
+                        currency: 'ILS',
+                        value: 0
+                    });
+                }
+
                 if (data.session) {
                     // Auto-confirmed — redirect directly to portal
                     window.location.href = 'course-library.html';

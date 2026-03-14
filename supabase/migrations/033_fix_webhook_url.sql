@@ -1,11 +1,6 @@
--- Migration 032: Auto-push leads to CRM webhook when phone is captured
--- Trigger: AFTER INSERT or UPDATE on profiles, ONLY when phone IS NOT NULL
--- Uses pg_net (built into Supabase) for async HTTP POST — no Edge Function needed
+-- Migration 033: Fix webhook URL to point to actual CRM bot on Fly.io
+-- Updates the trigger function from placeholder to real endpoint
 
--- 1. Enable pg_net if not already enabled
-CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
-
--- 2. Create the trigger function
 CREATE OR REPLACE FUNCTION public.notify_crm_on_phone_capture()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -44,7 +39,7 @@ BEGIN
         'timestamp', now()
     );
 
-    -- Fire async HTTP POST via pg_net (non-blocking, won't slow down the transaction)
+    -- Fire async HTTP POST via pg_net (non-blocking)
     PERFORM net.http_post(
         url     := _webhook_url,
         body    := _payload::text,
@@ -58,15 +53,5 @@ BEGIN
 END;
 $$;
 
--- 3. Create the trigger (drop first to make idempotent)
-DROP TRIGGER IF EXISTS trg_phone_lead_webhook ON public.profiles;
-
-CREATE TRIGGER trg_phone_lead_webhook
-    AFTER INSERT OR UPDATE OF phone
-    ON public.profiles
-    FOR EACH ROW
-    EXECUTE FUNCTION public.notify_crm_on_phone_capture();
-
--- 4. Verify
 COMMENT ON FUNCTION public.notify_crm_on_phone_capture() IS
-    'Sends lead data to CRM webhook when a user provides their phone number. Webhook URL must be updated before production use.';
+    'Sends lead data to CRM bot webhook (crm-bot-hillel.fly.dev) when a user provides their phone number.';

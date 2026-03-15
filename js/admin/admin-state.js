@@ -41,7 +41,7 @@ async function loadAllData() {
         // Sales rep: only load pipeline (RLS filters by assigned_to)
         await loadPipeline();
     } else {
-        await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires(), loadPipeline()]);
+        await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires(), loadPipeline(), loadPortalQuestionnaires()]);
     }
     updateCounts();
 }

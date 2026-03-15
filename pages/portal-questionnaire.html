@@ -822,18 +822,14 @@
                 return;
             }
 
-            // Save questionnaire data to profiles (extra fields) + portal_questionnaires table
             const userId = session.user.id;
 
-            // Update profile with questionnaire data
-            await supabaseClient
-                .from('profiles')
-                .update({
-                    questionnaire_completed: true,
-                    questionnaire_data: payload,
-                    questionnaire_completed_at: new Date().toISOString()
-                })
-                .eq('id', userId);
+            // Insert questionnaire to dedicated table
+            const { error: insertErr } = await supabaseClient
+                .from('portal_questionnaires')
+                .insert({ ...payload, user_id: userId });
+
+            if (insertErr) throw insertErr;
 
             // Mark questionnaire as done in localStorage (for faster checks)
             localStorage.setItem('portal_questionnaire_done', 'true');

@@ -5,7 +5,7 @@ const VIEW_GROUPS = {
     'overview': { views: ['overview'], header: null, default: 'overview' },
     'mizum':    { views: ['patients', 'therapists', 'matches'], header: 'mizum-header', default: 'patients' },
     'sales':    { views: ['contact-leads', 'questionnaires', 'pipeline'], header: 'sales-header', default: 'contact-leads' },
-    'learning': { views: ['leads', 'learners'], header: 'learning-header', default: 'leads' },
+    'learning': { views: ['leads', 'learners', 'portal-q'], header: 'learning-header', default: 'leads' },
     'bot':      { views: ['bot'], header: null, default: 'bot' },
     'analytics':{ views: ['analytics'], header: null, default: 'analytics' },
     'settings': { views: ['settings'], header: null, default: 'settings' },
@@ -78,6 +78,7 @@ function switchSubView(groupName, subView) {
 
     // Lazy-load hooks for sub-views
     if (subView === 'learners') loadLearnersView();
+    if (subView === 'portal-q' && !portalQLoaded) loadPortalQuestionnaires();
 }
 
 function updateOverview() {

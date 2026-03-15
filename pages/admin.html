@@ -307,6 +307,9 @@
                         <button class="sub-tab" onclick="switchSubView('learning', 'learners')">
                             <i class="fa-solid fa-book-open-reader"></i> לומדים <span class="badge" id="learners-count">0</span>
                         </button>
+                        <button class="sub-tab" onclick="switchSubView('learning', 'portal-q')">
+                            <i class="fa-solid fa-clipboard-list"></i> שאלוני היכרות <span class="badge" id="portal-q-count">0</span>
+                        </button>
                     </div>
                 </div>
 
@@ -412,6 +415,63 @@
                                 <tr><td colspan="7" class="empty-state"><i class="fa-solid fa-graduation-cap"></i><br>טוען נתוני למידה...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Portal Questionnaires View -->
+                <div id="portal-q-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.5rem;"></i> שאלוני היכרות — פורטל חינמי</h1>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon gold"><i class="fa-solid fa-clipboard-list"></i></div>
+                            <div><div class="stat-value" id="stat-portal-q-total">0</div><div class="stat-label">סה"כ שאלונים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-calendar-day"></i></div>
+                            <div><div class="stat-value" id="stat-portal-q-today">0</div><div class="stat-label">היום</div></div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div style="display:flex;align-items:center;gap:1rem;">
+                                <h3>תשובות שאלון ההיכרות</h3>
+                                <button class="btn btn-export" onclick="exportPortalQCSV()">
+                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
+                                </button>
+                            </div>
+                            <div class="search-box">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" placeholder="חיפוש לפי שם, אימייל, עיר..." id="portal-q-search" oninput="renderPortalQuestionnaires()">
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>שם</th>
+                                    <th>טלפון</th>
+                                    <th>אימייל</th>
+                                    <th>מין</th>
+                                    <th>עיר</th>
+                                    <th>למה NLP</th>
+                                    <th>מכיר את רם</th>
+                                    <th>תאריך</th>
+                                </tr>
+                            </thead>
+                            <tbody id="portal-q-table">
+                                <tr><td colspan="8" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>טוען שאלונים...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Portal Questionnaire Detail Modal -->
+                <div class="modal-overlay" id="portal-q-modal" onclick="if(event.target===this)this.classList.remove('active')">
+                    <div class="modal-content" style="max-width:600px;">
+                        <div class="modal-header">
+                            <h3><i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.5rem;"></i> שאלון היכרות</h3>
+                            <button onclick="document.getElementById('portal-q-modal').classList.remove('active')" class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body" id="portal-q-modal-content"></div>
                     </div>
                 </div>
 
@@ -1712,6 +1772,7 @@
     <script src="../js/admin/admin-therapists.js"></script>
     <script src="../js/admin/admin-leads.js"></script>
     <script src="../js/admin/admin-learners.js"></script>
+    <script src="../js/admin/admin-portal-questionnaires.js"></script>
     <script src="../js/admin/admin-pipeline.js"></script>
     <script src="../js/admin/admin-bot.js"></script>
     <script src="../js/admin/admin-analytics.js"></script>

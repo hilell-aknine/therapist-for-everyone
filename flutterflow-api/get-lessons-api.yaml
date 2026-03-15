@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: Beit HaMetaplim - Lessons API
+  description: API for fetching NLP Practitioner course lessons from Supabase
+  version: 1.0.0
+
+servers:
+  - url: https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1
+    description: Supabase Edge Functions (Production)
+
+paths:
+  /get-lessons:
+    post:
+      operationId: getLessons
+      summary: Get all NLP course lessons
+      description: Returns all 51 lessons grouped by 7 modules, or as a flat list
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                format:
+                  type: string
+                  enum:
+                    - grouped
+                    - flat
+                  default: grouped
+                  description: "grouped = lessons inside modules, flat = plain array"
+                module:
+                  type: string
+                  description: "Filter by module name (e.g. 'מבוא ל-NLP')"
+                  example: "מבוא ל-NLP"
+      responses:
+        "200":
+          description: Lessons retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupedLessonsResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+components:
+  schemas:
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique lesson ID
+        title:
+          type: string
+          description: Lesson title in Hebrew
+          example: "איך NLP יכול לשנות את חייך?"
+        description:
+          type: string
+          description: Lesson description with duration
+          example: "שיעור פתיחה – 20:20 דקות"
+        video_url:
+          type: string
+          format: uri
+          description: YouTube video URL
+          example: "https://www.youtube.com/watch?v=HdJTrqV-8kw"
+        section_name:
+          type: string
+          description: Module name in Hebrew
+          example: "מבוא ל-NLP"
+        order_index:
+          type: integer
+          description: Lesson order within module
+          example: 1
+
+    Module:
+      type: object
+      properties:
+        module_name:
+          type: string
+          description: Module name in Hebrew
+          example: "מבוא ל-NLP"
+        lesson_count:
+          type: integer
+          description: Number of lessons in this module
+          example: 8
+        lessons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lesson"
+
+    GroupedLessonsResponse:
+      type: object
+      properties:
+        total_lessons:
+          type: integer
+          description: Total number of lessons across all modules
+          example: 51
+        total_modules:
+          type: integer
+          description: Total number of modules
+          example: 7
+        modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/Module"
+
+    FlatLessonsResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of lessons
+          example: 51
+        lessons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lesson"

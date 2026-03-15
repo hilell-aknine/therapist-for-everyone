@@ -30,7 +30,9 @@
                 const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
                 const { data: { session } } = await sb.auth.getSession();
                 if (session?.user) {
-                    window.location.replace('course-library.html');
+                    // If questionnaire not done yet, go to questionnaire; otherwise go to portal
+                    const done = localStorage.getItem('portal_questionnaire_done');
+                    window.location.replace(done ? 'course-library.html' : 'portal-questionnaire.html');
                 }
             } catch (e) { /* not logged in — show page */ }
         })();
@@ -1371,7 +1373,7 @@
 
                 if (data.session) {
                     // Auto-confirmed — redirect directly to portal
-                    window.location.href = 'course-library.html';
+                    window.location.href = 'portal-questionnaire.html';
                 } else {
                     // Email confirmation needed
                     showRegSuccess('נרשמת בהצלחה! שלחנו לך קישור לאימייל — לחצו עליו כדי להיכנס לפורטל');

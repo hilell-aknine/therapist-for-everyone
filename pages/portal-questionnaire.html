@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+    <meta name="theme-color" content="#003B46">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>שאלון היכרות | פורטל הלמידה — בית המטפלים</title>
+    <meta name="description" content="שאלון היכרות קצר לפני כניסה לפורטל הלמידה החינמי של בית המטפלים">
+    <meta property="og:title" content="שאלון היכרות — בית המטפלים">
+    <meta property="og:description" content="שאלון היכרות קצר — 3 דקות מילוי">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.therapist-home.com/pages/portal-questionnaire.html">
+    <meta property="og:image" content="https://www.therapist-home.com/assets/logo.png">
+    <meta property="og:locale" content="he_IL">
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
+    <!-- Auth guard: redirect to free-portal if not logged in -->
+    <script>
+        (async function() {
+            try {
+                const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session?.user) {
+                    window.location.replace('free-portal.html');
+                }
+            } catch (e) {
+                window.location.replace('free-portal.html');
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            --brand-primary: #003B46;
+            --brand-primary-light: #00606B;
+            --brand-gold: #D4AF37;
+            --brand-gold-light: #E8C84A;
+            --brand-gold-glow: rgba(212, 175, 55, 0.15);
+            --brand-cream: #FBF8F1;
+            --brand-warm-white: #FFFDF7;
+            --brand-text: #2D3A3A;
+            --brand-text-soft: #5A6B6B;
+            --brand-border: #E2DDD3;
+            --brand-error: #C0392B;
+            --brand-success: #27AE60;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { -webkit-text-size-adjust: 100%; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--brand-cream);
+            color: var(--brand-text);
+            min-height: 100vh;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        input, button, select, textarea {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            font-size: 16px;
+            touch-action: manipulation;
+        }
+
+        button { -webkit-tap-highlight-color: transparent; }
+
+        /* Container */
+        .q-container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+        }
+
+        /* Logo */
+        .q-logo {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .q-logo img {
+            height: 48px;
+            width: auto;
+        }
+
+        .q-card {
+            background: var(--brand-warm-white);
+            border-radius: 20px;
+            box-shadow: 0 4px 40px rgba(0, 59, 70, 0.08), 0 1px 6px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            border: 1px solid var(--brand-border);
+        }
+
+        /* Header */
+        .q-header {
+            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-light) 100%);
+            padding: 2rem 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .q-header::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -30%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .q-header h1 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.6rem;
+            position: relative;
+        }
+
+        .q-header p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            font-weight: 400;
+            line-height: 1.7;
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .q-header .q-time-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50px;
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+            color: var(--brand-gold-light);
+            margin-top: 0.8rem;
+            position: relative;
+        }
+
+        /* Progress Bar */
+        .q-progress-wrap {
+            padding: 1.2rem 2rem 0.6rem;
+            border-bottom: 1px solid var(--brand-border);
+            background: var(--brand-warm-white);
+        }
+
+        .q-progress-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--brand-text-soft);
+            margin-bottom: 0.6rem;
+        }
+
+        .q-progress-label strong {
+            color: var(--brand-primary);
+            font-weight: 600;
+        }
+
+        .q-progress-track {
+            height: 6px;
+            background: #E8E4DA;
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .q-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-gold), var(--brand-gold-light));
+            border-radius: 100px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .q-progress-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Steps */
+        .q-step {
+            display: none;
+            padding: 1.8rem 2rem 1.5rem;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .q-step.active { display: block; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .q-step-title {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--brand-primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .q-step-subtitle {
+            font-size: 0.85rem;
+            color: var(--brand-text-soft);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Form Elements */
+        .q-field {
+            margin-bottom: 1.3rem;
+        }
+
+        .q-field label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--brand-text);
+            margin-bottom: 0.4rem;
+        }
+
+        .q-field label .q-required {
+            color: var(--brand-gold);
+            margin-right: 2px;
+        }
+
+        .q-input, .q-textarea, .q-select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid var(--brand-border);
+            border-radius: 10px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem;
+            color: var(--brand-text);
+            background: #fff;
+            transition: all 0.25s ease;
+            outline: none;
+        }
+
+        .q-input:focus, .q-textarea:focus, .q-select:focus {
+            border-color: var(--brand-gold);
+            box-shadow: 0 0 0 3px var(--brand-gold-glow);
+        }
+
+        .q-input.error, .q-textarea.error {
+            border-color: var(--brand-error);
+            box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
+        }
+
+        .q-textarea {
+            min-height: 90px;
+            resize: vertical;
+            line-height: 1.7;
+        }
+
+        .q-error-msg {
+            font-size: 0.78rem;
+            color: var(--brand-error);
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .q-error-msg.visible { display: block; }
+
+        /* Radio Group */
+        .q-radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .q-radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 1rem;
+            border: 1.5px solid var(--brand-border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fff;
+            font-size: 0.88rem;
+        }
+
+        .q-radio-option:hover {
+            border-color: var(--brand-gold);
+            background: var(--brand-gold-glow);
+        }
+
+        .q-radio-option.selected {
+            border-color: var(--brand-gold);
+            background: var(--brand-gold-glow);
+            box-shadow: 0 0 0 1px var(--brand-gold);
+        }
+
+        .q-radio-option input[type="radio"] {
+            accent-color: var(--brand-gold);
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .q-inline-radios {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .q-inline-radios .q-radio-option {
+            flex: 1;
+            min-width: 80px;
+            justify-content: center;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .q-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem 1.5rem;
+            gap: 0.8rem;
+        }
+
+        .q-btn {
+            padding: 0.7rem 2rem;
+            border-radius: 10px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+            outline: none;
+        }
+
+        .q-btn-next {
+            background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+            color: var(--brand-primary);
+            box-shadow: 0 2px 12px rgba(212, 175, 55, 0.3);
+        }
+
+        .q-btn-next:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .q-btn-next:active { transform: translateY(0); }
+
+        .q-btn-back {
+            background: transparent;
+            color: var(--brand-text-soft);
+            border: 1.5px solid var(--brand-border);
+        }
+
+        .q-btn-back:hover {
+            border-color: var(--brand-text-soft);
+            color: var(--brand-text);
+        }
+
+        .q-btn-submit {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-light));
+            color: #fff;
+            box-shadow: 0 2px 16px rgba(0, 59, 70, 0.25);
+            flex: 1;
+        }
+
+        .q-btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 24px rgba(0, 59, 70, 0.35);
+        }
+
+        .q-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Success Screen */
+        .q-success {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .q-success.active { display: block; }
+
+        .q-success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand-success), #2ECC71);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            box-shadow: 0 4px 20px rgba(39, 174, 96, 0.25);
+        }
+
+        .q-success-icon svg {
+            width: 36px;
+            height: 36px;
+            fill: #fff;
+        }
+
+        .q-success h2 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.5rem;
+            color: var(--brand-primary);
+            margin-bottom: 0.8rem;
+        }
+
+        .q-success p {
+            color: var(--brand-text-soft);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            max-width: 420px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .q-success-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+            color: var(--brand-primary);
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 0.85rem 2.2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+        }
+
+        .q-success-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(212, 175, 55, 0.45);
+        }
+
+        /* Spinner */
+        .q-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Mobile */
+        @media (max-width: 640px) {
+            .q-container { padding: 0.8rem 0.5rem; }
+            .q-card { border-radius: 14px; }
+            .q-header { padding: 1.5rem 1.2rem 1.2rem; }
+            .q-header h1 { font-size: 1.25rem; }
+            .q-header p { font-size: 0.85rem; }
+            .q-step { padding: 1.3rem 1.2rem 1rem; }
+            .q-buttons { padding: 0.8rem 1.2rem 1.2rem; }
+            .q-progress-wrap { padding: 1rem 1.2rem 0.5rem; }
+            .q-btn { padding: 0.65rem 1.2rem; font-size: 0.85rem; }
+            .q-inline-radios .q-radio-option { min-width: 70px; font-size: 0.82rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="q-container" id="questionnaire-root">
+    <!-- Logo -->
+    <div class="q-logo">
+        <a href="../index.html"><img src="../assets/logo.png" alt="בית המטפלים"></a>
+    </div>
+
+    <div class="q-card">
+        <!-- Header -->
+        <div class="q-header">
+            <h1>שאלון הרשמה לפורטל לימודים חינמי</h1>
+            <p>
+                בפורטל שאנחנו הולכים לתת לך גישה ללא עלות, הושקעו עשרות שעות של מחשבה ועשייה.
+                כדי שנכיר קצת יותר לעומק את מי שנרשם ונדע לשפר את חוויית הלמידה לכולם — אנחנו מזמינים אותך להקדיש 3 דק׳ למילוי שאלון ההיכרות
+            </p>
+            <div class="q-time-badge">
+                <i class="fa-regular fa-clock"></i>
+                כ-3 דקות מילוי
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="q-progress-wrap" id="progressWrap">
+            <div class="q-progress-label">
+                <span><strong id="stepLabel">שלב 1</strong> מתוך 3</span>
+                <span id="stepName">פרטים אישיים</span>
+            </div>
+            <div class="q-progress-track">
+                <div class="q-progress-fill" id="progressFill" style="width: 33%"></div>
+            </div>
+        </div>
+
+        <form id="questForm" novalidate>
+
+            <!-- ═══════ STEP 1: פרטים אישיים ═══════ -->
+            <div class="q-step active" data-step="1">
+                <h2 class="q-step-title">פרטים אישיים</h2>
+                <p class="q-step-subtitle">כמה פרטים בסיסיים כדי שנכיר אותך</p>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> המין שלי</label>
+                    <div class="q-radio-group q-inline-radios">
+                        <label class="q-radio-option">
+                            <input type="radio" name="gender" value="גבר" required> גבר
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="gender" value="אישה"> אישה
+                        </label>
+                    </div>
+                    <div class="q-error-msg">נא לבחור</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> תאריך לידה</label>
+                    <input type="date" name="birthDate" class="q-input" required dir="ltr" max="2008-12-31" min="1930-01-01">
+                    <div class="q-error-msg">נא למלא תאריך לידה</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> עיר מגורים</label>
+                    <input type="text" name="city" class="q-input" placeholder="למשל: תל אביב" required>
+                    <div class="q-error-msg">נא למלא עיר מגורים</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> העיסוק שלך כיום</label>
+                    <input type="text" name="occupation" class="q-input" placeholder="למשל: מורה, מהנדס, יועצת..." required>
+                    <div class="q-error-msg">נא למלא עיסוק</div>
+                </div>
+            </div>
+
+            <!-- ═══════ STEP 2: העדפות למידה ═══════ -->
+            <div class="q-step" data-step="2">
+                <h2 class="q-step-title">העדפות למידה</h2>
+                <p class="q-step-subtitle">נשמח להבין מה המטרה שלך ואיך תרצה ללמוד</p>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> אני רוצה ללמוד NLP כדי:</label>
+                    <div class="q-radio-group">
+                        <label class="q-radio-option">
+                            <input type="radio" name="whyNlp" value="התפתחות אישית" required>
+                            לעבור שינוי ותהליך התפתחות אישית וללמוד להיות ״המטפל״ של עצמי
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="whyNlp" value="שילוב בעסק">
+                            להכניס לעסק הקיים שלי כלים מעולמות ה-NLP והטיפול בשיטה מסודרת ופרקטית
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="whyNlp" value="קליניקה">
+                            לפתוח קליניקת טיפול משלי (1:1 / הרצאות / סדנאות) ולהרוויח כסף מהשליחות הזו
+                        </label>
+                    </div>
+                    <div class="q-error-msg">נא לבחור אפשרות</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> כמה זמן יש לך להקדיש ללמידה ביום / שבוע:</label>
+                    <div class="q-radio-group">
+                        <label class="q-radio-option">
+                            <input type="radio" name="studyTime" value="פחות מ-30 דק" required>
+                            פחות מ-30 דק׳ ביום
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="studyTime" value="30 דק - שעה">
+                            בין 30 דקות ל-1 שעה ביום
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="studyTime" value="1-2 שעות">
+                            בין 1-2 שעות ביום
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="studyTime" value="יותר מ-2 שעות">
+                            יותר מ-2 שעות ביום
+                        </label>
+                    </div>
+                    <div class="q-error-msg">נא לבחור אפשרות</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> מהם האתגרים שלך בלימוד בפורמט דיגיטלי:</label>
+                    <div class="q-radio-group">
+                        <label class="q-radio-option">
+                            <input type="radio" name="digitalChallenge" value="מוטיבציה" required>
+                            קושי בשמירה על מוטיבציה ללמוד לאורך זמן
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="digitalChallenge" value="ניהול זמן">
+                            קושי בניהול זמן והכנסת זמן למידה ליומן
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="digitalChallenge" value="הבנת חומר">
+                            קושי בהבנת חומר ללא עזרה / תמיכה אישית
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="digitalChallenge" value="טכנולוגי">
+                            קושי טכנולוגי בשימוש בפורטלים דיגיטליים
+                        </label>
+                    </div>
+                    <div class="q-error-msg">נא לבחור אפשרות</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> האם נחשפת לתכנים של רם אלוס (מרצה הקורס) לפני?</label>
+                    <div class="q-radio-group q-inline-radios">
+                        <label class="q-radio-option">
+                            <input type="radio" name="knewRam" value="כן" required> כן
+                        </label>
+                        <label class="q-radio-option">
+                            <input type="radio" name="knewRam" value="לא"> לא
+                        </label>
+                    </div>
+                    <div class="q-error-msg">נא לבחור</div>
+                </div>
+            </div>
+
+            <!-- ═══════ STEP 3: שאלות אישיות ═══════ -->
+            <div class="q-step" data-step="3">
+                <h2 class="q-step-title">קצת יותר לעומק</h2>
+                <p class="q-step-subtitle">השאלות האלו עוזרות לנו להכיר אותך טוב יותר ולהתאים את החוויה</p>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> על פי ניסיון העבר שלך, מה עוזר לך לשמור על מוטיבציית למידה לאורך זמן?</label>
+                    <textarea name="motivationTip" class="q-textarea" placeholder="למשל: לימוד עם חבר, יעדים יומיים, תגמולים..." required></textarea>
+                    <div class="q-error-msg">נא לכתוב תשובה</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> מה הדבר שהכי היית רוצה לפתור בחייך נכון להיום?</label>
+                    <textarea name="mainChallenge" class="q-textarea" placeholder="כתוב/י בחופשיות..." required></textarea>
+                    <div class="q-error-msg">נא לכתוב תשובה</div>
+                </div>
+
+                <div class="q-field">
+                    <label><span class="q-required">*</span> איפה אתה רואה את עצמך עוד שנה מהיום? (מותר לחלום!)</label>
+                    <textarea name="visionOneYear" class="q-textarea" placeholder="חלום גדול? יעד מדויק? הכל שווה..." required></textarea>
+                    <div class="q-error-msg">נא לכתוב תשובה</div>
+                </div>
+            </div>
+
+        </form>
+
+        <!-- Navigation Buttons -->
+        <div class="q-buttons" id="navButtons">
+            <button type="button" class="q-btn q-btn-back" id="btnBack" style="visibility:hidden;" onclick="prevStep()">→ חזרה</button>
+            <button type="button" class="q-btn q-btn-next" id="btnNext" onclick="nextStep()">המשך ←</button>
+        </div>
+
+        <!-- Success Screen -->
+        <div class="q-success" id="successScreen">
+            <div class="q-success-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </div>
+            <h2>תודה רבה!</h2>
+            <p>קיבלנו את התשובות שלך — עכשיו אפשר להתחיל את מסע הלמידה!<br>הפורטל המלא מחכה לך בפנים.</p>
+            <a href="course-library.html" class="q-success-cta">
+                <i class="fa-solid fa-play"></i>
+                כניסה לפורטל הלמידה
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="../js/supabase-client.js"></script>
+<script>
+(function() {
+    const TOTAL_STEPS = 3;
+    const STEP_NAMES = ['פרטים אישיים', 'העדפות למידה', 'שאלות אישיות'];
+
+    let currentStep = 1;
+
+    const form = document.getElementById('questForm');
+    const progressFill = document.getElementById('progressFill');
+    const stepLabel = document.getElementById('stepLabel');
+    const stepName = document.getElementById('stepName');
+    const btnNext = document.getElementById('btnNext');
+    const btnBack = document.getElementById('btnBack');
+    const progressWrap = document.getElementById('progressWrap');
+    const navButtons = document.getElementById('navButtons');
+    const successScreen = document.getElementById('successScreen');
+
+    // Radio visual selection
+    document.querySelectorAll('.q-radio-option input').forEach(input => {
+        input.addEventListener('change', function() {
+            const group = this.closest('.q-radio-group');
+            group.querySelectorAll('.q-radio-option').forEach(opt => opt.classList.remove('selected'));
+            this.closest('.q-radio-option').classList.add('selected');
+        });
+    });
+
+    function showStep(n) {
+        document.querySelectorAll('.q-step').forEach(s => s.classList.remove('active'));
+        const target = document.querySelector(`.q-step[data-step="${n}"]`);
+        if (target) target.classList.add('active');
+
+        currentStep = n;
+        progressFill.style.width = ((n / TOTAL_STEPS) * 100) + '%';
+        stepLabel.textContent = 'שלב ' + n;
+        stepName.textContent = STEP_NAMES[n - 1];
+        btnBack.style.visibility = n === 1 ? 'hidden' : 'visible';
+
+        if (n === TOTAL_STEPS) {
+            btnNext.textContent = 'שליחה וכניסה לפורטל';
+            btnNext.classList.remove('q-btn-next');
+            btnNext.classList.add('q-btn-submit');
+        } else {
+            btnNext.textContent = 'המשך ←';
+            btnNext.classList.add('q-btn-next');
+            btnNext.classList.remove('q-btn-submit');
+        }
+
+        document.getElementById('questionnaire-root').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function validateStep(n) {
+        const step = document.querySelector(`.q-step[data-step="${n}"]`);
+        let valid = true;
+
+        step.querySelectorAll('.q-error-msg').forEach(e => e.classList.remove('visible'));
+        step.querySelectorAll('.q-input, .q-textarea').forEach(e => e.classList.remove('error'));
+
+        // Required inputs/textareas
+        step.querySelectorAll('input[required]:not([type="radio"]), textarea[required]').forEach(el => {
+            if (!el.value.trim()) {
+                valid = false;
+                el.classList.add('error');
+                const errMsg = el.closest('.q-field')?.querySelector('.q-error-msg');
+                if (errMsg) errMsg.classList.add('visible');
+            }
+        });
+
+        // Required radio groups
+        const radioGroups = new Set();
+        step.querySelectorAll('input[type="radio"][required]').forEach(r => radioGroups.add(r.name));
+        radioGroups.forEach(name => {
+            if (!step.querySelector(`input[name="${name}"]:checked`)) {
+                valid = false;
+                const container = step.querySelector(`input[name="${name}"]`)?.closest('.q-field');
+                const errMsg = container?.querySelector('.q-error-msg');
+                if (errMsg) errMsg.classList.add('visible');
+            }
+        });
+
+        return valid;
+    }
+
+    window.nextStep = function() {
+        if (!validateStep(currentStep)) return;
+
+        if (currentStep < TOTAL_STEPS) {
+            showStep(currentStep + 1);
+        } else {
+            submitForm();
+        }
+    };
+
+    window.prevStep = function() {
+        if (currentStep > 1) showStep(currentStep - 1);
+    };
+
+    function collectFormData() {
+        const fd = new FormData(form);
+        const data = {};
+        fd.forEach((val, key) => { data[key] = val; });
+
+        return {
+            gender: data.gender || '',
+            birth_date: data.birthDate || '',
+            city: data.city || '',
+            occupation: data.occupation || '',
+            why_nlp: data.whyNlp || '',
+            study_time: data.studyTime || '',
+            digital_challenge: data.digitalChallenge || '',
+            knew_ram: data.knewRam || '',
+            motivation_tip: data.motivationTip || '',
+            main_challenge: data.mainChallenge || '',
+            vision_one_year: data.visionOneYear || '',
+            source: 'portal_questionnaire'
+        };
+    }
+
+    async function submitForm() {
+        btnNext.disabled = true;
+        btnNext.innerHTML = '<span class="q-spinner"></span> שולח...';
+
+        const payload = collectFormData();
+
+        try {
+            // Get current user
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session?.user) {
+                alert('נראה שהתנתקת — אנא התחבר מחדש');
+                window.location.href = 'free-portal.html';
+                return;
+            }
+
+            // Save questionnaire data to profiles (extra fields) + portal_questionnaires table
+            const userId = session.user.id;
+
+            // Update profile with questionnaire data
+            await supabaseClient
+                .from('profiles')
+                .update({
+                    questionnaire_completed: true,
+                    questionnaire_data: payload,
+                    questionnaire_completed_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            // Mark questionnaire as done in localStorage (for faster checks)
+            localStorage.setItem('portal_questionnaire_done', 'true');
+
+            // GA4 tracking
+            if (typeof gtag === 'function') {
+                gtag('event', 'questionnaire_completed', {
+                    event_category: 'registration',
+                    event_label: 'portal_questionnaire',
+                    why_nlp: payload.why_nlp
+                });
+            }
+
+            showSuccess();
+
+        } catch (err) {
+            console.error('Submit error:', err);
+            alert('אירעה שגיאה בשליחת השאלון. אנא נסו שוב.');
+            btnNext.disabled = false;
+            btnNext.textContent = 'שליחה וכניסה לפורטל';
+        }
+    }
+
+    function showSuccess() {
+        form.style.display = 'none';
+        navButtons.style.display = 'none';
+        progressWrap.style.display = 'none';
+        successScreen.classList.add('active');
+        document.getElementById('questionnaire-root').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Auto-redirect after 4 seconds
+        setTimeout(() => {
+            window.location.href = 'course-library.html';
+        }, 4000);
+    }
+
+    // Enter key = next step (except in textareas)
+    form.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            nextStep();
+        }
+    });
+
+    // Clear error on input
+    form.addEventListener('input', function(e) {
+        const el = e.target;
+        el.classList.remove('error');
+        const errMsg = el.closest('.q-field')?.querySelector('.q-error-msg');
+        if (errMsg) errMsg.classList.remove('visible');
+    });
+
+})();
+</script>
+
+</body>
+</html>

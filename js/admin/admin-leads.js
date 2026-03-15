@@ -16,7 +16,7 @@ function renderLeads() {
     updateBulkBarFor('leads');
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fa-solid fa-user-plus"></i><br>אין נרשמים</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-user-plus"></i><br>אין נרשמים</td></tr>';
         return;
     }
 
@@ -24,11 +24,12 @@ function renderLeads() {
     let html = '';
     for (const [group, items] of Object.entries(groups)) {
         if (items.length === 0) continue;
-        html += `<tr class="date-group-row"><td colspan="6"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+        html += `<tr class="date-group-row"><td colspan="7"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
         html += items.map(l => `
             <tr>
                 <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('leads')"></td>
                 <td><strong>${l.full_name || '-'}</strong></td>
+                <td>${l.phone ? `<a href="tel:${l.phone}">${l.phone}</a>` : '-'}</td>
                 <td>${l.email || '-'}</td>
                 <td>${(l.roles || []).map(r => `<span class="role-badge role-${r}">${roleLabel(r)}</span>`).join(' ')}</td>
                 <td>${formatDate(l.created_at)}</td>
@@ -49,9 +50,10 @@ function renderLeads() {
 
 function exportLeadsCSV() {
     if (leads.length === 0) { showToast('אין נתונים לייצוא', 'warning'); return; }
-    const headers = ['שם', 'אימייל', 'תפקידים', 'תאריך הרשמה'];
+    const headers = ['שם', 'טלפון', 'אימייל', 'תפקידים', 'תאריך הרשמה'];
     const rows = leads.map(l => [
         l.full_name || '',
+        l.phone || '',
         l.email || '',
         (l.roles || []).join(', '),
         formatDate(l.created_at)

@@ -31,7 +31,7 @@ function renderLeads() {
                 <td><strong>${l.full_name || '-'}</strong></td>
                 <td>${l.phone ? `<a href="tel:${l.phone}">${l.phone}</a>` : '-'}</td>
                 <td>${l.email || '-'}</td>
-                <td>${(l.roles || []).map(r => `<span class="role-badge role-${r}">${roleLabel(r)}</span>`).join(' ')}</td>
+                <td>${l.role ? `<span class="role-badge role-${l.role}">${roleLabel(l.role)}</span>` : ''}</td>
                 <td>${formatDate(l.created_at)}</td>
                 <td class="action-btns">
                     <div class="row-menu" id="menu-l-${l.id}">
@@ -55,7 +55,7 @@ function exportLeadsCSV() {
         l.full_name || '',
         l.phone || '',
         l.email || '',
-        (l.roles || []).join(', '),
+        l.role || '',
         formatDate(l.created_at)
     ]);
     const bom = '\uFEFF';

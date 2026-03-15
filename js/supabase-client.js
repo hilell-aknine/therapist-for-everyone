@@ -929,7 +929,7 @@
         try {
             const { data: existing, error: fetchError } = await supabaseClient
                 .from('profiles')
-                .select('id, roles')
+                .select('id, role')
                 .eq('id', user.id)
                 .single();
 
@@ -951,7 +951,7 @@
                     id: user.id,
                     email: user.email,
                     full_name: fullName,
-                    roles: ['student_lead'],
+                    role: 'student_lead',
                     created_at: new Date().toISOString()
                 };
                 if (phone) profileData.phone = phone;

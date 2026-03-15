@@ -35,7 +35,7 @@ async function loadLearnersData() {
 
         // Aggregate per user
         const userMap = {};
-        (progress || []).forEach(r => {
+        (progress || []).filter(r => !r.video_id?.startsWith('last_watched_')).forEach(r => {
             if (!userMap[r.user_id]) {
                 const profile = profileMap[r.user_id] || {};
                 userMap[r.user_id] = {

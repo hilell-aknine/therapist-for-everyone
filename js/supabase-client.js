@@ -929,7 +929,7 @@
         try {
             const { data: existing, error: fetchError } = await supabaseClient
                 .from('profiles')
-                .select('id, role')
+                .select('id, role, phone')
                 .eq('id', user.id)
                 .single();
 
@@ -939,14 +939,14 @@
             }
 
             let isNewProfile = false;
+            const fullName = user.user_metadata?.full_name ||
+                            user.user_metadata?.name ||
+                            user.email?.split('@')[0] ||
+                            'משתמש חדש';
+            const phone = user.user_metadata?.phone || null;
+
             if (!existing) {
                 isNewProfile = true;
-                const fullName = user.user_metadata?.full_name ||
-                                user.user_metadata?.name ||
-                                user.email?.split('@')[0] ||
-                                'משתמש חדש';
-                const phone = user.user_metadata?.phone || null;
-
                 const profileData = {
                     id: user.id,
                     email: user.email,
@@ -963,6 +963,12 @@
                 if (insertError) {
                     console.error('Profile create error:', insertError);
                 }
+            } else if (phone && !existing.phone) {
+                // Profile exists but phone missing (e.g. trigger ran before metadata was available)
+                await supabaseClient
+                    .from('profiles')
+                    .update({ phone })
+                    .eq('id', user.id);
             }
 
             // Ambassador Program: save referral for any user with pending ref data

@@ -450,15 +450,14 @@
                                     <th>שם</th>
                                     <th>טלפון</th>
                                     <th>אימייל</th>
-                                    <th>מין</th>
                                     <th>עיר</th>
                                     <th>למה NLP</th>
-                                    <th>מכיר את רם</th>
+                                    <th>סטטוס</th>
                                     <th>תאריך</th>
                                 </tr>
                             </thead>
                             <tbody id="portal-q-table">
-                                <tr><td colspan="8" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>טוען שאלונים...</td></tr>
+                                <tr><td colspan="7" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>טוען שאלונים...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -466,14 +465,55 @@
 
                 <!-- Portal Questionnaire Detail Modal -->
                 <div class="modal-overlay" id="portal-q-modal" onclick="if(event.target===this)this.classList.remove('active')">
-                    <div class="modal-content" style="max-width:600px;">
-                        <div class="modal-header">
-                            <h3><i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.5rem;"></i> שאלון היכרות</h3>
-                            <button onclick="document.getElementById('portal-q-modal').classList.remove('active')" class="modal-close">&times;</button>
+                    <div class="modal-content" style="max-width:680px;border-radius:16px;overflow:hidden;">
+                        <div class="modal-header" style="background:linear-gradient(135deg,var(--deep-petrol),var(--muted-teal));color:#fff;border:none;">
+                            <h3 style="color:#fff;"><i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.5rem;"></i> שאלון היכרות</h3>
+                            <button onclick="document.getElementById('portal-q-modal').classList.remove('active')" class="modal-close" style="color:#fff;">&times;</button>
                         </div>
-                        <div class="modal-body" id="portal-q-modal-content"></div>
+                        <div class="modal-body" id="portal-q-modal-content" style="padding:0;max-height:75vh;overflow-y:auto;"></div>
                     </div>
                 </div>
+                <style>
+                    /* Portal Questionnaire Modal — Card Design */
+                    .pq-header-card { display:flex; align-items:center; gap:1rem; padding:1.2rem 1.5rem; background:var(--card); border-bottom:1px solid var(--border); }
+                    .pq-avatar { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,var(--gold),#c4a030); color:var(--deep-petrol); font-weight:700; font-size:1.3rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+                    .pq-header-info { flex:1; }
+                    .pq-name { font-size:1.15rem; font-weight:700; color:var(--text); margin:0; }
+                    .pq-meta { display:flex; gap:1rem; font-size:0.8rem; color:var(--text-secondary); margin-top:0.2rem; flex-wrap:wrap; }
+                    .pq-meta i { margin-left:0.3rem; color:var(--gold); }
+                    .pq-status-area { flex-shrink:0; }
+                    .pq-status-select { padding:0.35rem 0.7rem; border-radius:8px; border:1.5px solid var(--gold); background:rgba(212,175,55,0.08); color:var(--gold); font-family:'Heebo',sans-serif; font-size:0.8rem; font-weight:600; cursor:pointer; outline:none; }
+                    .pq-status-select:focus { box-shadow:0 0 0 3px rgba(212,175,55,0.15); }
+                    .pq-section { margin:0; border-bottom:1px solid var(--border); }
+                    .pq-section:last-of-type { border-bottom:none; }
+                    .pq-section-header { padding:0.8rem 1.5rem; font-weight:600; font-size:0.85rem; color:var(--gold); background:rgba(212,175,55,0.04); letter-spacing:0.02em; }
+                    .pq-section-header i { margin-left:0.4rem; }
+                    .pq-section-body { padding:0.8rem 1.5rem 1rem; }
+                    .pq-fields-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem 1.5rem; }
+                    .pq-field { display:flex; flex-direction:column; gap:0.1rem; }
+                    .pq-field-label { font-size:0.75rem; color:var(--text-secondary); }
+                    .pq-field-value { font-size:0.9rem; color:var(--text); font-weight:500; }
+                    .pq-answer { margin-bottom:1rem; }
+                    .pq-answer:last-child { margin-bottom:0; }
+                    .pq-answer-q { font-size:0.8rem; font-weight:600; color:var(--text-secondary); margin-bottom:0.3rem; }
+                    .pq-answer-a { font-size:0.9rem; color:var(--text); line-height:1.7; padding:0.7rem 1rem; background:rgba(47,133,146,0.04); border-right:3px solid var(--gold); border-radius:0 8px 8px 0; }
+                    .pq-actions { display:flex; gap:0.6rem; padding:1rem 1.5rem; border-top:1px solid var(--border); flex-wrap:wrap; }
+                    .pq-btn { display:inline-flex; align-items:center; gap:0.4rem; padding:0.5rem 1rem; border-radius:8px; border:none; font-family:'Heebo',sans-serif; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+                    .pq-btn:hover { transform:translateY(-1px); }
+                    .pq-btn-docx { background:rgba(47,133,146,0.1); color:var(--dusty-aqua); }
+                    .pq-btn-docx:hover { background:rgba(47,133,146,0.2); }
+                    .pq-btn-whatsapp { background:rgba(37,211,102,0.1); color:#25D366; }
+                    .pq-btn-whatsapp:hover { background:rgba(37,211,102,0.2); }
+                    .pq-btn-pipeline { background:rgba(212,175,55,0.1); color:var(--gold); }
+                    .pq-btn-pipeline:hover { background:rgba(212,175,55,0.2); }
+                    @media (max-width:640px) {
+                        .pq-fields-grid { grid-template-columns:1fr; }
+                        .pq-header-card { flex-direction:column; text-align:center; }
+                        .pq-meta { justify-content:center; }
+                        .pq-actions { flex-direction:column; }
+                        .pq-btn { justify-content:center; }
+                    }
+                </style>
 
                 <!-- Sales Sub-Tabs Header -->
                 <div id="sales-header" class="view-group-header hidden">

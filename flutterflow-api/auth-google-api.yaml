@@ -1,0 +1,197 @@
+openapi: 3.0.0
+info:
+  title: Beit HaMetaplim - Google OAuth API
+  description: Google OAuth authentication via Supabase Auth
+  version: 1.0.0
+
+servers:
+  - url: https://eimcudmlfjlyxjyrdcgc.supabase.co
+    description: Supabase (Production)
+
+paths:
+  /auth/v1/token?grant_type=id_token:
+    post:
+      operationId: loginWithGoogle
+      summary: Login with Google ID token
+      description: |
+        Authenticates a user with a Google ID token obtained from Google Sign-In SDK.
+
+        **FlutterFlow flow:**
+        1. Use FlutterFlow's built-in Google Sign-In action to get the ID token
+        2. Send the ID token to this endpoint
+        3. Receive Supabase session (access_token + refresh_token + user)
+      parameters:
+        - name: apikey
+          in: header
+          required: true
+          schema:
+            type: string
+            default: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw"
+          description: Supabase anon key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleLoginRequest"
+            example:
+              provider: "google"
+              id_token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoogleLoginResponse"
+        "400":
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized - token verification failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/v1/authorize?provider=google:
+    get:
+      operationId: getGoogleOAuthUrl
+      summary: Get Google OAuth redirect URL (web flow)
+      description: |
+        Returns a redirect URL to Google's OAuth consent screen.
+        Use this for web-based OAuth flow (not needed for native mobile apps).
+
+        After user consents, Google redirects back to the redirect_to URL with auth code.
+      parameters:
+        - name: apikey
+          in: header
+          required: true
+          schema:
+            type: string
+            default: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw"
+          description: Supabase anon key
+        - name: redirect_to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+          description: URL to redirect after Google auth completes
+          example: "https://www.therapist-home.com/pages/course-library.html"
+      responses:
+        "302":
+          description: Redirect to Google OAuth consent screen
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Google OAuth URL
+
+components:
+  schemas:
+    GoogleLoginRequest:
+      type: object
+      required:
+        - provider
+        - id_token
+      properties:
+        provider:
+          type: string
+          enum:
+            - google
+          description: OAuth provider name
+          example: "google"
+        id_token:
+          type: string
+          description: Google ID token from Google Sign-In SDK
+          example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    GoogleLoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT access token for authenticated requests
+          example: "eyJhbGciOiJIUzI1NiIs..."
+        token_type:
+          type: string
+          example: "bearer"
+        expires_in:
+          type: integer
+          description: Token expiry in seconds
+          example: 3600
+        expires_at:
+          type: integer
+          description: Token expiry unix timestamp
+          example: 1742068800
+        refresh_token:
+          type: string
+          description: Refresh token for obtaining new access tokens
+          example: "abc123def456"
+        user:
+          $ref: "#/components/schemas/GoogleUser"
+
+    GoogleUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user ID
+          example: "ca788d2a-89e4-447c-9391-b1f25ead752e"
+        email:
+          type: string
+          format: email
+          example: "david@gmail.com"
+        email_confirmed_at:
+          type: string
+          format: date-time
+        user_metadata:
+          type: object
+          properties:
+            full_name:
+              type: string
+              example: "David Cohen"
+            avatar_url:
+              type: string
+              format: uri
+              description: Google profile picture URL
+              example: "https://lh3.googleusercontent.com/a/..."
+            email:
+              type: string
+              example: "david@gmail.com"
+            email_verified:
+              type: boolean
+              example: true
+            provider_id:
+              type: string
+              description: Google user ID
+              example: "109876543210"
+        app_metadata:
+          type: object
+          properties:
+            provider:
+              type: string
+              example: "google"
+            providers:
+              type: array
+              items:
+                type: string
+              example: ["google"]
+        created_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "invalid_grant"
+        error_description:
+          type: string
+          example: "Invalid ID token"

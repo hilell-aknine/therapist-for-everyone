@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+  title: Beit HaMetaplim - Auth API
+  description: Authentication API via Supabase Auth for login/signup
+  version: 1.0.0
+
+servers:
+  - url: https://eimcudmlfjlyxjyrdcgc.supabase.co
+    description: Supabase (Production)
+
+paths:
+  /auth/v1/token?grant_type=password:
+    post:
+      operationId: loginWithEmail
+      summary: Login with email and password
+      description: Authenticates a user with email/password and returns access token, refresh token and user details
+      parameters:
+        - name: apikey
+          in: header
+          required: true
+          schema:
+            type: string
+            default: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpbWN1ZG1sZmpseXhqeXJkY2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTA5MDYsImV4cCI6MjA4NDk4NjkwNn0.ESXViZ0DZxopHxHNuC6vRn3iIZz1KZkQcXwgLhK_nQw"
+          description: Supabase anon key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            example:
+              email: "test@test.com"
+              password: "123456"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "test@test.com"
+        password:
+          type: string
+          description: User password
+          example: "123456"
+
+    LoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT access token for authenticated requests
+          example: "eyJhbGciOiJIUzI1NiIs..."
+        token_type:
+          type: string
+          example: "bearer"
+        expires_in:
+          type: integer
+          description: Token expiry in seconds
+          example: 3600
+        expires_at:
+          type: integer
+          description: Token expiry unix timestamp
+          example: 1742068800
+        refresh_token:
+          type: string
+          description: Refresh token for obtaining new access tokens
+          example: "abc123"
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user ID
+          example: "ca788d2a-89e4-447c-9391-b1f25ead752e"
+        email:
+          type: string
+          format: email
+          example: "test@test.com"
+        user_metadata:
+          type: object
+          properties:
+            full_name:
+              type: string
+              example: "David"
+            phone:
+              type: string
+              example: "0549116092"
+        created_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "invalid_grant"
+        error_description:
+          type: string
+          example: "Invalid login credentials"

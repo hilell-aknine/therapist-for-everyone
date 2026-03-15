@@ -5,18 +5,31 @@ let portalQLoaded = false;
 
 async function loadPortalQuestionnaires() {
     try {
-        const { data, error } = await db
+        // Load questionnaires
+        const { data: qData, error: qErr } = await db
             .from('portal_questionnaires')
-            .select('*, profiles(full_name, email, phone)')
+            .select('*')
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        portalQuestionnaires = (data || []).map(q => ({
-            ...q,
-            full_name: q.profiles?.full_name || '',
-            email: q.profiles?.email || '',
-            phone: q.profiles?.phone || ''
-        }));
+        if (qErr) throw qErr;
+
+        // Load profiles for name/email/phone lookup
+        const { data: profiles } = await db
+            .from('profiles')
+            .select('id, full_name, email, phone');
+
+        const profileMap = {};
+        (profiles || []).forEach(p => { profileMap[p.id] = p; });
+
+        portalQuestionnaires = (qData || []).map(q => {
+            const profile = profileMap[q.user_id] || {};
+            return {
+                ...q,
+                full_name: profile.full_name || '',
+                email: profile.email || '',
+                phone: profile.phone || ''
+            };
+        });
 
         portalQLoaded = true;
         setText('portal-q-count', portalQuestionnaires.length);

@@ -26,7 +26,7 @@ async function loadLearnersData() {
         // Load profiles for name/email lookup
         const { data: profiles, error: profilesErr } = await db
             .from('profiles')
-            .select('id, email, full_name');
+            .select('id, email, full_name, phone');
 
         if (profilesErr) throw profilesErr;
 
@@ -42,6 +42,7 @@ async function loadLearnersData() {
                     user_id: r.user_id,
                     email: profile.email || '-',
                     full_name: profile.full_name || profile.email?.split('@')[0] || 'משתמש',
+                    phone: profile.phone || '',
                     completed_count: 0,
                     watched_seconds: 0,
                     courses: new Set(),
@@ -101,7 +102,7 @@ function renderLearners() {
     if (!tbody) return;
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fa-solid fa-graduation-cap"></i><br>אין לומדים</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-graduation-cap"></i><br>אין לומדים</td></tr>';
         return;
     }
 
@@ -116,7 +117,7 @@ function renderLearners() {
     let html = '';
     for (const [group, items] of Object.entries(groups)) {
         if (items.length === 0) continue;
-        html += `<tr class="date-group-row"><td colspan="6"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+        html += `<tr class="date-group-row"><td colspan="7"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
         html += items.map(u => {
             const hours = Math.floor(u.watched_seconds / 3600);
             const mins = Math.floor((u.watched_seconds % 3600) / 60);
@@ -126,6 +127,7 @@ function renderLearners() {
             return `
                 <tr>
                     <td><strong>${escapeHtml(u.full_name)}</strong></td>
+                    <td>${u.phone ? `<a href="tel:${escapeHtml(u.phone)}">${escapeHtml(u.phone)}</a>` : '-'}</td>
                     <td style="font-size:0.85rem;color:var(--text-secondary);">${escapeHtml(u.email)}</td>
                     <td>
                         <span style="display:inline-flex;align-items:center;gap:0.3rem;">
@@ -145,9 +147,10 @@ function renderLearners() {
 
 function exportLearnersCSV() {
     if (learnersData.length === 0) { showToast('אין נתונים לייצוא', 'warning'); return; }
-    const headers = ['שם', 'אימייל', 'שיעורים שהושלמו', 'זמן צפייה (דקות)', 'קורסים', 'פעילות אחרונה'];
+    const headers = ['שם', 'טלפון', 'אימייל', 'שיעורים שהושלמו', 'זמן צפייה (דקות)', 'קורסים', 'פעילות אחרונה'];
     const rows = learnersData.map(u => [
         u.full_name || '',
+        u.phone || '',
         u.email || '',
         u.completed_count,
         Math.round(u.watched_seconds / 60),

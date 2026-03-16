@@ -140,6 +140,31 @@
                             <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
                         </div>
                     </div>
+                    <!-- Sales Funnel -->
+                    <div class="overview-recent" style="margin-bottom:1.5rem;">
+                        <h2 style="font-size:1.1rem;margin-bottom:1rem;"><i class="fa-solid fa-filter" style="color:var(--gold);margin-left:0.4rem;"></i> פאנל מכירות</h2>
+                        <div class="pq-funnel">
+                            <div class="pq-funnel-step">
+                                <div class="pq-funnel-num" id="funnel-registered">0</div>
+                                <div class="pq-funnel-label">נרשמו</div>
+                            </div>
+                            <div class="pq-funnel-arrow">→</div>
+                            <div class="pq-funnel-step">
+                                <div class="pq-funnel-num" id="funnel-active">0</div>
+                                <div class="pq-funnel-label">לומדים</div>
+                            </div>
+                            <div class="pq-funnel-arrow">→</div>
+                            <div class="pq-funnel-step">
+                                <div class="pq-funnel-num" id="funnel-hot" style="color:#f85149;">0</div>
+                                <div class="pq-funnel-label">חמים</div>
+                            </div>
+                            <div class="pq-funnel-arrow">→</div>
+                            <div class="pq-funnel-step">
+                                <div class="pq-funnel-num" id="funnel-pipeline" style="color:#D4AF37;">0</div>
+                                <div class="pq-funnel-label">Pipeline</div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="overview-recent">
                         <h2 style="font-size:1.1rem;margin-bottom:1rem;"><i class="fa-solid fa-clock" style="color:var(--gold);margin-left:0.4rem;"></i> פעילות אחרונה</h2>
                         <div id="overview-recent-list" style="color:var(--text-secondary);font-size:0.9rem;">טוען...</div>
@@ -421,10 +446,11 @@
                 <!-- Portal Questionnaires View -->
                 <div id="portal-q-view" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.5rem;"></i> שאלוני היכרות — פורטל חינמי</h1>
+                    <!-- Stats -->
                     <div class="stats">
                         <div class="stat-card">
                             <div class="stat-icon gold"><i class="fa-solid fa-clipboard-list"></i></div>
-                            <div><div class="stat-value" id="stat-portal-q-total">0</div><div class="stat-label">סה"כ שאלונים</div></div>
+                            <div><div class="stat-value" id="stat-portal-q-total">0</div><div class="stat-label">סה"כ נרשמים</div></div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon green"><i class="fa-solid fa-calendar-day"></i></div>
@@ -435,12 +461,30 @@
                             <div><div class="stat-value" id="stat-portal-q-avg-score">0</div><div class="stat-label">ציון ממוצע</div></div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon green"><i class="fa-solid fa-trophy"></i></div>
-                            <div><div class="stat-value" id="stat-portal-q-top-learner" style="font-size:0.9rem;">-</div><div class="stat-label">הלומד המוביל</div></div>
+                            <div class="stat-icon" style="background:rgba(248,81,73,0.12);color:#f85149;"><i class="fa-solid fa-fire"></i></div>
+                            <div><div class="stat-value" id="stat-portal-q-hot">0</div><div class="stat-label">חמים + רותחים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(88,166,255,0.12);color:#58a6ff;"><i class="fa-solid fa-phone-slash"></i></div>
+                            <div><div class="stat-value" id="stat-portal-q-not-called">0</div><div class="stat-label">לא הותקשרו</div></div>
                         </div>
                     </div>
 
-                    <!-- Smart Filters -->
+                    <!-- View Tabs: Table / Caller -->
+                    <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;">
+                        <button class="pq-view-tab active" data-view="table" onclick="switchPqSubView('table')">
+                            <i class="fa-solid fa-table-list"></i> טבלה
+                        </button>
+                        <button class="pq-view-tab" data-view="caller" onclick="switchPqSubView('caller')">
+                            <i class="fa-solid fa-headset"></i> תצוגת מתקשר
+                        </button>
+                        <span style="margin-right:auto;"></span>
+                        <button class="btn btn-export" onclick="exportPortalQCSV()" style="font-size:0.8rem;">
+                            <i class="fa-solid fa-file-excel"></i> ייצא
+                        </button>
+                    </div>
+
+                    <!-- Filters -->
                     <div class="pq-filter-bar">
                         <select id="pq-filter-date" onchange="applyPqFilters()">
                             <option value="all">תאריך: הכל</option>
@@ -451,8 +495,15 @@
                         <select id="pq-filter-status" onchange="applyPqFilters()">
                             <option value="all">סטטוס: הכל</option>
                             <option value="new">תלמיד</option>
-                            <option value="potential">לקוח פוטנציאלי</option>
+                            <option value="potential">פוטנציאלי</option>
                             <option value="client">לקוח</option>
+                        </select>
+                        <select id="pq-filter-heat" onchange="applyPqFilters()">
+                            <option value="all">חום: הכל</option>
+                            <option value="hot">🔥🔥 רותח</option>
+                            <option value="warm">🔥 חם</option>
+                            <option value="cold">❄️ קר</option>
+                            <option value="none">לא סווג</option>
                         </select>
                         <select id="pq-filter-source" onchange="applyPqFilters()">
                             <option value="all">מקור: הכל</option>
@@ -461,44 +512,48 @@
                             <option value="all">למה NLP: הכל</option>
                         </select>
                         <select id="pq-filter-sort" onchange="applyPqFilters()">
-                            <option value="date">מיון: תאריך</option>
-                            <option value="score">מיון: ציון התאמה</option>
+                            <option value="score">מיון: ציון</option>
+                            <option value="heat">מיון: חום</option>
                             <option value="views">מיון: צפיות</option>
+                            <option value="date">מיון: תאריך</option>
                         </select>
-                        <span id="pq-results-count" style="font-size:0.8rem;color:rgba(232,241,242,0.5);margin-right:auto;"></span>
+                        <span id="pq-results-count" style="font-size:0.8rem;color:rgba(232,241,242,0.5);"></span>
                     </div>
 
-                    <div class="table-container">
-                        <div class="table-header">
-                            <div style="display:flex;align-items:center;gap:1rem;">
-                                <h3>תשובות שאלון ההיכרות</h3>
-                                <button class="btn btn-export" onclick="exportPortalQCSV()">
-                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
-                                </button>
+                    <!-- TABLE VIEW -->
+                    <div id="pq-table-view">
+                        <div class="table-container">
+                            <div class="table-header">
+                                <h3>נרשמים לפורטל</h3>
+                                <div class="search-box">
+                                    <i class="fa-solid fa-search"></i>
+                                    <input type="text" placeholder="חיפוש..." id="portal-q-search" oninput="renderPortalQuestionnaires()">
+                                </div>
                             </div>
-                            <div class="search-box">
-                                <i class="fa-solid fa-search"></i>
-                                <input type="text" placeholder="חיפוש לפי שם, טלפון, עיר..." id="portal-q-search" oninput="renderPortalQuestionnaires()">
-                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>שם</th>
+                                        <th>טלפון</th>
+                                        <th>עיר</th>
+                                        <th>למה NLP</th>
+                                        <th>ציון</th>
+                                        <th>חום</th>
+                                        <th>שיעורים</th>
+                                        <th>סטטוס</th>
+                                        <th>תאריך</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="portal-q-table">
+                                    <tr><td colspan="10" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>טוען...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>שם</th>
-                                    <th>טלפון</th>
-                                    <th>עיר</th>
-                                    <th>למה NLP</th>
-                                    <th>ציון</th>
-                                    <th>שיעורים</th>
-                                    <th>שעות</th>
-                                    <th>סטטוס</th>
-                                    <th>תאריך</th>
-                                </tr>
-                            </thead>
-                            <tbody id="portal-q-table">
-                                <tr><td colspan="10" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>טוען שאלונים...</td></tr>
-                            </tbody>
-                        </table>
+                    </div>
+
+                    <!-- CALLER VIEW -->
+                    <div id="pq-caller-view" class="hidden">
+                        <div id="pq-caller-cards"></div>
                     </div>
                 </div>
 
@@ -514,6 +569,37 @@
                 </div>
                 <style>
                     /* Portal Questionnaire Modal — Card Design */
+                    /* View tabs */
+                    .pq-view-tab { background:rgba(0,30,36,0.6); color:rgba(232,241,242,0.6); border:1px solid rgba(232,241,242,0.1); border-radius:8px; padding:0.45rem 1rem; font-size:0.82rem; font-family:'Heebo',sans-serif; cursor:pointer; transition:all 0.2s; }
+                    .pq-view-tab:hover { border-color:rgba(212,175,55,0.3); color:#e8f1f2; }
+                    .pq-view-tab.active { background:rgba(212,175,55,0.1); border-color:#D4AF37; color:#D4AF37; }
+                    .pq-view-tab i { margin-left:0.3rem; }
+                    /* Funnel */
+                    .pq-funnel { display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:1rem 0; }
+                    .pq-funnel-step { text-align:center; flex:1; }
+                    .pq-funnel-num { font-size:1.6rem; font-weight:700; color:#e8f1f2; }
+                    .pq-funnel-label { font-size:0.75rem; color:rgba(232,241,242,0.5); }
+                    .pq-funnel-arrow { color:rgba(212,175,55,0.4); font-size:1.2rem; }
+                    /* Caller cards */
+                    .pq-caller-card { background:rgba(0,30,36,0.6); border:1px solid rgba(232,241,242,0.08); border-radius:12px; padding:1rem 1.2rem; margin-bottom:0.8rem; transition:border-color 0.2s; }
+                    .pq-caller-card:hover { border-color:rgba(212,175,55,0.3); }
+                    .pq-caller-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; flex-wrap:wrap; gap:0.5rem; }
+                    .pq-caller-info { display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; }
+                    .pq-caller-info strong { color:#e8f1f2; font-size:1rem; }
+                    .pq-caller-contact { display:flex; gap:0.5rem; align-items:center; }
+                    .pq-caller-phone { color:#e8f1f2; text-decoration:none; font-size:0.85rem; background:rgba(232,241,242,0.06); padding:0.3rem 0.7rem; border-radius:6px; }
+                    .pq-caller-phone:hover { background:rgba(232,241,242,0.12); }
+                    .pq-caller-wa { color:#25D366; font-size:1.1rem; padding:0.3rem; }
+                    .pq-caller-details { display:flex; gap:1rem; font-size:0.8rem; color:rgba(232,241,242,0.5); margin-bottom:0.6rem; flex-wrap:wrap; }
+                    .pq-caller-details i { color:#D4AF37; margin-left:0.2rem; }
+                    .pq-caller-prev-note { font-size:0.8rem; color:rgba(232,241,242,0.6); background:rgba(212,175,55,0.05); padding:0.5rem 0.8rem; border-radius:6px; margin-bottom:0.6rem; border-right:2px solid rgba(212,175,55,0.3); }
+                    .pq-caller-prev-note i { color:#D4AF37; margin-left:0.3rem; }
+                    .pq-caller-actions { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
+                    .pq-heat-select { background:rgba(0,30,36,0.8); color:#e8f1f2; border:1px solid rgba(232,241,242,0.15); border-radius:6px; padding:0.35rem 0.5rem; font-size:0.8rem; font-family:'Heebo',sans-serif; cursor:pointer; }
+                    .pq-note-input { flex:1; min-width:150px; background:rgba(0,30,36,0.8); color:#e8f1f2; border:1px solid rgba(232,241,242,0.15); border-radius:6px; padding:0.35rem 0.7rem; font-size:0.8rem; font-family:'Heebo',sans-serif; outline:none; }
+                    .pq-note-input:focus { border-color:#D4AF37; }
+                    .pq-btn-call { background:rgba(39,174,96,0.15); color:#27ae60; }
+                    .pq-btn-call:hover { background:rgba(39,174,96,0.25); }
                     /* Filter bar */
                     .pq-filter-bar { display:flex; gap:0.5rem; padding:0.6rem 0; flex-wrap:wrap; align-items:center; }
                     .pq-filter-bar select { background:rgba(0,30,36,0.6); color:#e8f1f2; border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.45rem 0.7rem; font-size:0.8rem; font-family:'Heebo',sans-serif; cursor:pointer; outline:none; -webkit-appearance:none; }
@@ -1863,7 +1949,7 @@
     <script src="../js/admin/admin-therapists.js"></script>
     <script src="../js/admin/admin-leads.js"></script>
     <script src="../js/admin/admin-learners.js"></script>
-    <script src="../js/admin/admin-portal-questionnaires.js?v=3"></script>
+    <script src="../js/admin/admin-portal-questionnaires.js?v=4"></script>
     <script src="../js/admin/admin-pipeline.js"></script>
     <script src="../js/admin/admin-bot.js"></script>
     <script src="../js/admin/admin-analytics.js"></script>

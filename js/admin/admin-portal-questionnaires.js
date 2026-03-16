@@ -156,6 +156,7 @@ function viewPortalQ(id) {
                 ${_pqField('cake-candles', 'תאריך לידה', q.birth_date)}
                 ${_pqField('location-dot', 'עיר', q.city)}
                 ${_pqField('briefcase', 'עיסוק', q.occupation)}
+                ${_pqField('map-pin', 'מאיפה הגיע/ה', q.how_found)}
                 ${_pqField('video', 'מכיר את רם?', q.knew_ram)}
                 ${_pqField('calendar', 'תאריך מילוי', formatDate(q.created_at))}
             </div>
@@ -297,6 +298,7 @@ function downloadPortalQDocx(id) {
     <tr><td>תאריך לידה</td><td>${esc(q.birth_date)}</td></tr>
     <tr><td>עיר</td><td>${esc(q.city)}</td></tr>
     <tr><td>עיסוק</td><td>${esc(q.occupation)}</td></tr>
+    <tr><td>מאיפה הגיע/ה</td><td>${esc(q.how_found)}</td></tr>
     <tr><td>מכיר את רם?</td><td>${esc(q.knew_ram)}</td></tr>
 </table>
 
@@ -343,10 +345,10 @@ function esc(v) { return escapeHtml(v || '-'); }
 
 function exportPortalQCSV() {
     if (portalQuestionnaires.length === 0) { showToast('אין נתונים לייצוא', 'warning'); return; }
-    const headers = ['שם', 'טלפון', 'אימייל', 'מין', 'תאריך לידה', 'עיר', 'עיסוק', 'למה NLP', 'זמן ללמידה', 'אתגר דיגיטלי', 'מכיר את רם', 'מוטיבציה', 'מה לפתור', 'חזון לשנה', 'סטטוס', 'תאריך'];
+    const headers = ['שם', 'טלפון', 'אימייל', 'מין', 'תאריך לידה', 'עיר', 'עיסוק', 'מאיפה הגיע', 'למה NLP', 'זמן ללמידה', 'אתגר דיגיטלי', 'מכיר את רם', 'מוטיבציה', 'מה לפתור', 'חזון לשנה', 'סטטוס', 'תאריך'];
     const rows = portalQuestionnaires.map(q => [
         q.full_name || '', q.phone || '', q.email || '', q.gender || '', q.birth_date || '',
-        q.city || '', q.occupation || '', q.why_nlp || '', q.study_time || '',
+        q.city || '', q.occupation || '', q.how_found || '', q.why_nlp || '', q.study_time || '',
         q.digital_challenge || '', q.knew_ram || '', q.motivation_tip || '',
         q.main_challenge || '', q.vision_one_year || '', _pqLabels.status[q.status] || 'תלמיד', formatDate(q.created_at)
     ]);

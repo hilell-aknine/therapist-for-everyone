@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/logo-square.png">
-    <title>שלב 1 - סינון והיכרות | מטפל לכל אחד</title>
-    <meta name="description" content="שלב 1 — סינון והיכרות ראשונית בתהליך ההרשמה לטיפול בבית המטפלים.">
-    <meta property="og:title" content="שלב 1 — סינון והיכרות | בית המטפלים">
+    <title>שלב 1 - פרטים אישיים | מטפל לכל אחד</title>
+    <meta name="description" content="שלב 1 — פרטים אישיים בתהליך ההרשמה לטיפול בבית המטפלים.">
+    <meta property="og:title" content="שלב 1 — פרטים אישיים | בית המטפלים">
     <meta property="og:description" content="שלב 1 בתהליך ההרשמה לטיפול">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.therapist-home.com/pages/patient-step1.html">
@@ -35,7 +35,7 @@
             --border: #e0e0e0;
             --success: #28a745;
             --error: #dc3545;
-        
+
             /* === Theme Bridge === */
             --gold: var(--t-gold);
             --gold-light: var(--t-gold-light);
@@ -159,14 +159,24 @@
         .step-header h2 { color: var(--primary-dark); margin-bottom: 0.5rem; }
         .step-header p { color: var(--text-light); font-size: 0.95rem; }
 
-        .intro-notice {
-            background: linear-gradient(135deg, rgba(47, 133, 146, 0.1), rgba(0, 59, 70, 0.05));
-            border-radius: 12px;
-            padding: 1.2rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
+        .intro-card {
+            background: linear-gradient(135deg, rgba(0, 59, 70, 0.08), rgba(47, 133, 146, 0.06));
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            line-height: 1.8;
+        }
+        .intro-card .intro-title {
+            font-size: 1.2rem;
+            font-weight: 700;
             color: var(--primary-dark);
-            line-height: 1.7;
+            margin-bottom: 0.8rem;
+        }
+        .intro-card p {
+            font-size: 0.95rem;
+            color: var(--text);
         }
 
         .section-title {
@@ -217,6 +227,42 @@
             resize: vertical;
         }
 
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.3rem;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .radio-option:hover {
+            border-color: var(--primary);
+            background: rgba(47, 133, 146, 0.05);
+        }
+        .radio-option input[type="radio"] {
+            width: auto;
+            padding: 0;
+            margin: 0;
+            accent-color: var(--gold);
+        }
+        .radio-option input[type="radio"]:checked + span {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        .radio-option:has(input:checked) {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+        }
+
         .info-box {
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
             border-radius: 12px;
@@ -254,6 +300,16 @@
             box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
         }
 
+        .error-msg {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+        .error-msg.show { display: block; }
+        .field-error { border-color: var(--error) !important; }
+        .field-success { border-color: var(--success) !important; }
+
         .toast {
             position: fixed;
             bottom: 2rem;
@@ -277,16 +333,10 @@
             .step-label { font-size: 0.65rem; }
             .step-circle { width: 35px; height: 35px; font-size: 0.9rem; }
             .form-row { grid-template-columns: 1fr; }
+            .radio-group { gap: 0.4rem; }
         }
     </style>
-
-    <!-- === SEO Tags (auto-generated) === -->
     <link rel="canonical" href="https://www.therapist-home.com/pages/patient-step1.html">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="שלב 1 — סינון והיכרות | בית המטפלים">
-    <meta name="twitter:description" content="שלב 1 בתהליך ההרשמה לטיפול">
-    <meta name="twitter:image" content="https://www.therapist-home.com/assets/logo.png">
-    <!-- === /SEO Tags === -->
 </head>
 <body>
     <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
@@ -295,10 +345,11 @@
         <a href="course-library.html"><i class="fa-solid fa-arrow-right"></i> חזרה לפורטל</a>
     </nav>
     <div class="form-breadcrumb">
-        <a href="course-library.html">פורטל</a> <span class="separator">›</span>
-        <a href="course-library.html">הרשמה</a> <span class="separator">›</span>
+        <a href="course-library.html">פורטל</a> <span class="separator">></span>
+        <a href="course-library.html">הרשמה</a> <span class="separator">></span>
         <span class="current">שלב 1 מתוך 4</span>
     </div>
+
     <div class="header">
         <h1><img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle"> בית המטפלים</h1>
         <p>בקשה לקבלת טיפול רגשי</p>
@@ -308,143 +359,148 @@
         <div class="progress-steps">
             <div class="step active" aria-current="step">
                 <div class="step-circle">1</div>
-                <span class="step-label">סינון והיכרות</span>
+                <span class="step-label">פרטים אישיים</span>
             </div>
             <div class="step">
                 <div class="step-circle">2</div>
-                <span class="step-label">דינמיקה משפחתית</span>
+                <span class="step-label">היכרות עומק</span>
             </div>
             <div class="step">
                 <div class="step-circle">3</div>
-                <span class="step-label">ציפיות ורפואי</span>
+                <span class="step-label">שאלון מקצועי</span>
             </div>
             <div class="step">
                 <div class="step-circle">4</div>
-                <span class="step-label">התחייבות</span>
+                <span class="step-label">הסכם והגשה</span>
             </div>
         </div>
     </div>
 
     <main id="main-content" class="container">
+        <!-- Intro Card -->
+        <div class="intro-card">
+            <div class="intro-title">&#127973; הגשת מועמדות לתוכנית הטיפול</div>
+            <p>
+                אנחנו שמחים שבחרת לפנות אלינו. התהליך שלנו כולל 10 מפגשים עם מטפל מוסמך — בחינם.<br>
+                השאלון לפניך יעזור לנו להכיר אותך ולהתאים לך את המטפל הנכון.<br>
+                זה לוקח כ-5 דקות. קדימה! &#128155;
+            </p>
+        </div>
+
         <div class="form-card">
             <div class="step-header">
                 <div class="step-icon"><i class="fa-solid fa-user"></i></div>
-                <h2>סינון והיכרות</h2>
-                <p>נתחיל להכיר אותך</p>
+                <h2>שנכיר אותך ברמה הטכנית</h2>
+                <p>פרטים אישיים בסיסיים</p>
             </div>
 
-            <div class="intro-notice">
-                <strong>פרויקט זה נועד לאנשים המעוניינים לעבור תהליך עומק וזקוקים לסיוע.</strong>
-                <br>אנו מחברים בין מטופלים למטפלים איכותיים שמציעים טיפול מסובסד או בהתנדבות.
-            </div>
-
-            <form id="step1-form">
+            <form id="step1-form" novalidate>
                 <h3 class="section-title"><i class="fa-solid fa-id-card"></i> פרטים אישיים</h3>
 
                 <div class="form-group">
-                    <label>שם מלא <span class="required">*</span></label>
+                    <label for="full_name">שם מלא <span class="required">*</span></label>
                     <input type="text" name="full_name" id="full_name" required placeholder="שם פרטי ומשפחה" autocomplete="name">
                     <div class="error-msg" id="full_name-error">יש להזין שם מלא</div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>טלפון <span class="required">*</span></label>
+                        <label for="email">אימייל <span class="required">*</span></label>
+                        <input type="email" name="email" id="email" required placeholder="your@email.com" autocomplete="email">
+                        <div class="error-msg" id="email-error">כתובת אימייל לא תקינה</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">נייד <span class="required">*</span></label>
                         <input type="tel" name="phone" id="phone" required placeholder="050-0000000" autocomplete="tel">
                         <div class="error-msg" id="phone-error">מספר טלפון לא תקין</div>
                     </div>
-                    <div class="form-group">
-                        <label>אימייל <span class="required">*</span></label>
-                        <input type="email" name="email" id="email" required placeholder="your@email.com" autocomplete="email" pattern="[^@\s]+@[^@\s]+\.[^@\s]+">
-                        <div class="error-msg" id="email-error">כתובת אימייל לא תקינה</div>
-                    </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>תאריך לידה</label>
-                        <input type="date" name="birth_date" id="birth_date" autocomplete="bday">
+                        <label for="city">עיר מגורים <span class="required">*</span></label>
+                        <input type="text" name="city" id="city" required placeholder="תל אביב" autocomplete="address-level2">
+                        <div class="error-msg" id="city-error">יש להזין עיר מגורים</div>
                     </div>
                     <div class="form-group">
                         <label>מגדר</label>
-                        <select name="gender" id="gender">
-                            <option value="">בחר/י</option>
-                            <option value="male">זכר</option>
-                            <option value="female">נקבה</option>
-                            <option value="other">אחר</option>
-                        </select>
+                        <div class="radio-group">
+                            <label class="radio-option"><input type="radio" name="gender" value="male"><span>זכר</span></label>
+                            <label class="radio-option"><input type="radio" name="gender" value="female"><span>נקבה</span></label>
+                            <label class="radio-option"><input type="radio" name="gender" value="other"><span>אחר</span></label>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>עיר מגורים</label>
-                        <input type="text" name="city" id="city" placeholder="תל אביב" autocomplete="address-level2">
+                        <label for="birth_date">תאריך לידה</label>
+                        <input type="date" name="birth_date" id="birth_date" min="1930-01-01" max="2008-12-31" autocomplete="bday">
                     </div>
                     <div class="form-group">
-                        <label>מצב משפחתי</label>
+                        <label for="occupation">תעסוקה</label>
+                        <input type="text" name="occupation" id="occupation" placeholder="מקצוע / תפקיד" autocomplete="organization-title">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="marital_status">מצב זוגי</label>
                         <select name="marital_status" id="marital_status">
                             <option value="">בחר/י</option>
                             <option value="single">רווק/ה</option>
+                            <option value="relationship">בזוגיות</option>
                             <option value="married">נשוי/אה</option>
                             <option value="divorced">גרוש/ה</option>
                             <option value="widowed">אלמן/ה</option>
-                            <option value="relationship">בזוגיות</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="form-row">
                     <div class="form-group">
-                        <label>תעסוקה</label>
-                        <input type="text" name="occupation" id="occupation" placeholder="מקצוע / תפקיד" autocomplete="organization-title">
-                    </div>
-                    <div class="form-group">
-                        <label>שירות צבאי/לאומי</label>
-                        <select name="military_service" id="military_service">
+                        <label for="service_type">סגנון שירות</label>
+                        <select name="service_type" id="service_type">
                             <option value="">בחר/י</option>
-                            <option value="idf">צה"ל</option>
-                            <option value="national">שירות לאומי</option>
-                            <option value="exempt">פטור</option>
+                            <option value="military">צבאי</option>
+                            <option value="national">לאומי</option>
+                            <option value="civil">אזרחי</option>
                             <option value="none">לא שירתתי</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>תפקיד בצבא/שירות לאומי <span class="label-hint">(אופציונלי)</span></label>
-                    <input type="text" name="military_role" id="military_role" placeholder="לדוגמה: קצין חינוך, מדריכה, לוחם..." autocomplete="off">
+                    <label for="service_role">תפקיד שעשית <span class="label-hint">(אופציונלי)</span></label>
+                    <input type="text" name="service_role" id="service_role" placeholder="למשל: לוחם, קצין, מדריך..." autocomplete="off">
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>רשת חברתית <span class="label-hint">(אופציונלי)</span></label>
-                        <select name="social_network" id="social_network">
-                            <option value="">בחר/י רשת</option>
-                            <option value="instagram">אינסטגרם</option>
-                            <option value="facebook">פייסבוק</option>
-                            <option value="linkedin">לינקדאין</option>
-                            <option value="tiktok">טיקטוק</option>
-                            <option value="other">אחר</option>
-                        </select>
+                <h3 class="section-title"><i class="fa-solid fa-comment-dots"></i> למה הגעת אלינו</h3>
+
+                <div class="form-group">
+                    <label for="main_reason">מה הסיבה שהגעת אלינו? <span class="required">*</span></label>
+                    <textarea name="main_reason" id="main_reason" required placeholder="ספר/י לנו מה מביא אותך לחפש טיפול כרגע..." autocomplete="off"></textarea>
+                    <div class="error-msg" id="main_reason-error">יש לתאר את סיבת הפנייה (לפחות 10 תווים)</div>
+                </div>
+
+                <div class="form-group">
+                    <label>איך הגעת אלינו?</label>
+                    <div class="radio-group">
+                        <label class="radio-option"><input type="radio" name="referral_source" value="youtube"><span>יוטיוב</span></label>
+                        <label class="radio-option"><input type="radio" name="referral_source" value="instagram"><span>אינסטגרם</span></label>
+                        <label class="radio-option"><input type="radio" name="referral_source" value="facebook"><span>פייסבוק</span></label>
+                        <label class="radio-option"><input type="radio" name="referral_source" value="tiktok"><span>טיקטוק</span></label>
+                        <label class="radio-option"><input type="radio" name="referral_source" value="google"><span>חיפוש בגוגל</span></label>
+                        <label class="radio-option"><input type="radio" name="referral_source" value="friend"><span>המלצה מחבר</span></label>
+                        <label class="radio-option"><input type="radio" name="referral_source" value="other"><span>אחר</span></label>
                     </div>
-                    <div class="form-group">
-                        <label>שם משתמש ברשת</label>
-                        <input type="text" name="social_username" id="social_username" placeholder="@username" autocomplete="off">
-                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="social_link">לינק לרשת חברתית <span class="label-hint">(אופציונלי)</span></label>
+                    <input type="url" name="social_link" id="social_link" placeholder="https://instagram.com/..." autocomplete="off">
                 </div>
 
                 <div class="info-box">
                     <i class="fa-solid fa-lock"></i>
                     <span>כל המידע שתמסור/י ישמר בסודיות מוחלטת</span>
-                </div>
-
-                <h3 class="section-title"><i class="fa-solid fa-comment-dots"></i> שאלת סינון</h3>
-
-                <div class="form-group">
-                    <label>מה הסיבה העיקרית שבגינה הגעת אלינו? <span class="required">*</span></label>
-                    <textarea name="main_reason" id="main_reason" required placeholder="ספר/י לנו מה מביא אותך לחפש טיפול כרגע..." autocomplete="off"></textarea>
-                    <div class="error-msg" id="main_reason-error">יש לכתוב לפחות 10 תווים</div>
                 </div>
 
                 <button type="submit" class="btn btn-primary">
@@ -458,64 +514,62 @@
     <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
     <script>
-        // Load saved data
         document.addEventListener('DOMContentLoaded', () => {
-            const saved = JSON.parse(localStorage.getItem('patientForm') || '{}');
-
-            // Populate all fields
-            const fields = ['full_name', 'phone', 'email', 'birth_date', 'gender', 'city',
-                          'marital_status', 'occupation', 'military_service', 'military_role',
-                          'social_network', 'social_username', 'main_reason'];
-            fields.forEach(field => {
-                const el = document.getElementById(field);
-                if (el && saved[field]) el.value = saved[field];
+            const saved = JSON.parse(localStorage.getItem('patient_form_data') || '{}');
+            // Populate text/date/select fields
+            const fields = ['full_name', 'email', 'phone', 'city', 'birth_date', 'occupation',
+                            'marital_status', 'service_type', 'service_role', 'main_reason', 'social_link'];
+            fields.forEach(f => {
+                const el = document.getElementById(f);
+                if (el && saved[f]) el.value = saved[f];
+            });
+            // Populate radio fields
+            ['gender', 'referral_source'].forEach(name => {
+                if (saved[name]) {
+                    const radio = document.querySelector(`input[name="${name}"][value="${saved[name]}"]`);
+                    if (radio) radio.checked = true;
+                }
             });
         });
 
-        // Form submission
         document.getElementById('step1-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
             const fullName = document.getElementById('full_name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const city = document.getElementById('city').value.trim();
             const mainReason = document.getElementById('main_reason').value.trim();
 
-            if (!fullName || fullName.length < 2) {
-                showToast('יש להזין שם מלא');
-                return;
-            }
-            if (!phone || !/^05\d{8}$|^0[2-489]\d{7}$/.test(phone.replace(/[-\s]/g, ''))) {
-                showToast('מספר טלפון לא תקין — יש להזין מספר ישראלי');
-                return;
-            }
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                showToast('יש להזין כתובת אימייל תקינה');
-                return;
-            }
-            if (!mainReason || mainReason.length < 10) {
-                showToast('יש לתאר את סיבת הפנייה (לפחות 10 תווים)');
-                return;
-            }
+            // Validation
+            if (!fullName || fullName.length < 2) { showToast('יש להזין שם מלא'); return; }
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('יש להזין כתובת אימייל תקינה'); return; }
+            if (!phone || !/^05\d{8}$|^0[2-489]\d{7}$/.test(phone.replace(/[-\s]/g, ''))) { showToast('מספר טלפון לא תקין — יש להזין מספר ישראלי'); return; }
+            if (!city || city.length < 2) { showToast('יש להזין עיר מגורים'); return; }
+            if (!mainReason || mainReason.length < 10) { showToast('יש לתאר את סיבת הפנייה (לפחות 10 תווים)'); return; }
+
+            // Collect radio values
+            const genderEl = document.querySelector('input[name="gender"]:checked');
+            const referralEl = document.querySelector('input[name="referral_source"]:checked');
 
             // Save to localStorage
-            const saved = JSON.parse(localStorage.getItem('patientForm') || '{}');
+            const saved = JSON.parse(localStorage.getItem('patient_form_data') || '{}');
             saved.full_name = fullName;
-            saved.phone = phone;
             saved.email = email;
+            saved.phone = phone;
+            saved.city = city;
+            saved.gender = genderEl ? genderEl.value : '';
             saved.birth_date = document.getElementById('birth_date').value;
-            saved.gender = document.getElementById('gender').value;
-            saved.city = document.getElementById('city').value.trim();
-            saved.marital_status = document.getElementById('marital_status').value;
             saved.occupation = document.getElementById('occupation').value.trim();
-            saved.military_service = document.getElementById('military_service').value;
-            saved.military_role = document.getElementById('military_role').value.trim();
-            saved.social_network = document.getElementById('social_network').value;
-            saved.social_username = document.getElementById('social_username').value.trim();
+            saved.marital_status = document.getElementById('marital_status').value;
+            saved.service_type = document.getElementById('service_type').value;
+            saved.service_role = document.getElementById('service_role').value.trim();
             saved.main_reason = mainReason;
-            localStorage.setItem('patientForm', JSON.stringify(saved));
+            saved.referral_source = referralEl ? referralEl.value : '';
+            saved.social_link = document.getElementById('social_link').value.trim();
+            saved.step1_complete = true;
+            localStorage.setItem('patient_form_data', JSON.stringify(saved));
 
-            // Go to next step
             window.location.href = 'patient-step2.html';
         });
 
@@ -532,8 +586,9 @@
         const phoneRegex = /^05\d{8}$|^0[2-489]\d{7}$/;
         const rules = [
             { id: 'full_name', errId: 'full_name-error', test: v => v.length >= 2 },
-            { id: 'phone', errId: 'phone-error', test: v => phoneRegex.test(v.replace(/[-\s]/g, '')) },
             { id: 'email', errId: 'email-error', test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+            { id: 'phone', errId: 'phone-error', test: v => phoneRegex.test(v.replace(/[-\s]/g, '')) },
+            { id: 'city', errId: 'city-error', test: v => v.length >= 2 },
             { id: 'main_reason', errId: 'main_reason-error', test: v => v.length >= 10 }
         ];
         function validate(rule) {
@@ -553,10 +608,8 @@
         });
     })();
     </script>
-    <!-- Marketing & Analytics -->
     <script src="../js/marketing-tools.js"></script>
     <script>
-    // P3-17: Autosave form data every 30s
     (function() {
         var key = 'autosave_' + location.pathname;
         var fields = document.querySelectorAll('input, select, textarea');

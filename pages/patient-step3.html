@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/logo-square.png">
-    <title>שלב 3 - ציפיות ורקע רפואי | מטפל לכל אחד</title>
-    <meta name="description" content="שלב 3 — העדפות טיפול בתהליך ההרשמה לטיפול בבית המטפלים.">
-    <meta property="og:title" content="שלב 3 — העדפות טיפול | בית המטפלים">
+    <title>שלב 3 - שאלון מקצועי | מטפל לכל אחד</title>
+    <meta name="description" content="שלב 3 — שאלון מקצועי בתהליך ההרשמה לטיפול בבית המטפלים.">
+    <meta property="og:title" content="שלב 3 — שאלון מקצועי | בית המטפלים">
     <meta property="og:description" content="שלב 3 בתהליך ההרשמה לטיפול">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.therapist-home.com/pages/patient-step3.html">
@@ -35,8 +35,6 @@
             --border: #e0e0e0;
             --success: #28a745;
             --error: #dc3545;
-        
-            /* === Theme Bridge === */
             --gold: var(--t-gold);
             --gold-light: var(--t-gold-light);
             --gold-glow: var(--t-gold-glow);
@@ -91,7 +89,8 @@
             background: var(--border);
             z-index: 1;
         }
-        .step.completed:not(:last-child)::after {
+        .step.completed:not(:last-child)::after,
+        .step.active:not(:last-child)::after {
             background: var(--gold);
         }
         .step-circle {
@@ -107,6 +106,7 @@
             color: var(--text-light);
             position: relative;
             z-index: 2;
+            transition: all 0.3s;
         }
         .step.active .step-circle {
             border-color: var(--gold);
@@ -169,7 +169,6 @@
             gap: 0.5rem;
         }
         .section-title i { color: var(--gold); }
-        .section-title:first-child { margin-top: 0; }
 
         .form-group { margin-bottom: 1.2rem; }
         label {
@@ -191,141 +190,89 @@
             background: white;
         }
         input:focus, select:focus, textarea:focus {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(47, 133, 146, 0.1);
         }
-        textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
+        textarea { min-height: 100px; resize: vertical; }
 
-        /* Option Cards */
-        .option-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-        .option-card {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: #f8f9fa;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .option-card:hover {
-            border-color: var(--primary);
-            background: white;
-        }
-        .option-card.selected {
-            border-color: var(--gold);
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
-        }
-        .option-card input { display: none; }
-        .option-icon {
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-size: 1.1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .option-card.selected .option-icon {
-            background: var(--gold);
-            color: white;
-        }
-        .option-text { flex: 1; }
-        .option-text strong {
-            display: block;
-            color: var(--primary-dark);
-            margin-bottom: 0.2rem;
-        }
-        .option-text span {
-            font-size: 0.85rem;
-            color: var(--text-light);
-        }
-        .option-check {
-            width: 22px;
-            height: 22px;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: transparent;
-            transition: all 0.2s;
-        }
-        .option-card.selected .option-check {
-            background: var(--gold);
-            border-color: var(--gold);
-            color: white;
-        }
-
-        /* Radio inline options */
         .radio-group {
             display: flex;
-            gap: 1rem;
             flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.3rem;
         }
         .radio-option {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.7rem 1rem;
-            background: #f8f9fa;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
             border: 2px solid var(--border);
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.95rem;
         }
         .radio-option:hover {
             border-color: var(--primary);
+            background: rgba(47, 133, 146, 0.05);
         }
-        .radio-option.selected {
+        .radio-option input[type="radio"] {
+            width: auto;
+            padding: 0;
+            margin: 0;
+            accent-color: var(--gold);
+        }
+        .radio-option input[type="radio"]:checked + span {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        .radio-option:has(input:checked) {
             border-color: var(--gold);
-            background: rgba(212, 175, 55, 0.1);
+            background: rgba(212, 175, 55, 0.08);
         }
-        .radio-option input { display: none; }
 
-        .medical-notice {
-            background: linear-gradient(135deg, rgba(47, 133, 146, 0.1), rgba(0, 59, 70, 0.05));
+        .conditional-field {
+            display: none;
+            margin-top: 0.8rem;
+            padding-right: 1rem;
+            border-right: 3px solid var(--gold);
+        }
+        .conditional-field.visible { display: block; }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
             border-radius: 12px;
             padding: 1rem;
-            margin-bottom: 1rem;
+            margin: 1.5rem 0;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 0.8rem;
             font-size: 0.9rem;
+            color: var(--primary-dark);
         }
-        .medical-notice i { color: var(--primary); font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+        .info-box i { color: var(--gold); font-size: 1.2rem; }
 
-        .btn-container {
+        .btn-row {
             display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
         }
         .btn {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            flex: 1;
+            width: 100%;
             padding: 1rem;
             border: none;
             border-radius: 12px;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            text-decoration: none;
         }
         .btn-primary {
             background: linear-gradient(135deg, var(--gold), #c9a227);
@@ -339,11 +286,22 @@
             background: white;
             color: var(--text);
             border: 2px solid var(--border);
+            flex: 0 0 auto;
+            width: auto;
+            padding: 1rem 1.5rem;
         }
         .btn-secondary:hover {
             border-color: var(--primary);
-            color: var(--primary);
+            background: rgba(47, 133, 146, 0.05);
         }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+        .error-msg.show { display: block; }
 
         .toast {
             position: fixed;
@@ -367,18 +325,12 @@
             .form-card { padding: 1.5rem; border-radius: 16px; }
             .step-label { font-size: 0.65rem; }
             .step-circle { width: 35px; height: 35px; font-size: 0.9rem; }
-            .btn-container { flex-direction: column-reverse; }
-            .radio-group { flex-direction: column; }
+            .radio-group { gap: 0.4rem; }
+            .btn-row { flex-direction: column-reverse; }
+            .btn-secondary { width: 100%; }
         }
     </style>
-
-    <!-- === SEO Tags (auto-generated) === -->
     <link rel="canonical" href="https://www.therapist-home.com/pages/patient-step3.html">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="שלב 3 — העדפות טיפול | בית המטפלים">
-    <meta name="twitter:description" content="שלב 3 בתהליך ההרשמה לטיפול">
-    <meta name="twitter:image" content="https://www.therapist-home.com/assets/logo.png">
-    <!-- === /SEO Tags === -->
 </head>
 <body>
     <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
@@ -387,10 +339,11 @@
         <a href="course-library.html"><i class="fa-solid fa-arrow-right"></i> חזרה לפורטל</a>
     </nav>
     <div class="form-breadcrumb">
-        <a href="course-library.html">פורטל</a> <span class="separator">›</span>
-        <a href="course-library.html">הרשמה</a> <span class="separator">›</span>
+        <a href="course-library.html">פורטל</a> <span class="separator">></span>
+        <a href="course-library.html">הרשמה</a> <span class="separator">></span>
         <span class="current">שלב 3 מתוך 4</span>
     </div>
+
     <div class="header">
         <h1><img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle"> בית המטפלים</h1>
         <p>בקשה לקבלת טיפול רגשי</p>
@@ -399,292 +352,217 @@
     <div class="progress-container">
         <div class="progress-steps">
             <div class="step completed">
-                <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-                <span class="step-label">סינון והיכרות</span>
+                <div class="step-circle"><i class="fa-solid fa-check" style="font-size:0.8rem"></i></div>
+                <span class="step-label">פרטים אישיים</span>
             </div>
             <div class="step completed">
-                <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-                <span class="step-label">דינמיקה משפחתית</span>
+                <div class="step-circle"><i class="fa-solid fa-check" style="font-size:0.8rem"></i></div>
+                <span class="step-label">היכרות עומק</span>
             </div>
             <div class="step active" aria-current="step">
                 <div class="step-circle">3</div>
-                <span class="step-label">ציפיות ורפואי</span>
+                <span class="step-label">שאלון מקצועי</span>
             </div>
             <div class="step">
                 <div class="step-circle">4</div>
-                <span class="step-label">התחייבות</span>
+                <span class="step-label">הסכם והגשה</span>
             </div>
         </div>
     </div>
 
     <main id="main-content" class="container">
-        <form id="step3-form">
-            <div class="form-card">
-                <div class="step-header">
-                    <div class="step-icon"><i class="fa-solid fa-comments"></i></div>
-                    <h2>תיאום ציפיות</h2>
-                    <p>כדי שנוכל להתאים לך את המטפל/ת הטוב/ה ביותר</p>
-                </div>
-
-                <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> ניסיון עבר</h3>
-
-                <div class="form-group">
-                    <label for="previous_therapy_history">האם עברת טיפול רגשי בעבר?</label>
-                    <textarea name="previous_therapy_history" id="previous_therapy_history" placeholder="אם כן, ספר/י בקצרה על הניסיון - מה עבד, מה פחות..." autocomplete="off"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="why_now">למה דווקא עכשיו? <span class="label-hint">(מה הטריגר לפנייה)</span></label>
-                    <textarea name="why_now" id="why_now" placeholder="מה קרה שגרם לך לחפש עזרה דווקא בתקופה הזו?" autocomplete="off"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="fears">האם יש לך חששות או פחדים לגבי הטיפול?</label>
-                    <textarea name="fears" id="fears" placeholder="חששות, פחדים, חסמים..." autocomplete="off"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="expectations">מה את/ה מקווה להשיג מהטיפול?</label>
-                    <textarea name="expectations" id="expectations" placeholder="מה היית רוצה שישתנה בחיים שלך?" autocomplete="off"></textarea>
-                </div>
+        <div class="form-card">
+            <div class="step-header">
+                <div class="step-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                <h2>כמה שאלות אחרונות לפני שנתאים לך מטפל</h2>
+                <p>שאלון מקצועי</p>
             </div>
 
-            <div class="form-card">
-                <h3 class="section-title"><i class="fa-solid fa-briefcase-medical"></i> מידע רפואי</h3>
+            <form id="step3-form" novalidate>
+                <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> רקע והקשר</h3>
 
-                <div class="medical-notice">
-                    <i class="fa-solid fa-shield-heart"></i>
-                    <div>מידע זה חשוב להתאמת הטיפול. הכל נשמר בסודיות מלאה.</div>
+                <div class="form-group">
+                    <label for="issue_duration">כמה זמן אתה מתמודד עם הנושא הזה?</label>
+                    <input type="text" name="issue_duration" id="issue_duration" placeholder="למשל: חודשיים, שנה, מאז הילדות..." autocomplete="off">
                 </div>
 
                 <div class="form-group">
-                    <label for="chronic_issues">האם יש לך מחלות כרוניות או בעיות בריאותיות?</label>
-                    <textarea name="chronic_issues" id="chronic_issues" placeholder="אם כן, פרט/י..." style="min-height: 60px;" autocomplete="off"></textarea>
+                    <label for="previous_attempts">מה ניסית עד עכשיו? איך זה הלך?</label>
+                    <textarea name="previous_attempts" id="previous_attempts" placeholder="טיפול קודם, ספרים, קורסים, שיחות..." autocomplete="off"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="medications">האם את/ה נוטל/ת תרופות פסיכיאטריות או אחרות?</label>
-                    <input type="text" name="medications" id="medications" placeholder="שמות תרופות (אם יש)" autocomplete="off">
+                    <label for="why_now">למה דווקא עכשיו חשוב לך לעבור תהליך כזה? <span class="required">*</span></label>
+                    <textarea name="why_now" id="why_now" required placeholder="מה הניע אותך לפנות דווקא עכשיו?" autocomplete="off"></textarea>
+                    <div class="error-msg" id="why_now-error">יש למלא שדה זה</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="other_treatment_yes">האם את/ה נמצא/ת בטיפול נפשי או רפואי נוסף כרגע?</label>
-                    <div class="radio-group" id="other-treatment-group">
-                        <label class="radio-option" data-value="yes" onclick="setTimeout(toggleTreatmentDetails, 10)">
-                            <input type="radio" name="other_treatment" value="yes" id="other_treatment_yes">
-                            <span>כן</span>
-                        </label>
-                        <label class="radio-option" data-value="no" onclick="setTimeout(toggleTreatmentDetails, 10)">
-                            <input type="radio" name="other_treatment" value="no">
-                            <span>לא</span>
-                        </label>
+                    <label for="fears">מה החששות שלך מתהליך כזה?</label>
+                    <textarea name="fears" id="fears" placeholder="חששות, פחדים, הסתייגויות..." autocomplete="off"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="success_definition">מה יגדיר מבחינתך הצלחה לתהליך הזה? <span class="required">*</span></label>
+                    <textarea name="success_definition" id="success_definition" required placeholder="מה היית רוצה שישתנה?" autocomplete="off"></textarea>
+                    <div class="error-msg" id="success_definition-error">יש למלא שדה זה</div>
+                </div>
+
+                <h3 class="section-title"><i class="fa-solid fa-heart-pulse"></i> רקע רפואי</h3>
+
+                <div class="form-group">
+                    <label for="medical_issues">האם יש לך בעיות רפואיות?</label>
+                    <textarea name="medical_issues" id="medical_issues" placeholder="אם כן, פרט/י..." autocomplete="off"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>האם אתה לוקח/לקחת תרופות פסיכיאטריות?</label>
+                    <div class="radio-group">
+                        <label class="radio-option"><input type="radio" name="psych_meds" value="yes"><span>כן</span></label>
+                        <label class="radio-option"><input type="radio" name="psych_meds" value="no"><span>לא</span></label>
                     </div>
-                    <div id="treatment-details-container" style="display: none; margin-top: 1rem;">
-                        <textarea name="other_treatment_details" id="other_treatment_details" placeholder="ספר/י לנו על הטיפול - איזה סוג טיפול, כמה זמן, תדירות..." style="min-height: 80px;" autocomplete="off"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-card">
-                <h3 class="section-title"><i class="fa-solid fa-sliders"></i> העדפות לוגיסטיות</h3>
-
-                <div class="form-group">
-                    <label for="therapy_type_online">סוג טיפול מועדף <span class="required">*</span></label>
-                    <div class="option-cards" id="therapy-type-options">
-                        <label class="option-card" data-value="online">
-                            <input type="radio" name="therapy_type" value="online" id="therapy_type_online">
-                            <div class="option-icon"><i class="fa-solid fa-video"></i></div>
-                            <div class="option-text">
-                                <strong>זום (אונליין)</strong>
-                                <span>טיפול מרחוק מהנוחות של הבית</span>
-                            </div>
-                            <div class="option-check"><i class="fa-solid fa-check"></i></div>
-                        </label>
-                        <label class="option-card" data-value="in_person">
-                            <input type="radio" name="therapy_type" value="in_person">
-                            <div class="option-icon"><i class="fa-solid fa-building"></i></div>
-                            <div class="option-text">
-                                <strong>פרונטלי</strong>
-                                <span>פגישה פנים אל פנים בקליניקה</span>
-                            </div>
-                            <div class="option-check"><i class="fa-solid fa-check"></i></div>
-                        </label>
-                        <label class="option-card" data-value="both">
-                            <input type="radio" name="therapy_type" value="both">
-                            <div class="option-icon"><i class="fa-solid fa-arrows-left-right"></i></div>
-                            <div class="option-text">
-                                <strong>גמיש</strong>
-                                <span>שניהם מתאימים לי</span>
-                            </div>
-                            <div class="option-check"><i class="fa-solid fa-check"></i></div>
-                        </label>
+                    <div class="conditional-field" id="psych_meds_details_container">
+                        <div class="form-group">
+                            <label for="psych_meds_details">פרט/י אילו תרופות</label>
+                            <textarea name="psych_meds_details" id="psych_meds_details" placeholder="שם התרופה, מינון, משך..." autocomplete="off"></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="therapist_gender_any">העדפת מגדר המטפל/ת</label>
-                    <div class="option-cards" id="gender-options">
-                        <label class="option-card selected" data-value="any">
-                            <input type="radio" name="therapist_gender_preference" value="any" id="therapist_gender_any" checked>
-                            <div class="option-icon"><i class="fa-solid fa-users"></i></div>
-                            <div class="option-text">
-                                <strong>לא משנה לי</strong>
-                                <span>מתאים לי כל מטפל/ת</span>
-                            </div>
-                            <div class="option-check"><i class="fa-solid fa-check"></i></div>
-                        </label>
-                        <label class="option-card" data-value="female">
-                            <input type="radio" name="therapist_gender_preference" value="female">
-                            <div class="option-icon"><i class="fa-solid fa-person-dress"></i></div>
-                            <div class="option-text">
-                                <strong>מטפלת (אישה)</strong>
-                                <span>אעדיף לקבל טיפול מאישה</span>
-                            </div>
-                            <div class="option-check"><i class="fa-solid fa-check"></i></div>
-                        </label>
-                        <label class="option-card" data-value="male">
-                            <input type="radio" name="therapist_gender_preference" value="male">
-                            <div class="option-icon"><i class="fa-solid fa-person"></i></div>
-                            <div class="option-text">
-                                <strong>מטפל (גבר)</strong>
-                                <span>אעדיף לקבל טיפול מגבר</span>
-                            </div>
-                            <div class="option-check"><i class="fa-solid fa-check"></i></div>
-                        </label>
+                    <label>האם אתה מטופל במסגרת טיפולית נוספת?</label>
+                    <div class="radio-group">
+                        <label class="radio-option"><input type="radio" name="other_treatment" value="yes"><span>כן</span></label>
+                        <label class="radio-option"><input type="radio" name="other_treatment" value="no"><span>לא</span></label>
+                    </div>
+                    <div class="conditional-field" id="other_treatment_details_container">
+                        <div class="form-group">
+                            <label for="other_treatment_details">פרט/י את סוג הטיפול</label>
+                            <textarea name="other_treatment_details" id="other_treatment_details" placeholder="סוג הטיפול, תדירות, היכן..." autocomplete="off"></textarea>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="btn-container">
-                <a href="patient-step2.html" class="btn btn-secondary">
-                    <i class="fa-solid fa-arrow-right"></i>
-                    חזרה
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    המשך לסיום
-                    <i class="fa-solid fa-arrow-left"></i>
-                </button>
-            </div>
-        </form>
+                <h3 class="section-title"><i class="fa-solid fa-sliders"></i> העדפות</h3>
+
+                <div class="form-group">
+                    <label>העדפת מגדר המטפל</label>
+                    <div class="radio-group">
+                        <label class="radio-option"><input type="radio" name="therapist_gender_pref" value="any" checked><span>לא משנה לי</span></label>
+                        <label class="radio-option"><input type="radio" name="therapist_gender_pref" value="male"><span>זכר</span></label>
+                        <label class="radio-option"><input type="radio" name="therapist_gender_pref" value="female"><span>נקבה</span></label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>העדפת סגנון פגישות</label>
+                    <div class="radio-group">
+                        <label class="radio-option"><input type="radio" name="session_style" value="any" checked><span>לא משנה לי</span></label>
+                        <label class="radio-option"><input type="radio" name="session_style" value="clinic"><span>קליניקה</span></label>
+                        <label class="radio-option"><input type="radio" name="session_style" value="zoom"><span>זום</span></label>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <i class="fa-solid fa-star"></i>
+                    <span>עוד שלב אחד קטן ואנחנו מתחילים לחפש לך את המטפל המושלם</span>
+                </div>
+
+                <div class="btn-row">
+                    <a href="patient-step2.html" class="btn btn-secondary">
+                        <i class="fa-solid fa-arrow-right"></i> חזרה
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        המשך לשלב האחרון
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
     </main>
 
     <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
     <script>
-        // Toggle treatment details visibility
-        function toggleTreatmentDetails() {
-            const yesSelected = document.querySelector('[name="other_treatment"][value="yes"]').checked;
-            const container = document.getElementById('treatment-details-container');
-            container.style.display = yesSelected ? 'block' : 'none';
-            if (!yesSelected) {
-                document.getElementById('other_treatment_details').value = '';
-            }
-        }
-
-        // Check if previous steps were completed
         document.addEventListener('DOMContentLoaded', () => {
-            const saved = JSON.parse(localStorage.getItem('patientForm') || '{}');
-            if (!saved.full_name || !saved.mother_relationship) {
-                window.location.href = 'patient-step1.html';
+            const saved = JSON.parse(localStorage.getItem('patient_form_data') || '{}');
+
+            // Step guard
+            if (!saved.step2_complete) {
+                window.location.href = 'patient-step2.html';
                 return;
             }
 
-            // Load saved data
-            const fields = ['previous_therapy_history', 'why_now', 'fears', 'expectations',
-                          'chronic_issues', 'medications'];
-            fields.forEach(field => {
-                const el = document.getElementById(field);
-                if (el && saved[field]) el.value = saved[field];
+            // Populate text fields
+            const textFields = ['issue_duration', 'previous_attempts', 'why_now', 'fears',
+                               'success_definition', 'medical_issues', 'psych_meds_details', 'other_treatment_details'];
+            textFields.forEach(f => {
+                const el = document.getElementById(f);
+                if (el && saved[f]) el.value = saved[f];
             });
 
-            // Load other_treatment radio
-            if (saved.other_treatment) {
-                const radio = document.querySelector(`[name="other_treatment"][value="${saved.other_treatment}"]`);
-                if (radio) {
-                    radio.checked = true;
-                    radio.closest('.radio-option').classList.add('selected');
+            // Populate radio fields
+            ['psych_meds', 'other_treatment', 'therapist_gender_pref', 'session_style'].forEach(name => {
+                if (saved[name]) {
+                    const radio = document.querySelector(`input[name="${name}"][value="${saved[name]}"]`);
+                    if (radio) radio.checked = true;
                 }
-                // Show details if "yes" was selected
-                if (saved.other_treatment === 'yes') {
-                    document.getElementById('treatment-details-container').style.display = 'block';
-                }
-            }
-
-            // Load other_treatment_details
-            if (saved.other_treatment_details) {
-                document.getElementById('other_treatment_details').value = saved.other_treatment_details;
-            }
-
-            // Load therapy type
-            if (saved.therapy_type) {
-                const card = document.querySelector(`#therapy-type-options [data-value="${saved.therapy_type}"]`);
-                if (card) {
-                    card.classList.add('selected');
-                    card.querySelector('input').checked = true;
-                }
-            }
-
-            // Load gender preference
-            if (saved.therapist_gender_preference) {
-                document.querySelectorAll('#gender-options .option-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                const card = document.querySelector(`#gender-options [data-value="${saved.therapist_gender_preference}"]`);
-                if (card) {
-                    card.classList.add('selected');
-                    card.querySelector('input').checked = true;
-                }
-            }
-        });
-
-        // Option card selection
-        document.querySelectorAll('.option-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const group = card.closest('.option-cards');
-                group.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-                card.querySelector('input').checked = true;
             });
+
+            // Show conditional fields if needed
+            updateConditionals();
         });
 
-        // Radio option selection
-        document.querySelectorAll('.radio-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const group = option.closest('.radio-group');
-                group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
-                option.classList.add('selected');
-                option.querySelector('input').checked = true;
-            });
+        // Conditional field toggling
+        document.querySelectorAll('input[name="psych_meds"]').forEach(r => {
+            r.addEventListener('change', updateConditionals);
+        });
+        document.querySelectorAll('input[name="other_treatment"]').forEach(r => {
+            r.addEventListener('change', updateConditionals);
         });
 
-        // Form submission
+        function updateConditionals() {
+            const medsVal = document.querySelector('input[name="psych_meds"]:checked');
+            const treatVal = document.querySelector('input[name="other_treatment"]:checked');
+            document.getElementById('psych_meds_details_container').classList.toggle('visible', medsVal && medsVal.value === 'yes');
+            document.getElementById('other_treatment_details_container').classList.toggle('visible', treatVal && treatVal.value === 'yes');
+        }
+
         document.getElementById('step3-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const therapyType = document.querySelector('[name="therapy_type"]:checked');
-            if (!therapyType) {
-                showToast('יש לבחור סוג טיפול מועדף');
-                return;
-            }
+            const whyNow = document.getElementById('why_now').value.trim();
+            const successDef = document.getElementById('success_definition').value.trim();
 
-            const therapistGender = document.querySelector('[name="therapist_gender_preference"]:checked');
-            const otherTreatment = document.querySelector('[name="other_treatment"]:checked');
+            if (!whyNow || whyNow.length < 5) { showToast('יש לענות על השאלה "למה דווקא עכשיו"'); return; }
+            if (!successDef || successDef.length < 5) { showToast('יש להגדיר מה הצלחה מבחינתך'); return; }
 
-            // Save to localStorage
-            const saved = JSON.parse(localStorage.getItem('patientForm') || '{}');
-            saved.previous_therapy_history = document.getElementById('previous_therapy_history').value.trim();
-            saved.why_now = document.getElementById('why_now').value.trim();
+            const saved = JSON.parse(localStorage.getItem('patient_form_data') || '{}');
+
+            saved.issue_duration = document.getElementById('issue_duration').value.trim();
+            saved.previous_attempts = document.getElementById('previous_attempts').value.trim();
+            saved.why_now = whyNow;
             saved.fears = document.getElementById('fears').value.trim();
-            saved.expectations = document.getElementById('expectations').value.trim();
-            saved.chronic_issues = document.getElementById('chronic_issues').value.trim();
-            saved.medications = document.getElementById('medications').value.trim();
-            saved.other_treatment = otherTreatment ? otherTreatment.value : '';
-            saved.other_treatment_details = document.getElementById('other_treatment_details').value.trim();
-            saved.therapy_type = therapyType.value;
-            saved.therapist_gender_preference = therapistGender ? therapistGender.value : 'any';
-            localStorage.setItem('patientForm', JSON.stringify(saved));
+            saved.success_definition = successDef;
+            saved.medical_issues = document.getElementById('medical_issues').value.trim();
 
-            // Go to final step
+            const medsEl = document.querySelector('input[name="psych_meds"]:checked');
+            saved.psych_meds = medsEl ? medsEl.value : '';
+            saved.psych_meds_details = document.getElementById('psych_meds_details').value.trim();
+
+            const treatEl = document.querySelector('input[name="other_treatment"]:checked');
+            saved.other_treatment = treatEl ? treatEl.value : '';
+            saved.other_treatment_details = document.getElementById('other_treatment_details').value.trim();
+
+            const genderPrefEl = document.querySelector('input[name="therapist_gender_pref"]:checked');
+            saved.therapist_gender_pref = genderPrefEl ? genderPrefEl.value : 'any';
+
+            const styleEl = document.querySelector('input[name="session_style"]:checked');
+            saved.session_style = styleEl ? styleEl.value : 'any';
+
+            saved.step3_complete = true;
+            localStorage.setItem('patient_form_data', JSON.stringify(saved));
+
             window.location.href = 'patient-step4.html';
         });
 
@@ -695,10 +573,8 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
     </script>
-    <!-- Marketing & Analytics -->
     <script src="../js/marketing-tools.js"></script>
     <script>
-    // P3-17: Autosave form data every 30s
     (function() {
         var key = 'autosave_' + location.pathname;
         var fields = document.querySelectorAll('input, select, textarea');

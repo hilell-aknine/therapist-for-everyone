@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#003B46">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="../assets/logo-square.png">
-    <title>שלב 4 - התחייבות וסיום | מטפל לכל אחד</title>
-    <meta name="description" content="שלב 4 — אישור תנאים וסיום ההרשמה לטיפול בבית המטפלים.">
-    <meta property="og:title" content="שלב 4 — אישור ושליחה | בית המטפלים">
-    <meta property="og:description" content="שלב 4 — סיום ההרשמה לטיפול">
+    <title>שלב 4 - הסכם והגשה | מטפל לכל אחד</title>
+    <meta name="description" content="שלב 4 — אישור והגשת המועמדות בבית המטפלים.">
+    <meta property="og:title" content="שלב 4 — הסכם והגשה | בית המטפלים">
+    <meta property="og:description" content="שלב 4 בתהליך ההרשמה לטיפול">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.therapist-home.com/pages/patient-step4.html">
     <meta property="og:image" content="https://www.therapist-home.com/assets/logo.png">
@@ -22,6 +22,9 @@
     <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
     <link rel="stylesheet" href="../css/theme.css">
     <script src="../js/theme-toggle.js" defer></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
     <style>
         :root {
             --primary: #2F8592;
@@ -35,8 +38,6 @@
             --border: #e0e0e0;
             --success: #28a745;
             --error: #dc3545;
-        
-            /* === Theme Bridge === */
             --gold: var(--t-gold);
             --gold-light: var(--t-gold-light);
             --gold-glow: var(--t-gold-glow);
@@ -91,7 +92,8 @@
             background: var(--border);
             z-index: 1;
         }
-        .step.completed:not(:last-child)::after {
+        .step.completed:not(:last-child)::after,
+        .step.active:not(:last-child)::after {
             background: var(--gold);
         }
         .step-circle {
@@ -107,6 +109,7 @@
             color: var(--text-light);
             position: relative;
             z-index: 2;
+            transition: all 0.3s;
         }
         .step.active .step-circle {
             border-color: var(--gold);
@@ -128,7 +131,7 @@
         .step.completed .step-label { color: var(--t-gold-text, #8B6914); }
 
         .container {
-            max-width: 700px;
+            max-width: 600px;
             margin: 0 auto;
             padding: 2rem 1rem;
         }
@@ -157,215 +160,186 @@
         .step-header h2 { color: var(--primary-dark); margin-bottom: 0.5rem; }
         .step-header p { color: var(--text-light); font-size: 0.95rem; }
 
-        /* Moral Commitment Box - Scrollable */
-        .moral-box {
-            background: linear-gradient(135deg, rgba(47, 133, 146, 0.08), rgba(0, 59, 70, 0.04));
-            border: 2px solid var(--primary);
-            border-radius: 16px;
-            padding: 1.8rem;
-            margin-bottom: 1rem;
-            max-height: 350px;
-            overflow-y: auto;
-        }
-        .moral-box h4 {
-            color: var(--primary-dark);
+        .section-title {
             font-size: 1rem;
-            margin: 1.5rem 0 0.8rem 0;
-        }
-        .moral-box h4:first-of-type {
-            margin-top: 1rem;
-        }
-        .moral-box .warning-box {
-            background: rgba(220, 53, 69, 0.1);
-            border: 1px solid var(--error);
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .moral-box .warning-box p {
-            color: var(--error);
-            font-weight: 500;
-        }
-        .moral-box::-webkit-scrollbar {
-            width: 6px;
-        }
-        .moral-box::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 3px;
-        }
-        .moral-box::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
-        }
-        .moral-box h3 {
-            color: var(--primary-dark);
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .moral-box h3 i { color: var(--t-gold-text, #8B6914); }
-        .moral-box p {
-            color: var(--text);
-            line-height: 1.9;
-            font-size: 1rem;
-        }
-        .moral-box .highlight {
-            color: var(--primary-dark);
             font-weight: 600;
-        }
-
-        /* Scroll hint */
-        .scroll-hint {
+            color: var(--primary-dark);
+            margin: 1.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gold);
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
-            padding: 0.6rem;
-            background: rgba(220, 53, 69, 0.1);
-            border: 1px solid var(--error);
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            color: var(--error);
-            font-size: 0.85rem;
-            animation: pulse 2s infinite;
         }
-        .scroll-hint.hidden { display: none; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
+        .section-title i { color: var(--gold); }
 
-        /* Locked state for checkboxes */
-        .checkbox-item.locked {
-            opacity: 0.5;
-            pointer-events: none;
+        .form-group { margin-bottom: 1.2rem; }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+        .required { color: var(--error); }
+
+        /* Summary card */
+        .summary-card {
+            background: linear-gradient(135deg, rgba(0, 59, 70, 0.06), rgba(47, 133, 146, 0.04));
+            border: 1px solid rgba(47, 133, 146, 0.2);
+            border-radius: 14px;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .summary-card h4 {
+            color: var(--primary-dark);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .summary-card h4 i { color: var(--gold); }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            font-size: 0.95rem;
+        }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-label { color: var(--text-light); }
+        .summary-value { font-weight: 600; color: var(--text); }
+
+        /* Photo upload */
+        .photo-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(47, 133, 146, 0.02);
+        }
+        .photo-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(47, 133, 146, 0.05);
+        }
+        .photo-upload-area.has-photo {
+            border-color: var(--success);
+            background: rgba(40, 167, 69, 0.05);
+        }
+        .photo-upload-area i {
+            font-size: 2.5rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+        .photo-upload-area.has-photo i { color: var(--success); }
+        .photo-upload-area p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        .photo-preview {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 12px;
+            margin-top: 0.8rem;
+            display: none;
+            object-fit: cover;
+        }
+        .photo-preview.visible { display: block; margin: 0.8rem auto 0; }
+        input[type="file"] { display: none; }
+
+        /* Legal box */
+        .legal-box {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 1rem;
         }
 
         /* Checkboxes */
         .checkbox-item {
             display: flex;
             align-items: flex-start;
-            gap: 0.8rem;
-            padding: 1rem;
-            background: #f8f9fa;
+            gap: 0.6rem;
+            padding: 0.8rem;
             border: 2px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 0.8rem;
+            border-radius: 10px;
+            margin-bottom: 0.6rem;
             cursor: pointer;
             transition: all 0.2s;
         }
         .checkbox-item:hover {
             border-color: var(--primary);
+            background: rgba(47, 133, 146, 0.03);
         }
         .checkbox-item.checked {
-            border-color: var(--success);
-            background: rgba(40, 167, 69, 0.05);
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.06);
         }
-        .checkbox-item input {
-            width: 22px;
-            height: 22px;
-            margin-top: 2px;
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-top: 0.15rem;
+            accent-color: var(--gold);
             flex-shrink: 0;
-            accent-color: var(--success);
-            cursor: pointer;
         }
         .checkbox-item label {
+            margin: 0;
+            font-weight: 400;
             cursor: pointer;
-            line-height: 1.5;
+            font-size: 0.95rem;
         }
-        .checkbox-item .required { color: var(--error); }
 
-        /* Signature Canvas */
-        .signature-section {
-            margin-top: 1.5rem;
-        }
-        .signature-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        .btn-clear-signature {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            cursor: pointer;
+        .error-msg {
+            color: var(--error);
             font-size: 0.85rem;
-            text-decoration: underline;
-        }
-        .btn-clear-signature:hover { color: var(--error); }
-        .field-error {
-            color: #dc3545;
-            font-size: 0.82rem;
             margin-top: 0.3rem;
             display: none;
         }
-        .field-error.show { display: block; }
-        .checkbox-item.error { border-color: #dc3545 !important; }
-        .signature-canvas-container.error { border-color: #dc3545 !important; }
-        .signature-canvas-container {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            background: white;
-            position: relative;
-            overflow: hidden;
-        }
-        .signature-canvas-container.has-signature {
-            border-style: solid;
-            border-color: var(--success);
-        }
-        #signature-canvas {
-            width: 100%;
-            height: 150px;
-            cursor: crosshair;
-            touch-action: none;
-        }
-        .signature-placeholder {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--text-light);
-            pointer-events: none;
-            font-size: 0.9rem;
-        }
-        .signature-canvas-container.has-signature .signature-placeholder {
-            display: none;
+        .error-msg.show { display: block; }
+
+        /* Turnstile container */
+        #turnstile-container {
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0;
         }
 
-        .btn-container {
+        .btn-row {
             display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
         }
         .btn {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            flex: 1;
+            width: 100%;
             padding: 1rem;
             border: none;
             border-radius: 12px;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            text-decoration: none;
         }
         .btn-primary {
-            background: linear-gradient(135deg, var(--success), #20c997);
-            color: white;
+            background: linear-gradient(135deg, var(--gold), #c9a227);
+            color: var(--primary-dark);
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
         }
         .btn-primary:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
@@ -374,43 +348,66 @@
             background: white;
             color: var(--text);
             border: 2px solid var(--border);
+            flex: 0 0 auto;
+            width: auto;
+            padding: 1rem 1.5rem;
         }
         .btn-secondary:hover {
             border-color: var(--primary);
-            color: var(--primary);
+            background: rgba(47, 133, 146, 0.05);
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        .btn-whatsapp:hover {
+            background: #1fb855;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+        .btn-outline {
+            background: white;
+            color: var(--primary-dark);
+            border: 2px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: rgba(47, 133, 146, 0.05);
         }
 
-        /* Success State */
-        .success-container {
+        /* Success view */
+        .success-view {
+            display: none;
             text-align: center;
-            padding: 2rem;
+            padding: 2rem 0;
         }
+        .success-view.visible { display: block; }
         .success-icon {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             background: linear-gradient(135deg, var(--success), #20c997);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1.5rem;
-            animation: successPop 0.5s ease;
         }
-        .success-icon i { font-size: 3rem; color: white; }
-        @keyframes successPop {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+        .success-icon i { font-size: 2rem; color: white; }
+        .success-view h2 {
+            color: var(--primary-dark);
+            margin-bottom: 0.8rem;
         }
-        .success-container h2 { color: var(--primary-dark); margin-bottom: 1rem; }
-        .success-container p { color: var(--text-light); line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.05rem; }
-        .btn-home {
-            background: var(--primary);
-            color: white;
-            display: inline-flex;
-            padding: 1rem 2rem;
+        .success-view p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
         }
-        .btn-home:hover { background: var(--primary-dark); }
+        .success-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            max-width: 350px;
+            margin: 0 auto;
+        }
 
         .hidden { display: none !important; }
 
@@ -428,8 +425,8 @@
             background: var(--error);
             color: white;
         }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         .toast.success { background: var(--success); }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         @media (max-width: 600px) {
             .header { padding: 1rem; }
@@ -437,17 +434,12 @@
             .form-card { padding: 1.5rem; border-radius: 16px; }
             .step-label { font-size: 0.65rem; }
             .step-circle { width: 35px; height: 35px; font-size: 0.9rem; }
-            .btn-container { flex-direction: column-reverse; }
+            .btn-row { flex-direction: column-reverse; }
+            .btn-secondary { width: 100%; }
+            .summary-item { flex-direction: column; gap: 0.1rem; }
         }
     </style>
-
-    <!-- === SEO Tags (auto-generated) === -->
     <link rel="canonical" href="https://www.therapist-home.com/pages/patient-step4.html">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="שלב 4 — אישור ושליחה | בית המטפלים">
-    <meta name="twitter:description" content="שלב 4 — סיום ההרשמה לטיפול">
-    <meta name="twitter:image" content="https://www.therapist-home.com/assets/logo.png">
-    <!-- === /SEO Tags === -->
 </head>
 <body>
     <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
@@ -456,10 +448,11 @@
         <a href="course-library.html"><i class="fa-solid fa-arrow-right"></i> חזרה לפורטל</a>
     </nav>
     <div class="form-breadcrumb">
-        <a href="course-library.html">פורטל</a> <span class="separator">›</span>
-        <a href="course-library.html">הרשמה</a> <span class="separator">›</span>
+        <a href="course-library.html">פורטל</a> <span class="separator">></span>
+        <a href="course-library.html">הרשמה</a> <span class="separator">></span>
         <span class="current">שלב 4 מתוך 4</span>
     </div>
+
     <div class="header">
         <h1><img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle"> בית המטפלים</h1>
         <p>בקשה לקבלת טיפול רגשי</p>
@@ -468,20 +461,20 @@
     <div class="progress-container" id="progress-bar">
         <div class="progress-steps">
             <div class="step completed">
-                <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-                <span class="step-label">סינון והיכרות</span>
+                <div class="step-circle"><i class="fa-solid fa-check" style="font-size:0.8rem"></i></div>
+                <span class="step-label">פרטים אישיים</span>
             </div>
             <div class="step completed">
-                <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-                <span class="step-label">דינמיקה משפחתית</span>
+                <div class="step-circle"><i class="fa-solid fa-check" style="font-size:0.8rem"></i></div>
+                <span class="step-label">היכרות עומק</span>
             </div>
             <div class="step completed">
-                <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-                <span class="step-label">ציפיות ורפואי</span>
+                <div class="step-circle"><i class="fa-solid fa-check" style="font-size:0.8rem"></i></div>
+                <span class="step-label">שאלון מקצועי</span>
             </div>
             <div class="step active" aria-current="step">
                 <div class="step-circle">4</div>
-                <span class="step-label">התחייבות</span>
+                <span class="step-label">הסכם והגשה</span>
             </div>
         </div>
     </div>
@@ -492,135 +485,82 @@
             <div class="form-card">
                 <div class="step-header">
                     <div class="step-icon"><i class="fa-solid fa-file-signature"></i></div>
-                    <h2>התחייבות וחתימה</h2>
-                    <p>נא לקרוא ולאשר לפני השליחה</p>
+                    <h2>שלב אחרון — אישור והגשה</h2>
+                    <p>בדוק את הפרטים, העלה תמונה ואשר את התנאים</p>
                 </div>
 
-                <!-- PDF Download Button -->
-                <div style="text-align: center; margin-bottom: 1rem;">
-                    <a href="../docs/הסכם תנאי שימוש למטופל עודכן ב1.2.pdf" target="_blank" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; text-decoration: none;">
-                        <i class="fa-solid fa-file-pdf" style="color: #dc3545;"></i>
-                        הורד את המסמך המשפטי המלא (PDF)
-                    </a>
-                </div>
-
-                <!-- Moral Commitment Box - Scrollable -->
-                <div class="moral-box" id="moral-box" tabindex="0" role="region" aria-label="טקסט משפטי">
-                    <h3><i class="fa-solid fa-scroll"></i> הסכם תנאי שימוש, כתב ויתור ושחרור מאחריות</h3>
-                    <p><strong>פלטפורמת "מטפל לכל אחד"</strong></p>
-                    <p><em>גרסה משפטית סופית (3.3) – כולל הגבלת זכאות חד-פעמית</em></p>
-                    <p>השימוש במערכת, מילוי השאלונים וקבלת פרטי קשר של מטפל מהווים הסכמה מלאה, בלתי חוזרת ומחייבת לכל התנאים המפורטים להלן.</p>
-
-                    <h4>1. הצהרת חירום והעדר מענה רפואי</h4>
-                    <p><strong>1.1. הפלטפורמה אינה גוף רפואי:</strong> המערכת משמשת כלוח מודעות טכנולוגי בלבד. היא אינה מספקת שירותי חירום, עזרה ראשונה נפשית, או אבחון רפואי/פסיכיאטרי.</p>
-                    <p><strong>1.2. איסור שימוש במצבי קיצון:</strong> השימוש בפלטפורמה אסור למי שנמצא במצב של מצוקה אקוטית, סכנת אובדנות, או מסוכנות לעצמו או לאחרים.</p>
-                    <p><strong>1.3. פטור מאחריות בחירום:</strong> הפלטפורמה לא תישא בשום אחריות לכל נזק שייגרם עקב הסתמכות עליה במצב חירום. במקרים אלו, יש לפנות לגורמי חירום (משטרה 100, מד"א 101, ער"ן 1201).</p>
-
-                    <h4>2. כשירות משפטית וגיל</h4>
-                    <p><strong>2.1. בגירים בלבד:</strong> השירות מיועד אך ורק לבגירים מעל גיל 18.</p>
-                    <p><strong>2.2. הצהרת המשתמש:</strong> בחתימתו, המטופל מצהיר כי הוא בגיר (מעל 18), צלול בדעתו, וכשיר משפטית להתקשר בהסכם זה. חל איסור מוחלט על רישום קטינים.</p>
-
-                    <h4>3. מהות השירות: "לוח מודעות"</h4>
-                    <p><strong>3.1. העדר יחסי עובד-מעביד:</strong> ידוע למטופל כי המטפלים בפלטפורמה הינם ספקים עצמאיים ומתנדבים. אין בינם לבין הפלטפורמה יחסי עובד-מעביד.</p>
-                    <p><strong>3.2. אי-אחריות לטיב הטיפול:</strong> הפלטפורמה אינה בודקת את שיטות הטיפול או את התכנים המועברים במפגשים. האחריות המקצועית חלה במלואה על המטפל בלבד.</p>
-
-                    <h4>4. גבולות הטיפול ומוגנות</h4>
-                    <p><strong>4.1. איסור מגע:</strong> ידוע למטופל כי הטיפול בפלטפורמה מוגדר כשיחה בלבד. חל איסור מוחלט על המטפל ליצור מגע פיזי עם המטופל. במידה והמטפל מנסה ליצור מגע, חובה על המטופל להפסיק את המפגש ולדווח לפלטפורמה.</p>
-                    <p><strong>4.2. איסור קשרים רומנטיים:</strong> הקשר הינו מקצועי בלבד. כל הצעה בעלת אופי רומנטי או מיני מצד המטפל מהווה עבירה אתית חמורה ויש לדווח עליה.</p>
-
-                    <h4>5. ויתור ושיפוי</h4>
-                    <p><strong>5.1. ויתור על תביעות:</strong> המטופל מוותר בזאת ויתור סופי ומוחלט על כל טענה או תביעה כלפי הפלטפורמה ומנהליה בגין כל נזק (נפשי, גופני או ממוני) שייגרם לו כתוצאה מהטיפול או מהקשר עם המטפל.</p>
-                    <p><strong>5.2. תביעה אישית:</strong> כל טענה בדבר רשלנות מקצועית, הטרדה או נזק תופנה אך ורק כלפי המטפל האישי, ולא כלפי הפלטפורמה המתווכת.</p>
-
-                    <h4>6. פרטיות המידע</h4>
-                    <p><strong>6.1. המטפל כבעל המאגר:</strong> ידוע למטופל כי הרשומות הרפואיות וסיכומי השיחות נשמרים אך ורק אצל המטפל, והוא האחראי הבלעדי לאבטחתם.</p>
-                    <p><strong>6.2. העדר גישה לפלטפורמה:</strong> למנהלי הפלטפורמה אין גישה לתיק הרפואי או לתוכן השיחות. הפלטפורמה שומרת מידע אדמיניסטרטיבי בלבד (שם וטלפון לתיאום).</p>
-
-                    <h4>7. אמיתות מידע וכללי התנהגות</h4>
-                    <p><strong>7.1. הצהרת אמת בשאלונים:</strong> המטופל מצהיר ומתחייב כי כל המידע שמסר בשאלוני ההיכרות הוא אמת, מלא ומדויק. מסירת מידע כוזב או הסתרת מידע רפואי/נפשי מהותי היא באחריותו הבלעדית של המטופל.</p>
-                    <p><strong>7.2. איסור הקלטה:</strong> חל איסור מוחלט על המטופל להקליט או לצלם את המפגשים ללא אישור בכתב מהמטפל.</p>
-                    <p><strong>7.3. התנהגות הולמת:</strong> המטופל מתחייב לנהוג בכבוד, לא להטריד ולא לנקוט באלימות מילולית כלפי המטפל. הפרה תגרור הרחקה מיידית.</p>
-
-                    <h4>8. מודל "10 המפגשים"</h4>
-                    <p><strong>8.1. זכאות חד-פעמית:</strong> הזכאות לקבלת סדרת מפגשים ללא עלות הינה חד-פעמית לכל משתמש. לא ניתן להירשם מחדש לקבלת סדרה נוספת לאחר סיום המכסה.</p>
-                    <p><strong>8.2. מכסת חינם:</strong> עד 10 מפגשים ללא עלות.</p>
-                    <p><strong>8.3. איסור שיווק:</strong> ידוע למטופל כי למטפל אסור למכור לו שירותים במהלך הסדרה. אם הוצעו שירותים בתשלום – יש לדווח לפלטפורמה.</p>
-                    <p><strong>8.4. המשך פרטי:</strong> המשך טיפול בתשלום לאחר סיום הסדרה הוא התקשרות פרטית נפרדת, ללא קשר או אחריות של הפלטפורמה.</p>
-
-                    <h4>9. סמכות שיפוט</h4>
-                    <p>על הסכם זה יחולו דיני מדינת ישראל בלבד. סמכות השיפוט הבלעדית בכל עניין מוקנית לבתי המשפט בעיר תל אביב-יפו.</p>
-
-                    <hr style="border: none; border-top: 2px solid var(--gold); margin: 2rem 0 1.5rem;">
-                    <h4 style="color: var(--t-gold-text, #8B6914); text-align: center;"><i class="fa-solid fa-heart"></i> לפני שחותמים</h4>
-                    <p style="text-align: center;"><strong>הפרויקט הזה נועד לאנשים שרוצים לעבור תהליכי טיפול וריפוי שחווים קושי ואתגרים כלכליים.</strong></p>
-                    <p style="text-align: center;"><strong>אדם שיכנס לתהליך שהוא לא באמת זקוק לעזרה הזו - יקח את מקומו של אדם אחר שכן צריך.</strong></p>
-                    <p style="text-align: center;"><strong>אנחנו לא רוצים שתוכיחו לנו את מצבכם הכלכלי. אנחנו סומכים עליכם ועל המוסר הנשמתי שלכם.</strong></p>
-                </div>
-
-                <!-- Scroll hint -->
-                <div class="scroll-hint" id="scroll-hint">
-                    <i class="fa-solid fa-arrow-down"></i>
-                    <span>יש לגלול עד סוף התקנון כדי להמשיך</span>
-                </div>
-
-                <form id="step4-form">
-                    <!-- Checkbox 1: Terms Confirmation -->
-                    <div class="checkbox-item locked" id="terms-checkbox">
-                        <input type="checkbox" id="terms_confirmed" name="terms_confirmed" required>
-                        <label for="terms_confirmed">
-                            אני מאשר/ת שקראתי והבנתי את הסכם תנאי השימוש המלא <span class="required">*</span>
-                        </label>
+                <!-- Summary -->
+                <div class="summary-card">
+                    <h4><i class="fa-solid fa-list-check"></i> סיכום הפרטים שלך</h4>
+                    <div class="summary-item">
+                        <span class="summary-label">שם מלא</span>
+                        <span class="summary-value" id="summary-name">—</span>
                     </div>
-                    <div class="field-error" id="terms-error">יש לאשר את תנאי השימוש</div>
-
-                    <!-- Checkbox 3: Age Declaration -->
-                    <div class="checkbox-item locked" id="age-checkbox">
-                        <input type="checkbox" id="age_confirmed" name="age_confirmed" required>
-                        <label for="age_confirmed">
-                            אני מצהיר/ה שאני מעל גיל 18 <span class="required">*</span>
-                        </label>
+                    <div class="summary-item">
+                        <span class="summary-label">טלפון</span>
+                        <span class="summary-value" id="summary-phone">—</span>
                     </div>
-                    <div class="field-error" id="age-error">יש לאשר הצהרת גיל</div>
-
-                    <!-- Marketing Consent -->
-                    <div class="checkbox-item" style="margin-top: 0.8rem;">
-                        <input type="checkbox" id="marketing_consent" name="marketing_consent">
-                        <label for="marketing_consent">
-                            במידה ואהיה מרוצה, אני מסכים/ה שתשתמשו בצורה אנונימית לחלוטין בהצלחות שלי כדי לקדם את הפרויקט
-                        </label>
+                    <div class="summary-item">
+                        <span class="summary-label">עיר</span>
+                        <span class="summary-value" id="summary-city">—</span>
                     </div>
+                    <div class="summary-item">
+                        <span class="summary-label">סיבת הפנייה</span>
+                        <span class="summary-value" id="summary-reason">—</span>
+                    </div>
+                </div>
 
-                    <!-- Signature -->
-                    <div class="signature-section">
-                        <div class="signature-label">
-                            <label>חתימה דיגיטלית <span class="required">*</span></label>
-                            <button type="button" class="btn-clear-signature" id="btn-clear-signature">נקה חתימה</button>
+                <form id="step4-form" novalidate>
+                    <h3 class="section-title"><i class="fa-solid fa-camera"></i> תמונת פנים</h3>
+
+                    <div class="form-group">
+                        <label>תמונת פנים שלך <span class="required">*</span></label>
+                        <div class="photo-upload-area" id="photo-upload-area">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <p>לחץ כאן להעלאת תמונה</p>
+                            <img id="photo-preview" class="photo-preview" alt="תצוגה מקדימה">
                         </div>
-                        <div class="signature-canvas-container" id="signature-container">
-                            <canvas id="signature-canvas"></canvas>
-                            <span class="signature-placeholder">חתום/י כאן</span>
-                        </div>
-                        <div class="field-error" id="signature-error">יש לחתום על ההסכם</div>
-                        <div class="typed-signature-fallback" style="margin-top: 0.8rem;">
-                            <label for="typed-name" style="font-size: 0.85rem; color: var(--text-light, #6c757d);">
-                                <i class="fa-solid fa-keyboard"></i>
-                                לא ניתן לחתום? הקלד/י את שמך המלא:
-                            </label>
-                            <input type="text" id="typed-name" placeholder="שם מלא" autocomplete="name" style="width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--border, #e0e0e0); border-radius: 8px; font-family: inherit; font-size: 0.95rem; margin-top: 0.3rem;">
-                        </div>
+                        <input type="file" id="photo-input" accept="image/*">
+                        <div class="error-msg" id="photo-error">יש להעלות תמונת פנים</div>
                     </div>
 
-                    <!-- Turnstile verification -->
-                    <div id="turnstile-container" style="display: flex; justify-content: center; margin: 1rem 0;"></div>
+                    <h3 class="section-title"><i class="fa-solid fa-scale-balanced"></i> הסכם מוסרי</h3>
 
-                    <div class="btn-container">
+                    <div class="legal-box" id="legal-box">
+                        הפרויקט הזה נועד לאנשים שרוצים לעבור תהליכי טיפול וריפוי וחווים קושי ואתגרים כלכליים.
+                        <br><br>
+                        אדם שייכנס לתהליך שהוא לא באמת זקוק לעזרה הזו — ייקח את מקומו של אדם אחר שכן צריך.
+                        <br><br>
+                        אנחנו לא רוצים שתוכיחו לנו את מצבכם הכלכלי. אנחנו סומכים עליכם ועל המוסר הנשמתי שלכם.
+                    </div>
+
+                    <div class="checkbox-item" id="terms-checkbox">
+                        <input type="checkbox" id="terms_confirmed" name="terms_confirmed">
+                        <label for="terms_confirmed">קראתי את התנאים ואני מסכים/ה</label>
+                    </div>
+                    <div class="error-msg" id="terms-error">יש לאשר את התנאים</div>
+
+                    <div class="checkbox-item" id="commitment-checkbox">
+                        <input type="checkbox" id="commitment_confirmed" name="commitment_confirmed">
+                        <label for="commitment_confirmed">אני מתחייב/ת לתהליך של 10 מפגשים עם מטפל</label>
+                    </div>
+                    <div class="error-msg" id="commitment-error">יש לאשר את ההתחייבות</div>
+
+                    <div class="checkbox-item" id="truth-checkbox">
+                        <input type="checkbox" id="truth_confirmed" name="truth_confirmed">
+                        <label for="truth_confirmed">אני מאשר/ת שהמידע שמסרתי הוא אמיתי ומדויק</label>
+                    </div>
+                    <div class="error-msg" id="truth-error">יש לאשר שהמידע אמיתי</div>
+
+                    <div id="turnstile-container"></div>
+
+                    <div class="btn-row">
                         <a href="patient-step3.html" class="btn btn-secondary">
-                            <i class="fa-solid fa-arrow-right"></i>
-                            חזרה
+                            <i class="fa-solid fa-arrow-right"></i> חזרה
                         </a>
-                        <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
                             <i class="fa-solid fa-paper-plane"></i>
-                            שליחת הבקשה
+                            שליחת המועמדות
                         </button>
                     </div>
                 </form>
@@ -628,27 +568,23 @@
         </div>
 
         <!-- Success View -->
-        <div id="success-view" class="hidden">
+        <div class="success-view" id="success-view">
             <div class="form-card">
-                <div class="success-container">
-                    <div class="success-icon">
-                        <i class="fa-solid fa-check"></i>
-                    </div>
-                    <h2>אנו שמחים מאוד על הצעד שעשית!</h2>
-                    <p>
-                        אנו נעשה הכל בשביל לעזור לך.
-                        <br>ברגע שנמצא את המטפל הכי מקצועי ומתאים עבורך, הוא ייצור איתך קשר בהקדם.
-                    </p>
-                    <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
-                        <a href="https://wa.me/972549116092?text=%D7%94%D7%99%D7%99%20%D7%94%D7%99%D7%9C%D7%9C%2C%20%D7%9E%D7%99%D7%9C%D7%90%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%98%D7%95%D7%A4%D7%A1%20%D7%95%D7%90%D7%A0%D7%99%20%D7%9E%D7%A6%D7%A4%D7%94%20%D7%9C%D7%A2%D7%91%D7%95%D7%93%20%D7%90%D7%99%D7%AA%D7%9B%D7%9D%20%F0%9F%92%9A" target="_blank" class="btn" style="background: #25D366; color: white; display: inline-flex; padding: 1rem 2rem;">
-                            <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i>
-                            שלח הודעה להילל בוואטסאפ
-                        </a>
-                        <a href="course-library.html" class="btn btn-home">
-                            <i class="fa-solid fa-home"></i>
-                            חזרה לפורטל
-                        </a>
-                    </div>
+                <div class="success-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h2>תודה! קיבלנו את המועמדות שלך</h2>
+                <p>הצוות שלנו יעבור על הפרטים ויחזור אליך בהקדם.</p>
+                <div class="success-buttons">
+                    <a href="https://wa.me/972549116092?text=%D7%94%D7%99%2C%20%D7%94%D7%92%D7%A9%D7%AA%D7%99%20%D7%9E%D7%95%D7%A2%D7%9E%D7%93%D7%95%D7%AA%20%D7%93%D7%A8%D7%9A%20%D7%94%D7%90%D7%AA%D7%A8.%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%AA%D7%A9%D7%95%D7%91%D7%94!"
+                       target="_blank" class="btn btn-whatsapp">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        שלח הודעה בוואטסאפ
+                    </a>
+                    <a href="course-library.html" class="btn btn-outline">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        חזרה לפורטל
+                    </a>
                 </div>
             </div>
         </div>
@@ -656,11 +592,282 @@
 
     <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/supabase-config.js"></script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
-    <script src="../js/patient-step4.js"></script>
-    <!-- Marketing & Analytics -->
+    <script>
+    (function() {
+        'use strict';
+
+        let formData = {};
+        let photoFile = null;
+        let photoBase64 = null;
+
+        // ========== Turnstile ==========
+        window.onloadTurnstileCallback = function() {
+            const siteKey = window.SUPABASE_CONFIG?.turnstileSiteKey;
+            if (!siteKey) {
+                console.warn('Turnstile: site key not configured');
+                return;
+            }
+            const container = document.getElementById('turnstile-container');
+            if (container) {
+                turnstile.render(container, { sitekey: siteKey, appearance: 'interaction-only', theme: 'light' });
+            }
+        };
+
+        function getTurnstileToken() {
+            if (typeof turnstile === 'undefined') return null;
+            const container = document.getElementById('turnstile-container');
+            if (!container) return null;
+            return turnstile.getResponse(container);
+        }
+
+        // ========== Photo Upload ==========
+        const photoUploadArea = document.getElementById('photo-upload-area');
+        const photoInput = document.getElementById('photo-input');
+        const photoPreview = document.getElementById('photo-preview');
+
+        photoUploadArea.addEventListener('click', () => photoInput.click());
+
+        photoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('יש להעלות קובץ תמונה בלבד');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('התמונה גדולה מדי (מקסימום 5MB)');
+                return;
+            }
+
+            photoFile = file;
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                photoBase64 = ev.target.result;
+                photoPreview.src = ev.target.result;
+                photoPreview.classList.add('visible');
+                photoUploadArea.classList.add('has-photo');
+                photoUploadArea.querySelector('p').textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ========== Checkbox Toggle ==========
+        document.querySelectorAll('.checkbox-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
+            });
+        });
+
+        document.querySelectorAll('.checkbox-item input').forEach(input => {
+            input.addEventListener('change', function() {
+                this.closest('.checkbox-item').classList.toggle('checked', this.checked);
+            });
+        });
+
+        // ========== Init ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            formData = JSON.parse(localStorage.getItem('patient_form_data') || '{}');
+
+            // Step guard
+            if (!formData.step3_complete) {
+                window.location.href = 'patient-step3.html';
+                return;
+            }
+
+            // Populate summary
+            document.getElementById('summary-name').textContent = formData.full_name || '—';
+            document.getElementById('summary-phone').textContent = formData.phone || '—';
+            document.getElementById('summary-city').textContent = formData.city || '—';
+            const reason = formData.main_reason || '—';
+            document.getElementById('summary-reason').textContent = reason.length > 80 ? reason.substring(0, 80) + '...' : reason;
+
+            // Render Turnstile if already loaded
+            if (typeof turnstile !== 'undefined' && window.onloadTurnstileCallback) {
+                window.onloadTurnstileCallback();
+            }
+        });
+
+        // ========== Form Submission ==========
+        document.getElementById('step4-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const termsOk = document.getElementById('terms_confirmed').checked;
+            const commitOk = document.getElementById('commitment_confirmed').checked;
+            const truthOk = document.getElementById('truth_confirmed').checked;
+
+            // Clear previous errors
+            document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
+
+            let hasErrors = false;
+
+            if (!photoFile && !photoBase64) {
+                document.getElementById('photo-error').classList.add('show');
+                hasErrors = true;
+            }
+            if (!termsOk) {
+                document.getElementById('terms-error').classList.add('show');
+                hasErrors = true;
+            }
+            if (!commitOk) {
+                document.getElementById('commitment-error').classList.add('show');
+                hasErrors = true;
+            }
+            if (!truthOk) {
+                document.getElementById('truth-error').classList.add('show');
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
+                showToast('יש למלא את כל השדות הנדרשים');
+                return;
+            }
+
+            // Verify Turnstile
+            const turnstileToken = getTurnstileToken();
+            if (!turnstileToken) {
+                showToast('אנא אשר שאתה לא רובוט');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שולח...';
+
+            try {
+                // Try to upload photo to Supabase Storage
+                let photoUrl = null;
+                try {
+                    const db = window.supabase.createClient(
+                        window.SUPABASE_CONFIG.url,
+                        window.SUPABASE_CONFIG.anonKey
+                    );
+                    const ext = photoFile.name.split('.').pop();
+                    const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`;
+                    const { data: uploadData, error: uploadError } = await db.storage
+                        .from('patient-photos')
+                        .upload(fileName, photoFile, { cacheControl: '3600', upsert: false });
+
+                    if (!uploadError && uploadData) {
+                        const { data: urlData } = db.storage.from('patient-photos').getPublicUrl(fileName);
+                        photoUrl = urlData?.publicUrl || null;
+                    }
+                } catch (uploadErr) {
+                    console.warn('Photo upload to storage failed, sending as base64:', uploadErr);
+                }
+
+                // Build questionnaire object
+                const questionnaire = {
+                    main_reason: formData.main_reason || '',
+                    issue_duration: formData.issue_duration || '',
+                    previous_attempts: formData.previous_attempts || '',
+                    why_now: formData.why_now || '',
+                    fears: formData.fears || '',
+                    success_definition: formData.success_definition || '',
+                    medical_background: {
+                        medical_issues: formData.medical_issues || '',
+                        psych_meds: formData.psych_meds || '',
+                        psych_meds_details: formData.psych_meds_details || '',
+                        other_treatment: formData.other_treatment || '',
+                        other_treatment_details: formData.other_treatment_details || ''
+                    },
+                    family_dynamics: {
+                        mother_name: formData.mother_name || '',
+                        mother_relationship: formData.mother_relationship || '',
+                        father_name: formData.father_name || '',
+                        father_relationship: formData.father_relationship || '',
+                        siblings_count: formData.siblings_count || 0,
+                        siblings_details: formData.siblings_details || []
+                    },
+                    inner_world: {
+                        early_memory: formData.early_memory || '',
+                        open_share: formData.open_share || ''
+                    }
+                };
+
+                // Build final data object
+                const utm = window.getUtmData ? window.getUtmData() : {};
+                const data = {
+                    full_name: formData.full_name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    city: formData.city || null,
+                    birth_date: formData.birth_date || null,
+                    gender: formData.gender || null,
+                    marital_status: formData.marital_status || null,
+                    occupation: formData.occupation || null,
+                    military_service: formData.service_type || null,
+                    military_role: formData.service_role || null,
+                    social_link: formData.social_link || null,
+                    referral_source: formData.referral_source || null,
+                    therapist_gender_preference: formData.therapist_gender_pref || 'any',
+                    session_style: formData.session_style || 'any',
+                    photo_url: photoUrl,
+                    photo_base64: !photoUrl ? photoBase64 : null,
+                    questionnaire: questionnaire,
+                    legal_consent_date: new Date().toISOString(),
+                    status: 'new',
+                    terms_confirmed: true,
+                    commitment_confirmed: true,
+                    truth_confirmed: true,
+                    utm_source: utm.utm_source || null,
+                    utm_medium: utm.utm_medium || null,
+                    utm_campaign: utm.utm_campaign || null
+                };
+
+                // Submit via Edge Function
+                const functionsUrl = window.SUPABASE_CONFIG.functionsUrl;
+                const res = await fetch(`${functionsUrl}/submit-lead`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        table: 'patients',
+                        data: data,
+                        turnstileToken: turnstileToken
+                    })
+                });
+
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'שגיאה בשליחת הטופס');
+
+                // Clear localStorage
+                localStorage.removeItem('patient_form_data');
+                localStorage.removeItem('utm_data');
+
+                // Show success
+                document.getElementById('form-view').classList.add('hidden');
+                document.getElementById('progress-bar').classList.add('hidden');
+                document.getElementById('success-view').classList.add('visible');
+                showToast('המועמדות נשלחה בהצלחה!', 'success');
+
+            } catch (error) {
+                console.error('Submit error:', error);
+                showToast(error.message || 'שגיאה בשליחת הטופס. נסה שוב.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שליחת המועמדות';
+
+                // Reset Turnstile for retry
+                if (typeof turnstile !== 'undefined') {
+                    const container = document.getElementById('turnstile-container');
+                    if (container) turnstile.reset(container);
+                }
+            }
+        });
+
+        // ========== Toast ==========
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (type === 'success' ? ' success' : '') + ' show';
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    })();
+    </script>
     <script src="../js/marketing-tools.js"></script>
 </body>
 </html>

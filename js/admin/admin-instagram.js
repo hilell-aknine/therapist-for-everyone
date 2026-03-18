@@ -11,17 +11,24 @@ async function loadInstagramAnalytics() {
     }
 
     try {
-        // Query all 3 tables for utm_source = 'instagram'
-        const [patientsRes, therapistsRes, contactsRes] = await Promise.all([
+        // Query all 5 tables for utm_source = 'instagram'
+        const [patientsRes, therapistsRes, contactsRes, profilesRes, questionnairesRes] = await Promise.all([
             db.from('patients').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
             db.from('therapists').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
             db.from('contact_requests').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
+            db.from('profiles').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
+            db.from('portal_questionnaires').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
         ]);
+
+        // Deduplicate: profiles that also appear in questionnaires (by user matching)
+        const profileIds = new Set((profilesRes.data || []).map(r => r.id));
 
         const allLeads = [
             ...(patientsRes.data || []).map(r => ({ ...r, type: 'מטופל' })),
             ...(therapistsRes.data || []).map(r => ({ ...r, type: 'מטפל' })),
             ...(contactsRes.data || []).map(r => ({ ...r, type: 'ליד' })),
+            ...(profilesRes.data || []).map(r => ({ ...r, type: 'נרשם לפורטל' })),
+            ...(questionnairesRes.data || []).map(r => ({ ...r, type: 'מילא שאלון' })),
         ];
 
         allLeads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -69,7 +76,8 @@ function renderInstagramData(allLeads) {
     } else {
         breakdownTbody.innerHTML = typeRows.map(([type, count]) => {
             const pct = allLeads.length > 0 ? Math.round((count / allLeads.length) * 100) : 0;
-            const color = type === 'מטופל' ? '#3b82f6' : type === 'מטפל' ? '#22c55e' : '#f59e0b';
+            const typeColors = { 'מטופל': '#3b82f6', 'מטפל': '#22c55e', 'ליד': '#f59e0b', 'נרשם לפורטל': '#E4405F', 'מילא שאלון': '#a855f7' };
+            const color = typeColors[type] || '#6b7280';
             return `<tr>
                 <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-left:0.5rem;"></span>${type}</td>
                 <td><strong>${count}</strong></td>
@@ -132,7 +140,8 @@ function renderInstagramData(allLeads) {
             const date = new Date(l.created_at);
             const dateStr = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jerusalem' });
             const timeStr = date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
-            const typeColor = l.type === 'מטופל' ? '#3b82f6' : l.type === 'מטפל' ? '#22c55e' : '#f59e0b';
+            const typeColors2 = { 'מטופל': '#3b82f6', 'מטפל': '#22c55e', 'ליד': '#f59e0b', 'נרשם לפורטל': '#E4405F', 'מילא שאלון': '#a855f7' };
+            const typeColor = typeColors2[l.type] || '#6b7280';
             const camp = campaignNameMap[l.utm_campaign] || l.utm_campaign || '—';
             return `<tr>
                 <td><strong>${l.full_name || 'ללא שם'}</strong></td>

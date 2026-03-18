@@ -1373,6 +1373,7 @@
 
                 if (data.user) {
                     await new Promise(r => setTimeout(r, 500));
+                    const utm = window.getUtmData ? window.getUtmData() : {};
                     await supabaseClient
                         .from('profiles')
                         .upsert({
@@ -1380,7 +1381,10 @@
                             email: email,
                             full_name: fullName,
                             phone: phone,
-                            roles: ['student_lead']
+                            roles: ['student_lead'],
+                            utm_source: utm.utm_source || null,
+                            utm_medium: utm.utm_medium || null,
+                            utm_campaign: utm.utm_campaign || null
                         }, { onConflict: 'id' });
                 }
 

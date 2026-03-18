@@ -730,6 +730,7 @@
     </div>
 </div>
 
+<script src="../js/marketing-tools.js" defer></script>
 <script src="../js/supabase-client.js"></script>
 <script>
 (function() {
@@ -897,10 +898,17 @@
                     .eq('id', userId);
             }
 
-            // Insert questionnaire to dedicated table
+            // Insert questionnaire to dedicated table (with UTM data)
+            const utm = window.getUtmData ? window.getUtmData() : {};
             const { error: insertErr } = await supabaseClient
                 .from('portal_questionnaires')
-                .insert({ ...payload, user_id: userId });
+                .insert({
+                    ...payload,
+                    user_id: userId,
+                    utm_source: utm.utm_source || null,
+                    utm_medium: utm.utm_medium || null,
+                    utm_campaign: utm.utm_campaign || null
+                });
 
             if (insertErr) throw insertErr;
 

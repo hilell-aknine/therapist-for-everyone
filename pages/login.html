@@ -534,15 +534,17 @@
                 return;
             }
 
-            // If role not passed, fetch it
+            // Fetch profile (role + phone)
+            let phone = null;
             if (!role) {
                 try {
                     const { data: profile } = await supabaseClient
                         .from('profiles')
-                        .select('role')
+                        .select('role, phone')
                         .eq('id', user.id)
                         .single();
                     role = profile?.role || 'student_lead';
+                    phone = profile?.phone || null;
                 } catch (err) {
                     role = 'student_lead';
                 }
@@ -560,6 +562,31 @@
                     break;
                 case 'student_lead':
                 default:
+                    // Check if phone or questionnaire missing → complete profile first
+                    if (!phone) {
+                        window.location.href = 'portal-questionnaire.html';
+                        return;
+                    }
+                    // Check questionnaire completion
+                    const qDone = localStorage.getItem('portal_questionnaire_done');
+                    if (!qDone) {
+                        // Double-check in DB (localStorage can be cleared)
+                        try {
+                            const { data: qData } = await supabaseClient
+                                .from('portal_questionnaires')
+                                .select('id')
+                                .eq('user_id', user.id)
+                                .limit(1);
+                            if (qData && qData.length > 0) {
+                                localStorage.setItem('portal_questionnaire_done', 'true');
+                            } else {
+                                window.location.href = 'portal-questionnaire.html';
+                                return;
+                            }
+                        } catch (e) {
+                            // If check fails, let them through
+                        }
+                    }
                     window.location.href = 'course-library.html';
                     break;
             }

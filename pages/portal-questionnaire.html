@@ -526,6 +526,12 @@
                 <h2 class="q-step-title">פרטים אישיים</h2>
                 <p class="q-step-subtitle">כמה פרטים בסיסיים כדי שנכיר אותך</p>
 
+                <div class="q-field" id="phone-field">
+                    <label><span class="q-required">*</span> מספר טלפון</label>
+                    <input type="tel" name="phone" class="q-input" placeholder="050-1234567" required dir="ltr" pattern="^0[2-9]\d{7,8}$" inputmode="tel">
+                    <div class="q-error-msg">נא למלא מספר טלפון תקין</div>
+                </div>
+
                 <div class="q-field">
                     <label><span class="q-required">*</span> המין שלי</label>
                     <div class="q-radio-group q-inline-radios">
@@ -742,6 +748,28 @@
     const navButtons = document.getElementById('navButtons');
     const successScreen = document.getElementById('successScreen');
 
+    // Pre-fill phone if user already has one (email+password signup)
+    (async function prefillPhone() {
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session?.user) {
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('phone')
+                    .eq('id', session.user.id)
+                    .single();
+                if (profile?.phone) {
+                    const phoneInput = form.querySelector('input[name="phone"]');
+                    const phoneField = document.getElementById('phone-field');
+                    if (phoneInput) {
+                        phoneInput.value = profile.phone;
+                        phoneField.style.display = 'none'; // Hide if already has phone
+                    }
+                }
+            }
+        } catch (e) { /* ignore */ }
+    })();
+
     // Radio visual selection
     document.querySelectorAll('.q-radio-option input').forEach(input => {
         input.addEventListener('change', function() {
@@ -827,6 +855,7 @@
         fd.forEach((val, key) => { data[key] = val; });
 
         return {
+            phone: data.phone || '',
             gender: data.gender || '',
             birth_date: data.birthDate || '',
             city: data.city || '',
@@ -859,6 +888,14 @@
             }
 
             const userId = session.user.id;
+
+            // Save phone to profiles table
+            if (payload.phone) {
+                await supabaseClient
+                    .from('profiles')
+                    .update({ phone: payload.phone })
+                    .eq('id', userId);
+            }
 
             // Insert questionnaire to dedicated table
             const { error: insertErr } = await supabaseClient

@@ -865,6 +865,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
+    <script src="js/nav-auth.js" defer></script>
     <script src="js/marketing-tools.js"></script>
     <script>
         // ===== Navbar Scroll =====
@@ -954,28 +955,7 @@
             });
         }
 
-        // ===== Auth-Aware Navbar CTA =====
-        (async function initAuthNav() {
-            try {
-                const user = await Auth.getCurrentUser();
-                if (user) {
-                    // Desktop CTA
-                    const navCta = document.querySelector('.nav-cta');
-                    if (navCta) {
-                        navCta.href = 'pages/profile.html';
-                        navCta.innerHTML = '<i class="fa-solid fa-user-circle"></i> האזור שלי';
-                    }
-                    // Mobile CTA
-                    const mobileCta = document.querySelector('.mobile-cta.primary');
-                    if (mobileCta) {
-                        mobileCta.href = 'pages/profile.html';
-                        mobileCta.innerHTML = '<i class="fa-solid fa-user-circle"></i> האזור שלי';
-                    }
-                }
-            } catch (e) {
-                // Not logged in — keep default CTA
-            }
-        })();
+        // Auth-aware navbar handled by nav-auth.js
 
     </script>
 </body>

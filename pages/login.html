@@ -562,15 +562,10 @@
                     break;
                 case 'student_lead':
                 default:
-                    // Check if phone or questionnaire missing → complete profile first
-                    if (!phone) {
-                        window.location.href = 'portal-questionnaire.html';
-                        return;
-                    }
-                    // Check questionnaire completion
-                    const qDone = localStorage.getItem('portal_questionnaire_done');
-                    if (!qDone) {
-                        // Double-check in DB (localStorage can be cleared)
+                    // Check questionnaire + phone completion
+                    let questionnaireDone = !!localStorage.getItem('portal_questionnaire_done');
+                    if (!questionnaireDone) {
+                        // Double-check in DB (localStorage can be cleared on logout)
                         try {
                             const { data: qData } = await supabaseClient
                                 .from('portal_questionnaires')
@@ -579,13 +574,15 @@
                                 .limit(1);
                             if (qData && qData.length > 0) {
                                 localStorage.setItem('portal_questionnaire_done', 'true');
-                            } else {
-                                window.location.href = 'portal-questionnaire.html';
-                                return;
+                                questionnaireDone = true;
                             }
-                        } catch (e) {
-                            // If check fails, let them through
-                        }
+                        } catch (e) { /* let them through on error */ }
+                    }
+
+                    // Missing phone OR questionnaire → complete profile
+                    if (!phone || !questionnaireDone) {
+                        window.location.href = 'portal-questionnaire.html';
+                        return;
                     }
                     window.location.href = 'course-library.html';
                     break;

@@ -83,6 +83,11 @@
                     <i class="fa-solid fa-robot"></i>
                     <span>בוט CRM</span>
                 </div>
+                <div class="nav-item" onclick="switchView('instagram')">
+                    <i class="fa-brands fa-instagram"></i>
+                    <span>אינסטגרם</span>
+                    <span class="badge" id="ig-total-badge" style="background:#E4405F;">0</span>
+                </div>
                 <div class="nav-item" onclick="switchView('analytics')">
                     <i class="fa-solid fa-chart-line"></i>
                     <span>אנליטיקס</span>
@@ -135,6 +140,19 @@
                                 <div class="overview-card-stats">
                                     <span><strong id="ov-leads">0</strong> נרשמים</span>
                                     <span><strong id="ov-learners">0</strong> לומדים</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
+                        </div>
+                        <div class="overview-card" onclick="switchView('instagram')">
+                            <div class="overview-card-icon" style="background:rgba(228,64,95,0.12);color:#E4405F;">
+                                <i class="fa-brands fa-instagram"></i>
+                            </div>
+                            <div class="overview-card-body">
+                                <div class="overview-card-title">אינסטגרם</div>
+                                <div class="overview-card-stats">
+                                    <span><strong id="ov-ig-total">0</strong> לידים</span>
+                                    <span><strong id="ov-ig-7d">0</strong> ב-7 ימים</span>
                                 </div>
                             </div>
                             <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
@@ -1078,6 +1096,102 @@
                 </div>
 
                 <!-- GA4 Analytics View -->
+                <!-- Instagram Tracking View -->
+                <div id="instagram-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-brands fa-instagram" style="color:#E4405F;margin-left:0.5rem;"></i> מעקב אינסטגרם</h1>
+                    <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">כמה אנשים הגיעו מהקישור המוצמד באינסטגרם — <span style="direction:ltr;display:inline;">therapist-home.com/ig</span></p>
+
+                    <!-- Stats Cards -->
+                    <div class="stats">
+                        <div class="stat-card" title="סה״כ לידים שהגיעו מאינסטגרם (כל הזמנים)">
+                            <div class="stat-icon" style="background:rgba(228,64,95,0.12);color:#E4405F;"><i class="fa-brands fa-instagram"></i></div>
+                            <div>
+                                <div class="stat-value" id="ig-total-leads">-</div>
+                                <div class="stat-label">סה״כ לידים מ-IG</div>
+                            </div>
+                        </div>
+                        <div class="stat-card" title="לידים מאינסטגרם ב-30 יום האחרונים">
+                            <div class="stat-icon" style="background:rgba(228,64,95,0.12);color:#E4405F;"><i class="fa-solid fa-calendar-days"></i></div>
+                            <div>
+                                <div class="stat-value" id="ig-30d-leads">-</div>
+                                <div class="stat-label">30 יום אחרונים</div>
+                            </div>
+                        </div>
+                        <div class="stat-card" title="לידים מאינסטגרם ב-7 ימים האחרונים">
+                            <div class="stat-icon" style="background:rgba(228,64,95,0.12);color:#E4405F;"><i class="fa-solid fa-fire"></i></div>
+                            <div>
+                                <div class="stat-value" id="ig-7d-leads">-</div>
+                                <div class="stat-label">7 ימים אחרונים</div>
+                            </div>
+                        </div>
+                        <div class="stat-card" title="לידים מאינסטגרם היום">
+                            <div class="stat-icon gold"><i class="fa-solid fa-bolt"></i></div>
+                            <div>
+                                <div class="stat-value" id="ig-today-leads">-</div>
+                                <div class="stat-label">היום</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown by type -->
+                    <div class="table-container" style="margin-top:1.5rem;">
+                        <div class="table-header">
+                            <h3><i class="fa-solid fa-chart-pie" style="color:#E4405F;margin-left:0.4rem;"></i> פילוח לפי סוג</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>סוג</th>
+                                    <th>כמות</th>
+                                    <th>אחוז</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ig-breakdown-table">
+                                <tr><td colspan="3" class="empty-state">טוען...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Campaign breakdown -->
+                    <div class="table-container" style="margin-top:1.5rem;">
+                        <div class="table-header">
+                            <h3><i class="fa-solid fa-tags" style="color:var(--gold);margin-left:0.4rem;"></i> פילוח לפי קמפיין</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>קמפיין</th>
+                                    <th>כמות</th>
+                                    <th>אחוז</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ig-campaigns-table">
+                                <tr><td colspan="3" class="empty-state">טוען...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Recent leads from Instagram -->
+                    <div class="table-container" style="margin-top:1.5rem;">
+                        <div class="table-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--dusty-aqua);margin-left:0.4rem;"></i> לידים אחרונים מאינסטגרם</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>שם</th>
+                                    <th>סוג</th>
+                                    <th>קמפיין</th>
+                                    <th>תאריך</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ig-recent-table">
+                                <tr><td colspan="4" class="empty-state">טוען...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div id="analytics-view" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-chart-line" style="color:var(--gold);margin-left:0.5rem;"></i> סטטיסטיקות האתר</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">נתונים מ-Google Analytics — כמה אנשים נכנסים לאתר, מאיפה הם מגיעים, ומה הם צופים.</p>
@@ -1952,6 +2066,7 @@
     <script src="../js/admin/admin-portal-questionnaires.js?v=4"></script>
     <script src="../js/admin/admin-pipeline.js"></script>
     <script src="../js/admin/admin-bot.js"></script>
+    <script src="../js/admin/admin-instagram.js"></script>
     <script src="../js/admin/admin-analytics.js"></script>
     <script src="../js/admin/admin-settings.js"></script>
     <script src="../js/admin/admin-export.js"></script>

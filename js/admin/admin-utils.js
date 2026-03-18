@@ -7,6 +7,7 @@ const VIEW_GROUPS = {
     'sales':    { views: ['contact-leads', 'questionnaires', 'pipeline'], header: 'sales-header', default: 'contact-leads' },
     'learning': { views: ['leads', 'learners', 'portal-q'], header: 'learning-header', default: 'leads' },
     'bot':      { views: ['bot'], header: null, default: 'bot' },
+    'instagram':{ views: ['instagram'], header: null, default: 'instagram' },
     'analytics':{ views: ['analytics'], header: null, default: 'analytics' },
     'settings': { views: ['settings'], header: null, default: 'settings' },
 };
@@ -51,6 +52,7 @@ function switchView(view) {
     // Lazy-load hooks
     if (view === 'learning' || group.default === 'learners') loadLearnersView();
     if (view === 'bot' || group.default === 'bot') loadBotView();
+    if (view === 'instagram' || group.default === 'instagram') loadInstagramAnalytics();
     if (view === 'analytics' || group.default === 'analytics') loadGA4Analytics();
     if (view === 'settings' || group.default === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }
 
@@ -94,6 +96,24 @@ function updateOverview() {
     const qCount = typeof questionnaires !== 'undefined' ? questionnaires.length : 0;
     setText('ov-contact-leads', clCount);
     setText('ov-questionnaires', qCount);
+
+    // Instagram overview stats (async, non-blocking)
+    if (!igCache) {
+        Promise.all([
+            db.from('patients').select('id, created_at', { count: 'exact', head: true }).eq('utm_source', 'instagram'),
+            db.from('therapists').select('id, created_at', { count: 'exact', head: true }).eq('utm_source', 'instagram'),
+            db.from('contact_requests').select('id, created_at', { count: 'exact', head: true }).eq('utm_source', 'instagram'),
+        ]).then(([p, t, c]) => {
+            const total = (p.count || 0) + (t.count || 0) + (c.count || 0);
+            setText('ov-ig-total', total);
+            const badge = document.getElementById('ig-total-badge');
+            if (badge) { badge.textContent = total; badge.style.display = total > 0 ? '' : 'none'; }
+        }).catch(() => {});
+    } else {
+        const d7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        setText('ov-ig-total', igCache.length);
+        setText('ov-ig-7d', igCache.filter(l => new Date(l.created_at) >= d7).length);
+    }
 
     // Recent activity summary
     const recentEl = document.getElementById('overview-recent-list');

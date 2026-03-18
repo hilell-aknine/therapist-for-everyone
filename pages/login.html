@@ -389,7 +389,7 @@
                 <span id="success-text"></span>
             </div>
 
-            <!-- LOGIN FORM -->
+            <!-- LOGIN FORM (Magic Link — no password needed) -->
             <div class="auth-form-panel active" id="login-panel">
                 <form id="login-form">
                     <div class="form-group">
@@ -397,13 +397,12 @@
                         <input type="email" id="login-email" name="email" required placeholder="example@email.com" autocomplete="email">
                     </div>
 
-                    <div class="form-group">
-                        <label for="login-password">סיסמה</label>
-                        <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
-                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted, #888); margin: -0.3rem 0 0.8rem; line-height: 1.5;">
+                        נשלח לך קישור התחברות למייל — בלי צורך בסיסמה ✨
+                    </p>
 
                     <button type="submit" class="btn-login" id="login-btn">
-                        <span class="btn-text">התחברות</span>
+                        <span class="btn-text">שלחו לי קישור</span>
                         <div class="spinner" id="login-spinner"></div>
                     </button>
                 </form>
@@ -427,10 +426,9 @@
                         <input type="tel" id="signup-phone" name="phone" required placeholder="05X-XXXXXXX" autocomplete="tel" dir="ltr" inputmode="tel" pattern="^0[2-9]\d{7,8}$" title="מספר טלפון ישראלי תקין">
                     </div>
 
-                    <div class="form-group">
-                        <label for="signup-password">סיסמה *</label>
-                        <input type="password" id="signup-password" name="password" required placeholder="לפחות 6 תווים" autocomplete="new-password" minlength="6">
-                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted, #888); margin: -0.3rem 0 0.8rem; line-height: 1.5;">
+                        נשלח לך קישור למייל לאישור ההרשמה — בלי סיסמה ✨
+                    </p>
 
                     <button type="submit" class="btn-login" id="signup-btn">
                         <span class="btn-text">הרשמה</span>
@@ -486,16 +484,34 @@
             await new Promise(r => setTimeout(r, 300));
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
+                await savePendingProfile(session.user);
                 await redirectLoggedInUser(session.user);
             }
         })();
 
-        // Safety net: catch OAuth redirect that the IIFE might miss
+        // Safety net: catch OAuth/magic-link redirect
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
+                await savePendingProfile(session.user);
                 await redirectLoggedInUser(session.user);
             }
         });
+
+        // Save phone/name from signup form (stored in localStorage before magic link)
+        async function savePendingProfile(user) {
+            const pendingPhone = localStorage.getItem('pending_phone');
+            const pendingName = localStorage.getItem('pending_name');
+            if (pendingPhone || pendingName) {
+                try {
+                    const update = {};
+                    if (pendingPhone) update.phone = pendingPhone;
+                    if (pendingName) update.full_name = pendingName;
+                    await supabaseClient.from('profiles').update(update).eq('id', user.id);
+                    localStorage.removeItem('pending_phone');
+                    localStorage.removeItem('pending_name');
+                } catch (e) { /* will be caught by questionnaire */ }
+            }
+        }
 
         // Show error
         function showError(text) {
@@ -589,51 +605,58 @@
             }
         }
 
-        // Handle LOGIN form
+        // Handle LOGIN form (Magic Link — no password)
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
 
             document.getElementById('error-message').classList.remove('show');
-            setLoading('login-btn', 'login-spinner', true, 'מתחבר...', 'התחברות');
+            setLoading('login-btn', 'login-spinner', true, 'שולח...', 'שלחו לי קישור');
 
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                // Check if email exists in profiles first
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('id')
+                    .eq('email', email)
+                    .maybeSingle();
+
+                if (!profile) {
+                    showError('האימייל לא נמצא במערכת — צריך להירשם קודם');
+                    setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
+                    return;
+                }
+
+                // Send magic link
+                const { error } = await supabaseClient.auth.signInWithOtp({
                     email,
-                    password
+                    options: {
+                        emailRedirectTo: 'https://www.therapist-home.com/pages/login.html'
+                    }
                 });
 
                 if (error) throw error;
 
-                await redirectLoggedInUser(data.user);
+                showSuccess('קישור התחברות נשלח למייל! בדקו את תיבת הדואר 📧');
+                setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
 
             } catch (error) {
                 console.error('Login error:', error);
-
-                if (error.message.includes('Invalid login credentials')) {
-                    showError('פרטי התחברות שגויים');
-                } else if (error.message.includes('Email not confirmed')) {
-                    showError('האימייל לא אומת - בדקו את תיבת הדואר');
-                } else {
-                    showError('שגיאה בהתחברות - נסו שוב');
-                }
-
-                setLoading('login-btn', 'login-spinner', false, null, 'התחברות');
+                showError('שגיאה בשליחת הקישור — נסו שוב');
+                setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
             }
         });
 
-        // Handle SIGNUP form
+        // Handle SIGNUP form (Magic Link — no password)
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const fullName = document.getElementById('signup-name').value.trim();
             const email = document.getElementById('signup-email').value.trim();
             const phone = document.getElementById('signup-phone').value.trim().replace(/[-\s]/g, '');
-            const password = document.getElementById('signup-password').value;
 
-            if (!fullName || !email || !phone || !password) {
+            if (!fullName || !email || !phone) {
                 showError('נא למלא את כל השדות');
                 return;
             }
@@ -648,50 +671,32 @@
             setLoading('signup-btn', 'signup-spinner', true, 'נרשם...', 'הרשמה');
 
             try {
-                // 1. Create auth user with metadata
-                const { data, error } = await supabaseClient.auth.signUp({
+                // Send magic link (signInWithOtp creates user if doesn't exist)
+                const { error } = await supabaseClient.auth.signInWithOtp({
                     email,
-                    password,
                     options: {
-                        data: { full_name: fullName, phone: phone }
+                        data: { full_name: fullName, phone: phone },
+                        emailRedirectTo: 'https://www.therapist-home.com/pages/login.html'
                     }
                 });
 
                 if (error) throw error;
 
-                // 2. If user was created successfully, update profile with phone
-                if (data.user) {
-                    // Wait briefly for the profile trigger to create the row
-                    await new Promise(r => setTimeout(r, 500));
+                // Save phone+name to profiles (in case trigger doesn't catch it)
+                // Use service-role or upsert — this may fail for new users without ID,
+                // so we'll also save in the questionnaire step
+                showSuccess('קישור הרשמה נשלח למייל! לחצו על הקישור כדי להיכנס 📧');
+                setLoading('signup-btn', 'signup-spinner', false, null, 'הרשמה');
 
-                    await supabaseClient
-                        .from('profiles')
-                        .upsert({
-                            id: data.user.id,
-                            email: email,
-                            full_name: fullName,
-                            phone: phone,
-                            role: 'student_lead'
-                        }, { onConflict: 'id' });
-                }
-
-                // 3. Check if email confirmation is required
-                if (data.session) {
-                    // Auto-confirmed — redirect
-                    await redirectLoggedInUser(data.user, 'student_lead');
-                } else {
-                    // Email confirmation needed
-                    showSuccess('נרשמת בהצלחה! בדקו את תיבת האימייל לאישור');
-                    setLoading('signup-btn', 'signup-spinner', false, null, 'הרשמה');
-                }
+                // Store phone temporarily so we can save it after they click the link
+                localStorage.setItem('pending_phone', phone);
+                localStorage.setItem('pending_name', fullName);
 
             } catch (error) {
                 console.error('Signup error:', error);
 
                 if (error.message.includes('already registered')) {
-                    showError('כתובת האימייל כבר רשומה — נסו להתחבר');
-                } else if (error.message.includes('at least 6 characters')) {
-                    showError('הסיסמה חייבת להכיל לפחות 6 תווים');
+                    showError('כתובת האימייל כבר רשומה — נסו להתחבר בטאב השמאלי');
                 } else {
                     showError('שגיאה בהרשמה — נסו שוב');
                 }

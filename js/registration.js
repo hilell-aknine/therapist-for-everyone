@@ -23,7 +23,11 @@
 
     if (intent === 'training_program') {
         const heading = document.querySelector('#lead-section .step-header h2');
-        if (heading) heading.textContent = 'השאירו פרטים לבדיקת התאמה להכשרה';
+        const subtext = document.querySelector('#lead-section .step-header p');
+        if (heading) heading.textContent = 'הרשמה לתוכנית הכשרת מטפלים';
+        if (subtext) subtext.textContent = 'מלאו את הפרטים ונחזור אליכם עם כל המידע על ההכשרה';
+        // Update page title
+        document.title = 'הרשמה להכשרת מטפלים | בית המטפלים';
     }
 
     // ========== Auth Detection ==========
@@ -118,6 +122,7 @@
                 phone: phone.replace(/[-\s]/g, ''),
                 email: email || null,
                 source: 'registration_form',
+                request_type: intent === 'training_program' ? 'training' : 'patient',
                 status: 'new'
             };
 
@@ -306,12 +311,18 @@
             const result = await res.json();
             if (!res.ok) throw new Error(result.error || 'שגיאה בשליחת השאלון');
 
-            // Show success or redirect based on intent
+            // Show success view
             if (intent === 'training_program') {
-                showToast('הפרטים נשלחו! מעבר לשאלון ההתאמה...', 'success');
-                setTimeout(() => {
-                    window.location.href = 'questionnaire.html';
-                }, 1500);
+                // Training — simple confirmation, no WhatsApp
+                document.getElementById('questionnaire-section').classList.remove('section-visible');
+                document.getElementById('questionnaire-section').classList.add('section-hidden');
+                document.getElementById('success-title').textContent = 'תודה! קיבלנו את הפרטים';
+                document.getElementById('success-text').innerHTML = 'נשתדל לחזור אליך בהקדם עם כל המידע על תוכנית ההכשרה.';
+                const waBtn = document.getElementById('whatsapp-btn');
+                if (waBtn) waBtn.style.display = 'none';
+                document.getElementById('success-view').classList.remove('section-hidden');
+                document.getElementById('success-view').classList.add('section-visible');
+                showToast('הפרטים נשלחו בהצלחה!', 'success');
             } else {
                 document.getElementById('questionnaire-section').classList.remove('section-visible');
                 document.getElementById('questionnaire-section').classList.add('section-hidden');

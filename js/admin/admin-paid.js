@@ -239,6 +239,58 @@ async function deactivateSub(id) {
     }
 }
 
+// === Sync to Google Sheets ===
+async function syncToGoogleSheets() {
+    const btn = event?.target?.closest('button');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; }
+
+    try {
+        if (!paidCache) await loadPaidCustomers();
+        const rows = (paidCache || []).map(s => {
+            const p = s.profiles || {};
+            const days = daysRemaining(s.end_date);
+            return {
+                'שם': p.full_name || '',
+                'טלפון': p.phone || '',
+                'אימייל': p.email || '',
+                'תוכנית': PLAN_LABELS[s.plan] || s.plan,
+                'מחיר': s.price,
+                'תאריך התחלה': s.start_date ? new Date(s.start_date).toLocaleDateString('he-IL') : '',
+                'תאריך סיום': s.end_date ? new Date(s.end_date).toLocaleDateString('he-IL') : '',
+                'ימים נותרו': s.status === 'active' ? days : 0,
+                'סטטוס': (STATUS_LABELS_PAID[s.status] || {}).text || s.status,
+                'חוזה': s.contract_url ? 'חתום' : 'חסר',
+                'הערות': s.notes || ''
+            };
+        });
+
+        const GMAIL_API_URL = 'https://script.google.com/macros/s/AKfycbxtH1yYVyv8j561ztm1EJ0fIal9DD75wT9JFUokTh0jPkwc06yzlL_b9v7cCFgL3kXT/exec';
+        const GMAIL_API_TOKEN = '2fe00f3e650c58464562b19187dec038';
+
+        const res = await fetch(`${GMAIL_API_URL}?token=${GMAIL_API_TOKEN}&action=syncSheet&sheetName=לקוחות משלמים`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rows }),
+            redirect: 'follow'
+        });
+
+        // Apps Script redirects — need to follow
+        const data = await res.json().catch(() => null);
+
+        if (data?.success) {
+            alert(`✅ סונכרן בהצלחה! ${data.rows} שורות\n\n📊 ${data.url}`);
+            if (data.url) window.open(data.url, '_blank');
+        } else {
+            // Try following redirect manually
+            alert('סנכרון נשלח — בדוק ב-Google Sheets');
+        }
+    } catch (err) {
+        alert('שגיאה: ' + err.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-table"></i> Sheets'; }
+    }
+}
+
 // === Edit subscription — full modal ===
 function editSub(id) {
     const s = paidCache?.find(x => x.id === id);

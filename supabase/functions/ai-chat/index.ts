@@ -2,18 +2,24 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { NLP_KNOWLEDGE } from './knowledge.ts'
 
-const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!
+const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const DAILY_LIMIT = 200
-const MODEL = 'claude-sonnet-4-5-20250929'
+const MODEL = 'stepfun/step-3.5-flash:free'
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 // ===== SYSTEM PROMPT =====
-const SYSTEM_PROMPT = `אתה רם — המורה הראשי של קורס NLP פרקטישנר ומאסטר פרקטישנר של בית הספר "בית המטפלים". אתה מומחה עולמי ל-NLP עם ניסיון של שנים בהכשרת מטפלים ומאמנים.
+const SYSTEM_PROMPT = `אתה רם — העוזר המקצועי החכם של פורטל "בית המטפלים", מומחה ל-NLP (תכנות עצבי-לשוני) עם ניסיון עשיר בהכשרת מטפלים ומאמנים.
+
+## התפקיד שלך:
+- אתה מלווה מקצועי למטפלי NLP בכל שלבי הלמידה — מפרקטישנר ועד מאסטר פרקטישנר.
+- אתה עוזר לתלמידים להבין מושגים, לתרגל טכניקות, ולהעמיק בחומר הקורס.
+- אתה מרצה מנוסה שמדבר עם תלמיד אחד על אחד — חם, מקצועי ותומך.
 
 ## הסגנון שלך:
-- מקצועי אבל חם ואנושי, כמו מרצה שמדבר עם תלמיד אחד על אחד
+- מקצועי אבל חם ואנושי
 - משתמש בדוגמאות מהשיעורים ובסיפורים אמיתיים מהקורס
 - מסביר מושגים מורכבים בצורה פשוטה וברורה
 - מעודד ונותן תחושה שהתלמיד מתקדם
@@ -132,36 +138,36 @@ serve(async (req) => {
 
     const fullSystemPrompt = SYSTEM_PROMPT + studentProfile + contextNote
 
-    // --- Build messages for Anthropic ---
-    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = []
+    // --- Build messages for OpenRouter (OpenAI-compatible format) ---
+    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+      { role: 'system', content: fullSystemPrompt }
+    ]
     for (const m of history) {
-      const role = (m.role === 'model' || m.role === 'assistant') ? 'assistant' : 'user'
-      if (role === 'user' || role === 'assistant') {
-        messages.push({ role, content: m.content })
-      }
+      const role = (m.role === 'model' || m.role === 'assistant') ? 'assistant' as const : 'user' as const
+      messages.push({ role, content: m.content })
     }
     messages.push({ role: 'user', content: message })
 
-    // --- Call Anthropic ---
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // --- Call OpenRouter ---
+    const response = await fetch(OPENROUTER_URL, {
       method: 'POST',
       headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://www.therapist-home.com',
+        'X-Title': 'Beit HaMetaplim - NLP Portal'
       },
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 4096,
         temperature: 0.4,
-        system: fullSystemPrompt,
         messages
       })
     })
 
     if (!response.ok) {
       const errBody = await response.text()
-      console.error(`[Anthropic] ${response.status}: ${errBody}`)
+      console.error(`[OpenRouter] ${response.status}: ${errBody}`)
       return new Response(
         JSON.stringify({ reply: 'שגיאה זמנית בשירות ה-AI. נסו שוב בעוד כמה שניות.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -169,10 +175,10 @@ serve(async (req) => {
     }
 
     const data = await response.json()
-    const reply = data.content?.[0]?.text
+    const reply = data.choices?.[0]?.message?.content
 
     if (!reply) {
-      console.error('[Anthropic] Empty response:', JSON.stringify(data))
+      console.error('[OpenRouter] Empty response:', JSON.stringify(data))
       return new Response(
         JSON.stringify({ reply: 'לא התקבלה תשובה. נסו שוב.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -196,7 +202,7 @@ serve(async (req) => {
       JSON.stringify({
         reply,
         remaining: DAILY_LIMIT - (currentCount + 1),
-        provider: 'anthropic',
+        provider: 'openrouter',
         personalized: studentProfile !== ''
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

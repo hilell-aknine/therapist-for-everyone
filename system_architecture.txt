@@ -1,0 +1,1389 @@
+================================================================================
+  SYSTEM ARCHITECTURE DOCUMENT
+  Beit V'Metaplim - Therapists for Everyone (מטפל לכל אחד)
+================================================================================
+
+  Document Version: 1.0
+  Generated: 2026-03-02
+  Classification: INTERNAL - Share with trusted AI consultants only
+  Live URL: https://www.therapist-home.com/
+  Repository: https://github.com/hilell-aknine/therapist-for-everyone
+
+  SECURITY NOTE: All API keys, passwords, tokens, and credentials have been
+  replaced with [REDACTED]. No sensitive secrets appear in this document.
+
+================================================================================
+  TABLE OF CONTENTS
+================================================================================
+
+  1. EXECUTIVE SUMMARY
+  2. TECH STACK OVERVIEW
+  3. SYSTEM ARCHITECTURE DIAGRAM
+  4. FRONTEND ARCHITECTURE
+  5. DATABASE SCHEMA (Supabase)
+  6. ROW LEVEL SECURITY (RLS) POLICIES
+  7. EDGE FUNCTIONS (Serverless Backend)
+  8. CRM BOT ARCHITECTURE
+  9. FINANCE BOT ARCHITECTURE
+  10. AUTHENTICATION & AUTHORIZATION FLOWS
+  11. DATA FLOW DIAGRAMS
+  12. SECURITY POSTURE ASSESSMENT
+  13. GAP ANALYSIS & TECHNICAL DEBT
+  14. APPENDIX: FILE MAP
+
+================================================================================
+  1. EXECUTIVE SUMMARY
+================================================================================
+
+Beit V'Metaplim is a community portal connecting trauma patients (PTSD, combat
+veterans, Nova survivors) with volunteer therapists offering subsidized/free
+mental health care. The system consists of:
+
+  - PUBLIC WEBSITE: Static HTML/JS site with Tailwind CSS, deployed on Vercel
+  - LEARNING PORTAL: Free NLP practitioner courses with video player, notes,
+    AI tutor chatbot, and progress tracking
+  - ADMIN DASHBOARD: Full CRM with 5 data tables, GA4 analytics, settings,
+    and WhatsApp bot management
+  - CRM BOT: WhatsApp-based business automation (Express.js on Fly.io)
+  - FINANCE BOT: Personal finance tracker with receipt OCR (Express.js)
+  - DATABASE: Supabase (PostgreSQL) with 15+ tables and 40+ RLS policies
+  - EDGE FUNCTIONS: AI tutor (Claude Sonnet 4.5) + GA4 analytics aggregator
+
+The platform serves ~350+ therapists and processes leads from marketing
+campaigns. All UI is in Hebrew (RTL). The architecture prioritizes lead
+capture (no login required to submit forms) and security (RLS-first design).
+
+================================================================================
+  2. TECH STACK OVERVIEW
+================================================================================
+
+FRONTEND
+--------
+  Runtime:        Static HTML/CSS/JS (no framework, no build step)
+  Styling:        Tailwind CSS (CDN), custom CSS tokens (theme.css)
+  Fonts:          Heebo (body/UI) + Frank Ruhl Libre (headlines) via Google Fonts
+  Icons:          Font Awesome 6.5.1 (CDN, async loaded)
+  Database SDK:   @supabase/supabase-js v2 (CDN)
+  Analytics:      Google Analytics 4 (G-6YN94QMSH1) + Meta Pixel
+  Animations:     CSS transitions (no AOS/VanillaTilt in current build)
+  Direction:      RTL-first (Hebrew)
+  Dark Mode:      CSS custom properties with localStorage toggle
+
+BACKEND (CRM Bot)
+-----------------
+  Runtime:        Node.js 20 (Alpine)
+  Framework:      Express.js + compression + CORS + express-rate-limit
+  Database:       Supabase (service-role key, bypasses RLS)
+  WhatsApp:       Green API (webhook + REST)
+  AI - NL Queries: Groq (LLaMA 3.3-70b-versatile, free tier)
+  AI - Summaries:  Anthropic Claude (via @anthropic-ai/sdk v0.25)
+  AI - Voice:      Google Gemini (transcription, free tier)
+  Scheduler:      node-cron (7 scheduled jobs, Israel timezone)
+  Deployment:     Fly.io (Frankfurt region, shared-cpu-1x, 256MB)
+
+BACKEND (Finance Bot)
+---------------------
+  Runtime:        Node.js 20
+  Framework:      Express.js
+  Database:       SQLite (sql.js, in-memory with file persistence)
+  WhatsApp:       Green API
+  AI - OCR:       Google Gemini Vision 2.0 Flash (free tier)
+  Deployment:     Fly.io (Frankfurt)
+
+DATABASE
+--------
+  Provider:       Supabase (PostgreSQL)
+  Project ID:     eimcudmlfjlyxjyrdcgc
+  URL:            https://eimcudmlfjlyxjyrdcgc.supabase.co
+  Auth:           Supabase Auth (email/password + Google OAuth)
+  Storage:        Supabase Storage (avatars bucket)
+  Edge Functions: 2 deployed (ai-chat, ga4-analytics)
+  Migrations:     11 tracked SQL files
+
+DEPLOYMENT
+----------
+  Frontend:       Vercel (auto-deploy from master branch)
+  Domain:         www.therapist-home.com (Vercel DNS)
+  CRM Bot:        Fly.io (crm-bot-hillel.fly.dev, port 3002)
+  Finance Bot:    Fly.io (port 3001)
+  CI/CD:          GitHub Actions (.github/workflows/deploy.yml)
+
+================================================================================
+  3. SYSTEM ARCHITECTURE DIAGRAM
+================================================================================
+
+  +-------------------+     +-------------------+     +-------------------+
+  |   PUBLIC WEBSITE  |     |  LEARNING PORTAL  |     |  ADMIN DASHBOARD  |
+  |   (Marketing)     |     |  (Courses + AI)   |     |  (CRM + Analytics)|
+  |                   |     |                   |     |                   |
+  |  index.html       |     |  course-library   |     |  pages/admin.html |
+  |  landing-*.html   |     |  profile.html     |     |  admin-dashboard  |
+  |  patient-step1-4  |     |  learning-*.html  |     |    .js            |
+  |  therapist-step1-4|     |  nlp-game.html    |     |                   |
+  +--------+----------+     +--------+----------+     +--------+----------+
+           |                          |                         |
+           |    Supabase Anon Key     |                         |
+           +----------+---------------+-------------------------+
+                      |
+                      v
+  +---------------------------------------------------------------+
+  |                    SUPABASE API LAYER                          |
+  |                                                               |
+  |  Auth (signup, signin, OAuth, password reset)                 |
+  |  REST API (CRUD on 15+ tables via PostgREST)                  |
+  |  Edge Functions:                                              |
+  |    - ai-chat (Claude Sonnet 4.5 NLP tutor)                   |
+  |    - ga4-analytics (Google Analytics 4 aggregator)            |
+  +---------------------------------------------------------------+
+                      |
+                      | Row Level Security (40+ policies)
+                      v
+  +---------------------------------------------------------------+
+  |                  POSTGRESQL DATABASE                           |
+  |                                                               |
+  |  profiles | patients | therapists | appointments | matches    |
+  |  legal_consents | contact_requests | course_progress          |
+  |  user_notes | ai_chat_usage | course_questionnaires           |
+  |  crm_activity_log | crm_notes | crm_payments                 |
+  |  crm_bot_phones | crm_bot_access                              |
+  +---------------------------------------------------------------+
+                      ^
+                      | Service-Role Key (bypasses RLS)
+                      |
+  +-------------------+-------------------+
+  |                                       |
+  +---------------+           +-----------+---------+
+  |   CRM BOT     |           |   FINANCE BOT       |
+  |   (Port 3002) |           |   (Port 3001)       |
+  |               |           |                     |
+  |  25+ intents  |  proxy    |  7 intents          |
+  |  Groq + Claude+---------->+  Gemini OCR         |
+  |  7 cron jobs  |           |  SQLite             |
+  |  3 pipelines  |           |  Cost tracker       |
+  +-------+-------+           +----------+----------+
+          |                              |
+          +--------+   +-----------------+
+                   |   |
+                   v   v
+          +------------------+
+          |   GREEN API      |
+          |   (WhatsApp)     |
+          |                  |
+          |  Webhook IN      |
+          |  REST API OUT    |
+          +------------------+
+                   |
+                   v
+          +------------------+
+          |  WhatsApp Users  |
+          |  (Hillel + Team) |
+          +------------------+
+
+================================================================================
+  4. FRONTEND ARCHITECTURE
+================================================================================
+
+4.1 PAGE INVENTORY (24+ HTML pages)
+------------------------------------
+
+  ROOT LEVEL (Marketing/Public):
+  - index.html              Homepage with hero, stats (25K+ views), CTA
+  - landing-patient.html    Patient landing (PTSD, Nova survivors, veterans)
+  - landing-therapist.html  Therapist application landing
+  - patient-onboarding.html Patient form wrapper
+  - therapist-onboarding.html Therapist form wrapper
+  - patient-dashboard.html  Patient personal area (auth required)
+  - therapist-dashboard.html Therapist personal area (auth required)
+  - legal-gate.html         Legal consent page (scroll-lock + checkboxes)
+  - thank-you.html          Post-submission thank you
+  - privacy-policy.html     Cookie/privacy disclosure
+  - catalog.html            Legacy catalog (18 images, lazy loaded)
+
+  PAGES DIRECTORY (App):
+  - pages/login.html        Login (email/password + Google OAuth)
+  - pages/admin.html        Admin CRM dashboard (6 tabs)
+  - pages/course-library.html  Main learning portal (accordion + sidebar)
+  - pages/free-portal.html  Redirect to course-library (legacy bookmarks)
+  - pages/profile.html      User profile (stats, notes, AI chat stats)
+  - pages/about.html        About page
+  - pages/accessibility.html Accessibility statement
+  - pages/learning-booklets.html NLP workbook downloads
+  - pages/learning-master.html Master course index
+  - pages/nlp-game.html     Interactive NLP quiz game
+
+  REGISTRATION STEPS:
+  - pages/patient-step[1-4].html   Patient intake (demographics -> concerns -> preferences -> legal)
+  - pages/therapist-step[1-4].html Therapist application (contact -> credentials -> availability -> legal)
+
+  LESSON SUMMARIES:
+  - pages/summaries/lesson-[1-7].html      Student summaries
+  - pages/summaries-master/master-lesson-[1-7].html  Educator summaries
+
+4.2 JAVASCRIPT MODULES
+-----------------------
+
+  js/supabase-config.js (20 lines)
+  --------------------------------
+  Single source of truth for Supabase credentials.
+  Exports: window.SUPABASE_CONFIG = { url, anonKey: [REDACTED], functionsUrl }
+
+  js/supabase-client.js (988 lines) -- CORE MODULE
+  -------------------------------------------------
+  IIFE pattern with double-initialization guard.
+  Exports to window:
+
+    window.Auth
+      - signUp(email, password, fullName)
+      - signIn(email, password)
+      - signInWithGoogle() -> redirects to Google OAuth
+      - signOut()
+      - getCurrentUser() -> {user}
+      - getSession() -> {session}
+      - onAuthStateChange(callback)
+      - resetPassword(email)
+      - updatePassword(newPassword)
+
+    window.Profiles
+      - get(userId), getCurrent(), update(userId, updates), uploadAvatar()
+
+    window.Therapists
+      - getAll(), getById(id), getCurrent(), register(), update(), getReviews(), getAppointments()
+
+    window.Patients
+      - getCurrent(), register(), update(), getAppointments(), submitReview()
+
+    window.Appointments
+      - create(), update(), cancel(), complete()
+
+    window.CourseProgress
+      - getAll(), isVideoWatched(), markVideoWatched(), updateWatchTime()
+      - getCourseCompletion(), saveLastWatched(), getLastWatched(), getCompletedVideoIds()
+
+    window.UserNotes
+      - save(videoId, content, metadata), get(videoId), getAll(), delete(videoId)
+      Syncs to Supabase user_notes table with localStorage fallback.
+
+    window.ContactRequests
+      - submit(requestData) -- anonymous lead capture (no auth needed)
+
+    window.Certifications
+      - getAll(), hasCertification(type)
+
+    window.UI
+      - showSuccess(), showError(), showToast(), showLoading(), hideLoading()
+      - trapFocus(modal) -> cleanup function
+      - updateAuthUI(user)
+      Hebrew error translations for all Supabase auth errors.
+
+    window.FormAutosave
+      - init(containerSelector) -- auto-saves every 30s to localStorage
+      - clear() -- delete on submit
+
+    window.withRetry(fn, maxRetries=3)
+      Exponential backoff: 1s -> 2s -> 4s
+
+  Initialization: ensureProfile(user) auto-creates missing profile rows
+  on signup with default role 'student_lead'.
+
+  js/auth-guard.js (370 lines)
+  -----------------------------
+  Exports: window.AuthGuard
+
+    AuthGuard.getCurrentUser()     Handles OAuth hash race condition
+    AuthGuard.hasLegalConsent(uid) Checks legal_consents table
+    AuthGuard.getUserRole(uid)     Fetches profiles.role
+    AuthGuard.isAdmin(uid)         Checks profiles.role === 'admin'
+    AuthGuard.checkAccess(opts)    Main guard: requireAuth, requireConsent, requiredRole
+    AuthGuard.signLegalAgreement() Records consent + IP + user agent
+    AuthGuard.redirectByRole(role) Routes: admin->admin.html, therapist->dashboard, etc.
+
+  Public pages exempt from auth: index, legal-gate, landing-patient, landing-therapist
+
+  js/admin-dashboard.js (600+ lines)
+  ------------------------------------
+  Admin CRM with 6 sidebar tabs:
+    1. Therapists -- table with status filters (pending/interview/active/rejected)
+    2. Patients -- table with match status filters
+    3. Leads -- contact_requests table
+    4. Matches -- patient-therapist assignments
+    5. Contact Leads -- additional lead source
+    6. GA4 Analytics -- site traffic, top pages, channels, trends
+    7. CRM Bot -- phone management, activity log, broadcast
+    8. Settings -- analytics config, UTM builder, notification thresholds
+
+  Features:
+    - Date grouping: Today / Yesterday / Older
+    - Checkboxes + bulk delete bar
+    - 3-dot menu per row: view, edit (inline modal), delete (confirmation)
+    - Custom colors: #003B46 headers, #DFB74B "New" badges
+    - Edit modal: fetches record, renders dynamic form, saves back
+
+  js/patient-flow.js (312 lines)
+  --------------------------------
+  Patient registration handler.
+  Branch 1 (Logged In): Insert to patients + update profiles.role
+  Branch 2 (Anonymous): Insert to contact_requests as lead
+  No login required for form submission (lead capture priority).
+
+  js/marketing-tools.js (352 lines)
+  -----------------------------------
+  Cookie consent banner (GDPR compliant).
+  UTM capture from URL params -> localStorage (30-day expiry).
+  GA4 + Meta Pixel injection ONLY after user consents.
+  Exports: trackEvent(), trackFormSubmission(), trackSignup(), trackButtonClick()
+
+  js/theme-toggle.js (201 lines)
+  --------------------------------
+  Dark/light mode with FOUC prevention (inline <head> script).
+  localStorage key: 'beit-theme'. OS preference fallback.
+  Toggle button auto-injected on learning pages only.
+  Exports: window.ThemeToggle = { toggle(), set(theme), get() }
+
+  js/nlp-game.js (~1500 lines) + js/nlp-game-data.js
+  Interactive NLP quiz/game for course students.
+
+4.3 CSS ARCHITECTURE
+---------------------
+  css/theme.css         Global design tokens (light + dark mode)
+  css/accessibility.css WCAG AA focus styles, skip links, ARIA
+  css/components.css    Shared buttons, cards, modals, forms
+
+  Key Tokens:
+    Light:  --t-bg: #FAF8F4; --t-gold: #D4AF37; --t-gold-text: #8B6914 (AA safe)
+    Dark:   --t-bg: #091B21; --t-gold: #E6C65A; --t-deep-petrol: #0F2830
+
+4.4 CDN DEPENDENCIES
+----------------------
+  Google Fonts (Heebo, Frank Ruhl Libre)  -- preconnect + link
+  Font Awesome 6.5.1                      -- async load (print trick)
+  Supabase JS SDK v2                      -- deferred script
+  docx 8.2.2                              -- admin.html only (DOCX export)
+  Meta Pixel / GA4                        -- injected after consent
+  ipify.org                               -- IP capture for legal consent
+
+================================================================================
+  5. DATABASE SCHEMA (Supabase)
+================================================================================
+
+5.1 AUTH-RELATED TABLES
+------------------------
+
+  profiles
+  --------
+  id              UUID (PK, FK -> auth.users)
+  email           TEXT
+  full_name       TEXT
+  avatar_url      TEXT
+  role            TEXT ('admin' | 'therapist' | 'patient' | 'student' | 'student_lead')
+  roles           ARRAY (multi-role support)
+  created_at      TIMESTAMPTZ
+  RLS: Enabled
+
+  legal_consents
+  --------------
+  id              UUID (PK)
+  user_id         UUID (FK -> auth.users ON DELETE CASCADE)
+  agreed_version  TEXT ('1.0')
+  ip_address      TEXT
+  user_agent      TEXT
+  signed_at       TIMESTAMPTZ
+  created_at      TIMESTAMPTZ
+  UNIQUE(user_id, agreed_version)
+  RLS: Enabled
+  Helper: has_valid_consent(user_id, version) function
+
+5.2 LEAD CAPTURE TABLES
+-------------------------
+
+  patients
+  --------
+  id              UUID (PK)
+  user_id         UUID (FK -> auth.users, NULLABLE for anon leads)
+  therapist_id    UUID (FK -> therapists)
+  full_name       TEXT
+  phone           TEXT
+  email           TEXT
+  city            TEXT
+  age             INTEGER
+  status          TEXT ('new' | 'pending_review' | 'approved' | 'inactive' | 'rejected')
+  [Step 1-4 fields: therapy preferences, concerns, availability, etc.]
+  utm_source      TEXT
+  utm_medium      TEXT
+  utm_campaign    TEXT
+  created_at      TIMESTAMPTZ
+  updated_at      TIMESTAMPTZ
+  RLS: Enabled (INSERT open to anyone for lead capture)
+
+  therapists
+  ----------
+  id              UUID (PK)
+  user_id         UUID (FK -> auth.users, NULLABLE)
+  full_name       TEXT
+  phone           TEXT
+  email           TEXT
+  city            TEXT
+  birth_date      DATE
+  gender          TEXT CHECK IN ('male', 'female', 'other')
+  specialization  TEXT
+  license_number  TEXT
+  education       TEXT
+  social_link     TEXT
+  works_online    BOOLEAN
+  works_in_person BOOLEAN
+  available_hours_per_week INTEGER
+  questionnaire   JSONB (why, experience, case_study, health, commitment, practice, legal)
+  signature_data  TEXT (Base64 digital signature)
+  age_confirmed   BOOLEAN
+  terms_confirmed BOOLEAN
+  documents_verified BOOLEAN
+  status          TEXT ('new' | 'pending_review' | 'approved' | 'rejected' | 'inactive')
+  is_active       BOOLEAN
+  rating          FLOAT
+  utm_source      TEXT
+  utm_medium      TEXT
+  utm_campaign    TEXT
+  created_at      TIMESTAMPTZ
+  updated_at      TIMESTAMPTZ
+  Indexes: status, specialization, city, works_online, works_in_person
+  RLS: Enabled (INSERT open to anyone)
+
+  contact_requests
+  ----------------
+  id              UUID (PK)
+  name            TEXT
+  full_name       TEXT
+  phone           TEXT
+  email           TEXT
+  message         TEXT
+  request_type    TEXT ('general' | custom)
+  status          TEXT ('new' | 'contacted' | custom)
+  last_contacted_at TIMESTAMPTZ
+  contacted_by    TEXT
+  utm_source      TEXT
+  utm_medium      TEXT
+  utm_campaign    TEXT
+  created_at      TIMESTAMPTZ
+  updated_at      TIMESTAMPTZ
+  Indexes: status, created_at DESC, request_type
+  RLS: Enabled (INSERT open to anyone)
+
+5.3 BUSINESS LOGIC TABLES
+---------------------------
+
+  appointments
+  ------------
+  id              UUID (PK)
+  patient_id      UUID (FK -> patients)
+  therapist_id    UUID (FK -> therapists)
+  scheduled_at    TIMESTAMPTZ
+  status          TEXT ('scheduled' | 'completed' | 'cancelled')
+  [session details]
+  RLS: Enabled
+
+  matches
+  -------
+  patient_id      UUID (FK -> patients)
+  therapist_id    UUID (FK -> therapists)
+  [match metadata]
+  RLS: Enabled
+
+  reviews
+  -------
+  id              UUID (PK)
+  therapist_id    UUID (FK -> therapists)
+  patient_id      UUID (FK -> patients)
+  rating          INTEGER
+  comment         TEXT
+  created_at      TIMESTAMPTZ
+  RLS: Enabled
+
+5.4 LEARNING & ANALYTICS TABLES
+---------------------------------
+
+  course_progress
+  ---------------
+  user_id         UUID (FK -> auth.users)
+  video_id        TEXT (lesson ID or 'last_watched_[courseType]' for bookmarks)
+  course_type     TEXT ('nlp-practitioner' | others)
+  lesson_number   INTEGER
+  completed       BOOLEAN
+  watched_seconds INTEGER (or moduleIndex for bookmark entries)
+  completed_at    TIMESTAMPTZ
+  UNIQUE(user_id, video_id)
+  RLS: Enabled (users see own only)
+
+  user_notes
+  ----------
+  id              UUID (PK)
+  user_id         UUID (FK -> auth.users ON DELETE CASCADE)
+  video_id        TEXT
+  course_type     TEXT
+  lesson_title    TEXT
+  module_title    TEXT
+  lesson_number   INTEGER
+  content         TEXT (note text/markdown)
+  updated_at      TIMESTAMPTZ
+  created_at      TIMESTAMPTZ
+  UNIQUE(user_id, video_id)
+  Indexes: user_id, (user_id, updated_at DESC)
+  RLS: Enabled (users manage own only)
+
+  ai_chat_usage
+  -------------
+  id              UUID (PK)
+  user_id         UUID (FK -> auth.users ON DELETE CASCADE)
+  message_count   INTEGER (daily count)
+  date            DATE
+  UNIQUE(user_id, date)
+  Limit: 200 messages per day
+  RLS: Enabled
+
+  course_questionnaires
+  ---------------------
+  id              UUID (PK)
+  user_id         UUID (FK -> auth.users)
+  course_slug     TEXT ('nlp-practitioner')
+  full_name       TEXT
+  email           TEXT
+  phone           TEXT
+  motivation      TEXT
+  experience_level TEXT ('beginner' | 'intermediate' | 'advanced')
+  interest_certification TEXT ('yes' | 'maybe' | 'no')
+  preferred_learning TEXT ('online' | 'in_person' | 'both')
+  how_found_us    TEXT
+  notes           TEXT
+  created_at      TIMESTAMPTZ
+  RLS: Enabled (service role has full access for CRM bot)
+
+5.5 CRM & ADMIN TABLES
+------------------------
+
+  crm_activity_log
+  ----------------
+  [actor, action, entity_id, entity_type, timestamp]
+  RLS: Enabled (admin-only SELECT)
+
+  crm_notes
+  ---------
+  [notes on CRM records]
+  RLS: Enabled (admin SELECT + INSERT)
+
+  crm_payments
+  ------------
+  [payment tracking per appointment]
+  RLS: Enabled (admin-only SELECT)
+
+  crm_bot_phones
+  --------------
+  phone           TEXT (PK)
+  label           TEXT ('הלל', 'שותף', 'נוסף')
+  added_by        TEXT
+  created_at      TIMESTAMPTZ
+  RLS: Enabled (admin full CRUD, service role read-only)
+
+  crm_bot_access
+  --------------
+  user_id         UUID (PK, FK -> auth.users ON DELETE CASCADE)
+  role            TEXT ('admin' | 'manager' | 'viewer')
+  created_at      TIMESTAMPTZ
+  updated_at      TIMESTAMPTZ
+  RLS: Enabled (users read own, admin manage all)
+
+5.6 SCHEMA RELATIONSHIPS (Foreign Keys)
+-----------------------------------------
+
+  auth.users (Supabase built-in)
+      |
+      +--> profiles (1:1)
+      |       |
+      |       +--> patients (1:N, via user_id)
+      |       +--> therapists (1:N, via user_id)
+      |       +--> legal_consents (1:N)
+      |       +--> course_questionnaires (1:N)
+      |       +--> course_progress (1:N)
+      |       +--> user_notes (1:N)
+      |       +--> ai_chat_usage (1:N)
+      |       +--> crm_bot_access (1:1, optional)
+      |
+      +--> patients ---> appointments <--- therapists
+      |                       |
+      +--> matches (patients <-> therapists)
+      |
+      +--> reviews (patients -> therapists)
+      |
+      +--> contact_requests (no FK, anonymous lead capture)
+
+5.7 MIGRATIONS TIMELINE
+-------------------------
+
+  #   | File                              | Purpose
+  ----|-----------------------------------|------------------------------------------
+  002 | 002_legal_consents.sql            | Legal tracking + profiles.role column
+  003 | 003_therapist_form_upgrade.sql    | Therapist form v3.2 (15+ new columns + JSONB)
+  004 | 004_enable_rls_security.sql       | Enable RLS on all tables + 15+ policies
+  005 | 005_course_questionnaires.sql     | Course feedback after registration
+  008 | 008_user_notes.sql                | Lesson note sync to Supabase
+  009 | 009_create_contact_requests.sql   | Lead capture form submissions
+  012 | 012_add_delete_policies.sql       | Fix: admin DELETE policies (silent failures)
+  013 | 013_crm_tables_rls.sql            | CRM bot table security
+  014 | 014_bot_access.sql                | Bot phone mgmt + role-based access
+  015 | 015_utm_tracking.sql              | Campaign attribution (3 cols x 3 tables)
+  *   | 20260216073035_ai_chat_usage.sql  | AI tutor rate limiting (200/day)
+
+  CRITICAL: Migration 004 was the security turning point -- RLS was disabled
+  on all tables before this migration.
+
+================================================================================
+  6. ROW LEVEL SECURITY (RLS) POLICIES
+================================================================================
+
+  TABLE: profiles
+  ----------------------------------------------------------------
+  Policy                          | Op     | Condition
+  --------------------------------|--------|------------------------
+  Users can view own profile      | SELECT | auth.uid() = id
+  Users can update own profile    | UPDATE | auth.uid() = id
+  Admins can view all profiles    | SELECT | profiles.role = 'admin'
+  Admins can update all profiles  | UPDATE | profiles.role = 'admin'
+  Admins can delete profiles      | DELETE | profiles.role = 'admin'
+
+  TABLE: patients
+  ----------------------------------------------------------------
+  Anyone can submit patient form  | INSERT | true (lead capture!)
+  Patients can view own record    | SELECT | auth.uid() = user_id
+  Admins can view all patients    | SELECT | profiles.role = 'admin'
+  Admins can update patients      | UPDATE | profiles.role = 'admin'
+  Admins can delete patients      | DELETE | profiles.role = 'admin'
+  Therapists see assigned patients| SELECT | via matches table join
+
+  TABLE: therapists
+  ----------------------------------------------------------------
+  Anyone can submit application   | INSERT | true (lead capture!)
+  Therapists view own record      | SELECT | auth.uid() = user_id
+  Therapists update own record    | UPDATE | auth.uid() = user_id
+  Admins can view all             | SELECT | profiles.role = 'admin'
+  Admins can update               | UPDATE | profiles.role = 'admin'
+  Admins can delete               | DELETE | profiles.role = 'admin'
+
+  TABLE: contact_requests
+  ----------------------------------------------------------------
+  Anyone can submit               | INSERT | true (lead capture!)
+  Admins can view all             | SELECT | profiles.role = 'admin'
+  Admins can update               | UPDATE | profiles.role = 'admin'
+  Admins can delete               | DELETE | profiles.role = 'admin'
+
+  TABLE: legal_consents
+  ----------------------------------------------------------------
+  Users can view own consents     | SELECT | auth.uid() = user_id
+  Users can insert own consent    | INSERT | auth.uid() = user_id
+  Admins can view all             | SELECT | profiles.role = 'admin'
+
+  TABLE: appointments
+  ----------------------------------------------------------------
+  Patients view own               | SELECT | patient_id -> patients.user_id
+  Therapists view own             | SELECT | therapist_id -> therapists.user_id
+  Admins manage all               | ALL    | profiles.role = 'admin'
+
+  TABLE: user_notes
+  ----------------------------------------------------------------
+  Users manage own notes          | ALL    | auth.uid() = user_id
+
+  TABLE: ai_chat_usage
+  ----------------------------------------------------------------
+  Users read own usage            | SELECT | auth.uid() = user_id
+  Users insert own                | INSERT | auth.uid() = user_id
+  Users update own                | UPDATE | auth.uid() = user_id
+
+  TABLE: crm_bot_phones
+  ----------------------------------------------------------------
+  admin_all_bot_phones            | ALL    | profiles.role = 'admin'
+  service_read_bot_phones         | SELECT | true (service role)
+
+  TABLE: crm_bot_access
+  ----------------------------------------------------------------
+  users_read_own_access           | SELECT | user_id = auth.uid()
+  admin_all_bot_access            | ALL    | profiles.role = 'admin'
+  service_read_bot_access         | SELECT | true (service role)
+
+  KEY DESIGN DECISIONS:
+  - INSERT on patients/therapists/contact_requests is OPEN (true)
+    to enable anonymous lead capture without authentication.
+  - Service role (used by CRM bot) bypasses ALL RLS policies.
+  - Admin role checked against profiles.role column (not hardcoded emails).
+  - Migration 012 fixed missing DELETE policies that caused silent failures.
+
+================================================================================
+  7. EDGE FUNCTIONS (Serverless Backend)
+================================================================================
+
+7.1 AI CHAT (supabase/functions/ai-chat/index.ts)
+---------------------------------------------------
+  Endpoint:   {SUPABASE_URL}/functions/v1/ai-chat
+  Model:      Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
+  Auth:       Bearer token (JWT from Supabase auth)
+  Rate Limit: 200 messages/day per user (ai_chat_usage table)
+  Temp:       0.4 (focused, deterministic)
+  Max Tokens: 4,096
+  Language:   Hebrew only (system prompt in Hebrew)
+  CORS:       Access-Control-Allow-Origin: * (public)
+
+  Features:
+  - Personalization: reads student profile from course_questionnaires
+    (name, experience level, motivation) and adapts explanations
+  - Lesson context: receives moduleIndex, moduleTitle, lessonTitle
+  - Knowledge base: embedded NLP_KNOWLEDGE constant (26K+ lines in knowledge.ts)
+  - Rate limiting: increments message_count only after successful response
+
+  Request:  { message, history[], lessonContext }
+  Response: { reply, remaining (messages left today), provider, personalized }
+
+7.2 GA4 ANALYTICS (supabase/functions/ga4-analytics/index.ts)
+--------------------------------------------------------------
+  Endpoint:   {SUPABASE_URL}/functions/v1/ga4-analytics
+  GA4 Prop:   526099502
+  Service Acct: vertex-express@hilell.iam.gserviceaccount.com
+  Auth:       Admin-only (checks profiles.role = 'admin')
+  CORS:       Whitelisted origins only (therapist-home.com, vercel.app)
+  Secrets:    GA4_PROPERTY_ID + GA4_SERVICE_ACCOUNT_JSON (Supabase secrets)
+
+  5 Parallel GA4 Data API Queries:
+    1. Daily active users (last 7 days)
+    2. Aggregate 30-day active users (de-duplicated, no dimensions)
+    3. New users (last 7 days)
+    4. Top 20 pages by views (with Hebrew page name translation)
+    5. Traffic channels (Hebrew-translated: Organic=חיפוש בגוגל, Direct=ישיר)
+
+  CRITICAL TIMEZONE FIX (2026-03-02):
+  Edge Functions run in UTC. Uses Intl.DateTimeFormat('en-CA',
+  { timeZone: 'Asia/Jerusalem' }) for Israel date comparisons.
+  Bug: "today" was UTC, causing 0 stats between midnight-3AM Israel time.
+
+  CRITICAL COUNTING FIX (2026-03-02):
+  GA4 activeUsers is de-duplicated per-period. Never sum daily rows for
+  totals -- use separate aggregate query (no dimensions) for true 30-day count.
+
+================================================================================
+  8. CRM BOT ARCHITECTURE
+================================================================================
+
+8.1 OVERVIEW
+-------------
+  Entry:      server.js (540 lines)
+  Port:       3002
+  Deployment: Fly.io (crm-bot-hillel.fly.dev, Frankfurt, shared-cpu-1x, 256MB)
+  Machine:    e82227efd49578
+
+8.2 MODULE STRUCTURE
+---------------------
+
+  server.js               Express + webhook handler + dashboard API routes
+  config.js               Constants, phone caching from Supabase (5min TTL)
+  supabase.js             Service-role client (bypasses RLS)
+  whatsapp.js             Green API send/poll/file operations
+  intent.js               25+ Hebrew keyword intents + Groq AI fallback
+  router.js               Intent -> handler mapping (full CRM routing)
+  formatters.js           Date/currency formatting (Hebrew locale)
+  session-context.js      Row number mapping (UUID -> #1, #2)
+  followup-polls.js       Interactive polls after commands
+
+  src/handlers/           13 handler files
+    leads.js              List, add, search, convert, update lead status
+    patients.js           List, assign therapist, search, status updates
+    therapists.js         List, approve, reject, view stats
+    appointments.js       Schedule, cancel, complete; daily/weekly views
+    broadcast.js          Filtered bulk WhatsApp + 2-min confirmation
+    ai-query.js           Natural language queries (Groq engine)
+    search.js             Global search across all entities
+    notes.js              Attach notes to any entity
+    courses.js            Monitor course students, certifications
+    personal-report.js    AI-generated performance insights
+
+  src/services/           10 service files
+    patient-service.js    List, fetch, assign, update patients
+    therapist-service.js  List, approve, reject, fetch therapists
+    lead-service.js       List, add, convert, duplicate detection
+    appointment-service.js Create, cancel, complete; date range queries
+    course-service.js     Track student progress, questionnaires
+    broadcast-service.js  Query recipients by filter group
+    activity-log.js       Log every CRUD operation
+    analytics.js          Aggregate metrics for summaries
+
+  src/ai/                 8 files
+    groq.js               LLaMA 3.3-70b (free tier, NL queries)
+    claude.js             Claude API (summaries, insights, alerts)
+    matching.js           Patient-therapist fuzzy matching
+    memory.js             Per-phone session storage (15min TTL)
+    voice.js              Gemini voice transcription
+    prompts/              System prompts for AI interactions
+
+  src/automation/         5 files
+    pipelines.js          Lead nurture, patient auto-match, follow-up (every 2h)
+    followups.js          Welcome, payment reminders, check-ins (4x daily)
+    triggers.js           Event-based automations
+    export.js             Monthly CSV export of all CRM data
+
+  src/scheduler/          4 files
+    cron.js               All scheduled jobs (Israel timezone)
+
+  src/templates/          8 files
+    Hebrew WhatsApp message templates for all intents
+
+8.3 INTENT SYSTEM
+------------------
+  25+ intents organized by category:
+
+  LEADS:        leads_new, lead_add, lead_search, lead_convert, lead_status, lead_count
+  PATIENTS:     patients_list, patient_details, patient_assign, patient_status, patient_search
+  THERAPISTS:   therapists_list, therapist_details, therapist_approve, therapist_stats, therapist_reject
+  APPOINTMENTS: schedule_today, schedule_week, appointment_create, appointment_cancel
+  FINANCE:      payment_add, revenue_monthly, payments_outstanding
+  REPORTS:      daily_summary, weekly_report, dashboard, activity_log
+  AI:           smart_match, ai_query
+  BROADCAST:    broadcast_all/therapists/patients/leads/course/active + count variants
+  MISC:         profiles_breakdown, global_search, generate_link, help, greeting
+
+  Detection hierarchy:
+    1. Fast keyword match (free, <1ms)
+    2. Groq AI fallback for unknown messages (3s timeout)
+    3. Memory context for follow-up questions
+
+8.4 BROADCAST SYSTEM
+----------------------
+  Filters: all | therapists | patients | leads | course | active
+  Flow:
+    1. User sends "שלח לכולם: הודעה חדשה"
+    2. Bot counts recipients, sends confirmation poll
+    3. User confirms within 2 minutes (TTL)
+    4. Bot iterates recipients, sends via Green API
+    5. Reports success/failure count
+
+8.5 SCHEDULED JOBS (node-cron, Israel timezone)
+-------------------------------------------------
+  08:30          Morning briefing (business status to owners)
+  09:00          Proactive alerts (low therapist count, high no-shows)
+  Every 2h       Automation pipelines (lead nurture, patient match, follow-up)
+  08/12/16/20:00 Follow-ups (welcome, payment reminders, check-ins)
+  20:00          AI daily summary (Claude or template fallback)
+  Wed 09:00      Weekly report (metrics analysis)
+  1st @ 06:00    Monthly CSV export of all CRM data
+  Every 2 min    Poll for new website leads (contact_requests table)
+
+8.6 AUTHENTICATION (CRM Bot)
+------------------------------
+  Webhook:
+    1. IP whitelist check (Green API IPs: 51.250.*, 158.160.*, 66.241.*, 167.172.*)
+    2. Fallback: X-Webhook-Token header or ?token= query param
+    3. DM-only: group messages ignored (avoids conflict with finance bot)
+    4. Phone authorization: sender must be in crm_bot_phones table
+
+  Dashboard API:
+    1. JWT signature verification via supabase.auth.getUser(token)
+    2. Database role check: profiles.role === 'admin'
+    3. Bot role check: crm_bot_access table (admin/manager/viewer)
+    4. No row in crm_bot_access = defaults to 'admin' (backward compat)
+
+================================================================================
+  9. FINANCE BOT ARCHITECTURE
+================================================================================
+
+  Entry:      server.js (350+ lines)
+  Port:       3001
+  Database:   SQLite (local file, not Supabase)
+
+  Core Modules:
+    db.js               SQLite transactions (better-sqlite3)
+    whatsapp.js         Green API send operations
+    intent.js           7 intents (expense, income, summary, balance, etc.)
+    parser.js           Regex: extract amount/category from Hebrew text
+    categories.js       Expense/income categories + Hebrew aliases
+    ocr.js              Gemini Vision 2.0 Flash (receipt OCR, free)
+    nlp.js              Gemini text analysis (fallback intent)
+    cost-tracker/       API cost tracking subsystem (alerts + reports)
+
+  SQLite Schema:
+    transactions (id, type, amount, category, description, created_at, month_key)
+    Indexes: month_key, created_at DESC, (type, month_key)
+
+  Expense Categories: food, transport, bills, housing, health, education,
+                      entertainment, clothing, other
+  Income Categories:  salary, freelance, gift, refund, other
+
+  Cost Tracker: Monitors API costs across ALL bots (CRM, NLP, video editor).
+  Alerts at $5/day, $25/week, $100/month thresholds.
+
+  Bot-to-Bot Proxy: CRM bot proxies finance intents to localhost:3001/webhook.
+
+================================================================================
+  10. AUTHENTICATION & AUTHORIZATION FLOWS
+================================================================================
+
+10.1 USER LOGIN FLOW
+----------------------
+  1. User navigates to protected page
+  2. auth-guard.js calls checkAccess({ requireAuth: true })
+  3. No session -> toast "יש להתחבר" -> redirect to /pages/login.html
+     (saves returnUrl to sessionStorage)
+  4. Login page offers:
+     a) Email/password form -> Auth.signIn()
+     b) Google OAuth button -> Auth.signInWithGoogle()
+        -> Google consent screen -> callback with #access_token
+  5. On success: ensureProfile() creates profiles row if missing
+  6. Auth state listener fires -> UI updates
+  7. Redirect by role or to returnUrl
+
+10.2 LEGAL CONSENT FLOW
+-------------------------
+  1. User logged in but no legal_consents record
+  2. auth-guard.js detects missing consent
+  3. Redirect to legal-gate.html
+  4. User scrolls through terms (scroll-lock)
+  5. Checkboxes unlock at bottom (terms, age 18+, not in emergency)
+  6. Submit -> signLegalAgreement() captures:
+     - user_id, agreed_version ('1.0'), ip_address (ipify.org), user_agent
+  7. Redirect to dashboard
+
+10.3 ADMIN VERIFICATION
+-------------------------
+  1. Admin page loads
+  2. checkAccess({ requiredRole: 'admin' })
+  3. Fetches profiles.role from Supabase
+  4. If role !== 'admin' -> redirect to role-appropriate dashboard
+  5. Admin dashboard renders with full CRM access
+
+10.4 LEAD CAPTURE (No Auth)
+-----------------------------
+  1. Anonymous visitor fills patient-step1-4 or therapist-step1-4
+  2. Form data submitted directly to Supabase via anon key
+  3. RLS INSERT policy = true (open to anyone)
+  4. Data saved to patients/therapists/contact_requests
+  5. CRM bot polls for new leads every 2 minutes
+  6. Admin notified via WhatsApp DM
+
+================================================================================
+  11. DATA FLOW DIAGRAMS
+================================================================================
+
+11.1 PATIENT REGISTRATION -> MATCHING -> THERAPY
+--------------------------------------------------
+
+  [Patient]
+      |
+      | Fill form (no login)
+      v
+  [patient-step1-4]
+      |
+      | Insert to patients + contact_requests
+      v
+  [Supabase DB] <--- poll every 2min --- [CRM Bot]
+      |                                       |
+      | New lead detected                     | WhatsApp DM to admin
+      v                                       v
+  [Admin Dashboard]                    [Admin WhatsApp]
+      |                                       |
+      | Review + approve                      | "שבץ מטופל 5 למטפל 2"
+      v                                       v
+  [matches table]                      [CRM Bot assigns]
+      |                                       |
+      | Therapist notified                    |
+      v                                       v
+  [Therapist Dashboard]               [WhatsApp notification]
+      |
+      | Schedule appointment
+      v
+  [appointments table]
+      |
+      | Max 10 sessions per patient
+      v
+  [Therapy sessions]
+
+11.2 LEARNING PORTAL -> AI TUTOR
+----------------------------------
+
+  [Student]
+      |
+      | Login + legal consent
+      v
+  [course-library.html]
+      |
+      | Watch video lesson
+      v
+  [CourseProgress.markVideoWatched()]
+      |                    |
+      | Save note          | Ask AI tutor question
+      v                    v
+  [user_notes]        [ai-chat Edge Function]
+                           |
+                           | Claude Sonnet 4.5
+                           | + NLP knowledge base
+                           | + student profile personalization
+                           v
+                      [AI response in Hebrew]
+                           |
+                           | Increment ai_chat_usage (200/day limit)
+                           v
+                      [Student reads response]
+
+11.3 ADMIN DASHBOARD -> GA4 ANALYTICS
+---------------------------------------
+
+  [Admin logs into admin.html]
+      |
+      | Click "סטטיסטיקות האתר" tab
+      v
+  [admin-dashboard.js]
+      |
+      | Fetch with admin JWT
+      v
+  [ga4-analytics Edge Function]
+      |
+      | JWT sign with Google service account
+      v
+  [Google Analytics 4 Data API]
+      |
+      | 5 parallel queries (users, pages, channels, trends)
+      v
+  [Edge Function formats + translates to Hebrew]
+      |
+      v
+  [Admin Dashboard renders charts]
+      |
+      | 5-minute client-side cache (localStorage)
+      v
+  [Cached for subsequent views]
+
+11.4 CRM BOT COMMAND FLOW
+---------------------------
+
+  [WhatsApp User (Hillel)]
+      |
+      | Send message: "לידים חדשים"
+      v
+  [Green API Webhook]
+      |
+      | POST /webhook
+      v
+  [server.js]
+      |
+      | 1. IP/token verification
+      | 2. Message type filter (text/audio/poll)
+      | 3. Phone authorization (crm_bot_phones)
+      | 4. Bot response detection (avoid echo)
+      v
+  [intent.js]
+      |
+      | Keyword match: "לידים חדשים" -> leads_new
+      | (or Groq AI fallback for unknown)
+      v
+  [router.js -> handlers/leads.js]
+      |
+      | Query Supabase: contact_requests WHERE status='new'
+      v
+  [templates/leads.js]
+      |
+      | Format Hebrew response with emojis + row numbers
+      v
+  [whatsapp.js -> Green API sendMessage]
+      |
+      v
+  [WhatsApp response to user]
+
+================================================================================
+  12. SECURITY POSTURE ASSESSMENT
+================================================================================
+
+12.1 STRENGTHS
+---------------
+  [+] RLS-first architecture: all tables protected by Row Level Security
+  [+] Admin verified via database role (profiles.role), not hardcoded emails
+  [+] Legal consent tracked with IP + user agent + timestamp for audit
+  [+] OAuth race condition handled properly in auth-guard.js
+  [+] CRM bot uses IP whitelist + token + phone authorization (3 layers)
+  [+] Webhook returns 200 immediately (prevents retry spam)
+  [+] Hebrew error translations (prevents info leakage of Supabase internals)
+  [+] Form autosave to localStorage (prevents data loss, not a security feature)
+  [+] CORS whitelist on CRM bot (not wildcard *)
+  [+] GA4 Edge Function whitelists specific origins
+  [+] Service-role key only on server-side (never in frontend)
+  [+] Anon key in frontend is by design (RLS protected)
+  [+] Cookie consent banner before analytics load (GDPR compliant)
+  [+] Rate limiting on CRM bot (100 req/15min global, 60 req/min webhook)
+  [+] Graceful degradation: AI fallback -> keyword intent if Groq/Claude down
+  [+] .gitignore includes .env files
+
+12.2 VULNERABILITIES & RISKS
+------------------------------
+
+  CRITICAL:
+  [!] Verify .env files have NEVER been committed to Git history.
+      If they have, ALL API keys (Green API, Supabase service-role,
+      Anthropic, Groq, Gemini) must be rotated immediately.
+      Check: git log --all -- .env
+
+  HIGH:
+  [!] No rate limiting on frontend forms (patient-step, therapist-step).
+      Attacker could flood database with thousands of fake lead records.
+      Fix: Add Supabase Edge Function rate limiter or client-side throttle.
+
+  [!] No rate limiting on login form.
+      Brute-force attack possible on email/password.
+      Fix: Max 5 attempts per 15 minutes per IP + CAPTCHA after 3 failures.
+
+  [!] Insufficient server-side input validation.
+      Forms rely on HTML5 attributes only (no backend validation).
+      No maxlength on textarea fields (could submit 10MB+ strings).
+      Fix: Add Supabase database CHECK constraints + Edge Function validation.
+
+  MEDIUM:
+  [!] No Content Security Policy (CSP) headers.
+      XSS attacks could inject scripts if DOM manipulation is unsafe.
+      Fix: Add CSP meta tag or Vercel headers config.
+
+  [!] No X-Frame-Options header.
+      Site could be framed by malicious sites (clickjacking).
+      Fix: Add X-Frame-Options: SAMEORIGIN in vercel.json headers.
+
+  [!] No CSRF protection on forms.
+      Mitigated by Supabase JWT requirement, but authenticated users
+      could be CSRF'd into unwanted form submissions.
+      Fix: Add anti-CSRF tokens to admin dashboard forms.
+
+  [!] IP capture via external API (ipify.org) for legal consent.
+      Free API could be rate-limited, spoofed, or unavailable.
+      Fix: Migrate to backend-captured IP (Edge Function or X-Forwarded-For).
+
+  [!] CRM bot crm_bot_access defaults to 'admin' if no row exists.
+      New users without explicit role assignment get full admin access.
+      Fix: Default to 'viewer' and require explicit admin grant.
+
+  [!] Finance bot cost-tracker endpoint (/api/cost-event) has no auth.
+      Anyone who knows the URL can POST fake cost events.
+      Fix: Add shared secret or JWT verification.
+
+  LOW:
+  [!] No consent withdrawal mechanism (GDPR may require it).
+  [!] Console logs may contain PII (phone numbers, names, therapy concerns).
+  [!] Webhook phone number not regex-validated before use in CRM bot.
+  [!] http:// origins in CRM bot CORS config (dev-only, remove for prod).
+
+12.3 AUTHENTICATION SUMMARY
+-----------------------------
+
+  Component        | Auth Method                | Strength
+  -----------------|----------------------------|----------
+  Frontend Pages   | Supabase Auth (JWT)        | STRONG
+  Admin Dashboard  | JWT + profiles.role check  | STRONG
+  Legal Gate       | Consent record + version   | STRONG
+  CRM Bot Webhook  | IP + token + phone list    | STRONG
+  CRM Bot Dashboard| JWT + role + bot_access    | STRONG
+  Finance Bot      | Phone list from .env       | MODERATE
+  Cost Tracker API | None                       | WEAK
+  GA4 Edge Func    | Admin JWT + CORS whitelist | STRONG
+  AI Chat Edge Func| User JWT + rate limit      | STRONG
+  Lead Capture     | None (intentional)         | BY DESIGN
+
+================================================================================
+  13. GAP ANALYSIS & TECHNICAL DEBT
+================================================================================
+
+13.1 MISSING FEATURES (from CLAUDE.md roadmap)
+------------------------------------------------
+  [ ] AI screening integration (therapist vetting)
+  [ ] Email notifications (appointment reminders, status updates)
+  [ ] Session counter enforcement (max 10 per patient -- business rule exists but not enforced in DB)
+  [ ] WhatsApp/SMS reminders (partially done via CRM bot, not patient-facing)
+  [ ] Automatic matching algorithm (CRM bot has fuzzy match, not automated)
+  [ ] Video chat integration (no Zoom/Meet integration yet)
+
+13.2 ARCHITECTURAL TECHNICAL DEBT
+-----------------------------------
+
+  1. NO BUILD SYSTEM
+     The frontend is pure static HTML/JS with no bundler (Webpack, Vite, etc.).
+     Pros: Simple deployment, no build step, fast iteration.
+     Cons: No tree-shaking, no minification, no code splitting, no TypeScript.
+     Impact: Larger page loads, no compile-time error catching.
+
+  2. GLOBAL WINDOW NAMESPACE
+     All modules export to window.* (window.Auth, window.Profiles, etc.).
+     Pros: Simple inter-module communication.
+     Cons: No module isolation, potential naming conflicts, hard to test.
+     Impact: Technical debt grows with each new module.
+
+  3. SUPABASE-CLIENT.JS IS A MONOLITH (988 lines)
+     Single file handles auth, profiles, patients, therapists, appointments,
+     course progress, notes, certifications, UI, form autosave, retry logic.
+     Recommendation: Split into separate ES modules when build system is added.
+
+  4. NO AUTOMATED TESTING
+     No unit tests, integration tests, or E2E tests.
+     CRM bot has no test suite. Frontend has no test suite.
+     Risk: Regressions on every change. Manual QA only.
+
+  5. NO ENVIRONMENT SEPARATION
+     Same Supabase instance for dev and production.
+     CRM bot .env shared across local dev and Fly.io deployment.
+     Risk: Dev mistakes affect production data.
+
+  6. SQLITE IN FINANCE BOT (No Backup)
+     Finance bot uses local SQLite -- no backup policy, no replication.
+     If Fly.io machine dies, all financial data is lost.
+     Fix: Migrate to Supabase or add scheduled SQLite backup to cloud storage.
+
+  7. SINGLE INSTANCE DEPLOYMENT
+     Both bots run on single Fly.io machines (no redundancy).
+     If machine goes down, bot is offline until restart.
+     Fix: Set min_machines_running > 1 for high availability.
+
+  8. NO MONITORING/ALERTING INFRASTRUCTURE
+     No Sentry, DataDog, or similar error tracking.
+     Errors only visible in Fly.io logs (7-day retention).
+     Fix: Add error tracking service + uptime monitoring.
+
+  9. DUPLICATED AUTH LOGIC
+     auth-guard.js and supabase-client.js both handle auth state.
+     Profile creation logic (ensureProfile) runs on every page load.
+     Opportunity: Consolidate into single auth module.
+
+  10. NO API VERSIONING
+      Edge Functions have no version prefix (/v1/ai-chat).
+      Breaking changes would affect all clients simultaneously.
+      Low priority: Only 2 Edge Functions currently.
+
+13.3 SECURITY DEBT
+--------------------
+  1. Add Content Security Policy headers (vercel.json)
+  2. Add rate limiting to frontend forms
+  3. Add rate limiting to login
+  4. Add phone regex validation in CRM bot webhook
+  5. Add auth to finance bot cost-tracker endpoint
+  6. Change crm_bot_access default from 'admin' to 'viewer'
+  7. Add maxlength to all textarea fields
+  8. Implement consent withdrawal (GDPR requirement)
+  9. Audit that .env has never been in Git history
+  10. Add server-side input validation (Edge Function or DB constraints)
+
+13.4 SCALING CONSIDERATIONS
+-----------------------------
+  Current capacity: ~350 therapists, ~1000 patients (estimated)
+  Supabase free tier: 50K monthly active users
+  CRM bot: Single instance, 60 webhooks/min
+  GA4 analytics: 5-min client cache prevents API spam
+
+  When to scale:
+  - 5,000+ users: Upgrade Supabase to Pro plan
+  - 100+ concurrent webhooks: Add Fly.io machines
+  - Complex queries: Add database indexes + materialized views
+  - Multi-admin: Implement proper RBAC (currently admin/manager/viewer)
+
+================================================================================
+  14. APPENDIX: FILE MAP
+================================================================================
+
+  beit-vmetaplim/                          FRONTEND (Vercel)
+  ├── index.html                           Homepage
+  ├── landing-patient.html                 Patient landing
+  ├── landing-therapist.html               Therapist landing
+  ├── patient-onboarding.html              Patient form wrapper
+  ├── therapist-onboarding.html            Therapist form wrapper
+  ├── patient-dashboard.html               Patient personal area
+  ├── therapist-dashboard.html             Therapist personal area
+  ├── legal-gate.html                      Legal consent gate
+  ├── thank-you.html                       Post-submission
+  ├── privacy-policy.html                  Privacy policy
+  ├── catalog.html                         Legacy catalog
+  ├── js/
+  │   ├── supabase-config.js               Supabase credentials [REDACTED]
+  │   ├── supabase-client.js               Core DB layer (988 lines)
+  │   ├── auth-guard.js                    Auth + role + legal checks
+  │   ├── patient-flow.js                  Patient registration
+  │   ├── admin-dashboard.js               Admin CRM (600+ lines)
+  │   ├── marketing-tools.js               Analytics + cookie consent
+  │   ├── theme-toggle.js                  Dark/light mode
+  │   ├── nlp-game.js                      NLP quiz game
+  │   ├── nlp-game-data.js                 Game data
+  │   └── fill-patient-form.js             Form pre-fill utility
+  ├── css/
+  │   ├── theme.css                        Design tokens (light + dark)
+  │   ├── accessibility.css                WCAG AA styles
+  │   └── components.css                   Shared component styles
+  ├── pages/
+  │   ├── login.html                       Login page
+  │   ├── admin.html                       Admin dashboard
+  │   ├── course-library.html              Learning portal
+  │   ├── profile.html                     User profile
+  │   ├── about.html                       About page
+  │   ├── accessibility.html               Accessibility statement
+  │   ├── patient-step[1-4].html           Patient intake steps
+  │   ├── therapist-step[1-4].html         Therapist application steps
+  │   ├── learning-booklets.html           NLP workbooks
+  │   ├── learning-master.html             Master course
+  │   ├── nlp-game.html                    Interactive quiz
+  │   ├── summaries/                       Student lesson summaries
+  │   └── summaries-master/                Educator lesson summaries
+  ├── supabase/
+  │   ├── migrations/                      11 SQL migration files
+  │   └── functions/
+  │       ├── ai-chat/
+  │       │   ├── index.ts                 AI tutor endpoint
+  │       │   └── knowledge.ts             NLP knowledge base (26K+ lines)
+  │       └── ga4-analytics/
+  │           └── index.ts                 GA4 analytics endpoint
+  ├── docs/                                Documentation + assets
+  │   ├── booklets/                        NLP booklet HTML + PDF
+  │   ├── transcripts/                     Course transcripts
+  │   ├── master-course/                   Master course lessons
+  │   ├── images/                          Infographic PNGs
+  │   ├── summaries/                       Lesson summaries (DOCX)
+  │   ├── legal/                           Legal documents (PDF)
+  │   └── specs/                           System specifications
+  └── videos-remotion/                     Marketing video (Remotion)
+
+  crm-bot/                                 CRM BOT (Fly.io)
+  ├── server.js                            Express entry (540 lines)
+  ├── config.js                            Constants + phone cache
+  ├── supabase.js                          Service-role client
+  ├── whatsapp.js                          Green API wrapper
+  ├── intent.js                            25+ intent detection
+  ├── router.js                            Intent -> handler routing
+  ├── formatters.js                        Date/currency formatting
+  ├── session-context.js                   Row number mapping
+  ├── followup-polls.js                    Interactive polls
+  ├── Dockerfile                           Node 20 Alpine, non-root user
+  ├── fly.toml                             Fly.io config (Frankfurt)
+  ├── src/
+  │   ├── handlers/                        13 intent handlers
+  │   ├── services/                        10 Supabase query services
+  │   ├── ai/                              Groq, Claude, matching, memory
+  │   ├── automation/                      Pipelines, follow-ups, triggers
+  │   ├── scheduler/                       Cron jobs
+  │   └── templates/                       Hebrew message templates
+  └── .env                                 [REDACTED] (not committed)
+
+  finance-bot/                             FINANCE BOT (Fly.io)
+  ├── server.js                            Express entry (350+ lines)
+  ├── src/
+  │   ├── db.js                            SQLite operations
+  │   ├── intent.js                        7 intents
+  │   ├── parser.js                        Amount/category extraction
+  │   ├── categories.js                    Hebrew category aliases
+  │   ├── ocr.js                           Gemini receipt OCR
+  │   ├── nlp.js                           Gemini NLP fallback
+  │   ├── templates.js                     Response templates
+  │   └── cost-tracker/                    API cost monitoring subsystem
+  └── .env                                 [REDACTED] (not committed)
+
+================================================================================
+  END OF DOCUMENT
+================================================================================
+
+  Generated by: Claude Code (Senior Cloud Architect & Security Auditor)
+  Date: 2026-03-02
+  Scope: Full-stack system (frontend, backend, database, bots, security)
+  Classification: INTERNAL
+
+  NEXT STEPS FOR AI CONSULTANT:
+  1. Review Gap Analysis (Section 13) for priority action items
+  2. Verify .env not in Git history (CRITICAL security check)
+  3. Focus on HIGH vulnerabilities: form rate limiting, login rate limiting
+  4. Consider build system migration for frontend (TypeScript + Vite)
+  5. Add automated testing (Playwright for E2E, Vitest for unit tests)

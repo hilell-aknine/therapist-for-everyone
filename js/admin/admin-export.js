@@ -534,7 +534,7 @@ body {
 <div class="header">
     <div class="logo-section">
         <div class="logo-icon">❤</div>
-        <div style="font-size:1.2rem;font-weight:700;color:#003B46;">מטפל לכל אחד</div>
+        <div style="font-size:1.2rem;font-weight:700;color:#003B46;">בית המטפלים</div>
     </div>
     <div class="date-section">
         <div>תאריך הפקת המסמך:</div>
@@ -559,7 +559,7 @@ ${additionalInfo}
 <div class="legal-notice">
     <h3>📋 הצהרה משפטית</h3>
     <p>
-        ${isTherapist ? 'המטפל/ת' : 'המטופל/ת'} חתם/ה באופן דיגיטלי על תנאי השימוש והמסמך המשפטי של פלטפורמת "מטפל לכל אחד".
+        ${isTherapist ? 'המטפל/ת' : 'המטופל/ת'} חתם/ה באופן דיגיטלי על תנאי השימוש והמסמך המשפטי של פלטפורמת "בית המטפלים".
         החתימה בוצעה בתאריך ${signedDate} ומהווה הסכמה מלאה לכל התנאים המפורטים במסמך.
     </p>
 </div>
@@ -576,7 +576,7 @@ ${additionalInfo}
 </div>
 
 <div class="footer">
-    <p>מסמך זה הופק אוטומטית ממערכת ה-CRM של "מטפל לכל אחד"</p>
+    <p>מסמך זה הופק אוטומטית ממערכת ה-CRM של "בית המטפלים"</p>
     <p>www.therapist-home.com</p>
 </div>
     </div>

@@ -3763,13 +3763,30 @@
 
             <main class="main-content">
                 <div id="masterContentArea">
-                    <div style="text-align:center;padding:3rem 1.5rem;">
-                        <i class="fa-solid fa-crown" style="font-size:3rem;color:var(--gold);margin-bottom:1rem;display:block;"></i>
-                        <h2 style="font-family:var(--font-display);margin-bottom:0.5rem;">ברוך הבא לתוכנית ההכשרה</h2>
-                        <p style="color:var(--text-secondary);margin-bottom:2rem;">בחר חוברת מהתפריט או המתן להעלאת שיעורי הוידאו</p>
+                    <!-- Welcome + Workbook Cards -->
+                    <div id="masterWelcome" style="padding:1.5rem;">
+                        <div style="text-align:center;margin-bottom:2rem;">
+                            <i class="fa-solid fa-crown" style="font-size:2.5rem;color:var(--gold);margin-bottom:0.8rem;display:block;"></i>
+                            <h2 style="font-family:var(--font-display);margin-bottom:0.3rem;font-size:1.3rem;">תוכנית ההכשרה</h2>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;">חוברות עבודה ותכנים מקצועיים</p>
+                        </div>
+                        <div id="masterCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;"></div>
                     </div>
-                    <div id="masterWorkbookViewer" style="display:none;width:100%;height:calc(100vh - 120px);">
-                        <iframe id="masterPdfFrame" style="width:100%;height:100%;border:none;border-radius:8px;"></iframe>
+
+                    <!-- PDF Viewer (shown when viewing a workbook) -->
+                    <div id="masterWorkbookViewer" style="display:none;width:100%;height:calc(100vh - 60px);position:relative;">
+                        <div id="masterViewerHeader" style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 1rem;background:var(--bg-card);border-bottom:1px solid var(--border-color);">
+                            <div style="display:flex;align-items:center;gap:0.5rem;">
+                                <button onclick="closeMasterViewer()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-secondary);padding:4px;" title="חזרה">
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                                <span id="masterViewerTitle" style="font-weight:600;font-size:0.9rem;"></span>
+                            </div>
+                            <a id="masterDownloadBtn" href="#" target="_blank" style="padding:5px 14px;background:var(--gold);color:#003B46;border-radius:6px;font-size:0.8rem;font-weight:600;text-decoration:none;">
+                                <i class="fa-solid fa-download"></i> הורדה
+                            </a>
+                        </div>
+                        <iframe id="masterPdfFrame" style="width:100%;height:calc(100% - 44px);border:none;"></iframe>
                     </div>
                 </div>
             </main>
@@ -4020,35 +4037,92 @@
         }
 
         function loadMasterWorkbooks() {
+            // Sidebar items
             const list = document.getElementById('masterWorkbooksList');
-            if (!list) return;
-            list.innerHTML = masterWorkbooks.map((wb, i) => `
-                <div class="lesson-item" onclick="openMasterWorkbook(${i})" style="cursor:pointer;">
-                    <i class="${wb.icon}" style="color:var(--gold);font-size:0.8rem;margin-left:0.5rem;"></i>
-                    <span style="font-size:0.85rem;">${wb.title}</span>
-                </div>
-            `).join('');
+            if (list) {
+                list.innerHTML = masterWorkbooks.map((wb, i) => `
+                    <div class="lesson-item" id="mwb-sidebar-${i}" onclick="openMasterWorkbook(${i})" style="cursor:pointer;display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.8rem;">
+                        <i class="${wb.icon}" style="color:var(--gold);font-size:0.8rem;flex-shrink:0;"></i>
+                        <span style="font-size:0.82rem;line-height:1.3;">${wb.title}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Main content cards
+            const grid = document.getElementById('masterCardsGrid');
+            if (grid) {
+                grid.innerHTML = masterWorkbooks.map((wb, i) => `
+                    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:1.2rem;cursor:pointer;transition:all 0.2s;border-top:3px solid transparent;"
+                         onmouseenter="this.style.borderTopColor='var(--gold)';this.style.transform='translateY(-2px)'"
+                         onmouseleave="this.style.borderTopColor='transparent';this.style.transform=''"
+                         onclick="openMasterWorkbook(${i})">
+                        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.8rem;">
+                            <div style="width:36px;height:36px;border-radius:8px;background:rgba(212,175,55,0.12);display:flex;align-items:center;justify-content:center;">
+                                <i class="${wb.icon}" style="color:var(--gold);font-size:0.9rem;"></i>
+                            </div>
+                            <span style="font-size:0.75rem;background:var(--gold);color:#003B46;padding:2px 8px;border-radius:4px;font-weight:600;">PDF</span>
+                        </div>
+                        <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.5rem;line-height:1.4;">${wb.title}</div>
+                        <div style="display:flex;gap:0.5rem;margin-top:0.8rem;">
+                            <button onclick="event.stopPropagation();openMasterWorkbook(${i})" style="flex:1;padding:6px;background:var(--bg-card-hover);border:1px solid var(--border-color);border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.78rem;color:var(--text-secondary);">
+                                <i class="fa-solid fa-eye"></i> צפייה
+                            </button>
+                            <button onclick="event.stopPropagation();downloadMasterWorkbook(${i})" style="flex:1;padding:6px;background:var(--gold);color:#003B46;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:600;">
+                                <i class="fa-solid fa-download"></i> הורדה
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
         async function openMasterWorkbook(i) {
             const wb = masterWorkbooks[i];
-            // Show viewer, hide welcome
-            document.getElementById('masterContentArea').querySelector('div[style*="text-align:center"]').style.display = 'none';
+
+            // Hide welcome, show viewer
+            document.getElementById('masterWelcome').style.display = 'none';
             const viewer = document.getElementById('masterWorkbookViewer');
-            viewer.style.display = 'block';
+            viewer.style.display = '';
+            document.getElementById('masterViewerTitle').textContent = wb.title;
+
             const frame = document.getElementById('masterPdfFrame');
-            frame.src = ''; // reset
+            frame.src = '';
+
+            // Highlight sidebar item
+            document.querySelectorAll('[id^="mwb-sidebar-"]').forEach(el => el.style.background = '');
+            const sidebarItem = document.getElementById(`mwb-sidebar-${i}`);
+            if (sidebarItem) sidebarItem.style.background = 'var(--sidebar-active)';
 
             try {
                 const { data, error } = await supabaseClient.storage
                     .from('workbooks')
-                    .createSignedUrl(wb.name, 600); // 10 min
+                    .createSignedUrl(wb.name, 600);
                 if (error) throw error;
                 frame.src = data.signedUrl;
+                document.getElementById('masterDownloadBtn').href = data.signedUrl;
             } catch (err) {
                 frame.src = '';
                 alert('שגיאה בטעינת החוברת: ' + err.message);
             }
+        }
+
+        async function downloadMasterWorkbook(i) {
+            const wb = masterWorkbooks[i];
+            try {
+                const { data, error } = await supabaseClient.storage
+                    .from('workbooks')
+                    .createSignedUrl(wb.name, 300);
+                if (error) throw error;
+                window.open(data.signedUrl, '_blank');
+            } catch (err) {
+                alert('שגיאה: ' + err.message);
+            }
+        }
+
+        function closeMasterViewer() {
+            document.getElementById('masterWorkbookViewer').style.display = 'none';
+            document.getElementById('masterWelcome').style.display = '';
+            document.querySelectorAll('[id^="mwb-sidebar-"]').forEach(el => el.style.background = '');
         }
 
         function switchToMaster() {

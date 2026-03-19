@@ -38,13 +38,32 @@
         return 'light';
     }
 
-    // --- Apply theme to <html> ---
+    // --- Apply theme to <html> + swap logos ---
     function applyTheme(theme) {
         if (theme === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         } else {
             document.documentElement.removeAttribute('data-theme');
         }
+        swapLogos(theme);
+    }
+
+    // --- Swap logo images for dark/light mode ---
+    function swapLogos(theme) {
+        var logos = document.querySelectorAll('.logo-img, .footer-logo-img');
+        logos.forEach(function (img) {
+            var src = img.getAttribute('src') || '';
+            if (theme === 'dark') {
+                img.setAttribute('src', src.replace('logo.png', 'logo-light.png').replace('logo-square.png', 'logo-light.png'));
+            } else {
+                // Restore original — logo-light back to logo
+                if (src.indexOf('logo-light') !== -1) {
+                    // Determine original: footer uses square, nav uses regular
+                    var original = img.classList.contains('footer-logo-img') ? 'logo-square.png' : 'logo.png';
+                    img.setAttribute('src', src.replace('logo-light.png', original));
+                }
+            }
+        });
     }
 
     // --- Toggle ---
@@ -171,9 +190,12 @@
     // --- Init on DOMContentLoaded ---
     function init() {
         if (isLearningPage()) {
-            applyTheme(getPreferredTheme());
+            var theme = getPreferredTheme();
+            applyTheme(theme);
             injectToggleButton();
             listenOSChange();
+            // Ensure logos are swapped after DOM is fully ready
+            swapLogos(theme);
         } else {
             // Marketing pages — always light, no toggle
             document.documentElement.removeAttribute('data-theme');

@@ -9,7 +9,6 @@
         const utm_campaign = params.get('utm_campaign');
 
         if (utm_source || utm_medium || utm_campaign) {
-            // Store first-touch attribution (overwrite on new UTM visit)
             localStorage.setItem('utm_data', JSON.stringify({
                 utm_source: utm_source || null,
                 utm_medium: utm_medium || null,
@@ -17,7 +16,6 @@
                 captured_at: Date.now()
             }));
         } else {
-            // No UTM params — check for expiry of existing data (30 days)
             const existing = localStorage.getItem('utm_data');
             if (existing) {
                 const parsed = JSON.parse(existing);
@@ -27,7 +25,6 @@
                 }
             }
         }
-        // Capture referral param (?ref=USER_ID) for Ambassador Program
         const refParam = params.get('ref');
         if (refParam && refParam.length > 10) {
             localStorage.setItem('referrer_data', JSON.stringify({
@@ -35,15 +32,9 @@
                 captured_at: Date.now()
             }));
         }
-    } catch (e) {
-        // Silent fail — UTM capture is non-critical
-    }
+    } catch (e) { /* Silent fail */ }
 })();
 
-/**
- * Get stored referrer ID from Ambassador Program link.
- * Returns referrer UUID string or null. Returns null if older than 30 days.
- */
 window.getReferrerId = function () {
     try {
         const raw = localStorage.getItem('referrer_data');
@@ -55,22 +46,13 @@ window.getReferrerId = function () {
             return null;
         }
         return parsed.referrer_id || null;
-    } catch (e) {
-        return null;
-    }
+    } catch (e) { return null; }
 };
 
-/**
- * Clear referrer data after successful insertion into referrals table.
- */
 window.clearReferrerId = function () {
     try { localStorage.removeItem('referrer_data'); } catch (e) { /* silent */ }
 };
 
-/**
- * Get stored UTM data for injecting into form submissions.
- * Returns { utm_source, utm_medium, utm_campaign } or {}.
- */
 window.getUtmData = function () {
     try {
         const raw = localStorage.getItem('utm_data');
@@ -86,154 +68,105 @@ window.getUtmData = function () {
             utm_medium: parsed.utm_medium || null,
             utm_campaign: parsed.utm_campaign || null
         };
-    } catch (e) {
-        return {};
-    }
+    } catch (e) { return {}; }
 };
 
-/**
- * Marketing Tools - Central Management for Tracking & Legal Compliance
- * =====================================================================
- *
- * INSTRUCTIONS - Replace these placeholder IDs with your real ones:
- *
- * 1. Google Analytics (GA4):
- *    - Go to: https://analytics.google.com
- *    - Find your Measurement ID (looks like: G-XXXXXXXXXX)
- *    - Replace 'G-XXXXXXXXXX' below with your real ID
- *
- * 2. Meta (Facebook) Pixel:
- *    - Go to: https://business.facebook.com/events_manager
- *    - Find your Pixel ID (looks like: 123456789012345)
- *    - Replace '123456789' below with your real ID
- *
- * 3. Privacy Policy:
- *    - Replace '#' in PRIVACY_POLICY_URL with your real privacy policy page
- */
-
 // ============================================================================
-// CONFIGURATION - UPDATE THESE VALUES
+// CONFIGURATION
 // ============================================================================
 
 const MARKETING_CONFIG = {
-    // Google Analytics 4 Measurement ID
     GA4_ID: 'G-6YN94QMSH1',
-
-    // Meta (Facebook) Pixel ID
-    META_PIXEL_ID: '1039436226809281',  // <-- Replace with your real Pixel ID
-
-    // Privacy Policy URL
-    PRIVACY_POLICY_URL: 'privacy-policy.html',  // Privacy policy page
-
-    // Cookie consent key in localStorage
-    CONSENT_KEY: 'cookie_consent_approved',
-
-    // Enable/disable tracking (set to false to disable all tracking)
+    META_PIXEL_ID: '1039436226809281',
+    PRIVACY_POLICY_URL: 'privacy-policy.html',
+    CONSENT_KEY: 'cookie_consent_v2',       // v2: stores consent level, not just boolean
     TRACKING_ENABLED: true
 };
 
 // ============================================================================
-// COOKIE CONSENT MANAGEMENT
+// COOKIE CONSENT MANAGEMENT (v2 — granular: 'all' | 'essential' | null)
 // ============================================================================
 
-function hasUserConsented() {
-    return localStorage.getItem(MARKETING_CONFIG.CONSENT_KEY) === 'true';
+function getConsentLevel() {
+    return localStorage.getItem(MARKETING_CONFIG.CONSENT_KEY); // 'all', 'essential', or null
 }
 
-function setUserConsent() {
-    localStorage.setItem(MARKETING_CONFIG.CONSENT_KEY, 'true');
+function hasUserConsented() {
+    return getConsentLevel() === 'all';
 }
+
+function setUserConsent(level) {
+    localStorage.setItem(MARKETING_CONFIG.CONSENT_KEY, level);
+}
+
+// Migrate v1 consent (boolean 'true') → v2 ('all')
+(function migrateV1Consent() {
+    if (localStorage.getItem('cookie_consent_approved') === 'true' && !localStorage.getItem(MARKETING_CONFIG.CONSENT_KEY)) {
+        localStorage.setItem(MARKETING_CONFIG.CONSENT_KEY, 'all');
+        localStorage.removeItem('cookie_consent_approved');
+    }
+})();
 
 // ============================================================================
 // TRACKING PIXEL INJECTION
 // ============================================================================
 
 function injectGoogleAnalytics() {
-    if (MARKETING_CONFIG.GA4_ID === 'G-XXXXXXXXXX') {
-        console.log('[Marketing] GA4: Using placeholder ID - replace with real ID');
-        return;
-    }
-
-    // Google Analytics 4 Script
+    if (MARKETING_CONFIG.GA4_ID === 'G-XXXXXXXXXX') return;
     const gaScript = document.createElement('script');
     gaScript.async = true;
     gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${MARKETING_CONFIG.GA4_ID}`;
     document.head.appendChild(gaScript);
-
-    // GA4 Configuration
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     window.gtag = gtag;
     gtag('js', new Date());
     gtag('config', MARKETING_CONFIG.GA4_ID);
-
-    console.log('[Marketing] GA4 initialized:', MARKETING_CONFIG.GA4_ID);
 }
 
 function injectMetaPixel() {
-    if (MARKETING_CONFIG.META_PIXEL_ID === '123456789') {
-        console.log('[Marketing] Meta Pixel: Using placeholder ID - replace with real ID');
-        return;
-    }
-
-    // Meta (Facebook) Pixel
+    if (MARKETING_CONFIG.META_PIXEL_ID === '123456789') return;
     !function(f,b,e,v,n,t,s) {
         if(f.fbq) return;
-        n = f.fbq = function() {
-            n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-        };
-        if(!f._fbq) f._fbq = n;
-        n.push = n;
-        n.loaded = !0;
-        n.version = '2.0';
-        n.queue = [];
-        t = b.createElement(e);
-        t.async = !0;
-        t.src = v;
-        s = b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t, s);
+        n = f.fbq = function() { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+        if(!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
+        t = b.createElement(e); t.async = !0; t.src = v;
+        s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
     }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-
     fbq('init', MARKETING_CONFIG.META_PIXEL_ID);
     fbq('track', 'PageView');
-
-    console.log('[Marketing] Meta Pixel initialized:', MARKETING_CONFIG.META_PIXEL_ID);
 }
 
 function initializeTracking() {
-    if (!MARKETING_CONFIG.TRACKING_ENABLED) {
-        console.log('[Marketing] Tracking is disabled');
-        return;
-    }
-
-    if (!hasUserConsented()) {
-        console.log('[Marketing] Waiting for user consent...');
-        return;
-    }
-
+    if (!MARKETING_CONFIG.TRACKING_ENABLED || !hasUserConsented()) return;
     injectGoogleAnalytics();
     injectMetaPixel();
 }
 
 // ============================================================================
-// COOKIE CONSENT BANNER - Minimalist Sticky Footer
+// COOKIE CONSENT BANNER — Israeli law compliant (accept all / essential only)
 // ============================================================================
 
 function createConsentBanner() {
-    // Don't show if already consented
-    if (hasUserConsented()) {
-        return;
-    }
+    if (getConsentLevel()) return; // Already chose
 
-    // Create banner container
     const banner = document.createElement('div');
     banner.id = 'cookie-consent-banner';
+    banner.setAttribute('role', 'dialog');
+    banner.setAttribute('aria-label', 'הגדרות עוגיות');
     banner.innerHTML = `
-        <span class="cookie-text">אתר זה עושה שימוש בעוגיות (Cookies) ובכלי בינה מלאכותית כדי לשפר את חווית הלמידה. בהמשך הגלישה, הנך מסכים <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cookie-link">למדיניות הפרטיות</a> שלנו.</span>
-        <button id="cookie-accept-btn" class="cookie-btn">הבנתי ואני מסכים</button>
+        <div class="cookie-content">
+            <span class="cookie-text">
+                אתר זה משתמש בעוגיות הכרחיות לתפעול האתר, ובעוגיות אנליטיות ושיווקיות (Google Analytics, Meta Pixel) לשיפור השירות.
+                <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cookie-link">מדיניות פרטיות מלאה</a>
+            </span>
+            <div class="cookie-buttons">
+                <button id="cookie-accept-all" class="cookie-btn cookie-btn-primary">אישור הכל</button>
+                <button id="cookie-essential-only" class="cookie-btn cookie-btn-secondary">הכרחיות בלבד</button>
+            </div>
+        </div>
     `;
 
-    // Add styles
     const styles = document.createElement('style');
     styles.id = 'cookie-consent-styles';
     styles.textContent = `
@@ -243,119 +176,138 @@ function createConsentBanner() {
             left: 0;
             width: 100%;
             background: #ffffff;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
             z-index: 9999;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+            padding: 16px 24px;
             font-family: 'Heebo', sans-serif;
             font-size: 13px;
             direction: rtl;
             transform: translateY(0);
             transition: transform 0.3s ease-out;
+            border-top: 3px solid #2F8592;
         }
-
-        #cookie-consent-banner.hiding {
-            transform: translateY(100%);
+        #cookie-consent-banner.hiding { transform: translateY(100%); }
+        .cookie-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
-
-        .cookie-text {
-            color: #555;
-        }
-
+        .cookie-text { color: #444; flex: 1; line-height: 1.6; }
         .cookie-link {
             color: #2F8592;
-            text-decoration: none;
-            font-size: 12px;
+            text-decoration: underline;
             white-space: nowrap;
         }
-
-        .cookie-link:hover {
-            text-decoration: underline;
+        .cookie-buttons {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
         }
-
         .cookie-btn {
-            background: #2F8592;
-            color: #fff;
             border: none;
-            padding: 6px 16px;
-            border-radius: 4px;
+            padding: 8px 18px;
+            border-radius: 6px;
             font-family: inherit;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
-
-        .cookie-btn:hover {
-            background: #247580;
+        .cookie-btn-primary {
+            background: #2F8592;
+            color: #fff;
         }
-
+        .cookie-btn-primary:hover { background: #247580; }
+        .cookie-btn-secondary {
+            background: transparent;
+            color: #2F8592;
+            border: 2px solid #2F8592;
+        }
+        .cookie-btn-secondary:hover { background: rgba(47,133,146,0.08); }
         @media (max-width: 600px) {
-            #cookie-consent-banner {
-                flex-wrap: wrap;
-                gap: 8px;
-                padding: 10px 15px;
-                max-height: 18vh;
-            }
-
-            .cookie-text {
-                flex: 1 1 100%;
+            .cookie-content {
+                flex-direction: column;
+                gap: 12px;
                 text-align: center;
-                font-size: 12px;
             }
-
-            .cookie-link,
-            .cookie-btn {
-                font-size: 11px;
-            }
+            .cookie-text { font-size: 12px; }
+            .cookie-buttons { width: 100%; }
+            .cookie-btn { flex: 1; padding: 10px 12px; font-size: 13px; }
         }
+        /* Dark mode */
+        [data-theme="dark"] #cookie-consent-banner {
+            background: #1a2332;
+            border-top-color: #D4AF37;
+        }
+        [data-theme="dark"] .cookie-text { color: #ccc; }
+        [data-theme="dark"] .cookie-link { color: #D4AF37; }
+        [data-theme="dark"] .cookie-btn-secondary { color: #D4AF37; border-color: #D4AF37; }
     `;
 
     document.head.appendChild(styles);
     document.body.appendChild(banner);
 
-    // Handle accept button click
-    document.getElementById('cookie-accept-btn').addEventListener('click', function() {
-        setUserConsent();
+    function dismissBanner() {
         banner.classList.add('hiding');
         setTimeout(() => {
             banner.remove();
             document.getElementById('cookie-consent-styles')?.remove();
-            // Initialize tracking after consent
-            initializeTracking();
         }, 300);
+    }
+
+    document.getElementById('cookie-accept-all').addEventListener('click', function() {
+        setUserConsent('all');
+        dismissBanner();
+        initializeTracking();
     });
+
+    document.getElementById('cookie-essential-only').addEventListener('click', function() {
+        setUserConsent('essential');
+        dismissBanner();
+        // No tracking initialized — essential cookies only
+    });
+}
+
+// ============================================================================
+// COOKIE SETTINGS RESET — floating button at bottom of every page
+// ============================================================================
+
+function createCookieSettingsButton() {
+    if (!getConsentLevel()) return; // Banner still showing
+
+    const btn = document.createElement('button');
+    btn.id = 'cookie-settings-btn';
+    btn.setAttribute('aria-label', 'הגדרות עוגיות');
+    btn.title = 'הגדרות עוגיות';
+    btn.textContent = '🍪';
+    btn.style.cssText = 'position:fixed;bottom:12px;left:12px;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid #ddd;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;font-size:18px;z-index:9998;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;';
+    btn.addEventListener('mouseenter', () => btn.style.transform = 'scale(1.1)');
+    btn.addEventListener('mouseleave', () => btn.style.transform = 'scale(1)');
+    btn.addEventListener('click', function() {
+        localStorage.removeItem(MARKETING_CONFIG.CONSENT_KEY);
+        btn.remove();
+        createConsentBanner();
+    });
+    document.body.appendChild(btn);
 }
 
 // ============================================================================
 // TRACKING EVENT HELPERS
 // ============================================================================
 
-// Helper function to track custom events
 window.trackEvent = function(eventName, eventParams = {}) {
-    if (!hasUserConsented() || !MARKETING_CONFIG.TRACKING_ENABLED) {
-        console.log('[Marketing] Event not tracked (no consent):', eventName);
-        return;
-    }
-
-    // Google Analytics
+    if (!hasUserConsented() || !MARKETING_CONFIG.TRACKING_ENABLED) return;
     if (window.gtag && MARKETING_CONFIG.GA4_ID !== 'G-XXXXXXXXXX') {
         gtag('event', eventName, eventParams);
     }
-
-    // Meta Pixel
     if (window.fbq && MARKETING_CONFIG.META_PIXEL_ID !== '123456789') {
         fbq('trackCustom', eventName, eventParams);
     }
-
-    console.log('[Marketing] Event tracked:', eventName, eventParams);
 };
 
-// Pre-defined tracking events
 window.trackFormSubmission = function(formName) {
     trackEvent('form_submission', { form_name: formName });
     if (window.fbq) fbq('track', 'Lead');
@@ -375,13 +327,7 @@ window.trackButtonClick = function(buttonName) {
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('[Marketing Tools] Initializing...');
-
-    // Show consent banner (if not already consented)
     createConsentBanner();
-
-    // Initialize tracking (if already consented)
     initializeTracking();
-
-    console.log('[Marketing Tools] Ready');
+    createCookieSettingsButton();
 });

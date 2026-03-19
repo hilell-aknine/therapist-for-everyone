@@ -29,7 +29,7 @@ async function loadFunnel() {
                 .in('role', ['student_lead', 'student', 'paid_customer'])
                 .order('created_at', { ascending: false }),
             db.from('portal_questionnaires')
-                .select('user_id, how_found, why_nlp, study_time, heat_level, city, occupation, main_challenge, motivation_tip, vision_one_year, created_at'),
+                .select('user_id, how_found, why_nlp, study_time, heat_level, city, occupation, main_challenge, motivation_tip, vision_one_year, gender, birth_date, digital_challenge, knew_ram, phone, created_at'),
             db.from('course_progress')
                 .select('user_id, completed'),
             db.from('contact_requests')
@@ -250,17 +250,34 @@ function showProspect(index) {
 
     // Questionnaire
     if (q) {
+        // Calculate age from birth_date
+        let ageStr = '';
+        if (q.birth_date) {
+            const birth = new Date(q.birth_date);
+            if (!isNaN(birth)) {
+                const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+                ageStr = `${age}`;
+            }
+        }
+
         html += `<div style="background:var(--bg,#f3f4f6);border-radius:8px;padding:1rem;margin-bottom:1rem;">
             <h4 style="margin-bottom:0.5rem;font-size:0.9rem;"><i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.3rem;"></i> תשובות שאלון</h4>
             <div style="font-size:0.85rem;line-height:1.8;">`;
-        if (q.how_found) html += `<div><strong>מאיפה הגיע:</strong> ${q.how_found}</div>`;
-        if (q.why_nlp) html += `<div><strong>למה NLP:</strong> ${q.why_nlp}</div>`;
-        if (q.study_time) html += `<div><strong>זמן ללמידה:</strong> ${q.study_time}</div>`;
+        if (q.gender) html += `<div><strong>מגדר:</strong> ${q.gender}</div>`;
+        if (ageStr) html += `<div><strong>גיל:</strong> ${ageStr}</div>`;
+        if (q.birth_date) html += `<div><strong>תאריך לידה:</strong> ${q.birth_date}</div>`;
         if (q.city) html += `<div><strong>עיר:</strong> ${q.city}</div>`;
         if (q.occupation) html += `<div><strong>עיסוק:</strong> ${q.occupation}</div>`;
+        if (q.phone) html += `<div><strong>טלפון (שאלון):</strong> ${q.phone}</div>`;
+        if (q.how_found) html += `<div><strong>מאיפה הגיע:</strong> ${q.how_found}</div>`;
+        if (q.knew_ram) html += `<div><strong>מכיר את רם:</strong> ${q.knew_ram}</div>`;
+        if (q.why_nlp) html += `<div><strong>למה NLP:</strong> ${q.why_nlp}</div>`;
+        if (q.study_time) html += `<div><strong>זמן ללמידה:</strong> ${q.study_time}</div>`;
+        if (q.digital_challenge) html += `<div><strong>אתגר דיגיטלי:</strong> ${q.digital_challenge}</div>`;
         if (q.main_challenge) html += `<div><strong>אתגר עיקרי:</strong> ${q.main_challenge}</div>`;
         if (q.motivation_tip) html += `<div><strong>מוטיבציה:</strong> ${q.motivation_tip}</div>`;
         if (q.vision_one_year) html += `<div><strong>חזון לשנה:</strong> ${q.vision_one_year}</div>`;
+        if (q.heat_level) html += `<div><strong>רמת עניין:</strong> ${q.heat_level}</div>`;
         html += `</div></div>`;
     }
 

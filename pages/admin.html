@@ -1139,8 +1139,11 @@
                     </div>
 
                     <div class="table-container" style="margin-top:1.5rem;">
-                        <div class="table-header">
+                        <div class="table-header" style="display:flex;justify-content:space-between;align-items:center;">
                             <h3><i class="fa-solid fa-crown" style="color:var(--gold);margin-left:0.4rem;"></i> רשימת מנויים</h3>
+                            <button onclick="showActivateModal()" style="background:var(--gold);color:#003B46;border:none;padding:6px 16px;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.85rem;">
+                                <i class="fa-solid fa-plus"></i> הוסף לקוח
+                            </button>
                         </div>
                         <table>
                             <thead>
@@ -1151,16 +1154,49 @@
                                     <th>מחיר</th>
                                     <th>התחלה</th>
                                     <th>סיום</th>
-                                    <th>ימים נותרו</th>
+                                    <th>ימים</th>
                                     <th>סטטוס</th>
                                     <th>חוזה</th>
+                                    <th>פעולות</th>
                                 </tr>
                             </thead>
                             <tbody id="paid-customers-table">
-                                <tr><td colspan="9" class="empty-state">טוען...</td></tr>
+                                <tr><td colspan="10" class="empty-state">טוען...</td></tr>
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Activate Modal -->
+                    <div id="paid-activate-modal" class="modal-overlay" style="display:none;">
+                        <div class="modal-box" style="max-width:420px;background:var(--bg-card,#fff);border-radius:12px;padding:2rem;position:relative;">
+                            <button onclick="closeActivateModal()" style="position:absolute;top:12px;left:12px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-secondary);">&times;</button>
+                            <h3 style="margin-bottom:1rem;color:var(--gold);"><i class="fa-solid fa-crown"></i> הפעלת לקוח משלם</h3>
+                            <div style="display:flex;flex-direction:column;gap:0.8rem;">
+                                <label style="font-size:0.85rem;font-weight:600;">טלפון הלקוח *
+                                    <input type="text" id="activate-phone" placeholder="0541234567" dir="ltr" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                                </label>
+                                <div style="display:flex;gap:0.8rem;">
+                                    <label style="font-size:0.85rem;font-weight:600;flex:1;">חודשים
+                                        <input type="number" id="activate-months" value="12" min="1" max="60" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                                    </label>
+                                    <label style="font-size:0.85rem;font-weight:600;flex:1;">מחיר (₪)
+                                        <input type="number" id="activate-price" value="8880" min="0" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                                    </label>
+                                </div>
+                                <label style="font-size:0.85rem;font-weight:600;">הערות
+                                    <input type="text" id="activate-notes" placeholder="אופציונלי" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                                </label>
+                                <button onclick="activateNewCustomer()" style="background:var(--gold);color:#003B46;border:none;padding:10px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;font-family:inherit;margin-top:0.5rem;">
+                                    <i class="fa-solid fa-bolt"></i> הפעל גישה
+                                </button>
+                                <div id="activate-result" style="font-size:0.85rem;text-align:center;min-height:1.2rem;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <style>
+                        #paid-activate-modal.active { display:flex !important; }
+                        #paid-activate-modal { position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center; }
+                    </style>
                 </div>
 
                 <div id="instagram-view" class="hidden">

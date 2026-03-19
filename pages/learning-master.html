@@ -191,7 +191,7 @@
                 <a href="course-library.html"><i class="fa-solid fa-home"></i> ראשי</a>
                 <a href="learning-booklets.html"><i class="fa-solid fa-book"></i> חוברות</a>
                 <a href="summaries/index.html"><i class="fa-solid fa-clipboard-list"></i> סיכומים</a>
-                <a href="learning-master.html" class="active"><i class="fa-solid fa-scroll"></i> מאסטר</a>
+                <a href="learning-master.html" class="active"><i class="fa-solid fa-crown" style="color:var(--gold);"></i> מאסטר</a>
             </nav>
         </div>
         <div class="header-left">
@@ -226,8 +226,29 @@
             </div>
         </div>
 
+        <!-- Video Lessons (paid only) -->
+        <div id="videosSection" style="display:none;">
+            <div class="page-header" style="margin-top:0;">
+                <div class="page-icon" style="background:rgba(47,133,146,0.15);"><i class="fa-solid fa-play" style="color:var(--muted-teal);"></i></div>
+                <h2>שיעורי וידאו</h2>
+                <span class="count" id="videosCount">בקרוב</span>
+            </div>
+            <div class="cards-grid" id="videosGrid">
+                <div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--text-muted);">
+                    <i class="fa-solid fa-film" style="font-size:2.5rem;margin-bottom:1rem;display:block;opacity:0.4;"></i>
+                    <p style="font-size:1.1rem;">שיעורי הוידאו יעלו בקרוב</p>
+                    <p style="font-size:0.85rem;margin-top:0.5rem;">נעדכן אותך ברגע שהם מוכנים</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Workbooks (paid only) -->
         <div id="workbooksSection" style="display:none;">
+            <div class="page-header" style="margin-top:2rem;">
+                <div class="page-icon" style="background:rgba(212,175,55,0.15);"><i class="fa-solid fa-book" style="color:var(--gold);"></i></div>
+                <h2>חוברות עבודה</h2>
+                <span class="count">6 חוברות</span>
+            </div>
             <div class="cards-grid" id="workbooksGrid"></div>
         </div>
     </main>
@@ -256,6 +277,7 @@
                 if (_userRole === 'paid_customer' || _userRole === 'admin') {
                     // Full access — hide paywall, show workbooks
                     document.getElementById('paywallOverlay').style.display = 'none';
+                    document.getElementById('videosSection').style.display = '';
                     document.getElementById('workbooksSection').style.display = '';
                     loadWorkbooks(sb);
                 } else {

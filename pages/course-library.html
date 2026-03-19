@@ -3169,7 +3169,7 @@
                         <i class="fa-solid fa-crown" style="color: var(--gold);"></i>
                         <div>
                             <span class="course-switcher-name">NLP Master — תוכנית הכשרה</span>
-                            <span class="course-switcher-meta" id="masterSwitcherMeta">לחץ לכניסה</span>
+                            <span class="course-switcher-meta" id="masterSwitcherMeta">10 שיעורים + 6 חוברות</span>
                         </div>
                     </div>
                 </div>
@@ -3727,18 +3727,15 @@
                 </div>
 
                 <nav class="syllabus">
-                    <div class="module" onclick="this.classList.toggle('open')">
-                        <div class="module-header">
+                    <div class="module open">
+                        <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
                             <i class="fa-solid fa-chevron-left module-chevron"></i>
                             <i class="fa-solid fa-play-circle" style="color:var(--muted-teal);"></i>
                             <span>שיעורי וידאו</span>
-                            <span class="lesson-count">בקרוב</span>
+                            <span class="lesson-count">10</span>
                         </div>
-                        <div class="module-lessons">
-                            <div style="padding:1rem;color:var(--text-muted);font-size:0.85rem;text-align:center;">
-                                <i class="fa-solid fa-film" style="display:block;font-size:1.5rem;margin-bottom:0.5rem;opacity:0.4;"></i>
-                                שיעורי הוידאו יעלו בקרוב
-                            </div>
+                        <div class="module-lessons" id="masterLessonsList">
+                            <!-- Populated by JS -->
                         </div>
                     </div>
                     <div class="module open">
@@ -3768,9 +3765,46 @@
                         <div style="text-align:center;margin-bottom:2rem;">
                             <i class="fa-solid fa-crown" style="font-size:2.5rem;color:var(--gold);margin-bottom:0.8rem;display:block;"></i>
                             <h2 style="font-family:var(--font-display);margin-bottom:0.3rem;font-size:1.3rem;">תוכנית ההכשרה</h2>
-                            <p style="color:var(--text-secondary);font-size:0.9rem;">חוברות עבודה ותכנים מקצועיים</p>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;">10 שיעורי וידאו + 6 חוברות עבודה</p>
                         </div>
+
+                        <!-- Video Lessons Grid -->
+                        <h3 style="font-size:1rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
+                            <i class="fa-solid fa-play-circle" style="color:var(--muted-teal);"></i> שיעורי וידאו
+                        </h3>
+                        <div id="masterVideoGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem;"></div>
+
+                        <!-- Workbooks Grid -->
+                        <h3 style="font-size:1rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
+                            <i class="fa-solid fa-book" style="color:var(--gold);"></i> חוברות עבודה
+                        </h3>
                         <div id="masterCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;"></div>
+                    </div>
+
+                    <!-- Master Video Player (shown when watching a lesson) -->
+                    <div id="masterVideoPlayer" style="display:none;padding:1.5rem;">
+                        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">
+                            <button onclick="closeMasterVideo()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-secondary);padding:4px;" title="חזרה">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                            <span id="masterVideoTitle" style="font-weight:600;font-size:1rem;"></span>
+                        </div>
+                        <div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000;">
+                            <iframe id="masterVideoFrame" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding:0.8rem 1rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;">
+                            <div>
+                                <span id="masterVideoNumber" style="font-size:0.8rem;color:var(--text-secondary);"></span>
+                            </div>
+                            <div style="display:flex;gap:0.5rem;">
+                                <button id="masterPrevBtn" onclick="navigateMasterLesson(-1)" style="padding:6px 14px;background:var(--bg-card-hover);border:1px solid var(--border-color);border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.82rem;color:var(--text-secondary);">
+                                    <i class="fa-solid fa-arrow-right"></i> הקודם
+                                </button>
+                                <button id="masterNextBtn" onclick="navigateMasterLesson(1)" style="padding:6px 14px;background:var(--gold);color:#003B46;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">
+                                    הבא <i class="fa-solid fa-arrow-left"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- PDF Viewer (shown when viewing a workbook) -->
@@ -4018,6 +4052,20 @@
             { name: 'bonus-emotions-messages.pdf', title: 'חוברת בונוס — מסרים מרגשות', icon: 'fa-solid fa-heart' },
         ];
 
+        const masterLessons = [
+            { id: 'JcTS37pTm20', title: 'פתיחה וחזרה — תשאול סיבובי', duration: '25:28' },
+            { id: 'X6cJdC24BXo', title: 'אמפתיה באימון — שבירת אמונות', duration: '25:14' },
+            { id: 'k9BMu4tnkb8', title: 'הגדרת ערכים — השוואה מורכבת', duration: '22:40' },
+            { id: 'hxV25-3sT6Q', title: 'שחיקה ונוכחות — ערכי אמצעי מול מטרה', duration: '23:37' },
+            { id: 'Dgs89fazBY4', title: 'ערכים בזוגיות וקונפליקטים', duration: '28:03' },
+            { id: 'YjTrukA9pFI', title: 'שיטת חילוץ ערכים — אירוע שיא ושפל', duration: '28:54' },
+            { id: 'JGkGkOq7g14', title: 'הדגמה חיה — איגל ועודיה', duration: '29:34' },
+            { id: 'dnCF2sFupd8', title: 'דירוג ערכים ושיתופי תלמידים', duration: '23:07' },
+            { id: '3nJWE4gdxvg', title: 'ערכי מניעה ודגשי תרגול', duration: '27:43' },
+            { id: 'hgKxjmkEqzA', title: 'קריטריונים מעצימים ושיעורי בית', duration: '26:47' },
+        ];
+        let currentMasterLessonIndex = -1;
+
         async function checkPaidRole() {
             if (!supabaseClient || !currentUser) return;
             try {
@@ -4030,7 +4078,8 @@
                         item.style.display = '';
                         item.style.cursor = 'pointer';
                     }
-                    // Load workbooks sidebar
+                    // Load master content
+                    loadMasterLessons();
                     loadMasterWorkbooks();
                 }
             } catch (e) { /* silent */ }
@@ -4079,8 +4128,10 @@
         async function openMasterWorkbook(i) {
             const wb = masterWorkbooks[i];
 
-            // Hide welcome, show viewer
+            // Hide welcome + video player, show viewer
             document.getElementById('masterWelcome').style.display = 'none';
+            document.getElementById('masterVideoPlayer').style.display = 'none';
+            document.getElementById('masterVideoFrame').src = '';
             const viewer = document.getElementById('masterWorkbookViewer');
             viewer.style.display = '';
             document.getElementById('masterViewerTitle').textContent = wb.title;
@@ -4123,6 +4174,86 @@
             document.getElementById('masterWorkbookViewer').style.display = 'none';
             document.getElementById('masterWelcome').style.display = '';
             document.querySelectorAll('[id^="mwb-sidebar-"]').forEach(el => el.style.background = '');
+            document.querySelectorAll('[id^="ml-sidebar-"]').forEach(el => el.style.background = '');
+        }
+
+        function loadMasterLessons() {
+            // Sidebar items
+            const list = document.getElementById('masterLessonsList');
+            if (list) {
+                list.innerHTML = masterLessons.map((lesson, i) => `
+                    <div class="lesson-item" id="ml-sidebar-${i}" onclick="selectMasterLesson(${i})" style="cursor:pointer;display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.8rem;">
+                        <span style="min-width:18px;height:18px;border-radius:50%;background:var(--muted-teal);color:#fff;font-size:0.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i + 1}</span>
+                        <span style="font-size:0.82rem;line-height:1.3;flex:1;">${lesson.title}</span>
+                        <span style="font-size:0.7rem;color:var(--text-muted);flex-shrink:0;">${lesson.duration}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Video cards in welcome grid
+            const grid = document.getElementById('masterVideoGrid');
+            if (grid) {
+                grid.innerHTML = masterLessons.map((lesson, i) => `
+                    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.2s;border-top:3px solid transparent;"
+                         onmouseenter="this.style.borderTopColor='var(--muted-teal)';this.style.transform='translateY(-2px)'"
+                         onmouseleave="this.style.borderTopColor='transparent';this.style.transform=''"
+                         onclick="selectMasterLesson(${i})">
+                        <div style="position:relative;width:100%;padding-top:56.25%;background:#000;">
+                            <img src="https://img.youtube.com/vi/${lesson.id}/mqdefault.jpg" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" loading="lazy" alt="${lesson.title}">
+                            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);">
+                                <i class="fa-solid fa-play" style="color:#fff;font-size:1.5rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i>
+                            </div>
+                            <span style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.75);color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">${lesson.duration}</span>
+                        </div>
+                        <div style="padding:0.8rem;">
+                            <div style="font-size:0.75rem;color:var(--muted-teal);font-weight:600;margin-bottom:0.3rem;">שיעור ${i + 1}</div>
+                            <div style="font-weight:600;font-size:0.88rem;line-height:1.4;">${lesson.title}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function selectMasterLesson(i) {
+            const lesson = masterLessons[i];
+            currentMasterLessonIndex = i;
+
+            // Hide welcome + PDF viewer, show video player
+            document.getElementById('masterWelcome').style.display = 'none';
+            document.getElementById('masterWorkbookViewer').style.display = 'none';
+            document.getElementById('masterVideoPlayer').style.display = '';
+
+            // Set title and number
+            document.getElementById('masterVideoTitle').textContent = lesson.title;
+            document.getElementById('masterVideoNumber').textContent = `שיעור ${i + 1} מתוך ${masterLessons.length} • ${lesson.duration}`;
+
+            // Load YouTube embed
+            document.getElementById('masterVideoFrame').src = `https://www.youtube.com/embed/${lesson.id}?autoplay=1&rel=0`;
+
+            // Highlight sidebar
+            document.querySelectorAll('[id^="ml-sidebar-"]').forEach(el => el.style.background = '');
+            document.querySelectorAll('[id^="mwb-sidebar-"]').forEach(el => el.style.background = '');
+            const sidebarItem = document.getElementById(`ml-sidebar-${i}`);
+            if (sidebarItem) sidebarItem.style.background = 'var(--sidebar-active)';
+
+            // Prev/Next buttons
+            document.getElementById('masterPrevBtn').style.display = i === 0 ? 'none' : '';
+            document.getElementById('masterNextBtn').style.display = i === masterLessons.length - 1 ? 'none' : '';
+        }
+
+        function navigateMasterLesson(direction) {
+            const next = currentMasterLessonIndex + direction;
+            if (next >= 0 && next < masterLessons.length) {
+                selectMasterLesson(next);
+            }
+        }
+
+        function closeMasterVideo() {
+            document.getElementById('masterVideoPlayer').style.display = 'none';
+            document.getElementById('masterVideoFrame').src = '';
+            document.getElementById('masterWelcome').style.display = '';
+            currentMasterLessonIndex = -1;
+            document.querySelectorAll('[id^="ml-sidebar-"]').forEach(el => el.style.background = '');
         }
 
         function switchToMaster() {

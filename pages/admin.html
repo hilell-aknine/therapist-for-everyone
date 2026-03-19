@@ -83,6 +83,11 @@
                     <i class="fa-solid fa-robot"></i>
                     <span>בוט CRM</span>
                 </div>
+                <div class="nav-item" onclick="switchView('paid')">
+                    <i class="fa-solid fa-crown" style="color:#D4AF37;"></i>
+                    <span>לקוחות משלמים</span>
+                    <span class="badge" id="paid-count-badge" style="background:#D4AF37;color:#003B46;">0</span>
+                </div>
                 <div class="nav-item" onclick="switchView('instagram')">
                     <i class="fa-brands fa-instagram"></i>
                     <span>אינסטגרם</span>
@@ -1097,6 +1102,67 @@
 
                 <!-- GA4 Analytics View -->
                 <!-- Instagram Tracking View -->
+                <!-- Paid Customers View -->
+                <div id="paid-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-crown" style="color:var(--gold);margin-left:0.5rem;"></i> לקוחות משלמים</h1>
+                    <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">ניהול מנויים — לקוחות שרכשו קורס מאסטר NLP</p>
+
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon gold"><i class="fa-solid fa-users"></i></div>
+                            <div>
+                                <div class="stat-value" id="paid-active-count">-</div>
+                                <div class="stat-label">פעילים</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(37,211,102,0.12);color:#25D366;"><i class="fa-solid fa-shekel-sign"></i></div>
+                            <div>
+                                <div class="stat-value" id="paid-total-revenue">-</div>
+                                <div class="stat-label">הכנסות (פעילים)</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(248,81,73,0.12);color:#f85149;"><i class="fa-solid fa-hourglass-end"></i></div>
+                            <div>
+                                <div class="stat-value" id="paid-expiring-count">-</div>
+                                <div class="stat-label">פוקעים ב-30 יום</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(88,166,255,0.12);color:#58a6ff;"><i class="fa-solid fa-chart-line"></i></div>
+                            <div>
+                                <div class="stat-value" id="paid-total-count">-</div>
+                                <div class="stat-label">סה״כ (כל הזמנים)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container" style="margin-top:1.5rem;">
+                        <div class="table-header">
+                            <h3><i class="fa-solid fa-crown" style="color:var(--gold);margin-left:0.4rem;"></i> רשימת מנויים</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>שם</th>
+                                    <th>טלפון</th>
+                                    <th>תוכנית</th>
+                                    <th>מחיר</th>
+                                    <th>התחלה</th>
+                                    <th>סיום</th>
+                                    <th>ימים נותרו</th>
+                                    <th>סטטוס</th>
+                                    <th>חוזה</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paid-customers-table">
+                                <tr><td colspan="9" class="empty-state">טוען...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div id="instagram-view" class="hidden">
                     <h1 class="page-title"><i class="fa-brands fa-instagram" style="color:#E4405F;margin-left:0.5rem;"></i> מעקב אינסטגרם</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">כמה אנשים הגיעו מהקישור המוצמד באינסטגרם — <span style="direction:ltr;display:inline;">therapist-home.com/ig</span></p>
@@ -2066,6 +2132,7 @@
     <script src="../js/admin/admin-portal-questionnaires.js?v=4"></script>
     <script src="../js/admin/admin-pipeline.js"></script>
     <script src="../js/admin/admin-bot.js"></script>
+    <script src="../js/admin/admin-paid.js"></script>
     <script src="../js/admin/admin-instagram.js"></script>
     <script src="../js/admin/admin-analytics.js"></script>
     <script src="../js/admin/admin-settings.js"></script>

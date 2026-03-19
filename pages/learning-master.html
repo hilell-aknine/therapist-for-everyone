@@ -16,7 +16,7 @@
     <meta property="og:locale" content="he_IL">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
-    <!-- No auth needed - public page -->
+    <!-- Auth: requires paid_customer or admin role -->
     <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
     <link rel="stylesheet" href="../css/theme.css">
     <script src="../js/theme-toggle.js" defer></script>
@@ -45,6 +45,34 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: var(--font-body); background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; line-height: 1.6; }
+
+        /* Paywall */
+        .paywall-overlay { position: relative; z-index: 10; padding: 2rem 1rem; display: flex; justify-content: center; }
+        .paywall-card {
+            background: var(--bg-card); border: 1px solid var(--gold); border-radius: 16px;
+            padding: 2.5rem 2rem; max-width: 500px; width: 100%; text-align: center;
+            box-shadow: 0 0 40px rgba(212,175,55,0.15);
+        }
+        .paywall-icon { font-size: 2.5rem; color: var(--gold); margin-bottom: 1rem; }
+        .paywall-card h3 { font-family: var(--font-display); font-size: 1.5rem; color: var(--gold); margin-bottom: 0.5rem; }
+        .paywall-card p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 1rem; }
+        .paywall-price { margin: 1.5rem 0; }
+        .price-amount { font-size: 3rem; font-weight: 700; color: var(--gold); }
+        .price-currency { font-size: 1.2rem; color: var(--text-secondary); margin-right: 0.3rem; }
+        .paywall-includes { font-size: 0.85rem; color: var(--text-muted); }
+        .paywall-cta {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: #25D366; color: #fff; text-decoration: none;
+            padding: 0.8rem 2rem; border-radius: 10px; font-size: 1rem; font-weight: 600;
+            margin-top: 1rem; transition: background 0.2s;
+        }
+        .paywall-cta:hover { background: #1da851; }
+        .paywall-note { font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; }
+        .paywall-note a { color: var(--gold); }
+        @media (max-width: 480px) {
+            .paywall-card { padding: 1.5rem 1rem; }
+            .price-amount { font-size: 2.2rem; }
+        }
 
         .portal-header { background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .header-right { display: flex; align-items: center; gap: 1rem; }
@@ -179,6 +207,25 @@
             <h2>תמלולי קורס מאסטר</h2>
             <span class="count">7 שיעורים</span>
         </div>
+
+        <!-- Paywall overlay — shown for non-paying users -->
+        <div id="paywallOverlay" class="paywall-overlay" style="display:none;">
+            <div class="paywall-card">
+                <div class="paywall-icon"><i class="fa-solid fa-crown"></i></div>
+                <h3>תוכן פרימיום</h3>
+                <p>קורס מאסטר NLP — תוכנית הכשרה מתקדמת הכוללת סרטוני וידאו, חוברות עבודה, תמלולים מלאים ותרגולים מונחים.</p>
+                <div class="paywall-price">
+                    <span class="price-amount">8,880</span>
+                    <span class="price-currency">₪</span>
+                </div>
+                <p class="paywall-includes"><strong>מה כלול:</strong> 10 שיעורי וידאו מלאים, חוברות עבודה, תמלולים, גישה ל-12 חודשים</p>
+                <a href="https://wa.me/972549116092?text=%D7%94%D7%99%D7%99%20%D7%90%D7%A0%D7%99%20%D7%9E%D7%AA%D7%A2%D7%A0%D7%99%D7%99%D7%9F%20%D7%91%D7%A7%D7%95%D7%A8%D7%A1%20%D7%9E%D7%90%D7%A1%D7%98%D7%A8" class="paywall-cta">
+                    <i class="fa-brands fa-whatsapp"></i> דברו איתנו לפרטים
+                </a>
+                <p class="paywall-note">כבר רכשת? <a href="login.html">התחבר כאן</a> עם החשבון שלך.</p>
+            </div>
+        </div>
+
         <div class="cards-grid" id="cardsGrid"></div>
     </main>
 
@@ -203,18 +250,37 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-config.js"></script>
     <script>
-        // Auth gate — redirect to login if no session
+        // Auth gate — check session + role (paid_customer or admin)
+        let _userRole = null;
         (async function() {
             try {
                 const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
                 const { data: { session } } = await sb.auth.getSession();
                 if (!session) {
-                    sessionStorage.setItem('returnUrl', window.location.href);
-                    window.location.replace('free-portal.html');
+                    // Not logged in — show paywall
+                    document.getElementById('paywallOverlay').style.display = '';
+                    document.getElementById('cardsGrid').style.filter = 'blur(6px)';
+                    document.getElementById('cardsGrid').style.pointerEvents = 'none';
+                    document.getElementById('loadingScreen')?.classList.add('hide');
+                    return;
+                }
+                // Check role
+                const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
+                _userRole = profile?.role;
+
+                if (_userRole === 'paid_customer' || _userRole === 'admin') {
+                    // Full access — hide paywall
+                    document.getElementById('paywallOverlay').style.display = 'none';
+                } else {
+                    // Logged in but not paying — show paywall
+                    document.getElementById('paywallOverlay').style.display = '';
+                    document.getElementById('cardsGrid').style.filter = 'blur(6px)';
+                    document.getElementById('cardsGrid').style.pointerEvents = 'none';
                 }
             } catch (e) {
-                sessionStorage.setItem('returnUrl', window.location.href);
-                window.location.replace('free-portal.html');
+                document.getElementById('paywallOverlay').style.display = '';
+                document.getElementById('cardsGrid').style.filter = 'blur(6px)';
+                document.getElementById('cardsGrid').style.pointerEvents = 'none';
             }
         })();
 

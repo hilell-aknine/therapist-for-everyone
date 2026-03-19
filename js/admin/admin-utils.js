@@ -7,6 +7,7 @@ const VIEW_GROUPS = {
     'sales':    { views: ['contact-leads', 'questionnaires', 'pipeline'], header: 'sales-header', default: 'contact-leads' },
     'learning': { views: ['leads', 'learners', 'portal-q'], header: 'learning-header', default: 'leads' },
     'bot':      { views: ['bot'], header: null, default: 'bot' },
+    'paid':     { views: ['paid'], header: null, default: 'paid' },
     'instagram':{ views: ['instagram'], header: null, default: 'instagram' },
     'analytics':{ views: ['analytics'], header: null, default: 'analytics' },
     'settings': { views: ['settings'], header: null, default: 'settings' },
@@ -52,6 +53,7 @@ function switchView(view) {
     // Lazy-load hooks
     if (view === 'learning' || group.default === 'learners') loadLearnersView();
     if (view === 'bot' || group.default === 'bot') loadBotView();
+    if (view === 'paid' || group.default === 'paid') loadPaidCustomers();
     if (view === 'instagram' || group.default === 'instagram') loadInstagramAnalytics();
     if (view === 'analytics' || group.default === 'analytics') loadGA4Analytics();
     if (view === 'settings' || group.default === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }

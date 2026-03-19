@@ -3165,11 +3165,11 @@
                             <span class="course-switcher-meta">51 שיעורים • פעיל</span>
                         </div>
                     </div>
-                    <div class="course-switcher-item disabled" id="masterSwitcherItem" onclick="switchToMaster()">
+                    <div class="course-switcher-item" id="masterSwitcherItem" onclick="switchToMaster()" style="display:none;">
                         <i class="fa-solid fa-crown" style="color: var(--gold);"></i>
                         <div>
                             <span class="course-switcher-name">NLP Master — תוכנית הכשרה</span>
-                            <span class="course-switcher-meta" id="masterSwitcherMeta">לקוחות משלמים בלבד</span>
+                            <span class="course-switcher-meta" id="masterSwitcherMeta">לחץ לכניסה</span>
                         </div>
                     </div>
                 </div>
@@ -3186,14 +3186,6 @@
 
         <!-- LEFT GROUP: Actions + Auth -->
         <div class="header-left">
-            <a href="learning-master.html" class="header-intro-btn header-lead-cta" style="text-decoration:none;">
-                <i class="fa-solid fa-crown"></i>
-                <span>קורס מאסטר</span>
-            </a>
-            <a href="training.html" class="header-intro-btn" style="text-decoration:none;">
-                <i class="fa-solid fa-graduation-cap"></i>
-                <span>הכשרת מטפלים</span>
-            </a>
             <a href="../index.html" class="back-to-site">
                 <i class="fa-solid fa-arrow-right"></i>
                 <span>חזרה לאתר</span>
@@ -3239,40 +3231,7 @@
     </header>
 
     <!-- Lead Generation Modal -->
-    <div class="modal-overlay" id="leadModal" onclick="if(event.target===this)closeLeadModal()">
-        <div class="modal-box" style="max-width: 480px;">
-            <button class="video-modal-close" onclick="closeLeadModal()" aria-label="סגור">&times;</button>
-            <div class="modal-icon">
-                <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-            <h2 style="text-align: center;">הסמכה בינלאומית ב-NLP</h2>
-            <p class="lead-modal-desc">רוצה להפוך את זה למקצוע, לקבל תעודה בינלאומית ולהתחיל לעזור לאנשים? תשאיר פרטים ונדאג שיחזרו אליך בהקדם.</p>
-
-            <form id="leadForm" onsubmit="return submitLeadForm(event)">
-                <div class="form-group">
-                    <input type="text" id="leadName" placeholder="שם מלא" required autocomplete="name">
-                </div>
-                <div class="form-group">
-                    <input type="tel" id="leadPhone" placeholder="מספר טלפון" required autocomplete="tel" dir="ltr" style="text-align: left;">
-                </div>
-                <div class="form-group">
-                    <input type="email" id="leadEmail" placeholder="כתובת אימייל" required autocomplete="email" dir="ltr" style="text-align: left;">
-                </div>
-                <button type="submit" class="submit-btn" id="leadSubmitBtn">
-                    <i class="fa-solid fa-paper-plane" style="margin-left: 0.5rem;"></i>
-                    שלחו לי פרטים
-                </button>
-            </form>
-
-            <div class="lead-success" id="leadSuccess">
-                <div class="lead-success-icon">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <h3>תודה! הפרטים התקבלו</h3>
-                <p>ניצור איתך קשר בהקדם</p>
-            </div>
-        </div>
-    </div>
+    <!-- Lead modal removed — portal is for learning, not sales -->
 
     <!-- Course Player (unified portal view) -->
     <div id="playerView" class="portal-view">
@@ -4048,12 +4007,11 @@
                 const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', currentUser.id).single();
                 if (profile && (profile.role === 'paid_customer' || profile.role === 'admin')) {
                     _isPaidCustomer = true;
-                    // Enable master switcher
+                    // Show master switcher (hidden by default for non-paying)
                     const item = document.getElementById('masterSwitcherItem');
                     if (item) {
-                        item.classList.remove('disabled');
+                        item.style.display = '';
                         item.style.cursor = 'pointer';
-                        document.getElementById('masterSwitcherMeta').textContent = 'לחץ לכניסה';
                     }
                     // Load workbooks sidebar
                     loadMasterWorkbooks();

@@ -159,7 +159,9 @@ function renderFunnel() {
                     ${Object.entries(STAGES).map(([k, v]) => `<option value="${k}" ${k === p.stage ? 'selected' : ''}>${v.icon} ${v.label}</option>`).join('')}
                 </select>
             </td>
-            <td style="text-align:center;font-size:0.85rem;">${p.contactCount > 0 ? `<span style="background:${st.color}22;color:${st.color};padding:1px 6px;border-radius:10px;font-size:0.75rem;">${p.contactCount}</span>` : '—'}</td>
+            <td style="text-align:center;font-size:0.85rem;">
+                <span onclick="event.stopPropagation();editContactCount('${p.id}',${p.contactCount})" style="cursor:pointer;background:${st.color}22;color:${st.color};padding:1px 6px;border-radius:10px;font-size:0.75rem;" title="לחץ לעריכת מונה">${p.contactCount > 0 ? p.contactCount : '0'}</span>
+            </td>
             <td style="text-align:center;font-size:0.85rem;">${p.lessons > 0 ? `📚 ${p.lessons}` : '—'}</td>
             <td style="text-align:center;">${hasQ}</td>
             <td style="font-size:0.8rem;">${p.source || '—'}</td>
@@ -188,9 +190,11 @@ async function updateStage(userId, newStage) {
     } catch (err) { alert('שגיאה: ' + err.message); }
 }
 
-// === Log contact attempt ===
+// === Log contact attempt (with cancel support) ===
 async function logContact(userId) {
-    const note = prompt('הערה (אופציונלי):');
+    const note = prompt('הערה (אופציונלי — לחץ ביטול לביטול הפעולה):');
+    if (note === null) return; // User cancelled
+
     try {
         const p = funnelData?.find(x => x.id === userId);
         const newCount = (p?.contactCount || 0) + 1;
@@ -217,10 +221,27 @@ async function logContact(userId) {
 
         await db.from('profiles').update(updates).eq('id', userId);
 
-        // Refresh
-        funnelData = null;
-        funnelCacheTime = 0;
+        funnelData = null; funnelCacheTime = 0;
         loadFunnel();
+    } catch (err) { alert('שגיאה: ' + err.message); }
+}
+
+// === Edit contact count manually ===
+async function editContactCount(userId, current) {
+    const val = prompt(`מונה ניסיונות קשר נוכחי: ${current}\n\nהכנס ערך חדש (או 0 לאיפוס):`, current);
+    if (val === null) return;
+    const num = parseInt(val);
+    if (isNaN(num) || num < 0) return;
+
+    try {
+        await db.from('profiles').update({
+            sales_contact_count: num,
+            sales_updated_at: new Date().toISOString()
+        }).eq('id', userId);
+
+        const p = funnelData?.find(x => x.id === userId);
+        if (p) p.contactCount = num;
+        renderFunnel();
     } catch (err) { alert('שגיאה: ' + err.message); }
 }
 
@@ -243,7 +264,7 @@ function showProspect(index) {
         <div><strong>נרשם:</strong> ${date}</div>
         <div><strong>מקור:</strong> ${p.source || '—'}</div>
         <div><strong>שלב:</strong> <span style="color:${st.color};">${st.icon} ${st.label}</span></div>
-        <div><strong>ניסיונות קשר:</strong> ${p.contactCount}</div>
+        <div><strong>ניסיונות קשר:</strong> <span onclick="editContactCount('${p.id}',${p.contactCount})" style="cursor:pointer;text-decoration:underline;color:var(--gold);" title="לחץ לעריכה">${p.contactCount}</span></div>
         <div><strong>קשר אחרון:</strong> ${lastContact}</div>
         <div><strong>שיעורים שלמד:</strong> 📚 ${p.lessons}</div>
     </div>`;

@@ -1,8 +1,22 @@
-// admin-instagram.js — Instagram tracking: leads from utm_source=instagram
+// admin-instagram.js — Instagram tracking: UTM + how_found questionnaire answers
 
 let igCache = null;
 let igCacheTime = 0;
 const IG_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const IG_TYPE_COLORS = {
+    'מטופל': '#3b82f6',
+    'מטפל': '#22c55e',
+    'ליד': '#f59e0b',
+    'נרשם לפורטל': '#E4405F',
+    'מילא שאלון (UTM)': '#a855f7',
+    'מילא שאלון (דיווח עצמי)': '#8b5cf6',
+};
+
+const IG_CAMPAIGN_NAMES = {
+    'bio-link-pinned': 'קישור מוצמד בביו',
+    'free-course-march-2026': 'קורס חינמי מרץ 2026',
+};
 
 async function loadInstagramAnalytics() {
     if (igCache && (Date.now() - igCacheTime) < IG_CACHE_TTL) {
@@ -11,24 +25,37 @@ async function loadInstagramAnalytics() {
     }
 
     try {
-        // Query all 5 tables for utm_source = 'instagram'
-        const [patientsRes, therapistsRes, contactsRes, profilesRes, questionnairesRes] = await Promise.all([
+        // Query UTM-based sources + how_found questionnaire answers
+        const [patientsRes, therapistsRes, contactsRes, profilesRes, qUtmRes, qHowFoundRes] = await Promise.all([
             db.from('patients').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
             db.from('therapists').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
             db.from('contact_requests').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
             db.from('profiles').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
-            db.from('portal_questionnaires').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
+            // Questionnaires with UTM
+            db.from('portal_questionnaires').select('id, user_id, full_name, utm_source, utm_medium, utm_campaign, how_found, created_at').eq('utm_source', 'instagram'),
+            // Questionnaires where user said "אינסטגרם" (self-reported, no UTM)
+            db.from('portal_questionnaires').select('id, user_id, full_name, utm_source, utm_medium, utm_campaign, how_found, created_at').eq('how_found', 'אינסטגרם'),
         ]);
 
-        // Deduplicate: profiles that also appear in questionnaires (by user matching)
-        const profileIds = new Set((profilesRes.data || []).map(r => r.id));
+        // Merge questionnaire results, deduplicate by id
+        const allQuestionnaires = new Map();
+        (qUtmRes.data || []).forEach(r => allQuestionnaires.set(r.id, { ...r, source: 'utm' }));
+        (qHowFoundRes.data || []).forEach(r => {
+            if (!allQuestionnaires.has(r.id)) {
+                allQuestionnaires.set(r.id, { ...r, source: 'how_found' });
+            }
+        });
 
+        // Build combined list
         const allLeads = [
             ...(patientsRes.data || []).map(r => ({ ...r, type: 'מטופל' })),
             ...(therapistsRes.data || []).map(r => ({ ...r, type: 'מטפל' })),
             ...(contactsRes.data || []).map(r => ({ ...r, type: 'ליד' })),
             ...(profilesRes.data || []).map(r => ({ ...r, type: 'נרשם לפורטל' })),
-            ...(questionnairesRes.data || []).map(r => ({ ...r, type: 'מילא שאלון' })),
+            ...[...allQuestionnaires.values()].map(r => ({
+                ...r,
+                type: r.source === 'utm' ? 'מילא שאלון (UTM)' : 'מילא שאלון (דיווח עצמי)'
+            })),
         ];
 
         allLeads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -76,8 +103,7 @@ function renderInstagramData(allLeads) {
     } else {
         breakdownTbody.innerHTML = typeRows.map(([type, count]) => {
             const pct = allLeads.length > 0 ? Math.round((count / allLeads.length) * 100) : 0;
-            const typeColors = { 'מטופל': '#3b82f6', 'מטפל': '#22c55e', 'ליד': '#f59e0b', 'נרשם לפורטל': '#E4405F', 'מילא שאלון': '#a855f7' };
-            const color = typeColors[type] || '#6b7280';
+            const color = IG_TYPE_COLORS[type] || '#6b7280';
             return `<tr>
                 <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-left:0.5rem;"></span>${type}</td>
                 <td><strong>${count}</strong></td>
@@ -96,7 +122,7 @@ function renderInstagramData(allLeads) {
     // Breakdown by campaign
     const campaignCounts = {};
     allLeads.forEach(l => {
-        const camp = l.utm_campaign || '(ללא קמפיין)';
+        const camp = l.utm_campaign || '(דיווח עצמי / ללא קמפיין)';
         campaignCounts[camp] = (campaignCounts[camp] || 0) + 1;
     });
     const campaignRows = Object.entries(campaignCounts).sort((a, b) => b[1] - a[1]);
@@ -104,13 +130,9 @@ function renderInstagramData(allLeads) {
     if (campaignRows.length === 0) {
         campaignsTbody.innerHTML = '<tr><td colspan="3" class="empty-state">אין נתוני קמפיינים</td></tr>';
     } else {
-        const campaignNameMap = {
-            'bio-link-pinned': 'קישור מוצמד בביו',
-            'free-course-march-2026': 'קורס חינמי מרץ 2026',
-        };
         campaignsTbody.innerHTML = campaignRows.map(([camp, count]) => {
             const pct = allLeads.length > 0 ? Math.round((count / allLeads.length) * 100) : 0;
-            const displayName = campaignNameMap[camp] || camp;
+            const displayName = IG_CAMPAIGN_NAMES[camp] || camp;
             return `<tr>
                 <td><i class="fa-solid fa-tag" style="color:var(--gold);margin-left:0.4rem;font-size:0.8rem;"></i> ${displayName}</td>
                 <td><strong>${count}</strong></td>
@@ -132,17 +154,12 @@ function renderInstagramData(allLeads) {
     if (recent.length === 0) {
         recentTbody.innerHTML = '<tr><td colspan="4" class="empty-state">אין לידים מאינסטגרם עדיין</td></tr>';
     } else {
-        const campaignNameMap = {
-            'bio-link-pinned': 'ביו מוצמד',
-            'free-course-march-2026': 'קורס חינמי',
-        };
         recentTbody.innerHTML = recent.map(l => {
             const date = new Date(l.created_at);
             const dateStr = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jerusalem' });
             const timeStr = date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
-            const typeColors2 = { 'מטופל': '#3b82f6', 'מטפל': '#22c55e', 'ליד': '#f59e0b', 'נרשם לפורטל': '#E4405F', 'מילא שאלון': '#a855f7' };
-            const typeColor = typeColors2[l.type] || '#6b7280';
-            const camp = campaignNameMap[l.utm_campaign] || l.utm_campaign || '—';
+            const typeColor = IG_TYPE_COLORS[l.type] || '#6b7280';
+            const camp = IG_CAMPAIGN_NAMES[l.utm_campaign] || l.utm_campaign || '—';
             return `<tr>
                 <td><strong>${l.full_name || 'ללא שם'}</strong></td>
                 <td><span style="font-size:0.75rem;background:${typeColor}22;color:${typeColor};padding:2px 8px;border-radius:10px;">${l.type}</span></td>

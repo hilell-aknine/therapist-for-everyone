@@ -148,22 +148,17 @@ function initializeTracking() {
 // ============================================================================
 
 function createConsentBanner() {
-    if (getConsentLevel()) return; // Already chose
+    if (getConsentLevel()) return;
 
     const banner = document.createElement('div');
     banner.id = 'cookie-consent-banner';
     banner.setAttribute('role', 'dialog');
-    banner.setAttribute('aria-label', 'הגדרות עוגיות');
+    banner.setAttribute('aria-label', 'עוגיות');
     banner.innerHTML = `
-        <div class="cookie-content">
-            <span class="cookie-text">
-                אתר זה משתמש בעוגיות הכרחיות לתפעול האתר, ובעוגיות אנליטיות ושיווקיות (Google Analytics, Meta Pixel) לשיפור השירות.
-                <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cookie-link">מדיניות פרטיות מלאה</a>
-            </span>
-            <div class="cookie-buttons">
-                <button id="cookie-accept-all" class="cookie-btn cookie-btn-primary">אישור הכל</button>
-                <button id="cookie-essential-only" class="cookie-btn cookie-btn-secondary">הכרחיות בלבד</button>
-            </div>
+        <span class="cc-text">האתר משתמש בעוגיות. <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cc-link">פרטים</a></span>
+        <div class="cc-btns">
+            <button id="cookie-accept-all" class="cc-btn cc-yes">אישור</button>
+            <button id="cookie-essential-only" class="cc-btn cc-no">ללא מעקב</button>
         </div>
     `;
 
@@ -175,76 +170,44 @@ function createConsentBanner() {
             bottom: 0;
             left: 0;
             width: 100%;
-            background: #ffffff;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+            background: rgba(0,59,70,0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 9999;
-            padding: 16px 24px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
             font-family: 'Heebo', sans-serif;
-            font-size: 13px;
+            font-size: 12px;
             direction: rtl;
             transform: translateY(0);
             transition: transform 0.3s ease-out;
-            border-top: 3px solid #2F8592;
         }
         #cookie-consent-banner.hiding { transform: translateY(100%); }
-        .cookie-content {
-            max-width: 900px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .cookie-text { color: #444; flex: 1; line-height: 1.6; }
-        .cookie-link {
-            color: #2F8592;
-            text-decoration: underline;
-            white-space: nowrap;
-        }
-        .cookie-buttons {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        .cookie-btn {
+        .cc-text { color: rgba(255,255,255,0.8); }
+        .cc-link { color: #D4AF37; text-decoration: none; }
+        .cc-link:hover { text-decoration: underline; }
+        .cc-btns { display: flex; gap: 6px; flex-shrink: 0; }
+        .cc-btn {
             border: none;
-            padding: 8px 18px;
-            border-radius: 6px;
+            padding: 5px 14px;
+            border-radius: 4px;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
-            transition: all 0.2s;
+            transition: opacity 0.2s;
         }
-        .cookie-btn-primary {
-            background: #2F8592;
-            color: #fff;
+        .cc-btn:hover { opacity: 0.85; }
+        .cc-yes { background: #D4AF37; color: #003B46; }
+        .cc-no { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.3); }
+        @media (max-width: 480px) {
+            #cookie-consent-banner { font-size: 11px; gap: 8px; padding: 7px 12px; }
+            .cc-btn { padding: 4px 10px; font-size: 10px; }
         }
-        .cookie-btn-primary:hover { background: #247580; }
-        .cookie-btn-secondary {
-            background: transparent;
-            color: #2F8592;
-            border: 2px solid #2F8592;
-        }
-        .cookie-btn-secondary:hover { background: rgba(47,133,146,0.08); }
-        @media (max-width: 600px) {
-            .cookie-content {
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-            }
-            .cookie-text { font-size: 12px; }
-            .cookie-buttons { width: 100%; }
-            .cookie-btn { flex: 1; padding: 10px 12px; font-size: 13px; }
-        }
-        /* Dark mode */
-        [data-theme="dark"] #cookie-consent-banner {
-            background: #1a2332;
-            border-top-color: #D4AF37;
-        }
-        [data-theme="dark"] .cookie-text { color: #ccc; }
-        [data-theme="dark"] .cookie-link { color: #D4AF37; }
-        [data-theme="dark"] .cookie-btn-secondary { color: #D4AF37; border-color: #D4AF37; }
     `;
 
     document.head.appendChild(styles);
@@ -276,22 +239,9 @@ function createConsentBanner() {
 // ============================================================================
 
 function createCookieSettingsButton() {
-    if (!getConsentLevel()) return; // Banner still showing
-
-    const btn = document.createElement('button');
-    btn.id = 'cookie-settings-btn';
-    btn.setAttribute('aria-label', 'הגדרות עוגיות');
-    btn.title = 'הגדרות עוגיות';
-    btn.textContent = '🍪';
-    btn.style.cssText = 'position:fixed;bottom:12px;left:12px;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid #ddd;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;font-size:18px;z-index:9998;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;';
-    btn.addEventListener('mouseenter', () => btn.style.transform = 'scale(1.1)');
-    btn.addEventListener('mouseleave', () => btn.style.transform = 'scale(1)');
-    btn.addEventListener('click', function() {
-        localStorage.removeItem(MARKETING_CONFIG.CONSENT_KEY);
-        btn.remove();
-        createConsentBanner();
-    });
-    document.body.appendChild(btn);
+    if (!getConsentLevel()) return;
+    // No floating button — users can reset via privacy policy page or browser settings.
+    // This keeps the UI completely clean after the one-time choice.
 }
 
 // ============================================================================

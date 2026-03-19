@@ -227,6 +227,16 @@
         </div>
 
         <div class="cards-grid" id="cardsGrid"></div>
+
+        <!-- Workbooks Section (paid only) -->
+        <div id="workbooksSection" style="display:none;">
+            <div class="page-header" style="margin-top:2rem;">
+                <div class="page-icon" style="background:rgba(212,175,55,0.15);"><i class="fa-solid fa-book" style="color:var(--gold);"></i></div>
+                <h2>חוברות עבודה</h2>
+                <span class="count">6 חוברות</span>
+            </div>
+            <div class="cards-grid" id="workbooksGrid"></div>
+        </div>
     </main>
 
     <!-- Text Viewer Modal -->
@@ -269,8 +279,10 @@
                 _userRole = profile?.role;
 
                 if (_userRole === 'paid_customer' || _userRole === 'admin') {
-                    // Full access — hide paywall
+                    // Full access — hide paywall, show workbooks
                     document.getElementById('paywallOverlay').style.display = 'none';
+                    document.getElementById('workbooksSection').style.display = '';
+                    loadWorkbooks(sb);
                 } else {
                     // Logged in but not paying — show paywall
                     document.getElementById('paywallOverlay').style.display = '';
@@ -342,6 +354,56 @@
 
         document.getElementById('textModal').addEventListener('click', e => { if (e.target.id === 'textModal') closeModal(); });
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+        // Workbooks — loaded from Supabase Storage with signed URLs
+        const workbooks = [
+            { name: 'nlp-practitioner-main-workbook.pdf', title: 'חוברת ראשית — NLP Practitioner', icon: 'fa-solid fa-book-open' },
+            { name: 'master-course-workbook.pdf', title: 'חוברת קורס מאסטר', icon: 'fa-solid fa-crown' },
+            { name: 'master-nlp-techniques.pdf', title: 'טכניקות NLP מאסטר', icon: 'fa-solid fa-wand-magic-sparkles' },
+            { name: 'full-techniques-book.pdf', title: 'ספר טכניקות מלא', icon: 'fa-solid fa-book' },
+            { name: 'submodalities-questionnaire.pdf', title: 'דף שאלון סאב-מודאליטיז', icon: 'fa-solid fa-clipboard-question' },
+            { name: 'bonus-emotions-messages.pdf', title: 'חוברת בונוס — מסרים מרגשות', icon: 'fa-solid fa-heart' },
+        ];
+
+        async function loadWorkbooks(sb) {
+            const grid = document.getElementById('workbooksGrid');
+            grid.innerHTML = workbooks.map((wb, i) => `
+                <div class="content-card" id="wb-card-${i}">
+                    <div class="card-top">
+                        <div class="card-icon"><i class="${wb.icon}"></i></div>
+                        <span class="card-badge" style="background:var(--gold);color:#003B46;">PDF</span>
+                    </div>
+                    <div class="card-title">${esc(wb.title)}</div>
+                    <div class="card-actions">
+                        <button class="btn-view" onclick="openWorkbook(${i})" style="background:var(--gold);color:#003B46;border-color:var(--gold);">
+                            <i class="fa-solid fa-download"></i> הורדה
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Store sb reference for download
+            window._sbClient = sb;
+        }
+
+        async function openWorkbook(i) {
+            const wb = workbooks[i];
+            const btn = document.querySelector(`#wb-card-${i} .btn-view`);
+            if (btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> טוען...'; btn.disabled = true; }
+
+            try {
+                const { data, error } = await window._sbClient.storage
+                    .from('workbooks')
+                    .createSignedUrl(wb.name, 300); // 5 min expiry
+
+                if (error) throw error;
+                window.open(data.signedUrl, '_blank');
+            } catch (err) {
+                alert('שגיאה בטעינת הקובץ: ' + err.message);
+            } finally {
+                if (btn) { btn.innerHTML = '<i class="fa-solid fa-download"></i> הורדה'; btn.disabled = false; }
+            }
+        }
 
     </script>
     <div style="text-align:center;padding:2rem 1rem 1rem;color:var(--t-text-secondary,#8b949e);font-size:0.85rem;opacity:0.8;">

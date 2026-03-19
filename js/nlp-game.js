@@ -171,6 +171,12 @@ class StoryGame {
         this.heartTimerInterval = null;
         this.userMenuOpen = false;
 
+        // Combo & Speed systems
+        this.comboCount = 0;
+        this.maxCombo = 0;
+        this.exerciseStartTime = null;
+        this.secondChanceUsed = false;
+
         // Managers
         this.sound = new SoundManager();
         this.gemini = new GeminiMentor();
@@ -1431,6 +1437,8 @@ ${answers.action || ''}`;
         this.currentScreen = 'exercise';
         this.currentExerciseIndex = 0;
         this.lessonMistakes = 0;
+        this.comboCount = 0;
+        this.maxCombo = 0;
         this.showProgressBar();
         this.renderExercise();
     }
@@ -1444,6 +1452,8 @@ ${answers.action || ''}`;
 
         this.selectedAnswer = null;
         this.exerciseAnswered = false;
+        this.secondChanceUsed = false;
+        this.exerciseStartTime = Date.now();
         this.updateProgressBar();
 
         const container = document.getElementById('game-container');
@@ -1885,7 +1895,7 @@ ${answers.action || ''}`;
             <div class="exercise-container">
                 <div class="exercise-type">התאמה</div>
                 <div class="exercise-question">${exercise.question}</div>
-                <div class="match-instructions">לחצו על פריט משמאל ואז על הפריט המתאים מימין</div>
+                <div class="match-instructions">לחצו על פריט מצד אחד ואז על הפריט המתאים לו מהצד השני</div>
                 <div class="match-container">
                     <div class="match-column">${leftHtml}</div>
                     <div class="match-column">${rightHtml}</div>
@@ -1963,6 +1973,88 @@ ${answers.action || ''}`;
     }
 
     // ═══════════════════════════════════════
+    // Combo, Speed & Second Chance Systems
+    // ═══════════════════════════════════════
+    getComboBonus(count) {
+        if (count < 2) return 0;
+        if (count === 2) return 2;
+        if (count === 3) return 5;
+        if (count === 4) return 8;
+        return 12; // 5+
+    }
+
+    getComboLabel(count) {
+        if (count >= 5) return 'מדהים!';
+        if (count === 4) return 'פנטסטי!';
+        if (count === 3) return 'מצוין!';
+        if (count === 2) return 'רצף!';
+        return '';
+    }
+
+    showComboPopup(count, bonus) {
+        const label = this.getComboLabel(count);
+        const popup = document.createElement('div');
+        popup.className = 'combo-popup';
+        popup.innerHTML = `<div class="combo-label">${label}</div><div class="combo-count">x${count} 🔥 +${bonus} XP</div>`;
+        document.body.appendChild(popup);
+        setTimeout(() => popup.classList.add('show'), 50);
+        setTimeout(() => {
+            popup.classList.remove('show');
+            setTimeout(() => popup.remove(), 400);
+        }, 1800);
+    }
+
+    showSpeedBonusPopup() {
+        const popup = document.createElement('div');
+        popup.className = 'speed-bonus-popup';
+        popup.innerHTML = '⚡ +5 XP מהירות!';
+        document.body.appendChild(popup);
+        setTimeout(() => popup.classList.add('show'), 50);
+        setTimeout(() => {
+            popup.classList.remove('show');
+            setTimeout(() => popup.remove(), 400);
+        }, 1500);
+    }
+
+    showSecondChanceUI(exercise) {
+        // Eliminate the wrong option visually
+        if (exercise.type === 'compare') {
+            const cards = document.querySelectorAll('.compare-card');
+            if (cards[this.selectedAnswer]) {
+                cards[this.selectedAnswer].classList.add('eliminated');
+                cards[this.selectedAnswer].style.opacity = '0.35';
+                cards[this.selectedAnswer].style.pointerEvents = 'none';
+            }
+        } else {
+            const btns = document.querySelectorAll('.option-btn');
+            if (btns[this.selectedAnswer]) {
+                btns[this.selectedAnswer].classList.add('eliminated');
+                btns[this.selectedAnswer].disabled = true;
+                btns[this.selectedAnswer].style.opacity = '0.35';
+                btns[this.selectedAnswer].style.pointerEvents = 'none';
+            }
+        }
+
+        // Reset selection
+        this.selectedAnswer = null;
+        document.querySelectorAll('.option-btn, .compare-card').forEach(el => el.classList.remove('selected'));
+        this.disableCheckButton();
+
+        // Show toast
+        const toast = document.createElement('div');
+        toast.className = 'second-chance-toast';
+        toast.innerHTML = '🤔 ניסיון שני! נסה שוב';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 50);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 2000);
+
+        this.sound.play('click');
+    }
+
+    // ═══════════════════════════════════════
     // Answer Checking
     // ═══════════════════════════════════════
     checkAnswer() {
@@ -1971,53 +2063,93 @@ ${answers.action || ''}`;
         const exercise = this.currentLesson.exercises[this.currentExerciseIndex];
         let isCorrect = false;
 
+        // Step 1: Determine correctness
         switch (exercise.type) {
             case 'multiple-choice':
+            case 'scenario':
+            case 'improve':
                 isCorrect = this.selectedAnswer === exercise.correct;
-                this.showMultipleChoiceFeedback(isCorrect, exercise);
                 break;
             case 'fill-blank':
                 isCorrect = this.selectedAnswer === exercise.correct;
-                this.showFillBlankFeedback(isCorrect, exercise);
-                break;
-            case 'order':
-                isCorrect = this.checkOrderAnswer(exercise);
-                this.showOrderFeedback(isCorrect);
-                break;
-            case 'identify':
-                isCorrect = this.checkIdentifyAnswer(exercise);
-                this.showIdentifyFeedback(isCorrect, exercise);
                 break;
             case 'compare':
                 isCorrect = this.selectedAnswer === exercise.correct;
-                this.showCompareFeedback(isCorrect, exercise);
                 break;
-            case 'scenario':
-                isCorrect = this.selectedAnswer === exercise.correct;
-                this.showMultipleChoiceFeedback(isCorrect, exercise);
+            case 'order':
+                isCorrect = this.checkOrderAnswer(exercise);
                 break;
-            case 'improve':
-                isCorrect = this.selectedAnswer === exercise.correct;
-                this.showMultipleChoiceFeedback(isCorrect, exercise);
+            case 'identify':
+                isCorrect = this.checkIdentifyAnswer(exercise);
                 break;
             case 'match':
                 isCorrect = this.checkMatchAnswer(exercise);
+                break;
+        }
+
+        // Step 2: Second chance gate (option-based exercises only, first wrong attempt)
+        const secondChanceTypes = ['multiple-choice', 'scenario', 'improve', 'compare'];
+        if (!isCorrect && !this.secondChanceUsed && secondChanceTypes.includes(exercise.type)) {
+            this.secondChanceUsed = true;
+            this.comboCount = 0; // combo breaks on any mistake
+            this.showSecondChanceUI(exercise);
+            return;
+        }
+
+        // Step 3: Show type-specific visual feedback
+        switch (exercise.type) {
+            case 'multiple-choice':
+            case 'scenario':
+            case 'improve':
+                this.showMultipleChoiceFeedback(isCorrect, exercise);
+                break;
+            case 'fill-blank':
+                this.showFillBlankFeedback(isCorrect, exercise);
+                break;
+            case 'compare':
+                this.showCompareFeedback(isCorrect, exercise);
+                break;
+            case 'order':
+                this.showOrderFeedback(isCorrect);
+                break;
+            case 'identify':
+                this.showIdentifyFeedback(isCorrect, exercise);
+                break;
+            case 'match':
                 this.showMatchFeedback(isCorrect);
                 break;
         }
 
         this.exerciseAnswered = true;
 
+        // Step 4: XP, combo, speed bonus, hearts
         if (isCorrect) {
             this.sound.play('correct');
             this.playerData.totalCorrectAnswers = (this.playerData.totalCorrectAnswers || 0) + 1;
-            this.addXP(10);
+
+            // Combo system
+            this.comboCount++;
+            if (this.comboCount > this.maxCombo) this.maxCombo = this.comboCount;
+            const comboBonus = this.getComboBonus(this.comboCount);
+
+            // Speed bonus (< 10 seconds)
+            const elapsed = (Date.now() - this.exerciseStartTime) / 1000;
+            const speedBonus = elapsed < 10 ? 5 : 0;
+
+            const totalXP = 10 + comboBonus + speedBonus;
+            this.addXP(totalXP);
             this.createStarBurst();
-            // Haptic feedback
+
+            // Show combo popup
+            if (this.comboCount >= 2) this.showComboPopup(this.comboCount, comboBonus);
+            // Show speed bonus popup
+            if (speedBonus > 0) this.showSpeedBonusPopup();
+
             if (navigator.vibrate) navigator.vibrate(50);
         } else {
             this.sound.play('wrong');
             this.playerData.totalWrongAnswers = (this.playerData.totalWrongAnswers || 0) + 1;
+            this.comboCount = 0; // reset combo
             this.lessonMistakes++;
             this.loseHeart();
             if (navigator.vibrate) navigator.vibrate([100, 30, 100]);

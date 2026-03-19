@@ -32,10 +32,20 @@ async function loadInstagramAnalytics() {
             db.from('contact_requests').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
             db.from('profiles').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
             // Questionnaires with UTM
-            db.from('portal_questionnaires').select('id, user_id, full_name, utm_source, utm_medium, utm_campaign, how_found, created_at').eq('utm_source', 'instagram'),
+            db.from('portal_questionnaires').select('id, user_id, utm_source, utm_medium, utm_campaign, how_found, phone, created_at').eq('utm_source', 'instagram'),
             // Questionnaires where user said "אינסטגרם" (self-reported, no UTM)
-            db.from('portal_questionnaires').select('id, user_id, full_name, utm_source, utm_medium, utm_campaign, how_found, created_at').eq('how_found', 'אינסטגרם'),
+            db.from('portal_questionnaires').select('id, user_id, utm_source, utm_medium, utm_campaign, how_found, phone, created_at').eq('how_found', 'אינסטגרם'),
         ]);
+
+        // Build a map of user_id → full_name from profiles for questionnaire rows
+        const qUserIds = new Set();
+        (qUtmRes.data || []).forEach(r => r.user_id && qUserIds.add(r.user_id));
+        (qHowFoundRes.data || []).forEach(r => r.user_id && qUserIds.add(r.user_id));
+        let profileNameMap = {};
+        if (qUserIds.size > 0) {
+            const { data: pNames } = await db.from('profiles').select('id, full_name').in('id', [...qUserIds]);
+            (pNames || []).forEach(p => { profileNameMap[p.id] = p.full_name; });
+        }
 
         // Merge questionnaire results, deduplicate by id
         const allQuestionnaires = new Map();
@@ -46,14 +56,19 @@ async function loadInstagramAnalytics() {
             }
         });
 
+        // Deduplicate: don't show profile row if same user already has a questionnaire
+        const qUserIdSet = new Set([...allQuestionnaires.values()].map(r => r.user_id).filter(Boolean));
+        const filteredProfiles = (profilesRes.data || []).filter(r => !qUserIdSet.has(r.id));
+
         // Build combined list
         const allLeads = [
             ...(patientsRes.data || []).map(r => ({ ...r, type: 'מטופל' })),
             ...(therapistsRes.data || []).map(r => ({ ...r, type: 'מטפל' })),
             ...(contactsRes.data || []).map(r => ({ ...r, type: 'ליד' })),
-            ...(profilesRes.data || []).map(r => ({ ...r, type: 'נרשם לפורטל' })),
+            ...filteredProfiles.map(r => ({ ...r, type: 'נרשם לפורטל' })),
             ...[...allQuestionnaires.values()].map(r => ({
                 ...r,
+                full_name: profileNameMap[r.user_id] || r.phone || 'ללא שם',
                 type: r.source === 'utm' ? 'מילא שאלון (UTM)' : 'מילא שאלון (דיווח עצמי)'
             })),
         ];

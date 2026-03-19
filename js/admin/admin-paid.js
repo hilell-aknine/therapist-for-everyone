@@ -88,8 +88,8 @@ function renderPaidCustomers(subs) {
             <td>${s.contract_url ? `<a href="${s.contract_url}" target="_blank" style="color:var(--gold);"><i class="fa-solid fa-file-contract"></i></a>` : `<button onclick="uploadContract('${s.id}')" class="btn-sm" style="font-size:0.7rem;padding:2px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text-secondary);" title="העלאת חוזה"><i class="fa-solid fa-upload"></i></button>`}</td>
             <td>
                 <div style="display:flex;gap:4px;">
-                    ${s.status === 'active' ? `<button onclick="deactivateSub('${s.id}')" class="btn-sm" style="font-size:0.65rem;padding:2px 6px;background:rgba(248,81,73,0.1);border:1px solid #f85149;border-radius:4px;cursor:pointer;color:#f85149;" title="ביטול">ביטול</button>` : ''}
-                    ${s.status === 'active' ? `<button onclick="extendSub('${s.id}')" class="btn-sm" style="font-size:0.65rem;padding:2px 6px;background:rgba(212,175,55,0.1);border:1px solid var(--gold);border-radius:4px;cursor:pointer;color:var(--gold);" title="הארכה">+</button>` : ''}
+                    <button onclick="editSub('${s.id}')" style="font-size:0.65rem;padding:2px 6px;background:rgba(59,130,246,0.1);border:1px solid #3b82f6;border-radius:4px;cursor:pointer;color:#3b82f6;" title="עריכה">✏️</button>
+                    <button onclick="deleteSub('${s.id}','${(profile.full_name||'').replace(/'/g,'')}')" style="font-size:0.65rem;padding:2px 6px;background:rgba(248,81,73,0.1);border:1px solid #f85149;border-radius:4px;cursor:pointer;color:#f85149;" title="מחיקה">🗑️</button>
                 </div>
             </td>
         </tr>`;
@@ -237,6 +237,137 @@ async function deactivateSub(id) {
     } catch (err) {
         alert('שגיאה: ' + err.message);
     }
+}
+
+// === Edit subscription — full modal ===
+function editSub(id) {
+    const s = paidCache?.find(x => x.id === id);
+    if (!s) return;
+    const p = s.profiles || {};
+    const fmtDate = d => d ? new Date(d).toISOString().split('T')[0] : '';
+
+    const html = `
+        <div class="modal-box" style="max-width:500px;background:var(--bg-card,#fff);border-radius:12px;padding:2rem;position:relative;">
+            <button onclick="closeEditSubModal()" style="position:absolute;top:12px;left:12px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-secondary);">&times;</button>
+            <h3 style="margin-bottom:1rem;color:var(--gold);"><i class="fa-solid fa-pen"></i> עריכת לקוח משלם</h3>
+            <div style="display:flex;flex-direction:column;gap:0.7rem;">
+                <label style="font-size:0.85rem;font-weight:600;">שם מלא
+                    <input type="text" id="edit-sub-name" value="${p.full_name || ''}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                </label>
+                <label style="font-size:0.85rem;font-weight:600;">טלפון
+                    <input type="text" id="edit-sub-phone" value="${p.phone || ''}" dir="ltr" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                </label>
+                <label style="font-size:0.85rem;font-weight:600;">אימייל
+                    <input type="email" id="edit-sub-email" value="${p.email || ''}" dir="ltr" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                </label>
+                <div style="display:flex;gap:0.7rem;">
+                    <label style="font-size:0.85rem;font-weight:600;flex:1;">תוכנית
+                        <select id="edit-sub-plan" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                            <option value="master_course" ${s.plan==='master_course'?'selected':''}>קורס מאסטר NLP</option>
+                            <option value="practitioner_course" ${s.plan==='practitioner_course'?'selected':''}>קורס פרקטישנר NLP</option>
+                            <option value="bundle" ${s.plan==='bundle'?'selected':''}>חבילה מלאה</option>
+                        </select>
+                    </label>
+                    <label style="font-size:0.85rem;font-weight:600;flex:1;">מחיר (₪)
+                        <input type="number" id="edit-sub-price" value="${s.price||8880}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                    </label>
+                </div>
+                <div style="display:flex;gap:0.7rem;">
+                    <label style="font-size:0.85rem;font-weight:600;flex:1;">תאריך התחלה
+                        <input type="date" id="edit-sub-start" value="${fmtDate(s.start_date)}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                    </label>
+                    <label style="font-size:0.85rem;font-weight:600;flex:1;">תאריך סיום
+                        <input type="date" id="edit-sub-end" value="${fmtDate(s.end_date)}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                    </label>
+                </div>
+                <label style="font-size:0.85rem;font-weight:600;">סטטוס
+                    <select id="edit-sub-status" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                        <option value="active" ${s.status==='active'?'selected':''}>פעיל</option>
+                        <option value="suspended" ${s.status==='suspended'?'selected':''}>מושהה</option>
+                        <option value="cancelled" ${s.status==='cancelled'?'selected':''}>בוטל</option>
+                        <option value="expired" ${s.status==='expired'?'selected':''}>פקע</option>
+                    </select>
+                </label>
+                <label style="font-size:0.85rem;font-weight:600;">הערות
+                    <textarea id="edit-sub-notes" rows="3" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;resize:vertical;">${s.notes||''}</textarea>
+                </label>
+                <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+                    <button onclick="saveEditSub('${s.id}','${s.user_id}')" style="flex:1;padding:10px;background:var(--gold);color:#003B46;border:none;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;font-family:inherit;">
+                        <i class="fa-solid fa-check"></i> שמור
+                    </button>
+                    <button onclick="deleteSub('${s.id}','${(p.full_name||'').replace(/'/g,'')}')" style="padding:10px 16px;background:#f85149;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;font-family:inherit;">
+                        <i class="fa-solid fa-trash"></i> מחק
+                    </button>
+                </div>
+                <div id="edit-sub-result" style="font-size:0.85rem;text-align:center;min-height:1.2rem;"></div>
+            </div>
+        </div>`;
+
+    let modal = document.getElementById('edit-sub-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'edit-sub-modal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        modal.onclick = e => { if (e.target === modal) closeEditSubModal(); };
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function closeEditSubModal() {
+    const m = document.getElementById('edit-sub-modal');
+    if (m) m.style.display = 'none';
+}
+
+async function saveEditSub(subId, userId) {
+    const res = document.getElementById('edit-sub-result');
+    res.textContent = 'שומר...'; res.style.color = 'var(--text-secondary)';
+
+    try {
+        await db.from('profiles').update({
+            full_name: document.getElementById('edit-sub-name').value.trim(),
+            phone: document.getElementById('edit-sub-phone').value.trim(),
+            email: document.getElementById('edit-sub-email').value.trim(),
+        }).eq('id', userId);
+
+        const newStatus = document.getElementById('edit-sub-status').value;
+        await db.from('subscriptions').update({
+            plan: document.getElementById('edit-sub-plan').value,
+            price: parseFloat(document.getElementById('edit-sub-price').value) || 8880,
+            start_date: new Date(document.getElementById('edit-sub-start').value).toISOString(),
+            end_date: new Date(document.getElementById('edit-sub-end').value).toISOString(),
+            status: newStatus,
+            notes: document.getElementById('edit-sub-notes').value.trim() || null,
+        }).eq('id', subId);
+
+        if (newStatus === 'active') {
+            await db.from('profiles').update({ role: 'paid_customer' }).eq('id', userId);
+        } else {
+            const { data: oa } = await db.from('subscriptions').select('id').eq('user_id', userId).eq('status', 'active').neq('id', subId);
+            if (!oa || !oa.length) await db.from('profiles').update({ role: 'student_lead' }).eq('id', userId);
+        }
+
+        res.innerHTML = '<span style="color:#22c55e;">✅ נשמר!</span>';
+        paidCache = null; paidCacheTime = 0; loadPaidCustomers();
+        setTimeout(closeEditSubModal, 1000);
+    } catch (err) {
+        res.textContent = 'שגיאה: ' + err.message; res.style.color = '#f85149';
+    }
+}
+
+async function deleteSub(id, name) {
+    if (!confirm(`למחוק לצמיתות את המנוי של ${name || 'לקוח זה'}?\n\nפעולה זו בלתי הפיכה.`)) return;
+    try {
+        const sub = paidCache?.find(s => s.id === id);
+        await db.from('subscriptions').delete().eq('id', id);
+        if (sub) {
+            const { data: oa } = await db.from('subscriptions').select('id').eq('user_id', sub.user_id).eq('status', 'active');
+            if (!oa || !oa.length) await db.from('profiles').update({ role: 'student_lead' }).eq('id', sub.user_id);
+        }
+        closeEditSubModal();
+        paidCache = null; paidCacheTime = 0; loadPaidCustomers();
+    } catch (err) { alert('שגיאה: ' + err.message); }
 }
 
 // === Extend subscription ===

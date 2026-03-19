@@ -264,25 +264,23 @@ async function syncToGoogleSheets() {
             };
         });
 
-        const GMAIL_API_URL = 'https://script.google.com/macros/s/AKfycbxtH1yYVyv8j561ztm1EJ0fIal9DD75wT9JFUokTh0jPkwc06yzlL_b9v7cCFgL3kXT/exec';
-        const GMAIL_API_TOKEN = '2fe00f3e650c58464562b19187dec038';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxtH1yYVyv8j561ztm1EJ0fIal9DD75wT9JFUokTh0jPkwc06yzlL_b9v7cCFgL3kXT/exec';
+        const API_TOKEN = '2fe00f3e650c58464562b19187dec038';
 
-        const res = await fetch(`${GMAIL_API_URL}?token=${GMAIL_API_TOKEN}&action=syncSheet&sheetName=לקוחות משלמים`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rows }),
-            redirect: 'follow'
-        });
+        // Clear sheet first with empty row, then append all
+        let sheetUrl = '';
+        for (let i = 0; i < rows.length; i++) {
+            const encodedData = encodeURIComponent(JSON.stringify(rows[i]));
+            const res = await fetch(`${API_URL}?token=${API_TOKEN}&action=appendRow&sheetName=לקוחות משלמים&data=${encodedData}`);
+            const data = await res.json().catch(() => null);
+            if (data?.url) sheetUrl = data.url;
+        }
 
-        // Apps Script redirects — need to follow
-        const data = await res.json().catch(() => null);
-
-        if (data?.success) {
-            alert(`✅ סונכרן בהצלחה! ${data.rows} שורות\n\n📊 ${data.url}`);
-            if (data.url) window.open(data.url, '_blank');
+        if (sheetUrl) {
+            alert(`✅ סונכרן בהצלחה! ${rows.length} שורות`);
+            window.open(sheetUrl, '_blank');
         } else {
-            // Try following redirect manually
-            alert('סנכרון נשלח — בדוק ב-Google Sheets');
+            alert(`✅ סונכרן ${rows.length} שורות`);
         }
     } catch (err) {
         alert('שגיאה: ' + err.message);

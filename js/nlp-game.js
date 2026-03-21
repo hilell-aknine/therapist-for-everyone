@@ -406,15 +406,17 @@ class StoryGame {
         document.getElementById('ram-chat-fab').style.display = 'flex';
 
         // Migrate progress if needed (21 → 51 lessons)
-        this.migrateProgress();
+        try { this.migrateProgress(); } catch (e) { console.warn('Migration skipped:', e); }
 
         // Init game
-        this.updateStreak();
-        this.recoverHearts();
-        this.updateStatsDisplay();
-        this.startHeartTimer();
+        try {
+            this.updateStreak();
+            this.recoverHearts();
+            this.updateStatsDisplay();
+            this.startHeartTimer();
+        } catch (e) { console.warn('Game init warning:', e); }
 
-        // Check onboarding
+        // Always render home screen
         if (!this.playerData.onboardingComplete) {
             this.showOnboarding();
         } else {
@@ -3015,8 +3017,23 @@ ${answers.action || ''}`;
         const panel = document.getElementById('ram-chat-panel');
         const isOpen = panel.style.display !== 'none';
         panel.style.display = isOpen ? 'none' : 'flex';
+
+        // Backdrop for mobile
+        let backdrop = document.getElementById('ram-chat-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.id = 'ram-chat-backdrop';
+            backdrop.className = 'ram-chat-backdrop';
+            backdrop.addEventListener('click', () => this.toggleRamChat());
+            document.body.appendChild(backdrop);
+        }
+
         if (!isOpen) {
+            backdrop.classList.add('active');
             document.getElementById('ram-chat-input').focus();
+        } else {
+            backdrop.classList.remove('active');
+            document.getElementById('ram-chat-input').blur();
         }
     }
 

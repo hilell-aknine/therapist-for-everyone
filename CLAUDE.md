@@ -326,7 +326,77 @@ META_PIXEL_ID: '123456789',  // Meta (Facebook) Pixel
 
 ---
 
-## 14. Skills (מיומנויות אוטונומיות)
+## 14. NLP Duolingo Game
+
+### Architecture
+```
+pages/nlp-game.html          # Game page (loads all scripts)
+js/nlp-game.js                # Game engine (~3000 lines) — rendering, auth, gamification
+js/nlp-game-data.js           # Assembler — combines MODULE_1..MODULE_7 into MODULES array
+js/nlp-game-data-m[1-7].js    # Per-module data files (lessons, reading sections, exercises)
+css/nlp-game.css              # Game styles + responsive + welcome gate
+assets/game/                  # AI-generated visuals (127 images + 3 videos)
+├── lessons/m{1-7}-l{1-8}.jpg # 51 lesson reading section hero images
+├── badges/                   # 14 achievement badge icons
+├── exercises/                # 8 exercise type icons
+├── levels/                   # 8 level-up tree illustrations
+├── completions/              # 7 module completion celebrations
+├── banners/                  # 7 module entry banners (landscape, HD)
+├── videos/                   # 3 animated videos (welcome, knowledge-tree, celebration)
+├── feedback/                 # correct, wrong, combo, perfect-score
+├── rewards/                  # XP, hearts, streak, unlock, course-complete
+├── social/                   # OG share card, achievement share
+├── screens/                  # game-map, no-hearts, daily-challenge, streak-lost
+├── onboarding/               # 3 onboarding step illustrations
+└── bg/                       # Background patterns
+```
+
+### Key Design Decisions
+- **Open access** — no login required (marketing funnel). Guest mode uses localStorage only.
+- **Welcome gate** — branded entry screen with animated brain video, logo, stats, CTA
+- **Reading section** — 3-5 paragraphs from actual course transcripts before each exercise
+- **51 lessons × 5-6 exercises** = 300 total exercises across 7 modules
+- **8 exercise types:** multiple-choice, fill-blank, match, compare, order, identify, improve, scenario
+- **Content language** — everyday life examples (NOT business/sales language)
+- **Lesson titles** — MUST match exactly with `course-library.html` lines 4282-4376
+
+### Data Model
+```javascript
+// Each module file (nlp-game-data-m{N}.js):
+const MODULE_N = {
+    id: N, title: "...", description: "...", icon: "emoji",
+    image: "../assets/game/module-N.jpg",
+    lessons: [{
+        id: 1,                    // Sequential number (NOT string like "5-1")
+        title: "exact course title",
+        reading: {
+            paragraphs: ["...", "..."],  // 3-5 from transcripts
+            keyTerms: ["NLP", "..."]     // Highlighted in gold
+        },
+        exercises: [{ type, question, options, correct, explanation, wrongExplanations }]
+    }]
+};
+```
+
+### Player Data (Supabase: `nlp_game_players`)
+- `xp`, `level`, `hearts` (5 max, recover 1/20min), `streak`, `completedLessons` (keyed "moduleId-lessonId")
+- `migrationVersion: 2` — migration from old 21-lesson version
+- Achievement badges: first_lesson, five/ten/twenty_lessons, half_course, forty/all_lessons, streaks, XP milestones
+
+### Content Rules
+- All reading/exercise content from `docs/transcripts/per-lesson/moduleX_lessonY.txt`
+- NO invented NLP content — transcript-based only
+- NO business language (לקוח, מכירה, עסק, יועץ) — use everyday examples
+- `wrongExplanations` must be ARRAY (not string), with null at correct answer index
+
+### Visuals
+- All AI-generated via fal-ai (FLUX schnell/dev + Kling video)
+- Brand palette: deep teal (#003B46) + gold (#D4AF37)
+- Images fallback gracefully via `onerror` handler
+
+---
+
+## 15. Skills (מיומנויות אוטונומיות)
 
 ### Project-Level Skills (`.claude/skills/`)
 מיומנויות מותאמות לפרויקט — פקודות חוזרות שהפכו לאוטומציה:

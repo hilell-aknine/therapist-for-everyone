@@ -1047,7 +1047,8 @@ class StoryGame {
             const justUnlocked = previousLocked.includes(module.id) && !isLocked;
 
             let stateClass = 'available';
-            let stateIcon = module.icon;
+            const moduleImg = module.image ? `<img src="${module.image}" alt="" class="home-path-img">` : module.icon;
+            let stateIcon = moduleImg;
             if (isLocked) {
                 stateClass = 'locked';
                 stateIcon = '🔒';
@@ -1598,13 +1599,13 @@ ${answers.action || ''}`;
 
     createExerciseTip(exerciseType) {
         const tips = {
-            'multiple-choice': "💡 חשבו מה היה מושך אתכם כלקוחות - זו בדרך כלל התשובה הנכונה!",
-            'fill-blank': "💡 המילה הנכונה היא זו שיוצרת את הרגש החזק ביותר.",
-            'order': "💡 חשבו על המסע של הקהל - מה הם צריכים לשמוע קודם?",
+            'multiple-choice': "💡 חשבו על מה שמרגיש הכי נכון מהחוויה שלכם — סמכו על האינטואיציה!",
+            'fill-blank': "💡 המילה הנכונה היא זו שמשלימה את המשפט בצורה הטבעית ביותר.",
+            'order': "💡 חשבו על הסדר ההגיוני — מה קורה קודם ומה אחר כך?",
             'identify': "💡 חפשו את החלק שגורם לכם להרגיש משהו.",
-            'compare': "💡 דמיינו את עצמכם כלקוח - איזו גרסה הייתה גורמת לכם לעצור ולקרוא?",
-            'improve': "💡 חפשו את האפשרות שמוסיפה רגש, ספציפיות או חיבור אישי.",
-            'match': "💡 חפשו את הקשר הלוגי בין העמודות - מה מתחבר למה?",
+            'compare': "💡 דמיינו את עצמכם בסיטואציה — איזו גישה הייתה עוזרת לכם יותר?",
+            'improve': "💡 חפשו את האפשרות שהכי מחוברת לרגש, לספציפיות ולחוויה אישית.",
+            'match': "💡 חפשו את הקשר הלוגי בין העמודות — מה מתחבר למה?",
             'scenario': "💡 דמיינו את עצמכם במצב הזה — מה הייתם עושים?"
         };
         return tips[exerciseType] || "";

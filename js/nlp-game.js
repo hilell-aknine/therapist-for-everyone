@@ -329,15 +329,18 @@ class StoryGame {
     // Auth Flow
     // ═══════════════════════════════════════
     async initAuth() {
+        // Show branded welcome gate first
+        this.showWelcomeGate();
+
         // Check existing session via Auth module from supabase-client.js
         try {
             const session = await window.Auth.getSession();
             if (session?.user) {
                 this.onAuthSuccess(session.user);
             } else {
-                // No session — redirect to login
-                window.location.href = 'login.html?redirect=nlp-game.html';
-                return;
+                // Guest mode — open to everyone for marketing
+                this.isGuest = true;
+                this.onAuthSuccess(null);
             }
         } catch (e) {
             // Guest mode fallback
@@ -346,11 +349,32 @@ class StoryGame {
         }
 
         // Listen for auth state changes
-        window.Auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session?.user && !this.user) {
-                this.onAuthSuccess(session.user);
-            }
-        });
+        try {
+            window.Auth.onAuthStateChange(async (event, session) => {
+                if (event === 'SIGNED_IN' && session?.user && !this.user) {
+                    this.isGuest = false;
+                    this.onAuthSuccess(session.user);
+                }
+            });
+        } catch (e) { /* Auth not available in guest mode */ }
+    }
+
+    showWelcomeGate() {
+        const gate = document.getElementById('welcome-gate');
+        if (!gate) return;
+        gate.style.display = 'flex';
+
+        // Animate elements in sequence
+        setTimeout(() => gate.classList.add('active'), 50);
+
+        // Auto-dismiss on button click
+        const btn = document.getElementById('welcome-gate-btn');
+        if (btn) {
+            btn.addEventListener('click', () => {
+                gate.classList.remove('active');
+                setTimeout(() => { gate.style.display = 'none'; }, 400);
+            });
+        }
     }
 
     async onAuthSuccess(user) {

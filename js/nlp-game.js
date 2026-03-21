@@ -1605,6 +1605,10 @@ ${answers.action || ''}`;
         }
     }
 
+    getExerciseTypeIcon(exerciseType) {
+        return `<img src="../assets/game/exercises/${exerciseType}.jpg" alt="" class="exercise-type-icon" onerror="this.style.display='none'">`;
+    }
+
     createExerciseTip(exerciseType) {
         const tips = {
             'multiple-choice': "💡 חשבו על מה שמרגיש הכי נכון מהחוויה שלכם — סמכו על האינטואיציה!",
@@ -1632,7 +1636,7 @@ ${answers.action || ''}`;
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
-                <div class="exercise-type">בחירה מרובה</div>
+                <div class="exercise-type">${this.getExerciseTypeIcon('multiple-choice')} בחירה מרובה</div>
                 <div class="exercise-question">${exercise.question}</div>
                 <div class="options-list">
                     ${optionsHtml}
@@ -1667,7 +1671,7 @@ ${answers.action || ''}`;
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
-                <div class="exercise-type">תרחיש</div>
+                <div class="exercise-type">${this.getExerciseTypeIcon('scenario')} תרחיש</div>
                 <div class="exercise-question">${exercise.question}</div>
                 ${exercise.context ? `<div class="scenario-context"><div class="scenario-context-label">📋 הקשר:</div><div class="scenario-context-text">${exercise.context}</div></div>` : ''}
                 <div class="options-list">
@@ -1688,7 +1692,7 @@ ${answers.action || ''}`;
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
-                <div class="exercise-type">השלמת משפט</div>
+                <div class="exercise-type">${this.getExerciseTypeIcon('fill-blank')} השלמת משפט</div>
                 <div class="exercise-question">${exercise.question}</div>
                 <div class="fill-blank-container">
                     <div class="template-text">${templateHtml}</div>
@@ -1736,7 +1740,7 @@ ${answers.action || ''}`;
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
-                <div class="exercise-type">סידור לפי סדר</div>
+                <div class="exercise-type">${this.getExerciseTypeIcon('order')} סידור לפי סדר</div>
                 <div class="exercise-question">${exercise.question}</div>
                 <div class="order-container" id="order-container">
                     ${itemsHtml}
@@ -1846,7 +1850,7 @@ ${answers.action || ''}`;
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
-                <div class="exercise-type">זיהוי בטקסט</div>
+                <div class="exercise-type">${this.getExerciseTypeIcon('identify')} זיהוי בטקסט</div>
                 <div class="exercise-question">${exercise.question}</div>
                 <div class="identify-instructions">סמנו את החלק הרלוונטי בטקסט</div>
                 <div class="identify-text" id="identify-text" onmouseup="game.handleTextSelection()" ontouchend="setTimeout(function(){game.handleTextSelection()}, 100)">${exercise.text}</div>
@@ -1905,7 +1909,7 @@ ${answers.action || ''}`;
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
-                <div class="exercise-type">איזה חזק יותר?</div>
+                <div class="exercise-type">${this.getExerciseTypeIcon('compare')} איזה חזק יותר?</div>
                 <div class="exercise-question">${exercise.question}</div>
                 <div class="compare-cards">
                     <div class="compare-card" onclick="game.selectCompare(0)">
@@ -1962,7 +1966,7 @@ ${answers.action || ''}`;
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
-                <div class="exercise-type">שפר את הסיפור</div>
+                <div class="exercise-type">${this.getExerciseTypeIcon('improve')} שפר את הסיפור</div>
                 <div class="exercise-question">${exercise.question}</div>
                 <div class="improve-original">
                     <div class="improve-original-label">המשפט המקורי:</div>
@@ -2004,7 +2008,7 @@ ${answers.action || ''}`;
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
-                <div class="exercise-type">התאמה</div>
+                <div class="exercise-type">${this.getExerciseTypeIcon('match')} התאמה</div>
                 <div class="exercise-question">${exercise.question}</div>
                 <div class="match-instructions">לחצו על פריט מצד אחד ואז על הפריט המתאים לו מהצד השני</div>
                 <div class="match-container">

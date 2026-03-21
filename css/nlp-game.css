@@ -4073,6 +4073,85 @@ main,
 }
 
 /* ═══════════════════════════════════════════════════════
+   Reading Section
+   ═══════════════════════════════════════════════════════ */
+.reading-section {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-lg);
+    padding: var(--space-6) var(--space-5);
+    max-width: 640px;
+    margin: var(--space-4) auto;
+    animation: fadeIn 0.4s ease;
+}
+
+.reading-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.reading-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.reading-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.reading-content {
+    margin-bottom: var(--space-6);
+}
+
+.reading-paragraph {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-4);
+    text-align: right;
+}
+
+.reading-paragraph:last-child {
+    margin-bottom: 0;
+}
+
+.key-term {
+    color: var(--color-gold-500);
+    font-weight: 600;
+}
+
+.reading-cta-wrapper {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--glass-border);
+    position: sticky;
+    bottom: 0;
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding-bottom: var(--space-2);
+    margin: 0 calc(-1 * var(--space-5));
+    padding-left: var(--space-5);
+    padding-right: var(--space-5);
+    border-radius: 0 0 var(--r-lg) var(--r-lg);
+}
+
+.reading-cta {
+    min-height: 52px;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════
    Responsive — Consolidated
    ═══════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
@@ -4093,7 +4172,7 @@ main,
     /* Exercise */
     .exercise-question { font-size: 18px; }
     .exercise-text, .question-text { font-size: 16px; }
-    .option-btn { padding: 14px var(--space-4); font-size: 14px; min-height: 50px; }
+    .option-btn { padding: 14px var(--space-4); font-size: 14px; min-height: 56px; }
 
     /* Compare */
     .compare-card { padding: var(--space-4); }
@@ -4101,7 +4180,7 @@ main,
 
     /* Match */
     .match-container { gap: var(--space-2); }
-    .match-item { padding: var(--space-3) var(--space-2); font-size: 13px; min-height: 48px; }
+    .match-item { padding: var(--space-3) var(--space-2); font-size: 13px; min-height: 52px; }
 
     /* Completion */
     .completion-stats { gap: var(--space-5); }
@@ -4142,15 +4221,56 @@ main,
     /* Level up */
     .level-up-heading { font-size: 28px; }
 
-    /* Ram chat */
-    .ram-chat-panel {
-        left: 12px;
-        bottom: 88px;
-        width: calc(100vw - 24px);
-        height: 50vh;
+    /* Reading section */
+    .reading-section { padding: var(--space-4) var(--space-4); margin: var(--space-3) auto; }
+    .reading-title { font-size: 1.1rem; }
+    .reading-paragraph { font-size: 1.05rem; line-height: 2; }
+    .reading-cta { min-height: 56px; font-size: 1.1rem; }
+    .reading-cta-wrapper {
+        margin: 0 calc(-1 * var(--space-4));
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+        padding-bottom: env(safe-area-inset-bottom, var(--space-2));
     }
-    .ram-chat-fab { bottom: 16px; left: 16px; width: 52px; height: 52px; }
+
+    /* Ram chat — bottom-sheet */
+    .ram-chat-panel {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 60vh;
+        border-radius: var(--r-xl) var(--r-xl) 0 0;
+        animation: slideUp 0.3s ease;
+    }
+    .ram-chat-fab { bottom: 80px; left: 16px; width: 52px; height: 52px; }
     .ram-fab-img { width: 38px; height: 38px; }
+}
+
+/* Ram chat bottom-sheet backdrop */
+.ram-chat-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+}
+.ram-chat-backdrop.active { display: block; }
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* Button stacking on very small screens */
+@media (max-width: 380px) {
+    #footer-actions .footer-buttons {
+        flex-direction: column-reverse;
+        gap: var(--space-2);
+    }
+    #footer-actions .footer-buttons .btn {
+        width: 100%;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════

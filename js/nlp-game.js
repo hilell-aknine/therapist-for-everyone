@@ -284,7 +284,11 @@ class StoryGame {
         this.achievements = [
             { id: 'first_lesson', title: 'צעד ראשון', desc: 'סיימת את השיעור הראשון', icon: '🧠', condition: (data) => Object.keys(data.completedLessons).length >= 1 },
             { id: 'five_lessons', title: 'לומד NLP', desc: 'סיימת 5 שיעורים', icon: '📚', condition: (data) => Object.keys(data.completedLessons).length >= 5 },
-            { id: 'all_lessons', title: 'NLP פרקטישנר', desc: 'סיימת את כל השיעורים', icon: '👑', condition: (data) => Object.keys(data.completedLessons).length >= 21 },
+            { id: 'ten_lessons', title: 'בדרך הנכונה', desc: 'סיימת 10 שיעורים', icon: '📖', condition: (data) => Object.keys(data.completedLessons).length >= 10 },
+            { id: 'twenty_lessons', title: 'לומד מתקדם', desc: 'סיימת 20 שיעורים', icon: '🎓', condition: (data) => Object.keys(data.completedLessons).length >= 20 },
+            { id: 'half_course', title: 'חצי דרך!', desc: 'סיימת 25 שיעורים', icon: '⚡', condition: (data) => Object.keys(data.completedLessons).length >= 25 },
+            { id: 'forty_lessons', title: 'כמעט פרקטישנר!', desc: 'סיימת 40 שיעורים', icon: '🌟', condition: (data) => Object.keys(data.completedLessons).length >= 40 },
+            { id: 'all_lessons', title: 'NLP פרקטישנר', desc: 'סיימת את כל 51 השיעורים', icon: '👑', condition: (data) => Object.keys(data.completedLessons).length >= 51 },
             { id: 'streak_3', title: 'התמדה', desc: '3 ימים ברצף', icon: '🔥', condition: (data) => data.streak >= 3 },
             { id: 'streak_7', title: 'שבוע של שינוי', desc: '7 ימים ברצף', icon: '⭐', condition: (data) => data.streak >= 7 },
             { id: 'streak_30', title: 'מחויבות אמיתית', desc: '30 ימים ברצף', icon: '💎', condition: (data) => data.streak >= 30 },
@@ -377,6 +381,9 @@ class StoryGame {
         // Show Ram chat FAB
         document.getElementById('ram-chat-fab').style.display = 'flex';
 
+        // Migrate progress if needed (21 → 51 lessons)
+        this.migrateProgress();
+
         // Init game
         this.updateStreak();
         this.recoverHearts();
@@ -419,6 +426,21 @@ class StoryGame {
             moduleAccuracy: {},
             perfectLessonsList: []
         };
+    }
+
+    migrateProgress() {
+        // Migration from 21-lesson version to 51-lesson version
+        if (this.playerData.migrationVersion >= 2) return;
+
+        // Preserve XP, level, hearts, streak, achievements
+        // Reset completed lessons — content changed completely
+        this.playerData.completedLessons = {};
+        this.playerData.moduleProgress = {};
+        this.playerData.migrationVersion = 2;
+        this.savePlayerData();
+
+        // Show migration toast
+        this.showToast('המשחק עודכן! 51 שיעורים חדשים מחכים לך 🎉');
     }
 
     async loadPlayerData(user) {
@@ -1434,13 +1456,69 @@ ${answers.action || ''}`;
             return;
         }
 
-        this.currentScreen = 'exercise';
         this.currentExerciseIndex = 0;
         this.lessonMistakes = 0;
         this.comboCount = 0;
         this.maxCombo = 0;
         this.showProgressBar();
-        this.renderExercise();
+
+        // Show reading section first if available
+        if (this.currentLesson.reading) {
+            this.currentScreen = 'reading';
+            this.updateProgressBar();
+            this.renderReading();
+        } else {
+            this.currentScreen = 'exercise';
+            this.renderExercise();
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // Reading Section
+    // ═══════════════════════════════════════
+    renderReading() {
+        const lesson = this.currentLesson;
+        const reading = lesson.reading;
+        const container = document.getElementById('game-container');
+
+        // Highlight key terms in paragraphs
+        const renderParagraph = (text) => {
+            if (!reading.keyTerms || reading.keyTerms.length === 0) return text;
+            let result = text;
+            reading.keyTerms.forEach(term => {
+                const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                result = result.replace(new RegExp(escaped, 'g'), `<span class="key-term">${term}</span>`);
+            });
+            return result;
+        };
+
+        const paragraphsHTML = reading.paragraphs
+            .map(p => `<p class="reading-paragraph">${renderParagraph(p)}</p>`)
+            .join('');
+
+        container.innerHTML = `
+            <div class="reading-section">
+                <div class="reading-header">
+                    <span class="reading-icon">📖</span>
+                    <h2 class="reading-title">${lesson.title}</h2>
+                </div>
+                <div class="reading-content">
+                    ${paragraphsHTML}
+                </div>
+                <div class="reading-cta-wrapper">
+                    <button class="btn btn-primary btn-full reading-cta" onclick="game.startExercises()">
+                        התחילו לתרגל ←
+                    </button>
+                </div>
+            </div>
+        `;
+
+        this.hideFooter();
+    }
+
+    startExercises() {
+        this.currentScreen = 'exercise';
+        this.transitionTo(() => this.renderExercise());
     }
 
     renderExercise() {
@@ -2862,19 +2940,22 @@ ${answers.action || ''}`;
     }
 
     updateProgressBar() {
-        const total = this.currentLesson.exercises.length;
-        const current = this.currentExerciseIndex;
+        const hasReading = this.currentLesson.reading ? 1 : 0;
+        const total = this.currentLesson.exercises.length + hasReading;
+        const current = this.currentExerciseIndex + (this.currentScreen !== 'reading' ? hasReading : 0);
         const percentage = (current / total) * 100;
         document.getElementById('progress-bar').style.width = percentage + '%';
     }
 
     showFooter() {
         document.getElementById('footer-actions').style.display = 'block';
+        document.getElementById('ram-chat-fab').style.display = 'none';
         this.disableCheckButton();
     }
 
     hideFooter() {
         document.getElementById('footer-actions').style.display = 'none';
+        document.getElementById('ram-chat-fab').style.display = 'flex';
     }
 
     enableCheckButton() {

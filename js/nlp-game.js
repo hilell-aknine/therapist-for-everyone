@@ -329,21 +329,21 @@ class StoryGame {
     // Auth Flow
     // ═══════════════════════════════════════
     async initAuth() {
-        // Show branded welcome gate first
-        this.showWelcomeGate();
-
         // Check existing session via Auth module from supabase-client.js
         try {
             const session = await window.Auth.getSession();
             if (session?.user) {
+                // Logged in — skip welcome gate, go straight to game
                 this.onAuthSuccess(session.user);
             } else {
-                // Guest mode — open to everyone for marketing
+                // Guest mode — show welcome gate first
+                this.showWelcomeGate();
                 this.isGuest = true;
                 this.onAuthSuccess(null);
             }
         } catch (e) {
-            // Guest mode fallback
+            // Guest mode fallback — show welcome gate
+            this.showWelcomeGate();
             this.isGuest = true;
             this.onAuthSuccess(null);
         }
@@ -464,7 +464,12 @@ class StoryGame {
         this.savePlayerData();
 
         // Show migration toast
-        this.showToast('המשחק עודכן! 51 שיעורים חדשים מחכים לך 🎉');
+        const toast = document.getElementById('toast');
+        if (toast) {
+            toast.textContent = 'המשחק עודכן! 51 שיעורים חדשים מחכים לך';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
     }
 
     async loadPlayerData(user) {

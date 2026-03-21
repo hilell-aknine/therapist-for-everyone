@@ -282,20 +282,20 @@ class StoryGame {
 
         // Achievements
         this.achievements = [
-            { id: 'first_lesson', title: 'צעד ראשון', desc: 'סיימת את השיעור הראשון', icon: '🧠', condition: (data) => Object.keys(data.completedLessons).length >= 1 },
-            { id: 'five_lessons', title: 'לומד NLP', desc: 'סיימת 5 שיעורים', icon: '📚', condition: (data) => Object.keys(data.completedLessons).length >= 5 },
-            { id: 'ten_lessons', title: 'בדרך הנכונה', desc: 'סיימת 10 שיעורים', icon: '📖', condition: (data) => Object.keys(data.completedLessons).length >= 10 },
-            { id: 'twenty_lessons', title: 'לומד מתקדם', desc: 'סיימת 20 שיעורים', icon: '🎓', condition: (data) => Object.keys(data.completedLessons).length >= 20 },
-            { id: 'half_course', title: 'חצי דרך!', desc: 'סיימת 25 שיעורים', icon: '⚡', condition: (data) => Object.keys(data.completedLessons).length >= 25 },
-            { id: 'forty_lessons', title: 'כמעט פרקטישנר!', desc: 'סיימת 40 שיעורים', icon: '🌟', condition: (data) => Object.keys(data.completedLessons).length >= 40 },
-            { id: 'all_lessons', title: 'NLP פרקטישנר', desc: 'סיימת את כל 51 השיעורים', icon: '👑', condition: (data) => Object.keys(data.completedLessons).length >= 51 },
-            { id: 'streak_3', title: 'התמדה', desc: '3 ימים ברצף', icon: '🔥', condition: (data) => data.streak >= 3 },
-            { id: 'streak_7', title: 'שבוע של שינוי', desc: '7 ימים ברצף', icon: '⭐', condition: (data) => data.streak >= 7 },
-            { id: 'streak_30', title: 'מחויבות אמיתית', desc: '30 ימים ברצף', icon: '💎', condition: (data) => data.streak >= 30 },
-            { id: 'xp_500', title: 'צובר ניסיון', desc: 'צברת 500 XP', icon: '🏅', condition: (data) => data.xp >= 500 },
-            { id: 'xp_1000', title: 'מאסטר XP', desc: 'צברת 1000 XP', icon: '🏆', condition: (data) => data.xp >= 1000 },
-            { id: 'perfect_lesson', title: 'ראפור מושלם!', desc: 'סיימת שיעור בלי טעויות', icon: '💯', condition: (data) => data.perfectLessons >= 1 },
-            { id: 'accuracy_80', title: 'חדות חושים', desc: 'דיוק של 80% ומעלה', icon: '🎯', condition: (data) => data.totalCorrectAnswers > 0 && (data.totalCorrectAnswers / (data.totalCorrectAnswers + data.totalWrongAnswers)) >= 0.8 }
+            { id: 'first_lesson', title: 'צעד ראשון', desc: 'סיימת את השיעור הראשון', icon: '🧠', badge: '../assets/game/badges/first-lesson.jpg', condition: (data) => Object.keys(data.completedLessons).length >= 1 },
+            { id: 'five_lessons', title: 'לומד NLP', desc: 'סיימת 5 שיעורים', icon: '📚', badge: '../assets/game/badges/five-lessons.jpg', condition: (data) => Object.keys(data.completedLessons).length >= 5 },
+            { id: 'ten_lessons', title: 'בדרך הנכונה', desc: 'סיימת 10 שיעורים', icon: '📖', badge: '../assets/game/badges/ten-lessons.jpg', condition: (data) => Object.keys(data.completedLessons).length >= 10 },
+            { id: 'twenty_lessons', title: 'לומד מתקדם', desc: 'סיימת 20 שיעורים', icon: '🎓', badge: '../assets/game/badges/twenty-lessons.jpg', condition: (data) => Object.keys(data.completedLessons).length >= 20 },
+            { id: 'half_course', title: 'חצי דרך!', desc: 'סיימת 25 שיעורים', icon: '⚡', badge: '../assets/game/badges/half-course.jpg', condition: (data) => Object.keys(data.completedLessons).length >= 25 },
+            { id: 'forty_lessons', title: 'כמעט פרקטישנר!', desc: 'סיימת 40 שיעורים', icon: '🌟', badge: '../assets/game/badges/forty-lessons.jpg', condition: (data) => Object.keys(data.completedLessons).length >= 40 },
+            { id: 'all_lessons', title: 'NLP פרקטישנר', desc: 'סיימת את כל 51 השיעורים', icon: '👑', badge: '../assets/game/badges/all-lessons.jpg', condition: (data) => Object.keys(data.completedLessons).length >= 51 },
+            { id: 'streak_3', title: 'התמדה', desc: '3 ימים ברצף', icon: '🔥', badge: '../assets/game/badges/streak-3.jpg', condition: (data) => data.streak >= 3 },
+            { id: 'streak_7', title: 'שבוע של שינוי', desc: '7 ימים ברצף', icon: '⭐', badge: '../assets/game/badges/streak-7.jpg', condition: (data) => data.streak >= 7 },
+            { id: 'streak_30', title: 'מחויבות אמיתית', desc: '30 ימים ברצף', icon: '💎', badge: '../assets/game/badges/streak-30.jpg', condition: (data) => data.streak >= 30 },
+            { id: 'xp_500', title: 'צובר ניסיון', desc: 'צברת 500 XP', icon: '🏅', badge: '../assets/game/badges/xp-500.jpg', condition: (data) => data.xp >= 500 },
+            { id: 'xp_1000', title: 'מאסטר XP', desc: 'צברת 1000 XP', icon: '🏆', badge: '../assets/game/badges/xp-1000.jpg', condition: (data) => data.xp >= 1000 },
+            { id: 'perfect_lesson', title: 'ראפור מושלם!', desc: 'סיימת שיעור בלי טעויות', icon: '💯', badge: '../assets/game/badges/perfect-lesson.jpg', condition: (data) => data.perfectLessons >= 1 },
+            { id: 'accuracy_80', title: 'חדות חושים', desc: 'דיוק של 80% ומעלה', icon: '🎯', badge: '../assets/game/badges/accuracy-80.jpg', condition: (data) => data.totalCorrectAnswers > 0 && (data.totalCorrectAnswers / (data.totalCorrectAnswers + data.totalWrongAnswers)) >= 0.8 }
         ];
 
         // Init ripple effect on all interactive elements
@@ -908,9 +908,12 @@ class StoryGame {
     renderAchievementsGrid() {
         return this.achievements.slice(0, 8).map(achievement => {
             const isUnlocked = this.playerData.achievements.includes(achievement.id);
+            const iconContent = achievement.badge
+                ? `<img src="${achievement.badge}" alt="" class="achievement-badge-img" onerror="this.outerHTML='${achievement.icon}'">`
+                : achievement.icon;
             return `
                 <div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
-                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-icon">${iconContent}</div>
                     <div class="achievement-name">${achievement.title}</div>
                 </div>
             `;
@@ -1521,8 +1524,13 @@ ${answers.action || ''}`;
             .map(p => `<p class="reading-paragraph">${renderParagraph(p)}</p>`)
             .join('');
 
+        const lessonImg = `../assets/game/lessons/m${this.currentModule.id}-l${lesson.id}.jpg`;
+
         container.innerHTML = `
             <div class="reading-section">
+                <div class="reading-hero">
+                    <img src="${lessonImg}" alt="" class="reading-hero-img" onerror="this.parentElement.style.display='none'">
+                </div>
                 <div class="reading-header">
                     <span class="reading-icon">📖</span>
                     <h2 class="reading-title">${lesson.title}</h2>

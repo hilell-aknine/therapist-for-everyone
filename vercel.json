@@ -11,5 +11,26 @@
       "destination": "https://www.therapist-home.com/$1",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    { "source": "/supabase/:path*", "destination": "/404.html" },
+    { "source": "/sql/:path*", "destination": "/404.html" },
+    { "source": "/docs/specs/:path*", "destination": "/404.html" },
+    { "source": "/docs/scripts/:path*", "destination": "/404.html" },
+    { "source": "/flutterflow-api/:path*", "destination": "/404.html" },
+    { "source": "/.claude/:path*", "destination": "/404.html" },
+    { "source": "/system_architecture.txt", "destination": "/404.html" },
+    { "source": "/CLAUDE.md", "destination": "/404.html" },
+    { "source": "/DOCUMENTATION.md", "destination": "/404.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
   ]
 }

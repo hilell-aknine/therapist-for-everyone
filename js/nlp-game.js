@@ -1005,6 +1005,7 @@ class StoryGame {
     // ═══════════════════════════════════════
     renderHomeScreen() {
         this.currentScreen = 'home';
+        document.body.classList.remove('game-fullscreen');
         const container = document.getElementById('game-container');
         const welcomeMessage = this.getRandomMessage(this.mentorMessages.welcome);
 
@@ -1485,6 +1486,7 @@ ${answers.action || ''}`;
     startLesson(lessonId) {
         this.currentLesson = this.currentModule.lessons.find(l => l.id === lessonId);
         if (!this.currentLesson) return;
+        document.body.classList.add('game-fullscreen');
 
         if (this.playerData.hearts <= 0) {
             this.showNoHeartsModal();

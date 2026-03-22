@@ -2797,6 +2797,59 @@ main,
     animation: fadeSlideIn 0.2s var(--ease-out);
 }
 
+/* Mobile: user menu as bottom sheet */
+@media (max-width: 480px) {
+    .user-menu {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        min-width: 100%;
+        border-radius: var(--r-xl) var(--r-xl) 0 0;
+        padding: var(--space-4) var(--space-5);
+        padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+        animation: slideUp 0.3s ease;
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .user-menu-item {
+        padding: var(--space-3) var(--space-4);
+        font-size: 16px;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    .user-menu-email {
+        font-size: 14px;
+        padding: var(--space-3) var(--space-4);
+        margin-bottom: var(--space-2);
+    }
+
+    /* Backdrop overlay for bottom sheet */
+    .user-menu::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: -1;
+    }
+
+    /* Drag handle indicator */
+    .user-menu::after {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: var(--border-light);
+        border-radius: var(--r-full);
+    }
+}
+
 .user-menu-email {
     font-size: 13px;
     color: var(--text-secondary);

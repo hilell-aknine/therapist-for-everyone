@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-config.js"></script>
-    <!-- Auth guard: redirect to free-portal if not logged in -->
+    <!-- Auth guard: redirect if not logged in, skip if already filled -->
     <script>
         (async function() {
             try {
@@ -25,6 +25,23 @@
                 const { data: { session } } = await sb.auth.getSession();
                 if (!session?.user) {
                     window.location.replace('free-portal.html');
+                    return;
+                }
+                // If questionnaire already filled — skip to course library
+                if (localStorage.getItem('portal_questionnaire_done')) {
+                    window.location.replace('course-library.html');
+                    return;
+                }
+                // Double-check in DB (localStorage may have been cleared)
+                const { data: qData } = await sb
+                    .from('portal_questionnaires')
+                    .select('id')
+                    .eq('user_id', session.user.id)
+                    .limit(1);
+                if (qData && qData.length > 0) {
+                    localStorage.setItem('portal_questionnaire_done', 'true');
+                    window.location.replace('course-library.html');
+                    return;
                 }
             } catch (e) {
                 window.location.replace('free-portal.html');

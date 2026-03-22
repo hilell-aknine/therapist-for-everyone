@@ -2482,6 +2482,11 @@ ${answers.action || ''}`;
             this.savePlayerData();
         }
 
+        // Sync to leaderboard
+        if (window.NLPLeaderboard) {
+            NLPLeaderboard.onLessonComplete(this.playerData);
+        }
+
         if (this.isDailyChallenge) {
             this.completeDailyChallenge();
         }

@@ -3825,6 +3825,145 @@
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Master Tabs Section -->
+                        <div class="tabs-section" style="margin-top:1.5rem;">
+                            <div class="tabs-header" role="tablist" aria-label="כלי למידה — מאסטר">
+                                <button class="tab-btn active" onclick="switchMasterTab('mNotes')" role="tab" aria-selected="true" id="mNotesTabBtn">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    הערות אישיות
+                                </button>
+                                <button class="tab-btn" onclick="switchMasterTab('mAi')" role="tab" aria-selected="false" id="mAiTabBtn">
+                                    <i class="fa-solid fa-robot"></i>
+                                    העוזר האישי
+                                </button>
+                                <button class="tab-btn" onclick="switchMasterTab('mResources')" role="tab" aria-selected="false" id="mResourcesTabBtn">
+                                    <i class="fa-solid fa-download"></i>
+                                    חומרי עזר
+                                </button>
+                                <button class="tab-btn" onclick="switchMasterTab('mGame')" role="tab" aria-selected="false" id="mGameTabBtn">
+                                    <i class="fa-solid fa-gamepad"></i>
+                                    משחק תרגול
+                                </button>
+                            </div>
+
+                            <div class="tabs-content">
+                                <!-- Master Notes Tab -->
+                                <div class="tab-panel active" id="mNotesPanel" role="tabpanel">
+                                    <div class="notes-container">
+                                        <textarea class="notes-textarea" id="masterNotesTextarea" placeholder="כתבו כאן את ההערות שלכם לשיעור זה..." oninput="handleMasterNotesInput()"></textarea>
+                                        <div class="notes-footer" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.8rem;border-top:1px solid var(--border-color);">
+                                            <div style="display:flex;align-items:center;gap:0.5rem;">
+                                                <span id="masterNotesSyncIndicator" style="font-size:0.75rem;color:var(--text-secondary);"><i class="fa-solid fa-cloud"></i></span>
+                                                <span id="masterNotesCharCount" style="font-size:0.72rem;color:var(--text-muted);">0 תווים</span>
+                                            </div>
+                                            <div style="display:flex;gap:0.4rem;">
+                                                <button onclick="exportMasterNotesToPDF()" style="padding:4px 10px;background:transparent;border:1px solid var(--border-color);border-radius:6px;cursor:pointer;font-size:0.75rem;color:var(--text-secondary);font-family:inherit;" title="ייצוא ל-PDF">
+                                                    <i class="fa-solid fa-file-pdf"></i> PDF
+                                                </button>
+                                                <button onclick="exportMasterNotesToWord()" style="padding:4px 10px;background:transparent;border:1px solid var(--border-color);border-radius:6px;cursor:pointer;font-size:0.75rem;color:var(--text-secondary);font-family:inherit;" title="ייצוא ל-Word">
+                                                    <i class="fa-solid fa-file-word"></i> Word
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Master AI Chat Tab -->
+                                <div class="tab-panel" id="mAiPanel" role="tabpanel">
+                                    <div class="ai-chat-container" id="masterAiChat" style="display:flex;flex-direction:column;height:500px;">
+                                        <div class="ai-chat-header" style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 1rem;border-bottom:1px solid var(--border-color);">
+                                            <div style="display:flex;align-items:center;gap:0.5rem;">
+                                                <i class="fa-solid fa-crown" style="color:var(--gold);"></i>
+                                                <span style="font-weight:600;font-size:0.85rem;">עוזר אישי — מאסטר</span>
+                                            </div>
+                                            <span id="masterAiLessonBadge" style="font-size:0.72rem;color:var(--text-secondary);background:var(--bg-card);padding:2px 8px;border-radius:10px;border:1px solid var(--border-color);"></span>
+                                        </div>
+                                        <div class="ai-chat-messages" id="masterAiMessages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.8rem;">
+                                            <div class="ai-message ai-message-bot">
+                                                <div style="display:flex;align-items:flex-start;gap:0.5rem;">
+                                                    <span style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:#003B46;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;"><i class="fa-solid fa-crown"></i></span>
+                                                    <div>
+                                                        <p style="margin:0;font-size:0.88rem;line-height:1.6;">שלום! אני העוזר האישי שלך לקורס המאסטר. אפשר לשאול אותי על ערכים, היפנוזה, טראנס, טכניקות NLP מתקדמות ועוד. במה אוכל לעזור?</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="ai-chat-input-area" style="display:flex;gap:0.5rem;padding:0.8rem 1rem;border-top:1px solid var(--border-color);">
+                                            <textarea id="masterAiInput" rows="1" placeholder="שאלו שאלה על השיעור..." style="flex:1;resize:none;border:1px solid var(--border-color);border-radius:8px;padding:0.5rem 0.8rem;font-family:inherit;font-size:0.85rem;background:var(--bg-card);color:var(--text-primary);"></textarea>
+                                            <button id="masterAiSendBtn" onclick="sendMasterAiMessage()" style="padding:0.5rem 1rem;background:var(--gold);color:#003B46;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;font-size:0.85rem;">
+                                                <i class="fa-solid fa-paper-plane"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Master Resources Tab -->
+                                <div class="tab-panel" id="mResourcesPanel" role="tabpanel">
+                                    <div class="resources-grid">
+                                        <div class="resource-card" style="flex-direction:column;align-items:stretch;gap:0.8rem;">
+                                            <div style="display:flex;align-items:center;gap:1rem;">
+                                                <div class="resource-icon"><i class="fa-solid fa-crown" style="color:var(--gold);"></i></div>
+                                                <div class="resource-info">
+                                                    <h4>חוברות עבודה — מאסטר</h4>
+                                                    <p>6 חוברות מקצועיות — טכניקות, תרגולים ושאלונים</p>
+                                                </div>
+                                            </div>
+                                            <div style="display:flex;gap:0.6rem;">
+                                                <button onclick="closeMasterVideo();document.getElementById('masterWelcome').style.display='';window.scrollTo({top:document.getElementById('masterCardsGrid').offsetTop-100,behavior:'smooth'});" style="flex:1;padding:0.55rem 1rem;background:linear-gradient(135deg,var(--gold),#c9a430);border:none;border-radius:8px;color:#003B46;font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
+                                                    <i class="fa-solid fa-book-open"></i> צפייה בחוברות
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="resource-card" style="flex-direction:column;align-items:stretch;gap:0.8rem;">
+                                            <div style="display:flex;align-items:center;gap:1rem;">
+                                                <div class="resource-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                                                <div class="resource-info">
+                                                    <h4>סיכומי שיעורים — מאסטר</h4>
+                                                    <p>7 סיכומים מקצועיים — נקודות מפתח מכל שיעור</p>
+                                                </div>
+                                            </div>
+                                            <div style="display:flex;gap:0.6rem;">
+                                                <a href="summaries-master/index.html" style="flex:1;padding:0.55rem 1rem;background:linear-gradient(135deg,var(--gold),#c9a430);border:none;border-radius:8px;color:#003B46;font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;text-decoration:none;">
+                                                    <i class="fa-solid fa-eye"></i> צפייה בסיכומים
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="resource-card" style="flex-direction:column;align-items:stretch;gap:0.8rem;">
+                                            <div style="display:flex;align-items:center;gap:1rem;">
+                                                <div class="resource-icon"><i class="fa-solid fa-film"></i></div>
+                                                <div class="resource-info">
+                                                    <h4>קליפים לתרגול</h4>
+                                                    <p>49 קליפים ב-15 קטגוריות — תרגול מעשי</p>
+                                                </div>
+                                            </div>
+                                            <div style="display:flex;gap:0.6rem;">
+                                                <a href="master-practice.html" style="flex:1;padding:0.55rem 1rem;background:linear-gradient(135deg,var(--gold),#c9a430);border:none;border-radius:8px;color:#003B46;font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;text-decoration:none;">
+                                                    <i class="fa-solid fa-play"></i> צפייה בקליפים
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Master Game Tab -->
+                                <div class="tab-panel" id="mGamePanel" role="tabpanel">
+                                    <div style="text-align:center;padding:2rem 1rem;">
+                                        <div style="width:80px;height:80px;background:linear-gradient(135deg,var(--gold),#c9a430);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-size:2rem;color:#003B46;">
+                                            <i class="fa-solid fa-gamepad"></i>
+                                        </div>
+                                        <h3 style="font-size:1.2rem;margin-bottom:0.5rem;color:var(--text-primary);">משחק תרגול — מאסטר</h3>
+                                        <p style="color:var(--text-secondary);margin-bottom:1.5rem;line-height:1.7;max-width:400px;margin-left:auto;margin-right:auto;">
+                                            תרגלו את החומר מקורס המאסטר — ערכים, היפנוזה, טראנס וטכניקות מתקדמות בסגנון Duolingo
+                                        </p>
+                                        <a href="nlp-game.html" style="display:inline-flex;align-items:center;gap:0.6rem;background:var(--gold);color:#003B46;padding:0.85rem 2rem;border-radius:10px;text-decoration:none;font-weight:700;font-size:1.05rem;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 2px 10px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 10px rgba(212,175,55,0.3)'">
+                                            <i class="fa-solid fa-gamepad"></i>
+                                            התחילו לשחק
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- PDF Viewer (shown when viewing a workbook) -->
@@ -4286,6 +4425,13 @@
             // Prev/Next buttons
             document.getElementById('masterPrevBtn').style.display = i === 0 ? 'none' : '';
             document.getElementById('masterNextBtn').style.display = i === masterLessons.length - 1 ? 'none' : '';
+
+            // Load notes for this lesson
+            loadMasterNotes();
+
+            // Update AI lesson badge
+            const badge = document.getElementById('masterAiLessonBadge');
+            if (badge) badge.textContent = `שיעור ${i + 1}: ${lesson.title}`;
         }
 
         function navigateMasterLesson(direction) {
@@ -4302,6 +4448,181 @@
             currentMasterLessonIndex = -1;
             document.querySelectorAll('[id^="ml-sidebar-"]').forEach(el => el.style.background = '');
         }
+
+        // ===== MASTER TABS =====
+        function switchMasterTab(tabName) {
+            const panels = ['mNotes', 'mAi', 'mResources', 'mGame'];
+            panels.forEach(p => {
+                const panel = document.getElementById(p + 'Panel');
+                const btn = document.getElementById(p + 'TabBtn');
+                if (panel) panel.classList.toggle('active', p === tabName);
+                if (btn) {
+                    btn.classList.toggle('active', p === tabName);
+                    btn.setAttribute('aria-selected', p === tabName ? 'true' : 'false');
+                }
+            });
+        }
+
+        // ===== MASTER NOTES =====
+        let masterNotesDebounceTimer = null;
+
+        function loadMasterNotes() {
+            if (currentMasterLessonIndex < 0) return;
+            const lesson = masterLessons[currentMasterLessonIndex];
+            const key = `notes_master_${lesson.id}`;
+            const textarea = document.getElementById('masterNotesTextarea');
+            if (!textarea) return;
+
+            // Try Supabase first, then localStorage
+            const cached = localStorage.getItem(key);
+            textarea.value = cached || '';
+            updateMasterNotesCharCount();
+
+            if (typeof UserNotes !== 'undefined' && window.supabaseClient) {
+                UserNotes.get(lesson.id).then(note => {
+                    if (note && note.content) {
+                        textarea.value = note.content;
+                        localStorage.setItem(key, note.content);
+                        updateMasterNotesCharCount();
+                        document.getElementById('masterNotesSyncIndicator').innerHTML = '<i class="fa-solid fa-cloud-arrow-down" style="color:var(--muted-teal);"></i>';
+                    }
+                }).catch(() => {});
+            }
+        }
+
+        function saveMasterNotes() {
+            if (currentMasterLessonIndex < 0) return;
+            const lesson = masterLessons[currentMasterLessonIndex];
+            const key = `notes_master_${lesson.id}`;
+            const content = document.getElementById('masterNotesTextarea').value;
+            localStorage.setItem(key, content);
+
+            const indicator = document.getElementById('masterNotesSyncIndicator');
+            if (typeof UserNotes !== 'undefined' && window.supabaseClient) {
+                UserNotes.save(lesson.id, content, {
+                    courseType: 'nlp-master',
+                    lessonTitle: lesson.title,
+                    moduleTitle: currentMasterLessonIndex < 10 ? 'ערכים' : 'היפנוזה וטראנס',
+                    lessonNumber: currentMasterLessonIndex + 1
+                }).then(() => {
+                    indicator.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" style="color:var(--muted-teal);"></i>';
+                }).catch(() => {
+                    indicator.innerHTML = '<i class="fa-solid fa-check" style="color:var(--text-secondary);"></i>';
+                });
+            }
+        }
+
+        function handleMasterNotesInput() {
+            updateMasterNotesCharCount();
+            document.getElementById('masterNotesSyncIndicator').innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color:var(--text-muted);"></i>';
+            clearTimeout(masterNotesDebounceTimer);
+            masterNotesDebounceTimer = setTimeout(saveMasterNotes, 800);
+        }
+
+        function updateMasterNotesCharCount() {
+            const textarea = document.getElementById('masterNotesTextarea');
+            const counter = document.getElementById('masterNotesCharCount');
+            if (textarea && counter) counter.textContent = `${textarea.value.length} תווים`;
+        }
+
+        function exportMasterNotesToPDF() {
+            if (currentMasterLessonIndex < 0) return;
+            const lesson = masterLessons[currentMasterLessonIndex];
+            const content = document.getElementById('masterNotesTextarea').value;
+            if (!content.trim()) { alert('אין הערות לייצא'); return; }
+            const html = `<div dir="rtl" style="font-family:Heebo,sans-serif;padding:2rem;"><h2 style="color:#003B46;">הערות — ${lesson.title}</h2><p style="color:#666;font-size:0.85rem;">קורס מאסטר NLP • שיעור ${currentMasterLessonIndex + 1} • ${new Date().toLocaleDateString('he-IL')}</p><hr style="border-color:#D4AF37;margin:1rem 0;"><div style="white-space:pre-wrap;line-height:1.8;font-size:1rem;">${content}</div></div>`;
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set({ margin: 10, filename: `הערות_מאסטר_${lesson.title}.pdf`, html2canvas: { scale: 2 }, jsPDF: { direction: 'rtl' } }).from(html).save();
+            }
+        }
+
+        function exportMasterNotesToWord() {
+            if (currentMasterLessonIndex < 0) return;
+            const lesson = masterLessons[currentMasterLessonIndex];
+            const content = document.getElementById('masterNotesTextarea').value;
+            if (!content.trim()) { alert('אין הערות לייצא'); return; }
+            const html = `<html dir="rtl"><head><meta charset="utf-8"><style>body{font-family:Heebo,sans-serif;padding:2rem;}h2{color:#003B46;}hr{border-color:#D4AF37;}</style></head><body><h2>הערות — ${lesson.title}</h2><p>קורס מאסטר NLP • שיעור ${currentMasterLessonIndex + 1} • ${new Date().toLocaleDateString('he-IL')}</p><hr><pre style="white-space:pre-wrap;line-height:1.8;">${content}</pre></body></html>`;
+            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `הערות_מאסטר_${lesson.title}.doc`;
+            a.click();
+        }
+
+        // ===== MASTER AI CHAT =====
+        let masterAiChatHistory = [];
+
+        function sendMasterAiMessage() {
+            const input = document.getElementById('masterAiInput');
+            const message = input.value.trim();
+            if (!message) return;
+            input.value = '';
+
+            appendMasterAiMsg('user', message);
+            masterAiChatHistory.push({ role: 'user', content: message });
+
+            const messagesDiv = document.getElementById('masterAiMessages');
+            const typing = document.createElement('div');
+            typing.className = 'ai-message ai-message-bot master-typing';
+            typing.innerHTML = '<div style="display:flex;align-items:flex-start;gap:0.5rem;"><span style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:#003B46;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;"><i class="fa-solid fa-crown"></i></span><div class="ai-typing-indicator"><span></span><span></span><span></span></div></div>';
+            messagesDiv.appendChild(typing);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            const lessonContext = currentMasterLessonIndex >= 0 ? masterLessons[currentMasterLessonIndex].title : 'כללי';
+            const SUPABASE_URL = window.SUPABASE_CONFIG?.url || 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
+
+            supabaseClient.auth.getSession().then(({ data }) => {
+                const token = data?.session?.access_token;
+                fetch(`${SUPABASE_URL}/functions/v1/ai-chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        message,
+                        history: masterAiChatHistory.slice(-10),
+                        lessonContext: `[קורס מאסטר NLP] שיעור: ${lessonContext}`,
+                        courseType: 'master'
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    const t = messagesDiv.querySelector('.master-typing');
+                    if (t) t.remove();
+                    appendMasterAiMsg('bot', data.reply || 'מצטער, לא הצלחתי לעבד את השאלה.');
+                    masterAiChatHistory.push({ role: 'assistant', content: data.reply });
+                })
+                .catch(() => {
+                    const t = messagesDiv.querySelector('.master-typing');
+                    if (t) t.remove();
+                    appendMasterAiMsg('bot', 'שגיאה בהתחברות. נסו שוב.');
+                });
+            });
+        }
+
+        function appendMasterAiMsg(type, text) {
+            const messagesDiv = document.getElementById('masterAiMessages');
+            const div = document.createElement('div');
+            div.className = `ai-message ai-message-${type}`;
+            if (type === 'bot') {
+                div.innerHTML = `<div style="display:flex;align-items:flex-start;gap:0.5rem;"><span style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:#003B46;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;"><i class="fa-solid fa-crown"></i></span><div><p style="margin:0;font-size:0.88rem;line-height:1.6;">${text}</p></div></div>`;
+            } else {
+                div.innerHTML = `<p style="margin:0;font-size:0.88rem;line-height:1.6;">${text}</p>`;
+            }
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Bind Enter key for master AI input
+        document.addEventListener('DOMContentLoaded', () => {
+            const masterInput = document.getElementById('masterAiInput');
+            if (masterInput) {
+                masterInput.addEventListener('keydown', e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMasterAiMessage();
+                    }
+                });
+            }
+        });
 
         function switchToMaster() {
             if (!_isPaidCustomer) return;

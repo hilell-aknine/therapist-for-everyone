@@ -3731,14 +3731,25 @@
                         <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
                             <i class="fa-solid fa-chevron-left module-chevron"></i>
                             <i class="fa-solid fa-play-circle" style="color:var(--muted-teal);"></i>
-                            <span>שיעורי וידאו</span>
+                            <span>חלק א׳ — ערכים</span>
                             <span class="lesson-count">10</span>
                         </div>
-                        <div class="module-lessons" id="masterLessonsList">
+                        <div class="module-lessons" id="masterLessonsPart1">
                             <!-- Populated by JS -->
                         </div>
                     </div>
-                    <div class="module open">
+                    <div class="module">
+                        <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+                            <i class="fa-solid fa-chevron-left module-chevron"></i>
+                            <i class="fa-solid fa-play-circle" style="color:var(--dusty-aqua);"></i>
+                            <span>חלק ב׳ — היפנוזה וטראנס</span>
+                            <span class="lesson-count">10</span>
+                        </div>
+                        <div class="module-lessons" id="masterLessonsPart2">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="module">
                         <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
                             <i class="fa-solid fa-chevron-left module-chevron"></i>
                             <i class="fa-solid fa-book" style="color:var(--gold);"></i>
@@ -3765,18 +3776,27 @@
                         <div style="text-align:center;margin-bottom:2rem;">
                             <i class="fa-solid fa-crown" style="font-size:2.5rem;color:var(--gold);margin-bottom:0.8rem;display:block;"></i>
                             <h2 style="font-family:var(--font-display);margin-bottom:0.3rem;font-size:1.3rem;">תוכנית ההכשרה</h2>
-                            <p style="color:var(--text-secondary);font-size:0.9rem;">10 שיעורי וידאו + 6 חוברות עבודה</p>
+                            <p style="color:var(--text-secondary);font-size:0.9rem;">20 שיעורי וידאו + 6 חוברות עבודה</p>
                         </div>
 
-                        <!-- Video Lessons Grid -->
+                        <!-- Part 1: Values -->
                         <h3 style="font-size:1rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
-                            <i class="fa-solid fa-play-circle" style="color:var(--muted-teal);"></i> שיעורי וידאו
+                            <i class="fa-solid fa-play-circle" style="color:var(--muted-teal);"></i> חלק א׳ — ערכים
+                            <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:400;">(10 שיעורים)</span>
                         </h3>
-                        <div id="masterVideoGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem;"></div>
+                        <div id="masterVideoGridPart1" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem;"></div>
+
+                        <!-- Part 2: Hypnosis & Trance -->
+                        <h3 style="font-size:1rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
+                            <i class="fa-solid fa-play-circle" style="color:var(--dusty-aqua);"></i> חלק ב׳ — היפנוזה וטראנס
+                            <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:400;">(10 שיעורים)</span>
+                        </h3>
+                        <div id="masterVideoGridPart2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem;"></div>
 
                         <!-- Workbooks Grid -->
                         <h3 style="font-size:1rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
                             <i class="fa-solid fa-book" style="color:var(--gold);"></i> חוברות עבודה
+                            <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:400;">(6 חוברות)</span>
                         </h3>
                         <div id="masterCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;"></div>
                     </div>
@@ -4189,25 +4209,28 @@
             document.querySelectorAll('[id^="ml-sidebar-"]').forEach(el => el.style.background = '');
         }
 
-        function loadMasterLessons() {
-            // Sidebar items
-            const list = document.getElementById('masterLessonsList');
-            if (list) {
-                list.innerHTML = masterLessons.map((lesson, i) => `
+        function renderMasterSidebarItems(lessons, containerId, startIndex, accentColor) {
+            const list = document.getElementById(containerId);
+            if (!list) return;
+            list.innerHTML = lessons.map((lesson, j) => {
+                const i = startIndex + j;
+                return `
                     <div class="lesson-item" id="ml-sidebar-${i}" onclick="selectMasterLesson(${i})" style="cursor:pointer;display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.8rem;">
-                        <span style="min-width:18px;height:18px;border-radius:50%;background:var(--muted-teal);color:#fff;font-size:0.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i + 1}</span>
+                        <span style="min-width:18px;height:18px;border-radius:50%;background:${accentColor};color:#fff;font-size:0.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i + 1}</span>
                         <span style="font-size:0.82rem;line-height:1.3;flex:1;">${lesson.title}</span>
                         <span style="font-size:0.7rem;color:var(--text-muted);flex-shrink:0;">${lesson.duration}</span>
-                    </div>
-                `).join('');
-            }
+                    </div>`;
+            }).join('');
+        }
 
-            // Video cards in welcome grid
-            const grid = document.getElementById('masterVideoGrid');
-            if (grid) {
-                grid.innerHTML = masterLessons.map((lesson, i) => `
+        function renderMasterVideoGrid(lessons, containerId, startIndex, accentColor) {
+            const grid = document.getElementById(containerId);
+            if (!grid) return;
+            grid.innerHTML = lessons.map((lesson, j) => {
+                const i = startIndex + j;
+                return `
                     <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.2s;border-top:3px solid transparent;"
-                         onmouseenter="this.style.borderTopColor='var(--muted-teal)';this.style.transform='translateY(-2px)'"
+                         onmouseenter="this.style.borderTopColor='${accentColor}';this.style.transform='translateY(-2px)'"
                          onmouseleave="this.style.borderTopColor='transparent';this.style.transform=''"
                          onclick="selectMasterLesson(${i})">
                         <div style="position:relative;width:100%;padding-top:56.25%;background:#000;">
@@ -4218,12 +4241,24 @@
                             <span style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.75);color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">${lesson.duration}</span>
                         </div>
                         <div style="padding:0.8rem;">
-                            <div style="font-size:0.75rem;color:var(--muted-teal);font-weight:600;margin-bottom:0.3rem;">שיעור ${i + 1}</div>
+                            <div style="font-size:0.75rem;color:${accentColor};font-weight:600;margin-bottom:0.3rem;">שיעור ${i + 1}</div>
                             <div style="font-weight:600;font-size:0.88rem;line-height:1.4;">${lesson.title}</div>
                         </div>
-                    </div>
-                `).join('');
-            }
+                    </div>`;
+            }).join('');
+        }
+
+        function loadMasterLessons() {
+            const part1 = masterLessons.slice(0, 10);
+            const part2 = masterLessons.slice(10);
+
+            // Sidebar
+            renderMasterSidebarItems(part1, 'masterLessonsPart1', 0, 'var(--muted-teal)');
+            renderMasterSidebarItems(part2, 'masterLessonsPart2', 10, 'var(--dusty-aqua)');
+
+            // Welcome grids
+            renderMasterVideoGrid(part1, 'masterVideoGridPart1', 0, 'var(--muted-teal)');
+            renderMasterVideoGrid(part2, 'masterVideoGridPart2', 10, 'var(--dusty-aqua)');
         }
 
         function selectMasterLesson(i) {

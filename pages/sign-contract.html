@@ -72,6 +72,7 @@
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
 </head>
 <body>
     <div class="container">
@@ -128,6 +129,8 @@
                 </div>
             </div>
 
+            <div id="turnstile-container"></div>
+
             <button class="submit-btn" id="submitBtn" onclick="submitContract()" disabled>
                 <i class="fa-solid fa-file-signature"></i> חתום ושלח
             </button>
@@ -146,6 +149,32 @@
     <script src="../js/supabase-config.js"></script>
     <script>
         const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+        const FUNCTIONS_URL = window.SUPABASE_CONFIG.functionsUrl;
+        const TURNSTILE_SITE_KEY = window.SUPABASE_CONFIG.turnstileSiteKey;
+
+        // Turnstile invisible widget
+        let turnstileWidgetId = null;
+        window.onloadTurnstileCallback = function () {
+            turnstileWidgetId = turnstile.render('#turnstile-container', {
+                sitekey: TURNSTILE_SITE_KEY,
+                size: 'invisible',
+            });
+        };
+
+        function getTurnstileToken() {
+            return new Promise((resolve, reject) => {
+                if (typeof turnstile === 'undefined' || turnstileWidgetId === null) {
+                    resolve(''); // Turnstile not loaded — Edge Function handles gracefully
+                    return;
+                }
+                // Reset and execute
+                turnstile.reset(turnstileWidgetId);
+                turnstile.execute(turnstileWidgetId, {
+                    callback: (token) => resolve(token),
+                    'error-callback': () => reject(new Error('Turnstile failed')),
+                });
+            });
+        }
 
         // Get token from URL: ?token=SUBSCRIPTION_ID
         const urlParams = new URLSearchParams(window.location.search);
@@ -235,7 +264,7 @@
         document.querySelectorAll('input').forEach(el => el.addEventListener('input', validateForm));
         document.querySelectorAll('input[type=checkbox]').forEach(el => el.addEventListener('change', validateForm));
 
-        // === Submit ===
+        // === Submit (via Edge Function) ===
         async function submitContract() {
             const btn = document.getElementById('submitBtn');
             const errEl = document.getElementById('errorMsg');
@@ -248,38 +277,27 @@
                 const idNumber = document.getElementById('sigId').value.trim();
                 const phone = document.getElementById('sigPhone').value.trim();
                 const signatureData = canvas.toDataURL('image/png');
-                const now = new Date().toISOString();
 
-                // Save to Supabase (signed_contracts table or update subscription)
-                const contractRecord = {
-                    subscription_id: subToken || null,
-                    signer_name: name,
-                    signer_id_number: idNumber,
-                    signer_phone: phone,
-                    signature_data: signatureData,
-                    contract_version: '1.0',
-                    signed_at: now,
-                    ip_address: null
-                };
+                // Get Turnstile token (invisible)
+                let turnstileToken = '';
+                try { turnstileToken = await getTurnstileToken(); } catch (e) { /* continue */ }
 
-                // Try to get IP
-                try {
-                    const ipRes = await fetch('https://api.ipify.org?format=json');
-                    const ipData = await ipRes.json();
-                    contractRecord.ip_address = ipData.ip;
-                } catch (e) { /* silent */ }
+                // Submit through Edge Function
+                const res = await fetch(`${FUNCTIONS_URL}/submit-contract`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subscription_id: subToken || null,
+                        signer_name: name,
+                        signer_id_number: idNumber,
+                        signer_phone: phone,
+                        signature_data: signatureData,
+                        turnstileToken: turnstileToken,
+                    }),
+                });
 
-                // Insert into signed_contracts
-                const { data: saved, error } = await sb.from('signed_contracts').insert(contractRecord).select().single();
-                if (error) throw error;
-
-                // If subscription token provided, link contract
-                if (subToken) {
-                    await sb.from('subscriptions').update({
-                        contract_url: `signed:${saved.id}`,
-                        notes: `חוזה נחתם ע״י ${name} (ת.ז. ${idNumber}) ב-${new Date().toLocaleDateString('he-IL')}`
-                    }).eq('id', subToken);
-                }
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'שגיאה בשמירה');
 
                 // Show success
                 document.getElementById('formSection').style.display = 'none';
@@ -291,6 +309,10 @@
                 errEl.textContent = 'שגיאה: ' + err.message;
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-file-signature"></i> חתום ושלח';
+                // Reset Turnstile for retry
+                if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+                    turnstile.reset(turnstileWidgetId);
+                }
             }
         }
     </script>

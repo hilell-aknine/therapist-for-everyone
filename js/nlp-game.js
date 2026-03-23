@@ -169,7 +169,7 @@ class StoryGame {
         this.onboardingStep = 0;
         this.saveDebounceTimer = null;
         this.heartTimerInterval = null;
-        this.userMenuOpen = false;
+        this.activeNavTab = 'home';
 
         // Combo & Speed systems
         this.comboCount = 0;
@@ -392,12 +392,8 @@ class StoryGame {
         document.getElementById('main-content').style.display = 'block';
         document.getElementById('progress-wrapper').style.display = 'block';
 
-        // Update user menu email
-        if (user) {
-            document.getElementById('user-menu-email').textContent = user.email || 'משתמש';
-        } else {
-            document.getElementById('user-menu-email').textContent = 'מצב אורח';
-        }
+        // Show bottom navigation
+        document.getElementById('bottom-nav').style.display = 'flex';
 
         // Update sound toggle
         document.getElementById('sound-toggle').textContent = this.sound.enabled ? '🔊' : '🔇';
@@ -762,35 +758,81 @@ class StoryGame {
     }
 
     // ═══════════════════════════════════════
-    // User Menu
+    // Bottom Navigation
     // ═══════════════════════════════════════
-    toggleUserMenu() {
-        this.userMenuOpen = !this.userMenuOpen;
-        document.getElementById('user-menu').style.display = this.userMenuOpen ? 'block' : 'none';
-        if (this.userMenuOpen) {
-            // Close on click outside
-            setTimeout(() => {
-                const handler = (e) => {
-                    if (!e.target.closest('.user-menu') && !e.target.closest('.user-menu-btn')) {
-                        this.hideUserMenu();
-                        document.removeEventListener('click', handler);
-                    }
-                };
-                document.addEventListener('click', handler);
-            }, 10);
+    navTo(tab) {
+        // Update active state
+        document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+        const navBtn = document.getElementById('nav-' + tab);
+        if (navBtn) navBtn.classList.add('active');
+
+        switch (tab) {
+            case 'home':
+                this.transitionTo(() => this.renderHomeScreen());
+                break;
+            case 'stats':
+                this.transitionTo(() => this.renderStatsScreen());
+                break;
+            case 'profile':
+                this.transitionTo(() => this.renderProfileScreen());
+                break;
         }
     }
 
-    hideUserMenu() {
-        this.userMenuOpen = false;
-        document.getElementById('user-menu').style.display = 'none';
+    updateBottomNav(screen) {
+        document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+        if (screen === 'home' || screen === 'module') {
+            const el = document.getElementById('nav-home');
+            if (el) el.classList.add('active');
+        } else if (screen === 'stats') {
+            const el = document.getElementById('nav-stats');
+            if (el) el.classList.add('active');
+        } else if (screen === 'profile') {
+            const el = document.getElementById('nav-profile');
+            if (el) el.classList.add('active');
+        }
+    }
+
+    renderProfileScreen() {
+        this.currentScreen = 'profile';
+        document.body.classList.remove('game-fullscreen');
+        this.updateBottomNav('profile');
+        this.hideProgressBar();
+
+        const container = document.getElementById('game-container');
+        const email = this.user ? (this.user.email || 'משתמש') : 'מצב אורח';
+        const levelInfo = this.getLevelProgressInfo();
+
+        container.innerHTML = `
+            <div class="profile-screen">
+                <div class="profile-card">
+                    <div class="profile-avatar">👤</div>
+                    <div class="profile-email">${email}</div>
+                    <div class="profile-role">${levelInfo.name} • רמה ${levelInfo.level}</div>
+                </div>
+
+                <div class="profile-actions">
+                    <button class="profile-action-btn" onclick="game.navTo('stats')">
+                        📊 <span>הסטטיסטיקות שלי</span>
+                    </button>
+                    <button class="profile-action-btn" onclick="game.toggleSound()">
+                        ${this.sound.enabled ? '🔊' : '🔇'} <span>צלילים: ${this.sound.enabled ? 'פעיל' : 'כבוי'}</span>
+                    </button>
+                    <button class="profile-action-btn" onclick="window.location.href='course-library.html'">
+                        📚 <span>חזרה לפורטל הלמידה</span>
+                    </button>
+                    <button class="profile-action-btn danger" onclick="game.logout()">
+                        🚪 <span>התנתקות</span>
+                    </button>
+                </div>
+            </div>
+        `;
     }
 
     async logout() {
         try { await window.Auth.signOut(); } catch(e) { /* ignore */ }
         this.user = null;
         this.isGuest = false;
-        this.hideUserMenu();
         window.location.href = 'login.html';
     }
 
@@ -1011,6 +1053,7 @@ class StoryGame {
     renderHomeScreen() {
         this.currentScreen = 'home';
         document.body.classList.remove('game-fullscreen');
+        this.updateBottomNav('home');
         const container = document.getElementById('game-container');
         const welcomeMessage = this.getRandomMessage(this.mentorMessages.welcome);
 
@@ -2737,7 +2780,6 @@ ${answers.action || ''}`;
     // Personal Stats Screen
     // ═══════════════════════════════════════
     showStats() {
-        this.hideUserMenu();
         this.transitionTo(() => this.renderStatsScreen());
     }
 
@@ -2747,6 +2789,8 @@ ${answers.action || ''}`;
 
     renderStatsScreen() {
         this.currentScreen = 'stats';
+        document.body.classList.remove('game-fullscreen');
+        this.updateBottomNav('stats');
         const container = document.getElementById('game-container');
         const pd = this.playerData;
 

@@ -303,9 +303,6 @@
                     <button class="sound-toggle" id="sound-toggle" onclick="game.toggleSound()" title="השתק/הפעל צלילים">
                         🔊
                     </button>
-                    <button class="user-menu-btn" id="user-menu-btn" onclick="game.toggleUserMenu()" aria-label="תפריט משתמש">
-                        👤
-                    </button>
                 </div>
             </div>
             <!-- Heart Recovery Timer -->
@@ -319,12 +316,21 @@
             </div>
         </header>
 
-        <!-- User Menu Dropdown -->
-        <div class="user-menu" id="user-menu" style="display: none;">
-            <div class="user-menu-email" id="user-menu-email"></div>
-            <button class="user-menu-item" onclick="game.showStats()">📊 הסטטיסטיקות שלי</button>
-            <button class="user-menu-item" onclick="game.logout()">🚪 התנתקות</button>
-        </div>
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav" id="bottom-nav" style="display: none;">
+            <button class="bottom-nav-item active" id="nav-home" onclick="game.navTo('home')" aria-label="דף הבית">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>בית</span>
+            </button>
+            <button class="bottom-nav-item" id="nav-stats" onclick="game.navTo('stats')" aria-label="סטטיסטיקות">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>סטטיסטיקה</span>
+            </button>
+            <button class="bottom-nav-item" id="nav-profile" onclick="game.navTo('profile')" aria-label="פרופיל">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>פרופיל</span>
+            </button>
+        </nav>
 
         <!-- Level Up Overlay -->
         <div class="level-up-overlay" id="level-up-overlay" style="display: none;">

@@ -2760,126 +2760,148 @@ main,
 .sound-toggle:hover { opacity: 1; }
 .sound-toggle.muted { opacity: 0.3; }
 
-.sound-toggle:focus-visible,
-.user-menu-btn:focus-visible {
+.sound-toggle:focus-visible {
     outline: 2px solid var(--color-primary-500);
     outline-offset: 2px;
 }
 
-.user-menu-btn {
+/* ═══════════════════════════════════════
+   Bottom Navigation Bar
+   ═══════════════════════════════════════ */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--bg-base, #0a1a1f);
+    border-top: 1px solid var(--border, rgba(255,255,255,0.08));
+    padding: 6px 0;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    z-index: 100;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
     background: none;
     border: none;
-    font-size: 18px;
+    color: var(--text-muted, rgba(232, 241, 242, 0.45));
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 600;
     cursor: pointer;
-    padding: var(--space-2);
-    min-width: 44px;
-    min-height: 44px;
-    display: inline-flex;
+    padding: 6px 16px;
+    border-radius: var(--r-md);
+    transition: color 0.2s ease;
+    min-width: 64px;
+    min-height: 48px;
+}
+
+.bottom-nav-item svg {
+    width: 22px;
+    height: 22px;
+    transition: color 0.2s ease;
+}
+
+.bottom-nav-item.active {
+    color: var(--color-gold-500, #D4AF37);
+}
+
+.bottom-nav-item:not(.active):hover {
+    color: var(--text-secondary);
+}
+
+/* Hide bottom nav during exercises/reading */
+body.game-fullscreen .bottom-nav {
+    display: none;
+}
+
+/* Profile Screen */
+.profile-screen {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-5);
+}
+
+.profile-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-xl);
+    padding: var(--space-6);
+    text-align: center;
+    margin-bottom: var(--space-4);
+}
+
+.profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-500));
+    display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
+    font-size: 32px;
+    margin: 0 auto var(--space-4);
+    border: 3px solid var(--color-gold-500);
 }
 
-.user-menu-btn:hover { opacity: 1; }
+.profile-email {
+    font-size: 14px;
+    color: var(--text-secondary);
+    direction: ltr;
+    word-break: break-all;
+    margin-bottom: var(--space-2);
+}
 
-.user-menu {
-    position: fixed;
-    top: 60px;
-    left: 20px;
-    background: var(--surface-modal);
+.profile-role {
+    font-size: 12px;
+    color: var(--color-gold-500);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.profile-action-btn {
+    width: 100%;
+    background: var(--bg-raised);
     border: 1px solid var(--border-light);
     border-radius: var(--r-md);
-    padding: var(--space-2);
-    z-index: var(--z-user-menu);
-    min-width: 200px;
-    box-shadow: var(--shadow-lg);
-    animation: fadeSlideIn 0.2s var(--ease-out);
-}
-
-/* Mobile: user menu as bottom sheet */
-@media (max-width: 480px) {
-    .user-menu {
-        top: auto;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        min-width: 100%;
-        border-radius: var(--r-xl) var(--r-xl) 0 0;
-        padding: var(--space-4) var(--space-5);
-        padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
-        animation: slideUp 0.3s ease;
-        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
-    }
-
-    .user-menu-item {
-        padding: var(--space-3) var(--space-4);
-        font-size: 16px;
-        min-height: 48px;
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-    }
-
-    .user-menu-email {
-        font-size: 14px;
-        padding: var(--space-3) var(--space-4);
-        margin-bottom: var(--space-2);
-    }
-
-    /* Backdrop overlay for bottom sheet */
-    .user-menu::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        z-index: -1;
-    }
-
-    /* Drag handle indicator */
-    .user-menu::after {
-        content: '';
-        position: absolute;
-        top: 8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40px;
-        height: 4px;
-        background: var(--border-light);
-        border-radius: var(--r-full);
-    }
-}
-
-.user-menu-email {
-    font-size: 13px;
-    color: var(--text-secondary);
-    padding: var(--space-2) var(--space-3);
-    border-bottom: 1px solid var(--border);
-    margin-bottom: var(--space-1);
-    direction: ltr;
-    text-align: right;
-    word-break: break-all;
-}
-
-.user-menu-item {
-    width: 100%;
-    background: none;
-    border: none;
-    padding: var(--space-2) var(--space-3);
-    font-size: 14px;
+    padding: var(--space-4);
+    font-size: 15px;
     font-family: var(--font-heading);
     color: var(--text-primary);
     cursor: pointer;
-    border-radius: var(--r-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     text-align: right;
-    transition: background var(--transition-fast);
+    transition: all 0.2s ease;
+    min-height: 52px;
 }
 
-.user-menu-item:hover { background: var(--bg-hover); }
+.profile-action-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--glass-border-hover);
+}
 
-.user-menu-item:focus-visible {
-    outline: 2px solid var(--color-primary-500);
-    outline-offset: -2px;
+.profile-action-btn.danger {
+    color: var(--color-error);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.profile-action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.08);
 }
 
 /* ═══════════════════════════════════════
@@ -4463,7 +4485,7 @@ video.welcome-gate-hero {
     .stat-item { font-size: 10px; padding: 2px var(--space-1); }
     .stat-item .icon { font-size: 13px; }
     .heart { font-size: 13px; }
-    .sound-toggle, .user-menu-btn { min-width: 36px; min-height: 36px; font-size: 16px; padding: var(--space-1); }
+    .sound-toggle { min-width: 36px; min-height: 36px; font-size: 16px; padding: var(--space-1); }
 
     /* Module cards */
     .module-icon { width: 48px; height: 48px; font-size: 24px; }

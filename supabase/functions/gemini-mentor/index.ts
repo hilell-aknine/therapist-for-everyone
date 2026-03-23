@@ -5,8 +5,8 @@ const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || ''
 const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') || ''
 
 const GEMINI_MODEL = 'gemini-2.0-flash'
-const OPENROUTER_MODEL = 'google/gemini-2.0-flash-exp:free'
-const OPENROUTER_FALLBACK = 'meta-llama/llama-3.3-8b-instruct:free'
+const OPENROUTER_MODEL = 'stepfun/step-3.5-flash:free'
+const OPENROUTER_FALLBACK = 'nvidia/nemotron-3-nano-30b-a3b:free'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,6 +32,23 @@ async function callGemini(messages: any[], systemPrompt: string): Promise<string
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
+
+  if (res.status === 429) {
+    // Rate limited — wait and retry once
+    console.log('[Gemini] Rate limited, retrying in 3s...')
+    await new Promise(r => setTimeout(r, 3000))
+    const retry = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!retry.ok) {
+      console.error(`[Gemini] Retry failed: ${retry.status}`)
+      return null
+    }
+    const retryData = await retry.json()
+    return retryData.candidates?.[0]?.content?.parts?.[0]?.text || null
+  }
 
   if (!res.ok) {
     console.error(`[Gemini] ${res.status}: ${await res.text()}`)

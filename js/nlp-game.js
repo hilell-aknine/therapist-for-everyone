@@ -773,6 +773,9 @@ class StoryGame {
             case 'stats':
                 this.transitionTo(() => this.renderStatsScreen());
                 break;
+            case 'leaderboard':
+                if (window.NLPLeaderboard) NLPLeaderboard.show();
+                break;
             case 'profile':
                 this.transitionTo(() => this.renderProfileScreen());
                 break;

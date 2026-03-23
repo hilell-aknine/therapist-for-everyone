@@ -223,25 +223,9 @@
         }
         @keyframes lb-spin { to { transform: rotate(360deg); } }
 
-        /* ── Floating Button ── */
+        /* ── Floating Button (hidden — integrated into bottom nav) ── */
         .lb-fab {
-            position: fixed;
-            bottom: 24px;
-            left: 24px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #D4AF37 0%, #E8C84A 100%);
-            border: none;
-            box-shadow: 0 4px 16px rgba(212,175,55,0.4);
-            cursor: pointer;
-            z-index: 9000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-            animation: lb-pulse 2s ease-in-out infinite;
+            display: none !important;
         }
         .lb-fab:hover {
             transform: scale(1.1);

@@ -88,25 +88,15 @@ class SoundManager {
 class GeminiMentor {
     constructor() {
         this.endpoint = `${window.SUPABASE_CONFIG?.url || 'https://eimcudmlfjlyxjyrdcgc.supabase.co'}/functions/v1/gemini-mentor`;
-        this.systemPrompt = `אתה רם, מנטור NLP חם, מעודד וידידותי במשחק לימודי בעברית.
-הנחיות:
-- דבר בעברית בלבד, בגובה העיניים, בגוף שני (את/ה)
-- תשובות קצרות — מקסימום 2-3 משפטים
-- השתמש בדוגמאות מהחיים ובמטאפורות
-- תמיד עודד, גם כשהתשובה שגויה — "אין כשלונות, רק משוב"
-- שלב מונחי NLP כשרלוונטי (ריפריימינג, עוגנים, סטייטים, מטא-מודל וכו')
-- אל תחזור על ההסבר שכבר ניתן — הוסף זווית חדשה או דוגמה`;
+        this.systemPrompt = window.NLP_COURSE_KNOWLEDGE || 'אתה רם, מנטור NLP חם ומעודד. דבר בעברית בלבד.';
     }
 
     async ask(userMessage, context = '') {
         try {
             const messages = [];
             if (context) {
-                messages.push({ role: 'user', parts: [{ text: this.systemPrompt + '\n\nהקשר: ' + context }] });
-                messages.push({ role: 'model', parts: [{ text: 'מבין, אני רם. אשמח לעזור!' }] });
-            } else {
-                messages.push({ role: 'user', parts: [{ text: this.systemPrompt }] });
-                messages.push({ role: 'model', parts: [{ text: 'מבין, אני רם. אשמח לעזור!' }] });
+                messages.push({ role: 'user', parts: [{ text: 'הקשר: ' + context }] });
+                messages.push({ role: 'model', parts: [{ text: 'מבין, אשמח לעזור!' }] });
             }
             messages.push({ role: 'user', parts: [{ text: userMessage }] });
 
@@ -128,7 +118,7 @@ class GeminiMentor {
             const data = await res.json();
             return data.text || null;
         } catch (e) {
-            console.warn('Gemini Mentor error:', e);
+            console.warn('Mentor error:', e);
             return null;
         }
     }
@@ -137,18 +127,18 @@ class GeminiMentor {
         const correctText = exercise.options ? exercise.options[exercise.correct] : '';
         const selectedText = exercise.options && selectedAnswer !== null ? exercise.options[selectedAnswer] : '';
         const prompt = isCorrect
-            ? `השחקן ענה נכון על שאלה: "${exercise.question}". התשובה: "${correctText}". תן טיפ קצר או תובנה מעניינת שמרחיבה את ההבנה.`
-            : `השחקן ענה שגוי. השאלה: "${exercise.question}". בחר: "${selectedText}" במקום "${correctText}". עודד אותו בקצרה והסבר בזווית אחרת מההסבר הרגיל.`;
-        return this.ask(prompt, `מודול: ${exercise.question}`);
+            ? `השחקן ענה נכון על: "${exercise.question}". התשובה: "${correctText}". תן טיפ קצר שמרחיב את ההבנה.`
+            : `השחקן ענה "${selectedText}" במקום "${correctText}" על: "${exercise.question}". עודד והסבר בזווית אחרת.`;
+        return this.ask(prompt);
     }
 
     async chat(userMessage, playerLevel, moduleName) {
-        const context = `השחקן ברמה ${playerLevel}, לומד כרגע: ${moduleName || 'NLP כללי'}`;
+        const context = `השחקן ברמה ${playerLevel}, לומד: ${moduleName || 'NLP כללי'}`;
         return this.ask(userMessage, context);
     }
 
     async coachPractice(stepTitle, userAnswer) {
-        const prompt = `השחקן כתב בתרגול חופשי (${stepTitle}): "${userAnswer}". תן משוב קצר ומעשי כמנטור NLP — מה טוב, ומה אפשר לחדד.`;
+        const prompt = `תרגול חופשי (${stepTitle}): "${userAnswer}". תן משוב קצר — מה טוב, מה אפשר לחדד.`;
         return this.ask(prompt);
     }
 }

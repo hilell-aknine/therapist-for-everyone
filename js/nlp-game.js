@@ -333,11 +333,8 @@ class StoryGame {
         try {
             const session = await window.Auth.getSession();
             if (session?.user) {
-                // Logged in — show welcome gate on first visit, then proceed
-                if (!sessionStorage.getItem('nlp_game_welcomed')) {
-                    sessionStorage.setItem('nlp_game_welcomed', '1');
-                    await this.showWelcomeGateAndWait();
-                }
+                // Logged in — always show welcome gate
+                await this.showWelcomeGateAndWait();
                 this.onAuthSuccess(session.user);
             } else {
                 // Guest mode — show welcome gate, wait for click, then proceed

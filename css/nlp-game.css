@@ -3884,6 +3884,15 @@ main,
     .btn { min-height: 48px; }
     .compare-card { min-height: 80px; }
     .match-item { min-height: 52px; }
+
+    /* Active/pressed state for touch */
+    .module-card:active,
+    .lesson-item:active,
+    .home-path-node:active,
+    .option-btn:active {
+        transform: scale(0.97);
+        transition: transform 0.1s ease;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -4449,9 +4458,9 @@ video.welcome-gate-hero {
     .container { padding: 14px var(--space-4); }
 
     /* Header — compact on mobile */
-    .logo { font-size: 16px; }
-    .stats-bar { gap: var(--space-1); flex-wrap: nowrap; overflow: hidden; }
-    .stat-item { font-size: 11px; padding: 3px var(--space-1); }
+    .logo { display: none; }
+    .stats-bar { gap: 2px; flex-wrap: nowrap; overflow: hidden; }
+    .stat-item { font-size: 10px; padding: 2px var(--space-1); }
     .stat-item .icon { font-size: 13px; }
     .heart { font-size: 13px; }
     .sound-toggle, .user-menu-btn { min-width: 36px; min-height: 36px; font-size: 16px; padding: var(--space-1); }
@@ -4472,7 +4481,7 @@ video.welcome-gate-hero {
 
     /* Match */
     .match-container { gap: var(--space-2); }
-    .match-item { padding: var(--space-3) var(--space-2); font-size: 13px; min-height: 52px; }
+    .match-item { padding: var(--space-3); font-size: 15px; min-height: 52px; }
 
     /* Completion */
     .completion-stats { gap: var(--space-5); }
@@ -4505,7 +4514,9 @@ video.welcome-gate-hero {
     .mentor-text { font-size: 15px; }
 
     /* Feedback */
-    .feedback-panel .feedback-content { padding: var(--space-5) var(--space-4); }
+    .feedback-panel { border-radius: 16px 16px 0 0; margin: 0; }
+    .feedback-panel .feedback-content { padding: 20px 16px; }
+    .feedback-panel .btn { width: 100%; min-height: 56px; font-size: 16px; }
 
     /* Modal */
     .modal-content { width: 95%; margin: var(--space-2); }
@@ -4525,6 +4536,42 @@ video.welcome-gate-hero {
         padding-left: var(--space-4);
         padding-right: var(--space-4);
         padding-bottom: env(safe-area-inset-bottom, var(--space-2));
+    }
+
+    /* Footer actions — mobile */
+    .footer-actions {
+        padding: 12px 16px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+    .footer-actions .container {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .footer-actions .btn-primary,
+    .footer-actions .btn-gold {
+        width: 100%;
+        min-height: 56px;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 14px;
+    }
+    .footer-actions .btn-secondary {
+        width: 100%;
+        min-height: 44px;
+        font-size: 14px;
+        opacity: 0.7;
+    }
+
+    /* Achievement popup — mobile centered */
+    .achievement-popup {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 320px;
+        text-align: center;
+        flex-direction: column;
+        padding: 20px;
     }
 
     /* Ram chat — bottom-sheet */
@@ -4592,6 +4639,62 @@ video.welcome-gate-hero {
         min-height: 48px;
         padding: var(--space-3);
     }
+}
+
+/* Performance: reduce backdrop-filter on mobile */
+@media (max-width: 480px) {
+    .module-card,
+    .lesson-item,
+    .exercise-container,
+    .path-node,
+    .home-path-node,
+    .mentor-welcome,
+    .mentor-tip,
+    .compare-card,
+    .match-item,
+    .order-item,
+    .stat-item {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(0, 42, 50, 0.85);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Exercise Breadcrumb
+   ═══════════════════════════════════════════════════════ */
+.exercise-breadcrumb {
+    font-size: 12px;
+    color: var(--text-muted, rgba(232, 241, 242, 0.5));
+    text-align: center;
+    margin-bottom: var(--space-2);
+    font-family: var(--font-heading);
+    letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Compact Hearts (Mobile)
+   ═══════════════════════════════════════════════════════ */
+.hearts-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px !important;
+}
+
+.hearts-compact .hearts-count {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--color-error, #EF4444);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Pause Animations (when tab not visible)
+   ═══════════════════════════════════════════════════════ */
+body.animations-paused *,
+body.animations-paused *::before,
+body.animations-paused *::after {
+    animation-play-state: paused !important;
 }
 
 /* ═══════════════════════════════════════════════════════

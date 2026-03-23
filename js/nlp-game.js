@@ -870,10 +870,15 @@ class StoryGame {
 
     renderHearts() {
         const container = document.getElementById('hearts-container');
+        const isMobile = window.innerWidth <= 480;
         let html = '';
-        for (let i = 0; i < this.playerData.maxHearts; i++) {
-            const isEmpty = i >= this.playerData.hearts;
-            html += `<span class="heart ${isEmpty ? 'empty' : ''}">❤️</span>`;
+        if (isMobile) {
+            html = `<span class="stat-item hearts-compact">❤️ <span class="hearts-count">${this.playerData.hearts}</span></span>`;
+        } else {
+            for (let i = 0; i < this.playerData.maxHearts; i++) {
+                const isEmpty = i >= this.playerData.hearts;
+                html += `<span class="heart ${isEmpty ? 'empty' : ''}">❤️</span>`;
+            }
         }
         container.innerHTML = html;
     }
@@ -1404,6 +1409,7 @@ ${answers.action || ''}`;
         if (!this.currentModule) return;
 
         this.currentScreen = 'module';
+        document.body.classList.add('game-fullscreen');
         const container = document.getElementById('game-container');
         const moduleIntroMessage = this.mentorMessages.moduleIntro[moduleId] || "בואו נתחיל!";
         const perfectList = this.playerData.perfectLessonsList || [];
@@ -1578,6 +1584,9 @@ ${answers.action || ''}`;
 
         const container = document.getElementById('game-container');
 
+        // Inject breadcrumb above exercise
+        const breadcrumbHtml = `<div class="exercise-breadcrumb">${this.currentModule.title} • שיעור ${this.currentLesson.id} • תרגיל ${this.currentExerciseIndex + 1}/${this.currentLesson.exercises.length}</div>`;
+
         switch (exercise.type) {
             case 'multiple-choice':
                 this.renderMultipleChoice(container, exercise);
@@ -1603,6 +1612,12 @@ ${answers.action || ''}`;
             case 'match':
                 this.renderMatch(container, exercise);
                 break;
+        }
+
+        // Insert breadcrumb after back button
+        const backBtn = container.querySelector('.back-btn');
+        if (backBtn) {
+            backBtn.insertAdjacentHTML('afterend', breadcrumbHtml);
         }
 
         this.showFooter();
@@ -3079,4 +3094,13 @@ ${answers.action || ''}`;
 let game;
 document.addEventListener('DOMContentLoaded', () => {
     game = new StoryGame();
+
+    // Pause animations when tab is hidden to save resources
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            document.body.classList.add('animations-paused');
+        } else {
+            document.body.classList.remove('animations-paused');
+        }
+    });
 });

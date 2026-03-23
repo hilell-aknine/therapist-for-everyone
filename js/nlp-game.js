@@ -333,21 +333,21 @@ class StoryGame {
         try {
             const session = await window.Auth.getSession();
             if (session?.user) {
-                // Logged in — show welcome gate on first visit per session
+                // Logged in — show welcome gate on first visit, then proceed
                 if (!sessionStorage.getItem('nlp_game_welcomed')) {
-                    this.showWelcomeGate();
                     sessionStorage.setItem('nlp_game_welcomed', '1');
+                    await this.showWelcomeGateAndWait();
                 }
                 this.onAuthSuccess(session.user);
             } else {
-                // Guest mode — show welcome gate first
-                this.showWelcomeGate();
+                // Guest mode — show welcome gate, wait for click, then proceed
+                await this.showWelcomeGateAndWait();
                 this.isGuest = true;
                 this.onAuthSuccess(null);
             }
         } catch (e) {
             // Guest mode fallback — show welcome gate
-            this.showWelcomeGate();
+            await this.showWelcomeGateAndWait();
             this.isGuest = true;
             this.onAuthSuccess(null);
         }
@@ -363,22 +363,29 @@ class StoryGame {
         } catch (e) { /* Auth not available in guest mode */ }
     }
 
-    showWelcomeGate() {
-        const gate = document.getElementById('welcome-gate');
-        if (!gate) return;
-        gate.style.display = 'flex';
+    showWelcomeGateAndWait() {
+        return new Promise((resolve) => {
+            const gate = document.getElementById('welcome-gate');
+            if (!gate) { resolve(); return; }
+            gate.style.display = 'flex';
 
-        // Animate elements in sequence
-        setTimeout(() => gate.classList.add('active'), 50);
+            // Animate elements in sequence
+            setTimeout(() => gate.classList.add('active'), 50);
 
-        // Auto-dismiss on button click
-        const btn = document.getElementById('welcome-gate-btn');
-        if (btn) {
-            btn.addEventListener('click', () => {
-                gate.classList.remove('active');
-                setTimeout(() => { gate.style.display = 'none'; }, 400);
-            });
-        }
+            // Wait for button click, then dismiss and resolve
+            const btn = document.getElementById('welcome-gate-btn');
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    gate.classList.remove('active');
+                    setTimeout(() => {
+                        gate.style.display = 'none';
+                        resolve();
+                    }, 400);
+                });
+            } else {
+                resolve();
+            }
+        });
     }
 
     async onAuthSuccess(user) {

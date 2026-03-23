@@ -333,7 +333,11 @@ class StoryGame {
         try {
             const session = await window.Auth.getSession();
             if (session?.user) {
-                // Logged in — skip welcome gate, go straight to game
+                // Logged in — show welcome gate on first visit per session
+                if (!sessionStorage.getItem('nlp_game_welcomed')) {
+                    this.showWelcomeGate();
+                    sessionStorage.setItem('nlp_game_welcomed', '1');
+                }
                 this.onAuthSuccess(session.user);
             } else {
                 // Guest mode — show welcome gate first
@@ -823,6 +827,9 @@ class StoryGame {
                     </button>
                     <button class="profile-action-btn" onclick="window.location.href='course-library.html'">
                         📚 <span>חזרה לפורטל הלמידה</span>
+                    </button>
+                    <button class="profile-action-btn" onclick="window.installApp()" style="${window.matchMedia('(display-mode: standalone)').matches ? 'display:none' : ''}">
+                        📲 <span>התקנה כאפליקציה</span>
                     </button>
                     <button class="profile-action-btn danger" onclick="game.logout()">
                         🚪 <span>התנתקות</span>

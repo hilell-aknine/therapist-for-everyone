@@ -237,28 +237,8 @@
     </div>
 
     <!-- Page Header -->
-    <header class="page-header">
-        <div class="header-right">
-            <a href="course-library.html" class="header-brand">
-                <div class="header-brand-icon"><i class="fa-solid fa-heart-pulse"></i></div>
-                <span class="header-brand-text">בית המטפלים</span>
-            </a>
-            <div class="header-separator"></div>
-            <span class="header-page-name">משחק NLP</span>
-        </div>
-        <div class="header-left">
-            <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="מצב כהה/בהיר">
-                <i class="fa-solid fa-moon"></i>
-            </button>
-            <a href="course-library.html" class="back-to-portal">
-                <i class="fa-solid fa-arrow-right"></i>
-                חזרה לפורטל
-            </a>
-        </div>
-    </header>
-
-    <!-- Page Body -->
-    <div class="page-body">
+    <!-- Page Body (no page-header — bottom nav handles navigation) -->
+    <div class="page-body" style="padding-top: 0;">
 
         <!-- Loading Screen -->
         <div id="loading-screen" class="loading-screen" style="display: none;">
@@ -465,6 +445,27 @@
                 history.replaceState(null, '', window.location.pathname);
             }
         })();
+
+        // Register Service Worker for PWA install
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('../sw.js').catch(function() {});
+        }
+
+        // PWA Install Prompt
+        var deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+        });
+        window.installApp = function() {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                deferredInstallPrompt.userChoice.then(function() { deferredInstallPrompt = null; });
+            } else {
+                // iOS: show instructions
+                showToast('לחצו על "שיתוף" → "הוסף למסך הבית"', 5000);
+            }
+        };
     </script>
 </body>
 </html>

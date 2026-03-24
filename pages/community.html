@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta name="theme-color" content="#003B46">
+    <title>קהילת NLP | בית המטפלים</title>
+    <meta name="description" content="קהילת הלמידה של בית המטפלים — שתפו ידע, שאלו שאלות וצמחו יחד">
+    <meta property="og:title" content="קהילת NLP — בית המטפלים">
+    <meta property="og:description" content="קהילת הלמידה של בית המטפלים">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="he_IL">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+
+    <!-- Theme init (prevent flash) -->
+    <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/community.css">
+</head>
+<body>
+    <!-- ══════════ HEADER ══════════ -->
+    <header class="community-header">
+        <div class="community-header-right">
+            <a href="../index.html" class="logo" title="בית המטפלים">
+                <img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm">
+            </a>
+            <div class="community-header-sep"></div>
+            <span class="community-header-title" style="font-family:var(--t-font-display);font-weight:700;font-size:1.1rem;color:var(--t-text);">קהילת NLP</span>
+
+            <div class="community-search">
+                <i class="fa-solid fa-magnifying-glass community-search-icon"></i>
+                <input type="search" id="communitySearch" placeholder="חיפוש בקהילה..." autocomplete="off" aria-label="חיפוש בקהילה">
+            </div>
+        </div>
+
+        <div class="community-header-left">
+            <a href="course-library.html" class="community-back-link">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span>חזרה לקורס</span>
+            </a>
+            <button class="community-sidebar-toggle" id="sidebarToggle" aria-label="תפריט צד" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <button class="theme-toggle-btn" id="themeToggle" aria-label="החלף ערכת נושא">
+                <i class="icon-sun" aria-hidden="true">☀️</i>
+                <i class="icon-moon" aria-hidden="true">🌙</i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ══════════ SIDEBAR OVERLAY (mobile) ══════════ -->
+    <div class="community-sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ══════════ LAYOUT ══════════ -->
+    <div class="community-layout">
+
+        <!-- ══════════ SIDEBAR ══════════ -->
+        <aside class="community-sidebar" id="communitySidebar">
+
+            <!-- Profile Card -->
+            <div class="community-profile-card" id="profileCard">
+                <div class="community-avatar" id="profileAvatar">?</div>
+                <div class="community-profile-name" id="profileName">טוען...</div>
+                <div style="margin-bottom:0.5rem;">
+                    <span class="community-level-badge" id="profileLevel">⭐ רמה 1</span>
+                </div>
+                <div class="community-profile-bio" id="profileBio"></div>
+                <div class="community-profile-stats">
+                    <div class="community-profile-stat">
+                        <span class="community-profile-stat-value" id="profilePoints">0</span>
+                        <span class="community-profile-stat-label">נקודות</span>
+                    </div>
+                    <div class="community-profile-stat">
+                        <span class="community-profile-stat-value" id="profilePosts">0</span>
+                        <span class="community-profile-stat-label">פוסטים</span>
+                    </div>
+                    <div class="community-profile-stat">
+                        <span class="community-profile-stat-value" id="profileLikes">0</span>
+                        <span class="community-profile-stat-label">לייקים</span>
+                    </div>
+                </div>
+                <div class="community-profile-rank" id="profileRank"></div>
+            </div>
+
+            <!-- New Post Button -->
+            <button class="community-new-post-btn" id="newPostBtn">
+                <i class="fa-solid fa-plus"></i>
+                פוסט חדש
+            </button>
+
+            <!-- Categories -->
+            <nav class="community-categories-nav" aria-label="קטגוריות">
+                <div class="community-categories-title">קטגוריות</div>
+                <button class="community-category-item active" data-category="all">
+                    <span class="community-category-icon">📋</span>
+                    <span>הכל</span>
+                </button>
+                <div id="categoriesList">
+                    <!-- Populated by JS -->
+                </div>
+            </nav>
+
+            <!-- Leaderboard -->
+            <div class="community-leaderboard">
+                <div class="community-leaderboard-title">
+                    🏆 הפעילים ביותר
+                </div>
+                <ul class="community-leaderboard-list" id="leaderboardList">
+                    <!-- Populated by JS -->
+                </ul>
+            </div>
+
+            <!-- Members count -->
+            <div style="text-align:center;font-size:0.8rem;color:var(--t-text-muted);padding:0.5rem 0;">
+                <i class="fa-solid fa-users" style="margin-left:0.3rem;"></i>
+                <span id="membersCount">0</span> חברי קהילה
+            </div>
+        </aside>
+
+        <!-- ══════════ MAIN CONTENT ══════════ -->
+        <main class="community-main">
+
+            <!-- Feed View -->
+            <div class="community-feed-view" id="feedView">
+
+                <!-- Filter Pills (mobile-friendly) -->
+                <div class="community-filter-pills" id="filterPills">
+                    <button class="community-filter-pill active" data-category="all">הכל</button>
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Sort Bar -->
+                <div class="community-sort-bar">
+                    <button class="community-sort-btn active" data-sort="recent">חדשים</button>
+                    <button class="community-sort-btn" data-sort="popular">פופולריים</button>
+                </div>
+
+                <!-- Composer -->
+                <div class="community-composer" id="postComposer">
+                    <button class="community-composer-toggle" id="composerToggle">
+                        <div class="community-avatar community-avatar--sm" id="composerAvatar">?</div>
+                        <span>שתפו משהו עם הקהילה...</span>
+                    </button>
+                    <form class="community-composer-form" id="composerForm">
+                        <div class="community-composer-field">
+                            <label for="composerTitle">כותרת</label>
+                            <input type="text" id="composerTitle" placeholder="על מה הפוסט?" maxlength="300" required>
+                        </div>
+                        <div class="community-composer-field">
+                            <label for="composerBody">תוכן</label>
+                            <textarea id="composerBody" placeholder="שתפו את המחשבות שלכם..." required></textarea>
+                        </div>
+                        <div class="community-composer-field">
+                            <label for="composerCategory">קטגוריה</label>
+                            <select id="composerCategory" required>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+
+                        <!-- Image preview -->
+                        <div class="community-composer-image-preview" id="imagePreview">
+                            <img id="imagePreviewImg" alt="תצוגה מקדימה">
+                            <button type="button" class="community-composer-image-remove" id="imageRemoveBtn" aria-label="הסר תמונה">✕</button>
+                        </div>
+
+                        <!-- Link field (hidden by default) -->
+                        <div class="community-composer-field" id="linkField" style="display:none;">
+                            <label for="composerLink">קישור</label>
+                            <input type="url" id="composerLink" placeholder="https://...">
+                        </div>
+
+                        <div class="community-composer-actions">
+                            <div class="community-composer-tools">
+                                <button type="button" class="community-composer-tool-btn" id="imageUploadBtn" title="העלאת תמונה" aria-label="העלאת תמונה">
+                                    <i class="fa-solid fa-image"></i>
+                                </button>
+                                <input type="file" id="imageFileInput" accept="image/jpeg,image/png,image/webp" hidden>
+                                <button type="button" class="community-composer-tool-btn" id="linkToggleBtn" title="הוספת קישור" aria-label="הוספת קישור">
+                                    <i class="fa-solid fa-link"></i>
+                                </button>
+                            </div>
+                            <div style="display:flex;gap:0.5rem;">
+                                <button type="button" class="community-composer-cancel" id="composerCancel">ביטול</button>
+                                <button type="submit" class="community-composer-submit" id="composerSubmit">פרסום</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Feed -->
+                <div id="feedContainer">
+                    <!-- Post cards rendered by JS -->
+                </div>
+
+                <!-- Load More -->
+                <div class="community-load-more" id="loadMore" style="display:none;">
+                    <button class="community-load-more-btn" id="loadMoreBtn">טען עוד</button>
+                </div>
+
+                <!-- Empty State -->
+                <div class="community-empty" id="emptyState" style="display:none;">
+                    <div class="community-empty-icon">💬</div>
+                    <div class="community-empty-title">הקהילה מחכה לכם!</div>
+                    <div class="community-empty-text">היו הראשונים לשתף — כתבו פוסט ותתחילו את השיחה.</div>
+                </div>
+            </div>
+
+            <!-- Post Detail View -->
+            <div class="community-detail" id="detailView">
+                <button class="community-detail-back" id="detailBack" aria-label="חזרה לפיד">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    חזרה לפיד
+                </button>
+
+                <div class="community-detail-post" id="detailPost">
+                    <!-- Rendered by JS -->
+                </div>
+
+                <div class="community-comments-section" id="commentsSection">
+                    <div class="community-comments-title">
+                        <i class="fa-regular fa-comments"></i>
+                        <span>תגובות</span>
+                        <span id="commentsCount" style="font-weight:400;color:var(--t-text-muted);font-size:0.85rem;"></span>
+                    </div>
+                    <div id="commentsList">
+                        <!-- Rendered by JS -->
+                    </div>
+                    <div class="community-comment-composer" id="commentComposer">
+                        <textarea id="commentInput" placeholder="כתבו תגובה..." rows="1" aria-label="כתבו תגובה"></textarea>
+                        <button class="community-comment-submit" id="commentSubmitBtn" type="button">שלח</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- FAB (mobile) -->
+    <button class="community-fab" id="fabBtn" aria-label="פוסט חדש">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <!-- Confirm Modal -->
+    <div class="community-confirm-modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="community-confirm-box">
+            <div class="community-confirm-title" id="confirmTitle">אתם בטוחים?</div>
+            <div class="community-confirm-text" id="confirmText">הפעולה הזו לא ניתנת לביטול.</div>
+            <div class="community-confirm-actions">
+                <button class="community-confirm-no" id="confirmNo">ביטול</button>
+                <button class="community-confirm-yes" id="confirmYes">מחיקה</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/theme-toggle.js"></script>
+    <script src="../js/community.js"></script>
+</body>
+</html>

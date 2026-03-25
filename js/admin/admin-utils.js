@@ -10,6 +10,8 @@ const VIEW_GROUPS = {
     'bot':      { views: ['bot'], header: null, default: 'bot' },
     'paid':     { views: ['paid'], header: null, default: 'paid' },
     'instagram':{ views: ['instagram'], header: null, default: 'instagram' },
+    'referrals':{ views: ['referrals'], header: null, default: 'referrals' },
+    'popups':   { views: ['popups'], header: null, default: 'popups' },
     'analytics':{ views: ['analytics'], header: null, default: 'analytics' },
     'settings': { views: ['settings'], header: null, default: 'settings' },
 };
@@ -57,6 +59,8 @@ function switchView(view) {
     if (view === 'funnel' || group.default === 'funnel') loadFunnel();
     if (view === 'paid' || group.default === 'paid') loadPaidCustomers();
     if (view === 'instagram' || group.default === 'instagram') loadInstagramAnalytics();
+    if (view === 'referrals' || group.default === 'referrals') loadReferralAnalytics();
+    if (view === 'popups' || group.default === 'popups') loadPopupConfigs();
     if (view === 'analytics' || group.default === 'analytics') loadGA4Analytics();
     if (view === 'settings' || group.default === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }
 

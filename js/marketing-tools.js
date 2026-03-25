@@ -224,12 +224,14 @@ function createConsentBanner() {
     document.getElementById('cookie-accept-all').addEventListener('click', function() {
         setUserConsent('all');
         dismissBanner();
+        if (window.PopupManager) window.PopupManager.dismiss('cookie_consent');
         initializeTracking();
     });
 
     document.getElementById('cookie-essential-only').addEventListener('click', function() {
         setUserConsent('essential');
         dismissBanner();
+        if (window.PopupManager) window.PopupManager.dismiss('cookie_consent');
         // No tracking initialized — essential cookies only
     });
 }
@@ -277,7 +279,21 @@ window.trackButtonClick = function(buttonName) {
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    createConsentBanner();
+    // Register cookie consent with PopupManager if available
+    if (window.PopupManager && !getConsentLevel()) {
+        window.PopupManager.register('cookie_consent', {
+            priority: 1,
+            category: 'critical',
+            show: function () { createConsentBanner(); },
+            hide: function () {
+                var b = document.getElementById('cookie-consent-banner');
+                if (b) { b.classList.add('hiding'); setTimeout(function() { b.remove(); }, 300); }
+            }
+        });
+        window.PopupManager.request('cookie_consent');
+    } else {
+        createConsentBanner();
+    }
     initializeTracking();
     createCookieSettingsButton();
 });

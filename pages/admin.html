@@ -98,6 +98,15 @@
                     <span>אינסטגרם</span>
                     <span class="badge" id="ig-total-badge" style="background:#E4405F;">0</span>
                 </div>
+                <div class="nav-item" onclick="switchView('referrals')">
+                    <i class="fa-solid fa-rocket" style="color:#D4AF37;"></i>
+                    <span>שותפים</span>
+                    <span class="badge" id="ref-total-badge" style="background:#D4AF37;color:#003B46;">0</span>
+                </div>
+                <div class="nav-item" onclick="switchView('popups')">
+                    <i class="fa-solid fa-window-restore" style="color:#2F8592;"></i>
+                    <span>פופאפים</span>
+                </div>
                 <div class="nav-item" onclick="switchView('analytics')">
                     <i class="fa-solid fa-chart-line"></i>
                     <span>אנליטיקס</span>
@@ -1385,6 +1394,94 @@
                     </div>
                 </div>
 
+                <!-- ===== Referrals View ===== -->
+                <div id="referrals-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-rocket" style="color:var(--gold);margin-left:0.5rem;"></i> תוכנית השותפים</h1>
+                    <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">מעקב הפניות — כמה משתמשים הביאו חברים דרך הלינק האישי שלהם</p>
+
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(212,175,55,0.12);color:#D4AF37;"><i class="fa-solid fa-users"></i></div>
+                            <div><div class="stat-value" id="ref-total">-</div><div class="stat-label">סה״כ הפניות</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(212,175,55,0.12);color:#D4AF37;"><i class="fa-solid fa-calendar-days"></i></div>
+                            <div><div class="stat-value" id="ref-30d">-</div><div class="stat-label">30 יום אחרונים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(212,175,55,0.12);color:#D4AF37;"><i class="fa-solid fa-fire"></i></div>
+                            <div><div class="stat-value" id="ref-7d">-</div><div class="stat-label">7 ימים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon gold"><i class="fa-solid fa-bolt"></i></div>
+                            <div><div class="stat-value" id="ref-today">-</div><div class="stat-label">היום</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(47,133,146,0.12);color:#2F8592;"><i class="fa-solid fa-user-plus"></i></div>
+                            <div><div class="stat-value" id="ref-unique">-</div><div class="stat-label">שותפים ייחודיים</div></div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top:1.5rem;">
+                        <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-trophy" style="color:var(--gold);margin-left:0.3rem;"></i> טבלת מובילים</h3>
+                        <div id="ref-leaderboard-table">
+                            <p style="color:var(--text-secondary);text-align:center;">טוען...</p>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top:1rem;">
+                        <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-clock-rotate-left" style="color:var(--gold);margin-left:0.3rem;"></i> הפניות אחרונות</h3>
+                        <div id="ref-recent-list">
+                            <p style="color:var(--text-secondary);text-align:center;">טוען...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Popups View ===== -->
+                <div id="popups-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-window-restore" style="color:#2F8592;margin-left:0.5rem;"></i> ניהול פופאפים</h1>
+                    <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">יצירה, עריכה ומעקב אחר כל הפופאפים באתר</p>
+
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(47,133,146,0.12);color:#2F8592;"><i class="fa-solid fa-window-restore"></i></div>
+                            <div><div class="stat-value" id="popup-active-count">-</div><div class="stat-label">פופאפים פעילים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(212,175,55,0.12);color:#D4AF37;"><i class="fa-solid fa-eye"></i></div>
+                            <div><div class="stat-value" id="popup-impressions-30d">-</div><div class="stat-label">חשיפות 30 יום</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(47,133,146,0.12);color:#2F8592;"><i class="fa-solid fa-hand-pointer"></i></div>
+                            <div><div class="stat-value" id="popup-clicks-30d">-</div><div class="stat-label">לחיצות 30 יום</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background:rgba(255,111,97,0.12);color:#FF6F61;"><i class="fa-solid fa-xmark"></i></div>
+                            <div><div class="stat-value" id="popup-dismiss-rate">-</div><div class="stat-label">אחוז סגירה</div></div>
+                        </div>
+                    </div>
+
+                    <div style="margin:1.5rem 0 1rem;display:flex;justify-content:flex-end;">
+                        <button onclick="openCreatePopupModal()" class="btn" style="background:var(--gold);color:var(--deep-petrol);font-weight:700;padding:0.5rem 1.2rem;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:0.4rem;">
+                            <i class="fa-solid fa-plus"></i> צור פופאפ חדש
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-list" style="color:#2F8592;margin-left:0.3rem;"></i> כל הפופאפים</h3>
+                        <div id="popup-configs-table">
+                            <p style="color:var(--text-secondary);text-align:center;">טוען...</p>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top:1rem;">
+                        <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-chart-bar" style="color:var(--gold);margin-left:0.3rem;"></i> סטטיסטיקות לפי פופאפ</h3>
+                        <div id="popup-stats-table">
+                            <p style="color:var(--text-secondary);text-align:center;">טוען...</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="analytics-view" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-chart-line" style="color:var(--gold);margin-left:0.5rem;"></i> סטטיסטיקות האתר</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">נתונים מ-Google Analytics — כמה אנשים נכנסים לאתר, מאיפה הם מגיעים, ומה הם צופים.</p>
@@ -2262,6 +2359,8 @@
     <script src="../js/admin/admin-funnel.js"></script>
     <script src="../js/admin/admin-paid.js"></script>
     <script src="../js/admin/admin-instagram.js"></script>
+    <script src="../js/admin/admin-referrals.js"></script>
+    <script src="../js/admin/admin-popups.js"></script>
     <script src="../js/admin/admin-analytics.js"></script>
     <script src="../js/admin/admin-settings.js"></script>
     <script src="../js/admin/admin-export.js"></script>

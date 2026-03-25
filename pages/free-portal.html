@@ -21,6 +21,12 @@
     <meta name="description" content="קורס NLP Practitioner מלא לצפייה ישירה בחינם — 51+ סרטונים, 20+ שעות למידה. קבלו גישה לפורטל לימודים בשווי 7,200 ש״ח">
     <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <!-- Capture ?ref= param BEFORE auth redirect (marketing-tools.js loads too late with defer) -->
+    <script>
+        (function(){try{var p=new URLSearchParams(location.search);var r=p.get('ref');
+        if(r&&r.length>10)localStorage.setItem('referrer_data',JSON.stringify({referrer_id:r,captured_at:Date.now()}));
+        }catch(e){}})();
+    </script>
     <!-- Early auth redirect — runs before page renders -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-config.js"></script>
@@ -30,9 +36,12 @@
                 const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
                 const { data: { session } } = await sb.auth.getSession();
                 if (session?.user) {
-                    // If questionnaire not done yet, go to questionnaire; otherwise go to portal
                     const done = localStorage.getItem('portal_questionnaire_done');
-                    window.location.replace(done ? 'course-library.html' : 'portal-questionnaire.html');
+                    var dest = done ? 'course-library.html' : 'portal-questionnaire.html';
+                    // Preserve ?ref= param through redirect
+                    var ref = new URLSearchParams(location.search).get('ref');
+                    if (ref) dest += (dest.includes('?') ? '&' : '?') + 'ref=' + encodeURIComponent(ref);
+                    window.location.replace(dest);
                 }
             } catch (e) { /* not logged in — show page */ }
         })();

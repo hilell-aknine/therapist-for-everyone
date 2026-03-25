@@ -2573,6 +2573,20 @@
             box-shadow: 0 0 8px rgba(212, 175, 55, 0.15);
         }
         .ambassador-sidebar-item i { font-size: 0.9rem; }
+        .amb-badge-new {
+            background: #D4AF37;
+            color: #003B46;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-right: auto;
+            animation: ambPulse 2s ease-in-out 3;
+        }
+        @keyframes ambPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
         .welcome-sidebar-sep {
             border: none;
             border-top: 1px solid var(--t-border, rgba(255,255,255,0.08));
@@ -2781,6 +2795,78 @@
             gap: 0.4rem;
         }
         .amb-copy-btn:hover { background: #c9a132; transform: translateY(-1px); }
+        .amb-share-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+        }
+        .amb-share-btn {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+        .amb-share-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+        .amb-share-wa { background: #25D366; color: #fff; }
+        .amb-share-msg { background: rgba(232,241,242,0.12); color: #E8F1F2; border: 1px solid rgba(232,241,242,0.15); }
+        @media (max-width: 480px) {
+            .amb-share-row { flex-direction: column; }
+        }
+        /* Share prompt bottom sheet */
+        .share-prompt-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9998;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .share-prompt-sheet {
+            background: #003B46;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem 1.2rem 2rem;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            animation: slideUp 0.3s ease-out;
+        }
+        .share-prompt-sheet h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #E8F1F2;
+            margin-bottom: 0.3rem;
+        }
+        .share-prompt-sheet p {
+            font-size: 0.85rem;
+            color: rgba(232,241,242,0.6);
+            margin-bottom: 1.2rem;
+        }
+        .share-prompt-btns {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .share-prompt-dismiss {
+            background: none;
+            border: none;
+            color: rgba(232,241,242,0.4);
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .share-prompt-dismiss:hover { color: rgba(232,241,242,0.7); }
         .amb-stat {
             display: flex;
             align-items: center;
@@ -3293,8 +3379,11 @@
                             <div class="wd-card-icon teal"><i class="fa-solid fa-circle-play"></i></div>
                             <h3>איך הפלטפורמה עובדת?</h3>
                         </div>
-                        <div class="wd-video-container" style="background: none; padding: 0;">
-                            <iframe width="100%" style="aspect-ratio: 16/9; border-radius: 8px;" src="https://www.youtube.com/embed/y5YBOZS-soI?rel=0" title="איך הפלטפורמה עובדת" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        <div class="wd-video-container" style="background: none; padding: 0; position: relative; cursor: pointer;" id="portalVideoContainer" onclick="this.innerHTML='<iframe width=\'100%\' style=\'aspect-ratio:16/9;border-radius:8px;\' src=\'https://www.youtube.com/embed/y5YBOZS-soI?rel=0&autoplay=1\' title=\'איך הפלטפורמה עובדת\' frameborder=\'0\' allow=\'accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share\' allowfullscreen></iframe>'">
+                            <img src="../assets/portal-video-thumbnail.png" alt="איך הפורטל עובד?" style="width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:8px; display:block;">
+                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:72px; height:72px; background:rgba(255,0,0,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                <div style="width:0; height:0; border-style:solid; border-width:14px 0 14px 24px; border-color:transparent transparent transparent #fff; margin-left:4px;"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -3335,6 +3424,14 @@
                             <input type="text" id="ambassadorLinkInput" readonly>
                             <button onclick="copyAmbassadorLink()" id="ambassadorCopyBtn" class="amb-copy-btn">
                                 <i class="fa-solid fa-copy"></i> העתק לינק
+                            </button>
+                        </div>
+                        <div class="amb-share-row">
+                            <button onclick="shareAmbassadorWhatsApp()" class="amb-share-btn amb-share-wa">
+                                <i class="fa-brands fa-whatsapp"></i> שתפו בוואטסאפ
+                            </button>
+                            <button onclick="copyAmbassadorMessage()" id="ambassadorMsgBtn" class="amb-share-btn amb-share-msg">
+                                <i class="fa-solid fa-message"></i> העתיקו הודעה מוכנה
                             </button>
                         </div>
                         <div class="amb-stat">
@@ -4166,6 +4263,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
     <script src="../js/supabase-config.js"></script>
     <script src="../js/marketing-tools.js"></script>
+    <script src="../js/popup-manager.js"></script>
     <script>
         // ===== Configuration — from centralized supabase-config.js =====
         const SUPABASE_URL = window.SUPABASE_CONFIG.url;
@@ -4791,7 +4889,7 @@
         // Local implementation using page's own supabaseClient
         const Referrals = {
             getLink(userId) {
-                return `https://www.therapist-home.com/pages/free-portal.html?ref=${userId}`;
+                return `https://www.therapist-home.com/pages/course-library.html?ref=${userId}`;
             },
             async getMyCount(userId) {
                 if (!supabaseClient) return 0;
@@ -4916,6 +5014,54 @@
                     }
                 }
             });
+
+            // ===== Register popups with PopupManager =====
+            if (window.PopupManager) {
+                window.PopupManager.register('auth_modal', {
+                    priority: 2,
+                    category: 'critical',
+                    show: function () { openModal(false); },
+                    hide: function () { closeModal(); }
+                });
+                window.PopupManager.register('auth_wall', {
+                    priority: 2,
+                    category: 'critical',
+                    show: function () { openModal(true); },
+                    hide: function () { closeModal(); }
+                });
+                window.PopupManager.register('ai_questionnaire', {
+                    priority: 3,
+                    category: 'engagement',
+                    show: function () { openQuestionnaireModal(); },
+                    hide: function () { closeQuestionnaireModal(); },
+                    maxPerDay: 1
+                });
+                window.PopupManager.register('video_toast', {
+                    priority: 5,
+                    category: 'info',
+                    show: function () { showToast(); },
+                    hide: function () { hideToast(); }
+                });
+                window.PopupManager.register('share_prompt', {
+                    priority: 4,
+                    category: 'engagement',
+                    show: function () { showSharePrompt(); },
+                    hide: function () { dismissSharePrompt(); },
+                    maxPerDay: 1,
+                    cooldownMs: 5 * 60 * 1000  // 5 min cooldown
+                });
+                window.PopupManager.register('referral_toast', {
+                    priority: 5,
+                    category: 'info',
+                    show: function () {
+                        if (window.UI && window.UI.showToast) {
+                            window.UI.showToast('\u05d9\u05e9 \u05dc\u05db\u05dd \u05d4\u05e4\u05e0\u05d9\u05d4 \u05d7\u05d3\u05e9\u05d4! \u{1F389}', 'success');
+                        }
+                    },
+                    hide: function () {},
+                    maxPerDay: 2
+                });
+            }
 
             // Auth setup (non-blocking)
             if (supabaseClient) {
@@ -5298,6 +5444,7 @@
                 <div class="ambassador-sidebar-item" id="ambassadorSidebarItem" onclick="showAmbassadorProgram()">
                     <i class="fa-solid fa-rocket"></i>
                     <span>תוכנית השותפים</span>
+                    <span class="amb-badge-new" id="ambBadgeNew">חדש</span>
                 </div>
                 <a href="community.html" class="ambassador-sidebar-item" style="text-decoration:none;color:inherit;">
                     <i class="fa-solid fa-users"></i>
@@ -5474,6 +5621,10 @@
             // Close mobile sidebar if open
             const sidebar = document.getElementById('sidebar');
             if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
+            // Hide "new" badge after first visit
+            var ambBadge = document.getElementById('ambBadgeNew');
+            if (ambBadge) ambBadge.style.display = 'none';
+            sessionStorage.setItem('amb_visited', '1');
             // Load ambassador data
             initAmbassadorDashboard();
         }
@@ -5506,12 +5657,18 @@
                 linkCard.style.display = '';
                 if (loginNotice) loginNotice.style.display = 'none';
                 // Generate referral link
-                const link = 'https://www.therapist-home.com/pages/free-portal.html?ref=' + user.id;
+                const link = 'https://www.therapist-home.com/pages/course-library.html?ref=' + user.id;
                 document.getElementById('ambassadorLinkInput').value = link;
                 // Load my referral count
                 try {
                     const count = await window.Referrals?.getMyCount(user.id) || 0;
                     document.getElementById('ambassadorMyCount').textContent = count;
+                    // Check for new referrals since last visit
+                    const prevCount = parseInt(localStorage.getItem('amb_prev_count') || '0');
+                    if (count > prevCount && prevCount > 0 && window.PopupManager) {
+                        window.PopupManager.request('referral_toast');
+                    }
+                    localStorage.setItem('amb_prev_count', count.toString());
                 } catch (e) { /* leaderboard non-critical */ }
             } else {
                 if (linkCard) linkCard.style.display = 'none';
@@ -5572,6 +5729,95 @@
                 input.select();
                 document.execCommand('copy');
             });
+        }
+
+        function getAmbassadorShareMessage() {
+            const link = document.getElementById('ambassadorLinkInput')?.value || '';
+            return 'היי! \u{1F64C}\n' +
+                'גיליתי קורס NLP Practitioner מלא בחינם \u2014 51 סרטונים, 20+ שעות של תוכן מקצועי.\n' +
+                'קיבלתי ממנו המון ערך ורציתי לשתף גם אתכם.\n\n' +
+                '\u{1F517} הנה הקישור שלי:\n' + link + '\n\n' +
+                'שווה לנסות \u{1F49B}';
+        }
+
+        function shareAmbassadorWhatsApp() {
+            const msg = getAmbassadorShareMessage();
+            if (!msg) return;
+            window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+            if (window.PopupManager) window.PopupManager.click('share_prompt');
+        }
+
+        function copyAmbassadorMessage() {
+            const msg = getAmbassadorShareMessage();
+            if (!msg) return;
+            const btn = document.getElementById('ambassadorMsgBtn');
+            navigator.clipboard.writeText(msg).then(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> \u05d4\u05d5\u05e2\u05ea\u05e7!';
+                btn.style.background = '#2F8592';
+                btn.style.color = '#fff';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-message"></i> \u05d4\u05e2\u05ea\u05d9\u05e7\u05d5 \u05d4\u05d5\u05d3\u05e2\u05d4 \u05de\u05d5\u05db\u05e0\u05d4';
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
+            }).catch(() => {});
+        }
+
+        // ===== Share Prompt (bottom sheet after lesson completion) =====
+        function showSharePrompt() {
+            if (!isAuthenticated || !currentUser) return;
+            const overlay = document.createElement('div');
+            overlay.className = 'share-prompt-overlay';
+            overlay.id = 'sharePromptOverlay';
+            overlay.onclick = function(e) { if (e.target === overlay) dismissSharePrompt(); };
+            const link = Referrals.getLink(currentUser.id);
+            overlay.innerHTML = `
+                <div class="share-prompt-sheet">
+                    <h3>\u05e0\u05d4\u05e0\u05d9\u05ea \u05de\u05d4\u05e9\u05d9\u05e2\u05d5\u05e8? \u{1F49B}</h3>
+                    <p>\u05e9\u05ea\u05e4\u05d5 \u05e2\u05dd \u05d7\u05d1\u05e8 \u05e9\u05d9\u05db\u05d5\u05dc \u05dc\u05d4\u05e8\u05d5\u05d5\u05d9\u05d7 \u05de\u05d6\u05d4</p>
+                    <div class="share-prompt-btns">
+                        <button onclick="sharePromptWhatsApp()" class="amb-share-btn amb-share-wa" style="flex:none;padding:0.6rem 1.4rem;">
+                            <i class="fa-brands fa-whatsapp"></i> \u05e9\u05ea\u05e4\u05d5 \u05d1\u05d5\u05d5\u05d0\u05d8\u05e1\u05d0\u05e4
+                        </button>
+                        <button onclick="sharePromptCopyLink()" id="sharePromptCopyBtn" class="amb-share-btn amb-share-msg" style="flex:none;padding:0.6rem 1.4rem;">
+                            <i class="fa-solid fa-copy"></i> \u05d4\u05e2\u05ea\u05d9\u05e7\u05d5 \u05dc\u05d9\u05e0\u05e7
+                        </button>
+                    </div>
+                    <button onclick="dismissSharePrompt()" class="share-prompt-dismiss">\u05d0\u05d7\u05e8 \u05db\u05da</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function dismissSharePrompt() {
+            const overlay = document.getElementById('sharePromptOverlay');
+            if (overlay) overlay.remove();
+            if (window.PopupManager) window.PopupManager.dismiss('share_prompt');
+        }
+
+        function sharePromptWhatsApp() {
+            if (!currentUser) return;
+            const link = Referrals.getLink(currentUser.id);
+            const msg = '\u05d4\u05d9\u05d9! \u{1F64C}\n' +
+                '\u05d2\u05d9\u05dc\u05d9\u05ea\u05d9 \u05e7\u05d5\u05e8\u05e1 NLP Practitioner \u05de\u05dc\u05d0 \u05d1\u05d7\u05d9\u05e0\u05dd \u2014 51 \u05e1\u05e8\u05d8\u05d5\u05e0\u05d9\u05dd, 20+ \u05e9\u05e2\u05d5\u05ea \u05e9\u05dc \u05ea\u05d5\u05db\u05df \u05de\u05e7\u05e6\u05d5\u05e2\u05d9.\n' +
+                '\u05e7\u05d9\u05d1\u05dc\u05ea\u05d9 \u05de\u05de\u05e0\u05d5 \u05d4\u05de\u05d5\u05df \u05e2\u05e8\u05da \u05d5\u05e8\u05e6\u05d9\u05ea\u05d9 \u05dc\u05e9\u05ea\u05e3 \u05d2\u05dd \u05d0\u05ea\u05db\u05dd.\n\n' +
+                '\u{1F517} \u05d4\u05e0\u05d4 \u05d4\u05e7\u05d9\u05e9\u05d5\u05e8 \u05e9\u05dc\u05d9:\n' + link + '\n\n' +
+                '\u05e9\u05d5\u05d5\u05d4 \u05dc\u05e0\u05e1\u05d5\u05ea \u{1F49B}';
+            window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+            dismissSharePrompt();
+            if (window.PopupManager) window.PopupManager.click('share_prompt');
+        }
+
+        function sharePromptCopyLink() {
+            if (!currentUser) return;
+            const link = Referrals.getLink(currentUser.id);
+            const btn = document.getElementById('sharePromptCopyBtn');
+            navigator.clipboard.writeText(link).then(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> \u05d4\u05d5\u05e2\u05ea\u05e7!';
+                btn.style.background = '#2F8592';
+                btn.style.color = '#fff';
+                setTimeout(() => dismissSharePrompt(), 1500);
+            }).catch(() => {});
         }
 
         function hideWelcomeDashboard() {
@@ -5776,6 +6022,11 @@
                 const wallThreshold = Math.ceil(totalLessons * 0.5);
                 if (completedLessons.length >= wallThreshold && !isAuthenticated) {
                     openModal(true);
+                }
+
+                // Share prompt after 3rd lesson (via PopupManager)
+                if (isAuthenticated && completedLessons.length >= 3 && window.PopupManager) {
+                    setTimeout(() => window.PopupManager.request('share_prompt'), 2000);
                 }
             }
         }
@@ -6255,6 +6506,10 @@
         function closeModal() {
             document.getElementById('registrationModal').classList.remove('active');
             hideAuthError();
+            if (window.PopupManager) {
+                window.PopupManager.dismiss('auth_modal');
+                window.PopupManager.dismiss('auth_wall');
+            }
         }
 
         // Close modal when clicking on overlay (outside the box)
@@ -6298,6 +6553,7 @@
             const toast = document.getElementById('toast');
             if (toast) toast.classList.remove('show');
             if (toastTimeout) clearTimeout(toastTimeout);
+            if (window.PopupManager) window.PopupManager.close('video_toast');
         }
 
         // ===== Game Access Check =====
@@ -6706,6 +6962,7 @@
         function skipQuestionnaire() {
             localStorage.setItem('questionnaireCompleted', 'true');
             closeQuestionnaireModal();
+            if (window.PopupManager) window.PopupManager.dismiss('ai_questionnaire');
         }
 
         async function submitQuestionnaire(event) {

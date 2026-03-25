@@ -1,434 +1,227 @@
-# CLAUDE.md - מטפל לכל אחד
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Quick Reference
 ```
-Project: Therapists for Everyone (פורטל מטפלים לכולם)
-Stack: HTML, Vanilla JS, Tailwind CDN, Supabase
+Project: Therapists for Everyone (בית המטפלים — פורטל מטפלים לכולם)
+Stack: Static HTML/JS + Supabase + Vercel
 Live: https://www.therapist-home.com/
 Repo: https://github.com/hilell-aknine/therapist-for-everyone
+Deploy: git push origin master → Vercel auto-deploys
+Supabase: https://supabase.com/dashboard/project/eimcudmlfjlyxjyrdcgc
 ```
 
----
+## Commands
+```bash
+# Deploy (auto via Vercel on push to master)
+git push origin master
 
-## 1. Project Vision
+# Supabase
+npx supabase db push --include-all              # Apply migrations (--include-all for out-of-order)
+npx supabase functions deploy <name> --no-verify-jwt  # Deploy Edge Function
+npx supabase secrets set --env-file .env.local   # Set secrets (Windows-safe)
 
-**מטרה:** פורטל קהילתי לחיבור מטופלים עם מטפלים איכותיים שמציעים טיפול נפשי מסובסד/חינם.
-
-**קהלי יעד:**
-- פוסט-טראומתיים, הלומי קרב, ניצולי נובה
-- כל מי שאין לו יכולת כלכלית לטיפול
-
-**בידול:** לא רק ספרייה - קהילה מנוהלת עם סינון AI ובקרת איכות.
-
----
-
-## 2. Architecture
-
-```
-beit-vmetaplim/
-├── index.html              # דף הבית + קורסים
-├── landing-patient.html    # נחיתה למטופלים
-├── landing-therapist.html  # נחיתה למטפלים
-├── patient-onboarding.html # הרשמת מטופל
-├── therapist-onboarding.html # הרשמת מטפל
-├── patient-dashboard.html  # אזור אישי למטופל
-├── therapist-dashboard.html # אזור אישי למטפל
-├── legal-gate.html         # שער משפטי
-├── thank-you.html          # דף תודה
-├── privacy-policy.html     # מדיניות פרטיות
-├── pages/                  # App pages (admin, steps, learning, etc.)
-│   ├── admin.html          # פאנל ניהול
-│   ├── patient-step[1-4].html
-│   ├── therapist-step[1-4].html
-│   └── ...                 # about, courses, login, etc.
-├── js/
-│   ├── supabase-client.js  # Supabase initialization (SINGLE SOURCE)
-│   ├── auth-guard.js       # Role & legal checks
-│   ├── patient-flow.js     # Patient logic
-│   ├── admin-dashboard.js  # Admin logic
-│   ├── fill-patient-form.js # Form auto-fill utility
-│   └── marketing-tools.js  # Cookie consent + Analytics
-├── supabase/
-│   └── migrations/         # Database schema
-├── docs/
-│   ├── booklets/           # NLP booklet (HTML, PDF)
-│   ├── transcripts/        # Course transcripts (JSON, MD, TXT)
-│   ├── master-course/      # Master course lessons
-│   ├── images/             # Infographic PNGs
-│   ├── summaries/          # Lesson summaries (DOCX)
-│   ├── legal/              # Legal documents (PDF)
-│   ├── specs/              # System specifications
-│   └── scripts/            # Utility scripts (Python)
-└── DOCUMENTATION.md        # Technical docs (Hebrew)
+# Backup (manual — also runs daily at 07:00 via Windows Scheduled Task)
+py scripts/backup-supabase.py                    # Full backup: DB + Storage + email report
 ```
 
----
+## Architecture
 
-## 3. Core Policies
+**Static site** — no build step, no framework. HTML files served directly by Vercel. All JS is vanilla, loaded via `<script>` tags.
 
-### Lead Capture First
-- **Onboarding forms DO NOT require login**
-- Anyone can fill patient/therapist questionnaire
-- Data saved as "lead" to DB
-- Auth is NOT a blocker for lead capture
+### Core JS Modules
+- `js/supabase-client.js` — **Single source** for Supabase init, Auth helpers, CourseProgress, Referrals, UI utilities (toast, loading)
+- `js/supabase-config.js` — Public config (URL, anon key, Turnstile site key, Sheets API)
+- `js/auth-guard.js` — Role-based access control, legal consent checks, redirect logic
+- `js/marketing-tools.js` — Cookie consent v2 (`cookie_consent_v2` localStorage key), GA4, Meta Pixel, UTM/ref capture
+- `js/popup-manager.js` — Central popup orchestrator (priority queue, cooldown, daily limits, audience targeting)
 
-### Legal Gate
-**Required for:**
-- Dashboard access
-- Matching phase
-- Viewing sensitive data
-
-**NOT required for:**
-- Filling forms
-- Leaving contact details
-- Browsing public pages
-
----
-
-## 4. User Roles (Supabase RLS)
-
-| Role | Permissions |
-|------|-------------|
-| **Admin** | See all data. Check via `profiles.role = 'admin'` |
-| **Therapist** | Own profile + assigned patients only |
-| **Patient** | Own profile + assigned therapist only |
-
----
-
-## 5. Database Schema
-
-### Main Tables
-- `profiles` - User profiles (auto-created on signup)
-- `therapists` - Therapist applications & data
-- `patients` - Patient intake forms
-- `appointments` - Sessions (max 10 per patient)
-- `legal_consents` - Legal signatures (timestamp + IP)
-- `contact_requests` - Lead capture
-- `course_progress` - Video course tracking
-
-### Supabase Connection
-```javascript
-const SUPABASE_URL = 'https://eimcudmlfjlyxjyrdcgc.supabase.co';
-// Anon key in supabase-client.js
+### NLP Game (biggest subsystem)
+```
+pages/nlp-game.html            # Game page — loads everything below
+js/nlp-game-knowledge.js       # Course knowledge base for AI mentor
+js/nlp-game-data-m[1-7].js     # Per-module data (lessons, readings, exercises)
+js/nlp-game-data.js             # Assembler — combines MODULE_1..7 into MODULES array
+js/nlp-game.js                  # Game engine (~3200 lines) — StoryGame class
+js/nlp-game-leaderboard.js      # Leaderboard module (IIFE → window.NLPLeaderboard)
+css/nlp-game.css                # All game styles (~4700 lines)
+assets/game/                    # AI-generated visuals (127 images + videos)
+docs/transcripts/per-lesson/    # Source transcripts for reading sections
 ```
 
-**Dashboard:** https://supabase.com/dashboard/project/eimcudmlfjlyxjyrdcgc
+**Game engine** (`StoryGame` class): manages screens (home/module/reading/exercise/stats/profile), hearts/XP/streak, 8 exercise types, AI mentor chat, leaderboard sync.
 
----
+**Bottom navigation**: 4 tabs (Home, Stats, Trophy, Profile). Hides during exercises via `body.game-fullscreen`.
 
-## 6. Coding Standards
+**AI Mentor** (`GeminiMentor` class): calls `gemini-mentor` Edge Function. System prompt loaded from `nlp-game-knowledge.js`. Dual-provider: Gemini direct → OpenRouter fallback.
 
-| Rule | Details |
-|------|---------|
-| **Secrets** | Never hardcode (except Supabase Anon Key) |
-| **Language** | UI in Hebrew (RTL), Code in English |
-| **Errors** | Always try/catch Supabase calls, show friendly errors |
-| **Style** | Descriptive names (`isTherapistApproved` not `approved`) |
-| **JS Location** | Complex logic goes to `/js` modules |
+### Supabase Edge Functions
+| Function | Purpose |
+|----------|---------|
+| `gemini-mentor` | AI chat — Gemini + OpenRouter dual-provider with retry |
+| `ga4-analytics` | GA4 Data API proxy (admin-only, Israel timezone) |
+| `submit-lead` | Turnstile-verified anonymous form submissions |
+| `submit-contract` | Contract signing with Turnstile verification |
+| `ai-chat` | Legacy AI chat endpoint |
+| `get-lessons` | Course lesson data API |
 
----
+### Key Supabase Tables
+- `profiles` — user profiles (role CHECK: admin/therapist/patient/student_lead/student/sales_rep/paid_customer)
+- `patients`, `therapists` — intake forms
+- `portal_questionnaires` — learning portal registration
+- `nlp_game_leaderboard` — game rankings (RLS: authenticated SELECT, own-row write)
+- `nlp_game_players` — player save data
+- `course_progress`, `ai_chat_usage`, `user_notes` — learning tracking
+- `subscriptions`, `signed_contracts` — paid customer system
+- `referrals`, `referral_leaderboard` (view) — ambassador/referral program
+- `popup_configs`, `popup_events` — popup management system (admin CRUD + analytics)
 
-## 7. User Flows
+## Core Policies
 
-### Patient Flow
-1. Landing page -> Fill questionnaire (no login)
-2. Data saved to `patients` + `contact_requests`
-3. Admin reviews & assigns therapist
-4. Patient gets legal gate -> Dashboard access
+### Security
+- **Anonymous form submissions** route through Edge Functions with Cloudflare Turnstile — never direct anon INSERT
+- **Never add `WITH CHECK (true)` on anon INSERT policies**
+- **`.vercelignore`** blocks: `supabase/`, `sql/`, `docs/specs/`, `CLAUDE.md`
+- **Admin auth**: `profiles.role === 'admin'` check (not just session existence) — admin.html is deployed but auth-guarded
+- **Secrets**: Supabase Secrets only — never hardcoded, no fallback tokens in source
 
-### Therapist Flow
-1. Landing page -> Fill application + upload certificates
-2. AI screening + Admin approval
-3. Receive email with password creation link
-4. Legal gate -> Access "המשרד" (personal dashboard)
-5. Receive patient assignments, initiate contact
+### Lead Capture
+- Onboarding forms do NOT require login — data saved as lead
+- Legal gate required only for dashboard access, not form filling
 
-### Admin Flow
-1. Login -> Dashboard
-2. Review new applications (email alerts)
-3. Approve/reject therapists
-4. Match patients to therapists
-5. Handle alerts (red flag: therapist inactive 30 days)
+### Content Language
+- UI: Hebrew (RTL). Code: English.
+- Public pages use warm language ("קהילה", "פרויקט") — formal "חברה" ONLY in legal docs
+- NLP game content: everyday examples only — NO business language (לקוח, מכירה, עסק)
 
----
-
-## 8. Current Status
-
-### Done
-- [x] Landing pages (patient/therapist)
-- [x] Onboarding forms
-- [x] Legal gate page
-- [x] Admin dashboard UI
-- [x] Patient dashboard (basic)
-- [x] Therapist dashboard (basic)
-- [x] Supabase integration
-- [x] Cookie consent banner
-- [x] Privacy policy page
-- [x] Legal documents in registration (PDF + scroll-lock)
-
-### In Progress
-- [ ] AI screening integration
-- [ ] Email notifications
-- [ ] Session counter (10 max)
-
-### Planned
-- [ ] WhatsApp/SMS reminders
-- [ ] Automatic matching algorithm
-- [ ] Video chat integration
-
----
-
-## 9. Branding
-
+## Branding
 ```css
-/* Colors */
 --deep-petrol: #003B46;
 --muted-teal: #00606B;
 --dusty-aqua: #2F8592;
 --frost-white: #E8F1F2;
 --gold: #D4AF37;
-
-/* Font */
-font-family: 'Heebo', sans-serif;
+font-family: 'Heebo', sans-serif;  /* body */
+font-family: 'Frank Ruhl Libre';   /* display/headlines */
 ```
 
-**Slogan:** "ריפוי הנפש לכל אדם"
+## Lessons Learned
+- **Supabase RLS**: Always add DELETE policies with CRUD. Silent denial on unauthorized ops.
+- **Supabase REST API**: New tables need `Accept-Profile: public` / `Content-Profile: public` headers.
+- **Edge Functions run in UTC**: Use `Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' })` for Israel dates.
+- **GA4 `activeUsers`**: Never sum daily rows for totals — use aggregate query with no dimensions.
+- **Vercel**: Never use `permanent` + `statusCode` together in `vercel.json`.
+- **Supabase Storage**: Hebrew filenames are invalid keys — use English filenames only.
+- **Cookie consent v2**: `cookie_consent_v2` localStorage key with values `all` or `essential`.
+- **`db push` with out-of-order migrations**: Use `--include-all` flag.
+- **NLP game data files**: Every property line MUST end with comma. Missing commas before `wrongExplanations` broke the entire game (57 instances fixed).
+- **supabase-client.js must be loaded**: If a page uses `window.CourseProgress`, `window.Referrals`, or `window.Auth`, it needs `<script src="../js/supabase-client.js"></script>`. Missing this caused progress to never save to DB.
+- **CORS in Edge Functions**: Never use `'*'` wildcard. Use explicit origin whitelist. Fallback to first allowed origin, not `*`.
+- **RLS audit**: `WITH CHECK (true)` on any table = open door. Service role bypasses RLS anyway, so these policies are redundant AND dangerous.
 
----
+## NLP Game Content Rules
+- All reading/exercise content from `docs/transcripts/per-lesson/moduleX_lessonY.txt`
+- NO invented NLP content — transcript-based only
+- `wrongExplanations` must be ARRAY with `null` at correct answer index
+- 8 exercise types: multiple-choice, fill-blank, match, compare, order, identify, improve, scenario
+- Lesson titles MUST match `course-library.html`
+- Instructor is רם (Ram), NOT Hillel
 
-## 10. Commands
-
-```bash
-# Local development
-# Just open HTML files in browser (static site)
-
-# Deploy
-git push origin master  # GitHub Pages auto-deploys
-```
-
----
-
-## 11. Video Marketing (Remotion)
-
-### Location
-```
-videos-remotion/
-├── src/
-│   └── videos/
-│       ├── Video1-PlatformIntro.tsx  # Main promotional video
-│       ├── Video2-PatientJourney.tsx
-│       └── Video3-TherapistJourney.tsx
-├── public/
-│   └── narration/                     # Hebrew voice narration files
-│       └── scene1-8.mp3
-└── scripts/
-    └── generate-narration.py          # Narration generation system
-```
-
-### Video Specs
-- Format: Instagram Reel (1080x1920, 9:16 vertical)
-- Duration: 47 seconds
-- FPS: 30
-
-### Narration System
-**Generate Hebrew narration:**
-```bash
-cd videos-remotion
-py scripts/generate-narration.py
-```
-
-**Key rules:**
-- Text must be SHORT to fit scene duration
-- Validation checks audio length vs scene length
-- Uses edge-tts with `he-IL-HilaNeural` voice
-- Results saved to `public/narration/validation_results.json`
-
-### Scene Timing (Video1)
-| Scene | Duration | Content |
-|-------|----------|---------|
-| 1 | 3s | Hook - "40%" |
-| 2 | 5s | Problem |
-| 3 | 4s | Solution |
-| 4 | 5s | Features |
-| 5 | 7s | Research |
-| 6 | 7s | Benefits |
-| 7 | 6s | Impact |
-| 8 | 10s | CTA |
-
-### Commands
-```bash
-# Start Remotion Studio
-cd videos-remotion && npm start
-
-# Generate narration (validates automatically)
-py scripts/generate-narration.py
-
-# Render video (only when requested!)
-npx remotion render Video1-PlatformIntro output.mp4
-
-# Render single frame for preview
-npx remotion still Video1-PlatformIntro --frame=180 --output=preview.png
-```
-
-### Style Guidelines
-- Fonts: Bold (900) for headlines
-- No blur effects (causes "cloud" appearance)
-- Gold borders on cards
-- Background music at 15% volume (allow narration)
-- Professional SVG icons (no emojis)
-
----
-
-## 12. Marketing & Legal Compliance
-
-### Cookie Consent (`js/marketing-tools.js`)
-- Minimalist sticky footer banner on all pages
-- Text: "אנחנו משתמשים בעוגיות כדי לשפר את החוויה שלך באתר"
-- Button: "הבנתי, תודה"
-- Link to privacy policy page
-- Saves consent to `localStorage` (key: `cookie_consent_approved`)
-- Tracking loads ONLY after user consent
-
-### Analytics (Placeholder IDs - Replace!)
-```javascript
-// In js/marketing-tools.js - UPDATE THESE:
-GA4_ID: 'G-XXXXXXXXXX',      // Google Analytics 4
-META_PIXEL_ID: '123456789',  // Meta (Facebook) Pixel
-```
-
-### Privacy Policy
-- Page: `privacy-policy.html`
-- Includes: data collection, cookies, user rights
-- Last updated: January 2026
-
-### Legal Documents in Registration
-- **Patient**: `docs/תקנון-שירות-למטופלים.pdf`
-- **Therapist**: `docs/תקנון-שירות-למטפלים.pdf`
-- Displayed at step 4 of registration (before submit)
-- Users must scroll to bottom to unlock checkboxes
-- 3 required checkboxes for patients:
-  - `terms_confirmed` - תנאי שימוש
-  - `age_confirmed` - מעל גיל 18
-  - `emergency_confirmed` - לא במצב חירום
-
----
-
-## 13. Important Notes
-
-- Max 10 sessions per patient (business rule)
-- Therapist initiates first contact (not patient)
-- Inactive therapist > 30 days = red flag alert
-- Location is flexible (Zoom default, physical optional)
-
-### NOT Currently Offered (Don't Add to Site!)
-- ❌ סופרוויז'ן (Supervision) - removed from all pages
-- ❌ מחירי מבחנים (Exam prices) - removed from courses section
-
----
-
-## 14. NLP Duolingo Game
+## Paid Customer / Master Course System
 
 ### Architecture
 ```
-pages/nlp-game.html          # Game page (loads all scripts)
-js/nlp-game.js                # Game engine (~3000 lines) — rendering, auth, gamification
-js/nlp-game-data.js           # Assembler — combines MODULE_1..MODULE_7 into MODULES array
-js/nlp-game-data-m[1-7].js    # Per-module data files (lessons, reading sections, exercises)
-css/nlp-game.css              # Game styles + responsive + welcome gate
-assets/game/                  # AI-generated visuals (127 images + 3 videos)
-├── lessons/m{1-7}-l{1-8}.jpg # 51 lesson reading section hero images
-├── badges/                   # 14 achievement badge icons
-├── exercises/                # 8 exercise type icons
-├── levels/                   # 8 level-up tree illustrations
-├── completions/              # 7 module completion celebrations
-├── banners/                  # 7 module entry banners (landscape, HD)
-├── videos/                   # 3 animated videos (welcome, knowledge-tree, celebration)
-├── feedback/                 # correct, wrong, combo, perfect-score
-├── rewards/                  # XP, hearts, streak, unlock, course-complete
-├── social/                   # OG share card, achievement share
-├── screens/                  # game-map, no-hearts, daily-challenge, streak-lost
-├── onboarding/               # 3 onboarding step illustrations
-└── bg/                       # Background patterns
+course-library.html  → masterView (hidden by default)
+  ├── Sidebar: חלק א׳ ערכים (1-10) + חלק ב׳ היפנוזה וטראנס (11-20) + חוברות (6)
+  ├── Welcome grid: video cards split by part + workbook cards
+  ├── Video player: YouTube embed + prev/next + tabs section
+  │   ├── הערות אישיות — per-lesson notes (Supabase user_notes, key: notes_master_{videoId})
+  │   ├── העוזר האישי — AI chat with master lesson context → ai-chat Edge Function
+  │   ├── חומרי עזר — links to workbooks, summaries-master/, master-practice.html
+  │   └── משחק תרגול — CTA to nlp-game.html
+  └── PDF viewer: signed URLs from Supabase Storage bucket "workbooks" (5-10min expiry)
 ```
 
-### Key Design Decisions
-- **Open access** — no login required (marketing funnel). Guest mode uses localStorage only.
-- **Welcome gate** — branded entry screen with animated brain video, logo, stats, CTA
-- **Reading section** — 3-5 paragraphs from actual course transcripts before each exercise
-- **51 lessons × 5-6 exercises** = 300 total exercises across 7 modules
-- **8 exercise types:** multiple-choice, fill-blank, match, compare, order, identify, improve, scenario
-- **Content language** — everyday life examples (NOT business/sales language)
-- **Lesson titles** — MUST match exactly with `course-library.html` lines 4282-4376
+### Gating
+- `checkPaidRole()` queries `profiles.role` — shows master switcher only for `paid_customer` or `admin`
+- `masterLessons` array: 20 YouTube videos (from playlist PLupBH8H284loAoWV2O98enTuCFG3fs01J)
+- `masterWorkbooks` array: 6 PDFs in private Supabase Storage bucket
 
-### Data Model
-```javascript
-// Each module file (nlp-game-data-m{N}.js):
-const MODULE_N = {
-    id: N, title: "...", description: "...", icon: "emoji",
-    image: "../assets/game/module-N.jpg",
-    lessons: [{
-        id: 1,                    // Sequential number (NOT string like "5-1")
-        title: "exact course title",
-        reading: {
-            paragraphs: ["...", "..."],  // 3-5 from transcripts
-            keyTerms: ["NLP", "..."]     // Highlighted in gold
-        },
-        exercises: [{ type, question, options, correct, explanation, wrongExplanations }]
-    }]
-};
-```
+### Related Files
+- `js/admin/admin-paid.js` — admin panel for managing subscriptions
+- `pages/sign-contract.html` — digital signature + Turnstile → `submit-contract` Edge Function
+- `pages/learning-master.html` — standalone paywall landing page (₪8,880)
+- `pages/summaries-master/` — 7 lesson summary pages
+- `pages/master-practice.html` — 49 practice clips in 15 categories
 
-### Player Data (Supabase: `nlp_game_players`)
-- `xp`, `level`, `hearts` (5 max, recover 1/20min), `streak`, `completedLessons` (keyed "moduleId-lessonId")
-- `migrationVersion: 2` — migration from old 21-lesson version
-- Achievement badges: first_lesson, five/ten/twenty_lessons, half_course, forty/all_lessons, streaks, XP milestones
+### Backup System
+- `scripts/backup-supabase.py` — full DB + Storage backup to `backups/` (inside OneDrive)
+- Windows Scheduled Task `BeitVmetaplim-DailyBackup` — runs daily at 07:00
+- Sends email report to `htjewelry.a474@gmail.com` via Gmail Apps Script API
+- Keeps last 30 backups, creates ZIP archive per run
 
-### Content Rules
-- All reading/exercise content from `docs/transcripts/per-lesson/moduleX_lessonY.txt`
-- NO invented NLP content — transcript-based only
-- NO business language (לקוח, מכירה, עסק, יועץ) — use everyday examples
-- `wrongExplanations` must be ARRAY (not string), with null at correct answer index
+## PopupManager System
 
-### Visuals
-- All AI-generated via fal-ai (FLUX schnell/dev + Kling video)
-- Brand palette: deep teal (#003B46) + gold (#D4AF37)
-- Images fallback gracefully via `onerror` handler
+Central orchestrator (`js/popup-manager.js`) manages all popups, modals, toasts, and banners.
 
----
+**Key concepts:**
+- **Priority queue**: 1=critical (auth, offline, cookie) → 5=low (toasts). Higher interrupts lower.
+- **Categories**: `critical` bypasses all limits; `engagement` respects cooldown + daily cap (3/day); `info` lightweight
+- **Audience targeting**: `all`, `authenticated`, `unauthenticated`, `free_user`, `paid_customer`, `admin`
+- **User context**: Call `PopupManager.setUser({ isAuthenticated, role })` on auth state change
+- **Memory**: `localStorage('popup_history')` tracks what was shown per day
 
-## 15. Skills (מיומנויות אוטונומיות)
+**Adding a new popup:**
+1. Register in `course-library.html` init block: `PopupManager.register('my_popup', { priority, category, targetAudience, show, hide })`
+2. Add config row in `popup_configs` table (admin can also do this via dashboard)
+3. Request display: `PopupManager.request('my_popup')` — manager handles queue/cooldown/audience
 
-### Project-Level Skills (`.claude/skills/`)
-מיומנויות מותאמות לפרויקט — פקודות חוזרות שהפכו לאוטומציה:
+**Admin panel** (`js/admin/admin-popups.js`): CRUD for popup configs, toggle active/inactive, live preview mockup, per-popup stats (impressions, CTR, dismiss rate), scheduling with start/end dates.
 
-| Skill | Trigger | Description |
-|-------|---------|-------------|
-| **create-infographic** | "צור אינפוגרפיקה לפרק X" | יצירת SVG ממותג לפרק בחוברת NLP, שילוב ב-HTML |
-| **generate-branded-pdf** | "צור PDF" / "הפק חוברת" | המרת חוברת NLP ל-PDF ממותג עם אינפוגרפיקות |
-| **mobile-audit** | "בדוק מובייל" / "mobile audit" | סריקת responsive על כל 24 דפי ה-HTML |
-| **deploy-site** | "פרסם" / "deploy" | git add → commit → push → GitHub Pages |
+## Referral / Ambassador Program
 
-### User-Level Skills (Available via Claude Code)
-כלים כלליים שזמינים בכל פרויקט:
+**Flow:** User shares `course-library.html?ref=UUID` → `marketing-tools.js` captures to `localStorage('referrer_data')` → on signup/login, `ensureProfile()` in `supabase-client.js` calls `saveReferral()` → INSERT to `referrals` table → leaderboard updates.
 
-| Skill | Use Case |
-|-------|----------|
-| `html-to-pdf` | המרת HTML ל-PDF (Puppeteer) |
-| `gh-pages-deploy` | פריסה ל-GitHub Pages |
-| `whatsapp` | שליחת הודעות WhatsApp |
-| `nano-banana-poster` | יצירת תמונות עם Gemini AI |
-| `speech-generator` | הפקת דיבור TTS |
-| `social-content` | יצירת תוכן לרשתות חברתיות |
-| `presentation-architect` | בניית מצגות |
+**Key files:**
+- `js/marketing-tools.js` — captures `?ref=` param, exposes `window.getReferrerId()`
+- `js/supabase-client.js` — `window.Referrals` module (getLink, getMyCount, getLeaderboard)
+- `pages/course-library.html` — ambassador tab UI (sidebar item, link card, WhatsApp share, leaderboard)
+- `js/admin/admin-referrals.js` — admin stats tab
 
-### Spaceship Mode Example
-```
-טרמינל: "הרץ create-infographic על פרקים 4, 9, 11, 13, 14, 15, 16, 17, 18"
-→ Claude עובד לבד 20 דקות, יוצר 9 אינפוגרפיקות
+**Important:** `pages/free-portal.html` has an inline `<head>` script that captures `?ref=` BEFORE the auth redirect. This was a critical bug fix — do not remove it.
 
-טרמינל: "הרץ generate-branded-pdf"
-→ Claude ממיר את החוברת ל-PDF ממותג
+## Admin Dashboard
 
-טרמינל: "הרץ deploy-site"
-→ Claude מעלה את הכל ל-GitHub Pages
-```
+**Architecture**: `pages/admin.html` + modular JS in `js/admin/`:
+- `admin-utils.js` — view switching via `VIEW_GROUPS` object, shared helpers (date grouping, formatDate, escapeHtml)
+- `admin-state.js` — loads all data in parallel via `Promise.all()`
+- `admin-auth.js` — checks `profiles.role === 'admin'`
+
+**Adding a new admin tab:**
+1. Add nav-item in `admin.html` sidebar with `onclick="switchView('myview')"`
+2. Add `<div id="myview-view" class="hidden">` container in admin.html
+3. Register in `admin-utils.js` → `VIEW_GROUPS`: `'myview': { views: ['myview'], header: null, default: 'myview' }`
+4. Add lazy-load hook in `switchView()`: `if (view === 'myview') loadMyView()`
+5. Create `js/admin/admin-myview.js`, add `<script>` tag in admin.html
+
+**Pattern**: All admin modules use 5-min cache (`cache + cacheTime + CACHE_TTL`), `db` global (Supabase client from admin-state.js), date grouping via `groupByDate()`.
+
+## Course Progress Tracking
+
+**Dual storage**: localStorage (offline-first) + Supabase `course_progress` table (persistent).
+
+**Critical**: `js/supabase-client.js` MUST be loaded in `course-library.html` for progress to sync to Supabase. Without it, `window.CourseProgress` is undefined and `mergeProgress()` silently returns.
+
+**Flow**: Video plays 45s → `markLessonCompleted()` → saves to localStorage + Supabase UPSERT. On login, `mergeProgress()` does bi-directional sync (union of localStorage + Supabase). Failed syncs go to `pendingSync` localStorage queue.
+
+**Admin view**: `js/admin/admin-learners.js` shows per-user progress (completed lessons, watch time, last activity).
+
+## User Roles
+| Role | Access |
+|------|--------|
+| `admin` | Full access to all data and dashboard |
+| `therapist` | Own profile + assigned patients |
+| `patient` | Own profile + assigned therapist |
+| `student_lead` | Learning portal (redirected to portal-questionnaire if not filled) |
+| `paid_customer` | Master course (20 lessons) + workbooks + AI tutor + notes |

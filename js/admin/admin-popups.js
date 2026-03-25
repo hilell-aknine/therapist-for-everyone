@@ -6,7 +6,26 @@ const POPUP_CACHE_TTL = 5 * 60 * 1000;
 
 const CATEGORY_LABELS = { 'critical': 'קריטי', 'engagement': 'מעורבות', 'info': 'מידע' };
 const CATEGORY_COLORS = { 'critical': '#FF6F61', 'engagement': '#D4AF37', 'info': '#2F8592' };
-const AUDIENCE_LABELS = { 'all': 'כולם', 'authenticated': 'מחוברים', 'unauthenticated': 'אורחים', 'paid_customer': 'לקוחות משלמים' };
+const AUDIENCE_LABELS = {
+    'all': 'כולם',
+    'authenticated': 'כל מי שרשום',
+    'unauthenticated': 'אורחים (לא רשומים)',
+    'free_user': 'רשומים חינם (לא משלמים)',
+    'paid_customer': 'לקוחות משלמים בלבד',
+    'admin': 'מנהלים בלבד'
+};
+const TRIGGER_LABELS = {
+    'manual': 'ידני (מופעל מהקוד)',
+    'page_load': 'בטעינת עמוד',
+    'lesson_complete': 'אחרי סיום שיעור',
+    'login': 'אחרי התחברות',
+    'signup': 'אחרי הרשמה חדשה'
+};
+const CATEGORY_HELP = {
+    'critical': 'מוצג מיד, מתעלם מקולדאון ומגבלות — רק לדברים חיוניים',
+    'engagement': 'מכבד קולדאון, מגבלה יומית, ולא מוצג אם נסגר ביום הזה',
+    'info': 'קל משקל — טוסטים, התראות. לא חוסם פופאפים אחרים'
+};
 
 async function loadPopupConfigs() {
     if (popupCache && (Date.now() - popupCacheTime) < POPUP_CACHE_TTL) {
@@ -87,7 +106,9 @@ function renderPopupConfigsTable(configs, stats) {
         const catColor = CATEGORY_COLORS[c.category] || '#999';
         const catLabel = CATEGORY_LABELS[c.category] || c.category;
         const audLabel = AUDIENCE_LABELS[c.target_audience] || c.target_audience;
+        const triggerLabel = TRIGGER_LABELS[c.trigger_event] || c.trigger_event || 'ידני';
         const shown = stats[c.popup_id]?.shown || 0;
+        const descHe = c.description_he || '';
         const isScheduled = c.start_date || c.end_date;
         const now = new Date();
         let scheduleNote = '';
@@ -97,13 +118,17 @@ function renderPopupConfigsTable(configs, stats) {
         html += `<tr style="border-bottom:1px solid var(--border);">
             <td style="padding:0.6rem;">
                 <div style="font-weight:600;">${escapeHtml(c.title)}</div>
-                <div style="font-size:0.78rem;color:var(--text-secondary);">${escapeHtml(c.popup_id)}${scheduleNote}</div>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">${descHe ? escapeHtml(descHe) : escapeHtml(c.popup_id)}${scheduleNote}</div>
+                ${c.trigger_min_lessons > 0 ? `<div style="font-size:0.72rem;color:var(--gold);margin-top:2px;">מופעל אחרי ${c.trigger_min_lessons} שיעורים</div>` : ''}
             </td>
             <td style="padding:0.6rem;text-align:center;">
-                <span style="background:${catColor}20;color:${catColor};padding:2px 8px;border-radius:6px;font-size:0.78rem;font-weight:600;">${catLabel}</span>
+                <span style="background:${catColor}20;color:${catColor};padding:2px 8px;border-radius:6px;font-size:0.78rem;font-weight:600;" title="${CATEGORY_HELP[c.category] || ''}">${catLabel}</span>
             </td>
             <td style="padding:0.6rem;text-align:center;font-weight:700;">${c.priority}</td>
-            <td style="padding:0.6rem;text-align:center;font-size:0.82rem;">${audLabel}</td>
+            <td style="padding:0.6rem;text-align:center;">
+                <div style="font-size:0.82rem;">${audLabel}</div>
+                <div style="font-size:0.72rem;color:var(--text-secondary);">${triggerLabel}</div>
+            </td>
             <td style="padding:0.6rem;text-align:center;font-weight:600;color:var(--gold);">${shown}</td>
             <td style="padding:0.6rem;text-align:center;">
                 <button onclick="togglePopupActive('${c.id}', ${!c.is_active})" style="background:${c.is_active ? '#2F8592' : '#666'};color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">
@@ -217,57 +242,96 @@ function renderPopupFormModal(config) {
             </h2>
             <form onsubmit="savePopupConfig(event, ${isEdit ? "'" + config.id + "'" : 'null'})">
                 <div style="display:grid;gap:0.8rem;">
-                    ${!isEdit ? `<label style="font-weight:600;font-size:0.85rem;">מזהה (popup_id)
-                        <input name="popup_id" required style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;direction:ltr;" placeholder="e.g. training_cta">
+                    ${!isEdit ? `<label style="font-weight:600;font-size:0.85rem;">מזהה טכני
+                        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">שם ייחודי באנגלית, למשל: training_cta</div>
+                        <input name="popup_id" required style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;direction:ltr;" placeholder="e.g. training_cta">
                     </label>` : ''}
-                    <label style="font-weight:600;font-size:0.85rem;">כותרת
-                        <input name="title" required value="${escapeHtml(config?.title || '')}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
+                    <label style="font-weight:600;font-size:0.85rem;">כותרת הפופאפ
+                        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">מה המשתמש יראה כטקסט ראשי</div>
+                        <input name="title" required value="${escapeHtml(config?.title || '')}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;">
                     </label>
-                    <label style="font-weight:600;font-size:0.85rem;">הודעה
-                        <textarea name="message" rows="3" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;resize:vertical;">${escapeHtml(config?.message || '')}</textarea>
+                    <label style="font-weight:600;font-size:0.85rem;">הסבר קצר (לאדמין בלבד)
+                        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">תיאור פנימי — מוצג רק בדשבורד, לא למשתמש</div>
+                        <input name="description_he" value="${escapeHtml(config?.description_he || '')}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;" placeholder="לדוגמה: מעודד שיתוף אחרי שיעור שלישי">
+                    </label>
+                    <label style="font-weight:600;font-size:0.85rem;">תוכן ההודעה
+                        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">הטקסט המלא שיופיע בפופאפ</div>
+                        <textarea name="message" rows="3" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;resize:vertical;">${escapeHtml(config?.message || '')}</textarea>
                     </label>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-                        <label style="font-weight:600;font-size:0.85rem;">טקסט כפתור (CTA)
-                            <input name="cta_text" value="${escapeHtml(config?.cta_text || '')}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
+                        <label style="font-weight:600;font-size:0.85rem;">טקסט כפתור
+                            <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">למשל: "למידע נוסף"</div>
+                            <input name="cta_text" value="${escapeHtml(config?.cta_text || '')}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;">
                         </label>
-                        <label style="font-weight:600;font-size:0.85rem;">קישור CTA
-                            <input name="cta_link" value="${escapeHtml(config?.cta_link || '')}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;direction:ltr;">
-                        </label>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;">
-                        <label style="font-weight:600;font-size:0.85rem;">קטגוריה
-                            <select name="category" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
-                                <option value="engagement" ${config?.category === 'engagement' ? 'selected' : ''}>מעורבות</option>
-                                <option value="info" ${config?.category === 'info' ? 'selected' : ''}>מידע</option>
-                                <option value="critical" ${config?.category === 'critical' ? 'selected' : ''}>קריטי</option>
-                            </select>
-                        </label>
-                        <label style="font-weight:600;font-size:0.85rem;">עדיפות (1-5)
-                            <input name="priority" type="number" min="1" max="5" value="${config?.priority || 4}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
-                        </label>
-                        <label style="font-weight:600;font-size:0.85rem;">מקסימום ליום
-                            <input name="max_per_day" type="number" min="1" max="99" value="${config?.max_per_day || 1}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
+                        <label style="font-weight:600;font-size:0.85rem;">קישור הכפתור
+                            <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">לאן הכפתור מוביל</div>
+                            <input name="cta_link" value="${escapeHtml(config?.cta_link || '')}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;direction:ltr;">
                         </label>
                     </div>
+
+                    <div style="background:rgba(47,133,146,0.06);border:1px solid rgba(47,133,146,0.15);border-radius:10px;padding:0.8rem;">
+                        <div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;"><i class="fa-solid fa-users" style="color:#2F8592;margin-left:0.3rem;"></i> למי מוצג?</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+                            <label style="font-weight:600;font-size:0.85rem;">קהל יעד
+                                <select name="target_audience" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
+                                    <option value="all" ${config?.target_audience === 'all' ? 'selected' : ''}>כולם</option>
+                                    <option value="authenticated" ${config?.target_audience === 'authenticated' ? 'selected' : ''}>כל מי שרשום (חינם + משלם)</option>
+                                    <option value="unauthenticated" ${config?.target_audience === 'unauthenticated' ? 'selected' : ''}>אורחים בלבד (לא רשומים)</option>
+                                    <option value="free_user" ${config?.target_audience === 'free_user' ? 'selected' : ''}>רשומים חינם בלבד (לא משלמים)</option>
+                                    <option value="paid_customer" ${config?.target_audience === 'paid_customer' ? 'selected' : ''}>לקוחות משלמים בלבד</option>
+                                    <option value="admin" ${config?.target_audience === 'admin' ? 'selected' : ''}>מנהלים בלבד</option>
+                                </select>
+                            </label>
+                            <label style="font-weight:600;font-size:0.85rem;">מתי קופץ?
+                                <select name="trigger_event" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
+                                    <option value="manual" ${config?.trigger_event === 'manual' ? 'selected' : ''}>ידני (מופעל מהקוד)</option>
+                                    <option value="page_load" ${config?.trigger_event === 'page_load' ? 'selected' : ''}>בטעינת עמוד</option>
+                                    <option value="lesson_complete" ${config?.trigger_event === 'lesson_complete' ? 'selected' : ''}>אחרי סיום שיעור</option>
+                                    <option value="login" ${config?.trigger_event === 'login' ? 'selected' : ''}>אחרי התחברות</option>
+                                    <option value="signup" ${config?.trigger_event === 'signup' ? 'selected' : ''}>אחרי הרשמה חדשה</option>
+                                </select>
+                            </label>
+                        </div>
+                        <label style="font-weight:600;font-size:0.85rem;margin-top:0.6rem;display:block;">אחרי כמה שיעורים?
+                            <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">רלוונטי רק אם "מתי קופץ" = אחרי סיום שיעור. 0 = מהשיעור הראשון</div>
+                            <input name="trigger_min_lessons" type="number" min="0" max="100" value="${config?.trigger_min_lessons || 0}" style="width:120px;padding:0.5rem;border:1px solid var(--border);border-radius:8px;">
+                        </label>
+                    </div>
+
+                    <div style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.15);border-radius:10px;padding:0.8rem;">
+                        <div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;"><i class="fa-solid fa-sliders" style="color:var(--gold);margin-left:0.3rem;"></i> הגבלות</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;">
+                            <label style="font-weight:600;font-size:0.85rem;">קטגוריה
+                                <div style="font-size:0.72rem;color:var(--text-secondary);">קריטי=מיידי, מעורבות=מוגבל, מידע=קל</div>
+                                <select name="category" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
+                                    <option value="engagement" ${config?.category === 'engagement' ? 'selected' : ''}>מעורבות</option>
+                                    <option value="info" ${config?.category === 'info' ? 'selected' : ''}>מידע</option>
+                                    <option value="critical" ${config?.category === 'critical' ? 'selected' : ''}>קריטי</option>
+                                </select>
+                            </label>
+                            <label style="font-weight:600;font-size:0.85rem;">עדיפות
+                                <div style="font-size:0.72rem;color:var(--text-secondary);">1=הכי גבוה, 5=הכי נמוך</div>
+                                <input name="priority" type="number" min="1" max="5" value="${config?.priority || 4}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
+                            </label>
+                            <label style="font-weight:600;font-size:0.85rem;">מקסימום ליום
+                                <div style="font-size:0.72rem;color:var(--text-secondary);">כמה פעמים ביום מותר להציג</div>
+                                <input name="max_per_day" type="number" min="1" max="99" value="${config?.max_per_day || 1}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
+                            </label>
+                        </div>
+                        <label style="font-weight:600;font-size:0.85rem;margin-top:0.6rem;display:block;">קולדאון (דקות)
+                            <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">כמה דקות לחכות אחרי פופאפ אחר לפני שמציגים את זה</div>
+                            <input name="cooldown_minutes" type="number" min="0" value="${config?.cooldown_minutes || 5}" style="width:120px;padding:0.5rem;border:1px solid var(--border);border-radius:8px;">
+                        </label>
+                    </div>
+
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-                        <label style="font-weight:600;font-size:0.85rem;">קהל יעד
-                            <select name="target_audience" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
-                                <option value="all" ${config?.target_audience === 'all' ? 'selected' : ''}>כולם</option>
-                                <option value="authenticated" ${config?.target_audience === 'authenticated' ? 'selected' : ''}>מחוברים</option>
-                                <option value="unauthenticated" ${config?.target_audience === 'unauthenticated' ? 'selected' : ''}>אורחים</option>
-                                <option value="paid_customer" ${config?.target_audience === 'paid_customer' ? 'selected' : ''}>לקוחות משלמים</option>
-                            </select>
+                        <label style="font-weight:600;font-size:0.85rem;">תאריך התחלה
+                            <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">ריק = פעיל מיד</div>
+                            <input name="start_date" type="datetime-local" value="${config?.start_date ? config.start_date.slice(0, 16) : ''}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;">
                         </label>
-                        <label style="font-weight:600;font-size:0.85rem;">קולדאון (דקות)
-                            <input name="cooldown_minutes" type="number" min="0" value="${config?.cooldown_minutes || 5}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
-                        </label>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-                        <label style="font-weight:600;font-size:0.85rem;">תאריך התחלה (אופציונלי)
-                            <input name="start_date" type="datetime-local" value="${config?.start_date ? config.start_date.slice(0, 16) : ''}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
-                        </label>
-                        <label style="font-weight:600;font-size:0.85rem;">תאריך סיום (אופציונלי)
-                            <input name="end_date" type="datetime-local" value="${config?.end_date ? config.end_date.slice(0, 16) : ''}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.3rem;">
+                        <label style="font-weight:600;font-size:0.85rem;">תאריך סיום
+                            <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.2rem;">ריק = בלי תאריך סיום</div>
+                            <input name="end_date" type="datetime-local" value="${config?.end_date ? config.end_date.slice(0, 16) : ''}" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;">
                         </label>
                     </div>
                 </div>
@@ -287,6 +351,7 @@ async function savePopupConfig(event, configId) {
     const form = event.target;
     const data = {
         title: form.title.value,
+        description_he: form.description_he.value || null,
         message: form.message.value || null,
         cta_text: form.cta_text.value || null,
         cta_link: form.cta_link.value || null,
@@ -295,6 +360,8 @@ async function savePopupConfig(event, configId) {
         max_per_day: parseInt(form.max_per_day.value),
         cooldown_minutes: parseInt(form.cooldown_minutes.value),
         target_audience: form.target_audience.value,
+        trigger_event: form.trigger_event.value,
+        trigger_min_lessons: parseInt(form.trigger_min_lessons.value) || 0,
         start_date: form.start_date.value ? new Date(form.start_date.value).toISOString() : null,
         end_date: form.end_date.value ? new Date(form.end_date.value).toISOString() : null,
         updated_at: new Date().toISOString()

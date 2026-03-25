@@ -16,10 +16,34 @@
     const MAX_ENGAGEMENT_PER_DAY = 3;            // max engagement popups per day
 
     // --- Internal state ---
-    const registry = {};       // { id: { priority, category, show, hide, condition, cooldownMs } }
+    const registry = {};       // { id: { priority, category, show, hide, condition, cooldownMs, targetAudience } }
     let activePopupId = null;  // currently showing popup id (or null)
     let queue = [];            // pending requests sorted by priority
     let processing = false;
+
+    // User context — set via setUser() when auth resolves
+    let userContext = {
+        isAuthenticated: false,
+        role: null       // e.g. 'admin', 'student_lead', 'paid_customer', 'therapist', etc.
+    };
+
+    // --- Audience matching ---
+    // targetAudience values:
+    //   'all'             — everyone
+    //   'authenticated'   — any logged-in user (regardless of role)
+    //   'unauthenticated' — guests only
+    //   'free_user'       — logged in but NOT paid_customer
+    //   'paid_customer'   — role === 'paid_customer' only
+    //   'admin'           — role === 'admin' only
+    function matchesAudience(targetAudience) {
+        if (!targetAudience || targetAudience === 'all') return true;
+        if (targetAudience === 'unauthenticated') return !userContext.isAuthenticated;
+        if (targetAudience === 'authenticated') return userContext.isAuthenticated;
+        if (targetAudience === 'free_user') return userContext.isAuthenticated && userContext.role !== 'paid_customer';
+        if (targetAudience === 'paid_customer') return userContext.role === 'paid_customer';
+        if (targetAudience === 'admin') return userContext.role === 'admin';
+        return true;
+    }
 
     // --- LocalStorage helpers ---
     function loadHistory() {
@@ -104,6 +128,12 @@
             const reg = registry[id];
             if (!reg) { queue.shift(); continue; }
 
+            // Audience check applies to ALL popups (including critical)
+            if (!matchesAudience(reg.targetAudience)) {
+                queue.shift();
+                continue;
+            }
+
             // Critical popups can interrupt anything
             if (reg.category === 'critical') {
                 // If another critical is active, wait
@@ -156,6 +186,12 @@
                     queue.shift();
                     continue;
                 }
+            }
+
+            // Check audience targeting
+            if (!matchesAudience(reg.targetAudience)) {
+                queue.shift();
+                continue;
             }
 
             // Check custom condition
@@ -230,8 +266,29 @@
                 hide: opts.hide || function () {},
                 condition: opts.condition || null,
                 cooldownMs: opts.cooldownMs || null,
-                maxPerDay: opts.maxPerDay || null
+                maxPerDay: opts.maxPerDay || null,
+                targetAudience: opts.targetAudience || 'all'
             };
+        },
+
+        /**
+         * Set user context for audience targeting.
+         * Call this when auth state changes (login/logout/role change).
+         * @param {Object} ctx
+         * @param {boolean} ctx.isAuthenticated
+         * @param {string|null} ctx.role - e.g. 'admin', 'student_lead', 'paid_customer'
+         */
+        setUser(ctx) {
+            userContext.isAuthenticated = !!ctx.isAuthenticated;
+            userContext.role = ctx.role || null;
+        },
+
+        /**
+         * Get current user context.
+         * @returns {Object} { isAuthenticated, role }
+         */
+        getUser() {
+            return { ...userContext };
         },
 
         /**

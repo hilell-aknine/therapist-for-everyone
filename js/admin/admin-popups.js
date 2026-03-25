@@ -135,11 +135,14 @@ function renderPopupConfigsTable(configs, stats) {
                     ${c.is_active ? 'פעיל' : 'כבוי'}
                 </button>
             </td>
-            <td style="padding:0.6rem;text-align:center;">
+            <td style="padding:0.6rem;text-align:center;white-space:nowrap;">
+                <button onclick="previewPopup('${c.id}')" style="background:none;border:none;cursor:pointer;color:#2F8592;font-size:1rem;" title="תצוגה מקדימה">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
                 <button onclick="openEditPopupModal('${c.id}')" style="background:none;border:none;cursor:pointer;color:var(--gold);font-size:1rem;" title="ערוך">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </button>
-                <button onclick="deletePopupConfig('${c.id}', '${escapeHtml(c.title)}')" style="background:none;border:none;cursor:pointer;color:#FF6F61;font-size:1rem;margin-right:0.3rem;" title="מחק">
+                <button onclick="deletePopupConfig('${c.id}', '${escapeHtml(c.title)}')" style="background:none;border:none;cursor:pointer;color:#FF6F61;font-size:1rem;" title="מחק">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </td>
@@ -386,4 +389,122 @@ async function savePopupConfig(event, configId) {
     } catch (err) {
         showToast('שגיאה: ' + (err.message || 'לא ידוע'), 'error');
     }
+}
+
+// ============================================================================
+// POPUP PREVIEW — Shows a live mockup of how the popup looks to users
+// ============================================================================
+
+function previewPopup(configId) {
+    const config = popupCache?.configs?.find(c => c.id === configId);
+    if (!config) return;
+
+    document.getElementById('popup-preview-modal')?.remove();
+
+    const catColor = CATEGORY_COLORS[config.category] || '#2F8592';
+    const catLabel = CATEGORY_LABELS[config.category] || config.category;
+    const audLabel = AUDIENCE_LABELS[config.target_audience] || config.target_audience;
+    const trigLabel = TRIGGER_LABELS[config.trigger_event] || config.trigger_event || 'ידני';
+    const s = getPopupStats(config.popup_id);
+
+    const modal = document.createElement('div');
+    modal.id = 'popup-preview-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    modal.onclick = function (e) { if (e.target === modal) modal.remove(); };
+
+    modal.innerHTML = `
+        <div style="background:var(--card-bg,#fff);border-radius:16px;width:92%;max-width:700px;max-height:90vh;overflow-y:auto;direction:rtl;" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div style="background:linear-gradient(135deg,#003B46,#00606B);padding:1.2rem 1.5rem;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <i class="fa-solid fa-eye" style="color:#D4AF37;font-size:1.1rem;"></i>
+                    <span style="color:#fff;font-weight:700;font-size:1rem;">תצוגה מקדימה</span>
+                    <span style="background:${catColor}30;color:${catColor};padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;">${catLabel}</span>
+                </div>
+                <button onclick="this.closest('#popup-preview-modal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:1.3rem;cursor:pointer;">&times;</button>
+            </div>
+
+            <div style="padding:1.5rem;">
+                <!-- Info cards -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.6rem;margin-bottom:1.5rem;">
+                    <div style="background:rgba(47,133,146,0.06);border-radius:10px;padding:0.6rem 0.8rem;text-align:center;">
+                        <div style="font-size:0.72rem;color:var(--text-secondary);">קהל יעד</div>
+                        <div style="font-weight:700;font-size:0.85rem;">${audLabel}</div>
+                    </div>
+                    <div style="background:rgba(212,175,55,0.06);border-radius:10px;padding:0.6rem 0.8rem;text-align:center;">
+                        <div style="font-size:0.72rem;color:var(--text-secondary);">מתי קופץ</div>
+                        <div style="font-weight:700;font-size:0.85rem;">${trigLabel}</div>
+                    </div>
+                    <div style="background:rgba(47,133,146,0.06);border-radius:10px;padding:0.6rem 0.8rem;text-align:center;">
+                        <div style="font-size:0.72rem;color:var(--text-secondary);">עדיפות</div>
+                        <div style="font-weight:700;font-size:0.85rem;">${config.priority} מתוך 5</div>
+                    </div>
+                    <div style="background:rgba(212,175,55,0.06);border-radius:10px;padding:0.6rem 0.8rem;text-align:center;">
+                        <div style="font-size:0.72rem;color:var(--text-secondary);">מקסימום ליום</div>
+                        <div style="font-weight:700;font-size:0.85rem;">${config.max_per_day}x</div>
+                    </div>
+                </div>
+
+                ${config.trigger_min_lessons > 0 ? `<div style="background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.2);border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:1rem;font-size:0.82rem;"><i class="fa-solid fa-graduation-cap" style="color:var(--gold);margin-left:0.3rem;"></i> מופעל אחרי <strong>${config.trigger_min_lessons}</strong> שיעורים</div>` : ''}
+
+                ${config.start_date || config.end_date ? `<div style="background:rgba(47,133,146,0.08);border:1px solid rgba(47,133,146,0.2);border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:1rem;font-size:0.82rem;"><i class="fa-solid fa-calendar" style="color:#2F8592;margin-left:0.3rem;"></i> ${config.start_date ? 'מ-' + formatDate(config.start_date) : ''} ${config.end_date ? 'עד ' + formatDate(config.end_date) : ''}</div>` : ''}
+
+                <!-- Live preview mockup -->
+                <div style="margin-bottom:1rem;">
+                    <div style="font-weight:700;font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.6rem;display:flex;align-items:center;gap:0.4rem;">
+                        <i class="fa-solid fa-mobile-screen" style="color:var(--gold);"></i> כך הפופאפ נראה למשתמש:
+                    </div>
+                    <div style="background:#003B46;border-radius:16px;padding:0;overflow:hidden;max-width:380px;margin:0 auto;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+                        <!-- Phone frame top bar -->
+                        <div style="background:#002830;padding:0.4rem 1rem;display:flex;align-items:center;justify-content:center;">
+                            <div style="width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:4px;"></div>
+                        </div>
+                        <!-- Popup content -->
+                        <div style="padding:1.5rem 1.2rem;text-align:center;">
+                            ${config.title ? `<h3 style="color:#E8F1F2;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;font-family:'Heebo',sans-serif;">${escapeHtml(config.title)}</h3>` : ''}
+                            ${config.message ? `<p style="color:rgba(232,241,242,0.7);font-size:0.88rem;line-height:1.6;margin-bottom:1.2rem;font-family:'Heebo',sans-serif;">${escapeHtml(config.message)}</p>` : ''}
+                            ${config.cta_text ? `
+                                <button style="background:#D4AF37;color:#003B46;border:none;border-radius:10px;padding:0.7rem 2rem;font-weight:700;font-size:0.9rem;font-family:'Heebo',sans-serif;cursor:default;">
+                                    ${escapeHtml(config.cta_text)}
+                                </button>
+                                ${config.cta_link ? `<div style="font-size:0.72rem;color:rgba(232,241,242,0.3);margin-top:0.5rem;direction:ltr;">${escapeHtml(config.cta_link)}</div>` : ''}
+                            ` : `
+                                <div style="color:rgba(232,241,242,0.3);font-size:0.8rem;font-style:italic;padding:1rem 0;">אין כפתור CTA מוגדר</div>
+                            `}
+                            <button style="background:none;border:none;color:rgba(232,241,242,0.35);font-size:0.78rem;margin-top:0.8rem;cursor:default;font-family:'Heebo',sans-serif;">אחר כך</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats mini-section -->
+                <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:0.5rem;">
+                    <div style="font-weight:700;font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.6rem;">
+                        <i class="fa-solid fa-chart-bar" style="color:var(--gold);margin-left:0.3rem;"></i> סטטיסטיקות (30 יום)
+                    </div>
+                    <div style="display:flex;gap:1.5rem;font-size:0.85rem;">
+                        <div><span style="color:var(--text-secondary);">חשיפות:</span> <strong>${s.shown}</strong></div>
+                        <div><span style="color:var(--text-secondary);">לחיצות:</span> <strong style="color:#2F8592;">${s.clicked}</strong></div>
+                        <div><span style="color:var(--text-secondary);">סגירות:</span> <strong style="color:#FF6F61;">${s.dismissed}</strong></div>
+                        <div><span style="color:var(--text-secondary);">CTR:</span> <strong style="color:var(--gold);">${s.shown > 0 ? Math.round((s.clicked / s.shown) * 100) + '%' : '-'}</strong></div>
+                    </div>
+                </div>
+
+                ${config.description_he ? `<div style="border-top:1px solid var(--border);padding-top:0.8rem;margin-top:0.8rem;font-size:0.82rem;color:var(--text-secondary);"><i class="fa-solid fa-info-circle" style="color:var(--gold);margin-left:0.3rem;"></i> ${escapeHtml(config.description_he)}</div>` : ''}
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+// Helper: get stats for a specific popup from cache
+function getPopupStats(popupId) {
+    const events = popupCache?.events || [];
+    const s = { shown: 0, clicked: 0, dismissed: 0, timeout: 0 };
+    events.forEach(e => {
+        if (e.popup_id === popupId && s[e.event_type] !== undefined) {
+            s[e.event_type]++;
+        }
+    });
+    return s;
 }

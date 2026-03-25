@@ -3430,9 +3430,6 @@
                             <button onclick="shareAmbassadorWhatsApp()" class="amb-share-btn amb-share-wa">
                                 <i class="fa-brands fa-whatsapp"></i> שתפו בוואטסאפ
                             </button>
-                            <button onclick="copyAmbassadorMessage()" id="ambassadorMsgBtn" class="amb-share-btn amb-share-msg">
-                                <i class="fa-solid fa-message"></i> העתיקו הודעה מוכנה
-                            </button>
                         </div>
                         <div class="amb-stat">
                             <span class="amb-stat-label">חברים שנרשמו דרככם החודש:</span>
@@ -4262,6 +4259,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
     <script src="../js/supabase-config.js"></script>
+    <script src="../js/supabase-client.js"></script>
     <script src="../js/marketing-tools.js"></script>
     <script src="../js/popup-manager.js"></script>
     <script>
@@ -4339,6 +4337,10 @@
             if (!supabaseClient || !currentUser) return;
             try {
                 const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', currentUser.id).single();
+                // Update PopupManager with user role for audience targeting
+                if (window.PopupManager && profile) {
+                    window.PopupManager.setUser({ isAuthenticated: true, role: profile.role });
+                }
                 if (profile && (profile.role === 'paid_customer' || profile.role === 'admin')) {
                     _isPaidCustomer = true;
                     // Show master switcher (hidden by default for non-paying)
@@ -5020,18 +5022,21 @@
                 window.PopupManager.register('auth_modal', {
                     priority: 2,
                     category: 'critical',
+                    targetAudience: 'unauthenticated',
                     show: function () { openModal(false); },
                     hide: function () { closeModal(); }
                 });
                 window.PopupManager.register('auth_wall', {
                     priority: 2,
                     category: 'critical',
+                    targetAudience: 'unauthenticated',
                     show: function () { openModal(true); },
                     hide: function () { closeModal(); }
                 });
                 window.PopupManager.register('ai_questionnaire', {
                     priority: 3,
                     category: 'engagement',
+                    targetAudience: 'free_user',
                     show: function () { openQuestionnaireModal(); },
                     hide: function () { closeQuestionnaireModal(); },
                     maxPerDay: 1
@@ -5039,12 +5044,14 @@
                 window.PopupManager.register('video_toast', {
                     priority: 5,
                     category: 'info',
+                    targetAudience: 'unauthenticated',
                     show: function () { showToast(); },
                     hide: function () { hideToast(); }
                 });
                 window.PopupManager.register('share_prompt', {
                     priority: 4,
                     category: 'engagement',
+                    targetAudience: 'free_user',
                     show: function () { showSharePrompt(); },
                     hide: function () { dismissSharePrompt(); },
                     maxPerDay: 1,
@@ -5053,6 +5060,7 @@
                 window.PopupManager.register('referral_toast', {
                     priority: 5,
                     category: 'info',
+                    targetAudience: 'authenticated',
                     show: function () {
                         if (window.UI && window.UI.showToast) {
                             window.UI.showToast('\u05d9\u05e9 \u05dc\u05db\u05dd \u05d4\u05e4\u05e0\u05d9\u05d4 \u05d7\u05d3\u05e9\u05d4! \u{1F389}', 'success');
@@ -5089,6 +5097,7 @@
                         } else if (event === 'SIGNED_OUT') {
                             isAuthenticated = false;
                             currentUser = null;
+                            if (window.PopupManager) window.PopupManager.setUser({ isAuthenticated: false, role: null });
                             updateUI();
                         }
                         // Clear pending state on any auth event
@@ -5115,6 +5124,7 @@
                 if (session && session.user) {
                     currentUser = session.user;
                     isAuthenticated = true;
+                    if (window.PopupManager) window.PopupManager.setUser({ isAuthenticated: true, role: null });
                     updateUI(); // Update UI first — non-critical ops below may fail
                     try {
                         await ensureProfileWithFormName(session.user);

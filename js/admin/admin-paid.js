@@ -264,8 +264,9 @@ async function syncToGoogleSheets() {
             };
         });
 
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxtH1yYVyv8j561ztm1EJ0fIal9DD75wT9JFUokTh0jPkwc06yzlL_b9v7cCFgL3kXT/exec';
-        const API_TOKEN = '2fe00f3e650c58464562b19187dec038';
+        const API_URL = window.SUPABASE_CONFIG?.sheetsApiUrl;
+        const API_TOKEN = window.SUPABASE_CONFIG?.sheetsApiToken;
+        if (!API_URL || !API_TOKEN) { showToast('חסר הגדרות Google Sheets', 'error'); return; }
 
         // Clear sheet first with empty row, then append all
         let sheetUrl = '';

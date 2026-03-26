@@ -98,6 +98,11 @@
                     <span>אינסטגרם</span>
                     <span class="badge" id="ig-total-badge" style="background:#E4405F;">0</span>
                 </div>
+                <div class="nav-item" onclick="switchView('campaigns')">
+                    <i class="fa-brands fa-meta" style="color:#1877F2;"></i>
+                    <span>קמפיינים</span>
+                    <span class="badge" id="campaigns-count" style="background:#1877F2;">0</span>
+                </div>
                 <div class="nav-item" onclick="switchView('referrals')">
                     <i class="fa-solid fa-rocket" style="color:#D4AF37;"></i>
                     <span>שותפים</span>
@@ -1394,6 +1399,113 @@
                     </div>
                 </div>
 
+                <!-- ===== Campaigns View ===== -->
+                <div id="campaigns-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-brands fa-meta" style="color:#1877F2;margin-left:0.5rem;"></i> קמפיינים ממומנים</h1>
+                    <p style="color:var(--text-secondary);margin:-1rem 0 1rem;font-size:0.9rem;">מעקב ביצועים, לידים, עלויות ו-ROI לכל קמפיין ממומן</p>
+
+                    <!-- Tab bar -->
+                    <div style="display:flex;gap:4px;margin-bottom:1rem;border-bottom:2px solid var(--border);padding-bottom:0;">
+                        <div class="camp-tab active" data-tab="stats" onclick="switchCampaignTab('stats')" style="padding:0.5rem 1.2rem;cursor:pointer;font-weight:600;font-size:0.88rem;border-bottom:2px solid var(--gold);margin-bottom:-2px;">סטטיסטיקות</div>
+                        <div class="camp-tab" data-tab="creative" onclick="switchCampaignTab('creative')" style="padding:0.5rem 1.2rem;cursor:pointer;font-weight:600;font-size:0.88rem;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-2px;">קריאטיב</div>
+                    </div>
+
+                    <!-- Stats panel -->
+                    <div id="camp-stats-panel">
+                        <div class="stats">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:rgba(24,119,242,0.12);color:#1877F2;"><i class="fa-brands fa-meta"></i></div>
+                                <div><div class="stat-value" id="camp-total-leads">-</div><div class="stat-label">לידים ממטא</div></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:rgba(47,133,146,0.12);color:#2F8592;"><i class="fa-solid fa-bullhorn"></i></div>
+                                <div><div class="stat-value" id="camp-active">-</div><div class="stat-label">קמפיינים פעילים</div></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background:rgba(212,175,55,0.12);color:#D4AF37;"><i class="fa-solid fa-coins"></i></div>
+                                <div><div class="stat-value" id="camp-spend">-</div><div class="stat-label">סה״כ הוצאה</div></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon gold"><i class="fa-solid fa-calculator"></i></div>
+                                <div><div class="stat-value" id="camp-cpl">-</div><div class="stat-label">עלות לליד (CPL)</div></div>
+                            </div>
+                        </div>
+
+                        <!-- Conversion funnel -->
+                        <div class="card" style="margin-top:1rem;">
+                            <h3 style="margin-bottom:0.8rem;"><i class="fa-solid fa-filter" style="color:#1877F2;margin-left:0.3rem;"></i> משפך המרה — מטא</h3>
+                            <div id="camp-funnel"><p style="color:var(--text-secondary);text-align:center;">טוען...</p></div>
+                        </div>
+
+                        <!-- Campaigns table -->
+                        <div class="card" style="margin-top:1rem;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">
+                                <h3><i class="fa-solid fa-table-list" style="color:var(--gold);margin-left:0.3rem;"></i> קמפיינים</h3>
+                                <button onclick="openAddCampaign()" style="background:var(--gold);color:var(--deep-petrol);border:none;border-radius:8px;padding:0.4rem 1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.82rem;">
+                                    <i class="fa-solid fa-plus"></i> הוסף קמפיין
+                                </button>
+                            </div>
+                            <div id="camp-table"><p style="color:var(--text-secondary);text-align:center;">טוען...</p></div>
+                        </div>
+
+                        <!-- Breakdown by campaign -->
+                        <div class="card" style="margin-top:1rem;">
+                            <h3 style="margin-bottom:0.8rem;"><i class="fa-solid fa-chart-pie" style="color:#1877F2;margin-left:0.3rem;"></i> פירוט לפי קמפיין (מ-UTM)</h3>
+                            <div id="camp-breakdown"><p style="color:var(--text-secondary);text-align:center;">טוען...</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Creative panel -->
+                    <div id="camp-creative-panel" class="hidden">
+                        <div class="card">
+                            <h3 style="margin-bottom:0.8rem;"><i class="fa-solid fa-palette" style="color:var(--gold);margin-left:0.3rem;"></i> בריף לקמפיין</h3>
+                            <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">מלאו את הפרטים ותקבלו תבנית מסודרת להעביר למעצב או ליצירת מודעה</p>
+                            <div style="display:grid;gap:0.7rem;">
+                                <label style="font-weight:600;font-size:0.85rem;">קהל יעד
+                                    <input id="brief-audience" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.2rem;" placeholder="למשל: נשים 25-45, מתעניינות בהתפתחות אישית">
+                                </label>
+                                <label style="font-weight:600;font-size:0.85rem;">הצעת ערך / מבצע
+                                    <input id="brief-offer" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.2rem;" placeholder="למשל: קורס NLP בחינם — 51 סרטונים">
+                                </label>
+                                <label style="font-weight:600;font-size:0.85rem;">קריאה לפעולה (CTA)
+                                    <input id="brief-cta" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.2rem;" placeholder="למשל: הירשמו עכשיו בחינם">
+                                </label>
+                                <label style="font-weight:600;font-size:0.85rem;">טון
+                                    <select id="brief-tone" style="width:100%;padding:0.5rem;border:1px solid var(--border);border-radius:8px;margin-top:0.2rem;">
+                                        <option value="warm">חם ומזמין</option>
+                                        <option value="professional">מקצועי וסמכותי</option>
+                                        <option value="urgent">דחוף (FOMO)</option>
+                                        <option value="story">סיפורי (לפני/אחרי)</option>
+                                    </select>
+                                </label>
+                                <button onclick="generateBrief()" style="background:var(--gold);color:var(--deep-petrol);border:none;border-radius:8px;padding:0.5rem 1.2rem;font-weight:700;cursor:pointer;width:fit-content;">צור בריף</button>
+                            </div>
+                            <div id="brief-output" style="margin-top:1rem;display:none;"></div>
+                        </div>
+
+                        <div class="card" style="margin-top:1rem;">
+                            <h3 style="margin-bottom:0.8rem;"><i class="fa-solid fa-copy" style="color:#2F8592;margin-left:0.3rem;"></i> תבניות קופי מוכנות</h3>
+                            <div style="display:grid;gap:8px;" id="copy-templates">
+                                <div style="background:#f8fafb;border:1px solid #eef2f3;border-radius:10px;padding:12px;border-right:3px solid #D4AF37;">
+                                    <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">התפתחות אישית (70% מהקהל)</div>
+                                    <div style="font-size:0.82rem;color:#2d3e45;line-height:1.6;">רוצה להבין למה אתה חושב מה שאתה חושב? 🧠<br>קורס NLP Practitioner מלא — 51 סרטונים, 20+ שעות, בחינם לגמרי.<br>כלים אמיתיים לצמיחה אישית. בלי מכירות, בלי עמלות.<br><strong>הירשמו עכשיו →</strong></div>
+                                    <button onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText);this.textContent='✓ הועתק'" style="margin-top:6px;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:0.75rem;cursor:pointer;">העתק</button>
+                                </div>
+                                <div style="background:#f8fafb;border:1px solid #eef2f3;border-radius:10px;padding:12px;border-right:3px solid #1877F2;">
+                                    <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">שילוב בעסק (20% מהקהל)</div>
+                                    <div style="font-size:0.82rem;color:#2d3e45;line-height:1.6;">NLP זה לא רק טיפול — זה כלי עסקי.<br>למדו איך לשפר תקשורת, למכור בלי למכור, ולהוביל אנשים.<br>51 שיעורים מעשיים, בחינם מלא. רם מלמד, אתם מיישמים.<br><strong>התחילו היום →</strong></div>
+                                    <button onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText);this.textContent='✓ הועתק'" style="margin-top:6px;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:0.75rem;cursor:pointer;">העתק</button>
+                                </div>
+                                <div style="background:#f8fafb;border:1px solid #eef2f3;border-radius:10px;padding:12px;border-right:3px solid #E4405F;">
+                                    <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">קליניקה (10% מהקהל)</div>
+                                    <div style="font-size:0.82rem;color:#2d3e45;line-height:1.6;">חולמים לפתוח קליניקה? ההכשרה מתחילה כאן.<br>קורס NLP Practitioner מלא עם תעודה — ב-0 ₪.<br>51 סרטוני הדרכה מקצועיים, תרגול מעשי, ומנטור AI.<br><strong>הירשמו בחינם →</strong></div>
+                                    <button onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText);this.textContent='✓ הועתק'" style="margin-top:6px;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:0.75rem;cursor:pointer;">העתק</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ===== Referrals View ===== -->
                 <div id="referrals-view" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-rocket" style="color:var(--gold);margin-left:0.5rem;"></i> תוכנית השותפים</h1>
@@ -2360,6 +2472,7 @@
     <script src="../js/admin/admin-paid.js"></script>
     <script src="../js/admin/admin-instagram.js"></script>
     <script src="../js/admin/admin-referrals.js"></script>
+    <script src="../js/admin/admin-campaigns.js"></script>
     <script src="../js/admin/admin-popups.js"></script>
     <script src="../js/admin/admin-analytics.js"></script>
     <script src="../js/admin/admin-settings.js"></script>

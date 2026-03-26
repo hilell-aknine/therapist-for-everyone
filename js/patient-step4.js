@@ -330,6 +330,7 @@
             document.getElementById('progress-bar').classList.add('hidden');
             document.getElementById('success-view').classList.remove('hidden');
             showToast('הבקשה נשלחה בהצלחה!', 'success');
+            if (window.trackFormSubmission) window.trackFormSubmission('patient_intake');
 
         } catch (error) {
             console.error('Error:', error);

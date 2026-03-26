@@ -5149,6 +5149,9 @@
             updateUI();
             showAuthSuccess();
 
+            // Meta Pixel: track signup/login conversion
+            if (window.trackSignup) window.trackSignup('student');
+
             // Non-critical post-auth operations (don't block UI)
             try {
                 await ensureProfileWithFormName(user);

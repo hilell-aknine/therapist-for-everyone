@@ -153,8 +153,8 @@ async function openPipelineDetail(id) {
     // Fetch questionnaire answers if linked
     let q = null;
     if (l.questionnaire_id) {
-        const { data } = await db.from('questionnaire_submissions').select('*').eq('id', l.questionnaire_id).single();
-        q = data;
+        const { data } = await db.rpc('admin_get_questionnaire_by_id', { q_id: l.questionnaire_id });
+        q = data?.[0] || null;
     }
 
     document.getElementById('pipeline-modal-title').textContent = `Pipeline — ${l.full_name || 'ללא שם'}`;

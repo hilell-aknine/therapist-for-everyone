@@ -13,7 +13,7 @@ let pqCurrentSubView = 'table'; // 'table' | 'caller'
 async function loadPortalQuestionnaires() {
     try {
         const [qRes, profRes, progRes] = await Promise.all([
-            db.from('portal_questionnaires').select('*').order('created_at', { ascending: false }),
+            db.rpc('admin_get_portal_questionnaires_full'),
             db.from('profiles').select('id, full_name, email, phone'),
             db.from('course_progress').select('user_id, completed, watched_seconds, completed_at, updated_at, created_at, video_id').order('completed_at', { ascending: false })
         ]);

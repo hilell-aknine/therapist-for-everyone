@@ -28,8 +28,7 @@ async function loadFunnel() {
                 .select('id, full_name, email, phone, role, created_at, sales_stage, sales_contact_count, sales_notes, sales_last_contact')
                 .in('role', ['student_lead', 'student', 'paid_customer'])
                 .order('created_at', { ascending: false }),
-            db.from('portal_questionnaires')
-                .select('user_id, how_found, why_nlp, study_time, heat_level, city, occupation, main_challenge, motivation_tip, vision_one_year, gender, birth_date, digital_challenge, knew_ram, phone, created_at'),
+            db.rpc('admin_get_portal_questionnaires_full'),
             db.from('course_progress')
                 .select('user_id, completed'),
             db.from('contact_requests')

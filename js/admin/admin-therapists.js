@@ -1,7 +1,7 @@
 // admin-therapists.js — Therapists: load, render, filter, view, approve
 
 async function loadTherapists() {
-    const { data } = await db.from('therapists').select('*').order('created_at', { ascending: false });
+    const { data } = await db.rpc('admin_get_therapists_full');
     therapists = data || [];
     renderTherapists();
 }

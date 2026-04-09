@@ -175,7 +175,7 @@ let currentQFilter = 'all';
 let currentQId = null;
 
 async function loadQuestionnaires() {
-    const { data } = await db.from('questionnaire_submissions').select('*').order('created_at', { ascending: false });
+    const { data } = await db.rpc('admin_get_questionnaire_submissions_full');
     questionnaires = data || [];
     document.getElementById('questionnaires-count').textContent = questionnaires.length;
     document.getElementById('stat-q-total').textContent = questionnaires.length;

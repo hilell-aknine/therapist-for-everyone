@@ -10,6 +10,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const TURNSTILE_SECRET_KEY = Deno.env.get('TURNSTILE_SECRET_KEY') || ''
+if (!TURNSTILE_SECRET_KEY) {
+  console.error('CRITICAL: TURNSTILE_SECRET_KEY not configured — contract CAPTCHA protection is DISABLED')
+}
 const TURNSTILE_ENABLED = TURNSTILE_SECRET_KEY.length > 0
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 

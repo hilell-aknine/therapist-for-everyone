@@ -5,6 +5,9 @@ window._userBotRole = 'admin';
 window._userProfileRole = 'admin'; // profiles.role: 'admin' or 'sales_rep'
 window._userProfileId = null;
 
+// Auth readiness promise — other scripts await this before loading data
+window._authReady = new Promise((resolve) => { window._resolveAuth = resolve; });
+
 // AUTH GUARD - Redirect if not authenticated or not admin/sales_rep
 (async function() {
     const tempClient = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
@@ -53,4 +56,5 @@ window._userProfileId = null;
         window._userBotRole = access.role || 'admin';
         window._userCategoryAccess = access.category_access || null;
     }
+    window._resolveAuth();
 })();

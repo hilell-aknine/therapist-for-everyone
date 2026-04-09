@@ -76,20 +76,24 @@ function renderPaidCustomers(subs) {
         const end = s.end_date ? new Date(s.end_date).toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' }) : '—';
         const daysColor = s.status === 'active' ? (days <= 30 ? '#f85149' : days <= 90 ? '#f59e0b' : '#22c55e') : '#6b7280';
 
+        const safeName = escapeHtml(profile.full_name || 'ללא שם');
+        const safePhone = escapeHtml(profile.phone || '—');
+        const safeContractUrl = escapeHtml(s.contract_url || '');
+
         return `<tr>
-            <td><strong>${profile.full_name || 'ללא שם'}</strong></td>
-            <td style="direction:ltr;text-align:right;">${profile.phone || '—'}</td>
+            <td><strong>${safeName}</strong></td>
+            <td style="direction:ltr;text-align:right;">${safePhone}</td>
             <td><span style="font-size:0.75rem;background:var(--bg);padding:2px 8px;border-radius:10px;">${plan}</span></td>
             <td><strong>${parseFloat(s.price).toLocaleString()} ₪</strong></td>
             <td style="font-size:0.85rem;">${start}</td>
             <td style="font-size:0.85rem;">${end}</td>
             <td><span style="color:${daysColor};font-weight:600;">${s.status === 'active' ? days : '—'}</span></td>
             <td><span style="font-size:0.75rem;background:${status.color}22;color:${status.color};padding:2px 8px;border-radius:10px;">${status.text}</span></td>
-            <td>${s.contract_url ? `<a href="${s.contract_url}" target="_blank" style="color:var(--gold);"><i class="fa-solid fa-file-contract"></i></a>` : `<button onclick="uploadContract('${s.id}')" class="btn-sm" style="font-size:0.7rem;padding:2px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text-secondary);" title="העלאת חוזה"><i class="fa-solid fa-upload"></i></button>`}</td>
+            <td>${s.contract_url ? `<a href="${safeContractUrl}" target="_blank" style="color:var(--gold);"><i class="fa-solid fa-file-contract"></i></a>` : `<button onclick="uploadContract('${s.id}')" class="btn-sm" style="font-size:0.7rem;padding:2px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text-secondary);" title="העלאת חוזה"><i class="fa-solid fa-upload"></i></button>`}</td>
             <td>
                 <div style="display:flex;gap:4px;">
                     <button onclick="editSub('${s.id}')" style="font-size:0.65rem;padding:2px 6px;background:rgba(59,130,246,0.1);border:1px solid #3b82f6;border-radius:4px;cursor:pointer;color:#3b82f6;" title="עריכה">✏️</button>
-                    <button onclick="deleteSub('${s.id}','${(profile.full_name||'').replace(/'/g,'')}')" style="font-size:0.65rem;padding:2px 6px;background:rgba(248,81,73,0.1);border:1px solid #f85149;border-radius:4px;cursor:pointer;color:#f85149;" title="מחיקה">🗑️</button>
+                    <button data-delete-sub="${s.id}" data-delete-name="${safeName}" onclick="deleteSub(this.dataset.deleteSub, this.dataset.deleteName)" style="font-size:0.65rem;padding:2px 6px;background:rgba(248,81,73,0.1);border:1px solid #f85149;border-radius:4px;cursor:pointer;color:#f85149;" title="מחיקה">🗑️</button>
                 </div>
             </td>
         </tr>`;
@@ -167,7 +171,7 @@ async function activateNewCustomer() {
         // Update role
         await db.from('profiles').update({ role: 'paid_customer' }).eq('id', user.id);
 
-        resultEl.innerHTML = `<span style="color:#22c55e;">✅ ${user.full_name} — גישה הופעלה ל-${months} חודשים!</span>`;
+        resultEl.innerHTML = `<span style="color:#22c55e;">&#x2705; ${escapeHtml(user.full_name)} — גישה הופעלה ל-${months} חודשים!</span>`;
 
         // Refresh table
         paidCache = null;
@@ -264,25 +268,23 @@ async function syncToGoogleSheets() {
             };
         });
 
-        const API_URL = window.SUPABASE_CONFIG?.sheetsApiUrl;
-        const API_TOKEN = window.SUPABASE_CONFIG?.sheetsApiToken;
-        if (!API_URL || !API_TOKEN) { showToast('חסר הגדרות Google Sheets', 'error'); return; }
+        // Call sheets-sync Edge Function (token stored server-side)
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) { showToast('יש להתחבר מחדש', 'error'); return; }
 
-        // Clear sheet first with empty row, then append all
-        let sheetUrl = '';
-        for (let i = 0; i < rows.length; i++) {
-            const encodedData = encodeURIComponent(JSON.stringify(rows[i]));
-            const res = await fetch(`${API_URL}?token=${API_TOKEN}&action=appendRow&sheetName=לקוחות משלמים&data=${encodedData}`);
-            const data = await res.json().catch(() => null);
-            if (data?.url) sheetUrl = data.url;
-        }
+        const res = await fetch(`${window.SUPABASE_CONFIG.functionsUrl}/sheets-sync`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ action: 'appendRow', sheet: 'לקוחות משלמים', rows }),
+        });
 
-        if (sheetUrl) {
-            alert(`✅ סונכרן בהצלחה! ${rows.length} שורות`);
-            window.open(sheetUrl, '_blank');
-        } else {
-            alert(`✅ סונכרן ${rows.length} שורות`);
-        }
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Sync failed');
+
+        alert(`סונכרן ${result.synced}/${result.total} שורות`);
     } catch (err) {
         alert('שגיאה: ' + err.message);
     } finally {
@@ -296,6 +298,9 @@ function editSub(id) {
     if (!s) return;
     const p = s.profiles || {};
     const fmtDate = d => d ? new Date(d).toISOString().split('T')[0] : '';
+    const eName = escapeHtml(p.full_name || '');
+    const ePhone = escapeHtml(p.phone || '');
+    const eEmail = escapeHtml(p.email || '');
 
     const html = `
         <div class="modal-box" style="max-width:500px;background:var(--bg-card,#fff);border-radius:12px;padding:2rem;position:relative;">
@@ -303,13 +308,13 @@ function editSub(id) {
             <h3 style="margin-bottom:1rem;color:var(--gold);"><i class="fa-solid fa-pen"></i> עריכת לקוח משלם</h3>
             <div style="display:flex;flex-direction:column;gap:0.7rem;">
                 <label style="font-size:0.85rem;font-weight:600;">שם מלא
-                    <input type="text" id="edit-sub-name" value="${p.full_name || ''}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                    <input type="text" id="edit-sub-name" value="${eName}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
                 </label>
                 <label style="font-size:0.85rem;font-weight:600;">טלפון
-                    <input type="text" id="edit-sub-phone" value="${p.phone || ''}" dir="ltr" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                    <input type="text" id="edit-sub-phone" value="${ePhone}" dir="ltr" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
                 </label>
                 <label style="font-size:0.85rem;font-weight:600;">אימייל
-                    <input type="email" id="edit-sub-email" value="${p.email || ''}" dir="ltr" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                    <input type="email" id="edit-sub-email" value="${eEmail}" dir="ltr" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
                 </label>
                 <div style="display:flex;gap:0.7rem;">
                     <label style="font-size:0.85rem;font-weight:600;flex:1;">תוכנית
@@ -340,13 +345,13 @@ function editSub(id) {
                     </select>
                 </label>
                 <label style="font-size:0.85rem;font-weight:600;">הערות
-                    <textarea id="edit-sub-notes" rows="3" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;resize:vertical;">${s.notes||''}</textarea>
+                    <textarea id="edit-sub-notes" rows="3" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;resize:vertical;">${escapeHtml(s.notes||'')}</textarea>
                 </label>
                 <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
                     <button onclick="saveEditSub('${s.id}','${s.user_id}')" style="flex:1;padding:10px;background:var(--gold);color:#003B46;border:none;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;font-family:inherit;">
                         <i class="fa-solid fa-check"></i> שמור
                     </button>
-                    <button onclick="deleteSub('${s.id}','${(p.full_name||'').replace(/'/g,'')}')" style="padding:10px 16px;background:#f85149;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;font-family:inherit;">
+                    <button data-delete-sub="${s.id}" data-delete-name="${eName}" onclick="deleteSub(this.dataset.deleteSub, this.dataset.deleteName)" style="padding:10px 16px;background:#f85149;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;font-family:inherit;">
                         <i class="fa-solid fa-trash"></i> מחק
                     </button>
                 </div>

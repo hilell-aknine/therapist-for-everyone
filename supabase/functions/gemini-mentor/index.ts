@@ -1,16 +1,30 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // Keys from Supabase secrets — never hardcoded
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || ''
 const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') || ''
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const GEMINI_MODEL = 'gemini-2.0-flash'
 const OPENROUTER_MODEL = 'stepfun/step-3.5-flash:free'
 const OPENROUTER_FALLBACK = 'nvidia/nemotron-3-nano-30b-a3b:free'
+const DAILY_LIMIT = 100
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const ALLOWED_ORIGINS = [
+  'https://www.therapist-home.com',
+  'https://therapist-home.com',
+  'https://therapist-for-everyone.vercel.app',
+]
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') || ''
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  }
 }
 
 // ── Gemini Direct API ────────────────────────────────
@@ -105,17 +119,59 @@ async function callOpenRouter(
 
 // ── Main Handler ─────────────────────────────────────
 serve(async (req) => {
+  const cors = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: cors })
   }
 
   try {
+    // ── Auth check ──────────────────────────────────
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token' }),
+        { status: 401, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // ── Rate limiting (100/day per user) ────────────
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date())
+
+    const { data: usage } = await supabaseAdmin
+      .from('ai_chat_usage')
+      .select('message_count')
+      .eq('user_id', user.id)
+      .eq('date', today)
+      .eq('source', 'mentor')
+      .single()
+
+    const currentCount = usage?.message_count || 0
+    if (currentCount >= DAILY_LIMIT) {
+      return new Response(
+        JSON.stringify({ error: 'Daily mentor limit reached', limit: DAILY_LIMIT }),
+        { status: 429, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // ── Parse request ───────────────────────────────
     const { messages, systemPrompt } = await req.json()
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(
         JSON.stringify({ error: 'Missing messages' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -135,20 +191,28 @@ serve(async (req) => {
     if (!text) {
       return new Response(
         JSON.stringify({ error: 'All AI providers failed' }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 502, headers: { ...cors, 'Content-Type': 'application/json' } }
       )
     }
 
+    // ── Increment usage counter ─────────────────────
+    await supabaseAdmin.from('ai_chat_usage').upsert({
+      user_id: user.id,
+      date: today,
+      source: 'mentor',
+      message_count: currentCount + 1,
+    }, { onConflict: 'user_id,date,source' })
+
     return new Response(
       JSON.stringify({ text }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...cors, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
     console.error('[Mentor] Function error:', error)
     return new Response(
       JSON.stringify({ error: 'Internal error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   }
 })

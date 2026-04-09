@@ -10,9 +10,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const TURNSTILE_SECRET_KEY = Deno.env.get('TURNSTILE_SECRET_KEY') || ''
-
-// When TURNSTILE_SECRET_KEY is empty, Turnstile verification is skipped.
-// This allows forms to work before Turnstile is configured.
+if (!TURNSTILE_SECRET_KEY) {
+  console.error('CRITICAL: TURNSTILE_SECRET_KEY not configured — form CAPTCHA protection is DISABLED')
+}
 const TURNSTILE_ENABLED = TURNSTILE_SECRET_KEY.length > 0
 
 const ALLOWED_TABLES = ['patients', 'therapists', 'contact_requests', 'questionnaire_submissions', 'sales_leads']

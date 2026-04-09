@@ -24,6 +24,8 @@ const BOT_URL = 'https://crm-bot-hillel.fly.dev';
 
 document.addEventListener('DOMContentLoaded', async () => {
     applySettingsOnLoad();
+    // Wait for auth guard to finish verifying role before loading any data
+    if (window._authReady) await window._authReady;
     const { data: { session } } = await db.auth.getSession();
     if (session) {
         document.getElementById('user-email').textContent = session.user.email;

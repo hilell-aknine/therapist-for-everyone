@@ -2,6 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Startup Protocol (run BEFORE any work)
+1. Read `primer.md` — current state, last task, next planned task
+2. Read `hindsight.md` — known pitfalls to avoid
+3. Run `git log --oneline -10` — recent commits
+4. Run `git status --short` — uncommitted changes
+5. Only then start the user's task
+
+## Session Rules
+- **After every successful task:** update `primer.md` (Last task, Next planned, Recent Changes)
+- **After hitting an unexpected error or wasting >10 min:** add entry to `hindsight.md`
+- **Never repeat a mistake** already documented in `hindsight.md`
+
 ## Quick Reference
 ```
 Project: Therapists for Everyone (בית המטפלים — פורטל מטפלים לכולם)

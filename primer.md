@@ -1,17 +1,26 @@
 # Primer — Beit V'Metaplim
-> Last updated: 2026-04-09 by Claude Code
+> Last updated: 2026-04-12 by Claude Code
 
 ## Current State
-- **Status:** Active — security hardening phase 2 complete
-- **Last task completed:** Full security audit + 2-phase fix rollout (migrations 049-053, 5 Edge Functions hardened, 6 JS files updated). 8/8 verification tests passed.
-- **Next planned task:** Non-critical audit items if desired — NLP game bugs (XP farming, hearts, daily challenge), dead code cleanup, CSP header, missing CSS files on some pages
+- **Status:** Active — popup management system v2 complete, ready for deploy
+- **Last task completed:** Popup system overhaul for measurement + optimization. Migrations 054-057, popup-manager.js rewritten, admin-popups.js expanded with CSV/JSON export + insights timeline, new popup-preview.html iframe, Claude Code playbook at docs/popup-insights.md
+- **Next planned task:** Run `npx supabase db push --include-all` to apply migrations 054-057, then `git push origin master` to deploy. Verify anonymous session logging works (incognito → auth_modal should insert row with session_id in popup_events).
 - **Blocking issues:** None
 
 ## Recent Changes
 | Date | What Changed | Files Affected |
 |------|-------------|----------------|
+| 2026-04-12 | Popup system v2: anonymous session tracking, A/B variants, cross-device dismissals, status lifecycle, insights log, Claude Code export, funnel metrics, 7-day sparklines, bulk ops, CSV export, iframe preview | migrations 054-057, popup-manager.js, admin-popups.js, admin.html, course-library.html, pages/popup-preview.html (new), docs/popup-insights.md (new), .vercelignore |
 | 2026-04-09 | Security phase 2: auth/CORS/XSS/privilege escalation/Turnstile/Sheets token/404.html/vercelignore/auth race | migrations 052-053, 5 Edge Functions, admin-paid.js, admin-auth.js, admin-state.js, supabase-config.js, .vercelignore, 404.html |
 | 2026-04-07 | Security phase 1: RLS policies, column REVOKE, admin RPC functions | migrations 049-051, 5 admin JS files (use db.rpc instead of select('*') for sensitive tables) |
+
+## Popup System v2 — Quick Reference
+- **Anonymous event logging:** PopupManager generates session_id in sessionStorage (`popup_session_id`) and inserts popup_events with user_id=NULL. RLS policy in migration 054 allows this only when session_id is present.
+- **Triggers:** `PopupManager.notifyLessonComplete()` / `notifySignup()` / auto-fired `page_load` / `login` (on auth transition). Admin creates popups with `trigger_event` column, no code changes needed.
+- **A/B tests:** Set `variant_group` + `variant_label` on multiple popups. PopupManager picks sticky per session (sessionStorage `popup_variant_choice`).
+- **Cross-device dismiss:** `popup_dismissals` table synced to localStorage `popup_history` on login.
+- **Claude Code analysis:** Admin clicks "ייצא לקלוד" → downloads JSON → gives to Claude Code with `docs/popup-insights.md` playbook → Claude inserts findings into `popup_insights_log` table → they appear in admin dashboard timeline.
+- **Admin notes field:** Every popup has `admin_notes` — hypothesis/goals for Claude to read first.
 
 ## Security Architecture (post-audit)
 - **Sensitive columns REVOKEd** from `authenticated` role: `therapists.questionnaire`, `therapists.signature_data`, `questionnaire_submissions.{weakness,challenge,what_is_therapist,what_touched_you}`, `portal_questionnaires.{motivation_tip,main_challenge,vision_one_year}`, `signed_contracts.{signer_id_number,signature_data}`

@@ -960,6 +960,13 @@
         successScreen.classList.add('active');
         document.getElementById('questionnaire-root').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+        // Meta Pixel: fire conversion event before redirect
+        if (window.fbq) {
+            try {
+                fbq('track', 'CompleteRegistration', { content_name: 'portal_questionnaire' });
+            } catch (e) { /* non-blocking */ }
+        }
+
         // Auto-redirect after 4 seconds — with ?completed=1 for Meta Custom Conversion tracking
         setTimeout(() => {
             window.location.href = 'course-library.html?completed=1';

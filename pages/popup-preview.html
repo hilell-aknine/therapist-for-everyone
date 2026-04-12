@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תצוגה מקדימה — Popup Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700&family=Frank+Ruhl+Libre:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/supabase-client.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(135deg, #E8F1F2 0%, #f5f9fa 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            color: #003B46;
+        }
+        .frame-label {
+            font-size: 0.78rem;
+            color: #00606B;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        .phone-frame {
+            background: #003B46;
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 12px 48px rgba(0, 59, 70, 0.25);
+            position: relative;
+        }
+        .phone-top {
+            background: #002830;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .phone-top::before {
+            content: '';
+            width: 50px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        .popup-body {
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        .popup-title {
+            color: #E8F1F2;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            line-height: 1.3;
+        }
+        .popup-message {
+            color: rgba(232, 241, 242, 0.75);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        .popup-cta {
+            background: #D4AF37;
+            color: #003B46;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 2.2rem;
+            font-weight: 700;
+            font-size: 0.98rem;
+            font-family: 'Heebo', sans-serif;
+            cursor: pointer;
+            transition: transform 0.15s;
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+        }
+        .popup-cta:hover { transform: translateY(-1px); }
+        .popup-dismiss {
+            background: none;
+            border: none;
+            color: rgba(232, 241, 242, 0.4);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            font-family: 'Heebo', sans-serif;
+            display: block;
+            width: 100%;
+        }
+        .popup-dismiss:hover { color: rgba(232, 241, 242, 0.7); }
+        .meta {
+            margin-top: 1.2rem;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            font-size: 0.78rem;
+            color: #00606B;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+        }
+        .meta strong { color: #003B46; }
+        .category-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+        }
+        .cat-critical { background: rgba(255, 111, 97, 0.15); color: #FF6F61; }
+        .cat-engagement { background: rgba(212, 175, 55, 0.15); color: #8B6914; }
+        .cat-info { background: rgba(47, 133, 146, 0.15); color: #2F8592; }
+        .error { color: #FF6F61; text-align: center; padding: 2rem; }
+        .variant-ribbon {
+            position: absolute;
+            top: 1rem;
+            left: -2rem;
+            background: #D4AF37;
+            color: #003B46;
+            padding: 0.2rem 2.5rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            transform: rotate(-45deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="frame-label">כך הפופאפ נראה למשתמש</div>
+    <div id="preview-root">
+        <div class="phone-frame">
+            <div class="phone-top"></div>
+            <div class="popup-body"><p style="color:rgba(232,241,242,0.6);">טוען...</p></div>
+        </div>
+    </div>
+    <div class="meta" id="meta"></div>
+
+    <script>
+        (async function () {
+            const params = new URLSearchParams(location.search);
+            const popupId = params.get('popup_id');
+            const root = document.getElementById('preview-root');
+            const meta = document.getElementById('meta');
+
+            if (!popupId) {
+                root.innerHTML = '<div class="error">לא סופק popup_id</div>';
+                return;
+            }
+
+            // Wait for supabase client
+            let attempts = 0;
+            while (!window.supabaseClient && attempts < 50) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+            if (!window.supabaseClient) {
+                root.innerHTML = '<div class="error">Supabase לא נטען</div>';
+                return;
+            }
+
+            try {
+                const { data: config, error } = await window.supabaseClient
+                    .from('popup_configs')
+                    .select('*')
+                    .eq('popup_id', popupId)
+                    .single();
+
+                if (error || !config) {
+                    root.innerHTML = '<div class="error">הפופאפ לא נמצא</div>';
+                    return;
+                }
+
+                const catClass = 'cat-' + (config.category || 'info');
+                const catLabel = {
+                    critical: 'קריטי',
+                    engagement: 'מעורבות',
+                    info: 'מידע'
+                }[config.category] || config.category;
+
+                const variantRibbon = config.variant_group
+                    ? `<div class="variant-ribbon">A/B: ${escapeHtml(config.variant_label || '?')}</div>`
+                    : '';
+
+                root.innerHTML = `
+                    <div class="phone-frame">
+                        ${variantRibbon}
+                        <div class="phone-top"></div>
+                        <div class="popup-body">
+                            <div class="category-badge ${catClass}">${catLabel}</div>
+                            ${config.title ? `<h2 class="popup-title">${escapeHtml(config.title)}</h2>` : ''}
+                            ${config.message ? `<p class="popup-message">${escapeHtml(config.message)}</p>` : ''}
+                            ${config.cta_text
+                                ? `<button class="popup-cta">${escapeHtml(config.cta_text)}</button>`
+                                : '<p style="color:rgba(232,241,242,0.4);font-style:italic;">אין כפתור CTA</p>'}
+                            <button class="popup-dismiss">אחר כך</button>
+                        </div>
+                    </div>
+                `;
+
+                const audLabels = {
+                    all: 'כולם',
+                    authenticated: 'רשומים',
+                    unauthenticated: 'אורחים',
+                    free_user: 'רשומים חינם',
+                    paid_customer: 'משלמים',
+                    admin: 'מנהלים'
+                };
+                const trigLabels = {
+                    manual: 'ידני',
+                    page_load: 'טעינת עמוד',
+                    lesson_complete: 'סיום שיעור',
+                    login: 'התחברות',
+                    signup: 'הרשמה'
+                };
+
+                meta.innerHTML = `
+                    <div><strong>קהל:</strong> ${audLabels[config.target_audience] || config.target_audience}
+                    &nbsp;·&nbsp; <strong>טריגר:</strong> ${trigLabels[config.trigger_event] || config.trigger_event || 'ידני'}
+                    ${config.trigger_min_lessons > 0 ? `&nbsp;·&nbsp; <strong>מינ׳ שיעורים:</strong> ${config.trigger_min_lessons}` : ''}
+                    </div>
+                    ${config.cta_link ? `<div style="margin-top:0.4rem;direction:ltr;font-size:0.72rem;opacity:0.7;">→ ${escapeHtml(config.cta_link)}</div>` : ''}
+                `;
+            } catch (e) {
+                console.error(e);
+                root.innerHTML = '<div class="error">שגיאה בטעינה</div>';
+            }
+        })();
+
+        function escapeHtml(s) {
+            if (s === null || s === undefined) return '';
+            return String(s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>

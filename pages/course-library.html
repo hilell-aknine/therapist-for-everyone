@@ -4337,9 +4337,13 @@
             if (!supabaseClient || !currentUser) return;
             try {
                 const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', currentUser.id).single();
-                // Update PopupManager with user role for audience targeting
+                // Update PopupManager with user role + lesson count for audience targeting
                 if (window.PopupManager && profile) {
-                    window.PopupManager.setUser({ isAuthenticated: true, role: profile.role });
+                    window.PopupManager.setUser({
+                        isAuthenticated: true,
+                        role: profile.role,
+                        lessonCount: (typeof completedLessons !== 'undefined' && Array.isArray(completedLessons)) ? completedLessons.length : 0
+                    });
                 }
                 if (profile && (profile.role === 'paid_customer' || profile.role === 'admin')) {
                     _isPaidCustomer = true;
@@ -5157,6 +5161,13 @@
                 await ensureProfileWithFormName(user);
                 await mergeProgress();
                 checkPaidRole();
+
+                // Fire signup trigger for admin-created popups.
+                // PopupManager enforces per-popup max_per_day + dismissal history,
+                // so calling this on every auth is safe.
+                if (window.PopupManager) {
+                    window.PopupManager.notifySignup();
+                }
 
                 // Resume from Supabase last-watched (if different from current)
                 if (window.CourseProgress) {
@@ -6040,6 +6051,13 @@
                 // Share prompt after 3rd lesson (via PopupManager)
                 if (isAuthenticated && completedLessons.length >= 3 && window.PopupManager) {
                     setTimeout(() => window.PopupManager.request('share_prompt'), 2000);
+                }
+
+                // Update PopupManager lesson count + fire lesson_complete trigger
+                // (admin-created popups with trigger_event=lesson_complete will auto-fire)
+                if (window.PopupManager) {
+                    window.PopupManager.setLessonCount(completedLessons.length);
+                    window.PopupManager.notifyLessonComplete();
                 }
             }
         }

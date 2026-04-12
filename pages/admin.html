@@ -1633,10 +1633,45 @@
                         </div>
                     </div>
 
-                    <div style="margin:1.5rem 0 1rem;display:flex;justify-content:flex-end;">
+                    <!-- Engagement summary card (top/bottom performers + alerts) -->
+                    <div class="card" style="margin-top:1rem;background:linear-gradient(135deg,rgba(0,59,70,0.04),rgba(212,175,55,0.04));border:1px solid rgba(212,175,55,0.18);">
+                        <h3 style="margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem;">
+                            <i class="fa-solid fa-magnifying-glass-chart" style="color:var(--gold);"></i>
+                            מה עובד ומה לא — סקירה מהירה
+                        </h3>
+                        <div id="popup-summary-card">
+                            <p style="color:var(--text-secondary);text-align:center;">טוען...</p>
+                        </div>
+                    </div>
+
+                    <div style="margin:1rem 0 1rem;display:flex;justify-content:space-between;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+                        <div style="display:flex;gap:0.5rem;align-items:center;">
+                            <button onclick="bulkTogglePopups(true)" id="popup-bulk-activate" style="display:none;background:#2F8592;color:#fff;font-weight:600;padding:0.45rem 0.9rem;border:none;border-radius:8px;cursor:pointer;font-size:0.82rem;">
+                                <i class="fa-solid fa-play"></i> הפעל מסומנים
+                            </button>
+                            <button onclick="bulkTogglePopups(false)" id="popup-bulk-deactivate" style="display:none;background:#666;color:#fff;font-weight:600;padding:0.45rem 0.9rem;border:none;border-radius:8px;cursor:pointer;font-size:0.82rem;">
+                                <i class="fa-solid fa-pause"></i> כבה מסומנים
+                            </button>
+                            <button onclick="exportPopupStatsCsv()" style="background:none;color:#2F8592;font-weight:600;padding:0.45rem 0.9rem;border:1px solid #2F8592;border-radius:8px;cursor:pointer;font-size:0.82rem;">
+                                <i class="fa-solid fa-file-csv"></i> ייצא ל-CSV
+                            </button>
+                            <button onclick="exportPopupInsightsJson()" style="background:none;color:#D4AF37;font-weight:600;padding:0.45rem 0.9rem;border:1px solid #D4AF37;border-radius:8px;cursor:pointer;font-size:0.82rem;" title="הורד קובץ JSON מלא שקלוד קוד יכול לקרוא ולנתח">
+                                <i class="fa-solid fa-robot"></i> ייצא לקלוד
+                            </button>
+                        </div>
                         <button onclick="openCreatePopupModal()" class="btn" style="background:var(--gold);color:var(--deep-petrol);font-weight:700;padding:0.5rem 1.2rem;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:0.4rem;">
                             <i class="fa-solid fa-plus"></i> צור פופאפ חדש
                         </button>
+                    </div>
+
+                    <!-- Status filter tabs -->
+                    <div style="display:flex;gap:0.4rem;margin-bottom:1rem;flex-wrap:wrap;" id="popup-status-tabs">
+                        <button data-status="all" class="popup-tab-btn active" onclick="filterPopupStatus('all')" style="padding:0.4rem 0.9rem;border:1px solid var(--border);border-radius:20px;background:var(--deep-petrol);color:#fff;font-weight:600;font-size:0.78rem;cursor:pointer;">הכל</button>
+                        <button data-status="live" class="popup-tab-btn" onclick="filterPopupStatus('live')" style="padding:0.4rem 0.9rem;border:1px solid var(--border);border-radius:20px;background:none;font-weight:600;font-size:0.78rem;cursor:pointer;">חיים</button>
+                        <button data-status="draft" class="popup-tab-btn" onclick="filterPopupStatus('draft')" style="padding:0.4rem 0.9rem;border:1px solid var(--border);border-radius:20px;background:none;font-weight:600;font-size:0.78rem;cursor:pointer;">טיוטות</button>
+                        <button data-status="scheduled" class="popup-tab-btn" onclick="filterPopupStatus('scheduled')" style="padding:0.4rem 0.9rem;border:1px solid var(--border);border-radius:20px;background:none;font-weight:600;font-size:0.78rem;cursor:pointer;">מתוזמנים</button>
+                        <button data-status="paused" class="popup-tab-btn" onclick="filterPopupStatus('paused')" style="padding:0.4rem 0.9rem;border:1px solid var(--border);border-radius:20px;background:none;font-weight:600;font-size:0.78rem;cursor:pointer;">בהמתנה</button>
+                        <button data-status="archived" class="popup-tab-btn" onclick="filterPopupStatus('archived')" style="padding:0.4rem 0.9rem;border:1px solid var(--border);border-radius:20px;background:none;font-weight:600;font-size:0.78rem;cursor:pointer;">בארכיון</button>
                     </div>
 
                     <div class="card">
@@ -1649,6 +1684,20 @@
                     <div class="card" style="margin-top:1rem;">
                         <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-chart-bar" style="color:var(--gold);margin-left:0.3rem;"></i> סטטיסטיקות לפי פופאפ</h3>
                         <div id="popup-stats-table">
+                            <p style="color:var(--text-secondary);text-align:center;">טוען...</p>
+                        </div>
+                    </div>
+
+                    <!-- Insights timeline: admin + Claude notes per popup -->
+                    <div class="card" style="margin-top:1rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+                            <h3 style="margin:0;"><i class="fa-solid fa-lightbulb" style="color:var(--gold);margin-left:0.3rem;"></i> יומן תובנות והמלצות</h3>
+                            <button onclick="openInsightModal()" style="background:var(--deep-petrol);color:#fff;font-weight:600;padding:0.45rem 0.9rem;border:none;border-radius:8px;cursor:pointer;font-size:0.82rem;">
+                                <i class="fa-solid fa-plus"></i> הוסף תובנה
+                            </button>
+                        </div>
+                        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">מקום לרשום השערות, תוצאות של ניסויים, והערות. קלוד קוד יכול גם לכתוב לכאן אחרי שמריצים עליו ניתוח (`docs/popup-insights.md`).</p>
+                        <div id="popup-insights-list">
                             <p style="color:var(--text-secondary);text-align:center;">טוען...</p>
                         </div>
                     </div>

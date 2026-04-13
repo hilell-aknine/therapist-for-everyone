@@ -1,15 +1,16 @@
 # Primer — Beit V'Metaplim
-> Last updated: 2026-04-12 by Claude Code
+> Last updated: 2026-04-13 by Claude Code
 
 ## Current State
-- **Status:** Active — popup management system v2 complete, ready for deploy
-- **Last task completed:** Popup system overhaul for measurement + optimization. Migrations 054-057, popup-manager.js rewritten, admin-popups.js expanded with CSV/JSON export + insights timeline, new popup-preview.html iframe, Claude Code playbook at docs/popup-insights.md
-- **Next planned task:** Run `npx supabase db push --include-all` to apply migrations 054-057, then `git push origin master` to deploy. Verify anonymous session logging works (incognito → auth_modal should insert row with session_id in popup_events).
+- **Status:** Active — backup system hardened, popup v2 still pending deploy
+- **Last task completed:** CRM backup hardening — diagnosed 20-day silent failure (battery-disallow on Task Scheduler), expanded backup from 15 → 35 tables (1,082 → 35,990 rows incl. crm_activity_log 34K rows), added per-table try/except, top-level try/except, WhatsApp failure alerts via Green API (crm-bot instance), `backups/backup-runs.log` history, independent watchdog `scripts/check_backup_health.py` running daily 09:00. Both Task Scheduler tasks fixed: 8.3 short paths + full python.exe + AllowStartIfOnBatteries.
+- **Next planned task:** Run `npx supabase db push --include-all` to apply migrations 054-057 (popup v2), then `git push origin master`. Verify anonymous session logging works (incognito → auth_modal should insert row with session_id in popup_events).
 - **Blocking issues:** None
 
 ## Recent Changes
 | Date | What Changed | Files Affected |
 |------|-------------|----------------|
+| 2026-04-13 | Backup hardening: 35 tables, try/except, WhatsApp alerts, run log, watchdog, fixed Task Scheduler battery + Hebrew path issues | scripts/backup-supabase.py, scripts/check_backup_health.py (new), CLAUDE.md, Windows Task Scheduler (BeitVmetaplim-DailyBackup + BeitVmetaplim-BackupHealthCheck) |
 | 2026-04-12 | Popup system v2: anonymous session tracking, A/B variants, cross-device dismissals, status lifecycle, insights log, Claude Code export, funnel metrics, 7-day sparklines, bulk ops, CSV export, iframe preview | migrations 054-057, popup-manager.js, admin-popups.js, admin.html, course-library.html, pages/popup-preview.html (new), docs/popup-insights.md (new), .vercelignore |
 | 2026-04-09 | Security phase 2: auth/CORS/XSS/privilege escalation/Turnstile/Sheets token/404.html/vercelignore/auth race | migrations 052-053, 5 Edge Functions, admin-paid.js, admin-auth.js, admin-state.js, supabase-config.js, .vercelignore, 404.html |
 | 2026-04-07 | Security phase 1: RLS policies, column REVOKE, admin RPC functions | migrations 049-051, 5 admin JS files (use db.rpc instead of select('*') for sensitive tables) |

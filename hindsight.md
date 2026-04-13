@@ -53,6 +53,20 @@ Each entry:
 - **Fix:** Migration 052 — `WITH CHECK (role IS NOT DISTINCT FROM (SELECT role FROM profiles WHERE id = auth.uid()))`. This makes `role` immutable via self-update. Admin can still change roles via service_role.
 - **Rule:** For any column that represents privilege/trust (role, is_admin, permissions), add `WITH CHECK` that compares new value to current value. `USING` alone is insufficient.
 
+### Silent backup failure — battery + Hebrew path + no alerting
+- **Date:** 2026-04-13
+- **Problem:** `BeitVmetaplim-DailyBackup` Task Scheduler task ran daily at 07:00 but produced **zero successful backups for 20 days** (24/03 → 12/04). Failure was completely silent — email reports only fire on success, no WhatsApp, no log. User would have lost 20 days of CRM data in a disaster.
+- **Root Causes (three independent bugs compounding):**
+  1. Task had `DisallowStartIfOnBatteries=true` + `StopIfGoingOnBatteries=true`. Laptop was on battery at 07:00 most days → task simply didn't run. CLAUDE.md *already* documented this exact lesson under Night Automation, but the backup task was created without the fix.
+  2. Task used `py` (the Python launcher) which depends on PATH. When Task Scheduler couldn't resolve it under certain conditions → ERROR_FILE_NOT_FOUND (0x80070002).
+  3. Hebrew path `שולחן העבודה` in the script argument intermittently broke Task Scheduler arg parsing — even when fully quoted. Short 8.3 paths (e.g. `913C~1\BEIT-V~1\scripts\BACKUP~1.PY`) work reliably.
+- **Fix:**
+  1. `Set-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable` on both backup tasks.
+  2. Replaced `py` with full path to `python.exe` (`C:\Users\saraa\AppData\Local\Programs\Python\Python313\python.exe`).
+  3. Get 8.3 short path via `(New-Object -ComObject Scripting.FileSystemObject).GetFile($path).ShortPath` and pass that as the script argument.
+  4. Added 3-layer alerting: per-table try/except, top-level try/except → WhatsApp via Green API crm-bot instance (7103533485), independent watchdog `scripts/check_backup_health.py` running daily 09:00 that alerts if no fresh ZIP within 26h. `backups/backup-runs.log` for at-a-glance history.
+- **Rule:** **Any** Windows Scheduled Task that runs Python on this machine MUST: (1) use full python.exe path, not `py`; (2) use 8.3 short path for the script if its full path contains Hebrew; (3) set `AllowStartIfOnBatteries` + `StartWhenAvailable`; (4) emit a heartbeat to a log file on every run AND have an independent watchdog that fires WhatsApp if the heartbeat is stale. Schedulers that "ran" but returned a nonzero exit code count as silent failures — never trust the absence of an error message.
+
 ### CORS `*` wildcard violates own policy
 - **Date:** 2026-04-09
 - **Problem:** `gemini-mentor` and `ai-chat` had `Access-Control-Allow-Origin: '*'` — CLAUDE.md explicitly warns against this but code predated the rule.

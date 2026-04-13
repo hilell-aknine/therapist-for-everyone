@@ -169,8 +169,16 @@ course-library.html  → masterView (hidden by default)
 
 ### Backup System
 - `scripts/backup-supabase.py` — full DB + Storage backup to `backups/` (inside OneDrive)
-- Windows Scheduled Task `BeitVmetaplim-DailyBackup` — runs daily at 07:00
-- Sends email report to `htjewelry.a474@gmail.com` via Gmail Apps Script API
+- 35 tables backed up (auth.users + 34 public tables — full CRM, sales, popups, community, bot logs, ambassadors)
+- Per-table try/except — one bad table never kills the whole run
+- Top-level try/except + WhatsApp alert to 972549116092 (Green API crm-bot instance) on any failure or partial failure
+- `backups/backup-runs.log` — append-only history (timestamp, status, details) — quick health check
+- `scripts/check_backup_health.py` — independent watchdog, alerts WhatsApp if no fresh ZIP within 26h
+- **Windows Scheduled Tasks (must use 8.3 short paths + full python.exe path — Hebrew paths break Task Scheduler arg parsing):**
+  - `BeitVmetaplim-DailyBackup` — daily 07:00, runs `backup-supabase.py`
+  - `BeitVmetaplim-BackupHealthCheck` — daily 09:00, runs `check_backup_health.py`
+  - Both: `AllowStartIfOnBatteries=true` + `StartWhenAvailable=true` (battery=disallow caused 20-day silent failure 2026-03-24 → 2026-04-12)
+- Sends email report to `htjewelry.a474@gmail.com` via Gmail Apps Script API on success
 - Keeps last 30 backups, creates ZIP archive per run
 
 ## PopupManager System

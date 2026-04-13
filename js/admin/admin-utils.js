@@ -13,6 +13,7 @@ const VIEW_GROUPS = {
     'campaigns':{ views: ['campaigns'], header: null, default: 'campaigns' },
     'referrals':{ views: ['referrals'], header: null, default: 'referrals' },
     'popups':   { views: ['popups'], header: null, default: 'popups' },
+    'automations':{ views: ['automations'], header: null, default: 'automations' },
     'analytics':{ views: ['analytics'], header: null, default: 'analytics' },
     'settings': { views: ['settings'], header: null, default: 'settings' },
 };
@@ -63,6 +64,7 @@ function switchView(view) {
     if (view === 'campaigns' || group.default === 'campaigns') loadCampaignDashboard();
     if (view === 'referrals' || group.default === 'referrals') loadReferralAnalytics();
     if (view === 'popups' || group.default === 'popups') loadPopupConfigs();
+    if (view === 'automations' || group.default === 'automations') loadAutomations();
     if (view === 'analytics' || group.default === 'analytics') loadGA4Analytics();
     if (view === 'settings' || group.default === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }
 

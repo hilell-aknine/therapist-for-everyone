@@ -31,7 +31,10 @@
     transition: transform 0.15s, border-color 0.15s;
 }
 .automation-card:hover { transform: translateY(-2px); border-color: var(--gold, #D4AF37); }
-.automation-card.disabled { opacity: 0.55; }
+.automation-card.disabled {
+    opacity: 0.78;
+    border-right: 3px solid var(--muted-teal, #00606B);
+}
 
 .auto-card-head {
     display: flex;
@@ -69,7 +72,7 @@
     transition: all 0.15s;
 }
 .btn-icon:hover { background: rgba(212, 175, 55, 0.1); color: var(--gold, #D4AF37); border-color: rgba(212, 175, 55, 0.3); }
-.btn-icon.danger:hover { background: rgba(255, 111, 97, 0.1); color: #FF6F61; border-color: rgba(255, 111, 97, 0.3); }
+.btn-icon.danger:hover { background: rgba(214, 69, 69, 0.12); color: #E57373; border-color: rgba(214, 69, 69, 0.35); }
 
 .auto-card-desc {
     color: #aaa;
@@ -96,7 +99,7 @@
     line-height: 1;
 }
 .auto-stat-label { font-size: 0.7rem; color: #888; margin-top: 0.25rem; }
-.auto-stat.error .auto-stat-num { color: #FF6F61; }
+.auto-stat.error .auto-stat-num { color: #E57373; }
 
 .auto-card-footer {
     margin-top: 0.5rem;
@@ -117,7 +120,7 @@
 .auto-toggle-slider {
     position: absolute;
     inset: 0;
-    background: #444;
+    background: #5A6B6E;
     border-radius: 22px;
     cursor: pointer;
     transition: 0.2s;
@@ -143,7 +146,45 @@
     font-weight: 600;
 }
 .auto-badge-dry { background: rgba(212,175,55,0.15); color: var(--gold, #D4AF37); }
-.auto-badge-live { background: rgba(76,175,80,0.15); color: #4CAF50; }
+.auto-badge-live { background: rgba(47,133,146,0.22); color: var(--dusty-aqua, #2F8592); }
+
+/* Audience count badge on rule cards */
+.auto-audience-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(47,133,146,0.18);
+    color: var(--dusty-aqua, #2F8592);
+    padding: 0.15rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border: 1px solid rgba(47,133,146,0.3);
+}
+.auto-audience-badge.loading { color: #8fa3a6; border-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); }
+
+/* Live count pill inside editor */
+.auto-live-count-badge {
+    margin-bottom: 0.9rem;
+    min-height: 32px;
+}
+.auto-count-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    border: 1px solid transparent;
+}
+.auto-count-pill strong { font-size: 1.15rem; font-weight: 700; }
+.auto-count-pill.ok { background: rgba(47,133,146,0.18); color: var(--frost-white, #E8F1F2); border-color: rgba(47,133,146,0.45); }
+.auto-count-pill.ok strong { color: var(--gold, #D4AF37); }
+.auto-count-pill.zero { background: rgba(90,107,110,0.2); color: #c5d4d6; border-color: rgba(255,255,255,0.12); }
+.auto-count-pill.zero strong { color: #E8F1F2; }
+.auto-count-pill.err { background: rgba(214,69,69,0.15); color: #E57373; border-color: rgba(214,69,69,0.4); }
+.auto-count-loading { color: #8fa3a6; font-size: 0.85rem; font-style: italic; }
+.auto-error-text { color: #E57373; }
 
 /* ============================================================
    TEMPLATES section
@@ -206,8 +247,10 @@
 .auto-edit-section:last-child { border-bottom: 0; }
 .auto-edit-section h4 {
     margin: 0 0 0.75rem;
-    color: var(--gold, #D4AF37);
+    color: var(--dusty-aqua, #2F8592);
     font-size: 1rem;
+    font-family: 'Frank Ruhl Libre', serif;
+    letter-spacing: 0.01em;
 }
 .auto-help-inline { font-size: 0.8rem; color: #888; font-weight: normal; }
 
@@ -265,10 +308,12 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 .auto-sample-list {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0,96,107,0.15);
     border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(47,133,146,0.25);
 }
+.auto-sample-phone { color: #9ab3b6; direction: ltr; }
+.auto-sample-lessons { color: #9ab3b6; font-size: 0.82em; }
 .auto-sample-title { color: #888; font-size: 0.8rem; margin-bottom: 0.5rem; }
 .auto-sample-row {
     display: grid;
@@ -305,14 +350,16 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 }
 .auto-preview-label { color: #888; font-size: 0.78rem; margin-bottom: 0.4rem; }
 .auto-preview-bubble {
-    background: #DCF8C6;
-    color: #111;
-    padding: 0.75rem 1rem;
-    border-radius: 12px 12px 12px 4px;
+    background: linear-gradient(135deg, rgba(47,133,146,0.28), rgba(0,96,107,0.35));
+    color: var(--frost-white, #E8F1F2);
+    padding: 0.85rem 1.1rem;
+    border-radius: 14px 14px 14px 4px;
     max-width: 90%;
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.92rem;
+    line-height: 1.6;
     direction: rtl;
+    border: 1px solid rgba(47,133,146,0.4);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 
 .auto-checkbox-row {
@@ -388,10 +435,11 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
     font-weight: 600;
     text-transform: uppercase;
 }
-.auto-run-sent     { background: rgba(76,175,80,0.15); color: #4CAF50; }
+.auto-run-sent     { background: rgba(47,133,146,0.2); color: var(--dusty-aqua, #2F8592); }
 .auto-run-dry_run  { background: rgba(212,175,55,0.15); color: var(--gold, #D4AF37); }
-.auto-run-failed   { background: rgba(255,111,97,0.15); color: #FF6F61; }
+.auto-run-failed   { background: rgba(214,69,69,0.15); color: #E57373; }
 .auto-run-skipped  { background: rgba(150,150,150,0.15); color: #999; }
+.auto-run-err-cell { color: #E57373; font-size: 0.85em; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 768px) {
     .auto-condition-row { grid-template-columns: 1fr; }

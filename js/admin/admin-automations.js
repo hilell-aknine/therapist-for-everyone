@@ -12,6 +12,14 @@ let _autoFields = [];
 let _autoOps = [];
 let _autoEditing = null;        // currently-edited rule object (in-memory)
 let _autoFieldsLoaded = false;
+let _autoFieldsLoading = null;  // in-flight promise guard
+let _autoAudienceCounts = new Map();  // rule_id → { total, fetched_at }
+const _autoCountCache = new Map();    // filter_hash → { total, fetched_at } (5min TTL)
+let _autoLivePreviewTimer = null;
+const AUTO_COUNT_TTL_MS = 5 * 60 * 1000;
+
+// Valid cron: 5 whitespace-separated fields with digits, *, /, -, ,
+const CRON_REGEX = /^(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)$/;
 
 const OP_LABELS = {
     '=': 'שווה ל',
@@ -92,6 +100,8 @@ async function loadAutomations() {
         _autoRules = rules || [];
         _autoStats = new Map((stats || []).map(s => [s.rule_id, s]));
         renderAutomations();
+        // Best-effort: fetch audience count per rule in parallel, then re-render cards
+        fetchAllCardAudienceCounts();
     } catch (err) {
         console.error('❌ loadAutomations:', err);
         const list = document.getElementById('automations-list');
@@ -100,6 +110,9 @@ async function loadAutomations() {
 }
 
 async function loadAutomationFields() {
+    if (_autoFieldsLoaded) return;
+    if (_autoFieldsLoading) return _autoFieldsLoading;
+    _autoFieldsLoading = (async () => {
     try {
         const { data: { session } } = await db.auth.getSession();
         if (!session) throw new Error('לא מחובר');
@@ -128,6 +141,8 @@ async function loadAutomationFields() {
         _autoOps = ['=','!=','>','>=','<','<=','in','not_in','is_true','is_false','is_null','is_not_null'];
         _autoFieldsLoaded = true;
     }
+    })();
+    try { await _autoFieldsLoading; } finally { _autoFieldsLoading = null; }
 }
 
 // ============================================================================
@@ -184,6 +199,10 @@ function renderRuleCard(rule) {
     const cronLabel = humanizeCron(cronExpr);
     const conditions = (rule.audience_filter?.all || []).length;
     const enabledClass = rule.is_enabled ? 'enabled' : 'disabled';
+    const audienceCount = _autoAudienceCounts.has(rule.id) ? _autoAudienceCounts.get(rule.id) : null;
+    const audienceBadge = audienceCount !== null
+        ? `<span class="auto-audience-badge" title="כמה משתמשים תואמים כרגע לתנאי הכלל"><i class="fa-solid fa-users"></i> ${audienceCount} תואמים</span>`
+        : `<span class="auto-audience-badge loading"><i class="fa-solid fa-circle-notch fa-spin"></i> בודק...</span>`;
     const dryBadge = rule.dry_run
         ? '<span class="auto-badge auto-badge-dry">מצב תרגול</span>'
         : '<span class="auto-badge auto-badge-live">חי</span>';
@@ -203,6 +222,7 @@ function renderRuleCard(rule) {
                     <h3>${escapeHtml(rule.name || 'ללא שם')}</h3>
                     <div class="auto-card-meta">
                         ${dryBadge}
+                        ${audienceBadge}
                         <span><i class="fa-solid fa-clock"></i> ${escapeHtml(cronLabel)}</span>
                         <span><i class="fa-solid fa-filter"></i> ${conditions} תנאים</span>
                     </div>
@@ -216,6 +236,9 @@ function renderRuleCard(rule) {
                     </button>
                     <button class="btn-icon" title="היסטוריה" onclick="viewAutomationRuns('${rule.id}')">
                         <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                    <button class="btn-icon" title="שכפל" onclick="cloneAutomation('${rule.id}')">
+                        <i class="fa-solid fa-copy"></i>
                     </button>
                     <button class="btn-icon danger" title="מחק" onclick="deleteAutomation('${rule.id}')">
                         <i class="fa-solid fa-trash"></i>
@@ -311,13 +334,14 @@ function renderAutomationEditor() {
 
         <div class="auto-edit-section">
             <h4>3. למי לשלוח <span class="auto-help-inline">(תנאים מתחברים ב-AND)</span></h4>
+            <div id="auto-live-count-badge" class="auto-live-count-badge"></div>
             <div id="auto-conditions-list">${conditionsHtml}</div>
             <button class="btn btn-secondary" onclick="addAutomationCondition()">
                 <i class="fa-solid fa-plus"></i> הוסף תנאי
             </button>
             <div class="auto-preview-row">
                 <button class="btn btn-secondary" onclick="previewAutomation()">
-                    <i class="fa-solid fa-eye"></i> תצוגה מקדימה
+                    <i class="fa-solid fa-eye"></i> תצוגה מפורטת (דוגמה)
                 </button>
                 <span id="auto-preview-result" class="auto-preview-result"></span>
             </div>
@@ -357,6 +381,7 @@ function renderAutomationEditor() {
     `;
 
     document.getElementById('automation-editor-title').textContent = r.id ? `ערוך כלל: ${r.name}` : 'כלל חדש';
+    scheduleLivePreview();
 }
 
 function renderConditionRow(cond, idx) {
@@ -422,7 +447,9 @@ function updateConditionField(idx, key, value) {
         else if (fieldDef?.type === 'enum') { cond.op = '='; cond.value = (fieldDef.options || [''])[0]; }
         else { cond.op = '='; cond.value = ''; }
         renderAutomationEditor();
+        return;
     }
+    scheduleLivePreview();
 }
 
 function addAutomationCondition() {
@@ -481,6 +508,9 @@ async function saveAutomation() {
     if (!r) return;
     if (!r.name) return showToast('חסר שם לכלל', 'error');
     if (!r.trigger_config.cron) return showToast('חסר לוח זמנים', 'error');
+    if (!CRON_REGEX.test(r.trigger_config.cron.trim())) {
+        return showToast('לוח זמנים לא חוקי (פורמט cron נדרש: "דקה שעה יום חודש יום-בשבוע")', 'error');
+    }
     if (!r.action_config.message_template?.trim()) return showToast('חסרה הודעה', 'error');
 
     try {
@@ -512,6 +542,19 @@ async function toggleAutomationEnabled(ruleId, enabled) {
     }
 }
 
+function cloneAutomation(ruleId) {
+    const src = _autoRules.find(r => r.id === ruleId);
+    if (!src) return;
+    const copy = JSON.parse(JSON.stringify(src));
+    delete copy.id;
+    copy.name = (copy.name || 'ללא שם') + ' (עותק)';
+    copy.is_enabled = false;
+    copy.dry_run = true;
+    _autoEditing = copy;
+    renderAutomationEditor();
+    document.getElementById('automation-editor-modal').classList.add('active');
+}
+
 async function deleteAutomation(ruleId) {
     if (!confirm('למחוק את הכלל לצמיתות? פעולה זו אינה הפיכה.')) return;
     try {
@@ -527,6 +570,62 @@ async function deleteAutomation(ruleId) {
 // ============================================================================
 // PREVIEW + TEST + RUN — calls crm-bot
 // ============================================================================
+
+function hashAudienceFilter(filter) {
+    try { return JSON.stringify(filter?.all || []); } catch { return '[]'; }
+}
+
+async function fetchAudiencePreview(rule) {
+    const key = hashAudienceFilter(rule.audience_filter);
+    const cached = _autoCountCache.get(key);
+    if (cached && (Date.now() - cached.fetched_at) < AUTO_COUNT_TTL_MS) {
+        return cached.data;
+    }
+    const data = await callBot('/api/automations/preview', { rule });
+    _autoCountCache.set(key, { data, fetched_at: Date.now() });
+    return data;
+}
+
+async function fetchAllCardAudienceCounts() {
+    if (!_autoRules.length) return;
+    const results = await Promise.allSettled(
+        _autoRules.map(r => fetchAudiencePreview(r).then(d => ({ id: r.id, total: d.total })))
+    );
+    let anyUpdated = false;
+    for (const res of results) {
+        if (res.status === 'fulfilled' && res.value) {
+            _autoAudienceCounts.set(res.value.id, res.value.total);
+            anyUpdated = true;
+        }
+    }
+    if (anyUpdated) renderAutomations();
+}
+
+function scheduleLivePreview() {
+    clearTimeout(_autoLivePreviewTimer);
+    const badge = document.getElementById('auto-live-count-badge');
+    if (badge) badge.innerHTML = '<span class="auto-count-loading">בודק...</span>';
+    _autoLivePreviewTimer = setTimeout(runLivePreview, 350);
+}
+
+async function runLivePreview() {
+    const badge = document.getElementById('auto-live-count-badge');
+    if (!badge || !_autoEditing) return;
+    // Snapshot filter state from editor before fetching (in case user keeps typing)
+    readEditorIntoState();
+    const snapshot = JSON.parse(JSON.stringify(_autoEditing));
+    try {
+        const data = await fetchAudiencePreview(snapshot);
+        // Ignore stale result if editor state changed meanwhile
+        if (hashAudienceFilter(snapshot.audience_filter) !== hashAudienceFilter(_autoEditing?.audience_filter)) return;
+        const total = data.total ?? 0;
+        const cls = total === 0 ? 'zero' : 'ok';
+        badge.innerHTML = `<span class="auto-count-pill ${cls}"><strong>${total}</strong> משתמשים תואמים</span>`;
+    } catch (err) {
+        badge.innerHTML = `<span class="auto-count-pill err">שגיאה: ${escapeHtml(err.message || '')}</span>`;
+    }
+}
+
 async function callBot(path, body) {
     const { data: { session } } = await db.auth.getSession();
     if (!session) throw new Error('לא מחובר');
@@ -551,22 +650,30 @@ async function previewAutomation() {
     result.textContent = 'בודק...';
     sampleEl.innerHTML = '';
     try {
-        const data = await callBot('/api/automations/preview', { rule: r });
+        const data = await fetchAudiencePreview(r);
         result.innerHTML = `<strong>${data.total}</strong> משתמשים תואמים`;
-        if (data.sample?.length) {
+        // Dedupe sample rows by masked phone (backend may return duplicates on joined queries)
+        const seen = new Set();
+        const dedupedSample = (data.sample || []).filter(u => {
+            const key = u.phone_masked || u.full_name;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+        if (dedupedSample.length) {
             sampleEl.innerHTML = `<div class="auto-sample-list">
-                <div class="auto-sample-title">דוגמה ל-${data.sample.length} מהם:</div>
-                ${data.sample.map(u => `
+                <div class="auto-sample-title">דוגמה ל-${dedupedSample.length} מהם:</div>
+                ${dedupedSample.map(u => `
                     <div class="auto-sample-row">
                         <span>${escapeHtml(u.full_name || '—')}</span>
-                        <span style="color:#888;direction:ltr;">${escapeHtml(u.phone_masked)}</span>
-                        <span style="color:#aaa;">${u.lessons_completed} שיעורים</span>
+                        <span class="auto-sample-phone">${escapeHtml(u.phone_masked || '')}</span>
+                        <span class="auto-sample-lessons">${u.lessons_completed ?? 0} שיעורים</span>
                     </div>
                 `).join('')}
             </div>`;
         }
     } catch (err) {
-        result.innerHTML = `<span style="color:#FF6F61;">שגיאה: ${escapeHtml(err.message)}</span>`;
+        result.innerHTML = `<span class="auto-error-text">שגיאה: ${escapeHtml(err.message)}</span>`;
     }
 }
 
@@ -611,7 +718,7 @@ async function viewAutomationRuns(ruleId) {
                 <td><span class="auto-run-status auto-run-${run.status}">${run.status}</span></td>
                 <td style="direction:ltr;font-family:monospace;font-size:0.85em;">${escapeHtml(run.phone || '—')}</td>
                 <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml((run.message_text || '').slice(0, 80))}</td>
-                <td style="color:#FF6F61;font-size:0.85em;">${escapeHtml(run.error || '')}</td>
+                <td class="auto-run-err-cell">${escapeHtml(run.error || '')}</td>
             </tr>
         `).join('');
         const modal = document.getElementById('automation-runs-modal');

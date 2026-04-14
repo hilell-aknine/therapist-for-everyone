@@ -377,13 +377,14 @@ async function runSegPreview() {
 function segLaunchReengageAutomation() {
     const preset = {
         all: [
+            { field: 'minutes_since_signup', op: '>=', value: 30 },
+            { field: 'minutes_since_signup', op: '<',  value: 1440 },
             { field: 'filled_questionnaire', op: 'is_false' },
-            { field: 'days_since_signup', op: '<=', value: 7 },
             { field: 'has_phone', op: 'is_true' },
         ],
     };
-    const message = 'היי {{first_name}} 👋\nראינו שנרשמת לפורטל אבל עדיין לא מילאת את השאלון הקצר.\nזה לוקח שתי דקות ועוזר לנו להתאים לך בדיוק את התוכן שיעניין אותך:\nhttps://www.therapist-home.com/pages/portal-questionnaire.html';
-    segLaunchAutomationWithFilter(preset, 'תזכורת למי שלא מילא שאלון', message);
+    const message = 'היי {{first_name}} 👋\nראינו שנרשמת לפורטל לפני זמן קצר אבל עדיין לא מילאת את השאלון הקצר.\nזה לוקח שתי דקות ועוזר לנו להתאים לך בדיוק את התוכן שיעניין אותך:\nhttps://www.therapist-home.com/pages/portal-questionnaire.html';
+    segLaunchAutomationWithFilter(preset, 'תזכורת 30 דק׳ אחרי הרשמה למי שלא מילא שאלון', message);
 }
 
 function segLaunchAutomationWithFilter(filter, name, messageTemplate) {

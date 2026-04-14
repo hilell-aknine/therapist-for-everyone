@@ -74,9 +74,23 @@ const RULE_TEMPLATES = [
         ]},
         message: 'היי {{first_name}}, ראיתי שעדיין לא השלמת את שאלון ההיכרות 💛\nזה לוקח 2 דקות ועוזר לנו להתאים לך את התוכן הכי מדויק:\nhttps://www.therapist-home.com/pages/portal-questionnaire.html',
     },
+    {
+        name: 'תזכורת 30 דק׳ אחרי הרשמה למי שלא מילא שאלון',
+        description: 'שולחת WhatsApp אוטומטי כ-30 דקות אחרי שמישהו נרשם לפורטל אם הוא עדיין לא מילא את השאלון',
+        cron: '*/5 * * * *',
+        cron_label: 'כל 5 דקות',
+        filter: { all: [
+            { field: 'minutes_since_signup', op: '>=', value: 30 },
+            { field: 'minutes_since_signup', op: '<',  value: 120 },
+            { field: 'filled_questionnaire', op: 'is_false' },
+            { field: 'has_phone', op: 'is_true' },
+        ]},
+        message: 'היי {{first_name}} 👋\nראיתי שנרשמת לפורטל לפני זמן קצר אבל עדיין לא מילאת את השאלון הקצר.\nזה לוקח שתי דקות ועוזר לנו להתאים לך בדיוק את התוכן שיעניין אותך:\nhttps://www.therapist-home.com/pages/portal-questionnaire.html',
+    },
 ];
 
 const CRON_PRESETS = [
+    { value: '*/5 * * * *', label: 'כל 5 דקות' },
     { value: '0 9 * * *', label: 'כל יום ב-09:00' },
     { value: '0 14 * * *', label: 'כל יום ב-14:00' },
     { value: '0 10 * * 1-5', label: 'ימי חול ב-10:00' },
@@ -132,6 +146,7 @@ async function loadAutomationFields() {
             { key: 'last_lesson_days_ago', label: 'ימים מאז השיעור האחרון', type: 'number' },
             { key: 'role', label: 'תפקיד', type: 'enum', options: ['admin','therapist','patient','student_lead','student','sales_rep','paid_customer'] },
             { key: 'days_since_signup', label: 'ימים מאז הרשמה', type: 'number' },
+            { key: 'minutes_since_signup', label: 'דקות מאז הרשמה', type: 'number' },
             { key: 'sales_stage', label: 'שלב מכירה', type: 'enum', options: ['new','contacted','follow_up','presentation','negotiation','won','lost'] },
             { key: 'sales_stage_days', label: 'ימים בשלב הנוכחי', type: 'number' },
             { key: 'has_phone', label: 'יש מספר טלפון', type: 'boolean' },

@@ -107,6 +107,7 @@ function renderSegments(data) {
             ${renderKpiCard('הגיעו מפייסבוק', k.from_facebook, `אינסטגרם: ${k.from_instagram}`, 'fa-share-nodes')}
             ${renderKpiCard('למדו 5+ שיעורים', k.lessons_gt5, `10+ שיעורים: ${k.lessons_gte10}`, 'fa-graduation-cap')}
             ${renderKpiCard('לקוחות משלמים', data.active_paying || 0, `בפייפליין: ${data.pipeline_open || 0}`, 'fa-crown')}
+            ${renderAbandonKpiCard(k)}
         </div>
 
         <div class="seg-breakdowns">
@@ -152,6 +153,25 @@ function renderKpiCard(label, value, sub, icon) {
                 <div class="seg-kpi-label">${escapeHtml(label)}</div>
                 <div class="seg-kpi-value">${(value ?? 0).toLocaleString('he-IL')}</div>
                 <div class="seg-kpi-sub">${sub}</div>
+            </div>
+        </div>
+    `;
+}
+
+function renderAbandonKpiCard(k) {
+    const recent = k.abandoned_recent ?? 0;
+    const total = k.abandoned_total ?? 0;
+    const today = k.abandoned_today ?? 0;
+    return `
+        <div class="seg-kpi seg-kpi-warn">
+            <div class="seg-kpi-icon"><i class="fa-solid fa-user-xmark"></i></div>
+            <div class="seg-kpi-body">
+                <div class="seg-kpi-label">נרשמו אך לא מילאו שאלון</div>
+                <div class="seg-kpi-value">${recent.toLocaleString('he-IL')}</div>
+                <div class="seg-kpi-sub">השבוע · סה"כ אי-פעם: ${total.toLocaleString('he-IL')} · היום: ${today.toLocaleString('he-IL')}</div>
+                <button class="seg-reengage-btn" onclick="segLaunchReengageAutomation()">
+                    <i class="fa-solid fa-paper-plane"></i> בנה אוטומציית תזכורת
+                </button>
             </div>
         </div>
     `;
@@ -354,25 +374,42 @@ async function runSegPreview() {
     }
 }
 
-function segSaveAsAutomation() {
+function segLaunchReengageAutomation() {
+    const preset = {
+        all: [
+            { field: 'filled_questionnaire', op: 'is_false' },
+            { field: 'days_since_signup', op: '<=', value: 7 },
+            { field: 'has_phone', op: 'is_true' },
+        ],
+    };
+    const message = 'היי {{first_name}} 👋\nראינו שנרשמת לפורטל אבל עדיין לא מילאת את השאלון הקצר.\nזה לוקח שתי דקות ועוזר לנו להתאים לך בדיוק את התוכן שיעניין אותך:\nhttps://www.therapist-home.com/pages/portal-questionnaire.html';
+    segLaunchAutomationWithFilter(preset, 'תזכורת למי שלא מילא שאלון', message);
+}
+
+function segLaunchAutomationWithFilter(filter, name, messageTemplate) {
     if (typeof openAutomationEditor !== 'function' || typeof _autoEditing === 'undefined') {
         showToast('בונה האוטומציות לא נטען', 'error');
         return;
     }
-    // Switch tab to automations
     const navItems = document.querySelectorAll('.nav-item');
     let target = null;
     navItems.forEach(el => {
         if (el.getAttribute('onclick')?.includes("'automations'")) target = el;
     });
     if (target) target.click();
-    // Open editor with this filter pre-applied (defer to let the tab finish loading)
     setTimeout(() => {
         openAutomationEditor(null);
         if (window._autoEditing) {
-            window._autoEditing.audience_filter = JSON.parse(JSON.stringify(_segCustomFilter));
-            window._autoEditing.name = 'סגמנט מהפילוחים';
+            window._autoEditing.audience_filter = JSON.parse(JSON.stringify(filter));
+            window._autoEditing.name = name;
+            if (messageTemplate) {
+                window._autoEditing.action_config = { message_template: messageTemplate };
+            }
             if (typeof renderAutomationEditor === 'function') renderAutomationEditor();
         }
     }, 200);
+}
+
+function segSaveAsAutomation() {
+    segLaunchAutomationWithFilter(_segCustomFilter, 'סגמנט מהפילוחים', null);
 }

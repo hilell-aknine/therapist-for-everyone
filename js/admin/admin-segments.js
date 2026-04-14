@@ -93,12 +93,12 @@ function renderSegments(data) {
         </p>
 
         <div class="seg-kpi-grid">
-            ${renderKpiCard('היום', k.signups_today, `<span class="seg-delta ${deltaToday >= 0 ? 'up' : 'down'}">${deltaSign}${deltaToday} מאתמול</span>`, 'fa-calendar-day', 'gold')}
-            ${renderKpiCard('7 ימים אחרונים', k.signups_7d, 'נרשמו השבוע', 'fa-calendar-week', 'aqua')}
-            ${renderKpiCard('30 ימים אחרונים', k.signups_30d, 'נרשמו החודש', 'fa-calendar', 'aqua')}
-            ${renderKpiCard('מפייסבוק', k.from_facebook, `אינסטגרם: ${k.from_instagram}`, 'fa-share-nodes', 'aqua')}
-            ${renderKpiCard('למדו 5+ שיעורים', k.lessons_gt5, `10+ שיעורים: ${k.lessons_gte10}`, 'fa-graduation-cap', 'gold')}
-            ${renderKpiCard('לקוחות משלמים', data.active_paying || 0, `פייפליין פתוח: ${data.pipeline_open || 0}`, 'fa-crown', 'gold')}
+            ${renderKpiCard('נרשמו היום', k.signups_today, `<span class="seg-delta ${deltaToday >= 0 ? 'up' : 'down'}">${deltaSign}${deltaToday}</span> מאתמול`, 'fa-calendar-day')}
+            ${renderKpiCard('7 ימים אחרונים', k.signups_7d, 'נרשמים חדשים', 'fa-calendar-week')}
+            ${renderKpiCard('30 ימים אחרונים', k.signups_30d, 'נרשמים חדשים', 'fa-calendar')}
+            ${renderKpiCard('הגיעו מפייסבוק', k.from_facebook, `אינסטגרם: ${k.from_instagram}`, 'fa-share-nodes')}
+            ${renderKpiCard('למדו 5+ שיעורים', k.lessons_gt5, `10+ שיעורים: ${k.lessons_gte10}`, 'fa-graduation-cap')}
+            ${renderKpiCard('לקוחות משלמים', data.active_paying || 0, `בפייפליין: ${data.pipeline_open || 0}`, 'fa-crown')}
         </div>
 
         <div class="seg-breakdowns">
@@ -135,13 +135,13 @@ function renderSegments(data) {
     bootCustomBuilder();
 }
 
-function renderKpiCard(label, value, sub, icon, accent) {
+function renderKpiCard(label, value, sub, icon) {
     return `
-        <div class="seg-kpi seg-kpi-${accent}">
+        <div class="seg-kpi">
             <div class="seg-kpi-icon"><i class="fa-solid ${icon}"></i></div>
             <div class="seg-kpi-body">
-                <div class="seg-kpi-value">${(value ?? 0).toLocaleString('he-IL')}</div>
                 <div class="seg-kpi-label">${escapeHtml(label)}</div>
+                <div class="seg-kpi-value">${(value ?? 0).toLocaleString('he-IL')}</div>
                 <div class="seg-kpi-sub">${sub}</div>
             </div>
         </div>

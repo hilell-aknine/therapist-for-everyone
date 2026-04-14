@@ -448,9 +448,10 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 }
 
 /* ============================================================
-   SEGMENTS tab — KPI strip, breakdown panels, custom builder
-   Reuses .auto-count-pill, .auto-input, .auto-condition-row,
-   .auto-sample-list from above.
+   SEGMENTS tab — flat, theme-aware, accessible
+   Uses the same card pattern as .overview-card in admin-styles.css
+   so it adapts to Light/Dark theme via --card / --border / --text.
+   No gradients, no hardcoded greens, single accent color for bars.
    ============================================================ */
 
 .seg-toolbar {
@@ -458,180 +459,211 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .seg-error { color: #E57373; }
 
+/* --- KPI strip --- */
 .seg-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
     margin-bottom: 2rem;
 }
-
 .seg-kpi {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: rgba(0, 96, 107, 0.1);
-    border: 1px solid rgba(47, 133, 146, 0.25);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1.1rem 1.25rem;
-    transition: transform 0.15s, border-color 0.15s;
+    padding: 1.25rem 1.4rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    transition: border-color 0.2s, transform 0.15s;
 }
-.seg-kpi:hover { transform: translateY(-2px); border-color: var(--gold, #D4AF37); }
+.seg-kpi:hover { border-color: var(--t-border-strong); transform: translateY(-1px); }
 
 .seg-kpi-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    flex-shrink: 0;
-}
-.seg-kpi-gold .seg-kpi-icon { background: rgba(212,175,55,0.15); color: var(--gold, #D4AF37); }
-.seg-kpi-aqua .seg-kpi-icon { background: rgba(47,133,146,0.18); color: var(--dusty-aqua, #2F8592); }
-
-.seg-kpi-body { flex: 1; min-width: 0; }
-.seg-kpi-value {
-    font-size: 1.85rem;
-    font-weight: 700;
-    color: var(--frost-white, #E8F1F2);
-    line-height: 1;
-    font-family: 'Frank Ruhl Libre', serif;
-}
-.seg-kpi-label {
-    font-size: 0.82rem;
-    color: var(--dusty-aqua, #2F8592);
+    font-size: 1.1rem;
+    color: var(--text-secondary);
     margin-top: 0.35rem;
-    font-weight: 600;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+.seg-kpi-body { flex: 1; min-width: 0; }
+.seg-kpi-label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    margin-bottom: 0.35rem;
+}
+.seg-kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
 }
 .seg-kpi-sub {
-    font-size: 0.72rem;
-    color: #8fa3a6;
-    margin-top: 0.2rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 0.4rem;
 }
 .seg-delta { font-weight: 600; }
-.seg-delta.up   { color: var(--dusty-aqua, #2F8592); }
-.seg-delta.down { color: #E57373; }
+.seg-delta.up   { color: #10B981; }
+.seg-delta.down { color: #EF4444; }
 
+/* --- Breakdown panels --- */
 .seg-breakdowns {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     gap: 1rem;
     margin-bottom: 2rem;
 }
-
 .seg-panel {
-    background: rgba(0, 96, 107, 0.08);
-    border: 1px solid rgba(47, 133, 146, 0.2);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1.1rem 1.25rem;
+    padding: 1.25rem 1.4rem;
 }
 .seg-panel-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.85rem;
-    padding-bottom: 0.6rem;
-    border-bottom: 1px solid rgba(47, 133, 146, 0.2);
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
 }
 .seg-panel-head h4 {
     margin: 0;
-    color: var(--dusty-aqua, #2F8592);
+    color: var(--text);
     font-size: 0.95rem;
-    font-family: 'Frank Ruhl Libre', serif;
+    font-weight: 700;
 }
-.seg-panel-head h4 i { margin-left: 0.4rem; opacity: 0.85; }
-.seg-panel-total { color: #8fa3a6; font-size: 0.75rem; }
-
-.seg-panel-body { display: flex; flex-direction: column; gap: 0.4rem; }
+.seg-panel-head h4 i {
+    margin-left: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+.seg-panel-total {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+.seg-panel-body { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .seg-row {
     display: grid;
-    grid-template-columns: 0.9fr 1.4fr auto auto;
-    gap: 0.65rem;
+    grid-template-columns: 140px 1fr 48px 42px;
+    gap: 0.85rem;
     align-items: center;
-    padding: 0.4rem 0.5rem;
+    padding: 0.45rem 0.5rem;
     border-radius: 6px;
     cursor: pointer;
     transition: background 0.12s;
 }
-.seg-row:hover { background: rgba(47,133,146,0.12); }
+.seg-row:hover { background: var(--card-hover); }
 .seg-row-label {
-    color: var(--frost-white, #E8F1F2);
-    font-size: 0.85rem;
+    color: var(--text);
+    font-size: 0.88rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: 500;
 }
 .seg-row-bar {
-    height: 8px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 4px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
     overflow: hidden;
 }
 .seg-row-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--dusty-aqua, #2F8592), var(--gold, #D4AF37));
-    border-radius: 4px;
-    transition: width 0.3s;
+    background: var(--dusty-aqua, #2F8592);
+    border-radius: 3px;
+    transition: width 0.3s ease;
 }
 .seg-row-count {
-    color: var(--frost-white, #E8F1F2);
-    font-weight: 600;
-    font-size: 0.85rem;
-    min-width: 36px;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 0.9rem;
     text-align: left;
+    font-variant-numeric: tabular-nums;
 }
 .seg-row-pct {
-    color: #8fa3a6;
-    font-size: 0.75rem;
-    min-width: 36px;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
     text-align: left;
+    font-variant-numeric: tabular-nums;
 }
 
-.seg-empty { color: #8fa3a6; font-size: 0.85rem; padding: 0.5rem; }
+.seg-empty {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+}
 
+/* --- Custom builder (same flat card, no dashed border) --- */
 .seg-builder {
-    background: rgba(0, 59, 70, 0.55);
-    border: 1px dashed rgba(212, 175, 55, 0.3);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
-.seg-builder-head { margin-bottom: 1rem; }
+.seg-builder-head { margin-bottom: 1.25rem; }
 .seg-builder-head h3 {
-    margin: 0 0 0.4rem;
-    color: var(--frost-white, #E8F1F2);
-    font-family: 'Frank Ruhl Libre', serif;
-    font-size: 1.1rem;
+    margin: 0 0 0.35rem;
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 700;
 }
+.seg-builder-head h3 i { color: var(--text-secondary); font-size: 0.9em; margin-left: 0.4rem; }
 .seg-builder-head p {
     margin: 0;
-    color: #8fa3a6;
+    color: var(--text-secondary);
     font-size: 0.85rem;
+    line-height: 1.5;
 }
 .seg-builder-actions {
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
     justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
 }
-.seg-no-value { color: #8fa3a6; align-self: center; font-size: 0.85rem; }
+.seg-no-value {
+    color: var(--text-secondary);
+    align-self: center;
+    font-size: 0.85rem;
+}
 
 .seg-footer {
     text-align: left;
-    color: #6e8082;
+    color: var(--text-secondary);
     font-size: 0.72rem;
     direction: ltr;
     margin-top: 1rem;
+    opacity: 0.7;
+}
+
+/* Count pill override inside segments — match theme, not hardcoded */
+.seg-builder .auto-count-pill.ok {
+    background: var(--card-hover);
+    color: var(--text);
+    border-color: var(--t-border-strong);
+}
+.seg-builder .auto-count-pill.ok strong { color: var(--text); font-size: 1.2rem; }
+.seg-builder .auto-count-pill.zero {
+    background: var(--card-hover);
+    color: var(--text-secondary);
+    border-color: var(--border);
 }
 
 @media (max-width: 768px) {
     .seg-row { grid-template-columns: 1fr auto; }
     .seg-row-bar, .seg-row-pct { display: none; }
+    .seg-kpi-value { font-size: 1.7rem; }
 }

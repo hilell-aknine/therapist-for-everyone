@@ -37,6 +37,14 @@ const SEG_ROLE_LABELS = {
     'ללא תפקיד': 'ללא תפקיד',
 };
 
+const SEG_CHANNEL_LABELS = {
+    patients: 'טופס מטופל',
+    therapists: 'טופס מטפל',
+    contact_requests: 'טופס יצירת קשר',
+    profiles: 'הרשמה לפורטל',
+    portal_questionnaires: 'שאלון פורטל',
+};
+
 // ============================================================================
 // LOAD
 // ============================================================================
@@ -89,7 +97,7 @@ function renderSegments(data) {
             </button>
         </div>
         <p style="color:var(--text-secondary,#aaa);margin:0 0 1.5rem;font-size:0.9rem;">
-            תמונת מצב חיה של כל המשתמשים — מי, מאיפה, וכמה הם למדו. כל המספרים מחושבים לפי שעון ישראל.
+            תמונת מצב חיה של כל הנרשמים — מ-5 מסלולי הרשמה (טופס מטופל, טופס מטפל, יצירת קשר, הרשמה לפורטל, שאלון פורטל). כל המספרים מחושבים לפי שעון ישראל.
         </p>
 
         <div class="seg-kpi-grid">
@@ -102,10 +110,11 @@ function renderSegments(data) {
         </div>
 
         <div class="seg-breakdowns">
-            ${renderBreakdownPanel('פילוח לפי מקור הגעה', 'fa-bullhorn', data.by_source, 'source', null)}
-            ${renderBreakdownPanel('פילוח לפי שלב במכירה', 'fa-funnel-dollar', data.by_stage, 'stage', SEG_STAGE_LABELS)}
-            ${renderBreakdownPanel('פילוח לפי כמות שיעורים שהושלמו', 'fa-graduation-cap', data.by_lessons, 'bucket', null)}
-            ${renderBreakdownPanel('פילוח לפי תפקיד', 'fa-user-tag', data.by_role, 'role', SEG_ROLE_LABELS)}
+            ${renderBreakdownPanel('לפי מסלול הרשמה', 'fa-route', data.by_channel, 'channel', SEG_CHANNEL_LABELS)}
+            ${renderBreakdownPanel('לפי מקור הגעה (UTM / דיווח עצמי)', 'fa-bullhorn', data.by_source, 'source', null)}
+            ${renderBreakdownPanel('לפי כמות שיעורים שהושלמו (משתמשים עם חשבון)', 'fa-graduation-cap', data.by_lessons, 'bucket', null)}
+            ${renderBreakdownPanel('לפי שלב מכירה (משתמשים עם חשבון)', 'fa-funnel-dollar', data.by_stage, 'stage', SEG_STAGE_LABELS)}
+            ${renderBreakdownPanel('לפי תפקיד (משתמשים עם חשבון)', 'fa-user-tag', data.by_role, 'role', SEG_ROLE_LABELS)}
         </div>
 
         <div class="seg-builder">

@@ -18,8 +18,8 @@ const _autoCountCache = new Map();    // filter_hash → { total, fetched_at } (
 let _autoLivePreviewTimer = null;
 const AUTO_COUNT_TTL_MS = 5 * 60 * 1000;
 
-// Valid cron: 5 whitespace-separated fields with digits, *, /, -, ,
-const CRON_REGEX = /^(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)$/;
+// Valid cron: 5 whitespace-separated fields, each made of *, digits, commas, dashes, slashes
+const CRON_REGEX = /^([\*0-9,\-\/]+)\s+([\*0-9,\-\/]+)\s+([\*0-9,\-\/]+)\s+([\*0-9,\-\/]+)\s+([\*0-9,\-\/]+)$/;
 
 const OP_LABELS = {
     '=': 'שווה ל',

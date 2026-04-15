@@ -214,6 +214,7 @@ function renderRuleCard(rule) {
     const cronLabel = humanizeCron(cronExpr);
     const conditions = (rule.audience_filter?.all || []).length;
     const enabledClass = rule.is_enabled ? 'enabled' : 'disabled';
+    const dryClass = (rule.is_enabled && rule.dry_run) ? ' card-in-dry-run' : '';
     const audienceCount = _autoAudienceCounts.has(rule.id) ? _autoAudienceCounts.get(rule.id) : null;
     const audienceBadge = audienceCount !== null
         ? `<span class="auto-audience-badge" title="כמה משתמשים תואמים כרגע לתנאי הכלל"><i class="fa-solid fa-users"></i> ${audienceCount} תואמים</span>`
@@ -225,8 +226,20 @@ function renderRuleCard(rule) {
         ? `הרצה אחרונה: ${formatDateTime(stats.last_fired)}`
         : 'עדיין לא רץ';
 
+    // Loud warning banner when an enabled rule is still stuck in dry_run —
+    // this is the state that made the "pulse check" bug invisible.
+    const dryWarning = (rule.is_enabled && rule.dry_run) ? `
+                <div class="auto-dry-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>מצב תרגול פעיל — הכלל <b>לא שולח הודעות אמיתיות</b>.</span>
+                    <button class="auto-dry-golive" onclick="goLiveAutomation('${rule.id}')">
+                        עבור למצב חי
+                    </button>
+                </div>` : '';
+
     return `
-        <div class="automation-card ${enabledClass}">
+        <div class="automation-card ${enabledClass}${dryClass}">
+            ${dryWarning}
             <div class="auto-card-head">
                 <label class="auto-toggle">
                     <input type="checkbox" ${rule.is_enabled ? 'checked' : ''}
@@ -264,16 +277,17 @@ function renderRuleCard(rule) {
             <div class="auto-card-stats">
                 <div class="auto-stat">
                     <div class="auto-stat-num">${stats.sent_today || 0}</div>
-                    <div class="auto-stat-label">היום</div>
+                    <div class="auto-stat-label">נשלחו היום</div>
                 </div>
                 <div class="auto-stat">
                     <div class="auto-stat-num">${stats.sent_7d || 0}</div>
-                    <div class="auto-stat-label">7 ימים</div>
+                    <div class="auto-stat-label">נשלחו 7 ימים</div>
                 </div>
                 <div class="auto-stat">
                     <div class="auto-stat-num">${stats.total_sent || 0}</div>
                     <div class="auto-stat-label">סה״כ</div>
                 </div>
+                ${rule.dry_run && stats.dry_runs_7d ? `<div class="auto-stat dry"><div class="auto-stat-num">${stats.dry_runs_7d}</div><div class="auto-stat-label">תרגולים 7 ימים</div></div>` : ''}
                 ${stats.failed_7d ? `<div class="auto-stat error"><div class="auto-stat-num">${stats.failed_7d}</div><div class="auto-stat-label">שגיאות 7d</div></div>` : ''}
             </div>
             <div class="auto-card-footer">${lastFired}</div>
@@ -544,6 +558,21 @@ async function toggleAutomationEnabled(ruleId, enabled) {
     try {
         const rule = _autoRules.find(r => r.id === ruleId);
         if (!rule) return;
+
+        // Guard: enabling a rule that's still in dry_run means no real messages
+        // will go out. Make it explicit at the moment of the click instead of
+        // leaving the admin to discover it hours later in WhatsApp.
+        if (enabled && rule.dry_run) {
+            const proceed = confirm(
+                'הכלל הזה עדיין במצב תרגול — הוא יעדכן סטטיסטיקות אבל לא ישלח הודעות וואטסאפ אמיתיות.\n\n' +
+                'להפעיל ככה בכל זאת? (לחיצה על "ביטול" תשאיר את הכלל כבוי — פתח את הכלל לעריכה וכבה את "מצב תרגול" למשלוח אמיתי.)'
+            );
+            if (!proceed) {
+                renderAutomations();
+                return;
+            }
+        }
+
         const { error } = await db.rpc('admin_automations_upsert', {
             rule: { id: ruleId, is_enabled: enabled },
         });
@@ -553,6 +582,31 @@ async function toggleAutomationEnabled(ruleId, enabled) {
         renderAutomations();
     } catch (err) {
         showToast('שגיאה: ' + (err.message || err), 'error');
+        loadAutomations();
+    }
+}
+
+// One-click transition from "test mode" to real-send mode, straight from the
+// rule card. Fires only when the admin clicks the big warning button on an
+// enabled rule that's still in dry_run.
+async function goLiveAutomation(ruleId) {
+    const rule = _autoRules.find(r => r.id === ruleId);
+    if (!rule) return;
+    const proceed = confirm(
+        'לאחר המעבר הכלל ישלח הודעות וואטסאפ אמיתיות לכל מי שעונה על התנאים בהרצה הבאה.\n\n' +
+        'להמשיך?'
+    );
+    if (!proceed) return;
+    try {
+        const { error } = await db.rpc('admin_automations_upsert', {
+            rule: { id: ruleId, dry_run: false },
+        });
+        if (error) throw error;
+        rule.dry_run = false;
+        showToast('הכלל במצב חי — ההרצה הבאה תשלח הודעות אמיתיות', 'success');
+        renderAutomations();
+    } catch (err) {
+        showToast('שגיאה במעבר למצב חי: ' + (err.message || err), 'error');
         loadAutomations();
     }
 }

@@ -1,31 +1,138 @@
 // ============================================================================
-// UTM CAPTURE — Runs immediately on every page load
+// ATTRIBUTION CAPTURE — Professional traffic-source tracking
+// ----------------------------------------------------------------------------
+// Captures on EVERY page load:
+//   - All 5 UTM params (source/medium/campaign/term/content)
+//   - Click IDs: gclid (Google), fbclid (Meta), ttclid (TikTok), msclkid (Bing)
+//   - document.referrer (domain only)
+//   - landing page (pathname + query)
+//   - FIRST touch (persistent — never overwritten after first capture)
+//   - LAST touch (overwritten on every visit that has any signal)
+//   - Session id (sessionStorage, per-tab)
+//   - Device type + OS + browser + viewport + language + timezone
+// ----------------------------------------------------------------------------
+// Storage keys:
+//   localStorage('attribution_first_touch')  — persistent, first known source
+//   localStorage('attribution_last_touch')   — overwritten per visit
+//   sessionStorage('attribution_session_id') — per tab/session
+//   localStorage('utm_data')                 — LEGACY, still written for
+//                                              backwards compat with old code
 // ============================================================================
-(function captureUtm() {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        const utm_source = params.get('utm_source');
-        const utm_medium = params.get('utm_medium');
-        const utm_campaign = params.get('utm_campaign');
 
-        if (utm_source || utm_medium || utm_campaign) {
+// Lightweight device parser — no external library
+function parseDeviceFromUa(ua) {
+    if (!ua) return { type: 'unknown', os: null, browser: null };
+    const lower = ua.toLowerCase();
+
+    // Device type
+    let type = 'desktop';
+    if (/ipad|tablet|playbook|silk/.test(lower)) type = 'tablet';
+    else if (/mobi|iphone|ipod|android.*mobile|opera mini|windows phone|blackberry/.test(lower)) type = 'mobile';
+    else if (/android/.test(lower)) type = 'tablet'; // Android without "Mobile" → tablet
+
+    // OS
+    let os = null;
+    if (/windows nt/.test(lower)) os = 'Windows';
+    else if (/iphone|ipad|ipod/.test(lower)) os = 'iOS';
+    else if (/mac os x/.test(lower)) os = 'macOS';
+    else if (/android/.test(lower)) os = 'Android';
+    else if (/linux/.test(lower)) os = 'Linux';
+
+    // Browser
+    let browser = null;
+    if (/edg\//.test(lower)) browser = 'Edge';
+    else if (/opr\/|opera/.test(lower)) browser = 'Opera';
+    else if (/firefox/.test(lower)) browser = 'Firefox';
+    else if (/chrome|crios/.test(lower)) browser = 'Chrome';
+    else if (/safari/.test(lower)) browser = 'Safari';
+
+    return { type, os, browser };
+}
+
+function _extractDomain(url) {
+    if (!url || typeof url !== 'string') return null;
+    try {
+        const u = new URL(url);
+        return u.hostname.replace(/^www\./, '') || null;
+    } catch (e) { return null; }
+}
+
+// Build the "this touch" object from the current page load
+function _captureThisTouch() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        utm_source:   params.get('utm_source')   || null,
+        utm_medium:   params.get('utm_medium')   || null,
+        utm_campaign: params.get('utm_campaign') || null,
+        utm_term:     params.get('utm_term')     || null,
+        utm_content:  params.get('utm_content')  || null,
+        gclid:        params.get('gclid')        || null,
+        fbclid:       params.get('fbclid')       || null,
+        ttclid:       params.get('ttclid')       || null,
+        msclkid:      params.get('msclkid')      || null,
+        referrer_domain: _extractDomain(document.referrer),
+        landing_url: window.location.pathname + (window.location.search || ''),
+        at: new Date().toISOString()
+    };
+}
+
+function _touchHasAnySignal(t) {
+    if (!t) return false;
+    return !!(t.utm_source || t.utm_medium || t.utm_campaign || t.utm_term || t.utm_content ||
+              t.gclid || t.fbclid || t.ttclid || t.msclkid || t.referrer_domain);
+}
+
+(function captureAttribution() {
+    try {
+        const touch = _captureThisTouch();
+
+        // First-touch — write once, never overwrite (captures "where did they originally come from")
+        let first = null;
+        const firstRaw = localStorage.getItem('attribution_first_touch');
+        if (firstRaw) {
+            try { first = JSON.parse(firstRaw); } catch (e) { first = null; }
+        }
+        if (!first && _touchHasAnySignal(touch)) {
+            localStorage.setItem('attribution_first_touch', JSON.stringify(touch));
+        }
+
+        // Last-touch — overwrite if this visit has any new signal,
+        // otherwise leave the previous last-touch in place
+        if (_touchHasAnySignal(touch)) {
+            localStorage.setItem('attribution_last_touch', JSON.stringify(touch));
+        }
+
+        // Session id (per-tab)
+        if (!sessionStorage.getItem('attribution_session_id')) {
+            const sid = (crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : 'sid-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+            sessionStorage.setItem('attribution_session_id', sid);
+        }
+
+        // ─── LEGACY utm_data key — kept for backwards compat with old form code ──
+        if (touch.utm_source || touch.utm_medium || touch.utm_campaign) {
             localStorage.setItem('utm_data', JSON.stringify({
-                utm_source: utm_source || null,
-                utm_medium: utm_medium || null,
-                utm_campaign: utm_campaign || null,
+                utm_source: touch.utm_source,
+                utm_medium: touch.utm_medium,
+                utm_campaign: touch.utm_campaign,
                 captured_at: Date.now()
             }));
         } else {
             const existing = localStorage.getItem('utm_data');
             if (existing) {
-                const parsed = JSON.parse(existing);
-                const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-                if (Date.now() - parsed.captured_at > thirtyDays) {
-                    localStorage.removeItem('utm_data');
-                }
+                try {
+                    const parsed = JSON.parse(existing);
+                    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+                    if (Date.now() - parsed.captured_at > thirtyDays) {
+                        localStorage.removeItem('utm_data');
+                    }
+                } catch (e) { /* ignore */ }
             }
         }
-        const refParam = params.get('ref');
+
+        // Referral link param (ambassador system — unchanged)
+        const refParam = new URLSearchParams(window.location.search).get('ref');
         if (refParam && refParam.length > 10) {
             localStorage.setItem('referrer_data', JSON.stringify({
                 referrer_id: refParam,
@@ -34,6 +141,33 @@
         }
     } catch (e) { /* Silent fail */ }
 })();
+
+// Return the full attribution payload for form submits.
+// Shape matches what submit-lead Edge Function expects.
+window.getFullAttribution = function () {
+    try {
+        let first = null, last = null;
+        try { first = JSON.parse(localStorage.getItem('attribution_first_touch') || 'null'); } catch (e) {}
+        try { last  = JSON.parse(localStorage.getItem('attribution_last_touch')  || 'null'); } catch (e) {}
+
+        const device = parseDeviceFromUa(navigator.userAgent || '');
+        const session_id = sessionStorage.getItem('attribution_session_id') || null;
+
+        return {
+            session_id,
+            first: first || null,
+            last:  last  || null,
+            device_type:  device.type,
+            os_name:      device.os,
+            browser_name: device.browser,
+            viewport_w:   window.innerWidth  || null,
+            viewport_h:   window.innerHeight || null,
+            language:     navigator.language || null,
+            timezone:     (Intl && Intl.DateTimeFormat && Intl.DateTimeFormat().resolvedOptions().timeZone) || null,
+            raw_ua:       navigator.userAgent || null
+        };
+    } catch (e) { return null; }
+};
 
 window.getReferrerId = function () {
     try {
@@ -272,6 +406,94 @@ window.trackSignup = function(userType) {
 
 window.trackButtonClick = function(buttonName) {
     trackEvent('button_click', { button_name: buttonName });
+};
+
+// ============================================================================
+// META CONVERSIONS API (server-side) — pairs with browser pixel via event_id
+// ============================================================================
+
+function _getCookie(name) {
+    try {
+        const m = document.cookie.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]+)'));
+        return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) { return null; }
+}
+
+// Synthesize _fbc from URL fbclid if the pixel hasn't set the cookie yet
+function _buildFbc() {
+    const cookie = _getCookie('_fbc');
+    if (cookie) return cookie;
+    try {
+        const fbclid = new URLSearchParams(window.location.search).get('fbclid');
+        if (fbclid) return 'fb.1.' + Date.now() + '.' + fbclid;
+    } catch (e) { /* ignore */ }
+    return null;
+}
+
+// Returns a UUID suitable for pairing browser pixel + CAPI events
+window.newCapiEventId = function () {
+    try {
+        if (crypto && crypto.randomUUID) return crypto.randomUUID();
+    } catch (e) { /* ignore */ }
+    return 'evt-' + Date.now() + '-' + Math.random().toString(36).slice(2, 12);
+};
+
+// Fire one event to the server-side Meta CAPI Edge Function.
+// Non-blocking — failures are logged and swallowed so UX never breaks.
+//
+// Usage:
+//   const eventID = window.newCapiEventId();
+//   fbq('track', 'CompleteRegistration', {}, { eventID });  // browser pixel
+//   await window.sendEventToCAPI('CompleteRegistration', { email, phone }, { event_id: eventID });
+window.sendEventToCAPI = async function (eventName, userData, customData) {
+    userData = userData || {};
+    customData = customData || {};
+
+    if (!MARKETING_CONFIG.TRACKING_ENABLED || !hasUserConsented()) return null;
+
+    const eventId = customData.event_id || window.newCapiEventId();
+    const eventSourceUrl = customData.event_source_url || window.location.href;
+
+    // Strip our internal keys out of custom_data before sending
+    const metaCustomData = {};
+    for (const k in customData) {
+        if (k === 'event_id' || k === 'event_source_url') continue;
+        metaCustomData[k] = customData[k];
+    }
+
+    const payload = {
+        event_name: eventName,
+        event_id: eventId,
+        event_source_url: eventSourceUrl,
+        user_data: {
+            email: userData.email || null,
+            phone: userData.phone || null,
+            first_name: userData.first_name || null,
+            last_name: userData.last_name || null,
+            external_id: userData.external_id || null,
+            fbp: _getCookie('_fbp'),
+            fbc: _buildFbc()
+        },
+        custom_data: metaCustomData
+    };
+
+    try {
+        const functionsUrl = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.functionsUrl) ||
+            'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+        const res = await fetch(functionsUrl + '/meta-capi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok || result.success === false) {
+            console.warn('[CAPI]', eventName, 'failed:', result.error || res.status);
+        }
+        return result;
+    } catch (err) {
+        console.warn('[CAPI]', eventName, 'network error:', err && err.message);
+        return null;
+    }
 };
 
 // ============================================================================

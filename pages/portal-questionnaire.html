@@ -943,6 +943,39 @@
             // Meta Pixel: track questionnaire completion as Lead
             if (window.trackFormSubmission) window.trackFormSubmission('portal_questionnaire');
 
+            // ── Meta Conversions API: dedup-paired CompleteRegistration + QualifiedLead
+            // Browser pixel and server CAPI share the same event_id so Meta counts once.
+            // QualifiedLead is the optimization target — only people who finish the questionnaire.
+            try {
+                const userEmail = session.user.email || null;
+                const userPhone = payload.phone || null;
+                const capiUserData = {
+                    email: userEmail,
+                    phone: userPhone,
+                    external_id: userId
+                };
+
+                const registrationEventId = window.newCapiEventId ? window.newCapiEventId() : null;
+                if (window.fbq && registrationEventId) {
+                    fbq('track', 'CompleteRegistration',
+                        { content_name: 'portal_questionnaire' },
+                        { eventID: registrationEventId });
+                }
+                if (window.sendEventToCAPI) {
+                    // Fire and forget — no await so we don't block the redirect
+                    window.sendEventToCAPI('CompleteRegistration', capiUserData, {
+                        content_name: 'portal_questionnaire',
+                        event_id: registrationEventId
+                    });
+                    window.sendEventToCAPI('QualifiedLead', capiUserData, {
+                        content_name: 'questionnaire_complete',
+                        source: 'portal_questionnaire'
+                    });
+                }
+            } catch (capiErr) {
+                console.warn('CAPI dispatch error:', capiErr);
+            }
+
             showSuccess();
 
         } catch (err) {
@@ -960,12 +993,8 @@
         successScreen.classList.add('active');
         document.getElementById('questionnaire-root').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Meta Pixel: fire conversion event before redirect
-        if (window.fbq) {
-            try {
-                fbq('track', 'CompleteRegistration', { content_name: 'portal_questionnaire' });
-            } catch (e) { /* non-blocking */ }
-        }
+        // Note: CompleteRegistration + QualifiedLead are fired in submitForm() with a
+        // shared event_id so browser pixel and Meta CAPI deduplicate properly.
 
         // Auto-redirect after 4 seconds — with ?completed=1 for Meta Custom Conversion tracking
         setTimeout(() => {

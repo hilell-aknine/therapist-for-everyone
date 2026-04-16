@@ -62,9 +62,9 @@ function updateCounts() {
     setText('mizum-count', patients.length + therapists.length + matches.length);
     const pActive = pipelineLeads.filter(l => !['closed_won','closed_lost'].includes(l.stage));
     setText('pipeline-count', pActive.length);
-    // learning-count is set by updatePqStats() in admin-portal-questionnaires.js (uses portal_questionnaires count)
-    // Only set fallback if portal-q hasn't loaded yet
-    if (!portalQLoaded) setText('learning-count', leads.length);
+    // Use portal_questionnaires count (342) — the real number. Fallback to leads (profiles) only if empty.
+    const pqLen = (typeof portalQuestionnaires !== 'undefined' && portalQuestionnaires.length > 0) ? portalQuestionnaires.length : leads.length;
+    setText('learning-count', pqLen);
 
     // Stat cards
     setText('stat-new', patients.filter(p => p.status === 'new').length);

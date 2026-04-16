@@ -67,43 +67,32 @@
                 </div>
 
                 <div class="nav-section"><i class="fa-solid fa-briefcase"></i> עסקי</div>
-                <div class="nav-item" onclick="switchView('funnel')">
-                    <i class="fa-solid fa-fire"></i>
-                    <span>פאנל מכירות</span>
-                    <span class="badge" id="funnel-count">0</span>
-                </div>
-                <div class="nav-item" onclick="switchView('sales')">
-                    <i class="fa-solid fa-filter-circle-dollar"></i>
-                    <span>לידים ומכירות</span>
-                    <span class="badge" id="sales-count">0</span>
-                </div>
-
-                <div class="nav-section"><i class="fa-solid fa-graduation-cap"></i> למידה</div>
                 <div class="nav-item" onclick="switchView('learning')">
-                    <i class="fa-solid fa-book-open-reader"></i>
-                    <span>לומדים</span>
+                    <i class="fa-solid fa-clipboard-list" style="color:#D4AF37;"></i>
+                    <span>ניהול לומדים</span>
                     <span class="badge" id="learning-count">0</span>
                 </div>
-
-                <div class="nav-section"><i class="fa-solid fa-wrench"></i> כלים</div>
-                <div class="nav-item" onclick="switchView('bot')">
-                    <i class="fa-solid fa-robot"></i>
-                    <span>בוט CRM</span>
+                <div class="nav-item" onclick="switchView('funnel')">
+                    <i class="fa-solid fa-filter-circle-dollar"></i>
+                    <span>Pipeline מכירות</span>
+                    <span class="badge" id="funnel-count">0</span>
                 </div>
                 <div class="nav-item" onclick="switchView('paid')">
                     <i class="fa-solid fa-crown" style="color:#D4AF37;"></i>
                     <span>לקוחות משלמים</span>
                     <span class="badge" id="paid-count-badge" style="background:#D4AF37;color:#003B46;">0</span>
                 </div>
-                <div class="nav-item" onclick="switchView('instagram')">
-                    <i class="fa-brands fa-instagram"></i>
-                    <span>אינסטגרם</span>
-                    <span class="badge" id="ig-total-badge" style="background:#E4405F;">0</span>
+
+                <div class="nav-section"><i class="fa-solid fa-chart-line"></i> תנועה ונתונים</div>
+                <div class="nav-item" onclick="switchView('traffic')">
+                    <i class="fa-solid fa-compass" style="color:#2F8592;"></i>
+                    <span>מקורות תנועה</span>
                 </div>
-                <div class="nav-item" onclick="switchView('campaigns')">
-                    <i class="fa-brands fa-meta" style="color:#1877F2;"></i>
-                    <span>קמפיינים</span>
-                    <span class="badge" id="campaigns-count" style="background:#1877F2;">0</span>
+
+                <div class="nav-section"><i class="fa-solid fa-wrench"></i> כלים</div>
+                <div class="nav-item" onclick="switchView('bot')">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>בוט CRM</span>
                 </div>
                 <div class="nav-item" onclick="switchView('referrals')">
                     <i class="fa-solid fa-rocket" style="color:#D4AF37;"></i>
@@ -122,14 +111,6 @@
                     <i class="fa-solid fa-bolt" style="color:#D4AF37;"></i>
                     <span>אוטומציות חכמות</span>
                 </div>
-                <div class="nav-item" onclick="switchView('traffic')">
-                    <i class="fa-solid fa-compass" style="color:#2F8592;"></i>
-                    <span>מקורות תנועה</span>
-                </div>
-                <div class="nav-item" onclick="switchView('analytics')">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>אנליטיקס</span>
-                </div>
                 <div class="nav-item" onclick="switchView('settings')">
                     <i class="fa-solid fa-gear"></i>
                     <span>הגדרות</span>
@@ -141,6 +122,33 @@
                 <div id="overview-view">
                     <h1 class="page-title"><i class="fa-solid fa-house" style="color:var(--gold);margin-left:0.5rem;"></i> סקירה כללית</h1>
                     <div class="overview-grid">
+                        <div class="overview-card" onclick="switchView('learning')">
+                            <div class="overview-card-icon" style="background:rgba(212,175,55,0.12);color:var(--gold);">
+                                <i class="fa-solid fa-clipboard-list"></i>
+                            </div>
+                            <div class="overview-card-body">
+                                <div class="overview-card-title">ניהול לומדים</div>
+                                <div class="overview-card-stats">
+                                    <span><strong id="ov-leads">0</strong> נרשמים</span>
+                                    <span><strong id="ov-learners">0</strong> לומדים</span>
+                                    <span><strong id="ov-questionnaires">0</strong> שאלונים</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
+                        </div>
+                        <div class="overview-card" onclick="switchView('funnel')">
+                            <div class="overview-card-icon" style="background:rgba(47,133,146,0.12);color:var(--dusty-aqua);">
+                                <i class="fa-solid fa-filter-circle-dollar"></i>
+                            </div>
+                            <div class="overview-card-body">
+                                <div class="overview-card-title">Pipeline מכירות</div>
+                                <div class="overview-card-stats">
+                                    <span><strong id="ov-pipeline">0</strong> לידים</span>
+                                    <span><strong id="ov-contact-leads">0</strong> פניות</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
+                        </div>
                         <div class="overview-card" onclick="switchView('mizum')">
                             <div class="overview-card-icon" style="background:rgba(0,96,107,0.12);color:var(--muted-teal);">
                                 <i class="fa-solid fa-hand-holding-heart"></i>
@@ -155,42 +163,16 @@
                             </div>
                             <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
                         </div>
-                        <div class="overview-card" onclick="switchView('sales')">
-                            <div class="overview-card-icon" style="background:rgba(212,175,55,0.12);color:var(--gold);">
-                                <i class="fa-solid fa-filter-circle-dollar"></i>
+                        <div class="overview-card" onclick="switchView('traffic')">
+                            <div class="overview-card-icon" style="background:rgba(47,133,146,0.12);color:#2F8592;">
+                                <i class="fa-solid fa-compass"></i>
                             </div>
                             <div class="overview-card-body">
-                                <div class="overview-card-title">לידים ומכירות</div>
+                                <div class="overview-card-title">מקורות תנועה</div>
                                 <div class="overview-card-stats">
-                                    <span><strong id="ov-contact-leads">0</strong> לידים</span>
-                                    <span><strong id="ov-questionnaires">0</strong> שאלונים</span>
-                                    <span><strong id="ov-pipeline">0</strong> Pipeline</span>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
-                        </div>
-                        <div class="overview-card" onclick="switchView('learning')">
-                            <div class="overview-card-icon" style="background:rgba(47,133,146,0.12);color:var(--dusty-aqua);">
-                                <i class="fa-solid fa-graduation-cap"></i>
-                            </div>
-                            <div class="overview-card-body">
-                                <div class="overview-card-title">למידה</div>
-                                <div class="overview-card-stats">
-                                    <span><strong id="ov-leads">0</strong> נרשמים</span>
-                                    <span><strong id="ov-learners">0</strong> לומדים</span>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
-                        </div>
-                        <div class="overview-card" onclick="switchView('instagram')">
-                            <div class="overview-card-icon" style="background:rgba(228,64,95,0.12);color:#E4405F;">
-                                <i class="fa-brands fa-instagram"></i>
-                            </div>
-                            <div class="overview-card-body">
-                                <div class="overview-card-title">אינסטגרם</div>
-                                <div class="overview-card-stats">
-                                    <span><strong id="ov-ig-total">0</strong> לידים</span>
-                                    <span><strong id="ov-ig-7d">0</strong> ב-7 ימים</span>
+                                    <span id="ov-ig-total" style="display:none;"></span>
+                                    <span id="ov-ig-7d" style="display:none;"></span>
+                                    <span>Attribution · GA4 · אינסטגרם · קמפיינים</span>
                                 </div>
                             </div>
                             <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
@@ -501,7 +483,7 @@
 
                 <!-- Portal Questionnaires View -->
                 <div id="portal-q-view" class="hidden">
-                    <h1 class="page-title"><i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.5rem;"></i> שאלוני היכרות — פורטל חינמי</h1>
+                    <h1 class="page-title"><i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.5rem;"></i> ניהול לומדים</h1>
                     <!-- Stats -->
                     <div class="stats">
                         <div class="stat-card">
@@ -1955,10 +1937,27 @@
                 <!-- Segments & Filters View -->
                 <div id="segments-view" class="hidden"></div>
 
-                <!-- Traffic Sources View -->
+                <!-- Traffic Header (sub-tabs) -->
+                <div id="traffic-header" class="hidden" style="margin-bottom:0.5rem;">
+                    <h1 class="page-title" style="margin-bottom:0.5rem;"><i class="fa-solid fa-compass" style="color:var(--gold);margin-left:0.5rem;"></i> מקורות תנועה</h1>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                        <button class="sub-tab active" onclick="switchSubView('traffic','traffic')">
+                            <i class="fa-solid fa-route"></i> Attribution
+                        </button>
+                        <button class="sub-tab" onclick="switchSubView('traffic','analytics')">
+                            <i class="fa-solid fa-chart-line"></i> GA4
+                        </button>
+                        <button class="sub-tab" onclick="switchSubView('traffic','instagram')">
+                            <i class="fa-brands fa-instagram"></i> אינסטגרם
+                        </button>
+                        <button class="sub-tab" onclick="switchSubView('traffic','campaigns')">
+                            <i class="fa-brands fa-meta"></i> קמפיינים
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Traffic Sources View (Attribution) -->
                 <div id="traffic-view" class="hidden">
-                    <h1 class="page-title"><i class="fa-solid fa-compass" style="color:var(--gold);margin-left:0.5rem;"></i> מקורות תנועה</h1>
-                    <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">מאיפה מגיעים הלידים — first/last touch attribution, מכשירים, גיאוגרפיה, ופאנל המרות.</p>
                     <div id="traffic-body"></div>
                 </div>
 

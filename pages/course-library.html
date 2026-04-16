@@ -5202,12 +5202,12 @@
                 _skipPushState = true;
                 selectLesson(0, 0);
                 _skipPushState = false;
-                showAmbassadorProgram();
+                showAmbassadorProgram(true);
             } else if (location.hash === '#community') {
                 _skipPushState = true;
                 selectLesson(0, 0);
                 _skipPushState = false;
-                showCommunityFeed();
+                showCommunityFeed(true);
             } else {
                 const hashMatch = location.hash.match(/^#m(\d+)l(\d+)$/);
                 if (hashMatch) {
@@ -5222,16 +5222,20 @@
                     _skipPushState = true;
                     selectLesson(0, 0);
                     _skipPushState = false;
-                    showWelcomeDashboard();
+                    showWelcomeDashboard(true);
                 }
             }
 
-            // Handle browser back/forward
+            // Handle browser back/forward — route by hash
             window.addEventListener('popstate', (e) => {
                 if (e.state && typeof e.state.m === 'number') {
                     _skipPushState = true;
                     selectLesson(e.state.m, e.state.l);
                     _skipPushState = false;
+                } else if (location.hash === '#community') {
+                    showCommunityFeed(true);
+                } else if (location.hash === '#ambassador') {
+                    showAmbassadorProgram(true);
                 } else {
                     const hm = location.hash.match(/^#m(\d+)l(\d+)$/);
                     if (hm) {
@@ -5239,7 +5243,7 @@
                         selectLesson(parseInt(hm[1]), parseInt(hm[2]));
                         _skipPushState = false;
                     } else {
-                        showWelcomeDashboard();
+                        showWelcomeDashboard(true);
                     }
                 }
             });
@@ -5827,7 +5831,7 @@
             }
         }
 
-        function showWelcomeDashboard() {
+        function showWelcomeDashboard(skipPush) {
             // Hide video section + ambassador + community, show welcome dashboard
             document.querySelector('.video-section').style.display = 'none';
             document.getElementById('ambassadorDashboard').style.display = 'none';
@@ -5851,9 +5855,10 @@
             // Close mobile sidebar if open
             const sidebar = document.getElementById('sidebar');
             if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
+            if (!skipPush && location.hash) history.pushState(null, '', location.pathname);
         }
 
-        function showCommunityFeed() {
+        function showCommunityFeed(skipPush) {
             document.querySelector('.video-section').style.display = 'none';
             document.getElementById('welcomeDashboard').style.display = 'none';
             document.getElementById('ambassadorDashboard').style.display = 'none';
@@ -5866,10 +5871,11 @@
             clearInterval(wdBulletinInterval);
             var sidebar = document.getElementById('sidebar');
             if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
+            if (!skipPush && location.hash !== '#community') history.pushState(null, '', '#community');
             if (window.CommunityFeed) window.CommunityFeed.init();
         }
 
-        function showAmbassadorProgram() {
+        function showAmbassadorProgram(skipPush) {
             // Hide video section + welcome + community, show ambassador
             document.querySelector('.video-section').style.display = 'none';
             document.getElementById('welcomeDashboard').style.display = 'none';
@@ -5890,6 +5896,7 @@
             // Close mobile sidebar if open
             const sidebar = document.getElementById('sidebar');
             if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
+            if (!skipPush && location.hash !== '#ambassador') history.pushState(null, '', '#ambassador');
             // Hide "new" badge after first visit
             var ambBadge = document.getElementById('ambBadgeNew');
             if (ambBadge) ambBadge.style.display = 'none';

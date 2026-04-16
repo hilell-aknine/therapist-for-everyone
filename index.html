@@ -685,16 +685,16 @@
             </p>
             <div class="hero-stats">
                 <div class="hero-stat">
-                    <div class="hero-stat-number"><span data-count="25000">0</span>+</div>
-                    <div class="hero-stat-label">צפיות בקורסים</div>
+                    <div class="hero-stat-number"><span id="hero-lessons" data-count="0">0</span>+</div>
+                    <div class="hero-stat-label">שיעורים שהושלמו</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-number"><span data-count="70">0</span>+</div>
-                    <div class="hero-stat-label">שעות תוכן חינמי</div>
+                    <div class="hero-stat-number"><span id="hero-hours" data-count="0">0</span>+</div>
+                    <div class="hero-stat-label">שעות צפייה</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-number"><span data-count="350">0</span>+</div>
-                    <div class="hero-stat-label">מטפלים שהכשרנו</div>
+                    <div class="hero-stat-number"><span id="hero-learners" data-count="0">0</span>+</div>
+                    <div class="hero-stat-label">לומדים רשומים</div>
                 </div>
             </div>
             <div class="hero-cta-group">
@@ -917,6 +917,23 @@
         document.querySelectorAll('[data-reveal]').forEach(el => {
             revealObserver.observe(el);
         });
+
+        // ===== Load Real Stats from Supabase =====
+        (async function loadHeroStats() {
+            try {
+                const sb = window.supabase.createClient(
+                    window.SUPABASE_CONFIG.url,
+                    window.SUPABASE_CONFIG.anonKey
+                );
+                const { data, error } = await sb.rpc('public_site_stats');
+                if (!error && data) {
+                    const el = (id) => document.getElementById(id);
+                    if (data.completed_lessons > 0) el('hero-lessons').dataset.count = data.completed_lessons;
+                    if (data.total_watch_hours > 0) el('hero-hours').dataset.count = data.total_watch_hours;
+                    if (data.registered_learners > 0) el('hero-learners').dataset.count = data.registered_learners;
+                }
+            } catch (e) { /* stats stay at 0 — honest */ }
+        })();
 
         // ===== Animated Counters =====
         let countersAnimated = false;

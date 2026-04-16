@@ -235,6 +235,12 @@ function renderGA4Data(data) {
 }
 
 function showGA4Error(msg) {
+    // Clear stat cards so stale cache doesn't mislead
+    ['ga4-active-today', 'ga4-new-today', 'ga4-active-30d', 'ga4-new-30d'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '—';
+    });
+    // Clear tables
     const tables = ['ga4-channels-table', 'ga4-sources-table', 'ga4-pages-table', 'ga4-all-pages-table', 'ga4-daily-table'];
     const cols = [4, 3, 4, 4];
     tables.forEach((id, i) => {
@@ -243,4 +249,7 @@ function showGA4Error(msg) {
             <i class="fa-solid fa-circle-exclamation"></i> ${msg}
         </td></tr>`;
     });
+    // Invalidate cache so next load fetches fresh
+    ga4Cache = null;
+    ga4CacheTime = 0;
 }

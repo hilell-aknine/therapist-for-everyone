@@ -40,10 +40,13 @@ async function logout() {
 
 async function loadAllData() {
     if (window._userProfileRole === 'sales_rep') {
-        // Sales rep: only load pipeline (RLS filters by assigned_to)
         await loadPipeline();
     } else {
-        await Promise.all([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires(), loadPipeline(), loadPortalQuestionnaires()]);
+        const results = await Promise.allSettled([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires(), loadPipeline(), loadPortalQuestionnaires()]);
+        const failed = results.filter(r => r.status === 'rejected');
+        if (failed.length > 0) {
+            console.warn(`⚠️ ${failed.length}/${results.length} data loads failed:`, failed.map(r => r.reason?.message || r.reason));
+        }
     }
     updateCounts();
 }

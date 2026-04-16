@@ -1,0 +1,252 @@
+/* admin-traffic.css — Traffic Source Attribution dashboard */
+
+#traffic-view { padding: 0; }
+#traffic-view h1 { margin-bottom: 0.5rem; }
+
+.traffic-loading, .traffic-error, .traffic-empty {
+    padding: 2rem;
+    text-align: center;
+    color: #888;
+}
+.traffic-error { color: #FF6F61; }
+
+/* Toolbar */
+.traffic-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.traffic-range {
+    display: inline-flex;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.traffic-range-btn {
+    background: transparent;
+    color: #aaa;
+    border: 0;
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.traffic-range-btn:hover { color: #fff; background: rgba(255,255,255,0.04); }
+.traffic-range-btn.active {
+    background: var(--gold, #D4AF37);
+    color: #003B46;
+    font-weight: 600;
+}
+
+/* KPI strip */
+.traffic-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+.traffic-kpi {
+    background: rgba(0, 96, 107, 0.08);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    text-align: center;
+}
+.traffic-kpi-num {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gold, #D4AF37);
+    line-height: 1;
+    font-family: 'Frank Ruhl Libre', serif;
+}
+.traffic-kpi-label {
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: #999;
+}
+
+/* Panels + rows */
+.traffic-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.traffic-panel {
+    background: rgba(0, 96, 107, 0.08);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 1.25rem;
+}
+.traffic-panel h3 {
+    margin: 0 0 1rem;
+    color: var(--frost-white, #E8F1F2);
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 1.05rem;
+}
+.traffic-hint {
+    color: #888;
+    font-size: 0.75rem;
+    font-weight: normal;
+    font-family: 'Heebo', sans-serif;
+}
+
+/* Bars */
+.traffic-bars { display: flex; flex-direction: column; gap: 0.5rem; }
+.traffic-bar-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 90px;
+    gap: 0.75rem;
+    align-items: center;
+}
+.traffic-bar-label {
+    font-size: 0.85rem;
+    color: #ccc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    direction: ltr;
+    text-align: right;
+}
+.traffic-bar-track {
+    height: 20px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.traffic-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--muted-teal, #00606B), var(--gold, #D4AF37));
+    border-radius: 4px;
+    transition: width 0.3s ease-out;
+}
+.traffic-bar-val {
+    font-size: 0.78rem;
+    color: #aaa;
+    text-align: left;
+    direction: ltr;
+}
+
+/* Funnel table */
+.traffic-funnel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+.traffic-funnel-table th {
+    text-align: right;
+    padding: 0.6rem 0.75rem;
+    background: rgba(0,0,0,0.25);
+    color: #aaa;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.traffic-funnel-table td {
+    text-align: right;
+    padding: 0.6rem 0.75rem;
+    color: #ddd;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.traffic-funnel-table .pct { color: #888; font-size: 0.78rem; }
+.traffic-funnel-table tbody tr:hover { background: rgba(212, 175, 55, 0.04); }
+
+/* Device donut (list variant) */
+.traffic-donut { display: flex; flex-direction: column; gap: 0.5rem; }
+.traffic-donut-row {
+    display: grid;
+    grid-template-columns: 14px 100px 50px 50px;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.traffic-donut-row .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+}
+.traffic-donut-row .dot.mobile  { background: var(--gold, #D4AF37); }
+.traffic-donut-row .dot.desktop { background: var(--muted-teal, #00606B); }
+.traffic-donut-row .dot.tablet  { background: #8B6914; }
+.traffic-donut-row .label { color: #ccc; font-size: 0.85rem; }
+.traffic-donut-row .val { color: var(--gold, #D4AF37); font-weight: 600; }
+.traffic-donut-row .count { color: #777; font-size: 0.78rem; direction: ltr; }
+
+/* Geo list */
+.traffic-geo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    max-height: 260px;
+    overflow-y: auto;
+}
+.traffic-geo-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.88rem;
+}
+.traffic-geo-city { color: #ddd; }
+.traffic-geo-country { color: #777; font-size: 0.78rem; }
+.traffic-geo-count {
+    color: var(--gold, #D4AF37);
+    font-weight: 600;
+    min-width: 30px;
+    text-align: left;
+}
+
+/* Recent rows table */
+.traffic-recent-wrap { overflow-x: auto; }
+.traffic-recent-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+.traffic-recent-table th {
+    text-align: right;
+    padding: 0.6rem 0.75rem;
+    background: rgba(0,0,0,0.25);
+    color: #aaa;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.traffic-recent-table td {
+    padding: 0.55rem 0.75rem;
+    color: #ccc;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.traffic-tag {
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold, #D4AF37);
+    padding: 0.15rem 0.55rem;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    font-family: 'Courier New', monospace;
+}
+
+.traffic-footnote {
+    margin-top: 2rem;
+    padding: 1rem 1.25rem;
+    background: rgba(212, 175, 55, 0.04);
+    border: 1px dashed rgba(212, 175, 55, 0.2);
+    border-radius: 8px;
+    color: #aaa;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+.traffic-footnote code {
+    background: rgba(0,0,0,0.35);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    color: var(--gold, #D4AF37);
+}
+
+@media (max-width: 900px) {
+    .traffic-row { grid-template-columns: 1fr; }
+    .traffic-bar-row { grid-template-columns: 100px 1fr 80px; }
+}

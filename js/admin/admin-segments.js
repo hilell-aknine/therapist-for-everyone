@@ -45,6 +45,18 @@ const SEG_CHANNEL_LABELS = {
     portal_questionnaires: 'שאלון פורטל',
 };
 
+const SEG_GENDER_LABELS = {
+    male: 'גבר',
+    female: 'אישה',
+    other: 'אחר',
+};
+
+const SEG_PURPOSE_LABELS = {
+    'התפתחות אישית': 'התפתחות אישית',
+    'לשלב בעסק': 'שילוב בעסק',
+    'להקים קליניקה': 'הקמת קליניקה',
+};
+
 // ============================================================================
 // LOAD
 // ============================================================================
@@ -113,6 +125,10 @@ function renderSegments(data) {
         <div class="seg-breakdowns">
             ${renderBreakdownPanel('לפי מסלול הרשמה', 'fa-route', data.by_channel, 'channel', SEG_CHANNEL_LABELS)}
             ${renderBreakdownPanel('לפי מקור הגעה (UTM / דיווח עצמי)', 'fa-bullhorn', data.by_source, 'source', null)}
+            ${renderBreakdownPanel('לפי מגדר', 'fa-venus-mars', data.by_gender, 'gender', SEG_GENDER_LABELS)}
+            ${renderBreakdownPanel('לפי טווח גיל', 'fa-cake-candles', data.by_age_range, 'age_range', null)}
+            ${renderBreakdownPanel('לפי מטרת הלמידה', 'fa-bullseye', data.by_purpose, 'purpose', SEG_PURPOSE_LABELS)}
+            ${renderBreakdownPanel('לפי עיר (טופ 10)', 'fa-location-dot', data.by_city, 'city', null)}
             ${renderBreakdownPanel('לפי כמות שיעורים שהושלמו (משתמשים עם חשבון)', 'fa-graduation-cap', data.by_lessons, 'bucket', null)}
             ${renderBreakdownPanel('לפי שלב מכירה (משתמשים עם חשבון)', 'fa-funnel-dollar', data.by_stage, 'stage', SEG_STAGE_LABELS)}
             ${renderBreakdownPanel('לפי תפקיד (משתמשים עם חשבון)', 'fa-user-tag', data.by_role, 'role', SEG_ROLE_LABELS)}
@@ -137,7 +153,8 @@ function renderSegments(data) {
         </div>
 
         <div class="seg-footer">
-            עודכן: ${formatDateTime(data.generated_at)}
+            <i class="fa-solid fa-database" style="color:var(--gold);margin-left:0.3rem;"></i>
+            נתונים חיים מ-Supabase (profiles, portal_questionnaires, course_progress) · עודכן: ${formatDateTime(data.generated_at)}
         </div>
     `;
 
@@ -146,12 +163,14 @@ function renderSegments(data) {
 }
 
 function renderKpiCard(label, value, sub, icon) {
+    const hasValue = value !== null && value !== undefined;
+    const display = hasValue ? value.toLocaleString('he-IL') : '—';
     return `
         <div class="seg-kpi">
             <div class="seg-kpi-icon"><i class="fa-solid ${icon}"></i></div>
             <div class="seg-kpi-body">
                 <div class="seg-kpi-label">${escapeHtml(label)}</div>
-                <div class="seg-kpi-value">${(value ?? 0).toLocaleString('he-IL')}</div>
+                <div class="seg-kpi-value">${display}</div>
                 <div class="seg-kpi-sub">${sub}</div>
             </div>
         </div>

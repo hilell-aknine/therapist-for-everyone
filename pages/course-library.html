@@ -2573,6 +2573,102 @@
             box-shadow: 0 0 8px rgba(212, 175, 55, 0.15);
         }
         .ambassador-sidebar-item i { font-size: 0.9rem; }
+
+        /* ── Community Feed (inline) ─────────────────────────────── */
+        #communityDashboard { max-width: 640px; margin: 0 auto; padding: 1rem 0.5rem; }
+        .community-header-bar { margin-bottom: 1.2rem; }
+        .community-header-bar h2 {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.35rem;
+            color: var(--t-frost, #E8F1F2);
+            display: flex; align-items: center; gap: 0.6rem;
+        }
+        .community-header-bar h2 i { color: var(--t-gold, #D4AF37); font-size: 1.1rem; }
+        .community-composer {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .community-composer textarea {
+            width: 100%; border: none; background: transparent;
+            color: var(--t-frost, #E8F1F2); font-family: 'Heebo', sans-serif;
+            font-size: 0.95rem; resize: vertical; min-height: 70px;
+            outline: none; line-height: 1.6;
+        }
+        .community-composer textarea::placeholder { color: #6a8b8f; }
+        .community-composer button {
+            float: left; margin-top: 0.6rem;
+            background: var(--t-gold, #D4AF37); color: var(--t-deep, #003B46);
+            border: none; border-radius: 10px; padding: 0.55rem 1.4rem;
+            font-family: 'Heebo', sans-serif; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .community-composer button:hover {
+            transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,175,55,0.3);
+        }
+        .community-composer button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .community-composer::after { content: ''; display: table; clear: both; }
+
+        .community-post {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.8rem;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+        .community-post:hover { border-color: rgba(255,255,255,0.15); }
+        .community-post.pinned {
+            border-right: 3px solid var(--t-gold, #D4AF37);
+            background: rgba(212,175,55,0.04);
+        }
+        .community-pin-badge {
+            font-size: 0.72rem; font-weight: 600;
+            color: var(--t-gold, #D4AF37); margin-bottom: 0.5rem;
+        }
+        .community-pin-badge i { font-size: 0.65rem; }
+        .community-post-meta {
+            display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem;
+        }
+        .community-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: rgba(47,133,146,0.25); color: var(--t-frost, #E8F1F2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 700; flex-shrink: 0;
+        }
+        .community-meta-text { flex: 1; line-height: 1.3; }
+        .community-author { font-weight: 600; font-size: 0.88rem; color: var(--t-frost, #E8F1F2); }
+        .community-time {
+            display: block; font-size: 0.72rem; color: #6a8b8f; margin-top: 1px;
+        }
+        .community-menu-btn {
+            background: none; border: none; color: #6a8b8f; cursor: pointer;
+            padding: 0.3rem; border-radius: 6px; font-size: 0.85rem;
+            transition: color 0.15s, background 0.15s;
+        }
+        .community-menu-btn:hover { color: var(--t-frost, #E8F1F2); background: rgba(255,255,255,0.08); }
+        .community-menu {
+            position: absolute; left: 1rem; top: 2.8rem;
+            background: rgba(0,40,48,0.97); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px; padding: 0.35rem 0; z-index: 20;
+            min-width: 140px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .community-menu-item {
+            padding: 0.55rem 1rem; font-size: 0.82rem; cursor: pointer;
+            color: var(--t-frost, #E8F1F2); display: flex; align-items: center; gap: 0.5rem;
+            transition: background 0.15s;
+        }
+        .community-menu-item:hover { background: rgba(255,255,255,0.08); }
+        .community-menu-item.danger { color: #E57373; }
+        .community-menu-item.danger:hover { background: rgba(229,115,115,0.1); }
+        .community-post-body {
+            font-size: 0.92rem; line-height: 1.65; color: rgba(232,241,242,0.88);
+            white-space: pre-wrap; word-break: break-word;
+        }
+
         .amb-badge-new {
             background: #D4AF37;
             color: #003B46;
@@ -3504,6 +3600,25 @@
                 </div>
             </div>
 
+            <!-- Community Feed (inline, same pattern as ambassador) -->
+            <div id="communityDashboard" style="display:none;">
+                <div class="community-header-bar">
+                    <h2><i class="fa-solid fa-users"></i> קהילת NLP</h2>
+                </div>
+                <div class="community-composer">
+                    <textarea id="communityPostInput" placeholder="מה חדש אצלך?" rows="3" maxlength="2000" dir="rtl"></textarea>
+                    <button id="communityPostBtn" onclick="submitCommunityPost()">פרסם ▸</button>
+                </div>
+                <div id="communityFeed"></div>
+                <div id="communityLoading" style="text-align:center;padding:2rem;color:#8fa3a6;display:none;">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> טוען...
+                </div>
+                <div id="communityEmpty" style="text-align:center;padding:3rem;color:#8fa3a6;display:none;">
+                    <i class="fa-solid fa-leaf" style="font-size:2rem;opacity:0.4;display:block;margin-bottom:0.8rem;"></i>
+                    עדיין אין פוסטים. תהיו הראשונים!
+                </div>
+            </div>
+
             <div class="video-section" style="display:none;">
                 <div class="video-wrapper">
                     <div class="video-placeholder" id="videoPlaceholder">
@@ -4260,6 +4375,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
     <script src="../js/supabase-config.js"></script>
     <script src="../js/supabase-client.js"></script>
+    <script src="../js/community-feed.js"></script>
     <script src="../js/marketing-tools.js"></script>
     <script src="../js/popup-manager.js"></script>
     <script>
@@ -4979,12 +5095,17 @@
             const firstModule = document.querySelector('.module');
             if (firstModule) firstModule.classList.add('open');
 
-            // Routing: hash → lesson, #ambassador → ambassador tab, no hash → welcome dashboard
+            // Routing: hash → lesson, #ambassador → ambassador tab, #community → community feed, no hash → welcome dashboard
             if (location.hash === '#ambassador') {
                 _skipPushState = true;
                 selectLesson(0, 0);
                 _skipPushState = false;
                 showAmbassadorProgram();
+            } else if (location.hash === '#community') {
+                _skipPushState = true;
+                selectLesson(0, 0);
+                _skipPushState = false;
+                showCommunityFeed();
             } else {
                 const hashMatch = location.hash.match(/^#m(\d+)l(\d+)$/);
                 if (hashMatch) {
@@ -5470,10 +5591,10 @@
                     <span>תוכנית השותפים</span>
                     <span class="amb-badge-new" id="ambBadgeNew">חדש</span>
                 </div>
-                <a href="community.html" class="ambassador-sidebar-item" style="text-decoration:none;color:inherit;">
+                <div class="ambassador-sidebar-item" id="communitySidebarItem" onclick="showCommunityFeed()">
                     <i class="fa-solid fa-users"></i>
                     <span>קהילת NLP</span>
-                </a>
+                </div>
                 <hr class="welcome-sidebar-sep">
             `;
             syllabus.innerHTML = welcomeItem + modules.map((module, mIndex) => {
@@ -5605,9 +5726,10 @@
         }
 
         function showWelcomeDashboard() {
-            // Hide video section + ambassador, show welcome dashboard
+            // Hide video section + ambassador + community, show welcome dashboard
             document.querySelector('.video-section').style.display = 'none';
             document.getElementById('ambassadorDashboard').style.display = 'none';
+            document.getElementById('communityDashboard').style.display = 'none';
             document.getElementById('welcomeDashboard').style.display = '';
             // Update sidebar: deselect all lessons, highlight welcome item
             document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
@@ -5615,6 +5737,8 @@
             if (welcomeItem) welcomeItem.classList.add('active');
             const ambassadorItem = document.getElementById('ambassadorSidebarItem');
             if (ambassadorItem) ambassadorItem.classList.remove('active');
+            const communityItem = document.getElementById('communitySidebarItem');
+            if (communityItem) communityItem.classList.remove('active');
             // Hide video nav bar
             const navBar = document.getElementById('videoNavBar');
             if (navBar) navBar.style.display = 'none';
@@ -5627,10 +5751,27 @@
             if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
         }
 
-        function showAmbassadorProgram() {
-            // Hide video section + welcome, show ambassador
+        function showCommunityFeed() {
             document.querySelector('.video-section').style.display = 'none';
             document.getElementById('welcomeDashboard').style.display = 'none';
+            document.getElementById('ambassadorDashboard').style.display = 'none';
+            document.getElementById('communityDashboard').style.display = '';
+            document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
+            var wi = document.getElementById('welcomeSidebarItem'); if (wi) wi.classList.remove('active');
+            var ai = document.getElementById('ambassadorSidebarItem'); if (ai) ai.classList.remove('active');
+            var ci = document.getElementById('communitySidebarItem'); if (ci) ci.classList.add('active');
+            var nb = document.getElementById('videoNavBar'); if (nb) nb.style.display = 'none';
+            clearInterval(wdBulletinInterval);
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
+            if (window.CommunityFeed) window.CommunityFeed.init();
+        }
+
+        function showAmbassadorProgram() {
+            // Hide video section + welcome + community, show ambassador
+            document.querySelector('.video-section').style.display = 'none';
+            document.getElementById('welcomeDashboard').style.display = 'none';
+            document.getElementById('communityDashboard').style.display = 'none';
             document.getElementById('ambassadorDashboard').style.display = '';
             // Update sidebar highlights
             document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
@@ -5638,6 +5779,8 @@
             if (welcomeItem) welcomeItem.classList.remove('active');
             const ambassadorItem = document.getElementById('ambassadorSidebarItem');
             if (ambassadorItem) ambassadorItem.classList.add('active');
+            const communityItem2 = document.getElementById('communitySidebarItem');
+            if (communityItem2) communityItem2.classList.remove('active');
             // Hide video nav bar
             const navBar = document.getElementById('videoNavBar');
             if (navBar) navBar.style.display = 'none';
@@ -5847,11 +5990,14 @@
         function hideWelcomeDashboard() {
             document.getElementById('welcomeDashboard').style.display = 'none';
             document.getElementById('ambassadorDashboard').style.display = 'none';
+            document.getElementById('communityDashboard').style.display = 'none';
             document.querySelector('.video-section').style.display = '';
             const welcomeItem = document.getElementById('welcomeSidebarItem');
             if (welcomeItem) welcomeItem.classList.remove('active');
             const ambassadorItem = document.getElementById('ambassadorSidebarItem');
             if (ambassadorItem) ambassadorItem.classList.remove('active');
+            const communityItemH = document.getElementById('communitySidebarItem');
+            if (communityItemH) communityItemH.classList.remove('active');
             clearInterval(wdBulletinInterval);
         }
 

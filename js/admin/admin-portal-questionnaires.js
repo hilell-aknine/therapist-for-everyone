@@ -12,25 +12,28 @@ let pqCurrentSubView = 'table'; // 'table' | 'caller'
 
 async function loadPortalQuestionnaires() {
     try {
-        const [qRes, profRes, progRes] = await Promise.all([
-            db.rpc('admin_get_portal_questionnaires_full'),
-            db.from('profiles').select('id, full_name, email, phone'),
+        const [allLeadsRes, progRes] = await Promise.all([
+            db.rpc('admin_get_all_leads'),
             db.from('course_progress').select('user_id, completed, watched_seconds, completed_at, updated_at, created_at, video_id').order('completed_at', { ascending: false })
         ]);
 
-        if (qRes.error) {
-            console.error('❌ RPC admin_get_portal_questionnaires_full failed:', qRes.error);
-            // Fallback: query directly (without sensitive columns)
-            const fallback = await db.from('portal_questionnaires').select('*');
+        if (allLeadsRes.error) {
+            console.error('❌ RPC admin_get_all_leads failed:', allLeadsRes.error);
+            // Fallback to old RPC
+            const fallback = await db.rpc('admin_get_portal_questionnaires_full');
             if (fallback.error) throw fallback.error;
-            console.warn('⚠️ Using fallback direct query, got', fallback.data?.length, 'rows');
-            qRes.data = fallback.data;
+            const profRes = await db.from('profiles').select('id, full_name, email, phone');
+            const profileMap = {};
+            (profRes.data || []).forEach(p => { profileMap[p.id] = p; });
+            allLeadsRes.data = (fallback.data || []).map(q => ({
+                profile_id: q.user_id, user_email: profileMap[q.user_id]?.email || '', user_phone: profileMap[q.user_id]?.phone || '',
+                full_name: profileMap[q.user_id]?.full_name || '', user_role: null, profile_created_at: q.created_at,
+                has_questionnaire: true, q_id: q.id, ...q, q_status: q.status, q_created_at: q.created_at
+            }));
+            console.warn('⚠️ Fallback to old RPC, got', allLeadsRes.data?.length, 'rows');
         } else {
-            console.log('✅ Portal questionnaires loaded via RPC:', qRes.data?.length, 'rows');
+            console.log('✅ All leads loaded via RPC:', allLeadsRes.data?.length, 'rows');
         }
-
-        const profileMap = {};
-        (profRes.data || []).forEach(p => { profileMap[p.id] = p; });
 
         pqEngagementMap = {};
         (progRes.data || []).filter(r => !r.video_id?.startsWith('last_watched_')).forEach(r => {
@@ -42,13 +45,43 @@ async function loadPortalQuestionnaires() {
             if (act && (!u.last_activity || act > u.last_activity)) u.last_activity = act;
         });
 
-        portalQuestionnaires = (qRes.data || []).map(q => {
-            const p = profileMap[q.user_id] || {};
-            const e = pqEngagementMap[q.user_id] || { completed_count: 0, watched_seconds: 0, last_activity: null };
-            const merged = { ...q, full_name: p.full_name || '', email: p.email || '', phone: p.phone || '', completed_count: e.completed_count, watched_hours: Math.round((e.watched_seconds / 3600) * 10) / 10, last_activity: e.last_activity };
-            merged.fitScore = calculateFitScore(merged);
-            return merged;
+        portalQuestionnaires = (allLeadsRes.data || []).map(row => {
+            const e = pqEngagementMap[row.profile_id] || { completed_count: 0, watched_seconds: 0, last_activity: null };
+            return {
+                id: row.q_id || row.profile_id,
+                user_id: row.profile_id,
+                full_name: row.full_name || '',
+                email: row.user_email || '',
+                phone: row.phone || row.user_phone || '',
+                gender: row.gender,
+                birth_date: row.birth_date,
+                city: row.city,
+                occupation: row.occupation,
+                how_found: row.how_found,
+                why_nlp: row.why_nlp,
+                study_time: row.study_time,
+                digital_challenge: row.digital_challenge,
+                knew_ram: row.knew_ram,
+                motivation_tip: row.motivation_tip,
+                main_challenge: row.main_challenge,
+                vision_one_year: row.vision_one_year,
+                status: row.q_status || 'new',
+                heat_level: row.heat_level,
+                call_count: row.call_count || 0,
+                last_called_at: row.last_called_at,
+                caller_notes: row.caller_notes,
+                assigned_caller: row.assigned_caller,
+                utm_source: row.utm_source,
+                created_at: row.q_created_at || row.profile_created_at,
+                has_questionnaire: row.has_questionnaire,
+                user_role: row.user_role,
+                completed_count: e.completed_count,
+                watched_hours: Math.round((e.watched_seconds / 3600) * 10) / 10,
+                last_activity: e.last_activity,
+                fitScore: 0
+            };
         });
+        portalQuestionnaires.forEach(q => { q.fitScore = calculateFitScore(q); });
 
         portalQLoaded = true;
         updatePqStats();
@@ -83,11 +116,12 @@ function heatLabel(h) { return h === 'hot' ? 'רותח' : h === 'warm' ? 'חם' 
 
 function updatePqStats() {
     const t = portalQuestionnaires.length;
+    const withQ = portalQuestionnaires.filter(q => q.has_questionnaire).length;
     const today = portalQuestionnaires.filter(q => isToday(q.created_at)).length;
     const avg = t > 0 ? Math.round(portalQuestionnaires.reduce((s, q) => s + q.fitScore, 0) / t) : 0;
     const hot = portalQuestionnaires.filter(q => q.heat_level === 'hot').length;
     const warm = portalQuestionnaires.filter(q => q.heat_level === 'warm').length;
-    const notCalled = portalQuestionnaires.filter(q => !q.call_count || q.call_count === 0).length;
+    const notCalled = portalQuestionnaires.filter(q => q.has_questionnaire && (!q.call_count || q.call_count === 0)).length;
 
     setText('portal-q-count', t);
     setText('stat-portal-q-total', t);
@@ -250,7 +284,7 @@ function renderPortalQuestionnaires() {
             const src = q.how_found || q.utm_source || '—';
             return `
                 <tr onclick="viewPortalQ('${q.id}')" style="cursor:pointer;">
-                    <td><strong>${escapeHtml(q.full_name || '-')}</strong></td>
+                    <td><strong>${escapeHtml(q.full_name || '-')}</strong>${!q.has_questionnaire ? ' <span style="font-size:0.65rem;background:rgba(232,241,242,0.1);color:rgba(232,241,242,0.4);padding:0.1rem 0.3rem;border-radius:4px;">ללא שאלון</span>' : ''}</td>
                     <td style="font-size:0.82rem;">${escapeHtml(src)}</td>
                     <td>${q.phone ? `<a href="tel:${escapeHtml(q.phone)}" onclick="event.stopPropagation()">${escapeHtml(q.phone)}</a>` : '-'}</td>
                     <td style="font-size:0.85rem;">${escapeHtml(q.city || '-')}</td>

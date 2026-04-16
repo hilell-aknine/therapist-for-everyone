@@ -2574,99 +2574,105 @@
         }
         .ambassador-sidebar-item i { font-size: 0.9rem; }
 
-        /* ── Community Feed (inline) ─────────────────────────────── */
-        #communityDashboard { max-width: 640px; margin: 0 auto; padding: 1rem 0.5rem; }
-        .community-header-bar { margin-bottom: 1.2rem; }
+        /* ── Community Feed — Facebook-style ─────────────────────── */
+        #communityDashboard { max-width: 590px; margin: 0 auto; padding: 0.8rem 0; }
+        .community-header-bar { margin-bottom: 1rem; padding: 0 0.4rem; }
         .community-header-bar h2 {
-            font-family: 'Frank Ruhl Libre', serif;
-            font-size: 1.35rem;
-            color: #1a1a1a;
-            display: flex; align-items: center; gap: 0.6rem;
+            font-family: 'Frank Ruhl Libre', serif; font-size: 1.3rem;
+            color: #1a1a1a; display: flex; align-items: center; gap: 0.5rem; margin: 0;
         }
-        .community-header-bar h2 i { color: var(--t-gold, #D4AF37); font-size: 1.1rem; }
-        .community-composer {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 14px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .community-composer textarea {
-            width: 100%; border: none; background: transparent;
-            color: #1a1a1a; font-family: 'Heebo', sans-serif;
-            font-size: 0.95rem; resize: vertical; min-height: 70px;
-            outline: none; line-height: 1.6;
-        }
-        .community-composer textarea::placeholder { color: #999; }
-        .community-composer button {
-            float: left; margin-top: 0.6rem;
-            background: var(--t-gold, #D4AF37); color: #fff;
-            border: none; border-radius: 10px; padding: 0.55rem 1.4rem;
-            font-family: 'Heebo', sans-serif; font-weight: 700; font-size: 0.9rem;
-            cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .community-composer button:hover {
-            transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,175,55,0.3);
-        }
-        .community-composer button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .community-composer::after { content: ''; display: table; clear: both; }
+        .community-header-bar h2 i { color: var(--t-gold, #D4AF37); font-size: 1rem; }
 
-        .community-post {
-            background: #fff;
-            border: 1px solid #e5e5e5;
-            border-radius: 14px;
-            padding: 1rem 1.2rem;
-            margin-bottom: 0.8rem;
-            position: relative;
-            transition: border-color 0.2s;
+        /* Avatar shared */
+        .cf-avatar {
+            border-radius: 50%; object-fit: cover; flex-shrink: 0;
         }
-        .community-post:hover { border-color: #ccc; }
-        .community-post.pinned {
-            border-right: 3px solid var(--t-gold, #D4AF37);
-            background: rgba(212,175,55,0.05);
-        }
-        .community-pin-badge {
-            font-size: 0.72rem; font-weight: 600;
-            color: #b8941e; margin-bottom: 0.5rem;
-        }
-        .community-pin-badge i { font-size: 0.65rem; }
-        .community-post-meta {
-            display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem;
-        }
-        .community-avatar {
-            width: 34px; height: 34px; border-radius: 50%;
+        .cf-avatar-fallback {
             background: var(--t-deep, #003B46); color: #fff;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.85rem; font-weight: 700; flex-shrink: 0;
+            font-weight: 700; border-radius: 50%;
         }
-        .community-meta-text { flex: 1; line-height: 1.3; }
-        .community-author { font-weight: 600; font-size: 0.88rem; color: #1a1a1a; }
-        .community-time {
-            display: block; font-size: 0.72rem; color: #888; margin-top: 1px;
+
+        /* Composer — FB style: avatar + input row */
+        .community-composer {
+            background: #fff; border: 1px solid #ddd; border-radius: 12px;
+            padding: 0.9rem 1rem; margin-bottom: 0.9rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
-        .community-menu-btn {
-            background: none; border: none; color: #888; cursor: pointer;
-            padding: 0.3rem; border-radius: 6px; font-size: 0.85rem;
-            transition: color 0.15s, background 0.15s;
-        }
-        .community-menu-btn:hover { color: #333; background: rgba(0,0,0,0.05); }
-        .community-menu {
-            position: absolute; left: 1rem; top: 2.8rem;
-            background: #fff; border: 1px solid #ddd;
-            border-radius: 10px; padding: 0.35rem 0; z-index: 20;
-            min-width: 140px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        }
-        .community-menu-item {
-            padding: 0.55rem 1rem; font-size: 0.82rem; cursor: pointer;
-            color: #333; display: flex; align-items: center; gap: 0.5rem;
+        .cf-composer-top { display: flex; gap: 0.7rem; align-items: flex-start; }
+        .cf-composer-top textarea {
+            flex: 1; border: none; background: #f0f2f5; border-radius: 20px;
+            padding: 0.6rem 1rem; color: #1a1a1a; font-family: 'Heebo', sans-serif;
+            font-size: 0.95rem; resize: none; outline: none; line-height: 1.5;
             transition: background 0.15s;
         }
-        .community-menu-item:hover { background: #f5f5f5; }
-        .community-menu-item.danger { color: #d32f2f; }
-        .community-menu-item.danger:hover { background: #fde8e8; }
-        .community-post-body {
-            font-size: 0.92rem; line-height: 1.65; color: #222;
+        .cf-composer-top textarea:focus { background: #fff; box-shadow: inset 0 0 0 1px #bbb; border-radius: 12px; }
+        .cf-composer-top textarea::placeholder { color: #65676b; }
+        .cf-composer-bottom { display: flex; justify-content: flex-end; margin-top: 0.6rem; }
+        .cf-composer-bottom button {
+            background: var(--t-gold, #D4AF37); color: #fff; border: none;
+            border-radius: 8px; padding: 0.5rem 1.6rem;
+            font-family: 'Heebo', sans-serif; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; transition: opacity 0.15s;
+        }
+        .cf-composer-bottom button:hover { opacity: 0.88; }
+        .cf-composer-bottom button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        /* Post card — FB style */
+        .cf-post {
+            background: #fff; border: 1px solid #ddd; border-radius: 12px;
+            padding: 1rem 1rem 0.8rem; margin-bottom: 0.9rem; position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .cf-post.pinned {
+            border-right: 3px solid var(--t-gold, #D4AF37);
+            background: #fffdf5;
+        }
+        .cf-pin-badge {
+            font-size: 0.72rem; font-weight: 600; color: #b8941e;
+            margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.3rem;
+        }
+        .cf-pin-badge i { font-size: 0.62rem; }
+
+        /* Post header — avatar + name + time + menu */
+        .cf-post-header { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.7rem; }
+        .cf-post-info { flex: 1; line-height: 1.25; }
+        .cf-post-author { display: block; font-weight: 600; font-size: 0.93rem; color: #050505; }
+        .cf-post-time { display: block; font-size: 0.75rem; color: #65676b; margin-top: 1px; }
+
+        /* Post body */
+        .cf-post-body {
+            font-size: 0.95rem; line-height: 1.7; color: #1c1e21;
             white-space: pre-wrap; word-break: break-word;
+            padding-bottom: 0.3rem;
+        }
+
+        /* Three-dot menu */
+        .cf-menu-btn {
+            background: none; border: none; color: #65676b; cursor: pointer;
+            width: 36px; height: 36px; border-radius: 50%; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s;
+        }
+        .cf-menu-btn:hover { background: #f0f2f5; color: #050505; }
+        .cf-menu {
+            position: absolute; left: 0.8rem; top: 3.2rem;
+            background: #fff; border: 1px solid #ddd; border-radius: 10px;
+            padding: 0.3rem 0; z-index: 20; min-width: 160px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        .cf-menu-item {
+            padding: 0.6rem 1rem; font-size: 0.85rem; cursor: pointer;
+            color: #1c1e21; display: flex; align-items: center; gap: 0.6rem;
+            transition: background 0.12s;
+        }
+        .cf-menu-item:hover { background: #f0f2f5; }
+        .cf-menu-item.danger { color: #d32f2f; }
+        .cf-menu-item.danger:hover { background: #fde8e8; }
+
+        @media (max-width: 640px) {
+            #communityDashboard { padding: 0.5rem 0.3rem; }
+            .cf-post, .community-composer { border-radius: 0; border-left: none; border-right: none; }
         }
 
         .amb-badge-new {
@@ -3605,17 +3611,15 @@
                 <div class="community-header-bar">
                     <h2><i class="fa-solid fa-users"></i> קהילת NLP</h2>
                 </div>
-                <div class="community-composer">
-                    <textarea id="communityPostInput" placeholder="מה חדש אצלך?" rows="3" maxlength="2000" dir="rtl"></textarea>
-                    <button id="communityPostBtn" onclick="submitCommunityPost()">פרסם ▸</button>
-                </div>
+                <div class="community-composer" id="communityComposer"></div>
                 <div id="communityFeed"></div>
-                <div id="communityLoading" style="text-align:center;padding:2rem;color:#8fa3a6;display:none;">
+                <div id="communityLoading" style="text-align:center;padding:2rem;color:#65676b;display:none;">
                     <i class="fa-solid fa-circle-notch fa-spin"></i> טוען...
                 </div>
-                <div id="communityEmpty" style="text-align:center;padding:3rem;color:#8fa3a6;display:none;">
-                    <i class="fa-solid fa-leaf" style="font-size:2rem;opacity:0.4;display:block;margin-bottom:0.8rem;"></i>
-                    עדיין אין פוסטים. תהיו הראשונים!
+                <div id="communityEmpty" style="text-align:center;padding:3rem;color:#65676b;display:none;">
+                    <i class="fa-solid fa-comments" style="font-size:2.5rem;opacity:0.3;display:block;margin-bottom:1rem;"></i>
+                    <p style="margin:0;font-size:1.05rem;font-weight:600;color:#1c1e21;">עדיין אין פוסטים</p>
+                    <p style="margin:0.3rem 0 0;font-size:0.88rem;">תהיו הראשונים לשתף!</p>
                 </div>
             </div>
 

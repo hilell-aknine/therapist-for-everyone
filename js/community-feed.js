@@ -1,55 +1,96 @@
 // ============================================================================
-// Community Feed — minimal inline post board for course-library.html
-// Supabase tables: community_posts, community_members, profiles
+// Community Feed — Facebook-style inline post board for course-library.html
 // ============================================================================
 
 (function () {
-    let _posts = [];
-    let _loaded = false;
-    let _isAdmin = false;
-    let _userId = null;
-    let _userFullName = '';
-    let _members = new Map();
-    let _openMenuId = null;
+    var _posts = [];
+    var _loaded = false;
+    var _isAdmin = false;
+    var _userId = null;
+    var _userFullName = '';
+    var _userAvatar = null;
+    var _authors = new Map(); // user_id → { name, avatar }
+    var _openMenuId = null;
 
     function el(id) { return document.getElementById(id); }
     function show(id) { var e = el(id); if (e) e.style.display = ''; }
     function hide(id) { var e = el(id); if (e) e.style.display = 'none'; }
 
-    // ── Hebrew relative time ────────────────────────────────────────────────
     function timeAgo(dateStr) {
         var diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
         if (diff < 60) return 'עכשיו';
         if (diff < 3600) return 'לפני ' + Math.floor(diff / 60) + ' דק׳';
-        if (diff < 86400) return 'לפני ' + Math.floor(diff / 3600) + ' שעות';
+        if (diff < 86400) {
+            var h = Math.floor(diff / 3600);
+            return 'לפני ' + h + (h === 1 ? ' שעה' : ' שעות');
+        }
         if (diff < 172800) return 'אתמול';
         if (diff < 604800) return 'לפני ' + Math.floor(diff / 86400) + ' ימים';
         return new Date(dateStr).toLocaleDateString('he-IL');
     }
 
-    // ── Escape HTML ─────────────────────────────────────────────────────────
     function esc(s) {
         if (!s) return '';
         return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    // ── Init (idempotent) ───────────────────────────────────────────────────
+    function avatarHtml(name, url, size) {
+        size = size || 40;
+        if (url) {
+            return '<img class="cf-avatar" src="' + esc(url) + '" alt="' + esc(name) + '"'
+                + ' style="width:' + size + 'px;height:' + size + 'px;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+                + '<div class="cf-avatar cf-avatar-fallback" style="width:' + size + 'px;height:' + size + 'px;display:none;font-size:' + Math.round(size * 0.42) + 'px">'
+                + esc((name || '?').charAt(0)) + '</div>';
+        }
+        return '<div class="cf-avatar cf-avatar-fallback" style="width:' + size + 'px;height:' + size + 'px;font-size:' + Math.round(size * 0.42) + 'px">'
+            + esc((name || '?').charAt(0)) + '</div>';
+    }
+
+    // ── Init ────────────────────────────────────────────────────────────────
     async function init() {
         if (_loaded) { renderFeed(); return; }
         try {
             var sess = await supabaseClient.auth.getSession();
             if (!sess.data?.session?.user) return;
-            _userId = sess.data.session.user.id;
+            var user = sess.data.session.user;
+            _userId = user.id;
 
-            var prof = await supabaseClient.from('profiles').select('role, full_name').eq('id', _userId).single();
+            // Get avatar from Google OAuth metadata
+            _userAvatar = user.user_metadata?.avatar_url
+                || user.user_metadata?.picture
+                || null;
+
+            var prof = await supabaseClient.from('profiles')
+                .select('role, full_name, avatar_url')
+                .eq('id', _userId).single();
             _isAdmin = prof.data?.role === 'admin';
-            _userFullName = prof.data?.full_name || '';
+            _userFullName = prof.data?.full_name || user.user_metadata?.full_name || '';
+            // Prefer profiles.avatar_url if set, else OAuth
+            if (prof.data?.avatar_url) _userAvatar = prof.data.avatar_url;
+
+            // Render composer with user avatar
+            renderComposer();
 
             await loadPosts();
             _loaded = true;
         } catch (err) {
             console.error('[community-feed] init error:', err);
         }
+    }
+
+    // ── Composer ────────────────────────────────────────────────────────────
+    function renderComposer() {
+        var comp = el('communityComposer');
+        if (!comp) return;
+        comp.innerHTML =
+            '<div class="cf-composer-top">'
+            +   avatarHtml(_userFullName, _userAvatar, 40)
+            +   '<textarea id="communityPostInput" placeholder="מה חדש אצלך?" rows="1" maxlength="2000" dir="rtl"'
+            +   ' onfocus="this.rows=4" onblur="if(!this.value.trim())this.rows=1"></textarea>'
+            + '</div>'
+            + '<div class="cf-composer-bottom">'
+            +   '<button id="communityPostBtn" onclick="submitCommunityPost()">פרסם</button>'
+            + '</div>';
     }
 
     // ── Load posts ──────────────────────────────────────────────────────────
@@ -68,23 +109,39 @@
 
         var posts = res.data || [];
 
-        // Resolve author names
+        // Resolve author info: try community_members first, fallback to profiles
         var authorIds = [...new Set(posts.map(function (p) { return p.author_id; }))];
+        // Add current user so we always have their info
+        if (_userId && !authorIds.includes(_userId)) authorIds.push(_userId);
+
+        _authors.clear();
         if (authorIds.length) {
+            // Batch: community_members
             var mRes = await supabaseClient.from('community_members')
                 .select('user_id, display_name, avatar_url')
                 .in('user_id', authorIds);
-            _members.clear();
-            (mRes.data || []).forEach(function (m) { _members.set(m.user_id, m); });
+            (mRes.data || []).forEach(function (m) {
+                _authors.set(m.user_id, { name: m.display_name, avatar: m.avatar_url });
+            });
 
-            // Fallback to profiles for authors not in community_members
-            for (var i = 0; i < authorIds.length; i++) {
-                if (!_members.has(authorIds[i])) {
-                    var pRes = await supabaseClient.from('profiles')
-                        .select('full_name').eq('id', authorIds[i]).single();
-                    if (pRes.data) _members.set(authorIds[i], { display_name: pRes.data.full_name, avatar_url: null });
-                }
+            // Batch: profiles for anyone still missing
+            var missing = authorIds.filter(function (id) { return !_authors.has(id); });
+            if (missing.length) {
+                var pRes = await supabaseClient.from('profiles')
+                    .select('id, full_name, avatar_url')
+                    .in('id', missing);
+                (pRes.data || []).forEach(function (p) {
+                    _authors.set(p.id, { name: p.full_name, avatar: p.avatar_url });
+                });
             }
+        }
+
+        // Current user override — use fresh OAuth avatar if profiles doesn't have one
+        if (_userId && _userAvatar) {
+            var cur = _authors.get(_userId) || { name: _userFullName, avatar: null };
+            if (!cur.avatar) cur.avatar = _userAvatar;
+            cur.name = cur.name || _userFullName;
+            _authors.set(_userId, cur);
         }
 
         _posts = posts;
@@ -105,28 +162,27 @@
         hide('communityEmpty');
 
         feedEl.innerHTML = _posts.map(function (post) {
-            var member = _members.get(post.author_id) || { display_name: 'משתמש', avatar_url: null };
-            var name = esc(member.display_name || 'משתמש');
-            var initials = (member.display_name || '?').charAt(0);
+            var author = _authors.get(post.author_id) || { name: 'משתמש', avatar: null };
+            var name = esc(author.name || 'משתמש');
             var isOwn = post.author_id === _userId;
             var showMenu = _isAdmin || isOwn;
             var pinLabel = post.is_pinned ? 'בטל נעיצה' : 'נעץ פוסט';
 
-            return '<div class="community-post' + (post.is_pinned ? ' pinned' : '') + '" data-id="' + post.id + '">'
-                + (post.is_pinned ? '<div class="community-pin-badge"><i class="fa-solid fa-thumbtack"></i> פוסט נעוץ</div>' : '')
-                + '<div class="community-post-meta">'
-                +   '<div class="community-avatar">' + esc(initials) + '</div>'
-                +   '<div class="community-meta-text">'
-                +     '<span class="community-author">' + name + '</span>'
-                +     '<span class="community-time">' + timeAgo(post.created_at) + '</span>'
+            return '<div class="cf-post' + (post.is_pinned ? ' pinned' : '') + '" data-id="' + post.id + '">'
+                + (post.is_pinned ? '<div class="cf-pin-badge"><i class="fa-solid fa-thumbtack"></i> פוסט נעוץ</div>' : '')
+                + '<div class="cf-post-header">'
+                +   avatarHtml(author.name, author.avatar, 44)
+                +   '<div class="cf-post-info">'
+                +     '<span class="cf-post-author">' + name + '</span>'
+                +     '<span class="cf-post-time">' + timeAgo(post.created_at) + '</span>'
                 +   '</div>'
-                +   (showMenu ? '<button class="community-menu-btn" onclick="CommunityFeed._toggleMenu(\'' + post.id + '\', event)"><i class="fa-solid fa-ellipsis-vertical"></i></button>' : '')
+                +   (showMenu ? '<button class="cf-menu-btn" onclick="CommunityFeed._toggleMenu(\'' + post.id + '\', event)"><i class="fa-solid fa-ellipsis"></i></button>' : '')
                 + '</div>'
-                + (showMenu ? '<div class="community-menu" id="cmenu-' + post.id + '" style="display:none;">'
-                    + (_isAdmin ? '<div class="community-menu-item" onclick="CommunityFeed._pin(\'' + post.id + '\',' + !post.is_pinned + ')"><i class="fa-solid fa-thumbtack"></i> ' + pinLabel + '</div>' : '')
-                    + '<div class="community-menu-item danger" onclick="CommunityFeed._delete(\'' + post.id + '\')"><i class="fa-solid fa-trash"></i> מחק</div>'
+                + (showMenu ? '<div class="cf-menu" id="cmenu-' + post.id + '" style="display:none;">'
+                    + (_isAdmin ? '<div class="cf-menu-item" onclick="CommunityFeed._pin(\'' + post.id + '\',' + !post.is_pinned + ')"><i class="fa-solid fa-thumbtack"></i> ' + pinLabel + '</div>' : '')
+                    + '<div class="cf-menu-item danger" onclick="CommunityFeed._delete(\'' + post.id + '\')"><i class="fa-solid fa-trash-can"></i> מחק פוסט</div>'
                 + '</div>' : '')
-                + '<div class="community-post-body">' + esc(post.body).replace(/\n/g, '<br>') + '</div>'
+                + '<div class="cf-post-body">' + esc(post.body).replace(/\n/g, '<br>') + '</div>'
             + '</div>';
         }).join('');
     }
@@ -136,13 +192,10 @@
         event.stopPropagation();
         var menu = el('cmenu-' + postId);
         if (!menu) return;
-
-        // Close any previously open menu
         if (_openMenuId && _openMenuId !== postId) {
             var prev = el('cmenu-' + _openMenuId);
             if (prev) prev.style.display = 'none';
         }
-
         if (menu.style.display === 'none') {
             menu.style.display = '';
             _openMenuId = postId;
@@ -156,39 +209,40 @@
         var input = el('communityPostInput');
         var btn = el('communityPostBtn');
         if (!input || !btn) return;
-
         var body = input.value.trim();
         if (!body) return;
 
         btn.disabled = true;
-        btn.textContent = 'שולח...';
+        btn.textContent = 'מפרסם...';
 
         try {
-            // Ensure author exists in community_members
+            // Ensure author exists in community_members (with avatar)
             var existing = await supabaseClient.from('community_members')
-                .select('user_id').eq('user_id', _userId).single();
+                .select('user_id, avatar_url').eq('user_id', _userId).single();
             if (!existing.data) {
                 await supabaseClient.from('community_members').insert({
                     user_id: _userId,
                     display_name: _userFullName || 'משתמש',
-                    level: 1,
-                    total_points: 0,
-                    posts_count: 0,
-                    likes_received: 0
+                    avatar_url: _userAvatar || null,
+                    level: 1, total_points: 0, posts_count: 0, likes_received: 0
                 });
+            } else if (_userAvatar && !existing.data.avatar_url) {
+                // Update avatar if we have one from OAuth but community_members doesn't
+                await supabaseClient.from('community_members')
+                    .update({ avatar_url: _userAvatar })
+                    .eq('user_id', _userId);
             }
 
             var ins = await supabaseClient.from('community_posts').insert({
                 author_id: _userId,
                 body: body,
-                is_pinned: false,
-                is_locked: false,
-                likes_count: 0,
-                comments_count: 0
+                is_pinned: false, is_locked: false,
+                likes_count: 0, comments_count: 0
             });
             if (ins.error) throw ins.error;
 
             input.value = '';
+            input.rows = 1;
             _loaded = false;
             await init();
         } catch (err) {
@@ -196,7 +250,7 @@
             alert('שגיאה בפרסום — נסה שוב.');
         } finally {
             btn.disabled = false;
-            btn.textContent = 'פרסם ▸';
+            btn.textContent = 'פרסם';
         }
     }
 
@@ -206,24 +260,18 @@
             await supabaseClient.from('community_posts').delete().eq('id', postId);
             _loaded = false;
             await init();
-        } catch (err) {
-            alert('שגיאה במחיקה.');
-        }
+        } catch (err) { alert('שגיאה במחיקה.'); }
     }
 
     async function togglePin(postId, pinned) {
         try {
             await supabaseClient.from('community_posts')
-                .update({ is_pinned: pinned })
-                .eq('id', postId);
+                .update({ is_pinned: pinned }).eq('id', postId);
             _loaded = false;
             await init();
-        } catch (err) {
-            alert('שגיאה בנעיצה.');
-        }
+        } catch (err) { alert('שגיאה בנעיצה.'); }
     }
 
-    // Close menus on click outside
     document.addEventListener('click', function () {
         if (_openMenuId) {
             var menu = el('cmenu-' + _openMenuId);
@@ -232,13 +280,9 @@
         }
     });
 
-    // ── Public API ──────────────────────────────────────────────────────────
     window.CommunityFeed = {
-        init: init,
-        loadPosts: loadPosts,
-        _toggleMenu: toggleMenu,
-        _pin: togglePin,
-        _delete: deletePost
+        init: init, loadPosts: loadPosts,
+        _toggleMenu: toggleMenu, _pin: togglePin, _delete: deletePost
     };
     window.submitCommunityPost = submitPost;
 })();

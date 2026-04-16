@@ -1,6 +1,5 @@
 // ============================================================================
-// Community Feed — Facebook-style with likes + comments
-// Tables: community_posts, community_comments, community_likes, community_members, profiles
+// Community Feed — Facebook-style with likes, comments, edit, pin
 // ============================================================================
 
 (function () {
@@ -11,10 +10,12 @@
     var _userFullName = '';
     var _userAvatar = null;
     var _authors = new Map();
-    var _myLikes = new Set();       // post IDs user liked
-    var _comments = new Map();      // post_id → [comments]
+    var _myLikes = new Set();
+    var _comments = new Map();
     var _openMenuId = null;
-    var _expandedComments = new Set(); // post IDs with comments section open
+    var _expandedComments = new Set();
+    var _editingPostId = null;
+    var TOP_COMMENTS = 3;
 
     function el(id) { return document.getElementById(id); }
     function show(id) { var e = el(id); if (e) e.style.display = ''; }
@@ -59,12 +60,14 @@
             var user = sess.data.session.user;
             _userId = user.id;
             _userAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
+            _userFullName = user.user_metadata?.full_name || user.user_metadata?.name || '';
 
             var prof = await supabaseClient.from('profiles')
-                .select('role, full_name, avatar_url').eq('id', _userId).single();
-            _isAdmin = prof.data?.role === 'admin';
-            _userFullName = prof.data?.full_name || user.user_metadata?.full_name || '';
-            if (prof.data?.avatar_url) _userAvatar = prof.data.avatar_url;
+                .select('role, full_name').eq('id', _userId).single();
+            if (prof.data) {
+                _isAdmin = prof.data.role === 'admin';
+                if (prof.data.full_name) _userFullName = prof.data.full_name;
+            }
 
             renderComposer();
             await loadPosts();
@@ -88,7 +91,7 @@
             + '</div>';
     }
 
-    // ── Load posts + likes + comments ───────────────────────────────────────
+    // ── Load ────────────────────────────────────────────────────────────────
     async function loadPosts() {
         show('communityLoading');
         hide('communityEmpty');
@@ -101,25 +104,16 @@
                 .order('is_pinned', { ascending: false })
                 .order('created_at', { ascending: false })
                 .limit(50),
-            // My likes
             supabaseClient.from('community_likes')
-                .select('post_id')
-                .eq('user_id', _userId)
-                .not('post_id', 'is', null),
-            // All comments
+                .select('post_id').eq('user_id', _userId).not('post_id', 'is', null),
             supabaseClient.from('community_comments')
                 .select('id, post_id, author_id, body, created_at')
-                .order('created_at', { ascending: true })
-                .limit(500)
+                .order('created_at', { ascending: true }).limit(500)
         ]);
 
-        var posts = postsRes.data || [];
-
-        // My likes set
+        _posts = postsRes.data || [];
         _myLikes.clear();
         (likesRes.data || []).forEach(function (l) { if (l.post_id) _myLikes.add(l.post_id); });
-
-        // Comments grouped by post
         _comments.clear();
         (commentsRes.data || []).forEach(function (c) {
             var arr = _comments.get(c.post_id) || [];
@@ -127,11 +121,11 @@
             _comments.set(c.post_id, arr);
         });
 
-        // Resolve authors — collect all unique IDs (from posts + comments)
-        var allAuthorIds = new Set(posts.map(function (p) { return p.author_id; }));
-        (commentsRes.data || []).forEach(function (c) { allAuthorIds.add(c.author_id); });
-        if (_userId) allAuthorIds.add(_userId);
-        var authorIds = [...allAuthorIds];
+        // Resolve authors
+        var allIds = new Set(_posts.map(function (p) { return p.author_id; }));
+        (commentsRes.data || []).forEach(function (c) { allIds.add(c.author_id); });
+        if (_userId) allIds.add(_userId);
+        var authorIds = [...allIds];
 
         _authors.clear();
         if (authorIds.length) {
@@ -143,20 +137,18 @@
             var missing = authorIds.filter(function (id) { return !_authors.has(id); });
             if (missing.length) {
                 var pRes = await supabaseClient.from('profiles')
-                    .select('id, full_name, avatar_url').in('id', missing);
+                    .select('id, full_name').in('id', missing);
                 (pRes.data || []).forEach(function (p) {
-                    _authors.set(p.id, { name: p.full_name, avatar: p.avatar_url });
+                    _authors.set(p.id, { name: p.full_name, avatar: null });
                 });
             }
         }
-        if (_userId && _userAvatar) {
-            var cur = _authors.get(_userId) || { name: _userFullName, avatar: null };
-            if (!cur.avatar) cur.avatar = _userAvatar;
-            cur.name = cur.name || _userFullName;
-            _authors.set(_userId, cur);
-        }
+        // Current user — ensure we always have correct info
+        var curAuthor = _authors.get(_userId) || { name: _userFullName, avatar: null };
+        if (!curAuthor.avatar && _userAvatar) curAuthor.avatar = _userAvatar;
+        if (!curAuthor.name) curAuthor.name = _userFullName;
+        _authors.set(_userId, curAuthor);
 
-        _posts = posts;
         hide('communityLoading');
         renderFeed();
     }
@@ -175,16 +167,14 @@
         var name = esc(author.name || 'משתמש');
         var isOwn = post.author_id === _userId;
         var showMenu = _isAdmin || isOwn;
-        var pinLabel = post.is_pinned ? 'בטל נעיצה' : 'נעץ פוסט';
         var liked = _myLikes.has(post.id);
         var likeCount = post.likes_count || 0;
         var commentCount = post.comments_count || 0;
         var postComments = _comments.get(post.id) || [];
         var commentsOpen = _expandedComments.has(post.id);
+        var isEditing = _editingPostId === post.id;
 
         var html = '<div class="cf-post' + (post.is_pinned ? ' pinned' : '') + '" data-id="' + post.id + '">';
-
-        // Pin badge
         if (post.is_pinned) html += '<div class="cf-pin-badge"><i class="fa-solid fa-thumbtack"></i> פוסט נעוץ</div>';
 
         // Header
@@ -199,16 +189,26 @@
 
         // Menu
         if (showMenu) {
-            html += '<div class="cf-menu" id="cmenu-' + post.id + '" style="display:none;">'
-                + (_isAdmin ? '<div class="cf-menu-item" onclick="CommunityFeed._pin(\'' + post.id + '\',' + !post.is_pinned + ')"><i class="fa-solid fa-thumbtack"></i> ' + pinLabel + '</div>' : '')
-                + '<div class="cf-menu-item danger" onclick="CommunityFeed._delete(\'' + post.id + '\')"><i class="fa-solid fa-trash-can"></i> מחק פוסט</div>'
-                + '</div>';
+            html += '<div class="cf-menu" id="cmenu-' + post.id + '" style="display:none;">';
+            if (isOwn) html += '<div class="cf-menu-item" onclick="CommunityFeed._startEdit(\'' + post.id + '\')"><i class="fa-solid fa-pen"></i> ערוך פוסט</div>';
+            if (_isAdmin) html += '<div class="cf-menu-item" onclick="CommunityFeed._pin(\'' + post.id + '\',' + !post.is_pinned + ')"><i class="fa-solid fa-thumbtack"></i> ' + (post.is_pinned ? 'בטל נעיצה' : 'נעץ פוסט') + '</div>';
+            if (_isAdmin || isOwn) html += '<div class="cf-menu-item danger" onclick="CommunityFeed._delete(\'' + post.id + '\')"><i class="fa-solid fa-trash-can"></i> מחק פוסט</div>';
+            html += '</div>';
         }
 
-        // Body
-        html += '<div class="cf-post-body">' + esc(post.body).replace(/\n/g, '<br>') + '</div>';
+        // Body — editable or static
+        if (isEditing) {
+            html += '<div class="cf-edit-area">'
+                + '<textarea id="cf-edit-' + post.id + '" dir="rtl" rows="4">' + esc(post.body) + '</textarea>'
+                + '<div class="cf-edit-btns">'
+                + '<button class="cf-edit-save" onclick="CommunityFeed._saveEdit(\'' + post.id + '\')">שמור</button>'
+                + '<button class="cf-edit-cancel" onclick="CommunityFeed._cancelEdit()">ביטול</button>'
+                + '</div></div>';
+        } else {
+            html += '<div class="cf-post-body">' + esc(post.body).replace(/\n/g, '<br>') + '</div>';
+        }
 
-        // Like + comment counts bar
+        // Counts bar
         if (likeCount > 0 || commentCount > 0) {
             html += '<div class="cf-counts">';
             if (likeCount > 0) html += '<span class="cf-count-likes"><i class="fa-solid fa-thumbs-up cf-like-icon-small"></i> ' + likeCount + '</span>';
@@ -216,34 +216,45 @@
             html += '</div>';
         }
 
-        // Action buttons bar (Like + Comment)
+        // Action buttons
         html += '<div class="cf-actions">'
             + '<button class="cf-action-btn' + (liked ? ' liked' : '') + '" onclick="CommunityFeed._like(\'' + post.id + '\',' + liked + ')">'
-            + '<i class="' + (liked ? 'fa-solid' : 'fa-regular') + ' fa-thumbs-up"></i> אהבתי'
-            + '</button>'
+            + '<i class="' + (liked ? 'fa-solid' : 'fa-regular') + ' fa-thumbs-up"></i> אהבתי</button>'
             + '<button class="cf-action-btn" onclick="CommunityFeed._toggleComments(\'' + post.id + '\')">'
-            + '<i class="fa-regular fa-comment"></i> תגובה'
-            + '</button>'
+            + '<i class="fa-regular fa-comment"></i> תגובה</button>'
             + '</div>';
 
-        // Comments section
-        html += '<div class="cf-comments-section" id="cf-comments-' + post.id + '" style="display:' + (commentsOpen ? '' : 'none') + ';">';
+        // Comments section — show top 3 always, rest when expanded
+        html += '<div class="cf-comments-section" id="cf-comments-' + post.id + '">';
 
-        // Existing comments
-        if (postComments.length) {
-            html += postComments.map(function (c) {
+        if (postComments.length > 0) {
+            var visibleComments = commentsOpen ? postComments : postComments.slice(-TOP_COMMENTS);
+            var hiddenCount = postComments.length - TOP_COMMENTS;
+
+            // "Show more" link
+            if (!commentsOpen && hiddenCount > 0) {
+                html += '<div class="cf-show-more" onclick="CommunityFeed._toggleComments(\'' + post.id + '\')">'
+                    + 'הצג ' + hiddenCount + ' תגובות נוספות</div>';
+            }
+
+            html += visibleComments.map(function (c) {
                 var ca = _authors.get(c.author_id) || { name: 'משתמש', avatar: null };
-                var canDeleteComment = _isAdmin || c.author_id === _userId;
+                var canDel = _isAdmin || c.author_id === _userId;
                 return '<div class="cf-comment">'
                     + avatarHtml(ca.name, ca.avatar, 32)
                     + '<div class="cf-comment-bubble">'
                     + '<span class="cf-comment-author">' + esc(ca.name || 'משתמש') + '</span>'
                     + '<span class="cf-comment-body">' + esc(c.body).replace(/\n/g, '<br>') + '</span>'
                     + '</div>'
-                    + (canDeleteComment ? '<button class="cf-comment-delete" onclick="CommunityFeed._deleteComment(\'' + c.id + '\',\'' + post.id + '\')" title="מחק"><i class="fa-solid fa-xmark"></i></button>' : '')
+                    + (canDel ? '<button class="cf-comment-delete" onclick="CommunityFeed._deleteComment(\'' + c.id + '\',\'' + post.id + '\')" title="מחק"><i class="fa-solid fa-xmark"></i></button>' : '')
                     + '</div>'
                     + '<div class="cf-comment-time">' + timeAgo(c.created_at) + '</div>';
             }).join('');
+
+            if (commentsOpen && hiddenCount > 0) {
+                html += '<div class="cf-show-more" onclick="CommunityFeed._toggleComments(\'' + post.id + '\')">'
+                    + 'הסתר תגובות</div>';
+            }
         }
 
         // Comment input
@@ -254,8 +265,7 @@
             + ' onkeydown="if(event.key===\'Enter\'){event.preventDefault();CommunityFeed._submitComment(\'' + post.id + '\')}">'
             + '</div>';
 
-        html += '</div>'; // cf-comments-section
-        html += '</div>'; // cf-post
+        html += '</div></div>';
         return html;
     }
 
@@ -263,39 +273,27 @@
     async function toggleLike(postId, alreadyLiked) {
         try {
             if (alreadyLiked) {
-                await supabaseClient.from('community_likes')
-                    .delete().eq('user_id', _userId).eq('post_id', postId);
+                await supabaseClient.from('community_likes').delete().eq('user_id', _userId).eq('post_id', postId);
                 _myLikes.delete(postId);
-                // Decrement count locally
                 var p = _posts.find(function (x) { return x.id === postId; });
                 if (p) p.likes_count = Math.max(0, (p.likes_count || 0) - 1);
             } else {
-                await supabaseClient.from('community_likes')
-                    .insert({ user_id: _userId, post_id: postId });
+                await supabaseClient.from('community_likes').insert({ user_id: _userId, post_id: postId });
                 _myLikes.add(postId);
                 var p2 = _posts.find(function (x) { return x.id === postId; });
                 if (p2) p2.likes_count = (p2.likes_count || 0) + 1;
             }
             renderFeed();
-        } catch (err) {
-            console.error('[community-feed] like error:', err);
-        }
+        } catch (err) { console.error('[community-feed] like error:', err); }
     }
 
     // ── Comments ────────────────────────────────────────────────────────────
     function toggleComments(postId) {
-        if (_expandedComments.has(postId)) {
-            _expandedComments.delete(postId);
-        } else {
-            _expandedComments.add(postId);
-        }
+        if (_expandedComments.has(postId)) _expandedComments.delete(postId);
+        else _expandedComments.add(postId);
         renderFeed();
-        // Focus the input after render
         if (_expandedComments.has(postId)) {
-            setTimeout(function () {
-                var inp = el('cf-cinput-' + postId);
-                if (inp) inp.focus();
-            }, 50);
+            setTimeout(function () { var inp = el('cf-cinput-' + postId); if (inp) inp.focus(); }, 50);
         }
     }
 
@@ -305,41 +303,20 @@
         var body = inp.value.trim();
         if (!body) return;
         inp.disabled = true;
-
         try {
-            // Ensure author in community_members
-            var existing = await supabaseClient.from('community_members')
-                .select('user_id').eq('user_id', _userId).single();
-            if (!existing.data) {
-                await supabaseClient.from('community_members').insert({
-                    user_id: _userId, display_name: _userFullName || 'משתמש',
-                    avatar_url: _userAvatar || null,
-                    level: 1, total_points: 0, posts_count: 0, likes_received: 0
-                });
-            }
-
-            var ins = await supabaseClient.from('community_comments').insert({
-                post_id: postId, author_id: _userId, body: body
-            });
+            await ensureMember();
+            var ins = await supabaseClient.from('community_comments').insert({ post_id: postId, author_id: _userId, body: body });
             if (ins.error) throw ins.error;
-
-            // Update local comments_count
             var post = _posts.find(function (x) { return x.id === postId; });
             if (post) post.comments_count = (post.comments_count || 0) + 1;
-
-            // Add to local comments map
             var arr = _comments.get(postId) || [];
             arr.push({ id: 'temp-' + Date.now(), post_id: postId, author_id: _userId, body: body, created_at: new Date().toISOString() });
             _comments.set(postId, arr);
-
-            _expandedComments.add(postId);
             renderFeed();
         } catch (err) {
             console.error('[community-feed] comment error:', err);
             alert('שגיאה בתגובה — נסה שוב.');
-        } finally {
-            if (inp) inp.disabled = false;
-        }
+        } finally { if (inp) inp.disabled = false; }
     }
 
     async function deleteComment(commentId, postId) {
@@ -354,7 +331,51 @@
         } catch (err) { alert('שגיאה במחיקה.'); }
     }
 
-    // ── Post actions ────────────────────────────────────────────────────────
+    // ── Edit post ───────────────────────────────────────────────────────────
+    function startEdit(postId) {
+        _editingPostId = postId;
+        _openMenuId = null;
+        renderFeed();
+        setTimeout(function () { var ta = el('cf-edit-' + postId); if (ta) { ta.focus(); ta.selectionStart = ta.value.length; } }, 50);
+    }
+
+    function cancelEdit() { _editingPostId = null; renderFeed(); }
+
+    async function saveEdit(postId) {
+        var ta = el('cf-edit-' + postId);
+        if (!ta) return;
+        var body = ta.value.trim();
+        if (!body) { alert('פוסט לא יכול להיות ריק.'); return; }
+        try {
+            var res = await supabaseClient.from('community_posts').update({ body: body }).eq('id', postId);
+            if (res.error) throw res.error;
+            var post = _posts.find(function (x) { return x.id === postId; });
+            if (post) post.body = body;
+            _editingPostId = null;
+            renderFeed();
+        } catch (err) {
+            console.error('[community-feed] edit error:', err);
+            alert('שגיאה בעדכון — נסה שוב.');
+        }
+    }
+
+    // ── Ensure community_members row ────────────────────────────────────────
+    async function ensureMember() {
+        var existing = await supabaseClient.from('community_members')
+            .select('user_id, avatar_url').eq('user_id', _userId).single();
+        if (!existing.data) {
+            await supabaseClient.from('community_members').insert({
+                user_id: _userId, display_name: _userFullName || 'משתמש',
+                avatar_url: _userAvatar || null,
+                level: 1, total_points: 0, posts_count: 0, likes_received: 0
+            });
+        } else if (_userAvatar && !existing.data.avatar_url) {
+            await supabaseClient.from('community_members')
+                .update({ avatar_url: _userAvatar }).eq('user_id', _userId);
+        }
+    }
+
+    // ── Post CRUD ───────────────────────────────────────────────────────────
     function toggleMenu(postId, event) {
         event.stopPropagation();
         var menu = el('cmenu-' + postId);
@@ -376,18 +397,7 @@
         btn.disabled = true;
         btn.textContent = 'מפרסם...';
         try {
-            var existing = await supabaseClient.from('community_members')
-                .select('user_id, avatar_url').eq('user_id', _userId).single();
-            if (!existing.data) {
-                await supabaseClient.from('community_members').insert({
-                    user_id: _userId, display_name: _userFullName || 'משתמש',
-                    avatar_url: _userAvatar || null,
-                    level: 1, total_points: 0, posts_count: 0, likes_received: 0
-                });
-            } else if (_userAvatar && !existing.data.avatar_url) {
-                await supabaseClient.from('community_members')
-                    .update({ avatar_url: _userAvatar }).eq('user_id', _userId);
-            }
+            await ensureMember();
             var ins = await supabaseClient.from('community_posts').insert({
                 author_id: _userId, body: body,
                 is_pinned: false, is_locked: false, likes_count: 0, comments_count: 0
@@ -400,44 +410,34 @@
         } catch (err) {
             console.error('[community-feed] post error:', err);
             alert('שגיאה בפרסום — נסה שוב.');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'פרסם';
-        }
+        } finally { btn.disabled = false; btn.textContent = 'פרסם'; }
     }
 
     async function deletePost(postId) {
         if (!confirm('למחוק את הפוסט?')) return;
         try {
             await supabaseClient.from('community_posts').delete().eq('id', postId);
-            _loaded = false;
-            await init();
+            _loaded = false; await init();
         } catch (err) { alert('שגיאה במחיקה.'); }
     }
 
     async function togglePin(postId, pinned) {
         try {
-            await supabaseClient.from('community_posts')
-                .update({ is_pinned: pinned }).eq('id', postId);
-            _loaded = false;
-            await init();
+            await supabaseClient.from('community_posts').update({ is_pinned: pinned }).eq('id', postId);
+            _loaded = false; await init();
         } catch (err) { alert('שגיאה בנעיצה.'); }
     }
 
     document.addEventListener('click', function () {
-        if (_openMenuId) {
-            var menu = el('cmenu-' + _openMenuId);
-            if (menu) menu.style.display = 'none';
-            _openMenuId = null;
-        }
+        if (_openMenuId) { var menu = el('cmenu-' + _openMenuId); if (menu) menu.style.display = 'none'; _openMenuId = null; }
     });
 
     window.CommunityFeed = {
         init: init, loadPosts: loadPosts,
         _toggleMenu: toggleMenu, _pin: togglePin, _delete: deletePost,
         _like: toggleLike,
-        _toggleComments: toggleComments, _submitComment: submitComment,
-        _deleteComment: deleteComment
+        _toggleComments: toggleComments, _submitComment: submitComment, _deleteComment: deleteComment,
+        _startEdit: startEdit, _saveEdit: saveEdit, _cancelEdit: cancelEdit
     };
     window.submitCommunityPost = submitPost;
 })();

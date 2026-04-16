@@ -108,13 +108,15 @@ function updateOverview() {
     setText('ov-patients', patients.length);
     setText('ov-therapists', therapists.length);
     setText('ov-matches', matches.length);
-    setText('ov-leads', portalQuestionnaires?.length || leads.length);
+    // Use portal questionnaires as the real count (342), not profiles (233)
+    const pqCount = (typeof portalQuestionnaires !== 'undefined' && portalQuestionnaires.length) ? portalQuestionnaires.length : leads.length;
+    setText('ov-leads', pqCount);
     setText('ov-learners', learnersData?.length || 0);
     setText('ov-pipeline', pipelineLeads.length);
 
     // Contact leads + questionnaires counts
     const clCount = typeof contactLeads !== 'undefined' ? contactLeads.length : 0;
-    const qCount = typeof questionnaires !== 'undefined' ? questionnaires.length : 0;
+    const qCount = (typeof portalQuestionnaires !== 'undefined' && portalQuestionnaires.length) ? portalQuestionnaires.length : (typeof questionnaires !== 'undefined' ? questionnaires.length : 0);
     setText('ov-contact-leads', clCount);
     setText('ov-questionnaires', qCount);
 

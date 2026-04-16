@@ -60,19 +60,18 @@ function updateCounts() {
 
     // Sidebar combined badges
     setText('mizum-count', patients.length + therapists.length + matches.length);
-    const clLen = typeof contactLeads !== 'undefined' ? contactLeads.length : 0;
-    const qLen = typeof questionnaires !== 'undefined' ? questionnaires.length : 0;
     const pActive = pipelineLeads.filter(l => !['closed_won','closed_lost'].includes(l.stage));
-    setText('sales-count', clLen + qLen + pActive.length);
-    setText('learning-count', leads.length);
     setText('pipeline-count', pActive.length);
+    // learning-count is set by updatePqStats() in admin-portal-questionnaires.js (uses portal_questionnaires count)
+    // Only set fallback if portal-q hasn't loaded yet
+    if (!portalQLoaded) setText('learning-count', leads.length);
 
     // Stat cards
     setText('stat-new', patients.filter(p => p.status === 'new').length);
     setText('stat-waiting', patients.filter(p => p.status === 'waiting').length);
     setText('stat-in-treatment', patients.filter(p => p.status === 'in_treatment').length);
     setText('stat-total-leads', leads.length);
-    setText('stat-google-leads', leads.filter(l => !l.email || l.full_name !== l.email?.split('@')[0]).length);
+    setText('stat-google-leads', leads.filter(l => (l.utm_source || '').toLowerCase().includes('google')).length);
     setText('stat-email-leads', leads.filter(l => l.full_name === l.email?.split('@')[0]).length);
 
     // Update overview if visible

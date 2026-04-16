@@ -108,47 +108,44 @@ function updateOverview() {
     setText('ov-patients', patients.length);
     setText('ov-therapists', therapists.length);
     setText('ov-matches', matches.length);
-    // Use portal questionnaires as the real count (342), not profiles (233)
-    const pqCount = (typeof portalQuestionnaires !== 'undefined' && portalQuestionnaires.length) ? portalQuestionnaires.length : leads.length;
+
+    // Leads count — use portal questionnaires (342) as the real count
+    const pq = (typeof portalQuestionnaires !== 'undefined') ? portalQuestionnaires : [];
+    const pqCount = pq.length || leads.length;
     setText('ov-leads', pqCount);
-    setText('ov-learners', learnersData?.length || 0);
-    setText('ov-pipeline', pipelineLeads.length);
+    setText('ov-questionnaires', pqCount);
+    setText('ov-learners', pq.filter(q => (q.completed_count || 0) > 0).length || (learnersData?.length || 0));
 
-    // Contact leads + questionnaires counts
-    const clCount = typeof contactLeads !== 'undefined' ? contactLeads.length : 0;
-    const qCount = (typeof portalQuestionnaires !== 'undefined' && portalQuestionnaires.length) ? portalQuestionnaires.length : (typeof questionnaires !== 'undefined' ? questionnaires.length : 0);
-    setText('ov-contact-leads', clCount);
-    setText('ov-questionnaires', qCount);
-
-    // Instagram overview stats (async, non-blocking)
-    if (!igCache) {
-        Promise.all([
-            db.from('patients').select('id, created_at', { count: 'exact', head: true }).eq('utm_source', 'instagram'),
-            db.from('therapists').select('id, created_at', { count: 'exact', head: true }).eq('utm_source', 'instagram'),
-            db.from('contact_requests').select('id, created_at', { count: 'exact', head: true }).eq('utm_source', 'instagram'),
-        ]).then(([p, t, c]) => {
-            const total = (p.count || 0) + (t.count || 0) + (c.count || 0);
-            setText('ov-ig-total', total);
-            const badge = document.getElementById('ig-total-badge');
-            if (badge) { badge.textContent = total; badge.style.display = total > 0 ? '' : 'none'; }
-        }).catch(() => {});
-    } else {
-        const d7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        setText('ov-ig-total', igCache.length);
-        setText('ov-ig-7d', igCache.filter(l => new Date(l.created_at) >= d7).length);
+    // Funnel stats from portal questionnaires (real data)
+    if (pq.length > 0) {
+        setText('funnel-registered', pq.length);
+        setText('funnel-active', pq.filter(q => (q.completed_count || 0) > 0).length);
+        setText('funnel-hot', pq.filter(q => q.heat_level === 'hot' || q.heat_level === 'warm').length);
+        setText('funnel-pipeline', pq.filter(q => q.status === 'potential' || q.status === 'client').length);
     }
+
+    // Paid customers count (async, non-blocking)
+    db.from('subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'active')
+        .then(({ count }) => { setText('ov-paid-count', count || 0); })
+        .catch(() => { setText('ov-paid-count', '—'); });
 
     // Recent activity summary
     const recentEl = document.getElementById('overview-recent-list');
     if (!recentEl) return;
 
     const recentItems = [];
+    // Leads summary
+    const todayLeads = pq.filter(q => q.created_at && new Date(q.created_at).toDateString() === new Date().toDateString()).length;
+    if (todayLeads > 0) recentItems.push(`<i class="fa-solid fa-clipboard-list" style="color:var(--gold);"></i> ${todayLeads} לידים חדשים היום`);
+    const hotLeads = pq.filter(q => q.heat_level === 'hot').length;
+    if (hotLeads > 0) recentItems.push(`<i class="fa-solid fa-fire" style="color:#f85149;"></i> ${hotLeads} לידים רותחים ממתינים לטיפול`);
+    const potential = pq.filter(q => q.status === 'potential').length;
+    if (potential > 0) recentItems.push(`<i class="fa-solid fa-star" style="color:var(--gold);"></i> ${potential} לידים פוטנציאליים`);
+    // Social cause
     const newPatients = patients.filter(p => p.status === 'new').length;
     const newTherapists = therapists.filter(t => t.status === 'new').length;
-    if (newPatients > 0) recentItems.push(`<i class="fa-solid fa-user-injured" style="color:var(--gold);"></i> ${newPatients} מטופלים חדשים ממתינים לטיפול`);
+    if (newPatients > 0) recentItems.push(`<i class="fa-solid fa-user-injured" style="color:var(--muted-teal);"></i> ${newPatients} מטופלים חדשים ממתינים`);
     if (newTherapists > 0) recentItems.push(`<i class="fa-solid fa-user-doctor" style="color:var(--muted-teal);"></i> ${newTherapists} מטפלים חדשים ממתינים לאישור`);
-    const activePipeline = pipelineLeads.filter(l => !['closed_won','closed_lost'].includes(l.stage)).length;
-    if (activePipeline > 0) recentItems.push(`<i class="fa-solid fa-filter-circle-dollar" style="color:var(--gold);"></i> ${activePipeline} לידים פעילים ב-Pipeline`);
     if (recentItems.length === 0) recentItems.push('אין פעילות חדשה');
 
     recentEl.innerHTML = recentItems.map(item => `<div style="padding:0.5rem 0;border-bottom:1px solid var(--border);">${item}</div>`).join('');

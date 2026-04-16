@@ -108,7 +108,7 @@ function updateOverview() {
     setText('ov-patients', patients.length);
     setText('ov-therapists', therapists.length);
     setText('ov-matches', matches.length);
-    setText('ov-leads', leads.length);
+    setText('ov-leads', portalQuestionnaires?.length || leads.length);
     setText('ov-learners', learnersData?.length || 0);
     setText('ov-pipeline', pipelineLeads.length);
 

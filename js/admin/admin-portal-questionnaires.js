@@ -82,6 +82,7 @@ function updatePqStats() {
 
     setText('portal-q-count', t);
     setText('stat-portal-q-total', t);
+    setText('learning-count', t);
     setText('stat-portal-q-today', today);
     setText('stat-portal-q-avg-score', avg);
     setText('stat-portal-q-hot', hot + warm);

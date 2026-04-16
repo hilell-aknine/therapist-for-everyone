@@ -109,12 +109,25 @@ function updateOverview() {
     setText('ov-therapists', therapists.length);
     setText('ov-matches', matches.length);
 
-    // Leads count — use portal questionnaires (342) as the real count
+    // Leads count — use portal questionnaires array, fallback to direct count query
     const pq = (typeof portalQuestionnaires !== 'undefined') ? portalQuestionnaires : [];
-    const pqCount = pq.length || leads.length;
-    setText('ov-leads', pqCount);
-    setText('ov-questionnaires', pqCount);
-    setText('ov-learners', pq.filter(q => (q.completed_count || 0) > 0).length || (learnersData?.length || 0));
+    if (pq.length > 0) {
+        setText('ov-leads', pq.length);
+        setText('ov-questionnaires', pq.length);
+        setText('ov-learners', pq.filter(q => (q.completed_count || 0) > 0).length);
+    } else {
+        // Fallback: direct count from DB (in case RPC failed)
+        setText('ov-leads', leads.length);
+        db.from('portal_questionnaires').select('id', { count: 'exact', head: true })
+            .then(({ count }) => {
+                if (count && count > 0) {
+                    setText('ov-leads', count);
+                    setText('ov-questionnaires', count);
+                    setText('learning-count', count);
+                    setText('funnel-registered', count);
+                }
+            }).catch(() => {});
+    }
 
     // Funnel stats from portal questionnaires (real data)
     if (pq.length > 0) {

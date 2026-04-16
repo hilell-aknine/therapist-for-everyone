@@ -18,7 +18,16 @@ async function loadPortalQuestionnaires() {
             db.from('course_progress').select('user_id, completed, watched_seconds, completed_at, updated_at, created_at, video_id').order('completed_at', { ascending: false })
         ]);
 
-        if (qRes.error) throw qRes.error;
+        if (qRes.error) {
+            console.error('❌ RPC admin_get_portal_questionnaires_full failed:', qRes.error);
+            // Fallback: query directly (without sensitive columns)
+            const fallback = await db.from('portal_questionnaires').select('*');
+            if (fallback.error) throw fallback.error;
+            console.warn('⚠️ Using fallback direct query, got', fallback.data?.length, 'rows');
+            qRes.data = fallback.data;
+        } else {
+            console.log('✅ Portal questionnaires loaded via RPC:', qRes.data?.length, 'rows');
+        }
 
         const profileMap = {};
         (profRes.data || []).forEach(p => { profileMap[p.id] = p; });

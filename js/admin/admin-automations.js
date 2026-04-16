@@ -336,7 +336,7 @@ function renderAutomationEditor() {
     if (!r) return;
     const body = document.getElementById('automation-editor-body');
 
-    const conditionsHtml = (r.audience_filter.all || []).map((cond, i) => renderConditionRow(cond, i)).join('');
+    const conditionsHtml = (r.audience_filter?.all || []).map((cond, i) => renderConditionRow(cond, i)).join('');
 
     const cronCustom = !CRON_PRESETS.find(p => p.value === (r.trigger_config?.cron || ''));
 
@@ -478,6 +478,11 @@ function updateConditionField(idx, key, value) {
         renderAutomationEditor();
         return;
     }
+    if (key === 'op') {
+        // Re-render to show/hide value input for no-value ops (is_null, is_not_null, etc.)
+        renderAutomationEditor();
+        return;
+    }
     scheduleLivePreview();
 }
 
@@ -528,7 +533,7 @@ function readEditorIntoState() {
     r.action_config = { message_template: document.getElementById('auto-edit-message').value };
     r.dry_run = document.getElementById('auto-dry-run').checked;
     r.daily_cap = parseInt(document.getElementById('auto-daily-cap').value, 10) || 100;
-    r.cooldown_days = parseInt(document.getElementById('auto-cooldown').value, 10) || 0;
+    r.cooldown_days = parseInt(document.getElementById('auto-cooldown').value, 10) || 9999;
     return r;
 }
 
@@ -680,13 +685,15 @@ function scheduleLivePreview() {
 async function runLivePreview() {
     const badge = document.getElementById('auto-live-count-badge');
     if (!badge || !_autoEditing) return;
-    // Snapshot filter state from editor before fetching (in case user keeps typing)
+    // Snapshot filter state BEFORE mutation so the stale-result guard can detect changes
+    const snapshotBefore = JSON.parse(JSON.stringify(_autoEditing));
     readEditorIntoState();
     const snapshot = JSON.parse(JSON.stringify(_autoEditing));
     try {
         const data = await fetchAudiencePreview(snapshot);
-        // Ignore stale result if editor state changed meanwhile
-        if (hashAudienceFilter(snapshot.audience_filter) !== hashAudienceFilter(_autoEditing?.audience_filter)) return;
+        // Ignore stale result if editor state changed while fetch was in-flight
+        const currentHash = hashAudienceFilter(_autoEditing?.audience_filter);
+        if (hashAudienceFilter(snapshot.audience_filter) !== currentHash) return;
         const total = data.total ?? 0;
         const cls = total === 0 ? 'zero' : 'ok';
         badge.innerHTML = `<span class="auto-count-pill ${cls}"><strong>${total}</strong> משתמשים תואמים</span>`;
@@ -831,7 +838,8 @@ function humanizeCron(expr) {
     const preset = CRON_PRESETS.find(p => p.value === expr);
     if (preset) return preset.label;
     if (expr === '* * * * *') return 'כל דקה';
-    if (/^\*\/(\d+) \* \* \* \*$/.test(expr)) return `כל ${RegExp.$1} דקות`;
-    if (/^0 (\d+) \* \* \*$/.test(expr)) return `כל יום ב-${RegExp.$1.padStart(2,'0')}:00`;
+    let m;
+    if ((m = expr.match(/^\*\/(\d+) \* \* \* \*$/))) return `כל ${m[1]} דקות`;
+    if ((m = expr.match(/^0 (\d+) \* \* \*$/))) return `כל יום ב-${m[1].padStart(2,'0')}:00`;
     return expr;
 }

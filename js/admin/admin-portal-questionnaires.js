@@ -2,7 +2,7 @@
 
 let portalQuestionnaires = [];
 let portalQLoaded = false;
-let pqFilters = { dateRange: 'all', status: 'all', howFound: 'all', whyNlp: 'all', heat: 'all', sortBy: 'score' };
+let pqFilters = { dateRange: 'all', status: 'all', howFound: 'all', whyNlp: 'all', heat: 'all', sortBy: 'score', gender: 'all', city: 'all', ageMin: '', ageMax: '', dateFrom: '', dateTo: '', occupationSearch: '' };
 let pqEngagementMap = {};
 let pqCurrentSubView = 'table'; // 'table' | 'caller'
 
@@ -121,6 +121,14 @@ function populatePqFilterOptions() {
     const whys = [...new Set(portalQuestionnaires.map(q => q.why_nlp).filter(Boolean))];
     const el2 = document.getElementById('pq-filter-why');
     if (el2) el2.innerHTML = '<option value="all">למה NLP: הכל</option>' + whys.map(w => `<option value="${escapeHtml(w)}">${escapeHtml(w)}</option>`).join('');
+
+    const genders = [...new Set(portalQuestionnaires.map(q => q.gender).filter(Boolean))];
+    const el3 = document.getElementById('pq-filter-gender');
+    if (el3) el3.innerHTML = '<option value="all">מין: הכל</option>' + genders.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
+
+    const cities = [...new Set(portalQuestionnaires.map(q => q.city).filter(Boolean))].sort();
+    const el4 = document.getElementById('pq-filter-city');
+    if (el4) el4.innerHTML = '<option value="all">עיר: הכל</option>' + cities.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
 }
 
 function applyPqFilters() {
@@ -130,6 +138,13 @@ function applyPqFilters() {
     pqFilters.whyNlp = document.getElementById('pq-filter-why')?.value || 'all';
     pqFilters.heat = document.getElementById('pq-filter-heat')?.value || 'all';
     pqFilters.sortBy = document.getElementById('pq-filter-sort')?.value || 'score';
+    pqFilters.gender = document.getElementById('pq-filter-gender')?.value || 'all';
+    pqFilters.city = document.getElementById('pq-filter-city')?.value || 'all';
+    pqFilters.ageMin = document.getElementById('pq-filter-age-min')?.value || '';
+    pqFilters.ageMax = document.getElementById('pq-filter-age-max')?.value || '';
+    pqFilters.dateFrom = document.getElementById('pq-filter-date-from')?.value || '';
+    pqFilters.dateTo = document.getElementById('pq-filter-date-to')?.value || '';
+    pqFilters.occupationSearch = document.getElementById('pq-filter-occupation')?.value?.toLowerCase() || '';
     renderPortalQuestionnaires();
 }
 
@@ -147,10 +162,42 @@ function applyFiltered() {
         if (pqFilters.heat === 'none') f = f.filter(q => !q.heat_level);
         else f = f.filter(q => q.heat_level === pqFilters.heat);
     }
+    // Advanced filters
+    if (pqFilters.gender !== 'all') f = f.filter(q => q.gender === pqFilters.gender);
+    if (pqFilters.city !== 'all') f = f.filter(q => q.city === pqFilters.city);
+    if (pqFilters.occupationSearch) f = f.filter(q => (q.occupation || '').toLowerCase().includes(pqFilters.occupationSearch));
+    if (pqFilters.ageMin || pqFilters.ageMax) {
+        const now = new Date();
+        f = f.filter(q => {
+            if (!q.birth_date || !/^\d{4}-\d{2}-\d{2}$/.test(q.birth_date)) return false;
+            const age = Math.floor((now - new Date(q.birth_date)) / (365.25 * 86400000));
+            if (pqFilters.ageMin && age < Number(pqFilters.ageMin)) return false;
+            if (pqFilters.ageMax && age > Number(pqFilters.ageMax)) return false;
+            return true;
+        });
+    }
+    if (pqFilters.dateFrom || pqFilters.dateTo) {
+        f = f.filter(q => {
+            if (!q.created_at) return false;
+            const d = q.created_at.slice(0, 10);
+            if (pqFilters.dateFrom && d < pqFilters.dateFrom) return false;
+            if (pqFilters.dateTo && d > pqFilters.dateTo) return false;
+            return true;
+        });
+    }
+    // Sort
     if (pqFilters.sortBy === 'score') f.sort((a, b) => b.fitScore - a.fitScore);
     else if (pqFilters.sortBy === 'views') f.sort((a, b) => (b.completed_count || 0) - (a.completed_count || 0));
     else if (pqFilters.sortBy === 'heat') f.sort((a, b) => { const o = { hot: 3, warm: 2, cold: 1 }; return (o[b.heat_level] || 0) - (o[a.heat_level] || 0); });
+    else if (pqFilters.sortBy === 'date') f.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     return f;
+}
+
+function resetPqFilters() {
+    pqFilters = { dateRange: 'all', status: 'all', howFound: 'all', whyNlp: 'all', heat: 'all', sortBy: 'score', gender: 'all', city: 'all', ageMin: '', ageMax: '', dateFrom: '', dateTo: '', occupationSearch: '' };
+    ['pq-filter-date','pq-filter-status','pq-filter-heat','pq-filter-source','pq-filter-why','pq-filter-gender','pq-filter-city','pq-filter-sort'].forEach(id => { const el = document.getElementById(id); if (el) el.value = 'all'; });
+    ['pq-filter-age-min','pq-filter-age-max','pq-filter-date-from','pq-filter-date-to','pq-filter-occupation'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    renderPortalQuestionnaires();
 }
 
 // ============================================================================
@@ -178,30 +225,35 @@ function renderPortalQuestionnaires() {
     if (!tbody) return;
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>אין תוצאות</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>אין תוצאות</td></tr>';
         return;
     }
-
-    const statusLabels = { 'new': 'תלמיד', 'potential': 'פוטנציאלי', 'client': 'לקוח' };
-    const statusColors = { 'new': 'rgba(47,133,146,0.15);color:#2F8592', 'potential': 'rgba(212,175,55,0.15);color:#D4AF37', 'client': 'rgba(39,174,96,0.15);color:#27ae60' };
 
     const groups = groupByDate(filtered);
     let html = '';
     for (const [group, items] of Object.entries(groups)) {
         if (items.length === 0) continue;
-        html += `<tr class="date-group-row"><td colspan="10"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+        html += `<tr class="date-group-row"><td colspan="11"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
         html += items.map(q => {
             const st = q.status || 'new';
             const sc = q.fitScore || 0;
+            const src = q.how_found || q.utm_source || '—';
             return `
                 <tr onclick="viewPortalQ('${q.id}')" style="cursor:pointer;">
                     <td><strong>${escapeHtml(q.full_name || '-')}</strong></td>
+                    <td style="font-size:0.82rem;">${escapeHtml(src)}</td>
                     <td>${q.phone ? `<a href="tel:${escapeHtml(q.phone)}" onclick="event.stopPropagation()">${escapeHtml(q.phone)}</a>` : '-'}</td>
                     <td style="font-size:0.85rem;">${escapeHtml(q.city || '-')}</td>
                     <td><span class="pq-score ${scoreClass(sc)}">${sc}</span></td>
                     <td style="font-size:0.9rem;">${heatIcon(q.heat_level)}</td>
                     <td style="font-size:0.85rem;">${q.completed_count > 0 ? `<strong>${q.completed_count}</strong>` : '<span style="opacity:0.4;">0</span>'}${q.completed_count >= 10 ? ' <i class="fa-solid fa-fire" style="color:#f85149;font-size:0.7rem;"></i>' : ''}</td>
-                    <td><span style="font-size:0.8rem;background:${statusColors[st]};padding:0.15rem 0.5rem;border-radius:6px;">${statusLabels[st]}</span></td>
+                    <td onclick="event.stopPropagation();">
+                        <select class="pq-inline-status pq-st-${st}" onchange="changePortalQStatus('${q.id}', this.value); this.className='pq-inline-status pq-st-'+this.value;">
+                            <option value="new" ${st === 'new' ? 'selected' : ''}>תלמיד</option>
+                            <option value="potential" ${st === 'potential' ? 'selected' : ''}>פוטנציאלי</option>
+                            <option value="client" ${st === 'client' ? 'selected' : ''}>לקוח</option>
+                        </select>
+                    </td>
                     <td style="font-size:0.85rem;">${formatDate(q.created_at)}</td>
                 </tr>`;
         }).join('');

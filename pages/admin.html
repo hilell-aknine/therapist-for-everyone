@@ -573,7 +573,28 @@
                             <option value="views">מיון: צפיות</option>
                             <option value="date">מיון: תאריך</option>
                         </select>
+                        <button class="pq-btn" onclick="document.getElementById('pq-advanced-row').classList.toggle('open')" style="font-size:0.75rem;padding:0.3rem 0.6rem;background:rgba(212,175,55,0.08);color:#D4AF37;border:1px solid rgba(212,175,55,0.25);border-radius:8px;cursor:pointer;">
+                            <i class="fa-solid fa-sliders"></i> סינון מתקדם
+                        </button>
+                        <button class="pq-btn" onclick="resetPqFilters()" style="font-size:0.75rem;padding:0.3rem 0.6rem;background:rgba(232,241,242,0.06);color:rgba(232,241,242,0.5);border:1px solid rgba(232,241,242,0.1);border-radius:8px;cursor:pointer;">
+                            <i class="fa-solid fa-rotate-left"></i> נקה
+                        </button>
                         <span id="pq-results-count" style="font-size:0.8rem;color:rgba(232,241,242,0.5);"></span>
+                    </div>
+                    <div id="pq-advanced-row" class="pq-advanced-filters">
+                        <select id="pq-filter-gender" onchange="applyPqFilters()">
+                            <option value="all">מין: הכל</option>
+                        </select>
+                        <select id="pq-filter-city" onchange="applyPqFilters()">
+                            <option value="all">עיר: הכל</option>
+                        </select>
+                        <input type="number" id="pq-filter-age-min" min="18" max="99" placeholder="גיל מ..." oninput="applyPqFilters()">
+                        <input type="number" id="pq-filter-age-max" min="18" max="99" placeholder="גיל עד..." oninput="applyPqFilters()">
+                        <label style="font-size:0.8rem;color:rgba(232,241,242,0.5);">מ:</label>
+                        <input type="date" id="pq-filter-date-from" onchange="applyPqFilters()">
+                        <label style="font-size:0.8rem;color:rgba(232,241,242,0.5);">עד:</label>
+                        <input type="date" id="pq-filter-date-to" onchange="applyPqFilters()">
+                        <input type="text" id="pq-filter-occupation" placeholder="עיסוק..." oninput="applyPqFilters()">
                     </div>
 
                     <!-- TABLE VIEW -->
@@ -590,9 +611,9 @@
                                 <thead>
                                     <tr>
                                         <th>שם</th>
+                                        <th>מקור</th>
                                         <th>טלפון</th>
                                         <th>עיר</th>
-                                        <th>למה NLP</th>
                                         <th>ציון</th>
                                         <th>חום</th>
                                         <th>שיעורים</th>
@@ -601,7 +622,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="portal-q-table">
-                                    <tr><td colspan="10" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>טוען...</td></tr>
+                                    <tr><td colspan="11" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>טוען...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -661,6 +682,19 @@
                     .pq-filter-bar select { background:rgba(0,30,36,0.6); color:#e8f1f2; border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.45rem 0.7rem; font-size:0.8rem; font-family:'Heebo',sans-serif; cursor:pointer; outline:none; -webkit-appearance:none; }
                     .pq-filter-bar select:hover { border-color:rgba(212,175,55,0.5); }
                     .pq-filter-bar select:focus { border-color:#D4AF37; box-shadow:0 0 0 2px rgba(212,175,55,0.15); }
+                    /* Advanced filters */
+                    .pq-advanced-filters { display:none; gap:0.5rem; padding:0 0 0.6rem; flex-wrap:wrap; align-items:center; }
+                    .pq-advanced-filters.open { display:flex; }
+                    .pq-advanced-filters select { background:rgba(0,30,36,0.6); color:#e8f1f2; border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.45rem 0.7rem; font-size:0.8rem; font-family:'Heebo',sans-serif; cursor:pointer; outline:none; -webkit-appearance:none; }
+                    .pq-advanced-filters input[type="number"],
+                    .pq-advanced-filters input[type="date"],
+                    .pq-advanced-filters input[type="text"] { background:rgba(0,30,36,0.6); color:#e8f1f2; border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.45rem 0.7rem; font-size:0.8rem; font-family:'Heebo',sans-serif; outline:none; width:110px; }
+                    .pq-advanced-filters input:focus, .pq-advanced-filters select:focus { border-color:#D4AF37; box-shadow:0 0 0 2px rgba(212,175,55,0.15); }
+                    /* Inline status dropdown */
+                    .pq-inline-status { padding:0.15rem 0.5rem; border-radius:6px; border:none; font-family:'Heebo',sans-serif; font-size:0.8rem; font-weight:600; cursor:pointer; outline:none; -webkit-appearance:none; }
+                    .pq-inline-status.pq-st-new { background:rgba(47,133,146,0.15); color:#2F8592; }
+                    .pq-inline-status.pq-st-potential { background:rgba(212,175,55,0.15); color:#D4AF37; }
+                    .pq-inline-status.pq-st-client { background:rgba(39,174,96,0.15); color:#27ae60; }
                     /* Score badges */
                     .pq-score { font-size:0.8rem; padding:0.15rem 0.6rem; border-radius:8px; font-weight:bold; }
                     .pq-score-high { background:rgba(39,174,96,0.15); color:#27ae60; }

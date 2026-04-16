@@ -356,7 +356,7 @@ const AUTOMATION_CATEGORIES = {
     export:         { label: 'ייצוא נתונים',        icon: 'fa-file-export' },
 };
 
-const CATEGORY_COLORS = {
+const AUTO_CATEGORY_COLORS = {
     safety:         { bg: 'rgba(220,53,69,0.1)',  text: '#dc3545' },
     lead_lifecycle: { bg: 'rgba(40,167,69,0.1)',  text: '#28a745' },
     operations:     { bg: 'rgba(88,166,255,0.1)', text: '#58a6ff' },
@@ -511,7 +511,7 @@ function renderAutomationConfigs() {
     for (const a of filtered) {
         const cat = a.category;
         const catInfo = AUTOMATION_CATEGORIES[cat] || { label: cat, icon: 'fa-gear' };
-        const catColor = CATEGORY_COLORS[cat] || { bg: 'rgba(107,114,128,0.12)', text: '#6b7280' };
+        const catColor = AUTO_CATEGORY_COLORS[cat] || { bg: 'rgba(107,114,128,0.12)', text: '#6b7280' };
         const desc = AUTOMATION_DESCRIPTIONS[a.id] || a.description || '';
 
         html += `<div class="auto-config-card ${a.is_enabled ? '' : 'disabled'}" data-category="${cat}">

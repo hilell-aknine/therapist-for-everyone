@@ -12,13 +12,10 @@ const VIEW_GROUPS = {
     'popups':   { views: ['popups'], header: null, default: 'popups' },
     'segments': { views: ['segments'], header: null, default: 'segments' },
     'automations':{ views: ['automations'], header: null, default: 'automations' },
-    'traffic':  { views: ['traffic', 'analytics', 'instagram', 'campaigns'], header: 'traffic-header', default: 'traffic' },
+    'traffic':  { views: ['traffic'], header: 'traffic-header', default: 'traffic' },
     'settings': { views: ['settings'], header: null, default: 'settings' },
     // Legacy routes — hidden from sidebar but still accessible
     'sales':    { views: ['contact-leads', 'questionnaires', 'pipeline'], header: 'sales-header', default: 'contact-leads' },
-    'instagram':{ views: ['instagram'], header: null, default: 'instagram' },
-    'campaigns':{ views: ['campaigns'], header: null, default: 'campaigns' },
-    'analytics':{ views: ['analytics'], header: null, default: 'analytics' },
 };
 
 // All individual view IDs (flat list)
@@ -63,14 +60,11 @@ function switchView(view) {
     if (view === 'bot' || group.default === 'bot') loadBotView();
     if (view === 'funnel' || group.default === 'pipeline') { if (typeof loadPipeline === 'function') loadPipeline(); }
     if (view === 'paid' || group.default === 'paid') loadPaidCustomers();
-    if (view === 'instagram' || group.default === 'instagram') loadInstagramAnalytics();
-    if (view === 'campaigns' || group.default === 'campaigns') loadCampaignDashboard();
     if (view === 'referrals' || group.default === 'referrals') loadReferralAnalytics();
     if (view === 'popups' || group.default === 'popups') loadPopupConfigs();
     if (view === 'segments' || group.default === 'segments') loadSegments();
     if (view === 'automations' || group.default === 'automations') loadAutomations();
     if (view === 'traffic' || group.default === 'traffic') loadTrafficSources();
-    if (view === 'analytics' || group.default === 'analytics') loadGA4Analytics();
     if (view === 'settings' || group.default === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }
 
     // Update overview if navigating to it
@@ -99,9 +93,6 @@ function switchSubView(groupName, subView) {
     if (subView === 'learners') loadLearnersView();
     if (subView === 'portal-q' && !portalQLoaded) loadPortalQuestionnaires();
     if (subView === 'traffic' && typeof loadTrafficSources === 'function') loadTrafficSources();
-    if (subView === 'analytics' && typeof loadGA4Analytics === 'function') loadGA4Analytics();
-    if (subView === 'instagram' && typeof loadInstagramAnalytics === 'function') loadInstagramAnalytics();
-    if (subView === 'campaigns' && typeof loadCampaignDashboard === 'function') loadCampaignDashboard();
 }
 
 function updateOverview() {

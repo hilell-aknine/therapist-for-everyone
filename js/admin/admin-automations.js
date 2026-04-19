@@ -259,6 +259,9 @@ function renderRuleCard(rule) {
                     <button class="btn-icon" title="ערוך" onclick="openAutomationEditor('${rule.id}')">
                         <i class="fa-solid fa-pen"></i>
                     </button>
+                    <button class="btn-icon" title="בדיקת תקינות" onclick="diagnoseAutomation('${rule.id}')" style="color:#2F8592;">
+                        <i class="fa-solid fa-stethoscope"></i>
+                    </button>
                     <button class="btn-icon" title="הפעל עכשיו" onclick="runAutomationNow('${rule.id}')">
                         <i class="fa-solid fa-play"></i>
                     </button>
@@ -781,6 +784,96 @@ async function runAutomationNow(ruleId) {
     } catch (err) {
         showToast('שגיאה: ' + err.message, 'error');
     }
+}
+
+async function diagnoseAutomation(ruleId) {
+    const rule = _autoRules.find(r => r.id === ruleId);
+    if (!rule) return;
+
+    const issues = [];
+    const ok = [];
+
+    // 1. Check rule has conditions
+    const conditions = rule.audience_filter?.all || [];
+    if (conditions.length === 0) {
+        issues.push('❌ אין תנאי סינון — הכלל לא יתאים לאף משתמש');
+    } else {
+        ok.push(`✅ ${conditions.length} תנאי סינון מוגדרים`);
+    }
+
+    // 2. Check cron
+    if (!rule.cron_expression) {
+        issues.push('❌ אין תזמון (cron) — הכלל לא ירוץ אוטומטית');
+    } else {
+        ok.push(`✅ תזמון: ${rule.cron_expression}`);
+    }
+
+    // 3. Check message template
+    if (!rule.action_config?.message_template || rule.action_config.message_template.trim().length < 5) {
+        issues.push('❌ אין תבנית הודעה או שהיא קצרה מדי');
+    } else {
+        ok.push(`✅ תבנית הודעה: ${rule.action_config.message_template.length} תווים`);
+    }
+
+    // 4. Check daily cap
+    if (!rule.daily_cap || rule.daily_cap < 1) {
+        issues.push('⚠️ אין מגבלת שליחה יומית (daily_cap)');
+    } else {
+        ok.push(`✅ מגבלה יומית: ${rule.daily_cap} הודעות`);
+    }
+
+    // 5. Check dry_run
+    if (rule.dry_run) {
+        issues.push('⚠️ מצב תרגול (dry_run) פעיל — לא יישלחו הודעות אמיתיות');
+    } else {
+        ok.push('✅ מצב שידור חי (לא תרגול)');
+    }
+
+    // 6. Check bot connectivity
+    try {
+        const resp = await fetch(BOT_URL + '/', { method: 'GET' });
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.whatsapp === 'authorized') {
+                ok.push('✅ בוט WhatsApp מחובר ופעיל');
+            } else {
+                issues.push(`❌ בוט WhatsApp לא מחובר: ${data.whatsapp}`);
+            }
+        } else {
+            issues.push(`❌ בוט לא נגיש: HTTP ${resp.status}`);
+        }
+    } catch (e) {
+        issues.push('❌ בוט לא נגיש — בדוק שהשרת עובד');
+    }
+
+    // 7. Check audience match count
+    try {
+        const data = await fetchAudiencePreview(rule);
+        if (data.total === 0) {
+            issues.push('⚠️ 0 משתמשים תואמים כרגע — הכלל לא ימצא למי לשלוח');
+        } else {
+            ok.push(`✅ ${data.total} משתמשים תואמים כרגע`);
+        }
+    } catch (e) {
+        issues.push('⚠️ לא ניתן לבדוק התאמה — ייתכן שהבוט לא זמין');
+    }
+
+    // 8. Check field validity
+    for (const cond of conditions) {
+        const fieldDef = _autoFields.find(f => f.key === cond.field);
+        if (!fieldDef) {
+            issues.push(`❌ שדה "${cond.field}" לא מוכר למערכת — ייתכן שהבוט לא תומך בו`);
+        }
+    }
+
+    // Build result
+    const allResults = [...issues, ...ok];
+    const hasIssues = issues.length > 0;
+    const title = hasIssues
+        ? `🔍 נמצאו ${issues.length} בעיות ב"${rule.name}"`
+        : `✅ הכלל "${rule.name}" תקין`;
+
+    alert(title + '\n\n' + allResults.join('\n'));
 }
 
 async function viewAutomationRuns(ruleId) {

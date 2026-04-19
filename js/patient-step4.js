@@ -298,6 +298,7 @@
                 questionnaire: questionnaire,
                 signature_data: signatureData,
                 legal_consent_date: new Date().toISOString(),
+                agreement_signed_at: new Date().toISOString(),
                 status: 'new',
                 terms_confirmed: termsConfirmed,
                 age_confirmed: ageConfirmed,

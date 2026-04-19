@@ -301,6 +301,7 @@
                 age_confirmed: true,
                 terms_confirmed: true,
                 documents_verified: false,
+                agreement_signed_at: new Date().toISOString(),
                 status: 'new',
                 utm_source: utm.utm_source || null,
                 utm_medium: utm.utm_medium || null,

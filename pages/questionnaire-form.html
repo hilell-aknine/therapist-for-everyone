@@ -13,14 +13,7 @@
     <meta property="og:locale" content="he_IL">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Analytics (replace G-XXXXXX with your ID) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6YN94QMSH1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-6YN94QMSH1');
-    </script>
+    <!-- GA4 + Meta Pixel injected by marketing-tools.js (consent-gated) -->
     <style>
         /* ========= BRAND COLORS — edit these to match your brand ========= */
         :root {
@@ -843,18 +836,37 @@
                 });
             } catch(e) {}
 
+            const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
             const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/submit-lead`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'questionnaire_submissions',
-                    data: payload
+                    data: payload,
+                    attribution: attribution
                 })
             });
 
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || 'שגיאה בשמירה');
+            }
+
+            // Fire conversion events
+            if (window.trackFormSubmission) window.trackFormSubmission('questionnaire_form');
+            if (window.sendEventToCAPI) {
+                const eventId = window.newCapiEventId ? window.newCapiEventId() : null;
+                if (window.fbq && eventId) {
+                    fbq('track', 'Lead', { content_name: 'questionnaire_form' }, { eventID: eventId });
+                }
+                window.sendEventToCAPI('Lead', {
+                    em: payload.email || null,
+                    ph: payload.phone || null,
+                    fn: payload.full_name || null
+                }, {
+                    content_name: 'questionnaire_form',
+                    event_id: eventId
+                });
             }
 
             showSuccess();
@@ -894,5 +906,7 @@
 })();
 </script>
 
+<!-- Marketing & Analytics (consent-gated GA4 + Meta Pixel + attribution capture) -->
+<script src="../js/marketing-tools.js"></script>
 </body>
 </html>

@@ -133,12 +133,14 @@
             if (utm.utm_campaign) leadData.utm_campaign = utm.utm_campaign;
 
             // Submit lead to contact_requests via Edge Function
+            const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
             const res = await fetch(`${functionsUrl}/submit-lead`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'contact_requests',
-                    data: leadData
+                    data: leadData,
+                    attribution: attribution
                 })
             });
 
@@ -150,18 +152,25 @@
             // If training program intent, also create a sales_leads record
             if (intent === 'training_program') {
                 try {
+                    // sales_leads now also gets the full UTM set (migration 060)
+                    const salesLeadData = {
+                        full_name: leadData.full_name,
+                        phone: leadData.phone,
+                        email: leadData.email,
+                        stage: 'new_lead',
+                        call_attempts: 0,
+                        utm_source:   utm.utm_source   || null,
+                        utm_medium:   utm.utm_medium   || null,
+                        utm_campaign: utm.utm_campaign || null,
+                        landing_url:  (attribution && attribution.last && attribution.last.landing_url) || null
+                    };
                     await fetch(`${functionsUrl}/submit-lead`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             table: 'sales_leads',
-                            data: {
-                                full_name: leadData.full_name,
-                                phone: leadData.phone,
-                                email: leadData.email,
-                                stage: 'new_lead',
-                                call_attempts: 0
-                            }
+                            data: salesLeadData,
+                            attribution: attribution
                         })
                     });
                 } catch (e) {
@@ -298,13 +307,15 @@
         };
 
         try {
+            const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
             const res = await fetch(`${functionsUrl}/submit-lead`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'patients',
                     data: data,
-                    turnstileToken: turnstileToken || undefined
+                    turnstileToken: turnstileToken || undefined,
+                    attribution: attribution
                 })
             });
 

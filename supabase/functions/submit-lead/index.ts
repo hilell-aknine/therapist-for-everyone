@@ -72,6 +72,96 @@ async function verifyTurnstileToken(
 }
 
 // ---------------------------------------------------------------------------
+// IP → geo lookup (ipapi.co, free tier, no key required)
+// Returns null on any failure — we never fail a lead submit because of geo.
+// ---------------------------------------------------------------------------
+async function fetchGeo(ip: string): Promise<{
+  country_code?: string; country_name?: string; region?: string; city?: string;
+} | null> {
+  if (!ip || ip === 'unknown' || ip.startsWith('127.') || ip === '::1') return null;
+  try {
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), 2000)
+    const res = await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`, {
+      signal: ctrl.signal,
+      headers: { 'Accept-Language': 'he,en;q=0.8' }
+    })
+    clearTimeout(timer)
+    if (!res.ok) return null
+    const j = await res.json()
+    return {
+      country_code: j.country_code || null,
+      country_name: j.country_name || null,
+      region:       j.region       || null,
+      city:         j.city         || null,
+    }
+  } catch {
+    return null
+  }
+}
+
+// Flatten the client-side attribution payload into DB row shape
+function buildAttributionRow(
+  attribution: Record<string, any>,
+  linkedTable: string,
+  linkedId: string | null,
+  data: Record<string, any>,
+  geo: { country_code?: string; country_name?: string; region?: string; city?: string } | null
+): Record<string, unknown> {
+  const f = attribution?.first || {}
+  const l = attribution?.last  || {}
+  return {
+    linked_table:  linkedTable,
+    linked_id:     linkedId,
+    phone:         data?.phone || null,
+    email:         data?.email || null,
+    session_id:    attribution?.session_id || null,
+
+    first_utm_source:   f.utm_source   || null,
+    first_utm_medium:   f.utm_medium   || null,
+    first_utm_campaign: f.utm_campaign || null,
+    first_utm_term:     f.utm_term     || null,
+    first_utm_content:  f.utm_content  || null,
+    first_gclid:        f.gclid        || null,
+    first_fbclid:       f.fbclid       || null,
+    first_ttclid:       f.ttclid       || null,
+    first_msclkid:      f.msclkid      || null,
+    first_referrer_domain: f.referrer_domain || null,
+    first_landing_url:  f.landing_url  || null,
+    first_at:           f.at           || null,
+
+    last_utm_source:   l.utm_source   || null,
+    last_utm_medium:   l.utm_medium   || null,
+    last_utm_campaign: l.utm_campaign || null,
+    last_utm_term:     l.utm_term     || null,
+    last_utm_content:  l.utm_content  || null,
+    last_gclid:        l.gclid        || null,
+    last_fbclid:       l.fbclid       || null,
+    last_ttclid:       l.ttclid       || null,
+    last_msclkid:      l.msclkid      || null,
+    last_referrer_domain: l.referrer_domain || null,
+    last_landing_url:  l.landing_url  || null,
+    last_at:           l.at           || null,
+
+    device_type:  attribution?.device_type  || null,
+    os_name:      attribution?.os_name      || null,
+    browser_name: attribution?.browser_name || null,
+    viewport_w:   attribution?.viewport_w   || null,
+    viewport_h:   attribution?.viewport_h   || null,
+    language:     attribution?.language     || null,
+    timezone:     attribution?.timezone     || null,
+
+    country_code: geo?.country_code || null,
+    country_name: geo?.country_name || null,
+    region:       geo?.region       || null,
+    city:         geo?.city         || null,
+
+    raw_ua:       attribution?.raw_ua || null,
+    // NOTE: raw IP is NEVER stored. Only the resolved country/city above.
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Basic input sanitization — strip HTML tags from string values
 // ---------------------------------------------------------------------------
 function sanitizeData(data: Record<string, unknown>): Record<string, unknown> {
@@ -110,7 +200,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { table, data, turnstileToken } = body
+    const { table, data, turnstileToken, attribution, mirror_table, mirror_data } = body
 
     // ---- Validate required fields ----
     if (!table || !data) {
@@ -124,6 +214,14 @@ serve(async (req) => {
     if (!ALLOWED_TABLES.includes(table)) {
       return new Response(
         JSON.stringify({ error: `טבלה לא מורשית: ${table}` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // ---- Validate mirror_table if provided ----
+    if (mirror_table && !ALLOWED_TABLES.includes(mirror_table)) {
+      return new Response(
+        JSON.stringify({ error: `טבלת mirror לא מורשית: ${mirror_table}` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -156,14 +254,50 @@ serve(async (req) => {
     // ---- Sanitize input data ----
     const cleanData = sanitizeData(data as Record<string, unknown>)
 
+    // ---- Validate phone (Israeli format) ----
+    if (cleanData.phone && typeof cleanData.phone === 'string') {
+      const stripped = (cleanData.phone as string).replace(/[\s\-()]/g, '')
+      if (!/^0[2-9]\d{7,8}$/.test(stripped)) {
+        return new Response(
+          JSON.stringify({ error: 'מספר טלפון לא תקין. יש להזין מספר ישראלי (לדוגמה: 0541234567)' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      // Normalize: store digits only
+      cleanData.phone = stripped
+    }
+
     // ---- Insert via service role (bypasses RLS) ----
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     })
 
-    const { error: insertError } = await supabase
+    // ---- Same-table dedup check (prevent accidental double-submit) ----
+    // Cross-table "duplicates" are legitimate (same person as patient + learner + lead).
+    // Only block same phone in the SAME table within the last 24 hours.
+    if (cleanData.phone && typeof cleanData.phone === 'string') {
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      const { data: existing } = await supabase
+        .from(table)
+        .select('id')
+        .eq('phone', cleanData.phone)
+        .gte('created_at', twentyFourHoursAgo)
+        .limit(1)
+
+      if (existing && existing.length > 0) {
+        console.log(`Dedup: phone ${cleanData.phone} already exists in ${table} within 24h, id=${existing[0].id}`)
+        return new Response(
+          JSON.stringify({ success: true, id: existing[0].id, duplicate: true }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+
+    // Return the new row's id so we can link the attribution row to it
+    const { data: insertedRows, error: insertError } = await supabase
       .from(table)
       .insert(cleanData)
+      .select('id')
 
     if (insertError) {
       console.error(`Insert error [${table}]:`, insertError.message)
@@ -173,8 +307,47 @@ serve(async (req) => {
       )
     }
 
+    const newId = (insertedRows && insertedRows[0] && (insertedRows[0] as { id?: string }).id) || null
+
+    // ---- Mirror insert (atomic secondary table, e.g. contact_requests for CRM bot) ----
+    if (mirror_table && mirror_data && typeof mirror_data === 'object') {
+      try {
+        const cleanMirror = sanitizeData(mirror_data as Record<string, unknown>)
+        // Phone validation on mirror data too
+        if (cleanMirror.phone && typeof cleanMirror.phone === 'string') {
+          cleanMirror.phone = (cleanMirror.phone as string).replace(/[\s\-()]/g, '')
+        }
+        const { error: mirrorErr } = await supabase.from(mirror_table).insert(cleanMirror)
+        if (mirrorErr) {
+          console.error(`Mirror insert error [${mirror_table}]:`, mirrorErr.message)
+          // Don't fail — primary insert already succeeded
+        }
+      } catch (mirrorErr) {
+        console.warn(`Mirror insert exception [${mirror_table}]:`, mirrorErr)
+      }
+    }
+
+    // ---- Write lead_attribution row (best effort — never fails the lead) ----
+    // Done in parallel with building the response so latency is minimal.
+    if (attribution && typeof attribution === 'object') {
+      try {
+        const clientIp = req.headers.get('cf-connecting-ip') ||
+                         req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                         req.headers.get('x-real-ip') ||
+                         null
+        const geo = clientIp ? await fetchGeo(clientIp) : null
+        const row = buildAttributionRow(attribution, table, newId, cleanData, geo)
+        const { error: attrErr } = await supabase.from('lead_attribution').insert(row)
+        if (attrErr) {
+          console.warn(`lead_attribution insert warning [${table}/${newId}]:`, attrErr.message)
+        }
+      } catch (attrErr) {
+        console.warn('attribution pipeline error:', attrErr)
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, id: newId }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 

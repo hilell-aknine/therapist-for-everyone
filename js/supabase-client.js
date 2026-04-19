@@ -550,21 +550,29 @@
          * @param {string} [turnstileToken] - Cloudflare Turnstile token from the DOM widget
          * @param {string} [table='contact_requests'] - Target table
          */
-        async submit(requestData, turnstileToken = null, table = 'contact_requests') {
+        async submit(requestData, turnstileToken = null, table = 'contact_requests', options = {}) {
             const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl ||
                 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
 
             // Always route through Edge Function (uses service_role, bypasses RLS)
             // Turnstile token is optional — Edge Function skips verification when not configured
+            // options.mirror_table + options.mirror_data — optional atomic secondary insert
             try {
+                const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
+                const payload = {
+                    table: table,
+                    data: requestData,
+                    turnstileToken: turnstileToken || undefined,
+                    attribution: attribution
+                };
+                if (options.mirror_table && options.mirror_data) {
+                    payload.mirror_table = options.mirror_table;
+                    payload.mirror_data = options.mirror_data;
+                }
                 const res = await fetch(`${functionsUrl}/submit-lead`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        table: table,
-                        data: requestData,
-                        turnstileToken: turnstileToken || undefined
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const result = await res.json();

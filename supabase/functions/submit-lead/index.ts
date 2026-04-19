@@ -254,16 +254,16 @@ serve(async (req) => {
     // ---- Sanitize input data ----
     const cleanData = sanitizeData(data as Record<string, unknown>)
 
-    // ---- Validate phone (Israeli format) ----
+    // ---- Validate phone (Israeli or international) ----
     if (cleanData.phone && typeof cleanData.phone === 'string') {
       const stripped = (cleanData.phone as string).replace(/[\s\-()]/g, '')
-      if (!/^0[2-9]\d{7,8}$/.test(stripped)) {
+      if (!/^\+?\d{9,15}$/.test(stripped)) {
         return new Response(
-          JSON.stringify({ error: 'מספר טלפון לא תקין. יש להזין מספר ישראלי (לדוגמה: 0541234567)' }),
+          JSON.stringify({ error: 'מספר טלפון לא תקין. יש להזין 9-15 ספרות.' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
-      // Normalize: store digits only
+      // Normalize: store cleaned digits (with optional + prefix)
       cleanData.phone = stripped
     }
 

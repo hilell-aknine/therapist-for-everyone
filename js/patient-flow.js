@@ -290,8 +290,8 @@
         }
 
         const cleanPhone = (data.phone || '').replace(/[\s\-()]/g, '');
-        if (!cleanPhone || !/^0[2-9]\d{7,8}$/.test(cleanPhone)) {
-            showToast('אנא הזינו מספר טלפון ישראלי תקין (לדוגמה: 0541234567)', 'error');
+        if (!cleanPhone || cleanPhone.length < 9 || !/^\+?\d{9,15}$/.test(cleanPhone)) {
+            showToast('אנא הזינו מספר טלפון תקין (9-15 ספרות)', 'error');
             return false;
         }
 

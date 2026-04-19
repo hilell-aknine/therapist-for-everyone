@@ -58,10 +58,18 @@ function _extractDomain(url) {
 }
 
 // Build the "this touch" object from the current page load
+// Normalize UTM source to consistent values (fb→facebook, ig→instagram)
+function _normalizeSource(raw) {
+    if (!raw) return null;
+    const s = raw.toLowerCase().trim();
+    const map = { 'fb': 'facebook', 'ig': 'instagram', 'meta': 'facebook' };
+    return map[s] || s;
+}
+
 function _captureThisTouch() {
     const params = new URLSearchParams(window.location.search);
     return {
-        utm_source:   params.get('utm_source')   || null,
+        utm_source:   _normalizeSource(params.get('utm_source')),
         utm_medium:   params.get('utm_medium')   || null,
         utm_campaign: params.get('utm_campaign') || null,
         utm_term:     params.get('utm_term')     || null,

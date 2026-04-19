@@ -944,7 +944,7 @@ async function savePopupConfig(event, configId) {
         variant_label: form.variant_label.value || null,
         admin_notes: form.admin_notes.value || null,
         status: status,
-        is_active: status === 'live',
+        is_active: status === 'live' || status === 'scheduled',
         start_date: form.start_date.value ? new Date(form.start_date.value).toISOString() : null,
         end_date: form.end_date.value ? new Date(form.end_date.value).toISOString() : null,
         updated_at: new Date().toISOString()

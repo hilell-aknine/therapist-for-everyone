@@ -92,6 +92,8 @@
             ...client,
             serverStatus: server.status || (server.is_active ? 'live' : 'paused'),
             serverAudience: server.target_audience || client.targetAudience,
+            cooldownMs: (server.cooldown_minutes > 0) ? server.cooldown_minutes * 60000 : client.cooldownMs,
+            maxPerDay: server.max_per_day || client.maxPerDay,
             triggerEvent: server.trigger_event || 'manual',
             triggerMinLessons: server.trigger_min_lessons || 0,
             variantGroup: server.variant_group || null,

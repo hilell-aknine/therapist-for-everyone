@@ -85,7 +85,7 @@ function renderTraffic({ overview, funnel, recent }) {
         <div class="traffic-kpis">
             <div class="traffic-kpi">
                 <div class="traffic-kpi-num">${kpis.total_leads || 0}</div>
-                <div class="traffic-kpi-label">לידים ב-${_trafficDays} ימים</div>
+                <div class="traffic-kpi-label">אנשים ייחודיים ב-${_trafficDays} ימים</div>
             </div>
             <div class="traffic-kpi">
                 <div class="traffic-kpi-num">${kpis.today || 0}</div>

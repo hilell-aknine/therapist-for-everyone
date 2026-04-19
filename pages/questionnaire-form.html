@@ -772,7 +772,7 @@
 
         // GA4 tracking
         try {
-            gtag('event', 'step_completed', {
+            if (window.gtag) gtag('event', 'step_completed', {
                 step_number: currentStep,
                 step_name: STEP_NAMES[currentStep - 1]
             });
@@ -829,7 +829,7 @@
         try {
             // GA4: form submitted
             try {
-                gtag('event', 'form_submitted', {
+                if (window.gtag) gtag('event', 'form_submitted', {
                     form_name: 'שאלון_התאמה',
                     step_number: TOTAL_STEPS,
                     step_name: 'שליחה'

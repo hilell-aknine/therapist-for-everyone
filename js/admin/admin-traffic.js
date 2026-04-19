@@ -53,10 +53,12 @@ function renderTraffic({ overview, funnel, recent }) {
 
     const ov = overview || {};
     const kpis = ov.kpis || {};
+    // Only count records that HAVE device_type (backfilled records have NULL)
     const totalDevices = (kpis.mobile_count || 0) + (kpis.desktop_count || 0) + (kpis.tablet_count || 0);
-    const mobilePct = totalDevices ? Math.round(((kpis.mobile_count || 0) / totalDevices) * 100) : 0;
-    const desktopPct = totalDevices ? Math.round(((kpis.desktop_count || 0) / totalDevices) * 100) : 0;
-    const tabletPct = totalDevices ? Math.max(0, 100 - mobilePct - desktopPct) : 0;
+    const mobilePct = totalDevices ? Math.round(((kpis.mobile_count || 0) / totalDevices) * 100) : null;
+    const desktopPct = totalDevices ? Math.round(((kpis.desktop_count || 0) / totalDevices) * 100) : null;
+    const tabletPct = totalDevices ? Math.max(0, 100 - (mobilePct || 0) - (desktopPct || 0)) : null;
+    const noDeviceData = mobilePct === null;
 
     const firstTouch = ov.first_touch || [];
     const lastTouch  = ov.last_touch  || [];
@@ -94,8 +96,8 @@ function renderTraffic({ overview, funnel, recent }) {
                 <div class="traffic-kpi-label">7 ימים אחרונים</div>
             </div>
             <div class="traffic-kpi">
-                <div class="traffic-kpi-num">${mobilePct}%</div>
-                <div class="traffic-kpi-label">בנייד</div>
+                <div class="traffic-kpi-num">${noDeviceData ? '—' : mobilePct + '%'}</div>
+                <div class="traffic-kpi-label">${noDeviceData ? 'אין מידע מכשיר' : 'בנייד'}</div>
             </div>
             <div class="traffic-kpi">
                 <div class="traffic-kpi-num" style="font-size:1.1rem;">${escapeHtml(topChannel)}</div>
@@ -129,6 +131,7 @@ function renderTraffic({ overview, funnel, recent }) {
             </div>
             <div class="traffic-panel">
                 <h3>מכשיר</h3>
+                ${noDeviceData ? '<div class="traffic-empty">מידע על מכשיר זמין רק מלידים חדשים (מ-19/04 והלאה)</div>' : `
                 <div class="traffic-donut">
                     <div class="traffic-donut-row">
                         <span class="dot mobile"></span>
@@ -148,7 +151,7 @@ function renderTraffic({ overview, funnel, recent }) {
                         <span class="val">${tabletPct}%</span>
                         <span class="count">(${kpis.tablet_count || 0})</span>
                     </div>
-                </div>
+                </div>`}
             </div>
         </div>
 
@@ -184,9 +187,20 @@ function renderBars(items, total) {
         const label = item.source || '(ריק)';
         const pct = total ? Math.round(((item.n || 0) / total) * 100) : 0;
         const barW = Math.round(((item.n || 0) / max) * 100);
+        // Show medium badge (paid/organic) when available
+        let mediumBadge = '';
+        if (item.medium) {
+            const m = item.medium.toLowerCase();
+            const isPaid = m.includes('paid') || m.includes('cpc') || m.includes('ppc') || m.includes('ads');
+            const isOrganic = m.includes('organic') || m.includes('referral') || m.includes('social');
+            const cls = isPaid ? 'paid' : isOrganic ? 'organic' : 'unknown';
+            const txt = isPaid ? 'ממומן' : isOrganic ? 'אורגני' : escapeHtml(item.medium);
+            mediumBadge = `<span class="traffic-source-medium ${cls}">${txt}</span>`;
+        }
+        const displayLabel = String(label).length > 28 ? label.slice(0, 28) + '…' : label;
         return `
             <div class="traffic-bar-row">
-                <div class="traffic-bar-label" title="${escapeHtml(label)}">${escapeHtml(String(label).length > 34 ? label.slice(0, 34) + '…' : label)}</div>
+                <div class="traffic-bar-label" title="${escapeHtml(label)}">${mediumBadge}${escapeHtml(displayLabel)}</div>
                 <div class="traffic-bar-track"><div class="traffic-bar-fill" style="width:${barW}%;"></div></div>
                 <div class="traffic-bar-val">${item.n} · ${pct}%</div>
             </div>
@@ -212,9 +226,18 @@ function renderFunnel(rows) {
                     const q   = r.leads ? Math.round((r.questionnaires / r.leads) * 100) : 0;
                     const s   = r.leads ? Math.round((r.signups / r.leads) * 100) : 0;
                     const p   = r.leads ? Math.round((r.paid / r.leads) * 100) : 0;
+                    let medBadge = '';
+                    if (r.medium) {
+                        const m = r.medium.toLowerCase();
+                        const isPaid = m.includes('paid') || m.includes('cpc') || m.includes('ppc') || m.includes('ads');
+                        const isOrganic = m.includes('organic') || m.includes('referral') || m.includes('social');
+                        const cls = isPaid ? 'paid' : isOrganic ? 'organic' : 'unknown';
+                        const txt = isPaid ? 'ממומן' : isOrganic ? 'אורגני' : escapeHtml(r.medium);
+                        medBadge = ` <span class="traffic-source-medium ${cls}">${txt}</span>`;
+                    }
                     return `
                         <tr>
-                            <td><strong>${escapeHtml(r.source || '(ריק)')}</strong></td>
+                            <td><strong>${escapeHtml(r.source || '(ריק)')}</strong>${medBadge}</td>
                             <td>${r.leads}</td>
                             <td>${r.questionnaires} <span class="pct">(${q}%)</span></td>
                             <td>${r.signups} <span class="pct">(${s}%)</span></td>

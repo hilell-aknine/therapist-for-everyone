@@ -239,7 +239,7 @@ async function openPipelineDetail(id) {
     if (l.stage === 'closed_won') {
         dealInfo = `
             <div style="background:rgba(40,167,69,0.08);border-radius:10px;padding:1rem;margin-bottom:1rem;border-right:3px solid #28a745;">
-                <strong style="color:#28a745;">עסקה סגורה</strong><br>
+                <strong style="color:var(--success);">עסקה סגורה</strong><br>
                 ${l.deal_amount ? `💰 ₪${Number(l.deal_amount).toLocaleString()}<br>` : ''}
                 ${l.payment_method ? `💳 ${PIPELINE_PAYMENT_METHODS[l.payment_method] || l.payment_method}<br>` : ''}
                 ${l.contract_signed ? '✍️ חוזה נחתם<br>' : ''}

@@ -47,9 +47,19 @@
         },
 
         async signInWithGoogle() {
+            // Preserve UTM params across OAuth redirect so attribution isn't lost
+            const params = new URLSearchParams(window.location.search);
+            const utmKeys = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'];
+            const utmParams = utmKeys
+                .filter(k => params.get(k))
+                .map(k => k + '=' + encodeURIComponent(params.get(k)))
+                .join('&');
+            const redirectUrl = 'https://www.therapist-home.com/pages/course-library.html'
+                + (utmParams ? '?' + utmParams : '');
+
             const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: 'https://www.therapist-home.com/pages/course-library.html' }
+                options: { redirectTo: redirectUrl }
             });
             if (error) throw error;
             return data;
@@ -955,12 +965,16 @@
 
             if (!existing) {
                 isNewProfile = true;
+                const utm = window.getUtmData ? window.getUtmData() : {};
                 const profileData = {
                     id: user.id,
                     email: user.email,
                     full_name: fullName,
                     role: 'student_lead',
-                    created_at: new Date().toISOString()
+                    created_at: new Date().toISOString(),
+                    utm_source: utm.utm_source || null,
+                    utm_medium: utm.utm_medium || null,
+                    utm_campaign: utm.utm_campaign || null
                 };
                 if (phone) profileData.phone = phone;
 
@@ -970,6 +984,41 @@
 
                 if (insertError) {
                     console.error('Profile create error:', insertError);
+                }
+
+                // Create lead_attribution row for traffic source tracking
+                try {
+                    const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
+                    const attrRow = {
+                        linked_table: 'profiles',
+                        linked_id: user.id,
+                        phone: phone || null,
+                        email: user.email,
+                        session_id: attribution?.session_id || null,
+                        first_utm_source: attribution?.first?.utm_source || utm.utm_source || null,
+                        first_utm_medium: attribution?.first?.utm_medium || utm.utm_medium || null,
+                        first_utm_campaign: attribution?.first?.utm_campaign || utm.utm_campaign || null,
+                        first_referrer_domain: attribution?.first?.referrer_domain || null,
+                        first_landing_url: attribution?.first?.landing_url || null,
+                        first_at: attribution?.first?.at || null,
+                        last_utm_source: attribution?.last?.utm_source || utm.utm_source || null,
+                        last_utm_medium: attribution?.last?.utm_medium || utm.utm_medium || null,
+                        last_utm_campaign: attribution?.last?.utm_campaign || utm.utm_campaign || null,
+                        last_referrer_domain: attribution?.last?.referrer_domain || null,
+                        last_landing_url: attribution?.last?.landing_url || null,
+                        last_at: attribution?.last?.at || null,
+                        device_type: attribution?.device_type || null,
+                        os_name: attribution?.os_name || null,
+                        browser_name: attribution?.browser_name || null,
+                        viewport_w: attribution?.viewport_w || null,
+                        viewport_h: attribution?.viewport_h || null,
+                        language: attribution?.language || null,
+                        timezone: attribution?.timezone || null,
+                        raw_ua: attribution?.raw_ua || null
+                    };
+                    await supabaseClient.from('lead_attribution').insert([attrRow]);
+                } catch (attrErr) {
+                    console.warn('Attribution save for new profile:', attrErr);
                 }
             } else if (phone && !existing.phone) {
                 // Profile exists but phone missing (e.g. trigger ran before metadata was available)

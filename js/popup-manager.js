@@ -69,7 +69,7 @@
         if (!targetAudience || targetAudience === 'all') return true;
         if (targetAudience === 'unauthenticated') return !userContext.isAuthenticated;
         if (targetAudience === 'authenticated') return userContext.isAuthenticated;
-        if (targetAudience === 'free_user') return userContext.isAuthenticated && userContext.role !== 'paid_customer';
+        if (targetAudience === 'free_user') return userContext.isAuthenticated && userContext.role !== 'paid_customer' && userContext.role !== 'admin';
         if (targetAudience === 'paid_customer') return userContext.role === 'paid_customer';
         if (targetAudience === 'admin') return userContext.role === 'admin';
         return true;

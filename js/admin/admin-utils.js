@@ -4,7 +4,7 @@
 const VIEW_GROUPS = {
     'overview': { views: ['overview'], header: null, default: 'overview' },
     'mizum':    { views: ['patients', 'therapists', 'matches'], header: 'mizum-header', default: 'patients' },
-    'funnel':   { views: ['funnel'], header: null, default: 'funnel' },
+    'funnel':   { views: ['pipeline'], header: null, default: 'pipeline' },
     'learning': { views: ['portal-q'], header: null, default: 'portal-q' },
     'bot':      { views: ['bot'], header: null, default: 'bot' },
     'paid':     { views: ['paid'], header: null, default: 'paid' },
@@ -61,7 +61,7 @@ function switchView(view) {
     // Lazy-load hooks
     if (view === 'learning' || group.default === 'portal-q') { if (!portalQLoaded && typeof loadPortalQuestionnaires === 'function') loadPortalQuestionnaires(); }
     if (view === 'bot' || group.default === 'bot') loadBotView();
-    if (view === 'funnel' || group.default === 'funnel') loadFunnel();
+    if (view === 'funnel' || group.default === 'pipeline') { if (typeof loadPipeline === 'function') loadPipeline(); }
     if (view === 'paid' || group.default === 'paid') loadPaidCustomers();
     if (view === 'instagram' || group.default === 'instagram') loadInstagramAnalytics();
     if (view === 'campaigns' || group.default === 'campaigns') loadCampaignDashboard();

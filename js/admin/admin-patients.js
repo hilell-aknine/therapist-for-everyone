@@ -23,7 +23,7 @@ function renderPatients() {
     updateBulkBarFor('patients');
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטופלים</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטופלים</td></tr>';
         return;
     }
 
@@ -31,17 +31,15 @@ function renderPatients() {
     let html = '';
     for (const [group, items] of Object.entries(groups)) {
         if (items.length === 0) continue;
-        html += `<tr class="date-group-row"><td colspan="8"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+        html += `<tr class="date-group-row"><td colspan="10"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
         html += items.map(p => `
             <tr>
                 <td class="lead-checkbox"><input type="checkbox" value="${p.id}" onchange="updateBulkBarFor('patients')"></td>
                 <td><strong>${p.full_name}</strong></td>
                 <td><a href="tel:${p.phone}" style="color:var(--info);text-decoration:none;">${p.phone || '-'}</a></td>
                 <td>${p.city || '-'}</td>
-                <td><span class="verified-badge ${p.id_verified ? 'yes' : 'no'}">
-                    <i class="fa-solid ${p.id_verified ? 'fa-check-circle' : 'fa-clock'}"></i>
-                    ${p.id_verified ? 'מאומת' : 'ממתין'}
-                </span></td>
+                <td style="font-size:0.82rem;">${escapeHtml(p.utm_source || '-')}</td>
+                <td>${p.agreement_signed_at ? '<span style="color:#27ae60;">✅</span>' : '<span style="color:rgba(232,241,242,0.4);">⚠️</span>'}</td>
                 <td><span class="status-badge status-${p.status}">${statusLabel(p.status)}</span></td>
                 <td>${formatDate(p.created_at)}</td>
                 <td class="action-btns">

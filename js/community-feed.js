@@ -108,7 +108,7 @@
                 .select('post_id').eq('user_id', _userId).not('post_id', 'is', null),
             supabaseClient.from('community_comments')
                 .select('id, post_id, author_id, body, created_at')
-                .order('created_at', { ascending: true }).limit(500)
+                .order('created_at', { ascending: true }).limit(100)
         ]);
 
         _posts = postsRes.data || [];

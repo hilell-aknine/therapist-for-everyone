@@ -33,10 +33,7 @@ function renderTherapists() {
                 <td><a href="tel:${t.phone}" style="color:var(--info);text-decoration:none;">${t.phone || '-'}</a></td>
                 <td>${(Array.isArray(t.specializations) ? t.specializations.join(', ') : t.specialization) || '-'}</td>
                 <td style="text-align:center;">${t.experience_years || 0} שנים</td>
-                <td><span class="verified-badge ${t.documents_verified ? 'yes' : 'no'}">
-                    <i class="fa-solid ${t.documents_verified ? 'fa-check-circle' : 'fa-clock'}"></i>
-                    ${t.documents_verified ? 'מאומת' : 'ממתין'}
-                </span></td>
+                <td>${t.agreement_signed_at ? '<span style="color:#27ae60;">✅</span>' : '<span style="color:rgba(232,241,242,0.4);">⚠️</span>'}</td>
                 <td><span class="status-badge status-${t.status}">${statusLabel(t.status)}</span></td>
                 <td>${formatDate(t.created_at)}</td>
                 <td class="action-btns">

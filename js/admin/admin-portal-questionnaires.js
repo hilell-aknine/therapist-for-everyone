@@ -287,7 +287,7 @@ function renderPortalQuestionnaires() {
             const src = q.how_found || q.utm_source || '—';
             return `
                 <tr onclick="viewPortalQ('${q.id}')" style="cursor:pointer;">
-                    <td><strong>${escapeHtml(q.full_name || '-')}</strong>${q.lead_source === 'contact_form' ? ' <span style="font-size:0.65rem;background:rgba(212,175,55,0.15);color:#D4AF37;padding:0.1rem 0.3rem;border-radius:4px;">טופס${q.request_type === 'training' ? ' הכשרה' : ''}</span>' : !q.has_questionnaire ? ' <span style="font-size:0.65rem;background:rgba(232,241,242,0.1);color:rgba(232,241,242,0.4);padding:0.1rem 0.3rem;border-radius:4px;">ללא שאלון</span>' : ''}</td>
+                    <td><strong>${escapeHtml(q.full_name || '-')}</strong>${q.lead_source === 'contact_form' ? ` <span style="font-size:0.65rem;background:rgba(212,175,55,0.15);color:#D4AF37;padding:0.1rem 0.3rem;border-radius:4px;">טופס${q.request_type === "training" ? " הכשרה" : ""}</span>` : !q.has_questionnaire ? ' <span style="font-size:0.65rem;background:rgba(232,241,242,0.1);color:rgba(232,241,242,0.4);padding:0.1rem 0.3rem;border-radius:4px;">ללא שאלון</span>' : ''}</td>
                     <td style="font-size:0.82rem;">${escapeHtml(src)}</td>
                     <td>${q.phone ? `<a href="tel:${escapeHtml(q.phone)}" onclick="event.stopPropagation()">${escapeHtml(q.phone)}</a>` : '-'}</td>
                     <td style="font-size:0.85rem;">${escapeHtml(q.city || '-')}</td>

@@ -1,4 +1,5 @@
 /* admin-traffic.css — Traffic Source Attribution dashboard */
+/* Uses theme variables from admin-styles.css for light/dark mode support */
 
 #traffic-view { padding: 0; }
 #traffic-view h1 { margin-bottom: 0.5rem; }
@@ -6,9 +7,9 @@
 .traffic-loading, .traffic-error, .traffic-empty {
     padding: 2rem;
     text-align: center;
-    color: #888;
+    color: var(--text-secondary, #4B5563);
 }
-.traffic-error { color: #FF6F61; }
+.traffic-error { color: var(--danger, #FF6F61); }
 
 /* Toolbar */
 .traffic-toolbar {
@@ -21,14 +22,14 @@
 }
 .traffic-range {
     display: inline-flex;
-    background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--card, #fff);
+    border: 1px solid var(--border, rgba(0,0,0,0.1));
     border-radius: 8px;
     overflow: hidden;
 }
 .traffic-range-btn {
     background: transparent;
-    color: #aaa;
+    color: var(--text-secondary, #4B5563);
     border: 0;
     padding: 0.5rem 1rem;
     font-family: inherit;
@@ -36,7 +37,7 @@
     cursor: pointer;
     transition: all 0.15s;
 }
-.traffic-range-btn:hover { color: #fff; background: rgba(255,255,255,0.04); }
+.traffic-range-btn:hover { color: var(--text, #1A2D33); background: rgba(0,0,0,0.04); }
 .traffic-range-btn.active {
     background: var(--gold, #D4AF37);
     color: #003B46;
@@ -51,8 +52,8 @@
     margin-bottom: 1.5rem;
 }
 .traffic-kpi {
-    background: rgba(0, 96, 107, 0.08);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--card, #fff);
+    border: 1px solid var(--border, rgba(0,0,0,0.1));
     border-radius: 12px;
     padding: 1rem 1.25rem;
     text-align: center;
@@ -67,7 +68,7 @@
 .traffic-kpi-label {
     margin-top: 0.4rem;
     font-size: 0.78rem;
-    color: #999;
+    color: var(--text-secondary, #4B5563);
 }
 
 /* Panels + rows */
@@ -78,19 +79,19 @@
     margin-bottom: 1rem;
 }
 .traffic-panel {
-    background: rgba(0, 96, 107, 0.08);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--card, #fff);
+    border: 1px solid var(--border, rgba(0,0,0,0.1));
     border-radius: 12px;
     padding: 1.25rem;
 }
 .traffic-panel h3 {
     margin: 0 0 1rem;
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #1A2D33);
     font-family: 'Frank Ruhl Libre', serif;
     font-size: 1.05rem;
 }
 .traffic-hint {
-    color: #888;
+    color: var(--text-secondary, #4B5563);
     font-size: 0.75rem;
     font-weight: normal;
     font-family: 'Heebo', sans-serif;
@@ -106,7 +107,7 @@
 }
 .traffic-bar-label {
     font-size: 0.85rem;
-    color: #ccc;
+    color: var(--text, #1A2D33);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -115,7 +116,7 @@
 }
 .traffic-bar-track {
     height: 20px;
-    background: rgba(0,0,0,0.25);
+    background: rgba(0,59,70,0.08);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -127,7 +128,7 @@
 }
 .traffic-bar-val {
     font-size: 0.78rem;
-    color: #aaa;
+    color: var(--text-secondary, #4B5563);
     text-align: left;
     direction: ltr;
 }
@@ -141,19 +142,19 @@
 .traffic-funnel-table th {
     text-align: right;
     padding: 0.6rem 0.75rem;
-    background: rgba(0,0,0,0.25);
-    color: #aaa;
+    background: rgba(0,59,70,0.06);
+    color: var(--text-secondary, #4B5563);
     font-weight: 600;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.1));
 }
 .traffic-funnel-table td {
     text-align: right;
     padding: 0.6rem 0.75rem;
-    color: #ddd;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text, #1A2D33);
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.06));
 }
-.traffic-funnel-table .pct { color: #888; font-size: 0.78rem; }
-.traffic-funnel-table tbody tr:hover { background: rgba(212, 175, 55, 0.04); }
+.traffic-funnel-table .pct { color: var(--text-secondary, #4B5563); font-size: 0.78rem; }
+.traffic-funnel-table tbody tr:hover { background: rgba(212, 175, 55, 0.06); }
 
 /* Device donut (list variant) */
 .traffic-donut { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -163,7 +164,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.4rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.06));
 }
 .traffic-donut-row .dot {
     width: 10px; height: 10px; border-radius: 50%;
@@ -171,9 +172,9 @@
 .traffic-donut-row .dot.mobile  { background: var(--gold, #D4AF37); }
 .traffic-donut-row .dot.desktop { background: var(--muted-teal, #00606B); }
 .traffic-donut-row .dot.tablet  { background: #8B6914; }
-.traffic-donut-row .label { color: #ccc; font-size: 0.85rem; }
+.traffic-donut-row .label { color: var(--text, #1A2D33); font-size: 0.85rem; }
 .traffic-donut-row .val { color: var(--gold, #D4AF37); font-weight: 600; }
-.traffic-donut-row .count { color: #777; font-size: 0.78rem; direction: ltr; }
+.traffic-donut-row .count { color: var(--text-secondary, #4B5563); font-size: 0.78rem; direction: ltr; }
 
 /* Geo list */
 .traffic-geo-list {
@@ -188,11 +189,11 @@
     grid-template-columns: 1fr auto auto;
     gap: 0.5rem;
     padding: 0.4rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.06));
     font-size: 0.88rem;
 }
-.traffic-geo-city { color: #ddd; }
-.traffic-geo-country { color: #777; font-size: 0.78rem; }
+.traffic-geo-city { color: var(--text, #1A2D33); }
+.traffic-geo-country { color: var(--text-secondary, #4B5563); font-size: 0.78rem; }
 .traffic-geo-count {
     color: var(--gold, #D4AF37);
     font-weight: 600;
@@ -210,15 +211,15 @@
 .traffic-recent-table th {
     text-align: right;
     padding: 0.6rem 0.75rem;
-    background: rgba(0,0,0,0.25);
-    color: #aaa;
+    background: rgba(0,59,70,0.06);
+    color: var(--text-secondary, #4B5563);
     font-weight: 600;
     white-space: nowrap;
 }
 .traffic-recent-table td {
     padding: 0.55rem 0.75rem;
-    color: #ccc;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text, #1A2D33);
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.06));
 }
 .traffic-tag {
     background: rgba(212, 175, 55, 0.12);
@@ -232,19 +233,31 @@
 .traffic-footnote {
     margin-top: 2rem;
     padding: 1rem 1.25rem;
-    background: rgba(212, 175, 55, 0.04);
-    border: 1px dashed rgba(212, 175, 55, 0.2);
+    background: rgba(212, 175, 55, 0.06);
+    border: 1px dashed rgba(212, 175, 55, 0.3);
     border-radius: 8px;
-    color: #aaa;
+    color: var(--text-secondary, #4B5563);
     font-size: 0.82rem;
     line-height: 1.5;
 }
 .traffic-footnote code {
-    background: rgba(0,0,0,0.35);
+    background: rgba(0,59,70,0.08);
     padding: 0.1rem 0.4rem;
     border-radius: 4px;
     color: var(--gold, #D4AF37);
 }
+
+/* Source badge — shows medium (paid/organic) */
+.traffic-source-medium {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 6px;
+    margin-right: 0.3rem;
+    font-weight: 600;
+}
+.traffic-source-medium.paid { background: rgba(212,175,55,0.15); color: var(--gold, #D4AF37); }
+.traffic-source-medium.organic { background: rgba(39,174,96,0.12); color: #27ae60; }
+.traffic-source-medium.unknown { background: rgba(0,0,0,0.05); color: var(--text-secondary, #4B5563); }
 
 @media (max-width: 900px) {
     .traffic-row { grid-template-columns: 1fr; }

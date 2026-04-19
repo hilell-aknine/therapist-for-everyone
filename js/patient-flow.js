@@ -240,7 +240,7 @@
 
                 showToast('הפרטים נשלחו בהצלחה! ניצור איתך קשר בהקדם', 'success');
                 setTimeout(() => {
-                    window.location.href = 'thank-you.html';
+                    window.location.href = 'thank-you.html?type=contact';
                 }, 2000);
             }
 
@@ -289,8 +289,9 @@
             return false;
         }
 
-        if (!data.phone || data.phone.length < 9) {
-            showToast('אנא הזינו מספר טלפון תקין', 'error');
+        const cleanPhone = (data.phone || '').replace(/[\s\-()]/g, '');
+        if (!cleanPhone || !/^0[2-9]\d{7,8}$/.test(cleanPhone)) {
+            showToast('אנא הזינו מספר טלפון ישראלי תקין (לדוגמה: 0541234567)', 'error');
             return false;
         }
 
@@ -337,8 +338,8 @@
     // ============================================================================
 
     // Insert anonymous patient via Turnstile-protected Edge Function
+    // Single atomic call: patients + contact_requests (mirror) for CRM bot
     async function insertContactRequest(formData, turnstileToken) {
-        // Save to patients table via Edge Function
         const patientData = {
             full_name: formData.full_name,
             phone: formData.phone,
@@ -348,25 +349,23 @@
             status: 'new'
         };
 
-        await window.ContactRequests.submit(patientData, turnstileToken, 'patients');
+        const mirrorData = {
+            name: formData.full_name,
+            full_name: formData.full_name,
+            phone: formData.phone,
+            email: formData.email || null,
+            city: formData.city,
+            message: formData.main_concern,
+            request_type: 'patient',
+            status: 'new'
+        };
 
-        // Also save to contact_requests so CRM bot can track leads
-        try {
-            await window.ContactRequests.submit({
-                name: formData.full_name,
-                full_name: formData.full_name,
-                phone: formData.phone,
-                email: formData.email || null,
-                city: formData.city,
-                message: formData.main_concern,
-                request_type: 'patient',
-                status: 'new'
-            }, turnstileToken, 'contact_requests');
-        } catch (e) {
-            console.warn('Could not save to contact_requests:', e);
-        }
+        await window.ContactRequests.submit(patientData, turnstileToken, 'patients', {
+            mirror_table: 'contact_requests',
+            mirror_data: mirrorData
+        });
 
-        console.log('Anonymous patient created + lead saved (via Edge Function)');
+        console.log('Anonymous patient created + lead saved (atomic via Edge Function)');
         return { success: true };
     }
 

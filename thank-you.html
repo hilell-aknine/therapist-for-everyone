@@ -237,5 +237,40 @@
     </main>
     <!-- Marketing & Analytics -->
     <script src="js/marketing-tools.js"></script>
+    <script>
+    // Fire conversion events on thank-you page (reliable conversion point)
+    (function() {
+        // Prevent double-firing on page refresh
+        if (sessionStorage.getItem('thank_you_conversion_fired')) return;
+
+        var params = new URLSearchParams(window.location.search);
+        var type = params.get('type'); // patient, therapist, contact
+
+        if (!type) return; // Direct visit without form submission — skip
+
+        sessionStorage.setItem('thank_you_conversion_fired', '1');
+
+        // GA4 + browser Meta Pixel (via marketing-tools.js)
+        var formName = type === 'patient' ? 'patient_intake'
+                     : type === 'therapist' ? 'therapist_intake'
+                     : 'contact_form';
+
+        if (window.trackFormSubmission) window.trackFormSubmission(formName);
+
+        // Server-side Meta CAPI
+        if (window.sendEventToCAPI) {
+            var eventId = window.newCapiEventId ? window.newCapiEventId() : null;
+            if (window.fbq && eventId) {
+                fbq('track', 'CompleteRegistration',
+                    { content_name: formName },
+                    { eventID: eventId });
+            }
+            window.sendEventToCAPI('CompleteRegistration', {}, {
+                content_name: formName,
+                event_id: eventId
+            });
+        }
+    })();
+    </script>
 </body>
 </html>

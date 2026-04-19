@@ -309,13 +309,15 @@
 
             // Submit via Turnstile-protected Edge Function
             const functionsUrl = window.SUPABASE_CONFIG.functionsUrl;
+            const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
             const res = await fetch(`${functionsUrl}/submit-lead`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'therapists',
                     data: data,
-                    turnstileToken: turnstileToken
+                    turnstileToken: turnstileToken,
+                    attribution: attribution
                 })
             });
 
@@ -331,6 +333,24 @@
             document.getElementById('success-container').classList.remove('hidden');
             showToast('הבקשה נשלחה בהצלחה!', 'success');
             if (window.trackFormSubmission) window.trackFormSubmission('therapist_intake');
+
+            // Server-side Meta CAPI for better Event Match Quality
+            if (window.sendEventToCAPI) {
+                var capiEventId = window.newCapiEventId ? window.newCapiEventId() : null;
+                if (window.fbq && capiEventId) {
+                    fbq('track', 'CompleteRegistration',
+                        { content_name: 'therapist_intake' },
+                        { eventID: capiEventId });
+                }
+                window.sendEventToCAPI('CompleteRegistration', {
+                    em: data.email || null,
+                    ph: data.phone || null,
+                    fn: data.full_name || null
+                }, {
+                    content_name: 'therapist_intake',
+                    event_id: capiEventId
+                });
+            }
 
         } catch (error) {
             console.error('Error:', error);

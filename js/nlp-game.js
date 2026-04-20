@@ -963,19 +963,59 @@ class StoryGame {
     // ═══════════════════════════════════════
     // Achievements
     // ═══════════════════════════════════════
+    getAchievementProgress(achievement) {
+        const pd = this.playerData;
+        const lessons = Object.keys(pd.completedLessons).length;
+        switch (achievement.id) {
+            case 'first_lesson': return `${Math.min(lessons, 1)}/1 שיעורים`;
+            case 'five_lessons': return `${Math.min(lessons, 5)}/5 שיעורים`;
+            case 'ten_lessons': return `${Math.min(lessons, 10)}/10 שיעורים`;
+            case 'twenty_lessons': return `${Math.min(lessons, 20)}/20 שיעורים`;
+            case 'half_course': return `${Math.min(lessons, 25)}/25 שיעורים`;
+            case 'forty_lessons': return `${Math.min(lessons, 40)}/40 שיעורים`;
+            case 'all_lessons': return `${Math.min(lessons, 51)}/51 שיעורים`;
+            case 'streak_3': return `${Math.min(pd.streak, 3)}/3 ימים`;
+            case 'streak_7': return `${Math.min(pd.streak, 7)}/7 ימים`;
+            case 'streak_30': return `${Math.min(pd.streak, 30)}/30 ימים`;
+            case 'xp_500': return `${Math.min(pd.xp, 500)}/500 XP`;
+            case 'xp_1000': return `${Math.min(pd.xp, 1000)}/1000 XP`;
+            case 'perfect_lesson': return `${pd.perfectLessons || 0}/1 שיעורים מושלמים`;
+            case 'accuracy_80': {
+                const total = (pd.totalCorrectAnswers || 0) + (pd.totalWrongAnswers || 0);
+                const pct = total > 0 ? Math.round((pd.totalCorrectAnswers / total) * 100) : 0;
+                return `דיוק: ${pct}%`;
+            }
+            default: return '';
+        }
+    }
+
     renderAchievementsGrid() {
         return this.achievements.slice(0, 8).map(achievement => {
             const isUnlocked = this.playerData.achievements.includes(achievement.id);
             const iconContent = achievement.badge
                 ? `<img src="${achievement.badge}" alt="" class="achievement-badge-img" onerror="this.outerHTML='${achievement.icon}'">`
                 : achievement.icon;
+            const progress = isUnlocked ? '&#10003; הושג' : this.getAchievementProgress(achievement);
             return `
-                <div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
+                <div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}" onclick="game.showAchievementTooltip(this, '${achievement.title}', '${achievement.desc}', '${progress}')">
                     <div class="achievement-icon">${iconContent}</div>
                     <div class="achievement-name">${achievement.title}</div>
+                    <div class="achievement-progress">${progress}</div>
                 </div>
             `;
         }).join('');
+    }
+
+    showAchievementTooltip(el, title, desc, progress) {
+        // Remove any existing tooltip
+        document.querySelectorAll('.achievement-tooltip').forEach(t => t.remove());
+        const tooltip = document.createElement('div');
+        tooltip.className = 'achievement-tooltip';
+        tooltip.innerHTML = `<strong>${title}</strong><br>${desc}<br><small>${progress}</small>`;
+        el.style.position = 'relative';
+        el.appendChild(tooltip);
+        setTimeout(() => tooltip.classList.add('show'), 10);
+        setTimeout(() => tooltip.remove(), 3000);
     }
 
     checkAchievements() {

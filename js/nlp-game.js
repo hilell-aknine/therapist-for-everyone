@@ -1641,13 +1641,15 @@ ${answers.action || ''}`;
         const reading = lesson.reading;
         const container = document.getElementById('game-container');
 
-        // Highlight key terms in paragraphs
+        // Highlight key terms in paragraphs — tappable to ask Ram for definition
         const renderParagraph = (text) => {
             if (!reading.keyTerms || reading.keyTerms.length === 0) return text;
             let result = text;
             reading.keyTerms.forEach(term => {
                 const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                result = result.replace(new RegExp(escaped, 'g'), `<span class="key-term">${term}</span>`);
+                const safeTermAttr = term.replace(/'/g, "\\'");
+                result = result.replace(new RegExp(escaped, 'g'),
+                    `<span class="key-term" onclick="game.explainTerm('${safeTermAttr}')" title="לחץ להסבר">${term}</span>`);
             });
             return result;
         };
@@ -1658,6 +1660,10 @@ ${answers.action || ''}`;
 
         const lessonImg = `../assets/game/lessons/m${this.currentModule.id}-l${lesson.id}.jpg`;
 
+        // Estimate reading time (~200 Hebrew words per minute)
+        const wordCount = reading.paragraphs.join(' ').split(/\s+/).length;
+        const readingMinutes = Math.max(1, Math.round(wordCount / 200));
+
         container.innerHTML = `
             <div class="reading-section">
                 <div class="reading-hero">
@@ -1666,6 +1672,7 @@ ${answers.action || ''}`;
                 <div class="reading-header">
                     <span class="reading-icon">📖</span>
                     <h2 class="reading-title">${lesson.title}</h2>
+                    <div class="reading-time">📖 קריאה של כ-${readingMinutes} דקות</div>
                 </div>
                 <div class="reading-content">
                     ${paragraphsHTML}
@@ -1679,9 +1686,32 @@ ${answers.action || ''}`;
         `;
 
         this.hideFooter();
+
+        // Reading scroll progress bar
+        const readingEl = container.querySelector('.reading-section');
+        if (readingEl) {
+            const bar = document.createElement('div');
+            bar.className = 'reading-scroll-progress';
+            bar.innerHTML = '<div class="reading-scroll-fill"></div>';
+            readingEl.prepend(bar);
+            const fill = bar.querySelector('.reading-scroll-fill');
+            const onScroll = () => {
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 100;
+                fill.style.width = pct + '%';
+            };
+            window.addEventListener('scroll', onScroll, { passive: true });
+            this._readingScrollHandler = onScroll;
+        }
     }
 
     startExercises() {
+        // Cleanup reading scroll listener
+        if (this._readingScrollHandler) {
+            window.removeEventListener('scroll', this._readingScrollHandler);
+            this._readingScrollHandler = null;
+        }
         this.currentScreen = 'exercise';
         this.transitionTo(() => this.renderExercise());
     }
@@ -1777,7 +1807,7 @@ ${answers.action || ''}`;
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
-                <div class="exercise-type">${this.getExerciseTypeIcon('multiple-choice')} בחירה מרובה</div>
+                <div class="exercise-type">${this.getExerciseTypeIcon('multiple-choice')} שאלת בחירה</div>
                 <div class="exercise-question">${exercise.question}</div>
                 <div class="options-list">
                     ${optionsHtml}
@@ -3189,6 +3219,21 @@ ${answers.action || ''}`;
             backdrop.classList.remove('active');
             document.getElementById('ram-chat-input').blur();
         }
+    }
+
+    async explainTerm(term) {
+        // Show a floating tooltip with a quick AI explanation
+        document.querySelectorAll('.term-tooltip').forEach(t => t.remove());
+        const tooltip = document.createElement('div');
+        tooltip.className = 'term-tooltip';
+        tooltip.innerHTML = `<strong>${term}</strong><br><span class="term-loading">מחפש הסבר...</span>`;
+        document.body.appendChild(tooltip);
+        setTimeout(() => tooltip.classList.add('show'), 10);
+
+        const response = await this.gemini.ask(`הסבר בקצרה (2-3 משפטים) את המושג "${term}" בהקשר של NLP.`);
+        const loadingEl = tooltip.querySelector('.term-loading');
+        if (loadingEl) loadingEl.outerHTML = `<span>${response || 'לא הצלחתי להסביר כרגע'}</span>`;
+        setTimeout(() => { tooltip.classList.remove('show'); setTimeout(() => tooltip.remove(), 300); }, 8000);
     }
 
     sendRamSuggestion(btn) {

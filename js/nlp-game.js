@@ -390,14 +390,14 @@ class StoryGame {
         document.getElementById('main-content').style.display = 'block';
         document.getElementById('progress-wrapper').style.display = 'block';
 
-        // Show bottom navigation
-        document.getElementById('bottom-nav').style.display = 'flex';
+        // Show bottom navigation (via class, not inline style — inline would override game-fullscreen CSS)
+        document.getElementById('bottom-nav').classList.add('nav-visible');
 
         // Update sound toggle
         document.getElementById('sound-toggle').textContent = this.sound.enabled ? '🔊' : '🔇';
 
         // Show Ram chat FAB
-        document.getElementById('ram-chat-fab').style.display = 'flex';
+        document.getElementById('ram-chat-fab').classList.add('fab-visible');
 
         // Migrate progress if needed (21 → 51 lessons)
         try { this.migrateProgress(); } catch (e) { console.warn('Migration skipped:', e); }

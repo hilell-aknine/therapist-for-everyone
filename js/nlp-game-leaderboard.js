@@ -501,10 +501,13 @@
                 let rowClass = '';
                 if (row.rank <= 3) rowClass = `lb-row-${row.rank}`;
                 if (isMe) rowClass += ' lb-row-me';
+                const nameLabel = isMe
+                    ? `👤 ${this._escapeHtml(row.display_name || 'שחקן אנונימי')}`
+                    : this._escapeHtml(row.display_name || 'שחקן אנונימי');
 
-                return `<tr class="${rowClass}">
+                return `<tr class="${rowClass}" ${isMe ? 'id="lb-my-row"' : ''}>
                     <td class="lb-rank">${rankIcon(row.rank)}</td>
-                    <td class="lb-name">${this._escapeHtml(row.display_name || 'שחקן אנונימי')}</td>
+                    <td class="lb-name">${nameLabel}</td>
                     <td class="lb-xp">${(row.total_xp || 0).toLocaleString()}</td>
                     <td>${row.level || 1}</td>
                     <td>${row.current_streak || 0} &#128293;</td>
@@ -529,18 +532,26 @@
             // Show user's rank at bottom if not in top 20
             if (currentUserId && !userInTop) {
                 this.getPlayerRank(currentUserId).then(rank => {
+                    footer.style.display = 'flex';
                     if (rank) {
-                        footer.style.display = 'flex';
                         footer.innerHTML = `
-                            <span>המיקום שלך:</span>
+                            <span>👤 המיקום שלך:</span>
                             <span class="lb-my-rank-num">#${rank}</span>
                         `;
                     } else {
-                        footer.style.display = 'none';
+                        footer.innerHTML = `
+                            <span>👤 עדיין לא דורגת</span>
+                            <span class="lb-my-rank-num">השלם שיעור כדי להיכנס לטבלה</span>
+                        `;
                     }
                 });
             } else {
                 footer.style.display = 'none';
+                // Scroll to user's row if in table
+                setTimeout(() => {
+                    const myRow = document.getElementById('lb-my-row');
+                    if (myRow) myRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
             }
         },
 

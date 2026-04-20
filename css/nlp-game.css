@@ -2310,9 +2310,33 @@ main,
     animation: rainbow-glow-pulse 3s ease-in-out infinite;
 }
 
-.achievement-item.locked { opacity: 0.25; }
+.achievement-item.locked { opacity: 0.4; }
+.achievement-item { cursor: pointer; position: relative; }
 .achievement-icon { font-size: 24px; margin-bottom: 6px; }
 .achievement-name { font-size: 10px; font-weight: 600; color: var(--text-secondary); }
+.achievement-progress { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+.achievement-item.unlocked .achievement-progress { color: var(--accent-green); }
+
+.achievement-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-primary);
+    text-align: center;
+    white-space: nowrap;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    box-shadow: var(--shadow-md);
+    pointer-events: none;
+}
+.achievement-tooltip.show { opacity: 1; transform: translateX(-50%) scale(1); }
 
 /* ═══════════════════════════════════════
    Review Mode

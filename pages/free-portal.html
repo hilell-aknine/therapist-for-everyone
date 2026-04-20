@@ -1284,6 +1284,15 @@
             btn.innerHTML = isOpen ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
         }
 
+        // Force scroll to top on page load (Instagram/FB in-app browser fix)
+        // The #register anchor or fbclid can cause unexpected scroll-to-bottom
+        if (window.location.hash !== '#register' || document.referrer.includes('instagram') || document.referrer.includes('facebook') || new URLSearchParams(window.location.search).has('fbclid')) {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+            window.scrollTo(0, 0);
+        }
+        // Also force after a short delay (WebView quirk)
+        setTimeout(() => window.scrollTo(0, 0), 100);
+
         // Pass UTM params from landing URL to all course-library links
         (function() {
             const params = new URLSearchParams(window.location.search);

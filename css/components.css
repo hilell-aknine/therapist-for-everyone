@@ -513,3 +513,102 @@ body {
     }
     [data-reveal] { opacity: 1; transform: none; }
 }
+
+/* ============================================
+   Glass Buttons — Design System v2
+   Apple-style liquid glass with brand tints.
+   Classes: .btn, .btn--gold, .btn--teal,
+   .btn--clear, .btn--dark, .btn--purple,
+   .btn--pill, .btn--icon
+   ============================================ */
+.btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.18);
+    transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, background 0.25s ease-out;
+    isolation: isolate;
+    overflow: hidden;
+    text-decoration: none;
+}
+.btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.04) 45%, transparent 70%);
+    mix-blend-mode: overlay;
+}
+.btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.btn:hover { transform: translateY(-1px); }
+
+/* Gold (primary CTA) */
+.btn--gold {
+    background: linear-gradient(135deg, rgba(230,198,90,0.55), rgba(212,175,55,0.38));
+    color: #1a1205;
+    box-shadow: 0 10px 30px rgba(212,175,55,0.28), inset 0 0 0 1px rgba(255,255,255,0.2);
+}
+.btn--gold:hover { background: linear-gradient(135deg, rgba(230,198,90,0.7), rgba(212,175,55,0.5)); }
+
+/* Teal */
+.btn--teal {
+    background: linear-gradient(135deg, rgba(47,133,146,0.5), rgba(0,96,107,0.38));
+    color: #e8f8fa;
+    box-shadow: 0 10px 30px rgba(0,59,70,0.35);
+}
+.btn--teal:hover { background: linear-gradient(135deg, rgba(47,133,146,0.65), rgba(0,96,107,0.5)); }
+
+/* Clear (ghost) */
+.btn--clear {
+    background: rgba(255,255,255,0.10);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.btn--clear:hover { background: rgba(255,255,255,0.18); }
+
+/* Purple (social cause accent) */
+.btn--purple {
+    background: linear-gradient(135deg, rgba(155,114,207,0.5), rgba(123,94,167,0.38));
+    color: #f3ebff;
+    box-shadow: 0 10px 30px rgba(123,94,167,0.3);
+}
+.btn--purple:hover { background: linear-gradient(135deg, rgba(155,114,207,0.62), rgba(123,94,167,0.5)); }
+
+/* Dark */
+.btn--dark {
+    background: rgba(6,26,32,0.55);
+    color: #fff;
+    border-color: rgba(255,255,255,0.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+.btn--dark:hover { background: rgba(6,26,32,0.72); }
+
+/* Icon-only (circle) */
+.btn--icon { padding: 0.75rem 0.9rem; border-radius: 50%; }
+
+/* Pill shape */
+.btn--pill { border-radius: 50px; }
+
+/* On light surfaces */
+.on-light .btn--gold { color: #3a2a00; }
+.on-light .btn--teal { color: #fff; }
+.on-light .btn--clear { background: rgba(0,59,70,0.08); color: #003B46; border-color: rgba(0,59,70,0.15); }
+.on-light .btn--clear:hover { background: rgba(0,59,70,0.14); }

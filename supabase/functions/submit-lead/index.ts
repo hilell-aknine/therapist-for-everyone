@@ -300,9 +300,9 @@ serve(async (req) => {
       .select('id')
 
     if (insertError) {
-      console.error(`Insert error [${table}]:`, insertError.message)
+      console.error(`Insert error [${table}]:`, insertError.message, insertError.details, insertError.hint)
       return new Response(
-        JSON.stringify({ error: 'שגיאה בשמירת הנתונים. נסה שוב.' }),
+        JSON.stringify({ error: `שגיאה בשמירת הנתונים: ${insertError.message}` }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }

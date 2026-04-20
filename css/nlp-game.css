@@ -3561,8 +3561,20 @@ body.game-fullscreen #game-container {
 .home-path-node.locked:hover { transform: none; box-shadow: none; }
 .home-path-node.locked .home-path-icon { background: var(--bg-active); }
 
-.home-path-node.special { border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.05); }
+.home-path-node.special { border-color: var(--glass-border); background: var(--glass); }
 .home-path-node.special .home-path-icon { background: linear-gradient(135deg, var(--accent-amber), var(--accent-orange)); }
+
+/* Next recommended action — golden highlight + subtle pulse */
+.home-path-node.next-action {
+    border-color: rgba(212, 175, 55, 0.5);
+    background: rgba(212, 175, 55, 0.08);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+    animation: next-action-pulse 2.5s ease-in-out infinite;
+}
+@keyframes next-action-pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.15); }
+    50% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
+}
 
 .home-path-node.goal { border-color: rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.08); }
 .home-path-node.goal .home-path-icon {

@@ -349,6 +349,16 @@
             this._overlay.addEventListener('click', (e) => {
                 if (e.target === this._overlay) this.hide();
             });
+
+            // Swipe-down to dismiss
+            let _swipeStartY = 0;
+            const card = this._overlay.querySelector('.lb-card');
+            if (card) {
+                card.addEventListener('touchstart', (e) => { _swipeStartY = e.touches[0].clientY; }, { passive: true });
+                card.addEventListener('touchend', (e) => {
+                    if (e.changedTouches[0].clientY - _swipeStartY > 80) this.hide();
+                }, { passive: true });
+            }
             this._overlay.querySelectorAll('.lb-toggle-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     this._overlay.querySelectorAll('.lb-toggle-btn').forEach(b => b.classList.remove('lb-active'));

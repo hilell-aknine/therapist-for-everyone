@@ -1093,6 +1093,14 @@ class StoryGame {
             </div>
         `;
 
+        // Find the next recommended module (first incomplete + unlocked)
+        let nextModuleId = null;
+        for (let i = 0; i < MODULES.length; i++) {
+            const prog = this.getModuleProgress(MODULES[i].id);
+            const locked = i > 0 && this.getModuleProgress(MODULES[i - 1].id) < 50;
+            if (!locked && prog < 100) { nextModuleId = MODULES[i].id; break; }
+        }
+
         // Module nodes — track unlock transitions
         const previousLocked = this._previousLockedModules || [];
         const currentLocked = [];
@@ -1124,6 +1132,7 @@ class StoryGame {
             }
 
             if (justUnlocked) stateClass += ' just-unlocked';
+            if (module.id === nextModuleId) stateClass += ' next-action';
 
             pathNodesHtml += `
                 <div class="home-path-node ${stateClass}"

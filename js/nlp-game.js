@@ -2922,6 +2922,16 @@ ${answers.action || ''}`;
         const totalAnswers = (pd.totalCorrectAnswers || 0) + (pd.totalWrongAnswers || 0);
         const accuracyPct = totalAnswers > 0 ? Math.round((pd.totalCorrectAnswers / totalAnswers) * 100) : 0;
 
+        // Dynamic benchmark hints
+        const xpHint = levelInfo.xpToNext > 0 ? `עוד ${levelInfo.xpToNext} XP לרמה ${(pd.level || 1) + 1}` : 'רמה מקסימלית!';
+        const streakHint = pd.streak === 0 ? 'השלם שיעור כדי להתחיל' :
+            pd.streak < 7 ? 'שמור על הסטריק — היכנס מחר!' : 'כל הכבוד! המשך ככה';
+        const longestHint = longestStreak < 7 ? 'המטרה הבאה: 7 ימים רצופים' :
+            longestStreak < 30 ? 'המטרה הבאה: 30 ימים רצופים!' : 'התמדה אגדית!';
+        const lessonsHint = totalLessons === 0 ? 'השלם שיעור ראשון כדי להתחיל' :
+            totalLessons < 10 ? `עוד ${10 - totalLessons} שיעורים לתג "בדרך הנכונה"` :
+            `${totalLessons}/51 שיעורים הושלמו`;
+
         container.innerHTML = `
             <div class="stats-screen">
                 <button class="back-btn" onclick="game.hideStats()">→ חזרה</button>
@@ -2931,18 +2941,22 @@ ${answers.action || ''}`;
                     <div class="stats-card">
                         <div class="stats-card-value">${pd.xp}</div>
                         <div class="stats-card-label">⭐ סה"כ XP</div>
+                        <div class="stats-card-hint">${xpHint}</div>
                     </div>
                     <div class="stats-card">
                         <div class="stats-card-value">${pd.streak}</div>
                         <div class="stats-card-label">🔥 סטריק נוכחי</div>
+                        <div class="stats-card-hint">${streakHint}</div>
                     </div>
                     <div class="stats-card">
                         <div class="stats-card-value">${longestStreak}</div>
                         <div class="stats-card-label">🏆 סטריק שיא</div>
+                        <div class="stats-card-hint">${longestHint}</div>
                     </div>
                     <div class="stats-card">
                         <div class="stats-card-value">${totalLessons}</div>
                         <div class="stats-card-label">📚 שיעורים</div>
+                        <div class="stats-card-hint">${lessonsHint}</div>
                     </div>
                 </div>
 

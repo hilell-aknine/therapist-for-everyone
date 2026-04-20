@@ -698,14 +698,14 @@ class StoryGame {
             <p>${step.text}</p>
         `;
 
-        // Dots
+        // Dots — reverse order for RTL (progress right→left)
         const dotsEl = document.getElementById('onboarding-dots');
         dotsEl.innerHTML = steps.map((_, i) => {
             let cls = 'onboarding-dot';
             if (i < this.onboardingStep) cls += ' done';
             if (i === this.onboardingStep) cls += ' active';
             return `<div class="${cls}"></div>`;
-        }).join('');
+        }).reverse().join('');
 
         // Button text
         const btn = document.getElementById('onboarding-btn');
@@ -1264,11 +1264,11 @@ class StoryGame {
                 <div class="story-nav">
                     <div class="container">
                         ${currentStepNum > 0 ?
-                            '<button class="btn btn-secondary" onclick="game.prevStoryStep()">← הקודם</button>' :
+                            '<button class="btn btn-secondary" onclick="game.prevStoryStep()">הקודם →</button>' :
                             '<div></div>'
                         }
                         ${currentStepNum < totalSteps - 1 ?
-                            '<button class="btn btn-primary" onclick="game.nextStoryStep()">הבא →</button>' :
+                            '<button class="btn btn-primary" onclick="game.nextStoryStep()">← הבא</button>' :
                             '<button class="btn btn-primary" onclick="game.showStoryPreview()">סיום ותצוגה מקדימה</button>'
                         }
                     </div>
@@ -1333,7 +1333,7 @@ class StoryGame {
 
         container.innerHTML = `
             <div class="story-builder">
-                <button class="back-btn" onclick="game.transitionTo(function() { game.renderStoryBuilderStep() })">← חזרה לעריכה</button>
+                <button class="back-btn" onclick="game.transitionTo(function() { game.renderStoryBuilderStep() })">חזרה לעריכה →</button>
 
                 ${this.createMentorHTML('מדהים! עברת תהליך NLP שלם! בואו נראה את כל השלבים ביחד. את/ה יכול/ה להעתיק ולהשתמש בזה בתרגול היומי.')}
 

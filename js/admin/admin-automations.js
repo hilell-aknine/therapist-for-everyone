@@ -291,6 +291,7 @@ function renderRuleCard(rule) {
                     <div class="auto-stat-label">סה״כ</div>
                 </div>
                 ${rule.dry_run && stats.dry_runs_7d ? `<div class="auto-stat dry"><div class="auto-stat-num">${stats.dry_runs_7d}</div><div class="auto-stat-label">תרגולים 7 ימים</div></div>` : ''}
+                ${stats.invalid_7d ? `<div class="auto-stat error"><div class="auto-stat-num">${stats.invalid_7d}</div><div class="auto-stat-label">מספר לא בוואטסאפ</div></div>` : ''}
                 ${stats.failed_7d ? `<div class="auto-stat error"><div class="auto-stat-num">${stats.failed_7d}</div><div class="auto-stat-label">שגיאות 7d</div></div>` : ''}
             </div>
             <div class="auto-card-footer">${lastFired}</div>
@@ -802,10 +803,11 @@ async function diagnoseAutomation(ruleId) {
     }
 
     // 2. Check cron
-    if (!rule.cron_expression) {
+    const cronExpr = rule.trigger_config?.cron;
+    if (!cronExpr) {
         issues.push('❌ אין תזמון (cron) — הכלל לא ירוץ אוטומטית');
     } else {
-        ok.push(`✅ תזמון: ${rule.cron_expression}`);
+        ok.push(`✅ תזמון: ${cronExpr}`);
     }
 
     // 3. Check message template

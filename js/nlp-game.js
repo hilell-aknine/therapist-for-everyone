@@ -291,6 +291,9 @@ class StoryGame {
         // Init ripple effect on all interactive elements
         this.initRipple();
 
+        // Init swipe-to-dismiss on bottom sheets
+        this.initSwipeDismiss();
+
         // Init auth flow
         this.initAuth();
     }
@@ -313,6 +316,24 @@ class StoryGame {
             target.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
         });
+    }
+
+    initSwipeDismiss() {
+        // Swipe-down to dismiss bottom sheets (feedback panel, ram chat, leaderboard)
+        const sheets = [
+            { sel: '#feedback-panel', dismiss: () => this.continueToNext() },
+            { sel: '#ram-chat-panel', dismiss: () => this.toggleRamChat() },
+        ];
+        for (const { sel, dismiss } of sheets) {
+            const el = document.querySelector(sel);
+            if (!el) continue;
+            let startY = 0;
+            el.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
+            el.addEventListener('touchend', (e) => {
+                const dy = e.changedTouches[0].clientY - startY;
+                if (dy > 80) dismiss();
+            }, { passive: true });
+        }
     }
 
     // ═══════════════════════════════════════

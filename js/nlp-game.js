@@ -809,7 +809,7 @@ class StoryGame {
                 <div class="profile-card">
                     <div class="profile-avatar">👤</div>
                     <div class="profile-email">${email}</div>
-                    <div class="profile-role">${levelInfo.name} • רמה ${levelInfo.level}</div>
+                    <div class="profile-role">${this.getLevelName(this.playerData.level || 1)} • רמה ${this.playerData.level || 1}</div>
                 </div>
 
                 <div class="profile-actions">

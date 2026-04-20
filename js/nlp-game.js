@@ -3170,10 +3170,23 @@ ${answers.action || ''}`;
         }
     }
 
+    sendRamSuggestion(btn) {
+        const input = document.getElementById('ram-chat-input');
+        input.value = btn.textContent;
+        // Hide all suggestions after first use
+        const suggestions = document.getElementById('ram-chat-suggestions');
+        if (suggestions) suggestions.remove();
+        this.sendRamChat();
+    }
+
     async sendRamChat() {
         const input = document.getElementById('ram-chat-input');
         const message = input.value.trim();
         if (!message) return;
+
+        // Hide suggestions once user sends any message
+        const suggestions = document.getElementById('ram-chat-suggestions');
+        if (suggestions) suggestions.remove();
 
         input.value = '';
         const messagesEl = document.getElementById('ram-chat-messages');

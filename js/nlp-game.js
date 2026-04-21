@@ -2974,6 +2974,7 @@ ${answers.action || ''}`;
         const accuracyPct = totalAnswers > 0 ? Math.round((pd.totalCorrectAnswers / totalAnswers) * 100) : 0;
 
         // Dynamic benchmark hints
+        const levelInfo = this.getLevelProgressInfo();
         const xpHint = levelInfo.xpToNext > 0 ? `עוד ${levelInfo.xpToNext} XP לרמה ${(pd.level || 1) + 1}` : 'רמה מקסימלית!';
         const streakHint = pd.streak === 0 ? 'השלם שיעור כדי להתחיל' :
             pd.streak < 7 ? 'שמור על הסטריק — היכנס מחר!' : 'כל הכבוד! המשך ככה';

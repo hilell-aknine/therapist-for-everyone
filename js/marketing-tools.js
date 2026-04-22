@@ -507,35 +507,37 @@ window.sendEventToCAPI = async function (eventName, userData, customData) {
 // ============================================================================
 // CAPI BROWSER DATA — Save fbc/fbp to lead_attribution for server-side firing
 // ============================================================================
-window.saveCapiBrowserData = async function (linkedTable, linkedId, email) {
+window.saveCapiBrowserData = async function (linkedTable, linkedId, email, eventId) {
     try {
         if (!window.SUPABASE_CONFIG) return;
         const supabaseUrl = window.SUPABASE_CONFIG.url;
-        const serviceKey = window.SUPABASE_CONFIG.anonKey; // anon is fine — RLS allows authenticated
+        const anonKey = window.SUPABASE_CONFIG.anonKey;
         const fbc = _buildFbc();
         const fbp = _getCookie('_fbp');
-        if (!fbc && !fbp) return; // Nothing useful to save
 
         // Update the lead_attribution row that matches this submission
         const filter = linkedId
             ? `linked_id=eq.${linkedId}&linked_table=eq.${linkedTable}`
             : `email=eq.${encodeURIComponent(email)}&linked_table=eq.${linkedTable}`;
 
+        const body = {
+            meta_fbc: fbc || null,
+            meta_fbp: fbp || null,
+        };
+        // Store event_id for dedup between browser pixel and server-side CAPI
+        if (eventId) body.capi_event_id = eventId;
+
         await fetch(`${supabaseUrl}/rest/v1/lead_attribution?${filter}&order=created_at.desc&limit=1`, {
             method: 'PATCH',
             headers: {
-                'apikey': serviceKey,
-                'Authorization': `Bearer ${serviceKey}`,
+                'apikey': anonKey,
+                'Authorization': `Bearer ${anonKey}`,
                 'Content-Type': 'application/json',
                 'Accept-Profile': 'public',
                 'Content-Profile': 'public',
                 'Prefer': 'return=minimal'
             },
-            body: JSON.stringify({
-                meta_fbc: fbc || null,
-                meta_fbp: fbp || null,
-                client_ip: null // IP is set server-side by the Edge Function, not from browser
-            })
+            body: JSON.stringify(body)
         });
     } catch (e) {
         // Non-critical — the browser CAPI call is the backup anyway

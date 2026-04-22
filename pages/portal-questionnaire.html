@@ -915,7 +915,19 @@
                     .eq('id', userId);
             }
 
+            // ── Pre-save CAPI browser data BEFORE the questionnaire INSERT ──
+            // The INSERT fires a DB trigger that enqueues QualifiedLead to CAPI.
+            // The trigger reads fbc/fbp/event_id from lead_attribution, so we
+            // must save them first.
+            const qualifiedLeadEventId = window.newCapiEventId ? window.newCapiEventId() : null;
+            if (window.saveCapiBrowserData) {
+                try {
+                    await window.saveCapiBrowserData('profiles', userId, session.user.email, qualifiedLeadEventId);
+                } catch (e) { /* non-critical */ }
+            }
+
             // Insert questionnaire to dedicated table (with UTM data)
+            // This triggers enqueue_qualified_lead() which uses the saved event_id
             const utm = window.getUtmData ? window.getUtmData() : {};
             const { error: insertErr } = await supabaseClient
                 .from('portal_questionnaires')
@@ -955,29 +967,29 @@
                     external_id: userId
                 };
 
+                // qualifiedLeadEventId was generated and saved BEFORE the INSERT (above)
+                // so the DB trigger already used it. Now fire browser fallbacks with same IDs.
                 const registrationEventId = window.newCapiEventId ? window.newCapiEventId() : null;
+
+                // Browser pixel: CompleteRegistration (dedup with CAPI via shared eventID)
                 if (window.fbq && registrationEventId) {
                     fbq('track', 'CompleteRegistration',
                         { content_name: 'portal_questionnaire' },
                         { eventID: registrationEventId });
                 }
+
+                // 3. Browser CAPI calls (fallback — AdBlock may block these)
                 if (window.sendEventToCAPI) {
-                    // Fire and forget — no await so we don't block the redirect
                     window.sendEventToCAPI('CompleteRegistration', capiUserData, {
                         content_name: 'portal_questionnaire',
                         event_id: registrationEventId
                     });
-                    // QualifiedLead also fires from browser as fallback.
-                    // The primary server-side path is the DB trigger (enqueue_qualified_lead)
-                    // which reads fbc/fbp from lead_attribution — AdBlock-proof.
+                    // QualifiedLead browser fallback — uses SAME event_id as DB trigger
                     window.sendEventToCAPI('QualifiedLead', capiUserData, {
                         content_name: 'questionnaire_complete',
-                        source: 'portal_questionnaire'
+                        source: 'portal_questionnaire',
+                        event_id: qualifiedLeadEventId
                     });
-                }
-                // Save fbc/fbp to lead_attribution for the DB trigger's server-side CAPI
-                if (window.saveCapiBrowserData) {
-                    window.saveCapiBrowserData('profiles', userId, userEmail);
                 }
             } catch (capiErr) {
                 console.warn('CAPI dispatch error:', capiErr);

@@ -860,9 +860,10 @@
                     fbq('track', 'Lead', { content_name: 'questionnaire_form' }, { eventID: eventId });
                 }
                 window.sendEventToCAPI('Lead', {
-                    em: payload.email || null,
-                    ph: payload.phone || null,
-                    fn: payload.full_name || null
+                    email: payload.email || null,
+                    phone: payload.phone || null,
+                    first_name: (payload.full_name || '').split(' ')[0] || null,
+                    last_name: (payload.full_name || '').split(' ').slice(1).join(' ') || null
                 }, {
                     content_name: 'questionnaire_form',
                     event_id: eventId

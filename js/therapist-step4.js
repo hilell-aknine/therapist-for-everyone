@@ -344,9 +344,10 @@
                         { eventID: capiEventId });
                 }
                 window.sendEventToCAPI('CompleteRegistration', {
-                    em: data.email || null,
-                    ph: data.phone || null,
-                    fn: data.full_name || null
+                    email: data.email || null,
+                    phone: data.phone || null,
+                    first_name: (data.full_name || '').split(' ')[0] || null,
+                    last_name: (data.full_name || '').split(' ').slice(1).join(' ') || null
                 }, {
                     content_name: 'therapist_intake',
                     event_id: capiEventId

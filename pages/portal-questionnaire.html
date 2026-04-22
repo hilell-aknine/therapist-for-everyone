@@ -967,10 +967,17 @@
                         content_name: 'portal_questionnaire',
                         event_id: registrationEventId
                     });
+                    // QualifiedLead also fires from browser as fallback.
+                    // The primary server-side path is the DB trigger (enqueue_qualified_lead)
+                    // which reads fbc/fbp from lead_attribution — AdBlock-proof.
                     window.sendEventToCAPI('QualifiedLead', capiUserData, {
                         content_name: 'questionnaire_complete',
                         source: 'portal_questionnaire'
                     });
+                }
+                // Save fbc/fbp to lead_attribution for the DB trigger's server-side CAPI
+                if (window.saveCapiBrowserData) {
+                    window.saveCapiBrowserData('profiles', userId, userEmail);
                 }
             } catch (capiErr) {
                 console.warn('CAPI dispatch error:', capiErr);

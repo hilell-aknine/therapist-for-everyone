@@ -28,6 +28,47 @@
     <link rel="stylesheet" href="../css/components.css">
     <script src="../js/theme-toggle.js" defer></script>
     <style>
+        /* Page Switcher */
+        .page-switcher {
+            position: fixed;
+            top: 70px;
+            right: 50%;
+            transform: translateX(50%);
+            z-index: 999;
+            display: flex;
+            gap: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid rgba(0,59,70,0.08);
+        }
+        .page-switcher a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.5rem;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-dark, #1A2D33);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .page-switcher a:hover { background: rgba(0,59,70,0.05); }
+        .page-switcher a.active {
+            background: var(--deep-petrol, #003B46);
+            color: #fff;
+        }
+        .page-switcher a.active i { color: var(--gold, #D4AF37); }
+        .page-switcher a i { font-size: 0.85rem; color: var(--t-gold-text, #8B6914); }
+        @media (max-width: 600px) {
+            .page-switcher { top: 60px; right: 1rem; left: 1rem; transform: none; }
+            .page-switcher a { flex: 1; justify-content: center; padding: 0.6rem 0.8rem; font-size: 0.8rem; }
+        }
+
         /* Hero */
         .hero {
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
@@ -279,6 +320,16 @@
             <i class="fa-solid fa-bars"></i>
         </button>
     </nav>
+
+    <!-- Page Switcher -->
+    <div class="page-switcher">
+        <a href="project-lobby.html" class="active">
+            <i class="fa-solid fa-heart-pulse"></i> אני צריך/ה טיפול
+        </a>
+        <a href="../landing-therapist.html">
+            <i class="fa-solid fa-hand-holding-heart"></i> אני רוצה להתנדב כמטפל
+        </a>
+    </div>
 
     <main id="main-content">
     <!-- Hero -->

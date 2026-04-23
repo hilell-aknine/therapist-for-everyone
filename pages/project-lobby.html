@@ -28,45 +28,49 @@
     <link rel="stylesheet" href="../css/components.css">
     <script src="../js/theme-toggle.js" defer></script>
     <style>
-        /* Page Switcher */
+        /* Page Switcher — inside hero */
         .page-switcher {
-            position: fixed;
-            top: 70px;
-            right: 50%;
-            transform: translateX(50%);
-            z-index: 999;
             display: flex;
-            gap: 0;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-            border: 1px solid rgba(0,59,70,0.08);
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out 0.2s forwards;
         }
         .page-switcher a {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.7rem 1.5rem;
+            padding: 0.75rem 1.8rem;
             text-decoration: none;
-            font-size: 0.88rem;
+            font-size: 0.92rem;
             font-weight: 600;
-            color: var(--text-dark, #1A2D33);
-            transition: all 0.2s;
+            border-radius: 50px;
+            transition: all 0.3s;
             white-space: nowrap;
+            color: rgba(232,241,242,0.7);
+            border: 1.5px solid rgba(232,241,242,0.2);
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
-        .page-switcher a:hover { background: rgba(0,59,70,0.05); }
+        .page-switcher a:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(232,241,242,0.4);
+            color: #fff;
+        }
         .page-switcher a.active {
-            background: var(--deep-petrol, #003B46);
+            background: rgba(212,175,55,0.15);
+            border-color: var(--gold, #D4AF37);
             color: #fff;
         }
         .page-switcher a.active i { color: var(--gold, #D4AF37); }
-        .page-switcher a i { font-size: 0.85rem; color: var(--t-gold-text, #8B6914); }
+        .page-switcher a i { font-size: 0.85rem; }
         @media (max-width: 600px) {
-            .page-switcher { top: 60px; right: 1rem; left: 1rem; transform: none; }
-            .page-switcher a { flex: 1; justify-content: center; padding: 0.6rem 0.8rem; font-size: 0.8rem; }
+            .page-switcher { flex-direction: column; align-items: center; gap: 0.5rem; }
+            .page-switcher a { padding: 0.65rem 1.5rem; font-size: 0.85rem; }
         }
 
         /* Hero */
@@ -321,16 +325,6 @@
         </button>
     </nav>
 
-    <!-- Page Switcher -->
-    <div class="page-switcher">
-        <a href="project-lobby.html" class="active">
-            <i class="fa-solid fa-heart-pulse"></i> אני צריך/ה טיפול
-        </a>
-        <a href="../landing-therapist.html">
-            <i class="fa-solid fa-hand-holding-heart"></i> אני רוצה להתנדב כמטפל
-        </a>
-    </div>
-
     <main id="main-content">
     <!-- Hero -->
     <section class="hero">
@@ -341,21 +335,25 @@
             <div class="hero-bg-layer"></div>
         </div>
         <div class="hero-content">
+            <!-- Page Switcher -->
+            <div class="page-switcher">
+                <a href="project-lobby.html" class="active">
+                    <i class="fa-solid fa-heart-pulse"></i> אני צריך/ה טיפול
+                </a>
+                <a href="../landing-therapist.html">
+                    <i class="fa-solid fa-hand-holding-heart"></i> אני רוצה להתנדב כמטפל
+                </a>
+            </div>
+
             <h1>טיפול נפשי הוא זכות בסיסית,<br>לא מותרות.</h1>
             <p class="hero-subtitle">
                 מיזם חברתי המיועד ללוחמים, נפגעי נובה ומי שנחשף לאירועי ה-7 באוקטובר ומלחמת חרבות ברזל —
                 <strong>10 מפגשים טיפוליים מקצועיים ללא עלות.</strong>
             </p>
-            <div style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;">
-                <a href="registration.html" class="hero-cta">
-                    <i class="fa-solid fa-clipboard-check"></i>
-                    לבדיקת זכאות והתאמת מטפל
-                </a>
-                <a href="landing-therapist.html" class="hero-cta" style="background:transparent;border:2px solid rgba(232,241,242,0.6);color:#E8F1F2;">
-                    <i class="fa-solid fa-hand-holding-heart"></i>
-                    אני רוצה להתנדב כמטפל
-                </a>
-            </div>
+            <a href="registration.html" class="hero-cta">
+                <i class="fa-solid fa-clipboard-check"></i>
+                לבדיקת זכאות והתאמת מטפל
+            </a>
             <div class="hero-trust">
                 <div class="trust-item"><i class="fa-solid fa-check-circle"></i><span>10 מפגשים בחינם</span></div>
                 <div class="trust-item"><i class="fa-solid fa-check-circle"></i><span>מטפלים מוסמכים</span></div>

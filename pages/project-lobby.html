@@ -28,49 +28,78 @@
     <link rel="stylesheet" href="../css/components.css">
     <script src="../js/theme-toggle.js" defer></script>
     <style>
-        /* Page Switcher — inside hero */
-        .page-switcher {
-            display: flex;
-            justify-content: center;
-            gap: 0.8rem;
-            margin-bottom: 2.5rem;
-            position: relative;
-            z-index: 2;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out 0.2s forwards;
-        }
-        .page-switcher a {
+        /* Nav Switcher — course-switcher style */
+        .nav-switcher { position: relative; }
+        .nav-switcher-trigger {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.8rem;
-            text-decoration: none;
-            font-size: 0.92rem;
+            gap: 0.4rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
             font-weight: 600;
-            border-radius: 50px;
-            transition: all 0.3s;
             white-space: nowrap;
-            color: rgba(232,241,242,0.7);
-            border: 1.5px solid rgba(232,241,242,0.2);
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(0,96,107,0.1);
+            color: var(--muted-teal);
+            border: 1px solid rgba(0,96,107,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Heebo', sans-serif;
         }
-        .page-switcher a:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(232,241,242,0.4);
-            color: #fff;
+        .nav-switcher-trigger:hover {
+            background: rgba(0,96,107,0.15);
+            border-color: rgba(0,96,107,0.35);
         }
-        .page-switcher a.active {
-            background: rgba(212,175,55,0.15);
-            border-color: var(--gold, #D4AF37);
-            color: #fff;
+        .nav-switcher-dot { color: var(--gold); font-size: 0.5rem; }
+        .nav-switcher-chevron {
+            font-size: 0.55rem;
+            color: rgba(0,0,0,0.4);
+            transition: transform 0.2s;
+            margin-right: 0.1rem;
         }
-        .page-switcher a.active i { color: var(--gold, #D4AF37); }
-        .page-switcher a i { font-size: 0.85rem; }
-        @media (max-width: 600px) {
-            .page-switcher { flex-direction: column; align-items: center; gap: 0.5rem; }
-            .page-switcher a { padding: 0.65rem 1.5rem; font-size: 0.85rem; }
+        .nav-switcher-trigger.open .nav-switcher-chevron { transform: rotate(180deg); }
+        .nav-switcher-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: #fff;
+            border: 1px solid rgba(0,59,70,0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            min-width: 240px;
+            z-index: 300;
+            overflow: hidden;
+            padding: 0.4rem;
+        }
+        .nav-switcher-dropdown.open { display: block; }
+        .nav-switcher-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.7rem 0.8rem;
+            border-radius: 8px;
+            transition: background 0.15s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .nav-switcher-item:hover { background: rgba(0,96,107,0.06); }
+        .nav-switcher-item.active { background: rgba(0,96,107,0.06); cursor: default; }
+        .nav-switcher-item > i { color: var(--gold, #D4AF37); font-size: 1rem; }
+        .nav-switcher-name {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-dark, #1A2D33);
+        }
+        .nav-switcher-meta {
+            display: block;
+            font-size: 0.72rem;
+            color: rgba(0,0,0,0.45);
+            margin-top: 0.1rem;
+        }
+        @media (max-width: 900px) {
+            .nav-switcher-dropdown { right: auto; left: 50%; transform: translateX(-50%); }
         }
 
         /* Hero */
@@ -311,7 +340,29 @@
             <li><a href="about.html">עלינו</a></li>
             <li><a href="free-portal.html">ספריית הקורסים</a></li>
             <li><a href="training.html">הכשרת מטפלים</a></li>
-            <li><a href="project-lobby.html" class="active">מיזם חברתי</a></li>
+            <li class="nav-switcher">
+                <button class="nav-switcher-trigger" id="navSwitcherTrigger" onclick="this.classList.toggle('open');document.getElementById('navSwitcherDropdown').classList.toggle('open');">
+                    <i class="fa-solid fa-circle nav-switcher-dot"></i>
+                    מיזם חברתי
+                    <i class="fa-solid fa-chevron-up nav-switcher-chevron"></i>
+                </button>
+                <div class="nav-switcher-dropdown" id="navSwitcherDropdown">
+                    <a href="project-lobby.html" class="nav-switcher-item active">
+                        <i class="fa-solid fa-check-circle"></i>
+                        <div>
+                            <span class="nav-switcher-name">המיזם החברתי</span>
+                            <span class="nav-switcher-meta">בקשה לקבלת טיפול</span>
+                        </div>
+                    </a>
+                    <a href="../landing-therapist.html" class="nav-switcher-item">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                        <div>
+                            <span class="nav-switcher-name">אני רוצה להתנדב כמטפל</span>
+                            <span class="nav-switcher-meta">שאלון הצטרפות למטפלים</span>
+                        </div>
+                    </a>
+                </div>
+            </li>
             <div class="mobile-cta-group">
                 <a href="login.html" class="mobile-cta primary">
                     <i class="fa-solid fa-right-to-bracket"></i>
@@ -335,16 +386,6 @@
             <div class="hero-bg-layer"></div>
         </div>
         <div class="hero-content">
-            <!-- Page Switcher -->
-            <div class="page-switcher">
-                <a href="project-lobby.html" class="active">
-                    <i class="fa-solid fa-heart-pulse"></i> אני צריך/ה טיפול
-                </a>
-                <a href="../landing-therapist.html">
-                    <i class="fa-solid fa-hand-holding-heart"></i> אני רוצה להתנדב כמטפל
-                </a>
-            </div>
-
             <h1>טיפול נפשי הוא זכות בסיסית,<br>לא מותרות.</h1>
             <p class="hero-subtitle">
                 מיזם חברתי המיועד ללוחמים, נפגעי נובה ומי שנחשף לאירועי ה-7 באוקטובר ומלחמת חרבות ברזל —
@@ -462,6 +503,15 @@
         window.addEventListener('scroll', () => {
             document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
         }, { passive: true });
+
+        // Close nav switcher on outside click
+        document.addEventListener('click', (e) => {
+            const switcher = document.querySelector('.nav-switcher');
+            if (switcher && !switcher.contains(e.target)) {
+                document.getElementById('navSwitcherTrigger')?.classList.remove('open');
+                document.getElementById('navSwitcherDropdown')?.classList.remove('open');
+            }
+        });
 
         // Mobile Menu
         let menuOpen = false;

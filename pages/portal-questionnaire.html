@@ -980,15 +980,22 @@
 
                 // 3. Browser CAPI calls (fallback — AdBlock may block these)
                 if (window.sendEventToCAPI) {
+                    const utmData = window.getUtmData ? window.getUtmData() : {};
                     window.sendEventToCAPI('CompleteRegistration', capiUserData, {
                         content_name: 'portal_questionnaire',
-                        event_id: registrationEventId
+                        event_id: registrationEventId,
+                        utm_source: utmData.utm_source || null,
+                        utm_medium: utmData.utm_medium || null,
+                        utm_campaign: utmData.utm_campaign || null
                     });
                     // QualifiedLead browser fallback — uses SAME event_id as DB trigger
                     window.sendEventToCAPI('QualifiedLead', capiUserData, {
                         content_name: 'questionnaire_complete',
                         source: 'portal_questionnaire',
-                        event_id: qualifiedLeadEventId
+                        event_id: qualifiedLeadEventId,
+                        utm_source: utmData.utm_source || null,
+                        utm_medium: utmData.utm_medium || null,
+                        utm_campaign: utmData.utm_campaign || null
                     });
                 }
             } catch (capiErr) {

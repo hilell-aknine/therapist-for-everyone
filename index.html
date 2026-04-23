@@ -928,9 +928,10 @@
                 const { data, error } = await sb.rpc('public_site_stats');
                 if (!error && data) {
                     const el = (id) => document.getElementById(id);
-                    if (data.completed_lessons > 0) el('hero-lessons').dataset.count = data.completed_lessons;
-                    if (data.total_watch_hours > 0) el('hero-hours').dataset.count = data.total_watch_hours;
-                    if (data.registered_learners > 0) el('hero-learners').dataset.count = data.registered_learners;
+                    const setMax = (id, val) => { const e = el(id); if (val > parseInt(e.dataset.count)) e.dataset.count = val; };
+                    setMax('hero-lessons', data.completed_lessons || 0);
+                    setMax('hero-hours', data.total_watch_hours || 0);
+                    setMax('hero-learners', data.registered_learners || 0);
                 }
             } catch (e) { /* stats stay at 0 — honest */ }
         })();

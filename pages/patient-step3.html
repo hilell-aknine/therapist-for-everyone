@@ -411,12 +411,12 @@
                 <h3 class="section-title"><i class="fa-solid fa-heart-pulse"></i> רקע רפואי</h3>
 
                 <div class="form-group">
-                    <label for="medical_issues">האם יש לך בעיות רפואיות?</label>
-                    <textarea name="medical_issues" id="medical_issues" placeholder="אם כן, פרט/י..." autocomplete="off"></textarea>
+                    <label for="medical_issues">האם יש לך בעיות רפואיות? <span class="required">*</span></label>
+                    <textarea name="medical_issues" id="medical_issues" required placeholder="אם אין — כתוב/י 'אין'. אם כן — פרט/י..." autocomplete="off"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>האם אתה לוקח/לקחת תרופות פסיכיאטריות?</label>
+                    <label>האם אתה לוקח/לקחת תרופות פסיכיאטריות? <span class="required">*</span></label>
                     <div class="radio-group">
                         <label class="radio-option"><input type="radio" name="psych_meds" value="yes"><span>כן</span></label>
                         <label class="radio-option"><input type="radio" name="psych_meds" value="no"><span>לא</span></label>
@@ -430,7 +430,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>האם אתה מטופל במסגרת טיפולית נוספת?</label>
+                    <label>האם אתה מטופל במסגרת טיפולית נוספת? <span class="required">*</span></label>
                     <div class="radio-group">
                         <label class="radio-option"><input type="radio" name="other_treatment" value="yes"><span>כן</span></label>
                         <label class="radio-option"><input type="radio" name="other_treatment" value="no"><span>לא</span></label>
@@ -536,6 +536,15 @@
 
             if (!whyNow || whyNow.length < 5) { showToast('יש לענות על השאלה "למה דווקא עכשיו"'); return; }
             if (!successDef || successDef.length < 5) { showToast('יש להגדיר מה הצלחה מבחינתך'); return; }
+
+            const medicalIssues = document.getElementById('medical_issues').value.trim();
+            if (!medicalIssues || medicalIssues.length < 2) { showToast('יש לענות על שאלת הבעיות הרפואיות'); return; }
+
+            const medsChecked = document.querySelector('input[name="psych_meds"]:checked');
+            if (!medsChecked) { showToast('יש לענות האם אתה לוקח תרופות פסיכיאטריות'); return; }
+
+            const treatChecked = document.querySelector('input[name="other_treatment"]:checked');
+            if (!treatChecked) { showToast('יש לענות האם אתה מטופל במסגרת נוספת'); return; }
 
             const saved = JSON.parse(localStorage.getItem('patient_form_data') || '{}');
 

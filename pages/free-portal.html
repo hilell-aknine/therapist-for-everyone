@@ -28,6 +28,7 @@
         }catch(e){}})();
     </script>
     <!-- Early auth redirect — runs before page renders -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-config.js"></script>
     <script>
@@ -1218,6 +1219,8 @@
                         </label>
                     </div>
 
+                    <div id="turnstile-container" style="margin: 1rem 0; display: flex; justify-content: center;"></div>
+
                     <button type="submit" class="reg-submit" id="regSubmitBtn">
                         <span class="btn-text">אני מוכן!</span>
                         <div class="spinner" id="regSpinner"></div>
@@ -1347,6 +1350,23 @@
         }
 
         // Generate a secure random password (user never sees it — login via Google/magic link)
+        // ========== Turnstile (anti-bot) ==========
+        window.onloadTurnstileCallback = function() {
+            const siteKey = window.SUPABASE_CONFIG?.turnstileSiteKey;
+            if (!siteKey) { console.warn('Turnstile: site key not configured'); return; }
+            const container = document.getElementById('turnstile-container');
+            if (container) {
+                turnstile.render(container, { sitekey: siteKey, appearance: 'interaction-only', theme: 'light' });
+            }
+        };
+
+        function getTurnstileToken() {
+            if (typeof turnstile === 'undefined') return null;
+            const container = document.getElementById('turnstile-container');
+            if (!container) return null;
+            return turnstile.getResponse(container);
+        }
+
         function generateSecurePassword() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
             const arr = new Uint8Array(24);
@@ -1369,6 +1389,13 @@
 
             if (!/^0[2-9]\d{7,8}$/.test(phone)) {
                 showRegError('נא להזין מספר טלפון ישראלי תקין (למשל: 0541234567)');
+                return;
+            }
+
+            // Turnstile anti-bot verification
+            const turnstileToken = getTurnstileToken();
+            if (!turnstileToken) {
+                showRegError('נא לאמת שאתה לא רובוט');
                 return;
             }
 
@@ -1414,6 +1441,30 @@
                         method: 'email_form',
                         currency: 'ILS',
                         value: 0
+                    });
+                }
+
+                // Meta Pixel: track signup as Lead (browser-side)
+                const leadEventId = window.newCapiEventId ? window.newCapiEventId() : null;
+                if (typeof fbq === 'function' && leadEventId) {
+                    fbq('track', 'Lead', { content_name: 'free_portal_signup' }, { eventID: leadEventId });
+                }
+
+                // CAPI: server-side Lead event with UTM data for attribution
+                if (window.sendEventToCAPI && leadEventId) {
+                    const utmData = window.getUtmData ? window.getUtmData() : {};
+                    window.sendEventToCAPI('Lead', {
+                        email: email,
+                        phone: phone,
+                        first_name: fullName.split(' ')[0] || fullName,
+                        last_name: fullName.split(' ').slice(1).join(' ') || null,
+                        external_id: data.user?.id || null
+                    }, {
+                        event_id: leadEventId,
+                        content_name: 'free_portal_signup',
+                        utm_source: utmData.utm_source || null,
+                        utm_medium: utmData.utm_medium || null,
+                        utm_campaign: utmData.utm_campaign || null
                     });
                 }
 

@@ -30,6 +30,8 @@
     <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
     <link rel="stylesheet" href="../css/theme.css">
     <script src="../js/theme-toggle.js" defer></script>
+    <!-- YouTube IFrame API: enables Space → play/pause + Ctrl+S → insert timestamp into notes -->
+    <script src="https://www.youtube.com/iframe_api" async></script>
     <style>
         :root {
             /* Brand Colors */
@@ -323,42 +325,103 @@
         }
         .header-intro-btn i { font-size: 0.75rem; color: var(--dusty-aqua); }
 
+        /* Primary continue CTA — replaces gold as the loud button */
+        .header-continue-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.45rem 0.9rem 0.45rem 0.75rem;
+            border-radius: var(--t-btn-radius, 10px);
+            background: linear-gradient(135deg, #003B46 0%, #00606B 100%);
+            white-space: nowrap;
+            transition: all 0.2s;
+            box-shadow: 0 2px 10px rgba(0, 59, 70, 0.25);
+            cursor: pointer;
+            border: none;
+            max-width: 280px;
+            overflow: hidden;
+        }
+        .header-continue-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 59, 70, 0.35);
+        }
+        .header-continue-cta i {
+            color: #D4AF37;
+            font-size: 0.95rem;
+        }
+        .header-continue-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.15;
+            min-width: 0;
+        }
+        .header-continue-label {
+            font-size: 0.72rem;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+        .header-continue-lesson {
+            font-size: 0.85rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+        }
+        @media (max-width: 1024px) {
+            .header-continue-cta { max-width: 200px; padding: 0.4rem 0.7rem; }
+            .header-continue-lesson { max-width: 140px; font-size: 0.8rem; }
+            .header-continue-label { font-size: 0.68rem; }
+        }
+        @media (max-width: 768px) {
+            .header-continue-cta { display: none; }
+        }
+
+        /* Training CTA — demoted to outline secondary */
         .header-training-cta {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: #003B46;
+            color: var(--gold, #D4AF37);
             text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 700;
-            padding: 0.45rem 1rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.4rem 0.85rem;
             border-radius: var(--t-btn-radius, 10px);
-            background: linear-gradient(135deg, #D4AF37, #c9a227);
+            background: transparent;
+            border: 1.5px solid var(--gold, #D4AF37);
             white-space: nowrap;
             transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(212,175,55,0.3);
         }
         .header-training-cta:hover {
+            background: rgba(212,175,55,0.08);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(212,175,55,0.5);
         }
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .header-training-cta span { display: none; }
-            .header-training-cta { padding: 0.4rem 0.6rem; font-size: 1rem; }
+            .header-training-cta { padding: 0.4rem 0.55rem; font-size: 0.95rem; }
         }
+        /* Back-to-site — icon-only on desktop too (was text+icon) */
         .back-to-site {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            gap: 0;
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 500;
-            padding: 0.35rem 0.9rem;
+            padding: 0.4rem 0.55rem;
             border-radius: var(--t-btn-radius, 10px);
             transition: all 0.2s;
             border: 1px solid var(--border-default);
             white-space: nowrap;
+        }
+        .back-to-site span {
+            display: none;
         }
         .back-to-site:hover {
             background: var(--bg-secondary);
@@ -757,6 +820,38 @@
             letter-spacing: 0.5px;
         }
 
+        /* Jump-to-current pill — appears when a lesson is active */
+        .sidebar-jump-current {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0.5rem 1.25rem 0.25rem;
+            padding: 0.4rem 0.85rem;
+            background: rgba(47, 133, 146, 0.12);
+            color: var(--muted-teal, #00606B);
+            border: 1px solid rgba(47, 133, 146, 0.25);
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sidebar-jump-current:hover {
+            background: rgba(47, 133, 146, 0.2);
+            border-color: var(--muted-teal, #00606B);
+            transform: translateY(-1px);
+        }
+        .sidebar-jump-current i {
+            font-size: 0.7rem;
+        }
+        @keyframes lessonPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.5); }
+            50%      { box-shadow: 0 0 0 6px rgba(212,175,55,0); }
+        }
+        .lesson-item.lesson-pulse {
+            animation: lessonPulse 1s ease-out;
+        }
+
         /* Syllabus */
         .syllabus {
             flex: 1;
@@ -919,6 +1014,249 @@
         .video-section {
             flex: 1;
             padding: 1.5rem 2rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
+            transition: grid-template-columns 0.3s ease;
+            position: relative;
+        }
+        .video-section.notes-open { grid-template-columns: 2fr minmax(320px, 1fr); }
+        .lesson-split-main { position: relative; min-width: 0; }
+
+        /* Floating "Show notes" toggle button — sits above the video, top-right of split-main */
+        .notes-toggle-btn {
+            position: absolute;
+            top: -10px;
+            left: 8px;          /* RTL: visually left = end of LTR, opposite side from progress bar */
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.85rem;
+            background: var(--t-bg-card, #fff);
+            border: 1px solid var(--border-default, #e5e7eb);
+            color: var(--text-primary, #003B46);
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(15,40,48,0.08);
+            transition: all 0.2s;
+        }
+        .notes-toggle-btn:hover {
+            background: rgba(212,175,55,0.1);
+            border-color: var(--gold, #D4AF37);
+            transform: translateY(-1px);
+        }
+        .notes-toggle-btn i { color: var(--gold, #D4AF37); }
+        @media (max-width: 1280px) {
+            /* On smaller viewports, fall back to the notes tab — hide both side panel and toggle */
+            .notes-toggle-btn { display: none; }
+            .lesson-split-notes { display: none !important; }
+            .video-section.notes-open { grid-template-columns: 1fr; }
+        }
+
+        /* Side notes panel */
+        .lesson-split-notes {
+            display: none;
+            flex-direction: column;
+            gap: 0.6rem;
+            background: var(--t-bg-card, #fff);
+            border: 1px solid var(--border-default, #e5e7eb);
+            border-radius: 14px;
+            padding: 0.95rem 1rem 0.85rem;
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            max-height: calc(100vh - 100px);
+        }
+        .video-section.notes-open .lesson-split-notes { display: flex; }
+        .lsn-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.55rem;
+            border-bottom: 1px solid var(--border-default, #e5e7eb);
+        }
+        .lsn-header h4 {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-primary, #003B46);
+            margin: 0;
+            flex: 1;
+        }
+        .lsn-header h4 i { color: var(--gold, #D4AF37); margin-left: 0.4rem; }
+        .lsn-close {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            line-height: 1;
+            color: var(--text-secondary, #5A6B70);
+            cursor: pointer;
+            padding: 0.1rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .lsn-close:hover { background: var(--bg-secondary, #FAF8F4); color: var(--text-primary, #003B46); }
+        .lsn-textarea {
+            width: 100%;
+            min-height: 50vh;
+            max-height: 65vh;
+            resize: none;
+            padding: 0.75rem 0.85rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-default, #e5e7eb);
+            background: var(--t-bg-card, #fff);
+            color: var(--text-primary, #003B46);
+            font-family: inherit;
+            font-size: 0.92rem;
+            line-height: 1.55;
+            box-sizing: border-box;
+        }
+        .lsn-textarea:focus {
+            outline: none;
+            border-color: var(--gold, #D4AF37);
+            box-shadow: 0 0 0 3px rgba(212,175,55,0.15);
+        }
+        .lsn-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+        }
+        .lsn-footer-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .lsn-tip {
+            font-size: 0.72rem;
+            color: var(--text-secondary, #5A6B70);
+            border-top: 1px dashed var(--border-default, #e5e7eb);
+            padding-top: 0.55rem;
+            line-height: 1.4;
+        }
+        .lsn-tip kbd {
+            background: var(--bg-secondary, #FAF8F4);
+            border: 1px solid var(--border-default, #e5e7eb);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 0.7rem;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+        }
+        /* Hide notes tab on desktop (notes available via side panel toggle instead) */
+        @media (min-width: 1281px) {
+            #notesTabBtn { display: none; }
+        }
+
+        /* ===== Focus Mode (hides header + sidebar, leaves video + notes) ===== */
+        body.focus-mode .course-header,
+        body.focus-mode .sidebar,
+        body.focus-mode .feedback-fab,
+        body.focus-mode .mobile-toggle,
+        body.focus-mode .share-banner { display: none !important; }
+        body.focus-mode .lms-container { padding-top: 0 !important; }
+        body.focus-mode .main-content { padding: 0 !important; }
+        body.focus-mode .video-section { padding: 1rem 1.5rem; }
+        body.focus-mode .notes-toggle-btn { top: 8px; }
+
+        .focus-mode-toggle {
+            position: absolute;
+            top: -10px;
+            left: auto;
+            right: 8px;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--t-bg-card, #fff);
+            border: 1px solid var(--border-default, #e5e7eb);
+            color: var(--text-primary, #003B46);
+            border-radius: 999px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(15,40,48,0.08);
+            transition: all 0.2s;
+        }
+        .focus-mode-toggle:hover {
+            background: rgba(0,59,70,0.08);
+            border-color: var(--deep-petrol, #003B46);
+            transform: translateY(-1px);
+        }
+        @media (max-width: 1024px) {
+            .focus-mode-toggle { display: none; }
+        }
+
+        .keyboard-hint {
+            margin-top: 0.6rem;
+            padding: 0.45rem 0.85rem;
+            background: var(--bg-secondary, #FAF8F4);
+            border: 1px dashed var(--border-default, #e5e7eb);
+            border-radius: 8px;
+            color: var(--text-secondary, #5A6B70);
+            font-size: 0.74rem;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .keyboard-hint kbd {
+            background: var(--t-bg-card, #fff);
+            border: 1px solid var(--border-default, #e5e7eb);
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 0.72rem;
+            color: var(--text-primary, #003B46);
+            margin: 0 2px;
+        }
+        @media (max-width: 1024px) {
+            .keyboard-hint { display: none; }
+        }
+
+        /* ===== Lesson End Panel: mark-complete CTA + auto-track tip ===== */
+        .lesson-end-panel {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.8rem;
+            padding: 0.85rem 1.1rem;
+            background: var(--t-bg-card, #fff);
+            border: 1px solid var(--border-default, #e5e7eb);
+            border-radius: 12px;
+        }
+        .lesson-end-mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.55rem 1.1rem;
+            background: var(--bg-secondary, #FAF8F4);
+            color: var(--text-primary, #003B46);
+            border: 1px solid var(--border-default, #e5e7eb);
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .lesson-end-mark:hover { transform: translateY(-1px); border-color: var(--gold, #D4AF37); }
+        .lesson-end-mark.completed {
+            background: var(--success, #3FB950);
+            color: #fff;
+            border-color: var(--success, #3FB950);
+        }
+        .lesson-end-mark.completed i { color: #fff; }
+        .lesson-end-tip {
+            font-size: 0.78rem;
+            color: var(--text-secondary, #5A6B70);
+            line-height: 1.4;
+        }
+        @media (max-width: 600px) {
+            .lesson-end-panel { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+            .lesson-end-tip { font-size: 0.72rem; }
         }
 
         .video-wrapper {
@@ -2832,6 +3170,357 @@
         .wd-banner p { font-size: 0.95rem; opacity: 0.85; }
         .wd-content { padding: 1.2rem; display: flex; flex-direction: column; gap: 1.2rem; }
 
+        /* ===== Continue Learning Hero (replaces top banner on welcome dashboard) ===== */
+        .wd-continue-hero {
+            position: relative;
+            background:
+                radial-gradient(circle at 88% 20%, rgba(212,175,55,0.12) 0%, transparent 45%),
+                linear-gradient(135deg, #003B46 0%, #005C66 60%, #00606B 100%);
+            color: #fff;
+            padding: 1.6rem 1.4rem;
+            border-radius: 0 0 18px 18px;
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 1.4rem;
+            align-items: center;
+            overflow: hidden;
+        }
+        .wd-continue-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 30h60M30 0v60' stroke='rgba(255,255,255,0.04)' stroke-width='1'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        .wd-hero-thumb {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: rgba(0,0,0,0.25);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            cursor: pointer;
+        }
+        .wd-hero-thumb img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0.85;
+            transition: opacity 0.2s, transform 0.3s;
+        }
+        .wd-hero-thumb:hover img { opacity: 1; transform: scale(1.04); }
+        .wd-hero-thumb-play {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 54px; height: 54px;
+            border-radius: 50%;
+            background: var(--gold, #D4AF37);
+            color: #003B46;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+        }
+        .wd-hero-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .wd-hero-label {
+            font-size: 0.72rem;
+            opacity: 0.75;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .wd-hero-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            line-height: 1.25;
+            margin: 0;
+            color: #fff;
+        }
+        .wd-hero-meta {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 0.1rem;
+        }
+        .wd-hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            margin-top: 0.85rem;
+            padding: 0.7rem 1.4rem;
+            background: linear-gradient(135deg, #D4AF37 0%, #E6C65A 100%);
+            color: #003B46;
+            border: none;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(212,175,55,0.35);
+            transition: all 0.2s;
+            align-self: flex-start;
+        }
+        .wd-hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212,175,55,0.5);
+        }
+        .wd-hero-progress {
+            margin-top: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            font-size: 0.78rem;
+            opacity: 0.85;
+        }
+        .wd-hero-progress-bar {
+            height: 5px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .wd-hero-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #D4AF37, #E6C65A);
+            border-radius: 999px;
+            transition: width 0.6s ease;
+        }
+        @media (max-width: 768px) {
+            .wd-continue-hero { grid-template-columns: 1fr; padding: 1.2rem; }
+            .wd-hero-thumb { max-width: 280px; margin: 0 auto; }
+            .wd-hero-title { font-size: 1.15rem; }
+        }
+
+        /* ===== Quick Stats Row ===== */
+        .wd-stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.8rem;
+        }
+        .wd-stat-card {
+            background: var(--t-bg-card, #fff);
+            border: 1px solid var(--t-border, #e5e7eb);
+            border-radius: 12px;
+            padding: 0.9rem 0.7rem;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .wd-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(15,40,48,0.08);
+        }
+        .wd-stat-icon {
+            font-size: 1.4rem;
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+        .wd-stat-value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-primary, #003B46);
+            line-height: 1.1;
+        }
+        .wd-stat-label {
+            font-size: 0.72rem;
+            color: var(--text-secondary, #5A6B70);
+            margin-top: 0.15rem;
+            font-weight: 500;
+        }
+        @media (max-width: 600px) {
+            .wd-stats-row { grid-template-columns: 1fr; }
+        }
+
+        /* ===== Compact bulletin (collapsed default) ===== */
+        .wd-bulletin-card .wd-bulletin-toggle {
+            margin-right: auto;
+            background: none;
+            border: none;
+            color: var(--muted-teal, #00606B);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+        .wd-bulletin-card .wd-bulletin-toggle:hover { background: rgba(47,133,146,0.08); }
+        .wd-bulletin-card.collapsed .wd-bulletin-messages { min-height: 28px; max-height: 32px; overflow: hidden; }
+        .wd-bulletin-card.collapsed .wd-bulletin-dots { display: none; }
+        .wd-bulletin-card.collapsed .wd-bulletin-toggle::after { content: " ↓"; }
+        .wd-bulletin-card:not(.collapsed) .wd-bulletin-toggle::after { content: " ↑"; }
+
+        /* ===== Compact intro video card (after first watch) ===== */
+        .wd-intro-watched-btn {
+            margin-top: 0.7rem;
+            background: none;
+            border: 1px dashed var(--border-default, #e5e7eb);
+            color: var(--text-secondary, #5A6B70);
+            font-size: 0.78rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .wd-intro-watched-btn:hover {
+            border-color: var(--muted-teal, #00606B);
+            color: var(--muted-teal, #00606B);
+        }
+        .wd-intro-mini {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            background: var(--t-bg-card, #fff);
+            border: 1px solid var(--t-border, #e5e7eb);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary, #5A6B70);
+        }
+        .wd-intro-mini-btn {
+            margin-right: auto;
+            background: rgba(47,133,146,0.1);
+            color: var(--muted-teal, #00606B);
+            border: none;
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ===== Compact affiliate card on welcome dashboard ===== */
+        .wd-affiliate-compact {
+            background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(47,133,146,0.06) 100%);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .wd-affiliate-compact .wd-card-icon { background: rgba(212,175,55,0.15); color: var(--gold, #D4AF37); }
+        .wd-affiliate-compact h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary, #003B46);
+            margin: 0;
+        }
+        .wd-affiliate-compact p {
+            font-size: 0.82rem;
+            color: var(--text-secondary, #5A6B70);
+            margin: 0.15rem 0 0;
+        }
+        .wd-affiliate-compact a {
+            margin-right: auto;
+            background: var(--gold, #D4AF37);
+            color: #003B46;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 0.45rem 0.95rem;
+            border-radius: 999px;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .wd-affiliate-compact a:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,175,55,0.3); }
+
+        /* ===== Smaller, friendlier leaderboard podium ===== */
+        .wd-leaderboard-podium {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .wd-podium-spot {
+            text-align: center;
+            padding: 0.7rem 0.4rem;
+            background: var(--bg-secondary, #FAF8F4);
+            border-radius: 10px;
+            border: 1px solid var(--border-default, #e5e7eb);
+        }
+        .wd-podium-medal { font-size: 1.4rem; line-height: 1; }
+        .wd-podium-name {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-primary, #003B46);
+            margin-top: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .wd-podium-count {
+            font-size: 0.72rem;
+            color: var(--text-secondary, #5A6B70);
+            margin-top: 0.1rem;
+        }
+        .wd-leaderboard-thanks {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary, #5A6B70);
+            margin-top: 0.6rem;
+        }
+
+        /* ===== Community empty state ===== */
+        .community-empty {
+            text-align: center;
+            padding: 2.2rem 1rem;
+            background: var(--t-bg-card, #fff);
+            border: 1px dashed var(--t-border, #e5e7eb);
+            border-radius: 14px;
+        }
+        .community-empty-icon {
+            font-size: 2.4rem;
+            margin-bottom: 0.4rem;
+        }
+        .community-empty h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary, #003B46);
+            margin: 0 0 0.4rem;
+        }
+        .community-empty p {
+            font-size: 0.88rem;
+            color: var(--text-secondary, #5A6B70);
+            margin: 0 0 1.1rem;
+        }
+        .community-suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .community-suggestion-chips button {
+            background: var(--bg-secondary, #FAF8F4);
+            border: 1px solid var(--border-default, #e5e7eb);
+            color: var(--text-primary, #003B46);
+            padding: 0.45rem 0.95rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .community-suggestion-chips button:hover {
+            background: rgba(47,133,146,0.1);
+            border-color: var(--muted-teal, #00606B);
+            color: var(--muted-teal, #00606B);
+            transform: translateY(-1px);
+        }
+        .community-empty .community-post-btn {
+            background: var(--gold, #D4AF37);
+            color: #003B46;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .community-empty .community-post-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,175,55,0.3); }
+
         .wd-card {
             background: var(--t-bg-card, #fff);
             border: 1px solid var(--t-border, #e5e7eb);
@@ -3200,7 +3889,7 @@
             .wd-content { padding: 0.8rem; gap: 0.8rem; }
         }
 
-        /* ===== Feedback FAB ===== */
+        /* ===== Feedback FAB (compact: icon-only on desktop too, per proposed UX) ===== */
         .feedback-fab {
             position: fixed;
             bottom: 1.5rem;
@@ -3208,24 +3897,28 @@
             z-index: 190;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.7rem 1.2rem;
+            justify-content: center;
+            gap: 0;
+            padding: 0;
+            width: 44px;
+            height: 44px;
             background: var(--gradient-gold);
             color: var(--sidebar-dark);
             border: none;
-            border-radius: 25px;
+            border-radius: 50%;
             font-family: inherit;
-            font-size: 0.85rem;
+            font-size: 0;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 16px var(--gold-glow);
+            box-shadow: 0 4px 14px var(--gold-glow);
             transition: all 0.3s;
         }
+        .feedback-fab span { display: none; }
         .feedback-fab:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 24px var(--gold-glow);
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px var(--gold-glow);
         }
-        .feedback-fab i { font-size: 1.1rem; }
+        .feedback-fab i { font-size: 1rem; }
 
         @media (max-width: 1024px) {
             .feedback-fab span { display: none; }
@@ -3495,11 +4188,19 @@
 
         <!-- LEFT GROUP: Actions + Auth -->
         <div class="header-left">
+            <!-- Primary CTA: continue to next lesson (shown when user has unfinished lessons) -->
+            <button type="button" id="headerContinueBtn" class="header-continue-cta" onclick="continueToNextLesson()" style="display:none;">
+                <i class="fa-solid fa-play"></i>
+                <span class="header-continue-text">
+                    <span class="header-continue-label">המשך בשיעור הבא</span>
+                    <span class="header-continue-lesson" id="headerContinueLessonName">—</span>
+                </span>
+            </button>
             <a href="training.html" class="header-training-cta">
                 <i class="fa-solid fa-graduation-cap"></i>
                 <span>לקבלת פרטים לתוכנית הכשרה</span>
             </a>
-            <a href="../index.html" class="back-to-site">
+            <a href="../index.html" class="back-to-site" title="חזרה לאתר" aria-label="חזרה לאתר">
                 <i class="fa-solid fa-arrow-right"></i>
                 <span>חזרה לאתר</span>
             </a>
@@ -3569,6 +4270,11 @@
                 </div>
             </div>
 
+            <button type="button" class="sidebar-jump-current" id="sidebarJumpCurrent" onclick="jumpToCurrentLesson()" style="display:none;">
+                <i class="fa-solid fa-arrow-down"></i>
+                <span>קפיצה לשיעור הנוכחי</span>
+            </button>
+
             <div class="sidebar-section-title">תוכן הקורס</div>
 
             <div id="searchNoResults" style="display:none; text-align:center; padding:2rem 1rem; color:var(--text-muted, #8b949e);">
@@ -3585,47 +4291,81 @@
         <main class="main-content">
             <!-- Welcome Dashboard (shown when "ברוך הבא" sidebar item is selected) -->
             <div id="welcomeDashboard">
-                <div class="wd-banner">
-                    <h2>ברוך הבא לפורטל</h2>
-                    <p>הכל במקום אחד — שיעורים, כלים ותוכן מקצועי</p>
+                <!-- Continue Learning hero (replaces old wd-banner) -->
+                <div class="wd-continue-hero" id="wdContinueHero">
+                    <div class="wd-hero-thumb" id="wdHeroThumb" onclick="continueToNextLesson()">
+                        <img id="wdHeroThumbImg" src="" alt="">
+                        <div class="wd-hero-thumb-play"><i class="fa-solid fa-play"></i></div>
+                    </div>
+                    <div class="wd-hero-content">
+                        <span class="wd-hero-label" id="wdHeroLabel">השיעור הבא שלך</span>
+                        <h2 class="wd-hero-title" id="wdHeroTitle">טוען...</h2>
+                        <div class="wd-hero-meta" id="wdHeroMeta">—</div>
+                        <button type="button" class="wd-hero-cta" id="wdHeroCta" onclick="continueToNextLesson()">
+                            <i class="fa-solid fa-play"></i>
+                            <span id="wdHeroCtaText">המשך ללמוד</span>
+                        </button>
+                        <div class="wd-hero-progress">
+                            <span id="wdHeroProgressText">השלמת 0 מתוך 51 שיעורים • 0%</span>
+                            <div class="wd-hero-progress-bar"><div class="wd-hero-progress-fill" id="wdHeroProgressFill" style="width:0%"></div></div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="wd-content">
-                    <!-- Bulletin Board -->
-                    <div class="wd-card">
+                    <!-- Quick Stats Row -->
+                    <div class="wd-stats-row">
+                        <div class="wd-stat-card">
+                            <div class="wd-stat-icon">🔥</div>
+                            <div class="wd-stat-value" id="wdStatStreak">0</div>
+                            <div class="wd-stat-label">ימי רצף</div>
+                        </div>
+                        <div class="wd-stat-card">
+                            <div class="wd-stat-icon">⏱️</div>
+                            <div class="wd-stat-value" id="wdStatTimeLeft">~16h</div>
+                            <div class="wd-stat-label">זמן שנותר</div>
+                        </div>
+                        <div class="wd-stat-card">
+                            <div class="wd-stat-icon">📚</div>
+                            <div class="wd-stat-value" id="wdStatModule">1/8</div>
+                            <div class="wd-stat-label">במודול הנוכחי</div>
+                        </div>
+                    </div>
+
+                    <!-- Bulletin Board (compact: collapsed by default, click to expand) -->
+                    <div class="wd-card wd-bulletin-card collapsed" id="wdBulletinCard">
                         <div class="wd-card-header">
                             <div class="wd-card-icon gold"><i class="fa-solid fa-bullhorn"></i></div>
                             <h3>לוח מודעות</h3>
+                            <button type="button" class="wd-bulletin-toggle" onclick="toggleWdBulletin()">ראה הכל</button>
                         </div>
                         <div class="wd-bulletin-messages" id="wdBulletinMessages" aria-live="polite"></div>
                         <div class="wd-bulletin-dots" id="wdBulletinDots" role="tablist" aria-label="ניווט הודעות"></div>
                     </div>
 
-                    <!-- Video Section -->
-                    <div class="wd-card">
-                        <div class="wd-card-header">
-                            <div class="wd-card-icon teal"><i class="fa-solid fa-circle-play"></i></div>
-                            <h3>איך הפלטפורמה עובדת?</h3>
-                        </div>
-                        <div class="wd-video-container" style="background: none; padding: 0; position: relative; cursor: pointer;" id="portalVideoContainer" onclick="this.innerHTML='<iframe width=\'100%\' style=\'aspect-ratio:16/9;border-radius:8px;border:none;\' src=\'https://www.loom.com/embed/74117931a4c94c6b87d6aaa2f253819c?autoplay=1\' title=\'איך הפלטפורמה עובדת\' allow=\'accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share\' allowfullscreen></iframe>';this.style.cursor='default'">
-                            <img src="../assets/portal-video-thumbnail.png" alt="איך הפורטל עובד?" style="width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:8px; display:block;" loading="lazy">
-                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:72px; height:72px; background:rgba(255,0,0,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center;">
-                                <div style="width:0; height:0; border-style:solid; border-width:14px 0 14px 24px; border-color:transparent transparent transparent #fff; margin-left:4px;"></div>
-                            </div>
-                        </div>
+                    <!-- Intro Video — full card OR mini banner depending on watched state -->
+                    <div id="wdIntroVideoSlot">
+                        <!-- Filled by renderIntroVideoCard() -->
                     </div>
 
-                    <!-- Ambassador Leaderboard -->
+                    <!-- Compact affiliate prompt (link to full ambassador dashboard) -->
+                    <div class="wd-affiliate-compact" id="wdAffiliateCompact">
+                        <div class="wd-card-icon gold" style="flex-shrink:0;"><i class="fa-solid fa-heart"></i></div>
+                        <div style="min-width:0;">
+                            <h4>קיבלת טוב? תחזיר טוב 🤍</h4>
+                            <p>שתפו את הפורטל עם חברים והצטרפו לתוכנית השותפים שלנו</p>
+                        </div>
+                        <a href="#ambassador" onclick="showAmbassadorProgram();return false;">למידע נוסף ←</a>
+                    </div>
+
+                    <!-- Ambassador Leaderboard (compact podium) -->
                     <div class="wd-card" id="wdLeaderboardCard" style="display:none;">
                         <div class="wd-card-header">
                             <div class="wd-card-icon gold"><i class="fa-solid fa-trophy"></i></div>
-                            <h3>מובילי השותפים החודש 🏆</h3>
+                            <h3>מובילי החודש</h3>
                         </div>
-                        <div id="wdLeaderboardContent" style="min-height:40px;"></div>
-                        <div style="text-align:center;margin-top:0.8rem;">
-                            <a href="#ambassador" onclick="showAmbassadorProgram();return false;" style="font-size:0.82rem;color:#D4AF37;text-decoration:none;border-bottom:1px solid rgba(212,175,55,0.3);padding-bottom:2px;">
-                                <i class="fa-solid fa-rocket"></i> לתוכנית השותפים
-                            </a>
-                        </div>
+                        <div class="wd-leaderboard-podium" id="wdLeaderboardContent"></div>
+                        <div class="wd-leaderboard-thanks">תודה על ההפצה 🤍</div>
                     </div>
 
                 </div>
@@ -3741,14 +4481,30 @@
                 <div id="communityLoading" style="text-align:center;padding:2rem;color:#65676b;display:none;">
                     <i class="fa-solid fa-circle-notch fa-spin"></i> טוען...
                 </div>
-                <div id="communityEmpty" style="text-align:center;padding:3rem;color:#65676b;display:none;">
-                    <i class="fa-solid fa-comments" style="font-size:2.5rem;opacity:0.3;display:block;margin-bottom:1rem;"></i>
-                    <p style="margin:0;font-size:1.05rem;font-weight:600;color:#1c1e21;">עדיין אין פוסטים</p>
-                    <p style="margin:0.3rem 0 0;font-size:0.88rem;">תהיו הראשונים לשתף!</p>
+                <div id="communityEmpty" class="community-empty" style="display:none;">
+                    <div class="community-empty-icon">💬</div>
+                    <h3>פתחו שיחה ראשונה בקהילה</h3>
+                    <p>בחרו רעיון להתחיל בו — או כתבו משהו משלכם בתיבה למעלה</p>
+                    <div class="community-suggestion-chips">
+                        <button type="button" onclick="startCommunityPost('insight')">💡 שתפו תובנה מהשיעור</button>
+                        <button type="button" onclick="startCommunityPost('question')">❓ שאלה על טכניקה</button>
+                        <button type="button" onclick="startCommunityPost('experience')">🎯 חוויה אישית</button>
+                    </div>
+                    <button type="button" class="community-post-btn" onclick="document.getElementById('communityPostInput')?.focus()">פרסם פוסט ←</button>
                 </div>
             </div>
 
             <div class="video-section" style="display:none;">
+                <div class="lesson-split-main">
+                <!-- Floating notes toggle (desktop ≥1280px). Tap on mobile uses the tab instead. -->
+                <button type="button" class="notes-toggle-btn" id="notesToggleBtn" onclick="toggleNotesPanel()" title="הצג/הסתר הערות (N)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span id="notesToggleLabel">הצג הערות</span>
+                </button>
+                <!-- Focus mode toggle (desktop ≥1024px) -->
+                <button type="button" class="focus-mode-toggle" id="focusModeToggle" onclick="toggleFocusMode()" title="מצב ריכוז (F)" aria-label="מצב ריכוז">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
                 <div class="video-wrapper">
                     <div class="video-placeholder" id="videoPlaceholder">
                         <i class="fa-solid fa-play-circle"></i>
@@ -3786,6 +4542,15 @@
                             <span class="btn-sublabel" id="prevLessonName"></span>
                         </span>
                     </button>
+                </div>
+
+                <!-- Lesson End Panel: explicit "mark as completed" toggle for users who want manual control -->
+                <div class="lesson-end-panel" id="lessonEndPanel">
+                    <button type="button" class="lesson-end-mark" id="lessonEndMarkBtn" onclick="toggleLessonComplete()">
+                        <i class="fa-solid fa-check"></i>
+                        <span id="lessonEndMarkText">סמן כהושלם</span>
+                    </button>
+                    <div class="lesson-end-tip" id="lessonEndTip">השיעור יסומן אוטומטית אחרי 45 שניות צפייה — תוכלו גם לסמן ידנית</div>
                 </div>
 
                 <!-- Social Share Strip -->
@@ -4001,6 +4766,30 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Keyboard shortcuts hint (desktop only) -->
+                <div class="keyboard-hint">
+                    💡 קיצורי מקלדת: <kbd>←</kbd> שיעור הבא · <kbd>→</kbd> שיעור קודם · <kbd>רווח</kbd> הפעל/עצור · <kbd>F</kbd> מצב ריכוז · <kbd>N</kbd> הערות
+                </div>
+                </div><!-- /.lesson-split-main -->
+
+                <!-- Side notes panel (desktop split-view; toggled by #notesToggleBtn) -->
+                <aside class="lesson-split-notes" id="lessonSplitNotes" aria-label="הערות אישיות">
+                    <div class="lsn-header">
+                        <h4><i class="fa-solid fa-pen-to-square"></i> הערות לשיעור</h4>
+                        <button type="button" class="lsn-close" onclick="toggleNotesPanel()" title="סגור (N)">×</button>
+                    </div>
+                    <textarea class="notes-textarea lsn-textarea" id="notesSideTextarea" placeholder="כתבו כאן את ההערות שלכם לשיעור זה..." oninput="handleSideNotesInput()"></textarea>
+                    <div class="lsn-footer">
+                        <span class="notes-saved-indicator" id="notesSideSavedIndicator"></span>
+                        <div class="lsn-footer-actions">
+                            <button class="btn-export-note" onclick="exportNotesToPDF()" title="ייצוא ל-PDF"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+                            <button class="btn-export-note" onclick="exportNotesToWord()" title="ייצוא ל-Word"><i class="fa-solid fa-file-word"></i> Word</button>
+                            <span id="notesSideCharCount" style="font-size:0.72rem;color:var(--text-secondary,#5A6B70);">0 תווים</span>
+                        </div>
+                    </div>
+                    <div class="lsn-tip">💡 <kbd>Ctrl+S</kbd> מכניס חותמת זמן של הוידאו · <kbd>N</kbd> סוגר את הפאנל</div>
+                </aside>
             </div>
         </main>
     </div>
@@ -5242,6 +6031,10 @@
             updateProgress();
             updateUI();
 
+            // Wire keyboard shortcuts (← → space F N Esc Ctrl+S) and bump streak counter
+            if (typeof setupKeyboardShortcuts === 'function') setupKeyboardShortcuts();
+            if (typeof getStudyStreak === 'function') getStudyStreak(); // Increment / refresh today's streak
+
             // Fallback: reveal auth buttons after 500ms even if auth check is slow
             setTimeout(() => {
                 document.querySelectorAll('[data-auth-pending]').forEach(el => el.removeAttribute('data-auth-pending'));
@@ -5766,12 +6559,26 @@
                 </div>
                 <hr class="welcome-sidebar-sep">
             `;
+            // Progressive disclosure: open only the currently-active module.
+            // Falls back to first module with unfinished lessons if no active lesson;
+            // falls back to module 0 for brand-new users.
+            let openModuleIndex = (typeof currentModuleIndex === 'number' && currentModuleIndex >= 0)
+                ? currentModuleIndex
+                : (function() {
+                    for (let i = 0; i < modules.length; i++) {
+                        for (let j = 0; j < modules[i].lessons.length; j++) {
+                            if (!completedLessons.includes(`${i}-${j}`)) return i;
+                        }
+                    }
+                    return 0;
+                })();
+
             syllabus.innerHTML = welcomeItem + modules.map((module, mIndex) => {
                 const completedInModule = module.lessons.filter((_, lIdx) =>
                     completedLessons.includes(`${mIndex}-${lIdx}`)
                 ).length;
                 return `
-                <div class="module ${mIndex === 0 ? 'open' : ''}" data-module="${mIndex}">
+                <div class="module ${mIndex === openModuleIndex ? 'open' : ''}" data-module="${mIndex}">
                     <div class="module-header" onclick="toggleModule(${mIndex})">
                         <div class="module-info">
                             <div class="module-number">${module.id}</div>
@@ -5812,6 +6619,70 @@
             module.classList.toggle('open');
         }
 
+        // ===== Next-lesson helpers (used by header continue button + welcome hero) =====
+        // Returns {m, l, lesson, isFirstStart, allDone} for the next lesson the user should watch.
+        // Logic: first uncompleted lesson scanning module-by-module. If everything is done,
+        // returns {allDone:true} so callers can render a celebration state.
+        function getNextLesson() {
+            for (let i = 0; i < modules.length; i++) {
+                for (let j = 0; j < modules[i].lessons.length; j++) {
+                    if (!completedLessons.includes(`${i}-${j}`)) {
+                        return {
+                            m: i,
+                            l: j,
+                            lesson: modules[i].lessons[j],
+                            isFirstStart: completedLessons.length === 0
+                        };
+                    }
+                }
+            }
+            return { allDone: true };
+        }
+
+        function continueToNextLesson() {
+            const next = getNextLesson();
+            if (next.allDone) {
+                // All done — bring user back to welcome dashboard so they see the celebration hero
+                showWelcomeDashboard();
+                return;
+            }
+            selectLesson(next.m, next.l, true);
+        }
+
+        // Updates the header "המשך בשיעור הבא" button text + visibility.
+        // Called from updateProgress() so it stays in sync with completion state.
+        function updateContinueButton() {
+            const btn = document.getElementById('headerContinueBtn');
+            const nameEl = document.getElementById('headerContinueLessonName');
+            if (!btn || !nameEl) return;
+            const next = getNextLesson();
+            if (next.allDone) {
+                btn.style.display = 'none';
+                return;
+            }
+            nameEl.textContent = next.lesson.title;
+            btn.style.display = 'inline-flex';
+        }
+
+        // ===== Jump to current lesson in sidebar =====
+        function jumpToCurrentLesson() {
+            if (typeof currentModuleIndex !== 'number' || currentModuleIndex < 0) return;
+            // Open the current module, collapse others
+            document.querySelectorAll('.module').forEach(m => {
+                if (m.getAttribute('data-module') === String(currentModuleIndex)) {
+                    m.classList.add('open');
+                } else {
+                    m.classList.remove('open');
+                }
+            });
+            const activeItem = document.querySelector(`.lesson-item[data-module="${currentModuleIndex}"][data-lesson="${currentLessonIndex}"]`);
+            if (activeItem) {
+                activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                activeItem.classList.add('lesson-pulse');
+                setTimeout(() => activeItem.classList.remove('lesson-pulse'), 1200);
+            }
+        }
+
         // ===== Select Lesson =====
         let _skipPushState = false; // Flag to avoid pushState on popstate/init
 
@@ -5825,6 +6696,183 @@
             { icon: 'fa-solid fa-gamepad', text: 'משחק תרגול מקצועי חדש — XP, רמות והישגים' },
             { icon: 'fa-solid fa-rocket', text: 'קיבלת טוב? תחזיר טוב 🤍 הצטרפו לתוכנית השותפים שלנו', gold: true, onclick: 'showAmbassadorProgram()' }
         ];
+
+        // ===== Continue Learning Hero (welcome dashboard top card) =====
+        function renderContinueHero() {
+            const titleEl = document.getElementById('wdHeroTitle');
+            const labelEl = document.getElementById('wdHeroLabel');
+            const metaEl  = document.getElementById('wdHeroMeta');
+            const ctaTxt  = document.getElementById('wdHeroCtaText');
+            const thumbEl = document.getElementById('wdHeroThumbImg');
+            const progTxt = document.getElementById('wdHeroProgressText');
+            const progFill= document.getElementById('wdHeroProgressFill');
+            if (!titleEl) return;
+            const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+            const completed = completedLessons.length;
+            const percent = totalLessons ? Math.round((completed / totalLessons) * 100) : 0;
+            const next = getNextLesson();
+
+            if (next.allDone) {
+                labelEl.textContent = 'סיימת את הקורס';
+                titleEl.textContent = 'כל הכבוד! 🎉 סיימת את כל 51 השיעורים';
+                metaEl.textContent  = 'מומלץ לחזור למודולים שהכי משכו אותך — או לעבור למשחק התרגול';
+                ctaTxt.textContent  = 'חזרה לסקירה';
+                thumbEl.src = `https://img.youtube.com/vi/${modules[0].lessons[0].id}/mqdefault.jpg`;
+            } else {
+                labelEl.textContent = next.isFirstStart ? 'בואו נתחיל' : 'השיעור הבא שלך';
+                titleEl.textContent = next.isFirstStart
+                    ? 'התחילו את המסע: ' + next.lesson.title
+                    : next.lesson.title;
+                const moduleData = modules[next.m];
+                metaEl.textContent = `מודול ${moduleData.id}: ${moduleData.title} • ${next.lesson.duration} דק׳`;
+                ctaTxt.textContent = next.isFirstStart ? 'התחל ללמוד' : 'המשך ללמוד';
+                thumbEl.src = `https://img.youtube.com/vi/${next.lesson.id}/mqdefault.jpg`;
+                thumbEl.onerror = function() { this.style.display = 'none'; };
+            }
+            progTxt.textContent = `השלמת ${completed} מתוך ${totalLessons} שיעורים • ${percent}%`;
+            progFill.style.width = percent + '%';
+        }
+
+        // ===== Study streak (localStorage; cross-device sync is out of scope for now) =====
+        function getStudyStreak() {
+            try {
+                const raw = localStorage.getItem('study_streak');
+                const today = new Date().toISOString().slice(0, 10);
+                let state = raw ? JSON.parse(raw) : { lastDate: null, days: 0 };
+                if (state.lastDate === today) {
+                    return state.days || 1;
+                }
+                if (state.lastDate) {
+                    const last = new Date(state.lastDate);
+                    const diffMs = new Date(today) - last;
+                    const diffDays = Math.round(diffMs / 86400000);
+                    state.days = (diffDays === 1) ? (state.days || 0) + 1 : 1;
+                } else {
+                    state.days = 1;
+                }
+                state.lastDate = today;
+                localStorage.setItem('study_streak', JSON.stringify(state));
+                return state.days;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function parseDuration(str) {
+            // "20:20" → 1220 seconds; "1:05:00" → 3900
+            if (!str) return 0;
+            const parts = String(str).split(':').map(n => parseInt(n, 10) || 0);
+            if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+            if (parts.length === 2) return parts[0] * 60 + parts[1];
+            return parts[0] || 0;
+        }
+
+        function getRemainingTime() {
+            let secs = 0;
+            modules.forEach((mod, mIdx) => {
+                mod.lessons.forEach((les, lIdx) => {
+                    if (!completedLessons.includes(`${mIdx}-${lIdx}`)) {
+                        secs += parseDuration(les.duration);
+                    }
+                });
+            });
+            const hours = Math.floor(secs / 3600);
+            const mins = Math.round((secs % 3600) / 60);
+            if (hours >= 1) return `~${hours}${mins >= 30 ? '.5' : ''}h`;
+            if (mins >= 1) return `${mins} דק׳`;
+            return '0';
+        }
+
+        function getCurrentModuleProgress() {
+            // Use the currently-active module if set; otherwise the first module with unfinished lessons
+            let mIdx = (typeof currentModuleIndex === 'number' && currentModuleIndex >= 0) ? currentModuleIndex : -1;
+            if (mIdx === -1) {
+                const next = getNextLesson();
+                if (next.allDone) {
+                    const last = modules.length - 1;
+                    return { idx: last + 1, label: `${modules[last].lessons.length}/${modules[last].lessons.length}` };
+                }
+                mIdx = next.m;
+            }
+            const mod = modules[mIdx];
+            const done = mod.lessons.filter((_, lIdx) => completedLessons.includes(`${mIdx}-${lIdx}`)).length;
+            return { idx: mIdx + 1, label: `${done}/${mod.lessons.length}` };
+        }
+
+        function updateQuickStats() {
+            const streakEl = document.getElementById('wdStatStreak');
+            const timeEl   = document.getElementById('wdStatTimeLeft');
+            const modEl    = document.getElementById('wdStatModule');
+            if (!streakEl) return;
+            streakEl.textContent = getStudyStreak();
+            timeEl.textContent = getRemainingTime();
+            const modProg = getCurrentModuleProgress();
+            modEl.textContent = modProg.label;
+        }
+
+        // ===== Bulletin collapsed-by-default toggle =====
+        function toggleWdBulletin() {
+            const card = document.getElementById('wdBulletinCard');
+            if (!card) return;
+            const wasCollapsed = card.classList.contains('collapsed');
+            card.classList.toggle('collapsed');
+            const btn = card.querySelector('.wd-bulletin-toggle');
+            if (btn) btn.textContent = wasCollapsed ? 'צמצם' : 'ראה הכל';
+        }
+
+        // ===== Intro video card: full on first visit, mini afterward =====
+        function renderIntroVideoCard() {
+            const slot = document.getElementById('wdIntroVideoSlot');
+            if (!slot) return;
+            const watched = localStorage.getItem('intro_video_watched') === '1';
+            if (watched) {
+                slot.innerHTML =
+                    '<div class="wd-intro-mini">' +
+                        '<i class="fa-solid fa-circle-info" style="color:var(--muted-teal,#00606B);"></i>' +
+                        '<span>צריכים תזכורת? סרטון ההסבר על הפלטפורמה זמין בכל זמן</span>' +
+                        '<button type="button" class="wd-intro-mini-btn" onclick="reopenIntroVideo()">פתח שוב</button>' +
+                    '</div>';
+            } else {
+                slot.innerHTML =
+                    '<div class="wd-card" id="wdIntroVideoCard">' +
+                        '<div class="wd-card-header">' +
+                            '<div class="wd-card-icon teal"><i class="fa-solid fa-circle-play"></i></div>' +
+                            '<h3>איך הפלטפורמה עובדת?</h3>' +
+                        '</div>' +
+                        '<div class="wd-video-container" style="background:none;padding:0;position:relative;cursor:pointer;" id="portalVideoContainer" onclick="playIntroVideo()">' +
+                            '<img src="../assets/portal-video-thumbnail.png" alt="איך הפורטל עובד?" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block;" loading="lazy">' +
+                            '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:72px;height:72px;background:rgba(255,0,0,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;">' +
+                                '<div style="width:0;height:0;border-style:solid;border-width:14px 0 14px 24px;border-color:transparent transparent transparent #fff;margin-left:4px;"></div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<button type="button" class="wd-intro-watched-btn" onclick="markIntroVideoWatched()">צפיתי ✓ (אל תציג שוב)</button>' +
+                    '</div>';
+            }
+        }
+        function playIntroVideo() {
+            const c = document.getElementById('portalVideoContainer');
+            if (!c) return;
+            c.innerHTML = '<iframe width="100%" style="aspect-ratio:16/9;border-radius:8px;border:none;" src="https://www.loom.com/embed/74117931a4c94c6b87d6aaa2f253819c?autoplay=1" title="איך הפלטפורמה עובדת" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share" allowfullscreen></iframe>';
+            c.style.cursor = 'default';
+        }
+        function markIntroVideoWatched() {
+            try { localStorage.setItem('intro_video_watched', '1'); } catch (e) {}
+            renderIntroVideoCard();
+        }
+        function reopenIntroVideo() {
+            try { localStorage.removeItem('intro_video_watched'); } catch (e) {}
+            renderIntroVideoCard();
+            // Auto-play after re-rendering the card
+            setTimeout(playIntroVideo, 50);
+        }
+
+        // ===== Community empty-state suggestion chips =====
+        function startCommunityPost(kind) {
+            // Open the community feed; the feed widget itself handles post composition.
+            // Pass a hint via a global so community-feed.js can pre-fill the textarea if it supports it.
+            window.__pendingCommunityPostKind = kind;
+            showCommunityFeed();
+        }
 
         function initWdBulletin() {
             const container = document.getElementById('wdBulletinMessages');
@@ -5869,22 +6917,20 @@
             try {
                 const data = await window.Referrals?.getLeaderboard(3);
                 if (!data || data.length === 0) {
-                    container.innerHTML = '<p style="text-align:center;font-size:0.9rem;color:var(--t-text-muted,#888);padding:1rem 0;">החודש רק התחיל — מי יוביל את הטבלה?</p>';
+                    // Compact friendly empty state
+                    container.innerHTML = '<p style="grid-column:1/-1;text-align:center;font-size:0.85rem;color:var(--text-secondary,#5A6B70);padding:0.5rem 0;">החודש רק התחיל — מי יוביל?</p>';
                     card.style.display = '';
                     wdLeaderboardLoaded = true;
                     return;
                 }
                 const medals = ['🥇', '🥈', '🥉'];
                 container.innerHTML = data.map(function(user, i) {
-                    var name = user.referrer_name || 'שותף/ה';
+                    var name = (user.referrer_name || 'שותף/ה').split(' ')[0];
                     var count = user.referral_count || 0;
-                    var isFirst = i === 0;
-                    return '<div style="display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0.4rem;' +
-                        (i < data.length - 1 ? 'border-bottom:1px solid var(--t-border,#e5e7eb);' : '') +
-                        (isFirst ? 'background:rgba(212,175,55,0.06);border-radius:8px;margin:-0.2rem -0.4rem;padding:0.8rem;' : '') + '">' +
-                        '<span style="font-size:1.3rem;">' + medals[i] + '</span>' +
-                        '<span style="flex:1;font-weight:' + (isFirst ? '700' : '500') + ';font-size:0.9rem;color:' + (isFirst ? '#8B6914' : 'var(--t-text,#333)') + ';">' + name + '</span>' +
-                        '<span style="font-size:0.82rem;color:var(--t-text-muted,#888);"><strong style="color:' + (isFirst ? '#D4AF37' : 'var(--t-text,#333)') + ';">' + count + '</strong> הפניות</span>' +
+                    return '<div class="wd-podium-spot">' +
+                        '<div class="wd-podium-medal">' + medals[i] + '</div>' +
+                        '<div class="wd-podium-name">' + name + '</div>' +
+                        '<div class="wd-podium-count">' + count + ' הפניות</div>' +
                         '</div>';
                 }).join('');
                 card.style.display = '';
@@ -5915,6 +6961,13 @@
             initWdBulletin();
             // Init leaderboard
             initWdLeaderboard();
+            // Render Continue Learning hero + quick stats + intro video card (proposed UX)
+            if (typeof renderContinueHero === 'function') renderContinueHero();
+            if (typeof updateQuickStats === 'function') updateQuickStats();
+            if (typeof renderIntroVideoCard === 'function') renderIntroVideoCard();
+            // Hide "jump to current lesson" pill when no lesson is active
+            const jumpBtn = document.getElementById('sidebarJumpCurrent');
+            if (jumpBtn) jumpBtn.style.display = 'none';
             // Close mobile sidebar if open
             const sidebar = document.getElementById('sidebar');
             if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
@@ -6248,14 +7301,26 @@
                 activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
-            // Open the module containing this lesson
-            const moduleEl = document.querySelector(`.module[data-module="${moduleIndex}"]`);
-            if (moduleEl && !moduleEl.classList.contains('open')) {
-                moduleEl.classList.add('open');
-            }
+            // Open the module containing this lesson; collapse all others (progressive disclosure)
+            document.querySelectorAll('.module').forEach(m => {
+                if (m.getAttribute('data-module') === String(moduleIndex)) {
+                    m.classList.add('open');
+                } else {
+                    m.classList.remove('open');
+                }
+            });
+
+            // Show the "jump to current lesson" pill in sidebar
+            const jumpBtn = document.getElementById('sidebarJumpCurrent');
+            if (jumpBtn) jumpBtn.style.display = 'flex';
 
             // Update nav buttons (top + bottom)
             updateNavButtons();
+
+            // Update lesson-end panel (mark-as-completed toggle)
+            if (typeof updateLessonEndPanel === 'function') updateLessonEndPanel();
+            // Restore notes side-panel state if user had it open
+            if (typeof restoreNotesPanelState === 'function') restoreNotesPanelState();
 
             // Close sidebar on mobile
             if (window.innerWidth <= 1024) {
@@ -6305,6 +7370,31 @@
             }
         }
 
+        // ===== YouTube IFrame API integration (for Space → play/pause + Ctrl+S → timestamp) =====
+        // The YT script is loaded async in <head>. Once ready, it calls onYouTubeIframeAPIReady().
+        window._ytApiReady = false;
+        window._ytPlayer   = null;
+        window.onYouTubeIframeAPIReady = function() {
+            window._ytApiReady = true;
+            tryAttachYtPlayer();
+        };
+        function tryAttachYtPlayer() {
+            if (!window._ytApiReady) return;
+            if (!window.YT || !window.YT.Player) return;
+            const iframe = document.getElementById('videoPlayer');
+            if (!iframe || !iframe.src) return;
+            // Re-create the player instance pointing at the same iframe element
+            try {
+                window._ytPlayer = new YT.Player('videoPlayer', {
+                    events: {
+                        onReady: () => { /* ready */ }
+                    }
+                });
+            } catch (e) {
+                console.warn('YT.Player attach failed (non-fatal):', e);
+            }
+        }
+
         // ===== Play Video (on thumbnail click) =====
         function playVideo() {
             if (!currentVideoId) return;
@@ -6322,9 +7412,12 @@
                 toastTimeout = setTimeout(showToast, 60000);
             }
 
-            // Load iframe
-            const embedUrl = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1`;
+            // Load iframe — `enablejsapi=1` lets us attach YT.Player after onload
+            const embedUrl = `https://www.youtube.com/embed/${currentVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
             player.src = embedUrl;
+
+            // Reset player ref — will be re-attached on onload
+            window._ytPlayer = null;
 
             // Handle iframe load errors
             player.onerror = () => {
@@ -6337,11 +7430,137 @@
                 loading.classList.remove('active');
                 player.style.display = 'block';
 
+                // Attach YT.Player if API is ready (otherwise onYouTubeIframeAPIReady will pick it up)
+                tryAttachYtPlayer();
+
                 // Mark as completed after watching (clear previous timer first)
                 if (completionTimer) clearTimeout(completionTimer);
                 const mIdx = currentModuleIndex, lIdx = currentLessonIndex;
                 completionTimer = setTimeout(() => markLessonCompleted(mIdx, lIdx), 45000);
             };
+        }
+
+        // ===== Focus Mode (hides header + sidebar — keeps video + notes only) =====
+        function toggleFocusMode() {
+            const willOn = !document.body.classList.contains('focus-mode');
+            document.body.classList.toggle('focus-mode', willOn);
+            const btn = document.getElementById('focusModeToggle');
+            if (btn) {
+                const i = btn.querySelector('i');
+                if (i) i.className = willOn ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+                btn.title = willOn ? 'יציאה ממצב ריכוז (Esc)' : 'מצב ריכוז (F)';
+            }
+        }
+        function exitFocusMode() {
+            if (!document.body.classList.contains('focus-mode')) return false;
+            document.body.classList.remove('focus-mode');
+            const btn = document.getElementById('focusModeToggle');
+            if (btn) {
+                const i = btn.querySelector('i');
+                if (i) i.className = 'fa-solid fa-expand';
+                btn.title = 'מצב ריכוז (F)';
+            }
+            return true;
+        }
+
+        // ===== Keyboard shortcuts: ← → space F N Esc Ctrl+S =====
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Esc always works (even from inputs) — exits focus mode
+                if (e.key === 'Escape') {
+                    if (exitFocusMode()) { e.preventDefault(); return; }
+                    // If no focus mode and notes panel open, close it
+                    const sec = document.querySelector('.video-section');
+                    if (sec && sec.classList.contains('notes-open')) {
+                        toggleNotesPanel();
+                        e.preventDefault();
+                        return;
+                    }
+                }
+                // Ctrl+S in any textarea → insert video timestamp
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                    const ae = document.activeElement;
+                    if (ae && ae.tagName === 'TEXTAREA' && (ae.id === 'notesTextarea' || ae.id === 'notesSideTextarea')) {
+                        if (insertTimestampInNotes()) { e.preventDefault(); return; }
+                    }
+                }
+                // Skip everything else if focus is in input/textarea
+                const t = e.target;
+                if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+                // Only when a lesson is active (not on welcome dashboard)
+                if (typeof currentModuleIndex !== 'number' || currentModuleIndex < 0) return;
+                switch (e.key) {
+                    case 'ArrowLeft':  // RTL: left arrow = next
+                        e.preventDefault();
+                        navigateLesson(1);
+                        break;
+                    case 'ArrowRight': // RTL: right arrow = previous
+                        e.preventDefault();
+                        navigateLesson(-1);
+                        break;
+                    case ' ':
+                        if (window._ytPlayer && typeof window._ytPlayer.getPlayerState === 'function') {
+                            e.preventDefault();
+                            const st = window._ytPlayer.getPlayerState();
+                            if (st === 1) window._ytPlayer.pauseVideo();
+                            else window._ytPlayer.playVideo();
+                        }
+                        break;
+                    case 'f':
+                    case 'F':
+                        e.preventDefault();
+                        toggleFocusMode();
+                        break;
+                    case 'n':
+                    case 'N':
+                        if (window.innerWidth >= 1281) {
+                            e.preventDefault();
+                            toggleNotesPanel();
+                        }
+                        break;
+                }
+            });
+        }
+
+        // ===== Manual toggle of completion state (lesson-end panel button) =====
+        function toggleLessonComplete() {
+            if (typeof currentModuleIndex !== 'number' || currentModuleIndex < 0) return;
+            const lessonId = `${currentModuleIndex}-${currentLessonIndex}`;
+            if (completedLessons.includes(lessonId)) {
+                // Unmark — remove from local list
+                completedLessons = completedLessons.filter(id => id !== lessonId);
+                localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+                updateProgress();
+                renderSyllabus();
+                updateLessonEndPanel();
+                // No Supabase delete — server retains the row for analytics; only local UI flips.
+                // If user re-marks, the existing UPSERT updates it.
+            } else {
+                markLessonCompleted(currentModuleIndex, currentLessonIndex);
+                updateLessonEndPanel();
+            }
+        }
+
+        // Updates the "סמן כהושלם" button label/state based on the current lesson
+        function updateLessonEndPanel() {
+            const panel = document.getElementById('lessonEndPanel');
+            if (!panel) return;
+            // Hide when no lesson is active
+            if (typeof currentModuleIndex !== 'number' || currentModuleIndex < 0) {
+                panel.style.display = 'none';
+                return;
+            }
+            panel.style.display = 'flex';
+            const lessonId = `${currentModuleIndex}-${currentLessonIndex}`;
+            const isDone = completedLessons.includes(lessonId);
+            const btn = document.getElementById('lessonEndMarkBtn');
+            const txt = document.getElementById('lessonEndMarkText');
+            const tip = document.getElementById('lessonEndTip');
+            if (btn) btn.classList.toggle('completed', isDone);
+            if (txt) txt.textContent = isDone ? 'הושלם — בטל סימון' : 'סמן כהושלם';
+            if (tip) tip.textContent = isDone
+                ? '💡 השיעור מסומן. תוכלו לחזור אליו בכל עת — הסימון לא נמחק מהשרת.'
+                : 'השיעור יסומן אוטומטית אחרי 45 שניות צפייה — תוכלו גם לסמן ידנית';
         }
 
         // ===== Mark Lesson Completed =====
@@ -6499,6 +7718,12 @@
             // Update sidebar count
             const sidebarCount = document.getElementById('sidebarProgressCount');
             if (sidebarCount) sidebarCount.textContent = `${completed}/${totalLessons} שיעורים`;
+
+            // Keep header "continue" button + welcome dashboard hero in sync
+            if (typeof updateContinueButton === 'function') updateContinueButton();
+            if (typeof renderContinueHero === 'function') renderContinueHero();
+            if (typeof updateQuickStats === 'function') updateQuickStats();
+            if (typeof updateLessonEndPanel === 'function') updateLessonEndPanel();
         }
 
         // ===== Update UI based on authentication =====
@@ -7004,6 +8229,15 @@
         // ===== Notes Functions =====
         let notesDebounceTimer = null;
 
+        // Helper: write the same content to both the tab textarea AND the side-panel textarea
+        function setNotesContent(content) {
+            const ta = document.getElementById('notesTextarea');
+            const taSide = document.getElementById('notesSideTextarea');
+            if (ta && ta.value !== content) ta.value = content || '';
+            if (taSide && taSide.value !== content) taSide.value = content || '';
+            updateNotesCharCount();
+        }
+
         async function loadNotes() {
             if (!isAuthenticated) return;
             const textarea = document.getElementById('notesTextarea');
@@ -7016,7 +8250,7 @@
                 try {
                     const note = await UserNotes.get(currentVideoId);
                     if (note) {
-                        textarea.value = note.content || '';
+                        setNotesContent(note.content || '');
                         // Also update localStorage as cache
                         localStorage.setItem(key, note.content || '');
                         updateNotesCharCount();
@@ -7034,7 +8268,7 @@
 
             // Fallback to localStorage
             const saved = localStorage.getItem(key);
-            textarea.value = saved || '';
+            setNotesContent(saved || '');
             updateNotesCharCount();
             const lastSavedTime = localStorage.getItem(key + '_time');
             if (indicator && lastSavedTime) {
@@ -7089,12 +8323,28 @@
         }
 
         function handleNotesInput() {
+            // Tab textarea was the source — mirror to side textarea
+            const ta = document.getElementById('notesTextarea');
+            const taSide = document.getElementById('notesSideTextarea');
+            if (ta && taSide && ta.value !== taSide.value) taSide.value = ta.value;
+            _scheduleNotesSave();
+        }
+
+        function handleSideNotesInput() {
+            // Side textarea was the source — mirror to tab textarea
+            const ta = document.getElementById('notesTextarea');
+            const taSide = document.getElementById('notesSideTextarea');
+            if (ta && taSide && taSide.value !== ta.value) ta.value = taSide.value;
+            _scheduleNotesSave();
+        }
+
+        function _scheduleNotesSave() {
             updateNotesCharCount();
             const indicator = document.getElementById('notesSavedIndicator');
-            if (indicator) {
-                indicator.className = 'notes-saved-indicator saving';
-                indicator.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> שומר...';
-            }
+            const indicatorSide = document.getElementById('notesSideSavedIndicator');
+            const html = '<i class="fa-solid fa-spinner fa-spin"></i> שומר...';
+            if (indicator) { indicator.className = 'notes-saved-indicator saving'; indicator.innerHTML = html; }
+            if (indicatorSide) { indicatorSide.className = 'notes-saved-indicator saving'; indicatorSide.innerHTML = html; }
             clearTimeout(notesDebounceTimer);
             notesDebounceTimer = setTimeout(saveNotes, 800);
         }
@@ -7102,9 +8352,65 @@
         function updateNotesCharCount() {
             const textarea = document.getElementById('notesTextarea');
             const counter = document.getElementById('notesCharCount');
-            if (textarea && counter) {
-                counter.textContent = `${textarea.value.length} תווים`;
+            const counterSide = document.getElementById('notesSideCharCount');
+            if (textarea) {
+                const len = textarea.value.length;
+                if (counter) counter.textContent = `${len} תווים`;
+                if (counterSide) counterSide.textContent = `${len} תווים`;
             }
+        }
+
+        // ===== Toggle Side Notes Panel (desktop ≥1280px) =====
+        function toggleNotesPanel() {
+            const section = document.querySelector('.video-section');
+            if (!section) return;
+            const willOpen = !section.classList.contains('notes-open');
+            section.classList.toggle('notes-open', willOpen);
+            try { localStorage.setItem('notes_panel_open', willOpen ? '1' : '0'); } catch (e) {}
+            const label = document.getElementById('notesToggleLabel');
+            if (label) label.textContent = willOpen ? 'סגור הערות' : 'הצג הערות';
+            const btn = document.getElementById('notesToggleBtn');
+            if (btn) {
+                const icon = btn.querySelector('i');
+                if (icon) icon.className = willOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-pen-to-square';
+            }
+            if (willOpen) {
+                // Focus the side textarea for immediate typing
+                setTimeout(() => document.getElementById('notesSideTextarea')?.focus(), 350);
+            }
+        }
+        function restoreNotesPanelState() {
+            try {
+                if (localStorage.getItem('notes_panel_open') === '1' && window.innerWidth >= 1281) {
+                    const section = document.querySelector('.video-section');
+                    if (section && !section.classList.contains('notes-open')) {
+                        section.classList.add('notes-open');
+                        const label = document.getElementById('notesToggleLabel');
+                        if (label) label.textContent = 'סגור הערות';
+                        const icon = document.querySelector('#notesToggleBtn i');
+                        if (icon) icon.className = 'fa-solid fa-xmark';
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // ===== Insert YouTube timestamp into notes (Ctrl+S) =====
+        function insertTimestampInNotes() {
+            const t = (window._ytPlayer && typeof window._ytPlayer.getCurrentTime === 'function')
+                ? Math.floor(window._ytPlayer.getCurrentTime())
+                : null;
+            if (t === null) return false;
+            const m = Math.floor(t / 60), s = t % 60;
+            const stamp = `[${m}:${String(s).padStart(2,'0')}] `;
+            const ta = document.activeElement && document.activeElement.tagName === 'TEXTAREA'
+                ? document.activeElement
+                : document.getElementById('notesSideTextarea') || document.getElementById('notesTextarea');
+            if (!ta) return false;
+            const start = ta.selectionStart, end = ta.selectionEnd;
+            ta.value = ta.value.slice(0, start) + stamp + ta.value.slice(end);
+            ta.selectionStart = ta.selectionEnd = start + stamp.length;
+            ta.dispatchEvent(new Event('input', { bubbles: true }));
+            return true;
         }
 
         // ===== Notes Export Functions =====

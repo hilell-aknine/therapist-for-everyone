@@ -32,6 +32,8 @@
     <script src="../js/theme-toggle.js" defer></script>
     <!-- YouTube IFrame API: enables Space → play/pause + Ctrl+S → insert timestamp into notes -->
     <script src="https://www.youtube.com/iframe_api" async></script>
+    <!-- Confetti for lesson-completion celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js" defer></script>
     <style>
         :root {
             /* Brand Colors */
@@ -1220,6 +1222,74 @@
         }
         @media (max-width: 1024px) {
             .keyboard-hint { display: none; }
+        }
+
+        /* ===== Celebration toast (lesson completed) ===== */
+        .celebrate-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.85);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 320px;
+            max-width: 420px;
+            padding: 1.1rem 1.4rem;
+            background: linear-gradient(135deg, #003B46 0%, #00606B 100%);
+            color: #fff;
+            border-radius: 18px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.35), 0 0 0 1px rgba(212,175,55,0.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease, transform 0.4s cubic-bezier(.18,.89,.32,1.28);
+        }
+        .celebrate-toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .celebrate-toast-icon {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #D4AF37, #F0D875);
+            color: #003B46;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.55rem;
+            font-weight: 800;
+            box-shadow: 0 4px 14px rgba(212,175,55,0.4);
+            animation: celebrateIconPop 0.6s cubic-bezier(.18,.89,.32,1.28);
+        }
+        @keyframes celebrateIconPop {
+            0%   { transform: scale(0.2) rotate(-180deg); opacity: 0; }
+            60%  { transform: scale(1.15) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        .celebrate-toast-body { min-width: 0; }
+        .celebrate-toast-headline {
+            font-size: 1.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 0.2rem;
+        }
+        .celebrate-toast-sub {
+            font-size: 0.88rem;
+            opacity: 0.85;
+            line-height: 1.35;
+        }
+        @media (max-width: 600px) {
+            .celebrate-toast {
+                min-width: 0;
+                width: calc(100vw - 2rem);
+                left: 1rem;
+                right: 1rem;
+                transform: translateY(-50%) scale(0.85);
+            }
+            .celebrate-toast.show { transform: translateY(-50%) scale(1); }
         }
 
         /* ===== Lesson End Panel: mark-complete CTA + auto-track tip ===== */
@@ -7550,7 +7620,89 @@
             } else {
                 markLessonCompleted(currentModuleIndex, currentLessonIndex);
                 updateLessonEndPanel();
+                // Trigger celebration (confetti + "כל הכבוד" toast) on manual mark
+                celebrateLessonComplete();
             }
+        }
+
+        // ===== Celebrate (confetti + toast) on lesson completion =====
+        // Called from toggleLessonComplete (manual) AND markLessonCompleted (auto-after-45s).
+        // De-bounced via _lastCelebrateAt so a single mark can't double-fire.
+        let _lastCelebrateAt = 0;
+        function celebrateLessonComplete() {
+            const now = Date.now();
+            if (now - _lastCelebrateAt < 1500) return; // throttle
+            _lastCelebrateAt = now;
+
+            // Confetti burst from two corners (canvas-confetti loaded in <head>)
+            if (typeof confetti === 'function') {
+                const brand = ['#D4AF37', '#003B46', '#00606B', '#2F8592', '#E6C65A', '#F0D875'];
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { x: 0.2, y: 0.7 },
+                    colors: brand,
+                    ticks: 200
+                });
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { x: 0.8, y: 0.7 },
+                    colors: brand,
+                    ticks: 200
+                });
+                // Second wave after 250ms — feels more triumphant
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 60,
+                        spread: 100,
+                        origin: { x: 0.5, y: 0.5 },
+                        colors: brand,
+                        startVelocity: 35,
+                        ticks: 220
+                    });
+                }, 250);
+            }
+
+            // Toast banner
+            const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
+            const done = completedLessons.length;
+            const lessonTitle = modules[currentModuleIndex]?.lessons[currentLessonIndex]?.title || 'השיעור';
+            const messages = [
+                'כל הכבוד! 🎉',
+                'יופי, ממשיכים! ⭐',
+                'מצוין! 💪',
+                'עוד אחד מאחורייך 🔥',
+                'אש! 🚀'
+            ];
+            // Picks a different message each time (cycles by completed-count)
+            const headline = done === totalLessons
+                ? 'סיימת את הקורס! 🏆'
+                : messages[done % messages.length];
+            const sub = done === totalLessons
+                ? 'השלמת את כל ' + totalLessons + ' השיעורים. מטורף! 🤍'
+                : `השלמת ${done} מתוך ${totalLessons} שיעורים`;
+
+            // Build & inject the toast (replaces any existing instance)
+            const old = document.getElementById('celebrateToast');
+            if (old) old.remove();
+            const toast = document.createElement('div');
+            toast.id = 'celebrateToast';
+            toast.className = 'celebrate-toast';
+            toast.innerHTML =
+                '<div class="celebrate-toast-icon">✓</div>' +
+                '<div class="celebrate-toast-body">' +
+                    '<div class="celebrate-toast-headline">' + headline + '</div>' +
+                    '<div class="celebrate-toast-sub">' + sub + '</div>' +
+                '</div>';
+            document.body.appendChild(toast);
+            // Trigger CSS animation on next frame
+            requestAnimationFrame(() => toast.classList.add('show'));
+            // Auto-dismiss after 3.2s
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3200);
         }
 
         // Updates the "סמן כהושלם" button label/state based on the current lesson
@@ -7613,6 +7765,9 @@
                     window.PopupManager.setLessonCount(completedLessons.length);
                     window.PopupManager.notifyLessonComplete();
                 }
+
+                // Celebration (confetti + toast) — also fires for the auto-mark-after-45s path
+                if (typeof celebrateLessonComplete === 'function') celebrateLessonComplete();
             }
         }
 

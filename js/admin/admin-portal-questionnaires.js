@@ -2,7 +2,7 @@
 
 let portalQuestionnaires = [];
 let portalQLoaded = false;
-let pqFilters = { dateRange: 'all', status: 'all', howFound: 'all', whyNlp: 'all', heat: 'all', sortBy: 'score', gender: 'all', city: 'all', ageMin: '', ageMax: '', dateFrom: '', dateTo: '', occupationSearch: '' };
+let pqFilters = { dateRange: 'all', status: 'all', howFound: 'all', whyNlp: 'all', heat: 'all', sortBy: 'score', gender: 'all', city: 'all', ageMin: '', ageMax: '', dateFrom: '', dateTo: '', occupationSearch: '', lessons: 'all' };
 let pqEngagementMap = {};
 let pqCurrentSubView = 'table'; // 'table' | 'caller'
 
@@ -192,6 +192,7 @@ function applyPqFilters() {
     pqFilters.dateFrom = document.getElementById('pq-filter-date-from')?.value || '';
     pqFilters.dateTo = document.getElementById('pq-filter-date-to')?.value || '';
     pqFilters.occupationSearch = document.getElementById('pq-filter-occupation')?.value?.toLowerCase() || '';
+    pqFilters.lessons = document.getElementById('pq-filter-lessons')?.value || 'all';
     renderPortalQuestionnaires();
 }
 
@@ -208,6 +209,16 @@ function applyFiltered() {
     if (pqFilters.heat !== 'all') {
         if (pqFilters.heat === 'none') f = f.filter(q => !q.heat_level);
         else f = f.filter(q => q.heat_level === pqFilters.heat);
+    }
+    if (pqFilters.lessons !== 'all') {
+        f = f.filter(q => {
+            const c = q.completed_count || 0;
+            if (pqFilters.lessons === '0')    return c === 0;
+            if (pqFilters.lessons === '1-5')  return c >= 1 && c <= 5;
+            if (pqFilters.lessons === '6-10') return c >= 6 && c <= 10;
+            if (pqFilters.lessons === '11+')  return c >= 11;
+            return true;
+        });
     }
     // Advanced filters
     if (pqFilters.gender !== 'all') f = f.filter(q => q.gender === pqFilters.gender);
@@ -241,8 +252,8 @@ function applyFiltered() {
 }
 
 function resetPqFilters() {
-    pqFilters = { dateRange: 'all', status: 'all', howFound: 'all', whyNlp: 'all', heat: 'all', sortBy: 'score', gender: 'all', city: 'all', ageMin: '', ageMax: '', dateFrom: '', dateTo: '', occupationSearch: '' };
-    ['pq-filter-date','pq-filter-status','pq-filter-heat','pq-filter-source','pq-filter-why','pq-filter-gender','pq-filter-city','pq-filter-sort'].forEach(id => { const el = document.getElementById(id); if (el) el.value = 'all'; });
+    pqFilters = { dateRange: 'all', status: 'all', howFound: 'all', whyNlp: 'all', heat: 'all', sortBy: 'score', gender: 'all', city: 'all', ageMin: '', ageMax: '', dateFrom: '', dateTo: '', occupationSearch: '', lessons: 'all' };
+    ['pq-filter-date','pq-filter-status','pq-filter-heat','pq-filter-source','pq-filter-why','pq-filter-gender','pq-filter-city','pq-filter-sort','pq-filter-lessons'].forEach(id => { const el = document.getElementById(id); if (el) el.value = 'all'; });
     ['pq-filter-age-min','pq-filter-age-max','pq-filter-date-from','pq-filter-date-to','pq-filter-occupation'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     renderPortalQuestionnaires();
 }

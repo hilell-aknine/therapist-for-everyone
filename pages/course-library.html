@@ -1011,16 +1011,22 @@
         }
 
         /* Video Area */
+        /* Uses flex (not grid) so RTL puts split-main on the right + notes panel on the left,
+           matching the natural reading order (video first, then notes off to the side) */
         .video-section {
             flex: 1;
             padding: 1.5rem 2rem 2rem;
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 1.2rem;
-            transition: grid-template-columns 0.3s ease;
             position: relative;
         }
-        .video-section.notes-open { grid-template-columns: 2fr minmax(320px, 1fr); }
+        .video-section.notes-open {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        .video-section.notes-open > .lesson-split-main { flex: 2; min-width: 0; }
+        .video-section.notes-open > .lesson-split-notes { flex: 1; min-width: 320px; max-width: 400px; }
         .lesson-split-main { position: relative; min-width: 0; }
 
         /* Floating "Show notes" toggle button — sits above the video, top-right of split-main */
@@ -3171,6 +3177,7 @@
         .wd-content { padding: 1.2rem; display: flex; flex-direction: column; gap: 1.2rem; }
 
         /* ===== Continue Learning Hero (replaces top banner on welcome dashboard) ===== */
+        /* Uses flex (not grid) so RTL flow puts thumb on the right + content on the left */
         .wd-continue-hero {
             position: relative;
             background:
@@ -3179,12 +3186,14 @@
             color: #fff;
             padding: 1.6rem 1.4rem;
             border-radius: 0 0 18px 18px;
-            display: grid;
-            grid-template-columns: 220px 1fr;
+            display: flex;
+            flex-direction: row;
             gap: 1.4rem;
             align-items: center;
             overflow: hidden;
         }
+        .wd-continue-hero > .wd-hero-thumb { flex: 0 0 220px; max-width: 280px; }
+        .wd-continue-hero > .wd-hero-content { flex: 1; min-width: 0; }
         .wd-continue-hero::before {
             content: '';
             position: absolute;
@@ -3205,10 +3214,9 @@
             width: 100%; height: 100%;
             object-fit: cover;
             display: block;
-            opacity: 0.85;
-            transition: opacity 0.2s, transform 0.3s;
+            transition: transform 0.3s;
         }
-        .wd-hero-thumb:hover img { opacity: 1; transform: scale(1.04); }
+        .wd-hero-thumb:hover img { transform: scale(1.04); }
         .wd-hero-thumb-play {
             position: absolute;
             top: 50%; left: 50%;
@@ -3288,17 +3296,19 @@
             transition: width 0.6s ease;
         }
         @media (max-width: 768px) {
-            .wd-continue-hero { grid-template-columns: 1fr; padding: 1.2rem; }
-            .wd-hero-thumb { max-width: 280px; margin: 0 auto; }
+            .wd-continue-hero { flex-direction: column; padding: 1.2rem; }
+            .wd-continue-hero > .wd-hero-thumb { flex-basis: auto; max-width: 280px; margin: 0 auto; }
             .wd-hero-title { font-size: 1.15rem; }
         }
 
         /* ===== Quick Stats Row ===== */
+        /* Flex (not grid) so RTL puts the streak card on the right where the eye lands first */
         .wd-stats-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            display: flex;
+            flex-direction: row;
             gap: 0.8rem;
         }
+        .wd-stats-row > .wd-stat-card { flex: 1; min-width: 0; }
         .wd-stat-card {
             background: var(--t-bg-card, #fff);
             border: 1px solid var(--t-border, #e5e7eb);
@@ -3329,7 +3339,7 @@
             font-weight: 500;
         }
         @media (max-width: 600px) {
-            .wd-stats-row { grid-template-columns: 1fr; }
+            .wd-stats-row { flex-direction: column; }
         }
 
         /* ===== Compact bulletin (collapsed default) ===== */
@@ -3426,12 +3436,14 @@
         .wd-affiliate-compact a:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,175,55,0.3); }
 
         /* ===== Smaller, friendlier leaderboard podium ===== */
+        /* Flex so RTL puts gold (1st) on the right, bronze (3rd) on the left */
         .wd-leaderboard-podium {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            display: flex;
+            flex-direction: row;
             gap: 0.5rem;
             margin-top: 0.5rem;
         }
+        .wd-leaderboard-podium > .wd-podium-spot { flex: 1; min-width: 0; }
         .wd-podium-spot {
             text-align: center;
             padding: 0.7rem 0.4rem;

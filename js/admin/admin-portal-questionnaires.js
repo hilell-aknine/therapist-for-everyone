@@ -133,6 +133,23 @@ function updatePqStats() {
     setText('stat-portal-q-avg-score', avg);
     setText('stat-portal-q-hot', hot + warm);
     setText('stat-portal-q-not-called', notCalled);
+
+    // Training-leads-specific stats (sidebar badge + overview card)
+    const trainingAll = portalQuestionnaires.filter(q => q.request_type === 'training');
+    const trainingWeek = trainingAll.filter(q => isThisWeek(q.created_at)).length;
+    const trainingUncalled = trainingAll.filter(q => (!q.call_count || q.call_count === 0) && q.status !== 'client').length;
+    setText('training-leads-badge', trainingWeek > 0 ? trainingWeek : trainingAll.length);
+    const badgeEl = document.getElementById('training-leads-badge');
+    if (badgeEl) {
+        // Red pulse when fresh leads waiting
+        badgeEl.style.background = trainingWeek > 0 ? '#f85149' : '#D4AF37';
+        badgeEl.style.color = trainingWeek > 0 ? '#fff' : '#003B46';
+    }
+    setText('ov-training-total', trainingAll.length);
+    setText('ov-training-week', trainingWeek);
+    setText('ov-training-uncalled', trainingUncalled);
+    const newBadge = document.getElementById('ov-training-new-badge');
+    if (newBadge) newBadge.style.display = trainingWeek > 0 ? 'inline-block' : 'none';
 }
 
 function updateFunnelStats() {
@@ -285,7 +302,7 @@ function renderPortalQuestionnaires() {
     if (!tbody) return;
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>אין תוצאות</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fa-solid fa-clipboard-list"></i><br>אין תוצאות</td></tr>';
         return;
     }
 
@@ -293,7 +310,7 @@ function renderPortalQuestionnaires() {
     let html = '';
     for (const [group, items] of Object.entries(groups)) {
         if (items.length === 0) continue;
-        html += `<tr class="date-group-row"><td colspan="11"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+        html += `<tr class="date-group-row"><td colspan="10"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
         html += items.map(q => {
             const st = q.status || 'new';
             const sc = q.fitScore || 0;
@@ -315,6 +332,10 @@ function renderPortalQuestionnaires() {
                         </select>
                     </td>
                     <td style="font-size:0.85rem;">${formatDate(q.created_at)}</td>
+                    <td onclick="event.stopPropagation();" style="white-space:nowrap;">
+                        ${q.phone ? `<a href="https://wa.me/${(q.phone||'').replace(/^0/,'972').replace(/[^0-9]/g,'')}" target="_blank" title="WhatsApp" style="color:#25D366;margin-left:0.4rem;font-size:1.05rem;"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                        ${st !== 'client' ? `<button onclick="movePortalQToPipeline('${q.id}')" title="העבר ל-Pipeline" style="background:none;border:none;cursor:pointer;color:#D4AF37;font-size:1rem;padding:0.2rem;"><i class="fa-solid fa-filter-circle-dollar"></i></button>` : '<span style="color:rgba(232,241,242,0.3);font-size:0.75rem;">לקוח</span>'}
+                    </td>
                 </tr>`;
         }).join('');
     }
@@ -589,4 +610,52 @@ function exportPortalQCSV() {
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
     a.download = `portal_q_${new Date().toISOString().split('T')[0]}.csv`; a.click();
     showToast('הורד!', 'success');
+}
+
+// ============================================================================
+// LEAD-VIEW MODE SWITCHERS — wired to the sidebar nav-items + overview cards
+// ============================================================================
+
+function _applyLeadViewMode(mode) {
+    // mode: 'training' | 'all'
+    const titleEl = document.getElementById('portal-q-page-title');
+    const tableTitleEl = document.getElementById('portal-q-table-title');
+    if (mode === 'training') {
+        pqFilters.requestType = 'training';
+        pqFilters.sortBy = 'date';
+        const rt = document.getElementById('pq-filter-request-type'); if (rt) rt.value = 'training';
+        const sort = document.getElementById('pq-filter-sort'); if (sort) sort.value = 'date';
+        if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-graduation-cap" style="color:var(--gold);margin-left:0.5rem;"></i> לידי הכשרה — חמים ופתוחים לחזרה';
+        if (tableTitleEl) tableTitleEl.textContent = 'בקשות לתוכנית הכשרה';
+    } else {
+        pqFilters.requestType = 'all';
+        const rt = document.getElementById('pq-filter-request-type'); if (rt) rt.value = 'all';
+        if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.5rem;"></i> ניהול לידים';
+        if (tableTitleEl) tableTitleEl.textContent = 'נרשמים לפורטל';
+    }
+    if (typeof renderPortalQuestionnaires === 'function') renderPortalQuestionnaires();
+}
+
+function enterTrainingLeadsView() {
+    if (typeof switchView === 'function') switchView('learning');
+    if (portalQLoaded) {
+        _applyLeadViewMode('training');
+    } else {
+        const wait = setInterval(() => {
+            if (portalQLoaded) { clearInterval(wait); _applyLeadViewMode('training'); }
+        }, 80);
+        setTimeout(() => clearInterval(wait), 5000);
+    }
+}
+
+function enterAllLeadsView() {
+    if (typeof switchView === 'function') switchView('learning');
+    if (portalQLoaded) {
+        _applyLeadViewMode('all');
+    } else {
+        const wait = setInterval(() => {
+            if (portalQLoaded) { clearInterval(wait); _applyLeadViewMode('all'); }
+        }, 80);
+        setTimeout(() => clearInterval(wait), 5000);
+    }
 }

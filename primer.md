@@ -2,8 +2,16 @@
 > Last updated: 2026-04-28 by Claude Code
 
 ## Current State
-- **Status:** Active — Training program leads now visible in admin CRM (3-bug fix).
-- **Last task completed:** Training program lead visibility fix (2026-04-28):
+- **Status:** Active — Training program lead UX overhaul (dedicated tab + inline pipeline button + overview card).
+- **Last task completed:** Training-leads UX organization (2026-04-28, follow-up to CRM fix):
+  - **New sidebar nav-item "🎓 לידי הכשרה"** (`pages/admin.html`): routes to portal-q view with `request_type='training'` filter pre-applied + sort by date desc. Badge turns red with weekly-count when fresh leads waiting (gold + total otherwise).
+  - **Inline Pipeline button per row** (`js/admin/admin-portal-questionnaires.js` renderPortalQuestionnaires): added 10th column "פעולות" with WhatsApp link + gold `fa-filter-circle-dollar` button → `movePortalQToPipeline()`. Hidden when status='client'. Colspans corrected from 11 → 10.
+  - **Overview card on home** (`pages/admin.html`): new prominent gold-bordered "לידי הכשרה" card showing total/this-week/uncalled with "חדש" red badge when this-week > 0. Sits before "ניהול לידים" card.
+  - **`enterTrainingLeadsView()` / `enterAllLeadsView()`** globals (admin-portal-questionnaires.js): orchestrate switchView('learning') + filter set + page-title swap + table-title swap. Wait-loop for lazy-load on first visit.
+  - **`updatePqStats()`** extended: computes training totals/week/uncalled and writes badges (sidebar `#training-leads-badge`, overview `#ov-training-*`, `#ov-training-new-badge`).
+  - **course-library.html in-portal training form** (line 8350): added mirror_table to sales_leads + UTM/landing_url capture (matches training.html pattern).
+  - cache-buster bumped to `?v=6`.
+- **Prior task — CRM training program lead visibility fix (2026-04-28):**
   - **Bug 1 — RPC `admin_get_all_leads()` v3** (`supabase/migrations/20260428100000_admin_get_all_leads_v3.sql`): contact_request data (`request_type`, `message`) now LEFT JOIN LATERAL'd onto profile rows, so registered users who later filled the training form get the "טופס הכשרה" badge. Source 2 dedup also matches by email (not just phone). Before: training leads from registered users were invisible — phone-dedup excluded their contact_request and source 1 hardcoded `request_type=NULL`.
   - **Bug 2 — `pages/training.html` mirror to sales_leads** (line 684): the training landing form now dual-writes via `submit-lead` Edge Function's `mirror_table` mechanism (contact_requests + sales_leads). Before: only contact_requests, so 0 of the 8 training leads in the backup reached Pipeline. Also captures UTM + landing_url.
   - **Bug 3 — request_type filter** (`pages/admin.html` + `js/admin/admin-portal-questionnaires.js`): new dropdown "סוג ליד" in ניהול לידים tab (training/patient/general/course-feedback/portal_questionnaire). cache-buster bumped to `?v=5`.
@@ -39,6 +47,7 @@
 ## Recent Changes
 | Date | What Changed | Files Affected |
 |------|-------------|----------------|
+| 2026-04-28 | Training-leads UX overhaul: dedicated sidebar tab + overview card + inline pipeline button per row + fresh-week badge counter; course-library.html in-portal form also mirrors to sales_leads | pages/admin.html, pages/course-library.html, js/admin/admin-portal-questionnaires.js |
 | 2026-04-28 | Training program lead visibility fix: RPC v3 surfaces contact_request data on profile rows, training.html mirrors to sales_leads (Pipeline), new request_type filter in admin | migration 20260428100000 (new), pages/training.html, pages/admin.html, js/admin/admin-portal-questionnaires.js |
 | 2026-04-20 | Patient form fix: added missing columns (military_role, referral_source, session_style, photo_url, commitment_confirmed, truth_confirmed). Updated WhatsApp to 972512940781. Better submit-lead error messages. Modal overflow fix. LMS design demo deployed. | patient-step4.html, admin-styles.css, demo-portal/*, 2 migrations |
 | 2026-04-19 | Dashboard consolidation (16→9 tabs), unified leads RPC, social cause legal docs, popup fixes (cooldown/RLS/scheduled/auth_wall), training CTA popup, performance (defer scripts), community audit, automation diagnostic button, CRM bot report templates updated | admin.html, admin-utils.js, admin-portal-questionnaires.js, admin-popups.js, popup-manager.js, course-library.html, components.css, crm-bot/analytics+reports, 10+ migrations |

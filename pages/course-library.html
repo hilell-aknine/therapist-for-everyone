@@ -8135,6 +8135,8 @@
             try {
                 const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl ||
                     'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+                const utm = window.getUtmData ? window.getUtmData() : {};
+                const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
                 const res = await fetch(`${functionsUrl}/submit-lead`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -8147,7 +8149,23 @@
                             email: email,
                             request_type: 'training',
                             message: 'הרשמה להכשרה מתוך פורטל הלמידה',
-                            status: 'new'
+                            status: 'new',
+                            utm_source:   utm.utm_source   || null,
+                            utm_medium:   utm.utm_medium   || null,
+                            utm_campaign: utm.utm_campaign || null
+                        },
+                        attribution: attribution,
+                        mirror_table: 'sales_leads',
+                        mirror_data: {
+                            full_name: name,
+                            phone: phone,
+                            email: email,
+                            stage: 'new_lead',
+                            call_attempts: 0,
+                            utm_source:   utm.utm_source   || null,
+                            utm_medium:   utm.utm_medium   || null,
+                            utm_campaign: utm.utm_campaign || null,
+                            landing_url:  (attribution && attribution.last && attribution.last.landing_url) || null
                         }
                     })
                 });

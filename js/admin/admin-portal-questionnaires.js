@@ -150,6 +150,12 @@ function updatePqStats() {
     setText('ov-training-uncalled', trainingUncalled);
     const newBadge = document.getElementById('ov-training-new-badge');
     if (newBadge) newBadge.style.display = trainingWeek > 0 ? 'inline-block' : 'none';
+
+    // Silent leads — registered for free portal but no engagement (no questionnaire, no completed lessons)
+    const silent = portalQuestionnaires.filter(q =>
+        q.lead_source === 'profile' && !q.has_questionnaire && (q.completed_count || 0) === 0
+    ).length;
+    setText('ov-leads-silent', silent);
 }
 
 function updateFunnelStats() {
@@ -231,6 +237,11 @@ function applyFiltered() {
     if (pqFilters.lessons !== 'all') {
         f = f.filter(q => {
             const c = q.completed_count || 0;
+            if (pqFilters.lessons === 'silent') {
+                // Silent = registered for free portal, never filled questionnaire,
+                // never completed a lesson, never submitted a contact form
+                return q.lead_source === 'profile' && !q.has_questionnaire && c === 0;
+            }
             if (pqFilters.lessons === '0')    return c === 0;
             if (pqFilters.lessons === '1-5')  return c >= 1 && c <= 5;
             if (pqFilters.lessons === '6-10') return c >= 6 && c <= 10;
@@ -421,11 +432,19 @@ function renderCallerView() {
 // CALLER ACTIONS
 // ============================================================================
 
+// Lead-source-aware target table picker.
+// contact_form leads live in contact_requests (id = cr.id).
+// profile leads live in portal_questionnaires (id = pq.id).
+function _pqTargetTable(q) {
+    return q?.lead_source === 'contact_form' ? 'contact_requests' : 'portal_questionnaires';
+}
+
 async function markHeat(id, level) {
     try {
-        const { error } = await db.from('portal_questionnaires').update({ heat_level: level || null }).eq('id', id);
-        if (error) throw error;
         const q = portalQuestionnaires.find(x => x.id === id);
+        const table = _pqTargetTable(q);
+        const { error } = await db.from(table).update({ heat_level: level || null }).eq('id', id);
+        if (error) throw error;
         if (q) q.heat_level = level || null;
         updatePqStats();
         renderPortalQuestionnaires();
@@ -440,18 +459,21 @@ async function logCall(id) {
     try {
         const q = portalQuestionnaires.find(x => x.id === id);
         const newCount = (q?.call_count || 0) + 1;
+        const nowIso = new Date().toISOString();
+        const table = _pqTargetTable(q);
 
-        const { error } = await db.from('portal_questionnaires').update({
-            call_count: newCount,
-            last_called_at: new Date().toISOString(),
-            caller_notes: notes || q?.caller_notes || null
-        }).eq('id', id);
+        // contact_requests has last_contacted_at (existing, also written by crm-bot).
+        // portal_questionnaires has last_called_at (legacy column name).
+        const updates = (table === 'contact_requests')
+            ? { call_count: newCount, last_contacted_at: nowIso, caller_notes: notes || q?.caller_notes || null }
+            : { call_count: newCount, last_called_at:  nowIso, caller_notes: notes || q?.caller_notes || null };
 
+        const { error } = await db.from(table).update(updates).eq('id', id);
         if (error) throw error;
 
         if (q) {
             q.call_count = newCount;
-            q.last_called_at = new Date().toISOString();
+            q.last_called_at = nowIso;
             if (notes) q.caller_notes = notes;
         }
 
@@ -552,11 +574,26 @@ function viewPortalQ(id) {
 // STATUS + PIPELINE
 // ============================================================================
 
+// portal_questionnaires uses {new, potential, client}.
+// contact_requests (and crm-bot) use {new, contacted, qualified, converted, rejected}.
+// Map admin's values to crm-bot semantics when targeting contact_requests so
+// the bot's "פרטי ליד" view stays consistent with admin actions.
+const _pqStatusToCrStatus = { new: 'new', potential: 'contacted', client: 'converted' };
+
 async function changePortalQStatus(id, newStatus) {
     try {
-        const { error } = await db.from('portal_questionnaires').update({ status: newStatus }).eq('id', id);
-        if (error) throw error;
         const q = portalQuestionnaires.find(x => x.id === id);
+        const table = _pqTargetTable(q);
+        const updates = (table === 'contact_requests')
+            ? {
+                status: _pqStatusToCrStatus[newStatus] || newStatus,
+                // Mirror crm-bot behavior: stamp last_contacted_at on any non-new status
+                ...(newStatus !== 'new' ? { last_contacted_at: new Date().toISOString() } : {})
+            }
+            : { status: newStatus };
+
+        const { error } = await db.from(table).update(updates).eq('id', id);
+        if (error) throw error;
         if (q) q.status = newStatus;
         renderPortalQuestionnaires();
         showToast(`סטטוס עודכן ל: ${_pqLabels.status[newStatus]}`, 'success');

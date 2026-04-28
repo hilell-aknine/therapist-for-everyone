@@ -195,12 +195,12 @@ function roleLabel(role) {
 }
 
 function requestTypeLabel(type) {
-    const labels = { 'training': 'הכשרה', 'patient': 'מטופל', 'general': 'כללי', 'therapist': 'מטפל', 'course-feedback': 'משוב' };
+    const labels = { 'training': 'הכשרה', 'patient': 'מטופל', 'general': 'כללי', 'therapist': 'מטפל', 'course-feedback': 'משוב', 'whatsapp_manual': '📱 בוט', 'manual': '📱 בוט', 'portal_questionnaire': 'שאלון פורטל' };
     return labels[type] || type || 'כללי';
 }
 
 function requestTypeClass(type) {
-    const classes = { 'training': 'green', 'patient': 'blue', 'general': 'gold', 'therapist': 'blue', 'course-feedback': 'gold' };
+    const classes = { 'training': 'green', 'patient': 'blue', 'general': 'gold', 'therapist': 'blue', 'course-feedback': 'gold', 'whatsapp_manual': 'blue', 'manual': 'blue', 'portal_questionnaire': 'green' };
     return classes[type] || 'gold';
 }
 

@@ -8130,6 +8130,11 @@
             const name = document.getElementById('leadName').value.trim();
             const phone = document.getElementById('leadPhone').value.trim();
             const email = document.getElementById('leadEmail').value.trim();
+            // Catch obvious typos (.con / .cmo / etc.) before they become unreachable leads
+            if (email && !/^[^\s@]+@[^\s@]+\.(com|co\.il|org|net|gov|edu|ac\.il|info|me|io|biz)$/i.test(email)) {
+                alert('כתובת אימייל לא תקינה — בדקו את הסיומת (למשל gmail.com ולא gmaiil.con)');
+                return false;
+            }
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-left:0.5rem;"></i> שולח...';
             try {

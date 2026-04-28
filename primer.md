@@ -2,8 +2,16 @@
 > Last updated: 2026-04-28 by Claude Code
 
 ## Current State
-- **Status:** Active — Training program lead UX overhaul (dedicated tab + inline pipeline button + overview card).
-- **Last task completed:** Training-leads UX organization (2026-04-28, follow-up to CRM fix):
+- **Status:** Active — CRM lead coverage cleanup. Workflow now persists for contact_form leads; bot+admin write to same `last_contacted_at` field; silent free-portal leads surfaced.
+- **Last task completed:** CRM lead coverage cleanup (2026-04-28, third commit):
+  - **Workflow fix (silent no-op):** `markHeat`/`logCall`/`changePortalQStatus` in `js/admin/admin-portal-questionnaires.js` now route to `contact_requests` when `lead_source='contact_form'`, else `portal_questionnaires`. Field-name mapping (`last_called_at` ↔ `last_contacted_at`). Status mapping admin→bot semantics (`new/potential/client` ↔ `new/contacted/converted`). Stamps `last_contacted_at` on non-new statuses.
+  - **Migration `20260428200000_contact_requests_caller_columns.sql`:** adds `heat_level` + `call_count` + `caller_notes` to `contact_requests`. Reuses existing `last_contacted_at` / `contacted_by` (already written by crm-bot).
+  - **`whatsapp_manual` filter:** added to `pq-filter-request-type` dropdown + `requestTypeLabel()` map. Bot-entered leads now searchable.
+  - **Silent leads:** new `🔇 שקטים` option in `pq-filter-lessons`; condition: `lead_source='profile' && !has_questionnaire && completed_count===0`. Overview "ניהול לידים" card gets a 4th red stat `ov-leads-silent`.
+  - **Email TLD validation:** `pages/course-library.html` in-portal training form now whitelists common TLDs (.com/.co.il/.org/etc.) to catch typos like `gmaiil.con`. `training.html` has no email field, no validation needed.
+  - **Bot alignment (`crm-bot/`):** `src/templates/leads.js` `TYPE_LABELS` extended with 5 entries (training/whatsapp_manual/manual/portal_questionnaire/course-feedback). `src/services/lead-service.js` fallback `request_type` from `'manual'` → `'general'`. `src/ai/query-engine.js` schema extended with caller columns.
+  - cache-buster bumped to `?v=7`.
+- **Prior task — Training-leads UX organization (2026-04-28):**
   - **New sidebar nav-item "🎓 לידי הכשרה"** (`pages/admin.html`): routes to portal-q view with `request_type='training'` filter pre-applied + sort by date desc. Badge turns red with weekly-count when fresh leads waiting (gold + total otherwise).
   - **Inline Pipeline button per row** (`js/admin/admin-portal-questionnaires.js` renderPortalQuestionnaires): added 10th column "פעולות" with WhatsApp link + gold `fa-filter-circle-dollar` button → `movePortalQToPipeline()`. Hidden when status='client'. Colspans corrected from 11 → 10.
   - **Overview card on home** (`pages/admin.html`): new prominent gold-bordered "לידי הכשרה" card showing total/this-week/uncalled with "חדש" red badge when this-week > 0. Sits before "ניהול לידים" card.
@@ -47,6 +55,7 @@
 ## Recent Changes
 | Date | What Changed | Files Affected |
 |------|-------------|----------------|
+| 2026-04-28 | CRM lead coverage cleanup: workflow updates routed by lead_source (silent-no-op fix), migration adds caller columns to contact_requests, silent-leads filter + overview stat, whatsapp_manual filter, email TLD validation, bot type labels + fallback aligned | migration 20260428200000 (new), js/admin/admin-portal-questionnaires.js, js/admin/admin-utils.js, pages/admin.html, pages/course-library.html, crm-bot/src/templates/leads.js, crm-bot/src/services/lead-service.js, crm-bot/src/ai/query-engine.js |
 | 2026-04-28 | Training-leads UX overhaul: dedicated sidebar tab + overview card + inline pipeline button per row + fresh-week badge counter; course-library.html in-portal form also mirrors to sales_leads | pages/admin.html, pages/course-library.html, js/admin/admin-portal-questionnaires.js |
 | 2026-04-28 | Training program lead visibility fix: RPC v3 surfaces contact_request data on profile rows, training.html mirrors to sales_leads (Pipeline), new request_type filter in admin | migration 20260428100000 (new), pages/training.html, pages/admin.html, js/admin/admin-portal-questionnaires.js |
 | 2026-04-20 | Patient form fix: added missing columns (military_role, referral_source, session_style, photo_url, commitment_confirmed, truth_confirmed). Updated WhatsApp to 972512940781. Better submit-lead error messages. Modal overflow fix. LMS design demo deployed. | patient-step4.html, admin-styles.css, demo-portal/*, 2 migrations |

@@ -1,0 +1,534 @@
+/* ============================================================
+   portal.css — Liquid Glass overlay for the LMS portal
+   Scope: body[data-portal="true"] only. Safe to ship; no other
+   pages are affected. Pairs with theme.css; does NOT touch it.
+
+   Build: lg6 (2026-04-28)
+   Source: demo-portal/v1-balanced.js (Apple Liquid Glass V1)
+   ============================================================ */
+
+body[data-portal="true"]{
+  /* ---- Liquid Glass tokens (scoped, not global) ---- */
+  --lg-petrol-deep:#04161b;
+  --lg-petrol-bg:#062831;
+  --lg-petrol-mid:#0a3d48;
+  --lg-petrol-hi:#15525d;
+  --lg-teal:#2F8592;
+  --lg-teal-bright:#3FAABB;
+  --lg-gold:#D4AF37;
+  --lg-gold-light:#E6C65A;
+
+  --lg-blur-soft:14px;
+  --lg-blur-med:22px;
+  --lg-blur-heavy:36px;
+  --lg-sat:180%;
+
+  --lg-tint-light:rgba(255,255,255,.06);
+  --lg-tint-medium:rgba(255,255,255,.09);
+  --lg-tint-strong:rgba(255,255,255,.14);
+  --lg-tint-gold:rgba(212,175,55,.12);
+  --lg-tint-petrol:rgba(6,38,46,.55);
+
+  --lg-edge:rgba(255,255,255,.16);
+  --lg-edge-bright:rgba(255,255,255,.28);
+  --lg-edge-inner:inset 0 0 0 1px rgba(255,255,255,.06);
+
+  --lg-specular:linear-gradient(180deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.05) 28%,transparent 55%);
+  --lg-specular-soft:linear-gradient(180deg,rgba(255,255,255,.14) 0%,transparent 45%);
+  --lg-specular-crystal:linear-gradient(155deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.08) 22%,transparent 45%);
+
+  --lg-shadow-sm:0 4px 14px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.2);
+  --lg-shadow-md:0 12px 32px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.22);
+  --lg-shadow-lg:0 28px 60px rgba(0,0,0,.38),0 6px 14px rgba(0,0,0,.28);
+
+  --lg-r-outer:24px;
+  --lg-r-inner:16px;
+  --lg-r-pill:999px;
+}
+
+/* ============================================================
+   ATMOSPHERIC MESH BACKGROUND
+   Painted via body::before/::after — no DOM changes needed.
+   ============================================================ */
+body[data-portal="true"]{
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(230,198,90,.16), transparent 50%),
+    radial-gradient(ellipse at 88% 92%, rgba(47,133,146,.34), transparent 55%),
+    radial-gradient(ellipse at 78% 18%, rgba(63,170,187,.18), transparent 45%),
+    radial-gradient(ellipse at 22% 78%, rgba(139,75,12,.22), transparent 50%),
+    linear-gradient(160deg,#041d22 0%,#062831 38%,#0a3d48 78%,#0d4a56 100%) !important;
+  background-attachment: fixed !important;
+  color:#fff;
+  position:relative;
+}
+body[data-portal="true"]::before,
+body[data-portal="true"]::after{
+  content:"";
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+}
+/* Floating mesh blobs (single ::before, multi-layered via box-shadow tricks won't work — use a real element) */
+body[data-portal="true"] .lg-atmos{
+  position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+}
+body[data-portal="true"] .lg-atmos__blob{
+  position:absolute;border-radius:50%;filter:blur(120px);mix-blend-mode:screen;will-change:transform;
+}
+body[data-portal="true"] .lg-atmos__blob--a{width:540px;height:540px;background:#E6C65A;opacity:.32;top:-160px;inset-inline-end:-160px;animation:lgFloatA 26s ease-in-out infinite;}
+body[data-portal="true"] .lg-atmos__blob--b{width:480px;height:480px;background:#2F8592;opacity:.42;bottom:-180px;inset-inline-start:-150px;animation:lgFloatB 32s ease-in-out infinite;}
+body[data-portal="true"] .lg-atmos__blob--c{width:380px;height:380px;background:#3FAABB;opacity:.22;top:38%;inset-inline-start:42%;animation:lgFloatC 38s ease-in-out infinite;}
+body[data-portal="true"] .lg-atmos__blob--d{width:320px;height:320px;background:#D4AF37;opacity:.18;top:62%;inset-inline-end:24%;animation:lgFloatD 28s ease-in-out infinite;}
+
+body[data-portal="true"] .lg-atmos__grid{
+  position:absolute;inset:0;opacity:.06;mix-blend-mode:overlay;
+  background-image:
+    linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.5) 1px, transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);
+  mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);
+}
+body[data-portal="true"] .lg-atmos__grain{
+  position:absolute;inset:0;opacity:.045;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/></svg>");
+}
+
+@keyframes lgFloatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,40px) scale(1.08)}}
+@keyframes lgFloatB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-40px) scale(1.06)}}
+@keyframes lgFloatC{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-70px,-50px) scale(1.12)}}
+@keyframes lgFloatD{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,60px) scale(.92)}}
+
+/* Lift app content above atmosphere */
+body[data-portal="true"] > *:not(.lg-atmos){position:relative;z-index:1;}
+
+/* ============================================================
+   GLASS UTILITIES (3 tiers) — usable on any markup
+   ============================================================ */
+body[data-portal="true"] .lg-glass{
+  background:var(--lg-tint-light);
+  backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  -webkit-backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  border:1px solid var(--lg-edge);
+  box-shadow:var(--lg-shadow-sm), var(--lg-edge-inner);
+  position:relative;isolation:isolate;
+}
+body[data-portal="true"] .lg-glass::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:var(--lg-specular-soft);
+}
+body[data-portal="true"] .lg-heavy{
+  background:var(--lg-tint-medium);
+  backdrop-filter:blur(var(--lg-blur-heavy)) saturate(var(--lg-sat));
+  -webkit-backdrop-filter:blur(var(--lg-blur-heavy)) saturate(var(--lg-sat));
+  border:1px solid var(--lg-edge-bright);
+  box-shadow:var(--lg-shadow-md), var(--lg-edge-inner);
+  position:relative;isolation:isolate;
+}
+body[data-portal="true"] .lg-heavy::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:var(--lg-specular);
+}
+body[data-portal="true"] .lg-crystal{
+  background:var(--lg-tint-strong);
+  backdrop-filter:blur(var(--lg-blur-soft)) saturate(220%);
+  -webkit-backdrop-filter:blur(var(--lg-blur-soft)) saturate(220%);
+  border:1px solid var(--lg-edge-bright);
+  box-shadow:var(--lg-shadow-md), inset 0 0 0 1px rgba(255,255,255,.12), inset 0 1px 0 rgba(255,255,255,.3);
+  position:relative;isolation:isolate;
+}
+body[data-portal="true"] .lg-crystal::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:var(--lg-specular-crystal);
+}
+
+/* ============================================================
+   COURSE HEADER — liquid blur bar
+   ============================================================ */
+body[data-portal="true"] .course-header{
+  background:rgba(4,22,27,.55) !important;
+  backdrop-filter:blur(26px) saturate(180%);
+  -webkit-backdrop-filter:blur(26px) saturate(180%);
+  border-bottom:1px solid rgba(255,255,255,.08) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 6px 18px rgba(0,0,0,.18);
+}
+
+/* Course switcher pill — glass + specular corner light (RTL) */
+body[data-portal="true"] .course-switcher-trigger{
+  background:var(--lg-tint-light) !important;
+  backdrop-filter:blur(10px) saturate(180%);
+  -webkit-backdrop-filter:blur(10px) saturate(180%);
+  border:1px solid rgba(255,255,255,.10) !important;
+  border-radius:var(--lg-r-pill) !important;
+  position:relative;isolation:isolate;overflow:hidden;
+}
+body[data-portal="true"] .course-switcher-trigger::before{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(circle at 0% 0%, rgba(255,255,255,.32), transparent 55%);
+  mix-blend-mode:screen;
+}
+body[data-portal="true"] .course-switcher-dot{color:var(--lg-gold-light) !important;}
+
+/* Header progress pill — "liquid in a glass tube" */
+body[data-portal="true"] .header-progress-pill{
+  background:rgba(255,255,255,.10) !important;
+  backdrop-filter:blur(10px) saturate(180%);
+  -webkit-backdrop-filter:blur(10px) saturate(180%);
+  border:1px solid rgba(255,255,255,.14) !important;
+  border-radius:50px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(0,0,0,.18);
+  position:relative;
+}
+body[data-portal="true"] .header-progress-bar{
+  background:rgba(0,0,0,.25) !important;
+  border-radius:999px !important;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.4) !important;
+  overflow:hidden;
+  position:relative;
+}
+body[data-portal="true"] .header-progress-fill{
+  background:linear-gradient(90deg,#D4AF37,#E6C65A) !important;
+  border-radius:999px !important;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,.4),
+    0 0 12px rgba(212,175,55,.5) !important;
+  position:relative;
+}
+/* Liquid sheen meniscus */
+body[data-portal="true"] .header-progress-fill::after{
+  content:"";position:absolute;top:0;bottom:0;width:18px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  animation:lgLiquidSheen 3.2s ease-in-out infinite;
+  mix-blend-mode:screen;
+}
+@keyframes lgLiquidSheen{
+  0%{inset-inline-start:-20%;opacity:0;}
+  20%{opacity:.85;}
+  80%{opacity:.85;}
+  100%{inset-inline-start:110%;opacity:0;}
+}
+
+/* Notification bell as crystal + gold-glow dot */
+body[data-portal="true"] .header-icon-btn[aria-label*="התראות"],
+body[data-portal="true"] .header-icon-btn[aria-label*="notifications"]{
+  background:var(--lg-tint-strong) !important;
+  backdrop-filter:blur(14px) saturate(220%);
+  -webkit-backdrop-filter:blur(14px) saturate(220%);
+  border:1px solid var(--lg-edge-bright) !important;
+  box-shadow:var(--lg-shadow-sm), inset 0 0 0 1px rgba(255,255,255,.12), inset 0 1px 0 rgba(255,255,255,.3) !important;
+  position:relative;
+}
+
+/* ============================================================
+   SIDEBAR — soft glass, concentric radii
+   ============================================================ */
+body[data-portal="true"] .sidebar{
+  background:var(--lg-tint-light) !important;
+  backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  -webkit-backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  border:1px solid var(--lg-edge) !important;
+  border-radius:28px !important;
+  box-shadow:var(--lg-shadow-md), var(--lg-edge-inner) !important;
+  position:relative;isolation:isolate;
+}
+body[data-portal="true"] .sidebar::before{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:var(--lg-specular-soft);z-index:0;
+}
+body[data-portal="true"] .sidebar > *{position:relative;z-index:1;}
+
+body[data-portal="true"] .sidebar-progress-bar,
+body[data-portal="true"] .progress-fill{position:relative;}
+body[data-portal="true"] .sidebar-progress-bar{
+  background:rgba(255,255,255,.08) !important;
+  border-radius:999px !important;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.3);
+  overflow:hidden;
+}
+
+/* Module — concentric inner card */
+body[data-portal="true"] .module{
+  background:rgba(255,255,255,.025) !important;
+  border:1px solid rgba(255,255,255,.06) !important;
+  border-radius:var(--lg-r-inner) !important;
+  overflow:hidden;
+}
+body[data-portal="true"] .module-header{
+  background:transparent !important;
+}
+body[data-portal="true"] .lesson-item{
+  border-radius:12px !important;
+  border:1px solid transparent !important;
+  transition:background .15s, border-color .15s !important;
+}
+body[data-portal="true"] .lesson-item:hover{
+  background:rgba(255,255,255,.04) !important;
+}
+body[data-portal="true"] .lesson-item.active{
+  background:linear-gradient(135deg,rgba(230,198,90,.14),rgba(212,175,55,.04)) !important;
+  border-color:rgba(230,198,90,.3) !important;
+}
+body[data-portal="true"] .lesson-item.completed{
+  opacity:.85;
+}
+body[data-portal="true"] .lesson-item.locked{opacity:.45;}
+
+/* ============================================================
+   CONTINUE-LEARNING HERO — heavy glass, concentric, specular bloom
+   ============================================================ */
+body[data-portal="true"] .wd-continue-hero{
+  background:linear-gradient(135deg, rgba(0,59,70,.7), rgba(10,61,72,.45)) !important;
+  backdrop-filter:blur(var(--lg-blur-heavy)) saturate(var(--lg-sat));
+  -webkit-backdrop-filter:blur(var(--lg-blur-heavy)) saturate(var(--lg-sat));
+  border:1px solid var(--lg-edge-bright) !important;
+  border-radius:28px !important;
+  box-shadow:
+    var(--lg-shadow-lg),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 0 0 1px rgba(212,175,55,.12) !important;
+  position:relative;isolation:isolate;overflow:hidden;
+}
+/* Top-left specular bloom + gold inner-edge */
+body[data-portal="true"] .wd-continue-hero::before{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255,255,255,.28), transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(212,175,55,.18), transparent 55%);
+  mix-blend-mode:screen;z-index:0;
+}
+body[data-portal="true"] .wd-continue-hero > *{position:relative;z-index:1;}
+
+body[data-portal="true"] .wd-hero-thumb{
+  border-radius:18px !important;
+  box-shadow:0 12px 32px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.12) !important;
+  overflow:hidden;
+}
+body[data-portal="true"] .wd-hero-thumb-play{
+  background:linear-gradient(135deg, rgba(212,175,55,.95), rgba(230,198,90,.85)) !important;
+  border-radius:14px !important;
+  box-shadow:0 8px 22px rgba(212,175,55,.5), inset 0 1px 0 rgba(255,255,255,.4) !important;
+}
+
+body[data-portal="true"] .wd-hero-cta{
+  background:linear-gradient(135deg,rgba(230,198,90,.85),rgba(212,175,55,.7)) !important;
+  border:1px solid rgba(230,198,90,.5) !important;
+  border-radius:var(--lg-r-pill) !important;
+  box-shadow:
+    0 12px 28px rgba(212,175,55,.35),
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -1px 0 rgba(0,0,0,.15) !important;
+  color:#1a1205 !important;
+  position:relative;overflow:hidden;
+}
+body[data-portal="true"] .wd-hero-cta::before{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(180deg, rgba(255,255,255,.32), transparent 50%);
+}
+
+body[data-portal="true"] .wd-hero-progress-bar{
+  background:rgba(0,0,0,.28) !important;
+  border-radius:999px !important;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.4) !important;
+  overflow:hidden;
+}
+body[data-portal="true"] .wd-hero-progress-fill{
+  background:linear-gradient(90deg,#D4AF37,#E6C65A) !important;
+  border-radius:999px !important;
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.4), 0 0 12px rgba(212,175,55,.5) !important;
+}
+
+/* ============================================================
+   STATS ROW
+   ============================================================ */
+body[data-portal="true"] .wd-stat-card{
+  background:var(--lg-tint-light) !important;
+  backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  -webkit-backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  border:1px solid var(--lg-edge) !important;
+  border-radius:24px !important;
+  box-shadow:var(--lg-shadow-sm), var(--lg-edge-inner) !important;
+  position:relative;isolation:isolate;overflow:hidden;
+}
+body[data-portal="true"] .wd-stat-card::before{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,255,255,.22), transparent 55%),
+    var(--lg-specular-soft);
+  mix-blend-mode:screen;
+}
+body[data-portal="true"] .wd-stat-card > *{position:relative;z-index:1;}
+body[data-portal="true"] .wd-stat-icon,
+body[data-portal="true"] .wd-card-icon{
+  border-radius:14px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 4px 10px rgba(0,0,0,.15);
+}
+
+/* ============================================================
+   BULLETIN / WD-CARD / AFFILIATE-COMPACT
+   ============================================================ */
+body[data-portal="true"] .wd-card,
+body[data-portal="true"] .wd-bulletin-card,
+body[data-portal="true"] .wd-affiliate-compact{
+  background:var(--lg-tint-light) !important;
+  backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  -webkit-backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  border:1px solid var(--lg-edge) !important;
+  border-radius:24px !important;
+  box-shadow:var(--lg-shadow-sm), var(--lg-edge-inner) !important;
+  position:relative;isolation:isolate;
+}
+body[data-portal="true"] .wd-card::before,
+body[data-portal="true"] .wd-bulletin-card::before,
+body[data-portal="true"] .wd-affiliate-compact::before{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(circle at 0% 0%, rgba(255,255,255,.18), transparent 55%);
+  mix-blend-mode:screen;
+}
+body[data-portal="true"] .wd-card > *,
+body[data-portal="true"] .wd-bulletin-card > *,
+body[data-portal="true"] .wd-affiliate-compact > *{position:relative;z-index:1;}
+
+/* Affiliate banner — gold-tinted glass with concentric icon */
+body[data-portal="true"] .wd-affiliate-compact{
+  background:linear-gradient(135deg, rgba(212,175,55,.12), rgba(230,198,90,.04)) !important;
+  border:1px solid rgba(230,198,90,.28) !important;
+}
+
+/* ============================================================
+   TABS (player) — concentric, glass header
+   ============================================================ */
+body[data-portal="true"] .tabs-header{
+  background:rgba(0,0,0,.18) !important;
+  border-radius:18px !important;
+  border:1px solid rgba(255,255,255,.06) !important;
+  backdrop-filter:blur(14px) saturate(160%);
+  -webkit-backdrop-filter:blur(14px) saturate(160%);
+}
+body[data-portal="true"] .tab-btn{
+  border-radius:14px !important;
+  transition:background .2s, color .2s !important;
+}
+body[data-portal="true"] .tab-btn.active{
+  background:linear-gradient(135deg, rgba(230,198,90,.2), rgba(212,175,55,.08)) !important;
+  border:1px solid rgba(230,198,90,.3) !important;
+  color:#fff !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 4px 12px rgba(212,175,55,.15) !important;
+}
+
+/* Lesson navigation bar */
+body[data-portal="true"] .video-nav-bar{
+  background:var(--lg-tint-light) !important;
+  backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  -webkit-backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+  border:1px solid var(--lg-edge) !important;
+  border-radius:20px !important;
+  box-shadow:var(--lg-shadow-sm), var(--lg-edge-inner) !important;
+}
+body[data-portal="true"] .video-nav-btn{
+  border-radius:14px !important;
+}
+body[data-portal="true"] .video-nav-btn.next{
+  background:linear-gradient(135deg, rgba(230,198,90,.7), rgba(212,175,55,.5)) !important;
+  border:1px solid rgba(230,198,90,.4) !important;
+  color:#1a1205 !important;
+  box-shadow:0 8px 22px rgba(212,175,55,.3), inset 0 1px 0 rgba(255,255,255,.3) !important;
+}
+
+/* ============================================================
+   FAB — crystal glass with gold pulse
+   ============================================================ */
+body[data-portal="true"] .feedback-fab{
+  background:var(--lg-tint-strong) !important;
+  backdrop-filter:blur(14px) saturate(220%);
+  -webkit-backdrop-filter:blur(14px) saturate(220%);
+  border:1px solid var(--lg-edge-bright) !important;
+  border-radius:50% !important;
+  box-shadow:
+    var(--lg-shadow-md),
+    inset 0 0 0 1px rgba(255,255,255,.12),
+    inset 0 1px 0 rgba(255,255,255,.3),
+    0 0 0 0 rgba(229,181,71,.45) !important;
+  color:#fff !important;
+  position:fixed;
+  isolation:isolate;
+  animation:lgFabPulse 2.4s ease-in-out infinite;
+}
+body[data-portal="true"] .feedback-fab::before{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:var(--lg-specular-crystal);
+}
+body[data-portal="true"] .feedback-fab i{
+  background:linear-gradient(180deg, #F0D88A, #C99926);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.25)) drop-shadow(0 0 6px rgba(212,175,55,.55));
+}
+@keyframes lgFabPulse{
+  0%,100%{
+    box-shadow:
+      var(--lg-shadow-md),
+      inset 0 0 0 1px rgba(255,255,255,.12),
+      inset 0 1px 0 rgba(255,255,255,.3),
+      0 0 18px 2px rgba(229,181,71,.55),
+      0 0 0 0 rgba(229,181,71,.45);
+  }
+  50%{
+    box-shadow:
+      var(--lg-shadow-md),
+      inset 0 0 0 1px rgba(255,255,255,.16),
+      inset 0 1px 0 rgba(255,255,255,.4),
+      0 0 26px 5px rgba(229,181,71,.75),
+      0 0 0 12px rgba(229,181,71,.0);
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY FALLBACKS
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  body[data-portal="true"] .lg-atmos__blob,
+  body[data-portal="true"] .header-progress-fill::after,
+  body[data-portal="true"] .feedback-fab{
+    animation:none !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce){
+  body[data-portal="true"] .course-header,
+  body[data-portal="true"] .sidebar,
+  body[data-portal="true"] .wd-continue-hero,
+  body[data-portal="true"] .wd-stat-card,
+  body[data-portal="true"] .wd-card,
+  body[data-portal="true"] .wd-bulletin-card,
+  body[data-portal="true"] .wd-affiliate-compact,
+  body[data-portal="true"] .tabs-header,
+  body[data-portal="true"] .video-nav-bar,
+  body[data-portal="true"] .feedback-fab,
+  body[data-portal="true"] .course-switcher-trigger,
+  body[data-portal="true"] .header-progress-pill,
+  body[data-portal="true"] .lg-glass,
+  body[data-portal="true"] .lg-heavy,
+  body[data-portal="true"] .lg-crystal{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    background:rgba(10,40,46,.92) !important;
+  }
+  body[data-portal="true"] .course-header::before,
+  body[data-portal="true"] .sidebar::before,
+  body[data-portal="true"] .wd-continue-hero::before,
+  body[data-portal="true"] .wd-stat-card::before,
+  body[data-portal="true"] .wd-card::before,
+  body[data-portal="true"] .wd-bulletin-card::before,
+  body[data-portal="true"] .wd-affiliate-compact::before,
+  body[data-portal="true"] .feedback-fab::before,
+  body[data-portal="true"] .course-switcher-trigger::before,
+  body[data-portal="true"] .lg-glass::before,
+  body[data-portal="true"] .lg-heavy::before,
+  body[data-portal="true"] .lg-crystal::before{display:none;}
+}
+
+/* Focus-visible — gold ring, RTL-safe */
+body[data-portal="true"] button:focus-visible,
+body[data-portal="true"] a:focus-visible,
+body[data-portal="true"] input:focus-visible,
+body[data-portal="true"] textarea:focus-visible{
+  outline:3px solid var(--lg-gold) !important;
+  outline-offset:2px !important;
+}

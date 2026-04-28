@@ -22,7 +22,7 @@
           <header class="mv1-hd">
             <button class="mv1-hd__menu" aria-label="menu"><i class="fa-solid fa-bars"></i></button>
             <a class="mv1-hd__brand" href="#">
-              <img src="../../assets/logo-square.png" alt="">
+              <img src="../assets/logo-square.png" alt="">
               <span>בית <b>המטפלים</b></span>
             </a>
             <button class="mv1-hd__bell" aria-label="notifications"><i class="fa-regular fa-bell"></i><span class="mv1-hd__dot"></span></button>

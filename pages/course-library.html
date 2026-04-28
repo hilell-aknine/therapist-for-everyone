@@ -29,7 +29,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
     <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
     <link rel="stylesheet" href="../css/theme.css">
-    <link rel="stylesheet" href="../css/portal.css?v=lg6">
     <script src="../js/theme-toggle.js" defer></script>
     <!-- YouTube IFrame API: enables Space → play/pause + Ctrl+S → insert timestamp into notes -->
     <script src="https://www.youtube.com/iframe_api" async></script>
@@ -68,18 +67,7 @@
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
-
-            /* === Design tokens (UX overhaul 2026-04-27) === */
-            --color-primary: #1A4F4F;
-            --color-accent: #E5B547;
-            --color-text-primary: #FFFFFF;
-            --color-text-secondary: rgba(255,255,255,0.75);
-            --color-text-secondary-strong: #D4E5E5; /* WCAG AA on dark teal */
-            --radius-card: 16px;
-            --shadow-card: 0 2px 8px rgba(0,0,0,0.08);
-            --spacing-section: 32px;
-            --focus-ring: 3px solid #E5B547;
-
+        
             /* === Theme Bridge === */
             --light-gray: var(--t-bg);
             --bg-primary: var(--t-bg-card);
@@ -116,80 +104,6 @@
             background: var(--light-gray);
             color: var(--text-dark);
             line-height: 1.6;
-            overflow-x: hidden;
-            max-width: 100%;
-        }
-
-        /* ===== Global micro-interactions (UX overhaul 2026-04-27) ===== */
-        button, a, .wd-card, .wd-stat-card, .wd-affiliate-compact, .wd-podium-spot,
-        .wd-bulletin-msg, .header-intro-btn, .back-to-site, .header-training-cta,
-        .header-continue-cta, .feedback-fab, .mobile-toggle, .focus-mode-toggle,
-        .wd-hero-cta, .wd-intro-watched-btn, .wd-intro-mini-btn {
-            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
-                        box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
-        }
-
-        /* ===== Global focus-visible (a11y) ===== */
-        *:focus-visible {
-            outline: var(--focus-ring);
-            outline-offset: 2px;
-            border-radius: 6px;
-        }
-        /* Inputs already have a custom focus style — keep theirs */
-        input:focus-visible, textarea:focus-visible {
-            outline: none;
-        }
-
-        /* ===== Skeleton loaders (replace "נטען..." text) ===== */
-        .skeleton {
-            display: inline-block;
-            background: linear-gradient(90deg,
-                var(--t-bg-secondary, #f0f2f5) 0%,
-                var(--t-bg-card-hover, #e4e7ec) 50%,
-                var(--t-bg-secondary, #f0f2f5) 100%);
-            background-size: 200% 100%;
-            animation: skeleton-shimmer 1.4s ease-in-out infinite;
-            border-radius: 6px;
-            color: transparent;
-            user-select: none;
-        }
-        .skeleton.skeleton-line { height: 0.95em; min-width: 80px; }
-        .skeleton.skeleton-title { height: 1.4em; width: 70%; min-width: 180px; }
-        @keyframes skeleton-shimmer {
-            0%   { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .skeleton { animation: none; }
-        }
-
-        /* ===== Tooltip on hover for icon-only buttons ===== */
-        [data-tooltip] {
-            position: relative;
-        }
-        [data-tooltip]::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: calc(100% + 6px);
-            left: 50%;
-            transform: translateX(-50%) translateY(4px);
-            background: rgba(0, 30, 36, 0.95);
-            color: #fff;
-            font-size: 0.72rem;
-            font-weight: 500;
-            padding: 0.35rem 0.6rem;
-            border-radius: 6px;
-            white-space: nowrap;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.18s ease, transform 0.18s ease;
-            z-index: 250;
-            font-family: 'Heebo', sans-serif;
-        }
-        [data-tooltip]:hover::after,
-        [data-tooltip]:focus-visible::after {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
         }
 
         /* ===== Course Header ===== */
@@ -224,17 +138,8 @@
         }
 
         .logo-img {
-            height: 32px;
+            height: 34px;
             width: auto;
-        }
-
-        .header-brand-name {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            white-space: nowrap;
-            margin-right: 0.4rem;
-            font-family: 'Heebo', sans-serif;
         }
 
         .header-separator {
@@ -395,14 +300,9 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 0.6rem;
             flex-shrink: 0;
         }
-        /* Header continue CTA — replaced by hero "המשך מאיפה שהפסקת" section. Kept hidden for backwards compat. */
-        #headerContinueBtn { display: none !important; }
-        /* Center progress pill — moved into hero. Kept hidden for backwards compat. */
-        .header-center .header-progress-pill,
-        .header-center .header-center-sep { display: none; }
 
         .header-intro-btn {
             display: flex;
@@ -602,8 +502,8 @@
         .header-user-menu {
             display: none;
             align-items: center;
-            gap: 12px;
-            margin-left: 0;
+            gap: 0.6rem;
+            margin-left: 0.5rem;
         }
         .header-user-menu.visible { display: flex; }
 
@@ -3362,15 +3262,8 @@
             align-items: center;
             overflow: hidden;
         }
-        .wd-continue-hero > .wd-hero-thumb {
-            flex: 0 0 40%;
-            min-width: 480px;
-            max-width: 560px;
-        }
+        .wd-continue-hero > .wd-hero-thumb { flex: 0 0 220px; max-width: 280px; }
         .wd-continue-hero > .wd-hero-content { flex: 1; min-width: 0; }
-        @media (max-width: 1100px) {
-            .wd-continue-hero > .wd-hero-thumb { min-width: 360px; }
-        }
         .wd-continue-hero::before {
             content: '';
             position: absolute;
@@ -3413,8 +3306,8 @@
             gap: 0.35rem;
         }
         .wd-hero-label {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.85);
+            font-size: 0.72rem;
+            opacity: 0.75;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 600;
@@ -3444,26 +3337,21 @@
             font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(212,175,55,0.35);
+            transition: all 0.2s;
             align-self: flex-start;
         }
         .wd-hero-cta:hover {
             transform: translateY(-2px);
-            background: linear-gradient(135deg, #C49E2C 0%, #D8B84E 100%);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-        }
-        .wd-hero-cta:active {
-            transform: translateY(0);
+            box-shadow: 0 6px 20px rgba(212,175,55,0.5);
         }
         .wd-hero-progress {
             margin-top: 0.85rem;
             display: flex;
             flex-direction: column;
-            gap: 0.4rem;
-            font-size: 1rem;
-            color: rgba(255,255,255,0.9);
-            font-weight: 500;
+            gap: 0.35rem;
+            font-size: 0.78rem;
+            opacity: 0.85;
         }
         .wd-hero-progress-bar {
             height: 5px;
@@ -3494,52 +3382,30 @@
         .wd-stat-card {
             background: var(--t-bg-card, #fff);
             border: 1px solid var(--t-border, #e5e7eb);
-            border-radius: 14px;
-            padding: 1rem 0.85rem 0.9rem;
+            border-radius: 12px;
+            padding: 0.9rem 0.7rem;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            transition: all 0.2s;
         }
         .wd-stat-card:hover {
             transform: translateY(-2px);
-            background: #F8F9FA;
-            border-color: var(--t-border-strong, rgba(47,133,146,0.3));
             box-shadow: 0 4px 14px rgba(15,40,48,0.08);
         }
-        [data-theme="dark"] .wd-stat-card:hover {
-            background: var(--t-bg-card-hover, #153842);
-        }
-        .wd-stat-toplabel {
-            font-size: 0.72rem;
-            color: var(--text-secondary, #5A6B70);
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            margin-bottom: 0.1rem;
-        }
         .wd-stat-icon {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
+            margin-bottom: 0.25rem;
             line-height: 1;
-            color: var(--muted-teal, #00606B);
-            margin-bottom: 0.15rem;
         }
-        .wd-stat-icon.is-flame { color: #E55D3C; }
-        .wd-stat-icon.is-clock { color: var(--muted-teal, #00606B); }
-        .wd-stat-icon.is-book  { color: var(--gold, #D4AF37); }
         .wd-stat-value {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: var(--text-primary, #003B46);
             line-height: 1.1;
-            font-feature-settings: "tnum"; /* tabular numerals */
-            unicode-bidi: plaintext; /* keep "כ-15.5 שעות" rendering RTL-correctly */
         }
-        .wd-stat-context {
-            font-size: 0.74rem;
+        .wd-stat-label {
+            font-size: 0.72rem;
             color: var(--text-secondary, #5A6B70);
-            margin-top: 0.1rem;
+            margin-top: 0.15rem;
             font-weight: 500;
         }
         @media (max-width: 600px) {
@@ -3563,21 +3429,6 @@
         .wd-bulletin-card.collapsed .wd-bulletin-dots { display: none; }
         .wd-bulletin-card.collapsed .wd-bulletin-toggle::after { content: " ↓"; }
         .wd-bulletin-card:not(.collapsed) .wd-bulletin-toggle::after { content: " ↑"; }
-        /* Empty state — only shown when wdBulletinData is empty */
-        .wd-bulletin-empty {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            padding: 1.1rem 1rem;
-            text-align: center;
-            color: var(--text-secondary, #5A6B70);
-            font-size: 0.9rem;
-            justify-content: center;
-        }
-        .wd-bulletin-empty i {
-            font-size: 1.4rem;
-            color: var(--gold, #D4AF37);
-        }
 
         /* ===== Compact intro video card (after first watch) ===== */
         .wd-intro-watched-btn {
@@ -4120,12 +3971,11 @@
             .wd-content { padding: 0.8rem; gap: 0.8rem; }
         }
 
-        /* ===== Feedback FAB (bottom-right, stacked above mobile-toggle) ===== */
+        /* ===== Feedback FAB (compact: icon-only on desktop too, per proposed UX) ===== */
         .feedback-fab {
             position: fixed;
-            bottom: 5.5rem; /* sits above the mobile-toggle on mobile, alone on desktop */
-            right: 1.5rem;
-            left: auto;
+            bottom: 1.5rem;
+            left: 1.5rem;
             z-index: 190;
             display: flex;
             align-items: center;
@@ -4144,9 +3994,6 @@
             cursor: pointer;
             box-shadow: 0 4px 14px var(--gold-glow);
             transition: all 0.3s;
-        }
-        @media (min-width: 1025px) {
-            .feedback-fab { bottom: 1.5rem; }
         }
         .feedback-fab span { display: none; }
         .feedback-fab:hover {
@@ -4374,23 +4221,13 @@
     </script>
     <!-- === /SEO Tags === -->
 </head>
-<body data-portal="true">
-    <!-- Liquid Glass atmospheric mesh -->
-    <div class="lg-atmos" aria-hidden="true">
-        <div class="lg-atmos__blob lg-atmos__blob--a"></div>
-        <div class="lg-atmos__blob lg-atmos__blob--b"></div>
-        <div class="lg-atmos__blob lg-atmos__blob--c"></div>
-        <div class="lg-atmos__blob lg-atmos__blob--d"></div>
-        <div class="lg-atmos__grid"></div>
-        <div class="lg-atmos__grain"></div>
-    </div>
+<body>
     <!-- Course Header -->
     <header class="course-header">
         <!-- RIGHT GROUP: Logo + Course Title -->
         <div class="header-right">
-            <a href="../index.html" class="header-brand" aria-label="בית המטפלים — דף הבית">
-                <img src="../assets/logo.png" alt="" class="logo-img">
-                <span class="header-brand-name">בית המטפלים</span>
+            <a href="../index.html" class="header-brand">
+                <img src="../assets/logo.png" alt="בית המטפלים" class="logo-img">
             </a>
             <div class="header-separator"></div>
             <span class="header-course-name">קורס NLP - יסודות ומעשה</span>
@@ -4445,8 +4282,8 @@
                 <i class="fa-solid fa-graduation-cap"></i>
                 <span>לקבלת פרטים לתוכנית הכשרה</span>
             </a>
-            <a href="../index.html" class="back-to-site" data-tooltip="חזרה לאתר" aria-label="חזרה לאתר">
-                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            <a href="../index.html" class="back-to-site" title="חזרה לאתר" aria-label="חזרה לאתר">
+                <i class="fa-solid fa-arrow-right"></i>
                 <span>חזרה לאתר</span>
             </a>
 
@@ -4458,8 +4295,8 @@
 
             <!-- User menu (shown when authenticated) -->
             <div class="header-user-menu" id="headerUserMenu" data-auth-pending>
-                <button class="header-notif-btn" id="headerNotifBtn" data-tooltip="הודעות" aria-label="הודעות">
-                    <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                <button class="header-notif-btn" id="headerNotifBtn" title="הודעות" aria-label="הודעות">
+                    <i class="fa-solid fa-bell"></i>
                     <span class="header-notif-badge" id="headerNotifBadge"></span>
                 </button>
                 <div class="header-user-wrapper">
@@ -4559,24 +4396,21 @@
 
                 <div class="wd-content">
                     <!-- Quick Stats Row -->
-                    <div class="wd-stats-row" role="list" aria-label="סטטיסטיקות למידה">
-                        <div class="wd-stat-card" role="listitem">
-                            <span class="wd-stat-toplabel">רצף יומי</span>
-                            <i class="fa-solid fa-fire wd-stat-icon is-flame" aria-hidden="true"></i>
-                            <div class="wd-stat-value" id="wdStatStreak"><span class="skeleton skeleton-line">—</span></div>
-                            <div class="wd-stat-context" id="wdStatStreakContext">השיא שלך: 0 ימים</div>
+                    <div class="wd-stats-row">
+                        <div class="wd-stat-card">
+                            <div class="wd-stat-icon">🔥</div>
+                            <div class="wd-stat-value" id="wdStatStreak">0</div>
+                            <div class="wd-stat-label">ימי רצף</div>
                         </div>
-                        <div class="wd-stat-card" role="listitem">
-                            <span class="wd-stat-toplabel">זמן לסיום הקורס</span>
-                            <i class="fa-regular fa-clock wd-stat-icon is-clock" aria-hidden="true"></i>
-                            <div class="wd-stat-value" id="wdStatTimeLeft"><span class="skeleton skeleton-line">—</span></div>
-                            <div class="wd-stat-context" id="wdStatTimeLeftContext">לפי קצב צפייה רגיל</div>
+                        <div class="wd-stat-card">
+                            <div class="wd-stat-icon">⏱️</div>
+                            <div class="wd-stat-value" id="wdStatTimeLeft">~16h</div>
+                            <div class="wd-stat-label">זמן שנותר</div>
                         </div>
-                        <div class="wd-stat-card" role="listitem">
-                            <span class="wd-stat-toplabel">מודולים שהושלמו</span>
-                            <i class="fa-solid fa-book-open wd-stat-icon is-book" aria-hidden="true"></i>
-                            <div class="wd-stat-value" id="wdStatModule"><span class="skeleton skeleton-line">—</span></div>
-                            <div class="wd-stat-context" id="wdStatModuleContext">במודול הנוכחי</div>
+                        <div class="wd-stat-card">
+                            <div class="wd-stat-icon">📚</div>
+                            <div class="wd-stat-value" id="wdStatModule">1/8</div>
+                            <div class="wd-stat-label">במודול הנוכחי</div>
                         </div>
                     </div>
 
@@ -4750,7 +4584,7 @@
                     <span id="notesToggleLabel">הצג הערות</span>
                 </button>
                 <!-- Focus mode toggle (desktop ≥1024px) -->
-                <button type="button" class="focus-mode-toggle" id="focusModeToggle" onclick="toggleFocusMode()" data-tooltip="מצב ריכוז (F)" aria-label="מצב ריכוז">
+                <button type="button" class="focus-mode-toggle" id="focusModeToggle" onclick="toggleFocusMode()" title="מצב ריכוז (F)" aria-label="מצב ריכוז">
                     <i class="fa-solid fa-expand"></i>
                 </button>
                 <div class="video-wrapper">
@@ -5046,13 +4880,13 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Mobile Toggle -->
-    <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="פתח/סגור תפריט שיעורים" aria-expanded="false" id="mobileSidebarToggle" data-tooltip="תפריט שיעורים">
-        <i class="fa-solid fa-list" aria-hidden="true"></i>
+    <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="פתח/סגור תפריט שיעורים" aria-expanded="false" id="mobileSidebarToggle">
+        <i class="fa-solid fa-list"></i>
     </button>
 
     <!-- Feedback FAB -->
-    <button class="feedback-fab" id="feedbackFab" onclick="openFeedbackModal()" aria-label="משוב ורעיונות" data-tooltip="טיפים ומשוב">
-        <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
+    <button class="feedback-fab" id="feedbackFab" onclick="openFeedbackModal()" aria-label="משוב ורעיונות">
+        <i class="fa-solid fa-lightbulb"></i>
         <span>משוב</span>
     </button>
 
@@ -7024,14 +6858,10 @@
                     }
                 });
             });
-            const totalMinutes = Math.round(secs / 60);
-            const hours = Math.floor(totalMinutes / 60);
-            const halfHour = (totalMinutes % 60) >= 30;
-            if (hours >= 1) {
-                const display = halfHour ? `${hours}.5` : `${hours}`;
-                return `כ-${display} שעות`;
-            }
-            if (totalMinutes >= 1) return `${totalMinutes} דק׳`;
+            const hours = Math.floor(secs / 3600);
+            const mins = Math.round((secs % 3600) / 60);
+            if (hours >= 1) return `~${hours}${mins >= 30 ? '.5' : ''}h`;
+            if (mins >= 1) return `${mins} דק׳`;
             return '0';
         }
 
@@ -7056,34 +6886,10 @@
             const timeEl   = document.getElementById('wdStatTimeLeft');
             const modEl    = document.getElementById('wdStatModule');
             if (!streakEl) return;
-
-            const streak = getStudyStreak();
-            streakEl.textContent = streak;
-
-            // Streak context — track personal best in localStorage
-            try {
-                const bestRaw = localStorage.getItem('study_streak_best');
-                let best = bestRaw ? parseInt(bestRaw, 10) || 0 : 0;
-                if (streak > best) {
-                    best = streak;
-                    localStorage.setItem('study_streak_best', String(best));
-                }
-                const ctxStreak = document.getElementById('wdStatStreakContext');
-                if (ctxStreak) {
-                    ctxStreak.textContent = best > 0
-                        ? `השיא שלך: ${best} ${best === 1 ? 'יום' : 'ימים'}`
-                        : 'התחל רצף — שיעור ביום';
-                }
-            } catch (e) {}
-
+            streakEl.textContent = getStudyStreak();
             timeEl.textContent = getRemainingTime();
-
             const modProg = getCurrentModuleProgress();
             modEl.textContent = modProg.label;
-            const ctxMod = document.getElementById('wdStatModuleContext');
-            if (ctxMod && typeof modules !== 'undefined' && modules[Math.max(0, modProg.idx - 1)]) {
-                ctxMod.textContent = `מודול ${modProg.idx} מתוך ${modules.length}`;
-            }
         }
 
         // ===== Bulletin collapsed-by-default toggle =====
@@ -7151,24 +6957,9 @@
         }
 
         function initWdBulletin() {
-            const card = document.getElementById('wdBulletinCard');
             const container = document.getElementById('wdBulletinMessages');
             const dotsContainer = document.getElementById('wdBulletinDots');
-            if (!container || !card) return;
-
-            // Empty state: hide the card entirely (alternative — uncomment to show empty state instead)
-            if (!Array.isArray(wdBulletinData) || wdBulletinData.length === 0) {
-                card.style.display = 'none';
-                clearInterval(wdBulletinInterval);
-                return;
-                // Alternative: empty-state message
-                // card.style.display = '';
-                // container.innerHTML = '<div class="wd-bulletin-empty"><i class="fa-solid fa-seedling"></i><span>אין מודעות חדשות 🌱</span></div>';
-                // dotsContainer.innerHTML = '';
-                // return;
-            }
-
-            card.style.display = '';
+            if (!container) return;
             container.innerHTML = wdBulletinData.map((msg, i) => {
                 const goldClass = msg.gold ? ' gold-highlight' : '';
                 const clickAttr = msg.onclick ? ' onclick="' + msg.onclick + '" role="link" tabindex="0"' : '';

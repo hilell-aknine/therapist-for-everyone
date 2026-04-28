@@ -71,11 +71,93 @@
     --g-border: rgba(255,255,255,.14);
     --g-border-bright: rgba(255,255,255,.22);
     --g-top-light: linear-gradient(180deg, rgba(255,255,255,.18) 0%, transparent 45%);
+
+    /* Liquid Glass tiers (Apple-style) */
+    --lg-blur-soft: 14px;
+    --lg-blur-med: 22px;
+    --lg-blur-heavy: 36px;
+    --lg-sat: 180%;
+
+    --lg-tint-light: rgba(255,255,255,.06);
+    --lg-tint-medium: rgba(255,255,255,.09);
+    --lg-tint-strong: rgba(255,255,255,.14);
+    --lg-tint-gold: rgba(212,175,55,.12);
+    --lg-tint-petrol: rgba(6,38,46,.55);
+
+    --lg-edge: rgba(255,255,255,.16);
+    --lg-edge-bright: rgba(255,255,255,.28);
+    --lg-edge-inner: inset 0 0 0 1px rgba(255,255,255,.06);
+
+    --lg-specular: linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.05) 28%, transparent 55%);
+    --lg-specular-soft: linear-gradient(180deg, rgba(255,255,255,.14) 0%, transparent 45%);
+    --lg-specular-crystal: linear-gradient(155deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.08) 22%, transparent 45%);
+
+    --lg-shadow-sm: 0 4px 14px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.2);
+    --lg-shadow-md: 0 12px 32px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.22);
+    --lg-shadow-lg: 0 28px 60px rgba(0,0,0,.38), 0 6px 14px rgba(0,0,0,.28);
+
+    /* Concentric radii */
+    --lg-r-outer: 24px;
+    --lg-r-inner: 16px;
+    --lg-r-pill: 999px;
   }
 
-  /* Glass base helper */
+  /* ==================== LIQUID GLASS UTILITIES ==================== */
+  /* Tier 1 — soft glass (panels, sidebars, large surfaces) */
+  .lg-glass{
+    background:var(--lg-tint-light);
+    backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+    -webkit-backdrop-filter:blur(var(--lg-blur-med)) saturate(var(--lg-sat));
+    border:1px solid var(--lg-edge);
+    box-shadow:var(--lg-shadow-sm), var(--lg-edge-inner);
+    position:relative;isolation:isolate;
+  }
+  .lg-glass::before{
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:var(--lg-specular-soft);
+  }
+
+  /* Tier 2 — heavy glass (hero, primary cards, modals) */
+  .lg-heavy{
+    background:var(--lg-tint-medium);
+    backdrop-filter:blur(var(--lg-blur-heavy)) saturate(var(--lg-sat));
+    -webkit-backdrop-filter:blur(var(--lg-blur-heavy)) saturate(var(--lg-sat));
+    border:1px solid var(--lg-edge-bright);
+    box-shadow:var(--lg-shadow-md), var(--lg-edge-inner);
+    position:relative;isolation:isolate;
+  }
+  .lg-heavy::before{
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:var(--lg-specular);
+  }
+
+  /* Tier 3 — crystal glass (FABs, action buttons, focal accents) */
+  .lg-crystal{
+    background:var(--lg-tint-strong);
+    backdrop-filter:blur(var(--lg-blur-soft)) saturate(220%);
+    -webkit-backdrop-filter:blur(var(--lg-blur-soft)) saturate(220%);
+    border:1px solid var(--lg-edge-bright);
+    box-shadow:var(--lg-shadow-md), inset 0 0 0 1px rgba(255,255,255,.12), inset 0 1px 0 rgba(255,255,255,.3);
+    position:relative;isolation:isolate;
+  }
+  .lg-crystal::before{
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:var(--lg-specular-crystal);
+  }
+
+  /* Glass base helper (legacy alias for .lg-glass) */
   .g{background:var(--g-surface);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border:1px solid var(--g-border);position:relative;isolation:isolate;}
   .g::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:var(--g-top-light);}
+
+  /* Reduced-transparency fallback (accessibility / Windows high-contrast / Safari setting) */
+  @media (prefers-reduced-transparency: reduce){
+    .lg-glass, .lg-heavy, .lg-crystal, .g{
+      backdrop-filter:none !important;
+      -webkit-backdrop-filter:none !important;
+      background:rgba(10,40,46,.92) !important;
+    }
+    .lg-glass::before, .lg-heavy::before, .lg-crystal::before, .g::before{display:none;}
+  }
 
   /* Buttons — reuse the Components · Buttons family */
   .btn{position:relative;display:inline-flex;align-items:center;gap:.45rem;padding:.55rem 1rem;border-radius:10px;font-family:'Heebo',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:-.01em;border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);cursor:pointer;text-decoration:none;transition:transform .2s,background .2s;isolation:isolate;overflow:hidden;white-space:nowrap;}
@@ -90,18 +172,38 @@
   .btn--icon{padding:.55rem .65rem;border-radius:50%;}
   .btn--sm{padding:.35rem .7rem;font-size:.72rem;border-radius:8px;}
 
-  /* ==================== ATMOSPHERIC BG LAYERS ==================== */
+  /* ==================== ATMOSPHERIC MESH BG ==================== */
   .atmos{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
   .atmos__base{position:absolute;inset:0;background:
-    radial-gradient(ellipse at 15% 10%,rgba(212,175,55,.14),transparent 55%),
-    radial-gradient(ellipse at 85% 90%,rgba(47,133,146,.32),transparent 55%),
-    linear-gradient(160deg,#041d22 0%,#062831 45%,#0a3d48 100%);}
-  .atmos__blob{position:absolute;border-radius:50%;filter:blur(110px);opacity:.3;mix-blend-mode:screen;}
-  .atmos__blob--a{width:500px;height:500px;background:#D4AF37;top:-140px;inset-inline-end:-140px;animation:floatA 24s ease-in-out infinite;}
-  .atmos__blob--b{width:460px;height:460px;background:#2F8592;bottom:-160px;inset-inline-start:-130px;animation:floatB 30s ease-in-out infinite;}
-  @keyframes floatA{0%,100%{transform:translate(0,0)}50%{transform:translate(-40px,30px)}}
-  @keyframes floatB{0%,100%{transform:translate(0,0)}50%{transform:translate(50px,-30px)}}
-  .atmos__grain{position:absolute;inset:0;opacity:.04;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/></svg>");}
+    radial-gradient(ellipse at 12% 8%, rgba(230,198,90,.16), transparent 50%),
+    radial-gradient(ellipse at 88% 92%, rgba(47,133,146,.34), transparent 55%),
+    radial-gradient(ellipse at 78% 18%, rgba(63,170,187,.18), transparent 45%),
+    radial-gradient(ellipse at 22% 78%, rgba(139,75,12,.22), transparent 50%),
+    linear-gradient(160deg, #041d22 0%, #062831 38%, #0a3d48 78%, #0d4a56 100%);}
+
+  /* Floating mesh blobs */
+  .atmos__blob{position:absolute;border-radius:50%;filter:blur(120px);mix-blend-mode:screen;will-change:transform;}
+  .atmos__blob--a{width:540px;height:540px;background:#E6C65A;opacity:.32;top:-160px;inset-inline-end:-160px;animation:floatA 26s ease-in-out infinite;}
+  .atmos__blob--b{width:480px;height:480px;background:#2F8592;opacity:.42;bottom:-180px;inset-inline-start:-150px;animation:floatB 32s ease-in-out infinite;}
+  .atmos__blob--c{width:380px;height:380px;background:#3FAABB;opacity:.22;top:38%;inset-inline-start:42%;animation:floatC 38s ease-in-out infinite;}
+  .atmos__blob--d{width:320px;height:320px;background:#D4AF37;opacity:.18;top:62%;inset-inline-end:24%;animation:floatD 28s ease-in-out infinite;}
+
+  @keyframes floatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,40px) scale(1.08)}}
+  @keyframes floatB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-40px) scale(1.06)}}
+  @keyframes floatC{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-70px,-50px) scale(1.12)}}
+  @keyframes floatD{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,60px) scale(.92)}}
+
+  /* Subtle grid overlay (Apple-style depth cue) */
+  .atmos__grid{position:absolute;inset:0;opacity:.06;mix-blend-mode:overlay;
+    background-image:
+      linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);}
+
+  /* Film grain */
+  .atmos__grain{position:absolute;inset:0;opacity:.045;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/></svg>");}
 
   /* ==================== FRAME LAYOUTS ==================== */
   .frame{position:relative;isolation:isolate;}
@@ -162,11 +264,11 @@
 </script>
 
 <!-- Variation modules will be injected here -->
-<script src="v1-balanced.js"></script>
-<script src="v2-cinematic.js"></script>
-<script src="v3-timeline.js"></script>
-<script src="mobile-v1-v2.js"></script>
-<script src="mobile-v3.js"></script>
+<script src="v1-balanced.js?v=lg5"></script>
+<script src="v2-cinematic.js?v=lg5"></script>
+<script src="v3-timeline.js?v=lg5"></script>
+<script src="mobile-v1-v2.js?v=lg5"></script>
+<script src="mobile-v3.js?v=lg5"></script>
 
 </body>
 </html>

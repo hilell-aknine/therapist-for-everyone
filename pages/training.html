@@ -681,13 +681,30 @@
             const btn = e.target.querySelector('button[type="submit"]');
             if (btn) { btn.disabled = true; btn.textContent = 'שולח...'; }
             try {
+                const utm = window.getUtmData ? window.getUtmData() : {};
+                const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
                 await window.ContactRequests.submit({
                     name: name,
                     full_name: name,
                     phone: phone,
                     request_type: 'training',
                     message: 'הרשמה להכשרת מטפלים',
-                    status: 'new'
+                    status: 'new',
+                    utm_source:   utm.utm_source   || null,
+                    utm_medium:   utm.utm_medium   || null,
+                    utm_campaign: utm.utm_campaign || null
+                }, null, 'contact_requests', {
+                    mirror_table: 'sales_leads',
+                    mirror_data: {
+                        full_name: name,
+                        phone: phone,
+                        stage: 'new_lead',
+                        call_attempts: 0,
+                        utm_source:   utm.utm_source   || null,
+                        utm_medium:   utm.utm_medium   || null,
+                        utm_campaign: utm.utm_campaign || null,
+                        landing_url:  (attribution && attribution.last && attribution.last.landing_url) || null
+                    }
                 });
                 localStorage.setItem('training-registered', 'true');
                 alert('תודה! נחזור אליך בהקדם.');

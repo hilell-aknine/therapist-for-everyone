@@ -1,9 +1,14 @@
 # Primer — Beit V'Metaplim
-> Last updated: 2026-04-26 by Claude Code
+> Last updated: 2026-04-28 by Claude Code
 
 ## Current State
-- **Status:** Active — Course-library proposed UX redesign shipped (Continue Learning hero, sidebar progressive disclosure, split notes, focus mode, keyboard shortcuts).
-- **Last task completed:** Course-library proposed UX redesign (2026-04-26, single big PR):
+- **Status:** Active — Training program leads now visible in admin CRM (3-bug fix).
+- **Last task completed:** Training program lead visibility fix (2026-04-28):
+  - **Bug 1 — RPC `admin_get_all_leads()` v3** (`supabase/migrations/20260428100000_admin_get_all_leads_v3.sql`): contact_request data (`request_type`, `message`) now LEFT JOIN LATERAL'd onto profile rows, so registered users who later filled the training form get the "טופס הכשרה" badge. Source 2 dedup also matches by email (not just phone). Before: training leads from registered users were invisible — phone-dedup excluded their contact_request and source 1 hardcoded `request_type=NULL`.
+  - **Bug 2 — `pages/training.html` mirror to sales_leads** (line 684): the training landing form now dual-writes via `submit-lead` Edge Function's `mirror_table` mechanism (contact_requests + sales_leads). Before: only contact_requests, so 0 of the 8 training leads in the backup reached Pipeline. Also captures UTM + landing_url.
+  - **Bug 3 — request_type filter** (`pages/admin.html` + `js/admin/admin-portal-questionnaires.js`): new dropdown "סוג ליד" in ניהול לידים tab (training/patient/general/course-feedback/portal_questionnaire). cache-buster bumped to `?v=5`.
+  - **Deploy:** code via `git push origin master` (Vercel auto-deploy), migration via `npx supabase db push --include-all`.
+- **Prior task — Course-library proposed UX redesign (2026-04-26, single big PR):**
   - **Header:** New primary CTA "המשך בשיעור הבא" (deep-petrol gradient, gold play icon, shows next-uncompleted lesson title). Old gold "תוכנית הכשרה" CTA demoted to outline secondary. "חזרה לאתר" → icon-only with title tooltip.
   - **Sidebar progressive disclosure:** `renderSyllabus()` now opens only the module containing `currentModuleIndex` (or first module with unfinished lessons for new users). `selectLesson()` collapses all other modules. New "↓ קפיצה לשיעור הנוכחי" teal pill appears once a lesson is active; scrolls active lesson into view + 1s gold pulse animation.
   - **Continue Learning hero:** Replaces old `.wd-banner`. Deep-petrol gradient with subtle SVG grid pattern. 220px thumbnail (mqdefault.jpg from YouTube CDN) + content (label/title/meta/CTA/progress bar). Three states: first-start ("התחילו את המסע"), in-progress ("השיעור הבא שלך"), all-done ("כל הכבוד! סיימת את הקורס").
@@ -34,6 +39,7 @@
 ## Recent Changes
 | Date | What Changed | Files Affected |
 |------|-------------|----------------|
+| 2026-04-28 | Training program lead visibility fix: RPC v3 surfaces contact_request data on profile rows, training.html mirrors to sales_leads (Pipeline), new request_type filter in admin | migration 20260428100000 (new), pages/training.html, pages/admin.html, js/admin/admin-portal-questionnaires.js |
 | 2026-04-20 | Patient form fix: added missing columns (military_role, referral_source, session_style, photo_url, commitment_confirmed, truth_confirmed). Updated WhatsApp to 972512940781. Better submit-lead error messages. Modal overflow fix. LMS design demo deployed. | patient-step4.html, admin-styles.css, demo-portal/*, 2 migrations |
 | 2026-04-19 | Dashboard consolidation (16→9 tabs), unified leads RPC, social cause legal docs, popup fixes (cooldown/RLS/scheduled/auth_wall), training CTA popup, performance (defer scripts), community audit, automation diagnostic button, CRM bot report templates updated | admin.html, admin-utils.js, admin-portal-questionnaires.js, admin-popups.js, popup-manager.js, course-library.html, components.css, crm-bot/analytics+reports, 10+ migrations |
 | 2026-04-16 | Analytics accuracy overhaul: real hero stats, traffic tab wired, demographics, error handling, Google leads fix, badge defaults | index.html, admin.html, admin-segments.js, admin-analytics.js, admin-state.js, migrations |

@@ -86,13 +86,19 @@ function renderPipeline() {
         (l.phone || '').includes(search) ||
         (l.email || '').toLowerCase().includes(search)
     );
+    const srcFilter = (typeof currentSourceFilter !== 'undefined') ? currentSourceFilter.pipeline : 'all';
+    if (srcFilter && srcFilter !== 'all') {
+        filtered = filtered.filter(l => leadMatchesSourceFilter(l, attributionMap.get('sales_leads:' + l.id), srcFilter));
+    }
 
     const tbody = document.getElementById('pipeline-table');
     resetSelectAll('select-all-pipeline');
     updateBulkBarFor('pipeline');
 
+    refreshSourceFilterDropdown('pipeline-source-filter', pipelineLeads, 'sales_leads', srcFilter);
+
     const isAdmin = window._userProfileRole === 'admin';
-    const colSpan = isAdmin ? 10 : 9;
+    const colSpan = isAdmin ? 11 : 10;
 
     // Hide admin-only columns for sales_rep
     document.querySelectorAll('.admin-only-col').forEach(el => el.style.display = isAdmin ? '' : 'none');
@@ -123,6 +129,7 @@ function renderPipeline() {
                 <td><strong>${escapeHtml(l.full_name || 'ללא שם')}</strong></td>
                 <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;" onclick="event.stopPropagation()">${l.phone}</a>` : '-'}</td>
                 <td><span class="status-badge stage-${l.stage}">${PIPELINE_STAGES[l.stage] || l.stage}</span></td>
+                <td>${renderSourceChip(l, attributionMap.get('sales_leads:' + l.id))}</td>
                 <td><div class="call-dots">${dots}</div></td>
                 ${isAdmin ? `<td style="font-size:0.82rem;">${assignedName ? `<span style="color:var(--muted-teal);font-weight:600;">${escapeHtml(assignedName)}</span>` : '<span style="color:var(--text-secondary);">—</span>'}</td>` : ''}
                 <td style="font-size:0.82rem;">${callback}</td>

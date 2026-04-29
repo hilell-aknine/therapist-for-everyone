@@ -229,6 +229,10 @@ function applyFiltered() {
     else if (pqFilters.dateRange === 'month') f = f.filter(q => isThisMonth(q.created_at));
     if (pqFilters.status !== 'all') f = f.filter(q => (q.status || 'new') === pqFilters.status);
     if (pqFilters.howFound !== 'all') f = f.filter(q => q.how_found === pqFilters.howFound);
+    const srcFilter = (typeof currentSourceFilter !== 'undefined') ? currentSourceFilter.portal_q : 'all';
+    if (srcFilter && srcFilter !== 'all') {
+        f = f.filter(q => leadMatchesSourceFilter(q, attributionMap.get('portal_questionnaires:' + q.id) || attributionMap.get('profiles:' + q.user_id), srcFilter));
+    }
     if (pqFilters.whyNlp !== 'all') f = f.filter(q => q.why_nlp === pqFilters.whyNlp);
     if (pqFilters.heat !== 'all') {
         if (pqFilters.heat === 'none') f = f.filter(q => !q.heat_level);
@@ -317,6 +321,8 @@ function renderPortalQuestionnaires() {
         return;
     }
 
+    refreshSourceFilterDropdown('portal-q-source-filter', portalQuestionnaires, 'portal_questionnaires', (typeof currentSourceFilter !== 'undefined') ? currentSourceFilter.portal_q : 'all');
+
     const groups = groupByDate(filtered);
     let html = '';
     for (const [group, items] of Object.entries(groups)) {
@@ -325,11 +331,11 @@ function renderPortalQuestionnaires() {
         html += items.map(q => {
             const st = q.status || 'new';
             const sc = q.fitScore || 0;
-            const src = q.how_found || q.utm_source || '—';
+            const attr = attributionMap.get('portal_questionnaires:' + q.id) || attributionMap.get('profiles:' + q.user_id);
             return `
                 <tr onclick="viewPortalQ('${q.id}')" style="cursor:pointer;">
                     <td><strong>${escapeHtml(q.full_name || '-')}</strong>${q.lead_source === 'contact_form' ? ` <span style="font-size:0.65rem;background:rgba(212,175,55,0.15);color:#D4AF37;padding:0.1rem 0.3rem;border-radius:4px;">טופס${q.request_type === "training" ? " הכשרה" : ""}</span>` : !q.has_questionnaire ? ' <span style="font-size:0.65rem;background:rgba(232,241,242,0.1);color:rgba(232,241,242,0.4);padding:0.1rem 0.3rem;border-radius:4px;">ללא שאלון</span>' : ''}</td>
-                    <td style="font-size:0.82rem;">${escapeHtml(src)}</td>
+                    <td>${renderSourceChip(q, attr)}</td>
                     <td>${q.phone ? `<a href="tel:${escapeHtml(q.phone)}" onclick="event.stopPropagation()">${escapeHtml(q.phone)}</a>` : '-'}</td>
                     <td style="font-size:0.85rem;">${escapeHtml(q.city || '-')}</td>
                     <td><span class="pq-score ${scoreClass(sc)}">${sc}</span></td>

@@ -17,10 +17,17 @@ function renderPatients() {
     let filtered = patients;
     if (currentPatientFilter !== 'all') filtered = filtered.filter(p => p.status === currentPatientFilter);
     if (search) filtered = filtered.filter(p => p.full_name?.toLowerCase().includes(search) || p.phone?.includes(search));
+    const srcFilter = currentSourceFilter.patients;
+    if (srcFilter && srcFilter !== 'all') {
+        filtered = filtered.filter(p => leadMatchesSourceFilter(p, attributionMap.get('patients:' + p.id), srcFilter));
+    }
 
     const tbody = document.getElementById('patients-table');
     resetSelectAll('select-all-patients');
     updateBulkBarFor('patients');
+
+    // Refresh source filter dropdown options based on full patients list (not filtered)
+    refreshSourceFilterDropdown('patients-source-filter', patients, 'patients', srcFilter);
 
     if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטופלים</td></tr>';
@@ -38,7 +45,7 @@ function renderPatients() {
                 <td><strong>${p.full_name}</strong></td>
                 <td><a href="tel:${p.phone}" style="color:var(--info);text-decoration:none;">${p.phone || '-'}</a></td>
                 <td>${p.city || '-'}</td>
-                <td style="font-size:0.82rem;">${escapeHtml(p.utm_source || '-')}</td>
+                <td>${renderSourceChip(p, attributionMap.get('patients:' + p.id))}</td>
                 <td>${p.agreement_signed_at ? '<span style="color:#27ae60;">✅</span>' : '<span style="color:rgba(232,241,242,0.4);">⚠️</span>'}</td>
                 <td><span class="status-badge status-${p.status}">${statusLabel(p.status)}</span></td>
                 <td>${formatDate(p.created_at)}</td>

@@ -11,13 +11,19 @@ function renderTherapists() {
     let filtered = therapists;
     if (currentTherapistFilter !== 'all') filtered = filtered.filter(t => t.status === currentTherapistFilter);
     if (search) filtered = filtered.filter(t => t.full_name?.toLowerCase().includes(search) || t.phone?.includes(search));
+    const srcFilter = currentSourceFilter.therapists;
+    if (srcFilter && srcFilter !== 'all') {
+        filtered = filtered.filter(t => leadMatchesSourceFilter(t, attributionMap.get('therapists:' + t.id), srcFilter));
+    }
 
     const tbody = document.getElementById('therapists-table');
     resetSelectAll('select-all-therapists');
     updateBulkBarFor('therapists');
 
+    refreshSourceFilterDropdown('therapists-source-filter', therapists, 'therapists', srcFilter);
+
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטפלים</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין מטפלים</td></tr>';
         return;
     }
 
@@ -25,7 +31,7 @@ function renderTherapists() {
     let html = '';
     for (const [group, items] of Object.entries(groups)) {
         if (items.length === 0) continue;
-        html += `<tr class="date-group-row"><td colspan="9"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+        html += `<tr class="date-group-row"><td colspan="10"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
         html += items.map(t => `
             <tr>
                 <td class="lead-checkbox"><input type="checkbox" value="${t.id}" onchange="updateBulkBarFor('therapists')"></td>
@@ -33,6 +39,7 @@ function renderTherapists() {
                 <td><a href="tel:${t.phone}" style="color:var(--info);text-decoration:none;">${t.phone || '-'}</a></td>
                 <td>${(Array.isArray(t.specializations) ? t.specializations.join(', ') : t.specialization) || '-'}</td>
                 <td style="text-align:center;">${t.experience_years || 0} שנים</td>
+                <td>${renderSourceChip(t, attributionMap.get('therapists:' + t.id))}</td>
                 <td>${t.agreement_signed_at ? '<span style="color:#27ae60;">✅</span>' : '<span style="color:rgba(232,241,242,0.4);">⚠️</span>'}</td>
                 <td><span class="status-badge status-${t.status}">${statusLabel(t.status)}</span></td>
                 <td>${formatDate(t.created_at)}</td>

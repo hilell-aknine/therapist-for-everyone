@@ -10,13 +10,19 @@ function renderLeads() {
     const search = document.getElementById('leads-search')?.value?.toLowerCase() || '';
     let filtered = leads;
     if (search) filtered = filtered.filter(l => l.full_name?.toLowerCase().includes(search) || l.email?.toLowerCase().includes(search));
+    const srcFilter = currentSourceFilter.leads;
+    if (srcFilter && srcFilter !== 'all') {
+        filtered = filtered.filter(l => leadMatchesSourceFilter(l, attributionMap.get('profiles:' + l.id), srcFilter));
+    }
 
     const tbody = document.getElementById('leads-table');
     resetSelectAll('select-all-leads-reg');
     updateBulkBarFor('leads');
 
+    refreshSourceFilterDropdown('leads-source-filter', leads, 'profiles', srcFilter);
+
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-user-plus"></i><br>אין נרשמים</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-user-plus"></i><br>אין נרשמים</td></tr>';
         return;
     }
 
@@ -24,7 +30,7 @@ function renderLeads() {
     let html = '';
     for (const [group, items] of Object.entries(groups)) {
         if (items.length === 0) continue;
-        html += `<tr class="date-group-row"><td colspan="7"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+        html += `<tr class="date-group-row"><td colspan="8"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
         html += items.map(l => `
             <tr>
                 <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('leads')"></td>
@@ -32,6 +38,7 @@ function renderLeads() {
                 <td>${l.phone ? `<a href="tel:${l.phone}">${l.phone}</a>` : '-'}</td>
                 <td>${l.email || '-'}</td>
                 <td>${l.role ? `<span class="role-badge role-${l.role}">${roleLabel(l.role)}</span>` : ''}</td>
+                <td>${renderSourceChip(l, attributionMap.get('profiles:' + l.id))}</td>
                 <td>${formatDate(l.created_at)}</td>
                 <td class="action-btns">
                     <div class="row-menu" id="menu-l-${l.id}">
@@ -101,13 +108,19 @@ function renderContactLeads() {
     else if (currentContactFilter === 'contacted') filtered = filtered.filter(l => (l.status === 'contacted' || l.status === 'converted') && l.request_type !== 'course-feedback');
     else if (currentContactFilter === 'feedback') filtered = filtered.filter(l => l.request_type === 'course-feedback');
     if (search) filtered = filtered.filter(l => (l.name || l.full_name || '').toLowerCase().includes(search) || (l.phone || '').includes(search));
+    const srcFilter = currentSourceFilter.contact_leads;
+    if (srcFilter && srcFilter !== 'all') {
+        filtered = filtered.filter(l => leadMatchesSourceFilter(l, attributionMap.get('contact_requests:' + l.id), srcFilter));
+    }
 
     const tbody = document.getElementById('contact-leads-table');
     resetSelectAll('select-all-contact-leads');
     updateBulkBarFor('contact-leads');
 
+    refreshSourceFilterDropdown('contact-leads-source-filter', contactLeads, 'contact_requests', srcFilter);
+
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין לידים</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fa-solid fa-inbox"></i><br>אין לידים</td></tr>';
         return;
     }
 
@@ -115,7 +128,7 @@ function renderContactLeads() {
     let html = '';
     for (const [group, items] of Object.entries(groups)) {
         if (items.length === 0) continue;
-        html += `<tr class="date-group-row"><td colspan="8"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
+        html += `<tr class="date-group-row"><td colspan="9"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
         html += items.map(l => `
             <tr>
                 <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('contact-leads')"></td>
@@ -123,6 +136,7 @@ function renderContactLeads() {
                 <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;">${l.phone}</a>` : '-'}</td>
                 <td><span class="stat-icon ${requestTypeClass(l.request_type)}" style="width:auto;height:auto;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;display:inline-flex;">${requestTypeLabel(l.request_type)}</span></td>
                 <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(l.message || '').replace(/"/g, '&quot;')}">${l.message || '-'}</td>
+                <td>${renderSourceChip(l, attributionMap.get('contact_requests:' + l.id))}</td>
                 <td><span class="status-badge status-${l.status}">${statusLabel(l.status)}</span></td>
                 <td>${formatDate(l.created_at)}</td>
                 <td class="action-btns">

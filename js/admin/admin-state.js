@@ -20,6 +20,26 @@ let currentTherapistFilter = 'all';
 let currentViewedPatient = null;
 let currentViewedTherapist = null;
 
+// Per-lead source attribution map: key=`${linked_table}:${linked_id}` → row from lead_attribution
+let attributionMap = new Map();
+// Per-table source filter selections (default 'all')
+let currentSourceFilter = { patients: 'all', therapists: 'all', leads: 'all', contact_leads: 'all', pipeline: 'all', portal_q: 'all' };
+
+async function loadAttributionMap() {
+    try {
+        const { data, error } = await db.rpc('admin_get_all_attributions');
+        if (error) throw error;
+        attributionMap.clear();
+        (data || []).forEach(r => {
+            if (r.linked_table && r.linked_id) {
+                attributionMap.set(`${r.linked_table}:${r.linked_id}`, r);
+            }
+        });
+    } catch (err) {
+        console.warn('loadAttributionMap failed:', err);
+    }
+}
+
 const BOT_URL = 'https://crm-bot-hillel.fly.dev';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -42,6 +62,8 @@ async function loadAllData() {
     if (window._userProfileRole === 'sales_rep') {
         await loadPipeline();
     } else {
+        // Load attribution first so source chips render correctly on first paint
+        await loadAttributionMap();
         const results = await Promise.allSettled([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires(), loadPipeline(), loadPortalQuestionnaires()]);
         const failed = results.filter(r => r.status === 'rejected');
         if (failed.length > 0) {

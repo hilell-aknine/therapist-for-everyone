@@ -274,3 +274,96 @@ function escapeHtml(str) {
     div.textContent = str;
     return div.innerHTML;
 }
+
+// ===================
+// SHARED: Lead source rendering (unified across patients/therapists/leads/pipeline/portal-q)
+// ===================
+
+const SRC_HE = {
+    instagram: 'אינסטגרם', facebook: 'פייסבוק', google: 'גוגל',
+    youtube: 'יוטיוב', whatsapp: 'וואטסאפ', tiktok: 'טיקטוק',
+    email: 'אימייל', telegram: 'טלגרם', twitter: 'טוויטר',
+    linkedin: 'לינקדאין', meta: 'פייסבוק', fb: 'פייסבוק', ig: 'אינסטגרם'
+};
+
+const SRC_COLORS = {
+    instagram: '#E4405F', facebook: '#1877F2', google: '#4285F4',
+    youtube: '#FF0000', whatsapp: '#25D366', tiktok: '#111111',
+    email: '#7f8c8d', telegram: '#0088cc', twitter: '#1DA1F2',
+    linkedin: '#0A66C2', meta: '#1877F2', fb: '#1877F2', ig: '#E4405F'
+};
+
+// Returns { label, color, key } for a lead row's traffic source.
+// Prefers attribution table over inline row UTM. Falls back to how_found, then referrer.
+function formatLeadSource(row, attrib) {
+    const utmRaw = (attrib?.last_utm_source || attrib?.first_utm_source || row?.utm_source || '').toString().toLowerCase().trim();
+    const medium = attrib?.last_utm_medium || attrib?.first_utm_medium || row?.utm_medium;
+    const howFound = attrib?.self_reported_source || row?.how_found;
+    const ref = attrib?.last_referrer_domain || attrib?.first_referrer_domain;
+
+    if (utmRaw) {
+        const heName = SRC_HE[utmRaw] || utmRaw;
+        const color = SRC_COLORS[utmRaw] || '#6c7a89';
+        const label = medium ? `${heName} · ${medium}` : heName;
+        return { label, color, key: utmRaw };
+    }
+    if (howFound) {
+        return { label: howFound, color: '#9b59b6', key: 'self:' + howFound.toString().toLowerCase().trim() };
+    }
+    if (ref) {
+        return { label: ref, color: '#3498db', key: 'ref:' + ref.toString().toLowerCase().trim() };
+    }
+    return { label: 'ישיר / לא ידוע', color: '#5a6470', key: 'direct' };
+}
+
+function renderSourceChip(row, attrib) {
+    const { label, color } = formatLeadSource(row, attrib);
+    return `<span class="source-chip" style="background:${color}">${escapeHtml(label)}</span>`;
+}
+
+// Build options for the source filter dropdown from a list of lead rows.
+// Returns array of { value, label } for unique sources actually present.
+function buildSourceFilterOptions(rows, tableName) {
+    const seen = new Map();
+    rows.forEach(r => {
+        const attrib = (typeof attributionMap !== 'undefined') ? attributionMap.get(`${tableName}:${r.id}`) : null;
+        const { label, key } = formatLeadSource(r, attrib);
+        if (!seen.has(key)) seen.set(key, label);
+    });
+    return [...seen.entries()].map(([value, label]) => ({ value, label }));
+}
+
+// Returns true if the row matches the selected source filter key (or filter is 'all').
+function leadMatchesSourceFilter(row, attrib, filterKey) {
+    if (!filterKey || filterKey === 'all') return true;
+    const { key } = formatLeadSource(row, attrib);
+    return key === filterKey;
+}
+
+// Refreshes a <select> element with options derived from the current data.
+// Preserves the currently selected value if still present.
+function refreshSourceFilterDropdown(selectId, rows, tableName, currentValue) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    const options = buildSourceFilterOptions(rows, tableName);
+    const html = ['<option value="all">כל המקורות</option>']
+        .concat(options.map(o => `<option value="${escapeHtml(o.value)}"${o.value === currentValue ? ' selected' : ''}>${escapeHtml(o.label)}</option>`))
+        .join('');
+    if (sel.innerHTML !== html) sel.innerHTML = html;
+    if (currentValue && [...sel.options].some(o => o.value === currentValue)) sel.value = currentValue;
+}
+
+// Called by source filter dropdown onchange. Re-renders the table.
+function setSourceFilter(tableName, value) {
+    if (typeof currentSourceFilter === 'undefined') return;
+    currentSourceFilter[tableName] = value;
+    const renderers = {
+        patients: () => typeof renderPatients === 'function' && renderPatients(),
+        therapists: () => typeof renderTherapists === 'function' && renderTherapists(),
+        leads: () => typeof renderLeads === 'function' && renderLeads(),
+        contact_leads: () => typeof renderContactLeads === 'function' && renderContactLeads(),
+        pipeline: () => typeof renderPipeline === 'function' && renderPipeline(),
+        portal_q: () => typeof renderPortalQuestionnaires === 'function' && renderPortalQuestionnaires()
+    };
+    renderers[tableName]?.();
+}

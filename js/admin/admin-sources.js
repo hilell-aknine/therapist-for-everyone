@@ -337,6 +337,9 @@ function _flagClass(value, range) {
 
 function _fmtPct(v) {
     if (v == null) return '—';
+    // Cap at 100%+ — stages (visitors/leads/regs/paid) are now independent counts,
+    // not strict subsets, so raw ratios can exceed 100%. Display caps with a marker.
+    if (v > 100) return '100%+ <span title="המספר חורג מ-100%. סיבה: לידים, רשומים, ומשלמים נספרים עצמאית — לא תת-קבוצות. למשל: רשומים יכול להיות גדול מלידים אם אנשים נרשמים דרך Google בלי להשאיר UTM. המספרים הגולמיים נכונים." style="cursor:help;color:#F59E0B;">⚠</span>';
     if (v < 1) return v.toFixed(2) + '%';
     return v.toFixed(0) + '%';
 }
@@ -360,13 +363,13 @@ function showMismatchesModal() {
     `).join('');
 
     const html = `
-        <div class="modal active" id="mismatches-modal" onclick="if(event.target===this)closeMismatchesModal()">
-            <div class="modal-content" style="max-width:760px;">
+        <div class="modal-overlay active" id="mismatches-modal" onclick="if(event.target===this)closeMismatchesModal()">
+            <div class="modal" style="max-width:760px;">
                 <div class="modal-header">
                     <h2><i class="fa-solid fa-circle-exclamation" style="color:#F59E0B;"></i> סתירות מקור — ${_sourcesCache.mismatches.length} לידים</h2>
                     <button class="modal-close" onclick="closeMismatchesModal()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding:1.5rem;overflow-y:auto;">
                     <p style="color:var(--text-secondary);margin-bottom:1rem;">
                         UTM (טכני, מהקישור) שונה מהדיווח העצמי של המשתמש. כלל ההתאמה: UTM גובר. <strong>זה לא בהכרח באג</strong> — לעיתים המשתמש זוכר שחבר שלח לו קישור, אבל בפועל הוא קליק על קישור פרסומי. ייתכנו שני מקורות נכונים בו זמנית.
                     </p>
@@ -416,13 +419,13 @@ async function showWeeklyReconciliation() {
     `;
 
     const html = `
-        <div class="modal active" id="reconciliation-modal" onclick="if(event.target===this)closeReconciliationModal()">
-            <div class="modal-content" style="max-width:640px;">
+        <div class="modal-overlay active" id="reconciliation-modal" onclick="if(event.target===this)closeReconciliationModal()">
+            <div class="modal" style="max-width:640px;">
                 <div class="modal-header">
                     <h2><i class="fa-solid fa-chart-simple"></i> דוח התאמה שבועי</h2>
                     <button class="modal-close" onclick="closeReconciliationModal()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding:1.5rem;overflow-y:auto;">
                     <p style="color:var(--text-secondary);margin-bottom:1rem;">
                         סיכום איכות נתוני המקור — השבוע מול 30 הימים האחרונים. ככל שיותר לידים מסומנים כ"שניהם" או "UTM בלבד" — איכות הנתונים גבוהה יותר. עלייה ב-"אף אחד" = איתות לבדוק שה-UTM מופיע בכל קישור פרסומי.
                     </p>

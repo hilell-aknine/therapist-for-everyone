@@ -125,20 +125,28 @@ function _mergeFunnelWithVisitors(funnel, ga4, ga4Error) {
     }
 
     // Step 2: build merged per-source rows.
+    // Conversion math (v3):
+    //   V→L = leads / visitors           — anonymous GA4 ratio, can exceed 100% if undercounted
+    //   L→R = lead_and_reg / leads       — true subset (people who are both lead AND registered)
+    //   R→P = reg_and_paid / registrations — true subset (paid is always within registered)
     const perSource = (funnel.per_source || []).map(row => {
         const visitors = ga4ByCanonical[row.source] || 0;
+        const leadAndReg = row.lead_and_reg || 0;
+        const regAndPaid = row.reg_and_paid || 0;
         return {
             source:           row.source,
             visitors,
             leads:            row.leads || 0,
             registrations:    row.registrations || 0,
             paid:             row.paid || 0,
+            lead_and_reg:     leadAndReg,
+            reg_and_paid:     regAndPaid,
             utm_count:        row.utm_count || 0,
             how_found_count:  row.how_found_count || 0,
             mismatch_count:   row.mismatch_count || 0,
             v_to_l: visitors > 0 ? (row.leads / visitors) * 100 : null,
-            l_to_r: row.leads > 0 ? (row.registrations / row.leads) * 100 : null,
-            r_to_p: row.registrations > 0 ? (row.paid / row.registrations) * 100 : null,
+            l_to_r: row.leads > 0 ? (leadAndReg / row.leads) * 100 : null,
+            r_to_p: row.registrations > 0 ? (regAndPaid / row.registrations) * 100 : null,
         };
     });
 
@@ -167,6 +175,8 @@ function _mergeFunnelWithVisitors(funnel, ga4, ga4Error) {
             leads:         funnel.totals_per_stage?.leads || 0,
             registrations: funnel.totals_per_stage?.registrations || 0,
             paid:          funnel.totals_per_stage?.paid || 0,
+            lead_and_reg:  funnel.totals_per_stage?.lead_and_reg || 0,
+            reg_and_paid:  funnel.totals_per_stage?.reg_and_paid || 0,
             mismatches:    funnel.totals_per_stage?.mismatches || 0,
         },
         per_source: perSource,
@@ -180,9 +190,9 @@ function renderSources(data) {
     if (!host) return;
 
     const t = data.totals_per_stage;
-    const totalV2L = t.visitors > 0 ? ((t.leads / t.visitors) * 100).toFixed(2) : '—';
-    const totalL2R = t.leads > 0 ? ((t.registrations / t.leads) * 100).toFixed(0) : '—';
-    const totalR2P = t.registrations > 0 ? ((t.paid / t.registrations) * 100).toFixed(0) : '—';
+    // L→R uses the SUBSET count (people who are both lead AND registered) for
+    // a properly-bounded conversion rate that can't exceed 100%.
+    const totalL2R = t.leads > 0 ? Math.min(100, (t.lead_and_reg / t.leads) * 100).toFixed(0) : '—';
 
     host.innerHTML = `
         <!-- Toolbar -->
@@ -254,9 +264,9 @@ function renderSources(data) {
                 <div class="sources-kpi-num">${(t.paid || 0).toLocaleString()}</div>
                 <div class="sources-kpi-label">משלמים</div>
             </div>
-            <div class="sources-kpi">
-                <div class="sources-kpi-num">${totalV2L}%</div>
-                <div class="sources-kpi-label">המרה כוללת — גולש→ליד</div>
+            <div class="sources-kpi" title="מתוך כל הלידים בחלון, כמה הפכו גם לרשומים בפועל. נספר על אנשים שהם גם ליד וגם רשום (תת-קבוצה אמיתית).">
+                <div class="sources-kpi-num">${totalL2R}%</div>
+                <div class="sources-kpi-label">המרה כוללת — ליד→רשום</div>
             </div>
         </div>
 

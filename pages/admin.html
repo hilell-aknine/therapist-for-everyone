@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="../css/admin-styles.css">
     <link rel="stylesheet" href="../js/admin/admin-automations.css">
     <link rel="stylesheet" href="../js/admin/admin-traffic.css">
+    <link rel="stylesheet" href="../js/admin/admin-sources.css">
 
     <!-- === SEO Tags (auto-generated) === -->
     <link rel="canonical" href="https://www.therapist-home.com/pages/admin.html">
@@ -1997,9 +1998,26 @@
                 <!-- Segments & Filters View -->
                 <div id="segments-view" class="hidden"></div>
 
-                <!-- Traffic Sources — single unified view -->
-                <div id="traffic-header" class="hidden" style="margin-bottom:0.5rem;">
+                <!-- Traffic Sources — Phase 3 ROI: unified "מקור הלקוחות" + 3 legacy sub-tabs -->
+                <div id="traffic-header" class="view-group-header hidden" style="margin-bottom:0.5rem;">
                     <h1 class="page-title" style="margin-bottom:0.5rem;"><i class="fa-solid fa-compass" style="color:var(--gold);margin-left:0.5rem;"></i> מקורות תנועה</h1>
+                    <div class="sub-tabs">
+                        <button class="sub-tab active" onclick="switchSubView('traffic', 'sources')">
+                            <i class="fa-solid fa-chart-line"></i> מקור הלקוחות
+                        </button>
+                        <button class="sub-tab" onclick="switchSubView('traffic', 'traffic')" title="הדשבורד הישן של lead_attribution. ייסגר עוד שבועיים.">
+                            <i class="fa-solid fa-route"></i> טראפיק <span class="badge" style="background:rgba(0,0,0,0.1);color:var(--text-secondary);font-size:0.7rem;">ישן</span>
+                        </button>
+                        <button class="sub-tab" onclick="switchSubView('traffic', 'analytics')" title="GA4 הגולמי. ייסגר עוד שבועיים.">
+                            <i class="fa-solid fa-chart-pie"></i> GA4 <span class="badge" style="background:rgba(0,0,0,0.1);color:var(--text-secondary);font-size:0.7rem;">ישן</span>
+                        </button>
+                        <button class="sub-tab" onclick="switchSubView('traffic', 'instagram')" title="טאב אינסטגרם הישן. ייסגר עוד שבועיים.">
+                            <i class="fa-brands fa-instagram"></i> אינסטגרם <span class="badge" style="background:rgba(0,0,0,0.1);color:var(--text-secondary);font-size:0.7rem;">ישן</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="sources-view" class="hidden">
+                    <div id="sources-body"></div>
                 </div>
                 <div id="traffic-view" class="hidden">
                     <div id="traffic-body"></div>
@@ -2722,6 +2740,7 @@
     <script src="../js/admin/admin-segments.js"></script>
     <script src="../js/admin/admin-analytics.js"></script>
     <script src="../js/admin/admin-traffic.js"></script>
+    <script src="../js/admin/admin-sources.js?v=8"></script>
     <script src="../js/admin/admin-settings.js"></script>
     <script src="../js/admin/admin-export.js"></script>
 

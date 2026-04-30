@@ -12,7 +12,7 @@ const VIEW_GROUPS = {
     'popups':   { views: ['popups'], header: null, default: 'popups' },
     'segments': { views: ['segments'], header: null, default: 'segments' },
     'automations':{ views: ['automations'], header: null, default: 'automations' },
-    'traffic':  { views: ['traffic'], header: 'traffic-header', default: 'traffic' },
+    'traffic':  { views: ['sources', 'traffic', 'analytics', 'instagram'], header: 'traffic-header', default: 'sources' },
     'settings': { views: ['settings'], header: null, default: 'settings' },
     // Legacy routes — hidden from sidebar but still accessible
     'sales':    { views: ['contact-leads', 'questionnaires', 'pipeline'], header: 'sales-header', default: 'contact-leads' },
@@ -64,7 +64,7 @@ function switchView(view) {
     if (view === 'popups' || group.default === 'popups') loadPopupConfigs();
     if (view === 'segments' || group.default === 'segments') loadSegments();
     if (view === 'automations' || group.default === 'automations') loadAutomations();
-    if (view === 'traffic' || group.default === 'traffic') loadTrafficSources();
+    if (view === 'traffic') { if (typeof loadSources === 'function') loadSources(); }
     if (view === 'settings' || group.default === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }
 
     // Update overview if navigating to it
@@ -93,6 +93,9 @@ function switchSubView(groupName, subView) {
     if (subView === 'learners') loadLearnersView();
     if (subView === 'portal-q' && !portalQLoaded) loadPortalQuestionnaires();
     if (subView === 'traffic' && typeof loadTrafficSources === 'function') loadTrafficSources();
+    if (subView === 'sources' && typeof loadSources === 'function') loadSources();
+    if (subView === 'analytics' && typeof loadGA4Analytics === 'function') loadGA4Analytics();
+    if (subView === 'instagram' && typeof loadInstagramAnalytics === 'function') loadInstagramAnalytics();
 }
 
 function updateOverview() {

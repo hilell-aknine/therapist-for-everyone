@@ -8215,7 +8215,7 @@
             document.body.style.overflow = '';
         }
 
-        function submitFeedback(e) {
+        async function submitFeedback(e) {
             e.preventDefault();
             const btn = document.getElementById('feedbackSubmitBtn');
             const message = document.getElementById('feedbackMessage').value.trim();
@@ -8228,30 +8228,43 @@
             const feedbackData = {
                 message: message,
                 email: email || null,
-                request_type: 'course-feedback'
+                request_type: 'course-feedback',
+                status: 'new'
             };
 
-            // Save to Supabase directly (no dependency on supabase-client.js)
-            const save = supabaseClient
-                ? supabaseClient.from('contact_requests').insert(feedbackData).then(({ error }) => {
-                    if (error) throw error;
-                }).catch((err) => {
-                    console.warn('Feedback save to Supabase failed, using localStorage:', err);
-                    const stored = JSON.parse(localStorage.getItem('pending_feedback') || '[]');
-                    stored.push(feedbackData);
-                    localStorage.setItem('pending_feedback', JSON.stringify(stored));
-                })
-                : Promise.resolve().then(() => {
-                    const stored = JSON.parse(localStorage.getItem('pending_feedback') || '[]');
-                    stored.push(feedbackData);
-                    localStorage.setItem('pending_feedback', JSON.stringify(stored));
-                });
+            // Route through submit-lead Edge Function (sanitization + dedup + future Turnstile).
+            // Matches the lead modal pattern earlier in this file. No direct anon INSERT.
+            const stash = () => {
+                const stored = JSON.parse(localStorage.getItem('pending_feedback') || '[]');
+                stored.push(feedbackData);
+                localStorage.setItem('pending_feedback', JSON.stringify(stored));
+            };
 
-            save.then(() => {
-                document.getElementById('feedbackForm').style.display = 'none';
-                document.getElementById('feedbackSuccess').classList.add('show');
-                setTimeout(() => closeFeedbackModal(), 2000);
-            });
+            try {
+                const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl ||
+                    'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+                const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
+                const res = await fetch(`${functionsUrl}/submit-lead`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        table: 'contact_requests',
+                        data: feedbackData,
+                        attribution: attribution
+                    })
+                });
+                if (!res.ok) {
+                    const result = await res.json().catch(() => ({}));
+                    throw new Error(result.error || `HTTP ${res.status}`);
+                }
+            } catch (err) {
+                console.warn('Feedback submit failed, queued locally:', err);
+                stash();
+            }
+
+            document.getElementById('feedbackForm').style.display = 'none';
+            document.getElementById('feedbackSuccess').classList.add('show');
+            setTimeout(() => closeFeedbackModal(), 2000);
 
             return false;
         }

@@ -179,6 +179,7 @@ function _mergeFunnelWithVisitors(funnel, ga4, ga4Error) {
             reg_and_paid:  funnel.totals_per_stage?.reg_and_paid || 0,
             mismatches:    funnel.totals_per_stage?.mismatches || 0,
         },
+        all_time_totals: funnel.all_time_totals || { leads_total: 0, registrations_total: 0, paid_total: 0 },
         per_source: perSource,
         mismatches: funnel.mismatches || [],
         ga4_error:  ga4Error,
@@ -190,6 +191,7 @@ function renderSources(data) {
     if (!host) return;
 
     const t = data.totals_per_stage;
+    const at = data.all_time_totals || { leads_total: 0, registrations_total: 0, paid_total: 0 };
     // L→R uses the SUBSET count (people who are both lead AND registered) for
     // a properly-bounded conversion rate that can't exceed 100%.
     const totalL2R = t.leads > 0 ? Math.min(100, (t.lead_and_reg / t.leads) * 100).toFixed(0) : '—';
@@ -198,9 +200,11 @@ function renderSources(data) {
         <!-- Toolbar -->
         <div class="sources-toolbar">
             <div class="sources-range">
-                <button class="sources-range-btn ${_sourcesDays===7?'active':''}"  onclick="changeSourcesRange(7)">7 ימים</button>
-                <button class="sources-range-btn ${_sourcesDays===30?'active':''}" onclick="changeSourcesRange(30)">30 ימים</button>
-                <button class="sources-range-btn ${_sourcesDays===90?'active':''}" onclick="changeSourcesRange(90)">90 ימים</button>
+                <button class="sources-range-btn ${_sourcesDays===7?'active':''}"   onclick="changeSourcesRange(7)">7 ימים</button>
+                <button class="sources-range-btn ${_sourcesDays===30?'active':''}"  onclick="changeSourcesRange(30)">30 ימים</button>
+                <button class="sources-range-btn ${_sourcesDays===90?'active':''}"  onclick="changeSourcesRange(90)">90 ימים</button>
+                <button class="sources-range-btn ${_sourcesDays===365?'active':''}" onclick="changeSourcesRange(365)">שנה</button>
+                <button class="sources-range-btn ${_sourcesDays>=3650?'active':''}" onclick="changeSourcesRange(3650)" title="כל הזמן (10 שנים אחורה — מספיק לכל פעילות הפרויקט)">כל הזמן</button>
             </div>
             <div class="sources-actions">
                 <button class="btn btn-secondary" onclick="showWeeklyReconciliation()">
@@ -246,27 +250,32 @@ function renderSources(data) {
             </div>
         ` : ''}
 
-        <!-- KPI strip -->
+        <!-- KPI strip — windowed count + all-time count side by side -->
         <div class="sources-kpis">
-            <div class="sources-kpi">
+            <div class="sources-kpi" title="גולשים אנונימיים מ-Google Analytics בתקופה הנבחרת. אין סך-כל אי-פעם כי GA4 מוגבל ל-30 יום אחורה.">
                 <div class="sources-kpi-num">${(t.visitors || 0).toLocaleString()}</div>
                 <div class="sources-kpi-label">גולשים (${_sourcesDays} ימים)</div>
+                <div class="sources-kpi-sub">&nbsp;</div>
             </div>
-            <div class="sources-kpi">
+            <div class="sources-kpi" title="לידים שנכנסו לטבלת lead_attribution בתקופה הנבחרת. הסך-כל אי-פעם נספר אנשים ייחודיים (לא שורות) מאז התקנת המערכת ב-19/4/2026.">
                 <div class="sources-kpi-num">${(t.leads || 0).toLocaleString()}</div>
-                <div class="sources-kpi-label">לידים</div>
+                <div class="sources-kpi-label">לידים (${_sourcesDays} ימים)</div>
+                <div class="sources-kpi-sub">סך הכל אי-פעם: <strong>${(at.leads_total || 0).toLocaleString()}</strong></div>
             </div>
-            <div class="sources-kpi">
+            <div class="sources-kpi" title="פרופילים שנוצרו בתקופה הנבחרת. הסך-כל אי-פעם הוא מספר הרשומים הכולל במערכת.">
                 <div class="sources-kpi-num">${(t.registrations || 0).toLocaleString()}</div>
-                <div class="sources-kpi-label">רשומים</div>
+                <div class="sources-kpi-label">רשומים (${_sourcesDays} ימים)</div>
+                <div class="sources-kpi-sub">סך הכל אי-פעם: <strong>${(at.registrations_total || 0).toLocaleString()}</strong></div>
             </div>
-            <div class="sources-kpi">
+            <div class="sources-kpi" title="מנויים פעילים שמקושרים לאדם שנכנס בתקופה הנבחרת. הסך-כל אי-פעם הוא כל המנויים הפעילים כעת ללא קשר לתקופה.">
                 <div class="sources-kpi-num">${(t.paid || 0).toLocaleString()}</div>
-                <div class="sources-kpi-label">משלמים</div>
+                <div class="sources-kpi-label">משלמים (בתקופה)</div>
+                <div class="sources-kpi-sub">פעילים כעת: <strong>${(at.paid_total || 0).toLocaleString()}</strong></div>
             </div>
             <div class="sources-kpi" title="מתוך כל הלידים בחלון, כמה הפכו גם לרשומים בפועל. נספר על אנשים שהם גם ליד וגם רשום (תת-קבוצה אמיתית).">
                 <div class="sources-kpi-num">${totalL2R}%</div>
                 <div class="sources-kpi-label">המרה כוללת — ליד→רשום</div>
+                <div class="sources-kpi-sub">&nbsp;</div>
             </div>
         </div>
 

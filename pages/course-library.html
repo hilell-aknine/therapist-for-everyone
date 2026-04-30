@@ -3,7 +3,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,9 +12,13 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <meta name="theme-color" content="#003B46">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="בית המטפלים">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="../manifest.json">
-    <link rel="apple-touch-icon" href="../assets/logo-square.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon-180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/pwa-icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/pwa-icon-512.png">
     <title>ספריית הקורסים | בית המטפלים</title>
     <meta name="description" content="ספריית הקורסים של בית המטפלים — צפו בשיעורים, עקבו אחרי ההתקדמות ולמדו NLP בחינם.">
     <meta property="og:title" content="ספריית הקורסים — בית המטפלים">
@@ -4168,6 +4172,211 @@
             [data-theme="dark"] .feedback-fab {
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             }
+        }
+
+        /* ╔═══════════════════════════════════════════════════════════════╗
+           ║  MOBILE PATCH (2026-04-30) — placed last so it wins cascade   ║
+           ║  Targets: iPhone SE (375), iPhone 14 (390), Android 360-412   ║
+           ╚═══════════════════════════════════════════════════════════════╝ */
+
+        /* iOS Safari: keep tap-highlight subtle; prevent overscroll bouncing into nothing. */
+        @media (max-width: 1024px) {
+            html, body { overscroll-behavior-y: contain; }
+            body { -webkit-tap-highlight-color: transparent; }
+        }
+
+        /* dvh upgrade (newer iOS Safari handles URL bar dynamically) */
+        @supports (height: 100dvh) {
+            .lms-container { min-height: 100dvh; }
+        }
+
+        /* Safe-area for the fixed header (iPhone notch + Dynamic Island) */
+        .course-header {
+            padding-top: env(safe-area-inset-top, 0);
+            height: calc(64px + env(safe-area-inset-top, 0));
+            padding-inline-start: max(1.5rem, env(safe-area-inset-left, 0));
+            padding-inline-end: max(1.5rem, env(safe-area-inset-right, 0));
+        }
+        @media (max-width: 768px) {
+            .course-header {
+                height: calc(56px + env(safe-area-inset-top, 0));
+                padding-inline-start: max(0.8rem, env(safe-area-inset-left, 0));
+                padding-inline-end: max(0.8rem, env(safe-area-inset-right, 0));
+            }
+            .lms-container { padding-top: calc(56px + env(safe-area-inset-top, 0)); }
+            .sidebar { top: calc(56px + env(safe-area-inset-top, 0)); }
+        }
+        @media (min-width: 769px) {
+            .lms-container { padding-top: calc(64px + env(safe-area-inset-top, 0)); }
+        }
+
+        /* Feedback FAB above iPhone home indicator */
+        .feedback-fab {
+            bottom: calc(1.5rem + env(safe-area-inset-bottom, 0));
+            inset-inline-start: max(1.5rem, env(safe-area-inset-left, 0));
+        }
+
+        /* Mobile toggle (hamburger) — make sure it's a real 48x48 tap target */
+        .mobile-toggle {
+            min-width: 48px;
+            min-height: 48px;
+        }
+
+        /* Sidebar polish on mobile — lift effect + backdrop blur */
+        @media (max-width: 1024px) {
+            .sidebar {
+                box-shadow: -8px 0 32px rgba(0, 0, 0, 0);
+                transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.3s;
+            }
+            .sidebar.open {
+                box-shadow: -8px 0 32px rgba(0, 0, 0, 0.35);
+            }
+            .sidebar-overlay {
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+            }
+        }
+
+        /* iOS anti-zoom: any focusable input across the portal must be ≥16px */
+        @media (max-width: 768px) {
+            input, select, textarea,
+            #aiSeriesInput, .form-control, .feedback-textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        /* Touch target minimum on mobile (does not affect desktop density) */
+        @media (max-width: 768px) {
+            .btn,
+            button:not(.tab-btn-tiny):not(.lesson-icon):not(.note-action),
+            .icon-btn,
+            [role="button"],
+            a.btn {
+                min-height: 44px;
+            }
+            .modal-close { width: 48px; height: 48px; font-size: 1.4rem; }
+            .lesson-item { min-height: 44px; }
+        }
+
+        /* ===== Modals as bottom-sheet on mobile ===== */
+        @media (max-width: 768px) {
+            .modal-overlay {
+                align-items: flex-end;
+            }
+            .modal-overlay .modal-box,
+            .modal-overlay .modal-content,
+            .modal-overlay > div:not(.modal-close):not(.modal-actions) {
+                width: 100%;
+                max-width: 100%;
+                border-radius: 18px 18px 0 0;
+                max-height: 92dvh;
+                max-height: 92vh;     /* fallback */
+                overflow-y: auto;
+                padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0));
+                animation: sheet-up 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);
+            }
+            .modal-close {
+                top: 0.75rem;
+                inset-inline-start: 0.75rem;
+            }
+        }
+        @keyframes sheet-up {
+            from { transform: translateY(100%); opacity: 0.6; }
+            to   { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Body scroll lock — toggled from JS when any modal opens */
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        /* ===== AI chat: fullscreen on mobile ===== */
+        @media (max-width: 768px) {
+            #aiChat.ai-fullscreen {
+                position: fixed;
+                inset: 0;
+                top: calc(56px + env(safe-area-inset-top, 0));
+                background: var(--bg-primary, #fff);
+                z-index: 140;
+                display: flex !important;
+                flex-direction: column;
+                padding: 0.75rem;
+                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0));
+            }
+            #aiChat.ai-fullscreen #aiMessages {
+                flex: 1;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* ===== Video nav bar: sticky at bottom on mobile ===== */
+        @media (max-width: 768px) {
+            #videoNavBar {
+                position: sticky;
+                bottom: 0;
+                background: var(--bg-primary, #fff);
+                border-top: 1px solid var(--border-default, rgba(0,0,0,0.08));
+                padding: 0.6rem 0.75rem;
+                padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0));
+                z-index: 50;
+                margin-inline: -0.5rem;     /* negate video-section padding */
+            }
+            #videoNavBar .lesson-counter,
+            #videoNavBar [class*="counter"] { display: none; }
+        }
+
+        /* ===== iPhone SE & tighter (≤380px) ===== */
+        @media (max-width: 380px) {
+            .course-header { padding-inline: 0.5rem; }
+            .header-right { gap: 0.5rem; }
+            .header-progress-bar { display: none; }
+            .lesson-title, .header-lesson-title { font-size: 16px; }
+
+            /* Welcome dashboard hero: stack vertically */
+            .welcome-hero-card,
+            [class*="welcome-hero"] {
+                flex-direction: column !important;
+                gap: 0.75rem;
+            }
+
+            /* Quick stats row → horizontal scroll with snap */
+            .welcome-quick-stats,
+            [class*="quick-stats"],
+            [class*="stats-row"] {
+                grid-template-columns: none !important;
+                display: flex !important;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                gap: 0.5rem;
+                padding-inline: 0.25rem;
+                margin-inline: -0.25rem;
+                scrollbar-width: none;
+            }
+            .welcome-quick-stats::-webkit-scrollbar,
+            [class*="quick-stats"]::-webkit-scrollbar { display: none; }
+            .welcome-quick-stats > *,
+            [class*="quick-stats"] > * {
+                flex: 0 0 auto;
+                min-width: 140px;
+                scroll-snap-align: start;
+            }
+
+            /* Modal padding tighter */
+            .modal-overlay .modal-box { padding: 1.5rem 1rem; }
+            .modal-overlay h2 { font-size: 1.25rem !important; }
+
+            /* AI chat send button slightly smaller but still 44px */
+            #aiChat .ai-send-btn { padding: 0.5rem 0.75rem; }
+        }
+
+        /* Reduce motion respects user pref */
+        @media (prefers-reduced-motion: reduce) {
+            .modal-overlay .modal-box,
+            .modal-overlay .modal-content { animation: none; }
+            .sidebar { transition: none; }
         }
     </style>
 
@@ -9334,5 +9543,7 @@
         window.skipQuestionnaire = skipQuestionnaire;
         window.submitQuestionnaire = submitQuestionnaire;
     </script>
+    <script src="/js/portal-mobile-helpers.js" defer></script>
+    <script src="/js/pwa-install.js" defer></script>
 </body>
 </html>

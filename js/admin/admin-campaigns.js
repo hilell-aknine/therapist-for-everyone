@@ -17,14 +17,16 @@ async function loadCampaignDashboard() {
     }
 
     try {
-        // Parallel: campaigns + all Meta leads across tables
+        // Parallel: campaigns + all Meta leads across tables.
+        // utm_content / utm_term are now selected so the variant breakdown
+        // (e.g. var_a vs var_b inside one campaign) can render below.
         const [campaignsRes, patientsRes, therapistsRes, contactsRes, profilesRes, questRes] = await Promise.all([
             db.from('campaign_performance').select('*').order('created_at', { ascending: false }),
-            db.from('patients').select('id, utm_source, utm_campaign, created_at').in('utm_source', META_SOURCES),
-            db.from('therapists').select('id, utm_source, utm_campaign, created_at').in('utm_source', META_SOURCES),
-            db.from('contact_requests').select('id, utm_source, utm_campaign, created_at').in('utm_source', META_SOURCES),
-            db.from('profiles').select('id, role, utm_source, utm_campaign, created_at').in('utm_source', META_SOURCES),
-            db.from('portal_questionnaires').select('id, utm_source, utm_campaign, created_at').in('utm_source', META_SOURCES),
+            db.from('patients').select('id, utm_source, utm_campaign, utm_content, utm_term, created_at').in('utm_source', META_SOURCES),
+            db.from('therapists').select('id, utm_source, utm_campaign, utm_content, utm_term, created_at').in('utm_source', META_SOURCES),
+            db.from('contact_requests').select('id, utm_source, utm_campaign, utm_content, utm_term, created_at').in('utm_source', META_SOURCES),
+            db.from('profiles').select('id, role, utm_source, utm_campaign, utm_content, utm_term, created_at').in('utm_source', META_SOURCES),
+            db.from('portal_questionnaires').select('id, utm_source, utm_campaign, utm_content, utm_term, created_at').in('utm_source', META_SOURCES),
         ]);
 
         const allMetaLeads = [
@@ -33,9 +35,19 @@ async function loadCampaignDashboard() {
             ...(contactsRes.data || []).map(r => ({ ...r, type: 'contact' })),
         ];
 
+        // Wider pool for the variant breakdown (signups + questionnaires also
+        // contain utm_content). Kept separate from `allMetaLeads` so the top
+        // KPI doesn't double-count someone who is both a profile and a lead.
+        const allMetaTouchpoints = [
+            ...allMetaLeads,
+            ...(profilesRes.data || []).map(r => ({ ...r, type: 'signup' })),
+            ...(questRes.data || []).map(r => ({ ...r, type: 'questionnaire' })),
+        ];
+
         campCache = {
             campaigns: campaignsRes.data || [],
             metaLeads: allMetaLeads,
+            metaTouchpoints: allMetaTouchpoints,
             profiles: profilesRes.data || [],
             questionnaires: questRes.data || [],
         };
@@ -46,7 +58,7 @@ async function loadCampaignDashboard() {
     }
 }
 
-function renderCampaignData({ campaigns, metaLeads, profiles, questionnaires }) {
+function renderCampaignData({ campaigns, metaLeads, metaTouchpoints, profiles, questionnaires }) {
     const totalLeads = metaLeads.length;
     const activeCampaigns = campaigns.filter(c => c.status === 'active').length;
     const totalSpend = campaigns.reduce((s, c) => s + parseFloat(c.spend_to_date || 0), 0);
@@ -69,8 +81,9 @@ function renderCampaignData({ campaigns, metaLeads, profiles, questionnaires }) 
     // Campaigns table
     renderCampaignsTable(campaigns);
 
-    // By-campaign breakdown
-    renderCampaignBreakdown(metaLeads, campaigns);
+    // By-campaign breakdown — uses wider touchpoint pool so utm_content
+    // (ad-variant) data from signups + questionnaires shows up too.
+    renderCampaignBreakdown(metaTouchpoints || metaLeads, campaigns);
 }
 
 function renderCampaignFunnel(leads, signups, questionnaires, paid) {
@@ -157,14 +170,28 @@ function renderCampaignBreakdown(metaLeads, campaigns) {
     const el = document.getElementById('camp-breakdown');
     if (!el) return;
 
-    // Group leads by utm_campaign
+    // Group leads by utm_campaign, and inside each campaign by utm_content
+    // (ad variant). utm_term is appended as a sub-tag for image-level tracking.
     const byCampaign = {};
     metaLeads.forEach(l => {
         const key = l.utm_campaign || 'ללא קמפיין';
-        if (!byCampaign[key]) byCampaign[key] = { count: 0, sources: {} };
+        if (!byCampaign[key]) byCampaign[key] = { count: 0, sources: {}, variants: {}, types: {} };
         byCampaign[key].count++;
         const src = l.utm_source || 'unknown';
         byCampaign[key].sources[src] = (byCampaign[key].sources[src] || 0) + 1;
+
+        const variantKey = l.utm_content || '(ללא וריאנט)';
+        if (!byCampaign[key].variants[variantKey]) {
+            byCampaign[key].variants[variantKey] = { count: 0, terms: {}, types: {} };
+        }
+        byCampaign[key].variants[variantKey].count++;
+        const term = l.utm_term || null;
+        if (term) {
+            byCampaign[key].variants[variantKey].terms[term] = (byCampaign[key].variants[variantKey].terms[term] || 0) + 1;
+        }
+        const typ = l.type || 'unknown';
+        byCampaign[key].variants[variantKey].types[typ] = (byCampaign[key].variants[variantKey].types[typ] || 0) + 1;
+        byCampaign[key].types[typ] = (byCampaign[key].types[typ] || 0) + 1;
     });
 
     const sorted = Object.entries(byCampaign).sort((a, b) => b[1].count - a[1].count);
@@ -174,18 +201,56 @@ function renderCampaignBreakdown(metaLeads, campaigns) {
         return;
     }
 
-    let html = '<div style="display:grid;gap:6px;">';
+    const TYPE_LABELS = { patient: 'מטופלים', therapist: 'מטפלים', contact: 'פניות', signup: 'הרשמות', questionnaire: 'שאלונים' };
+
+    let html = '<div style="display:grid;gap:8px;">';
     sorted.forEach(([name, data]) => {
         const sourceTags = Object.entries(data.sources).map(([s, c]) =>
             `<span style="background:rgba(24,119,242,0.1);color:#1877F2;padding:1px 6px;border-radius:4px;font-size:0.72rem;">${s}: ${c}</span>`
         ).join(' ');
 
-        html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8fafb;border-radius:8px;border:1px solid #eef2f3;">
-            <span style="font-weight:700;font-size:1.1rem;color:var(--gold);min-width:30px;">${data.count}</span>
-            <div style="flex:1;">
-                <div style="font-weight:600;font-size:0.85rem;">${escapeHtml(name)}</div>
-                <div style="margin-top:2px;">${sourceTags}</div>
+        // Variant rows (sorted by count desc) — only show if there's >1 variant
+        // OR a single non-empty variant. Hides clutter for legacy campaigns.
+        const variantEntries = Object.entries(data.variants).sort((a, b) => b[1].count - a[1].count);
+        const hasVariants = variantEntries.some(([k, v]) => k !== '(ללא וריאנט)' || variantEntries.length > 1);
+        let variantHtml = '';
+        if (hasVariants) {
+            const variantRows = variantEntries.map(([variant, vd]) => {
+                const max = Math.max(...variantEntries.map(([, v]) => v.count), 1);
+                const pct = Math.round((vd.count / max) * 100);
+                const termTags = Object.entries(vd.terms).map(([t, c]) =>
+                    `<span style="background:rgba(212,175,55,0.12);color:#8B6914;padding:1px 5px;border-radius:3px;font-size:0.68rem;">${escapeHtml(t)}: ${c}</span>`
+                ).join(' ');
+                const typeTags = Object.entries(vd.types).map(([t, c]) =>
+                    `<span style="background:rgba(0,96,107,0.1);color:#00606B;padding:1px 5px;border-radius:3px;font-size:0.68rem;">${TYPE_LABELS[t] || t}: ${c}</span>`
+                ).join(' ');
+                return `
+                <div style="display:flex;align-items:center;gap:6px;margin-top:4px;padding:4px 8px;background:#fff;border-radius:6px;border:1px solid #e5ebed;">
+                    <span style="font-weight:700;font-size:0.95rem;color:var(--deep-petrol);min-width:30px;">${vd.count}</span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:600;font-size:0.78rem;direction:ltr;text-align:right;">${escapeHtml(variant)}</div>
+                        <div style="margin-top:2px;display:flex;flex-wrap:wrap;gap:3px;">${typeTags} ${termTags}</div>
+                    </div>
+                    <div style="width:60px;height:6px;background:#f0f4f5;border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:var(--gold);"></div>
+                    </div>
+                </div>`;
+            }).join('');
+            variantHtml = `<div style="margin-top:6px;padding-top:6px;border-top:1px dashed #d8dde0;">
+                <div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:2px;">פילוח לפי וריאנט (utm_content):</div>
+                ${variantRows}
+            </div>`;
+        }
+
+        html += `<div style="padding:8px 10px;background:#f8fafb;border-radius:8px;border:1px solid #eef2f3;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-weight:700;font-size:1.1rem;color:var(--gold);min-width:30px;">${data.count}</span>
+                <div style="flex:1;">
+                    <div style="font-weight:600;font-size:0.85rem;direction:ltr;text-align:right;">${escapeHtml(name)}</div>
+                    <div style="margin-top:2px;">${sourceTags}</div>
+                </div>
             </div>
+            ${variantHtml}
         </div>`;
     });
     html += '</div>';

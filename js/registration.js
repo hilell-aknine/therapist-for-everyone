@@ -131,6 +131,8 @@
             if (utm.utm_source) leadData.utm_source = utm.utm_source;
             if (utm.utm_medium) leadData.utm_medium = utm.utm_medium;
             if (utm.utm_campaign) leadData.utm_campaign = utm.utm_campaign;
+            if (utm.utm_content) leadData.utm_content = utm.utm_content;
+            if (utm.utm_term) leadData.utm_term = utm.utm_term;
 
             // Submit lead to contact_requests via Edge Function
             const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
@@ -162,6 +164,8 @@
                         utm_source:   utm.utm_source   || null,
                         utm_medium:   utm.utm_medium   || null,
                         utm_campaign: utm.utm_campaign || null,
+                        utm_content:  utm.utm_content  || null,
+                        utm_term:     utm.utm_term     || null,
                         landing_url:  (attribution && attribution.last && attribution.last.landing_url) || null
                     };
                     await fetch(`${functionsUrl}/submit-lead`, {
@@ -303,7 +307,9 @@
             status: 'new',
             utm_source: utm.utm_source || null,
             utm_medium: utm.utm_medium || null,
-            utm_campaign: utm.utm_campaign || null
+            utm_campaign: utm.utm_campaign || null,
+            utm_content: utm.utm_content || null,
+            utm_term: utm.utm_term || null
         };
 
         try {

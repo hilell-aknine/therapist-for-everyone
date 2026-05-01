@@ -119,11 +119,13 @@ function _touchHasAnySignal(t) {
         }
 
         // ─── LEGACY utm_data key — kept for backwards compat with old form code ──
-        if (touch.utm_source || touch.utm_medium || touch.utm_campaign) {
+        if (touch.utm_source || touch.utm_medium || touch.utm_campaign || touch.utm_content || touch.utm_term) {
             localStorage.setItem('utm_data', JSON.stringify({
                 utm_source: touch.utm_source,
                 utm_medium: touch.utm_medium,
                 utm_campaign: touch.utm_campaign,
+                utm_content: touch.utm_content,
+                utm_term: touch.utm_term,
                 captured_at: Date.now()
             }));
         } else {
@@ -208,7 +210,9 @@ window.getUtmData = function () {
         return {
             utm_source: parsed.utm_source || null,
             utm_medium: parsed.utm_medium || null,
-            utm_campaign: parsed.utm_campaign || null
+            utm_campaign: parsed.utm_campaign || null,
+            utm_content: parsed.utm_content || null,
+            utm_term: parsed.utm_term || null
         };
     } catch (e) { return {}; }
 };

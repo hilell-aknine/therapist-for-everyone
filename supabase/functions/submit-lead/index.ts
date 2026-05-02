@@ -161,6 +161,18 @@ function buildAttributionRow(
   }
 }
 
+// Backfill utm_* fields onto a row from attribution.last when the row didn't carry them.
+// Without this, primary tables (contact_requests / patients / therapists) get NULL UTM
+// even though attribution carries the values — only lead_attribution would receive them.
+function backfillUtmFromAttribution(row: Record<string, unknown>, attribution: any): void {
+  if (!attribution || typeof attribution !== 'object') return
+  const last = (attribution.last && typeof attribution.last === 'object') ? attribution.last : {}
+  const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const
+  for (const k of utmKeys) {
+    if (!row[k] && last[k]) row[k] = last[k]
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Basic input sanitization — strip HTML tags from string values
 // ---------------------------------------------------------------------------
@@ -254,6 +266,10 @@ serve(async (req) => {
     // ---- Sanitize input data ----
     const cleanData = sanitizeData(data as Record<string, unknown>)
 
+    // Backfill UTM fields from attribution so primary tables (not just lead_attribution)
+    // receive utm_source/medium/campaign/content/term. Client-provided values win.
+    backfillUtmFromAttribution(cleanData, attribution)
+
     // ---- Validate phone (Israeli or international) ----
     if (cleanData.phone && typeof cleanData.phone === 'string') {
       const stripped = (cleanData.phone as string).replace(/[\s\-()]/g, '')
@@ -317,6 +333,8 @@ serve(async (req) => {
         if (cleanMirror.phone && typeof cleanMirror.phone === 'string') {
           cleanMirror.phone = (cleanMirror.phone as string).replace(/[\s\-()]/g, '')
         }
+        // Same UTM backfill on the mirror row (e.g. contact_requests when primary is patients)
+        backfillUtmFromAttribution(cleanMirror, attribution)
         const { error: mirrorErr } = await supabase.from(mirror_table).insert(cleanMirror)
         if (mirrorErr) {
           console.error(`Mirror insert error [${mirror_table}]:`, mirrorErr.message)

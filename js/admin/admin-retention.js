@@ -209,12 +209,15 @@ function openRetentionModal(id) {
 
     const approveBtn = document.getElementById('retention-btn-approve');
     const rejectBtn = document.getElementById('retention-btn-reject');
+    const saveBtn = document.getElementById('retention-btn-save');
     if (isDraft) {
         approveBtn.style.display = '';
         rejectBtn.style.display = '';
+        if (saveBtn) saveBtn.style.display = '';
     } else {
         approveBtn.style.display = 'none';
         rejectBtn.style.display = 'none';
+        if (saveBtn) saveBtn.style.display = 'none';
     }
 
     const waBtn = document.getElementById('retention-btn-whatsapp');
@@ -248,6 +251,37 @@ async function approveRetentionFromModal() {
     if (!editedText) { showToast('ההודעה ריקה', 'error'); return; }
     await approveRetention(currentRetentionId, editedText);
     closeModal('retention-modal');
+}
+
+async function saveRetentionEdit() {
+    if (!currentRetentionId) return;
+    const row = retentionDrafts.find(x => x.id === currentRetentionId);
+    if (!row) return;
+    if (row.status !== 'draft') { showToast('ניתן לערוך רק טיוטות', 'warning'); return; }
+
+    const ta = document.getElementById('retention-message-text');
+    const editedText = ta ? ta.value.trim() : '';
+    if (!editedText) { showToast('ההודעה ריקה', 'error'); return; }
+
+    if (editedText === row.message_text) {
+        showToast('אין שינויים לשמירה', 'info');
+        return;
+    }
+
+    const btn = document.getElementById('retention-btn-save');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+
+    const { error } = await db.from('retention_messages')
+        .update({ message_text: editedText })
+        .eq('id', currentRetentionId);
+
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+
+    if (error) { showToast('שגיאה בשמירה: ' + (error.message || ''), 'error'); return; }
+
+    row.message_text = editedText;  // keep local state in sync so "no changes" check works on next click
+    showToast('השינויים נשמרו. עדיין לא אושר.', 'success');
+    loadRetention();
 }
 
 async function approveRetention(id, editedText) {

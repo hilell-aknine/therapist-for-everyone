@@ -117,6 +117,11 @@
                     <i class="fa-solid fa-bolt" style="color:#D4AF37;"></i>
                     <span>אוטומציות</span>
                 </div>
+                <div class="nav-item" onclick="switchView('retention')">
+                    <i class="fa-solid fa-bell" style="color:#D4AF37;"></i>
+                    <span>שימור — נוטשי קורס</span>
+                    <span class="badge" id="retention-count" style="background:#D4AF37;color:#003B46;"></span>
+                </div>
                 <div class="nav-item" onclick="switchView('settings')">
                     <i class="fa-solid fa-gear"></i>
                     <span>הגדרות</span>
@@ -2030,6 +2035,82 @@
                     <div id="automations-list"></div>
                 </div>
 
+                <!-- Retention (Course Abandoners) View -->
+                <div id="retention-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-bell" style="color:#D4AF37;margin-left:0.5rem;"></i> שימור — נוטשי קורס</h1>
+
+                    <details id="retention-info-box" style="margin:-0.5rem 0 1.2rem;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.3);border-radius:10px;padding:0.8rem 1rem;">
+                        <summary style="cursor:pointer;font-weight:600;color:var(--text-primary);font-size:0.9rem;"><i class="fa-solid fa-circle-info" style="color:#D4AF37;margin-left:0.3rem;"></i> איך זה עובד?</summary>
+                        <div style="margin-top:0.7rem;font-size:0.88rem;line-height:1.7;color:var(--text-secondary);">
+                            המערכת סורקת מדי יום תלמידים שלא התקדמו לפחות 3 ימים במודול 1 של הקורס החינמי. עבור כל אחד נוצרת אוטומטית טיוטת הודעת WhatsApp אישית — שמשקפת את ה-"למה" שלהם מהשאלון ואת השיעור הבא שלהם בקורס.
+                            <br><br>
+                            <strong>שום הודעה לא נשלחת אוטומטית.</strong> כל טיוטה מחכה כאן לסקירה שלך — אתה יכול לערוך את הטקסט, לאשר, או לדחות.
+                            <br><br>
+                            <strong>אושר</strong> = ההודעה נכנסה לתור שליחה (השליחה האוטומטית עצמה — Phase 3 — עוד לא בייצור). <strong>נדחה</strong> = ההודעה נשמרת לסטטיסטיקה אך לא תישלח.
+                        </div>
+                    </details>
+
+                    <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.8rem;margin-bottom:1.2rem;">
+                        <div class="stat-card" style="background:rgba(212,175,55,0.08);border-right:3px solid #D4AF37;border-radius:10px;padding:0.9rem 1.1rem;">
+                            <div style="font-size:0.78rem;color:var(--text-secondary);">טיוטות ממתינות</div>
+                            <div style="font-size:1.6rem;font-weight:700;color:#D4AF37;" id="retention-stat-draft">0</div>
+                        </div>
+                        <div class="stat-card" style="background:rgba(34,197,94,0.06);border-right:3px solid #22c55e;border-radius:10px;padding:0.9rem 1.1rem;">
+                            <div style="font-size:0.78rem;color:var(--text-secondary);">אושרו (בתור)</div>
+                            <div style="font-size:1.6rem;font-weight:700;color:#22c55e;" id="retention-stat-approved">0</div>
+                        </div>
+                        <div class="stat-card" style="background:rgba(47,133,146,0.06);border-right:3px solid #2F8592;border-radius:10px;padding:0.9rem 1.1rem;">
+                            <div style="font-size:0.78rem;color:var(--text-secondary);">נשלחו</div>
+                            <div style="font-size:1.6rem;font-weight:700;color:#2F8592;" id="retention-stat-sent">0</div>
+                        </div>
+                        <div class="stat-card" style="background:rgba(248,81,73,0.06);border-right:3px solid #f85149;border-radius:10px;padding:0.9rem 1.1rem;">
+                            <div style="font-size:0.78rem;color:var(--text-secondary);">נדחו</div>
+                            <div style="font-size:1.6rem;font-weight:700;color:#f85149;" id="retention-stat-rejected">0</div>
+                        </div>
+                    </div>
+
+                    <div class="tabs" style="display:flex;gap:0.4rem;margin-bottom:1rem;flex-wrap:wrap;">
+                        <button class="tab" onclick="filterRetention('all')">הכל</button>
+                        <button class="tab active" onclick="filterRetention('draft')">טיוטות</button>
+                        <button class="tab" onclick="filterRetention('approved')">אושרו</button>
+                        <button class="tab" onclick="filterRetention('sent')">נשלחו</button>
+                        <button class="tab" onclick="filterRetention('rejected')">נדחו</button>
+                        <button class="tab" onclick="filterRetention('opted_out')">הסירו</button>
+                        <button class="tab" onclick="filterRetention('failed')">נכשלו</button>
+                    </div>
+
+                    <div style="display:flex;gap:0.6rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
+                        <input type="search" id="retention-search" placeholder="חיפוש לפי שם או טלפון..." oninput="renderRetention()" style="flex:1;min-width:240px;padding:0.55rem 0.9rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-family:inherit;">
+                        <button class="btn btn-outline" onclick="exportRetentionCSV()"><i class="fa-solid fa-file-csv"></i> ייצוא CSV</button>
+                    </div>
+
+                    <div id="bulk-bar-retention" class="bulk-bar" style="display:none;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.4);border-radius:8px;padding:0.6rem 1rem;margin-bottom:0.8rem;align-items:center;justify-content:space-between;">
+                        <span id="bulk-count-retention" style="font-weight:600;">0 נבחרו</span>
+                        <button class="btn btn-gold" onclick="bulkApproveRetention()"><i class="fa-solid fa-check"></i> אשר את הנבחרות</button>
+                    </div>
+                    <style>#bulk-bar-retention.visible{display:flex !important;}</style>
+
+                    <div class="table-container" style="background:var(--card);border-radius:12px;overflow:hidden;border:1px solid var(--border);">
+                        <table style="width:100%;border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px;"><input type="checkbox" id="select-all-retention" onclick="toggleSelectAllRetention()"></th>
+                                    <th>תלמיד / תקציר ההודעה</th>
+                                    <th>טלפון</th>
+                                    <th>סיבה</th>
+                                    <th>שיעור הבא</th>
+                                    <th>חוסר פעילות</th>
+                                    <th>סטטוס</th>
+                                    <th style="width:60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="retention-table">
+                                <tr><td colspan="8" class="empty-state" style="padding:3rem;text-align:center;color:var(--text-secondary);">טוען...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Settings View -->
                 <div id="settings-view" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-gear" style="color:var(--gold);margin-left:0.5rem;"></i> הגדרות דאשבורד</h1>
@@ -2615,6 +2696,23 @@
 
     <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
+    <!-- Retention Draft Review Modal -->
+    <div class="modal-overlay" id="retention-modal" onclick="if(event.target===this)closeModal('retention-modal')">
+        <div class="modal" style="max-width:720px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-bell" style="color:#D4AF37;"></i> <span id="retention-modal-title">סקירת טיוטת שימור</span></h2>
+                <button class="modal-close" onclick="closeModal('retention-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="retention-modal-body" style="padding:0;"></div>
+            <div class="modal-footer" style="display:flex;gap:0.6rem;justify-content:flex-end;padding:1rem 1.5rem;border-top:1px solid var(--border);position:sticky;bottom:0;background:var(--card);">
+                <a id="retention-btn-whatsapp" href="#" target="_blank" rel="noopener" class="btn btn-outline" style="display:none;"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> פתח שיחה ב-WhatsApp</a>
+                <button class="btn btn-danger" id="retention-btn-reject" onclick="rejectRetentionFromModal()"><i class="fa-solid fa-xmark"></i> דחה טיוטה זו</button>
+                <button class="btn btn-gold" id="retention-btn-approve" onclick="approveRetentionFromModal()"><i class="fa-solid fa-check"></i> אשר ושלח לתור</button>
+                <button class="btn btn-outline" onclick="closeModal('retention-modal')">סגור</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div class="modal-overlay" id="delete-confirm-modal">
         <div class="modal" style="max-width:420px;">
@@ -2738,6 +2836,7 @@
     <script src="../js/admin/admin-popups.js"></script>
     <script src="../js/admin/admin-automations.js"></script>
     <script src="../js/admin/admin-segments.js"></script>
+    <script src="../js/admin/admin-retention.js"></script>
     <script src="../js/admin/admin-analytics.js"></script>
     <script src="../js/admin/admin-traffic.js"></script>
     <script src="../js/admin/admin-sources.js?v=11"></script>

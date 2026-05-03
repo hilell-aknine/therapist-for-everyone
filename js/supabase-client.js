@@ -985,47 +985,23 @@
                 if (insertError) {
                     console.error('Profile create error:', insertError);
                 }
-
-                // Create lead_attribution row for traffic source tracking
-                try {
-                    const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
-                    const attrRow = {
-                        linked_table: 'profiles',
-                        linked_id: user.id,
-                        phone: phone || null,
-                        email: user.email,
-                        session_id: attribution?.session_id || null,
-                        first_utm_source: attribution?.first?.utm_source || utm.utm_source || null,
-                        first_utm_medium: attribution?.first?.utm_medium || utm.utm_medium || null,
-                        first_utm_campaign: attribution?.first?.utm_campaign || utm.utm_campaign || null,
-                        first_referrer_domain: attribution?.first?.referrer_domain || null,
-                        first_landing_url: attribution?.first?.landing_url || null,
-                        first_at: attribution?.first?.at || null,
-                        last_utm_source: attribution?.last?.utm_source || utm.utm_source || null,
-                        last_utm_medium: attribution?.last?.utm_medium || utm.utm_medium || null,
-                        last_utm_campaign: attribution?.last?.utm_campaign || utm.utm_campaign || null,
-                        last_referrer_domain: attribution?.last?.referrer_domain || null,
-                        last_landing_url: attribution?.last?.landing_url || null,
-                        last_at: attribution?.last?.at || null,
-                        device_type: attribution?.device_type || null,
-                        os_name: attribution?.os_name || null,
-                        browser_name: attribution?.browser_name || null,
-                        viewport_w: attribution?.viewport_w || null,
-                        viewport_h: attribution?.viewport_h || null,
-                        language: attribution?.language || null,
-                        timezone: attribution?.timezone || null,
-                        raw_ua: attribution?.raw_ua || null
-                    };
-                    await supabaseClient.from('lead_attribution').insert([attrRow]);
-                } catch (attrErr) {
-                    console.warn('Attribution save for new profile:', attrErr);
-                }
             } else if (phone && !existing.phone) {
                 // Profile exists but phone missing (e.g. trigger ran before metadata was available)
                 await supabaseClient
                     .from('profiles')
                     .update({ phone })
                     .eq('id', user.id);
+            }
+
+            // Save (or backfill) lead_attribution. Runs for both new profiles AND
+            // existing ones whose attribution row is missing — handle_new_user
+            // trigger creates the profile row server-side, so the old "only on
+            // new profile" branch never fired and every signup ended up with a
+            // missing/empty attribution row. saveFullAttribution UPSERTS, so it
+            // PATCHES if the row exists and INSERTS if not. Skipped silently if
+            // the user has no attribution data at all in localStorage.
+            if (window.saveFullAttribution) {
+                try { await window.saveFullAttribution('profiles', user.id); } catch (e) { /* non-critical */ }
             }
 
             // Ambassador Program: save referral for any user with pending ref data

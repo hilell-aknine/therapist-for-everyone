@@ -595,18 +595,35 @@ window.saveFullAttribution = async function (linkedTable, linkedId) {
 
         const bearer = await _getBearerToken(anonKey);
         const filter = `linked_id=eq.${linkedId}&linked_table=eq.${linkedTable}`;
-        await fetch(`${supabaseUrl}/rest/v1/lead_attribution?${filter}&order=created_at.desc&limit=1`, {
+        const baseHeaders = {
+            'apikey': anonKey,
+            'Authorization': `Bearer ${bearer}`,
+            'Content-Type': 'application/json',
+            'Accept-Profile': 'public',
+            'Content-Profile': 'public',
+        };
+
+        // UPSERT pattern — try PATCH first (returns the affected row).
+        // If no row exists yet (signup before any form trigger fires), INSERT.
+        const patchRes = await fetch(`${supabaseUrl}/rest/v1/lead_attribution?${filter}&order=created_at.desc&limit=1`, {
             method: 'PATCH',
-            headers: {
-                'apikey': anonKey,
-                'Authorization': `Bearer ${bearer}`,
-                'Content-Type': 'application/json',
-                'Accept-Profile': 'public',
-                'Content-Profile': 'public',
-                'Prefer': 'return=minimal'
-            },
+            headers: { ...baseHeaders, 'Prefer': 'return=representation' },
             body: JSON.stringify(filtered)
         });
+
+        let updated = [];
+        try { updated = await patchRes.json(); } catch (e) {}
+        if (!Array.isArray(updated) || updated.length === 0) {
+            // No row to update — INSERT instead. Required fields per RLS auth_insert_own:
+            // linked_table='profiles' AND linked_id=auth.uid(). For other tables we rely
+            // on the auth_update_own_q_attr policy (UPDATE only — INSERT may 401 here).
+            const insertBody = { ...filtered, linked_table: linkedTable, linked_id: linkedId };
+            await fetch(`${supabaseUrl}/rest/v1/lead_attribution`, {
+                method: 'POST',
+                headers: { ...baseHeaders, 'Prefer': 'return=minimal' },
+                body: JSON.stringify(insertBody)
+            });
+        }
     } catch (e) {
         // Non-critical — main lead INSERT already succeeded, this is enrichment only
     }

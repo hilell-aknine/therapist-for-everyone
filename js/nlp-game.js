@@ -294,8 +294,42 @@ class StoryGame {
         // Init swipe-to-dismiss on bottom sheets
         this.initSwipeDismiss();
 
+        // Flush pending Supabase save when the tab is being closed
+        this.initBeforeUnload();
+
         // Init auth flow
         this.initAuth();
+    }
+
+    initBeforeUnload() {
+        window.addEventListener('beforeunload', () => {
+            // localStorage is already up-to-date (savePlayerData writes synchronously).
+            // Cancel the 1s debounce and fire the Supabase save immediately so we
+            // do not lose progress on quick tab close. Fire-and-forget — the browser
+            // may not deliver the request, but at least we attempted it.
+            if (this.saveDebounceTimer) {
+                clearTimeout(this.saveDebounceTimer);
+                this.saveDebounceTimer = null;
+                if (this.user) this.saveToSupabase();
+            }
+        });
+    }
+
+    showError(message) {
+        // Centralised user-facing error toast. Used wherever a code path would
+        // otherwise silently no-op and leave the user staring at a blank screen.
+        try {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 4000);
+            } else {
+                console.warn('[game]', message);
+            }
+        } catch (e) {
+            console.warn('[game] showError failed', e, message);
+        }
     }
 
     // ═══════════════════════════════════════
@@ -470,8 +504,16 @@ class StoryGame {
     }
 
     migrateProgress() {
-        // Migration from 21-lesson version to 51-lesson version
+        // Migration from 21-lesson version to 51-lesson version.
+        // Skip if already migrated, OR if user has any progress (safety guard:
+        // never wipe existing completedLessons even if migration_version is missing
+        // — see hindsight 2026-05-03 for the cross-device reset incident).
         if (this.playerData.migrationVersion >= 2) return;
+        if (this.playerData.completedLessons && Object.keys(this.playerData.completedLessons).length > 0) {
+            this.playerData.migrationVersion = 2;
+            this.savePlayerData();
+            return;
+        }
 
         // Preserve XP, level, hearts, streak, achievements
         // Reset completed lessons — content changed completely
@@ -500,7 +542,10 @@ class StoryGame {
                     .single();
 
                 if (data && !error) {
-                    // Map DB fields to local playerData
+                    // Map DB fields to local playerData. Every field from
+                    // getDefaultPlayerData() must appear here — missing fields
+                    // become undefined and silently break features (and trigger
+                    // migrateProgress() to wipe completedLessons; see hindsight 2026-05-03).
                     this.playerData = {
                         xp: data.xp || 0,
                         level: data.level || 1,
@@ -519,7 +564,12 @@ class StoryGame {
                         dailyChallengeCompleted: data.daily_challenge_completed || null,
                         reviewQueue: [],
                         lastReviewDate: null,
-                        onboardingComplete: true // if they have DB data, onboarding was done
+                        onboardingComplete: true, // if they have DB data, onboarding was done
+                        migrationVersion: data.migration_version != null ? data.migration_version : 2,
+                        perfectLessonsList: data.perfect_lessons_list || [],
+                        weeklyActivity: data.weekly_activity || {},
+                        moduleAccuracy: data.module_accuracy || {},
+                        longestStreak: data.longest_streak || 0
                     };
                     // Also cache to localStorage
                     localStorage.setItem('nlpGameData', JSON.stringify(this.playerData));
@@ -574,7 +624,12 @@ class StoryGame {
                 total_wrong: this.playerData.totalWrongAnswers,
                 stories_created: this.playerData.storiesCreated,
                 perfect_lessons: this.playerData.perfectLessons,
-                daily_challenge_completed: this.playerData.dailyChallengeCompleted
+                daily_challenge_completed: this.playerData.dailyChallengeCompleted,
+                migration_version: this.playerData.migrationVersion || 2,
+                perfect_lessons_list: this.playerData.perfectLessonsList || [],
+                weekly_activity: this.playerData.weeklyActivity || {},
+                module_accuracy: this.playerData.moduleAccuracy || {},
+                longest_streak: this.playerData.longestStreak || 0
             }, { onConflict: 'user_id' });
         } catch (e) {
             console.warn('Failed to create Supabase row', e);
@@ -610,6 +665,11 @@ class StoryGame {
                 stories_created: this.playerData.storiesCreated,
                 perfect_lessons: this.playerData.perfectLessons,
                 daily_challenge_completed: this.playerData.dailyChallengeCompleted,
+                migration_version: this.playerData.migrationVersion || 2,
+                perfect_lessons_list: this.playerData.perfectLessonsList || [],
+                weekly_activity: this.playerData.weeklyActivity || {},
+                module_accuracy: this.playerData.moduleAccuracy || {},
+                longest_streak: this.playerData.longestStreak || 0,
                 updated_at: new Date().toISOString()
             }).eq('user_id', this.user.id);
         } catch (e) {
@@ -1080,10 +1140,7 @@ class StoryGame {
         const today = new Date().toDateString();
         if (this.playerData.dailyChallengeCompleted === today) return;
 
-        const availableModules = MODULES.filter((module, index) => {
-            if (index === 0) return true;
-            return this.getModuleProgress(MODULES[index - 1].id) >= 50;
-        });
+        const availableModules = MODULES.filter((module, index) => !this.isModuleLocked(index));
 
         if (availableModules.length === 0) {
             this.transitionTo(() => this.openModule(1));
@@ -1158,8 +1215,7 @@ class StoryGame {
         let nextModuleId = null;
         for (let i = 0; i < MODULES.length; i++) {
             const prog = this.getModuleProgress(MODULES[i].id);
-            const locked = i > 0 && this.getModuleProgress(MODULES[i - 1].id) < 50;
-            if (!locked && prog < 100) { nextModuleId = MODULES[i].id; break; }
+            if (!this.isModuleLocked(i) && prog < 100) { nextModuleId = MODULES[i].id; break; }
         }
 
         // Module nodes — track unlock transitions
@@ -1169,7 +1225,7 @@ class StoryGame {
         MODULES.forEach((module, index) => {
             const progress = this.getModuleProgress(module.id);
             const isCompleted = progress === 100;
-            const isLocked = index > 0 && this.getModuleProgress(MODULES[index - 1].id) < 50;
+            const isLocked = this.isModuleLocked(index);
             const isPerfect = this.playerData.perfectLessonsList &&
                 module.lessons && module.lessons.every(l =>
                     this.playerData.perfectLessonsList.includes(`${module.id}-${l.id}`)
@@ -1518,6 +1574,23 @@ ${answers.action || ''}`;
         return Math.round((completedLessons / totalLessons) * 100);
     }
 
+    isModuleLocked(index) {
+        // Single source of truth for module locking. A module is unlocked when:
+        //   1. It is the first module, OR
+        //   2. The previous module is 100% complete, OR
+        //   3. The user already has at least one completed lesson in this module
+        //      (grandfathering — old criterion was 50% of previous; some users
+        //      passed that threshold and started this module).
+        if (index <= 0) return false;
+        const mod = MODULES[index];
+        if (!mod) return true;
+        if (this.getModuleProgress(MODULES[index - 1].id) >= 100) return false;
+        const hasOwnProgress = mod.lessons && mod.lessons.some(l =>
+            this.playerData.completedLessons[`${mod.id}-${l.id}`]
+        );
+        return !hasOwnProgress;
+    }
+
     // ═══════════════════════════════════════
     // Module Screen
     // ═══════════════════════════════════════
@@ -1607,8 +1680,15 @@ ${answers.action || ''}`;
     // Lesson & Exercise
     // ═══════════════════════════════════════
     startLesson(lessonId) {
+        if (!this.currentModule || !this.currentModule.lessons) {
+            this.showError('שגיאה בטעינת המודול. נסו לרענן את הדף.');
+            return;
+        }
         this.currentLesson = this.currentModule.lessons.find(l => l.id === lessonId);
-        if (!this.currentLesson) return;
+        if (!this.currentLesson) {
+            this.showError('השיעור לא נמצא. אם הבעיה חוזרת, פנו לתמיכה.');
+            return;
+        }
         document.body.classList.add('game-fullscreen');
 
         if (this.playerData.hearts <= 0) {
@@ -1717,6 +1797,12 @@ ${answers.action || ''}`;
     }
 
     renderExercise() {
+        if (!this.currentLesson || !Array.isArray(this.currentLesson.exercises)) {
+            this.showError('שגיאה בטעינת התרגיל. חוזר לתפריט הראשי.');
+            console.error('[game] renderExercise called without currentLesson.exercises', this.currentLesson);
+            this.transitionTo(() => this.renderHomeScreen());
+            return;
+        }
         const exercise = this.currentLesson.exercises[this.currentExerciseIndex];
         if (!exercise) {
             this.completeLesson();
@@ -2667,6 +2753,25 @@ ${answers.action || ''}`;
 
         const completionMessage = this.getRandomMessage(this.mentorMessages.lessonComplete);
 
+        // Decide the primary CTA: next uncompleted lesson in current module,
+        // else next available module, else "you finished everything".
+        const nextLesson = this.findNextLessonInCurrentModule();
+        const nextModule = nextLesson ? null : this.findNextModule();
+        let primaryCta;
+        if (nextLesson) {
+            primaryCta = `<button class="btn btn-primary btn-full" onclick="game.transitionTo(function() { game.startLesson(${nextLesson.id}) })">
+                    השיעור הבא: ${nextLesson.title} ←
+                </button>`;
+        } else if (nextModule) {
+            primaryCta = `<button class="btn btn-primary btn-full" onclick="game.transitionTo(function() { game.openModule(${nextModule.id}) })">
+                    המודול הבא: ${nextModule.title} ←
+                </button>`;
+        } else {
+            primaryCta = `<button class="btn btn-primary btn-full" onclick="game.transitionTo(function() { game.renderHomeScreen() })">
+                    סיימת את המסע! 🏆
+                </button>`;
+        }
+
         const container = document.getElementById('game-container');
         container.innerHTML = `
             <div class="completion-screen">
@@ -2684,14 +2789,36 @@ ${answers.action || ''}`;
                         <div class="completion-stat-label">ימים ברצף</div>
                     </div>
                 </div>
-                <button class="btn btn-primary btn-full" onclick="game.transitionTo(function() { game.openModule(${this.currentModule.id}) })">
-                    המשך ללמוד
-                </button>
+                ${primaryCta}
                 <button class="btn btn-secondary btn-full" style="margin-top: 10px;" onclick="game.transitionTo(function() { game.renderHomeScreen() })">
                     חזרה לתפריט
                 </button>
             </div>
         `;
+    }
+
+    findNextLessonInCurrentModule() {
+        if (!this.currentModule || !this.currentModule.lessons) return null;
+        const moduleId = this.currentModule.id;
+        return this.currentModule.lessons.find(l =>
+            !this.playerData.completedLessons[`${moduleId}-${l.id}`]
+        ) || null;
+    }
+
+    findNextModule() {
+        if (typeof MODULES === 'undefined') return null;
+        const startIdx = this.currentModule
+            ? MODULES.findIndex(m => m.id === this.currentModule.id) + 1
+            : 0;
+        for (let i = startIdx; i < MODULES.length; i++) {
+            if (this.isModuleLocked(i)) continue;
+            const mod = MODULES[i];
+            const hasUncompleted = mod.lessons && mod.lessons.some(l =>
+                !this.playerData.completedLessons[`${mod.id}-${l.id}`]
+            );
+            if (hasUncompleted) return mod;
+        }
+        return null;
     }
 
     // ═══════════════════════════════════════

@@ -343,3 +343,90 @@ function toggleRetentionInfo() {
     if (!box) return;
     box.classList.toggle('open');
 }
+
+// ---------------------------------------------------------------------------
+// Manual scan + generate trigger — calls retention-run Edge Function.
+// Limit: 30 students per call (Edge Function timeout safety). When more
+// inactive students remain, the response includes remaining > 0 and we
+// nudge the admin to click again.
+// ---------------------------------------------------------------------------
+
+async function runRetentionScan() {
+    const btn = document.getElementById('retention-run-btn');
+    const status = document.getElementById('retention-run-status');
+    if (!btn || !status) return;
+
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+    btn.style.cursor = 'wait';
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> סורק ומייצר טיוטות...';
+    status.textContent = 'הפעולה לוקחת בין 30 שניות לדקה וחצי, תלוי בכמה תלמידים יש. אל תסגור את הטאב.';
+    status.style.color = 'var(--text-secondary)';
+
+    try {
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) {
+            showToast('פג תוקף ההתחברות, התחבר מחדש', 'error');
+            resetRetentionRunButton();
+            return;
+        }
+
+        const url = window.SUPABASE_CONFIG.url + '/functions/v1/retention-run';
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json',
+                'apikey': window.SUPABASE_CONFIG.anonKey,
+            },
+            body: JSON.stringify({ limit: 30 }),
+        });
+        const result = await res.json();
+
+        if (!res.ok) {
+            const msg = result?.error || `שגיאה (HTTP ${res.status})`;
+            showToast('סריקה נכשלה: ' + msg, 'error');
+            status.textContent = 'הסריקה נכשלה. נסה שוב.';
+            status.style.color = 'var(--danger, #f85149)';
+            resetRetentionRunButton();
+            return;
+        }
+
+        const { scanned, processed, inserted, skipped, failed, remaining } = result;
+        const parts = [];
+        parts.push(`נמצאו ${scanned} תלמידים לא-פעילים`);
+        if (processed > 0) parts.push(`עיבדנו ${processed}`);
+        if (inserted > 0) parts.push(`${inserted} טיוטות חדשות`);
+        if (skipped > 0) parts.push(`${skipped} דילוגים (כבר קיים)`);
+        if (failed > 0) parts.push(`${failed} כשלונות`);
+        if (remaining > 0) parts.push(`נותרו ${remaining} — לחץ שוב כדי להמשיך`);
+        status.textContent = parts.join(' · ');
+        status.style.color = inserted > 0 ? 'var(--success, #22c55e)' : 'var(--text-secondary)';
+
+        if (inserted > 0) {
+            showToast(`${inserted} טיוטות חדשות מוכנות לסקירה`, 'success');
+        } else if (scanned === 0) {
+            showToast('אין תלמידים לא-פעילים כרגע', 'success');
+        } else if (skipped > 0 && inserted === 0) {
+            showToast('כל הטיוטות כבר קיימות — אין מה להוסיף', 'success');
+        }
+
+        await loadRetention();
+    } catch (err) {
+        console.error('retention-run error:', err);
+        showToast('שגיאה בקריאה לפונקציה: ' + (err?.message || ''), 'error');
+        status.textContent = 'שגיאה. בדוק את הקונסול.';
+        status.style.color = 'var(--danger, #f85149)';
+    } finally {
+        resetRetentionRunButton();
+    }
+}
+
+function resetRetentionRunButton() {
+    const btn = document.getElementById('retention-run-btn');
+    if (!btn) return;
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+    btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> סרוק נוטשים → ייצר טיוטות';
+}

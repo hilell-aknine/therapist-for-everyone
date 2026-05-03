@@ -4936,27 +4936,8 @@
                 </div>
 
                 <nav class="syllabus">
-                    <div class="module open">
-                        <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
-                            <i class="fa-solid fa-chevron-left module-chevron"></i>
-                            <i class="fa-solid fa-play-circle" style="color:var(--muted-teal);"></i>
-                            <span>חלק א׳ — ערכים</span>
-                            <span class="lesson-count">10</span>
-                        </div>
-                        <div class="module-lessons" id="masterLessonsPart1">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                    <div class="module">
-                        <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
-                            <i class="fa-solid fa-chevron-left module-chevron"></i>
-                            <i class="fa-solid fa-play-circle" style="color:var(--dusty-aqua);"></i>
-                            <span>חלק ב׳ — היפנוזה וטראנס</span>
-                            <span class="lesson-count">10</span>
-                        </div>
-                        <div class="module-lessons" id="masterLessonsPart2">
-                            <!-- Populated by JS -->
-                        </div>
+                    <div id="masterModulesContainer">
+                        <!-- Populated by JS — one module block per master lesson -->
                     </div>
                     <div class="module">
                         <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
@@ -4985,22 +4966,11 @@
                         <div style="text-align:center;margin-bottom:2rem;">
                             <i class="fa-solid fa-crown" style="font-size:2.5rem;color:var(--gold);margin-bottom:0.8rem;display:block;"></i>
                             <h2 style="font-family:var(--font-display);margin-bottom:0.3rem;font-size:1.3rem;">תוכנית ההכשרה</h2>
-                            <p style="color:var(--text-secondary);font-size:0.9rem;">20 שיעורי וידאו + 6 חוברות עבודה</p>
+                            <p id="masterWelcomeSubtitle" style="color:var(--text-secondary);font-size:0.9rem;">תוכן מתעדכן…</p>
                         </div>
 
-                        <!-- Part 1: Values -->
-                        <h3 style="font-size:1rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
-                            <i class="fa-solid fa-play-circle" style="color:var(--muted-teal);"></i> חלק א׳ — ערכים
-                            <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:400;">(10 שיעורים)</span>
-                        </h3>
-                        <div id="masterVideoGridPart1" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem;"></div>
-
-                        <!-- Part 2: Hypnosis & Trance -->
-                        <h3 style="font-size:1rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
-                            <i class="fa-solid fa-play-circle" style="color:var(--dusty-aqua);"></i> חלק ב׳ — היפנוזה וטראנס
-                            <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:400;">(10 שיעורים)</span>
-                        </h3>
-                        <div id="masterVideoGridPart2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem;"></div>
+                        <!-- Master modules grid — populated by JS, one block per master lesson -->
+                        <div id="masterWelcomeGrids"></div>
 
                         <!-- Workbooks Grid -->
                         <h3 style="font-size:1rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
@@ -5443,30 +5413,46 @@
             { name: 'bonus-emotions-messages.pdf', title: 'חוברת בונוס — מסרים מרגשות', icon: 'fa-solid fa-heart' },
         ];
 
-        const masterLessons = [
-            // חלק א׳ — ערכים (שיעורים 1-10)
-            { id: 'JcTS37pTm20', title: 'פתיחה וחזרה — תשאול סיבובי', duration: '25:28' },
-            { id: 'X6cJdC24BXo', title: 'אמפתיה באימון — שבירת אמונות', duration: '25:14' },
-            { id: 'k9BMu4tnkb8', title: 'הגדרת ערכים — השוואה מורכבת', duration: '22:40' },
-            { id: 'hxV25-3sT6Q', title: 'שחיקה ונוכחות — ערכי אמצעי מול מטרה', duration: '23:37' },
-            { id: 'Dgs89fazBY4', title: 'ערכים בזוגיות וקונפליקטים', duration: '28:03' },
-            { id: 'YjTrukA9pFI', title: 'שיטת חילוץ ערכים — אירוע שיא ושפל', duration: '28:54' },
-            { id: 'JGkGkOq7g14', title: 'הדגמה חיה — איגל ועודיה', duration: '29:34' },
-            { id: 'dnCF2sFupd8', title: 'דירוג ערכים ושיתופי תלמידים', duration: '23:07' },
-            { id: '3nJWE4gdxvg', title: 'ערכי מניעה ודגשי תרגול', duration: '27:43' },
-            { id: 'hgKxjmkEqzA', title: 'קריטריונים מעצימים ושיעורי בית', duration: '26:47' },
-            // חלק ב׳ — היפנוזה וטראנס (שיעורים 11-20)
-            { id: 'AYnuW5EwAY0', title: 'חזרה על ערכים ורגשות — תחושה ושיום', duration: '26:38' },
-            { id: '8JFPtpvoc6I', title: 'משולש הסטייט והקדמה לטראומה', duration: '24:38' },
-            { id: 'BiWbg48cjHI', title: 'תת המודע — מודל המוח והגורם הביקורתי', duration: '22:13' },
-            { id: 'SnW0fBe9AwI', title: 'מטאפורת המועדון — סוגסטיות ושינוי אמונות', duration: '26:11' },
-            { id: 'emHGCeXdgP4', title: 'מצבי טראנס — גלי מוח וסוגסטביליות', duration: '24:52' },
-            { id: 'NL5uocU1X7s', title: 'הדגמת קטלפסיה ותרגול הכנסה לטראנס', duration: '27:45' },
-            { id: '_b4BLBoRGyo', title: 'זיכרון אסוציאטיבי ואינדוקציית דייב אלמן', duration: '27:56' },
-            { id: 'Fup34B8x8Ps', title: 'הדגמה חיה — הכנסה מלאה לטראנס ליאל', duration: '27:06' },
-            { id: 'E6s8xjiiJd0', title: 'רגרסיה — ציר זמן והילד הפנימי', duration: '27:30' },
-            { id: 'KmLe4HmDBO4', title: 'ריפוי הילד הפנימי ושיעורי בית', duration: '27:37' },
+        // Master course is structured as modules, one per full master session.
+        // New sessions are appended to this array as they're produced (after silence-removal pipeline + YouTube upload).
+        // The previous content (chapters of מפגש 2, מפגש 3) was cleared 2026-05-03 — being re-cut and re-uploaded.
+        const masterModules = [
+            {
+                lessonNumber: 1,
+                lessonTitle: 'מפגש 1 — רמות לוגיות וזהות',
+                color: 'var(--muted-teal)',
+                chapters: [
+                    { id: '1qLcXgWTk9s', title: 'פתיחה ורמות לוגיות', duration: '26:58' },
+                    { id: '_pLj-c_8BXc', title: 'שינוי זהות וסקירת פרקטישנר', duration: '25:41' },
+                    { id: 'FR_Zs9s1X0g', title: 'מבנה הקורס והצבת יעדים', duration: '23:02' },
+                    { id: 'FZDfW0lY0bg', title: 'למידה לא מודעת, זהות וחזון', duration: '28:39' },
+                    { id: '7YcQszjC1Oo', title: 'חזון בפעולה ואפקט הפרפר', duration: '27:50' },
+                    { id: 'ZTqsfl7kt9A', title: 'תרגול — דמיון מודרך וצריבת מטרות', duration: '32:05' },
+                    { id: 'jXFat2nQTDY', title: 'מבנה אמונות וזיהוי', duration: '34:49' },
+                    { id: 'h4NHw3SFTXw', title: 'תיאוריה ותרגול — תשאול מעגלי', duration: '29:49' },
+                ]
+            },
         ];
+
+        // Flat list used by navigation/notes/AI code (currentMasterLessonIndex points here).
+        const masterLessons = masterModules.flatMap(m => m.chapters);
+
+        // Lookup: flat index → { module, moduleIndex, chapterIndex, chapter }
+        function getMasterModuleInfo(flatIndex) {
+            let cumulative = 0;
+            for (let m = 0; m < masterModules.length; m++) {
+                if (flatIndex < cumulative + masterModules[m].chapters.length) {
+                    return {
+                        module: masterModules[m],
+                        moduleIndex: m,
+                        chapterIndex: flatIndex - cumulative,
+                        chapter: masterModules[m].chapters[flatIndex - cumulative]
+                    };
+                }
+                cumulative += masterModules[m].chapters.length;
+            }
+            return null;
+        }
         let currentMasterLessonIndex = -1;
 
         async function checkPaidRole() {
@@ -5628,50 +5614,91 @@
         }
 
         function loadMasterLessons() {
-            const part1 = masterLessons.slice(0, 10);
-            const part2 = masterLessons.slice(10);
+            const sidebarContainer = document.getElementById('masterModulesContainer');
+            const gridsContainer = document.getElementById('masterWelcomeGrids');
+            const subtitle = document.getElementById('masterWelcomeSubtitle');
+            if (!sidebarContainer || !gridsContainer) return;
 
-            // Sidebar
-            renderMasterSidebarItems(part1, 'masterLessonsPart1', 0, 'var(--muted-teal)');
-            renderMasterSidebarItems(part2, 'masterLessonsPart2', 10, 'var(--dusty-aqua)');
+            const totalChapters = masterLessons.length;
 
-            // Welcome grids
-            renderMasterVideoGrid(part1, 'masterVideoGridPart1', 0, 'var(--muted-teal)');
-            renderMasterVideoGrid(part2, 'masterVideoGridPart2', 10, 'var(--dusty-aqua)');
+            sidebarContainer.innerHTML = '';
+            gridsContainer.innerHTML = '';
+
+            if (masterModules.length === 0) {
+                if (subtitle) subtitle.textContent = '6 חוברות עבודה זמינות. שיעורי הוידאו בעדכון.';
+                gridsContainer.innerHTML = `
+                    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:2rem;">
+                        <i class="fa-solid fa-video" style="font-size:1.8rem;color:var(--muted-teal);margin-bottom:0.6rem;display:block;"></i>
+                        <h4 style="font-size:1rem;margin-bottom:0.4rem;">שיעורי הוידאו בעדכון</h4>
+                        <p style="color:var(--text-secondary);font-size:0.85rem;margin:0;">תוכן הקורס נערך ומועלה מחדש בשלבים. בינתיים זמינות חוברות העבודה למטה.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (subtitle) subtitle.textContent = `${totalChapters} פרקי וידאו ב-${masterModules.length} מפגשים + 6 חוברות עבודה`;
+
+            let startIndex = 0;
+            masterModules.forEach((module, mIdx) => {
+                // Sidebar module block
+                const moduleEl = document.createElement('div');
+                moduleEl.className = 'module' + (mIdx === 0 ? ' open' : '');
+                moduleEl.innerHTML = `
+                    <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+                        <i class="fa-solid fa-chevron-left module-chevron"></i>
+                        <i class="fa-solid fa-play-circle" style="color:${module.color};"></i>
+                        <span>${module.lessonTitle}</span>
+                        <span class="lesson-count">${module.chapters.length}</span>
+                    </div>
+                    <div class="module-lessons" id="masterLessonsModule${mIdx}"></div>
+                `;
+                sidebarContainer.appendChild(moduleEl);
+                renderMasterSidebarItems(module.chapters, `masterLessonsModule${mIdx}`, startIndex, module.color);
+
+                // Welcome grid block
+                const gridBlock = document.createElement('div');
+                gridBlock.innerHTML = `
+                    <h3 style="font-size:1rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
+                        <i class="fa-solid fa-play-circle" style="color:${module.color};"></i> ${module.lessonTitle}
+                        <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:400;">(${module.chapters.length} פרקים)</span>
+                    </h3>
+                    <div id="masterVideoGridModule${mIdx}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2rem;"></div>
+                `;
+                gridsContainer.appendChild(gridBlock);
+                renderMasterVideoGrid(module.chapters, `masterVideoGridModule${mIdx}`, startIndex, module.color);
+
+                startIndex += module.chapters.length;
+            });
         }
 
         function selectMasterLesson(i) {
-            const lesson = masterLessons[i];
+            const info = getMasterModuleInfo(i);
+            if (!info) return;
+            const lesson = info.chapter;
             currentMasterLessonIndex = i;
 
-            // Hide welcome + PDF viewer, show video player
             document.getElementById('masterWelcome').style.display = 'none';
             document.getElementById('masterWorkbookViewer').style.display = 'none';
             document.getElementById('masterVideoPlayer').style.display = '';
 
-            // Set title and number
             document.getElementById('masterVideoTitle').textContent = lesson.title;
-            document.getElementById('masterVideoNumber').textContent = `שיעור ${i + 1} מתוך ${masterLessons.length} • ${lesson.duration}`;
+            document.getElementById('masterVideoNumber').textContent =
+                `${info.module.lessonTitle} • פרק ${info.chapterIndex + 1} מתוך ${info.module.chapters.length} • ${lesson.duration}`;
 
-            // Load YouTube embed
             document.getElementById('masterVideoFrame').src = `https://www.youtube.com/embed/${lesson.id}?autoplay=1&rel=0`;
 
-            // Highlight sidebar
             document.querySelectorAll('[id^="ml-sidebar-"]').forEach(el => el.style.background = '');
             document.querySelectorAll('[id^="mwb-sidebar-"]').forEach(el => el.style.background = '');
             const sidebarItem = document.getElementById(`ml-sidebar-${i}`);
             if (sidebarItem) sidebarItem.style.background = 'var(--sidebar-active)';
 
-            // Prev/Next buttons
             document.getElementById('masterPrevBtn').style.display = i === 0 ? 'none' : '';
             document.getElementById('masterNextBtn').style.display = i === masterLessons.length - 1 ? 'none' : '';
 
-            // Load notes for this lesson
             loadMasterNotes();
 
-            // Update AI lesson badge
             const badge = document.getElementById('masterAiLessonBadge');
-            if (badge) badge.textContent = `שיעור ${i + 1}: ${lesson.title}`;
+            if (badge) badge.textContent = `${info.module.lessonTitle} — פרק ${info.chapterIndex + 1}: ${lesson.title}`;
         }
 
         function navigateMasterLesson(direction) {
@@ -5739,11 +5766,12 @@
 
             const indicator = document.getElementById('masterNotesSyncIndicator');
             if (typeof UserNotes !== 'undefined' && window.supabaseClient) {
+                const _info = getMasterModuleInfo(currentMasterLessonIndex);
                 UserNotes.save(lesson.id, content, {
                     courseType: 'nlp-master',
                     lessonTitle: lesson.title,
-                    moduleTitle: currentMasterLessonIndex < 10 ? 'ערכים' : 'היפנוזה וטראנס',
-                    lessonNumber: currentMasterLessonIndex + 1
+                    moduleTitle: _info ? _info.module.lessonTitle : '',
+                    lessonNumber: _info ? _info.chapterIndex + 1 : currentMasterLessonIndex + 1
                 }).then(() => {
                     indicator.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" style="color:var(--muted-teal);"></i>';
                 }).catch(() => {
@@ -5770,7 +5798,9 @@
             const lesson = masterLessons[currentMasterLessonIndex];
             const content = document.getElementById('masterNotesTextarea').value;
             if (!content.trim()) { alert('אין הערות לייצא'); return; }
-            const html = `<div dir="rtl" style="font-family:Heebo,sans-serif;padding:2rem;"><h2 style="color:#003B46;">הערות — ${lesson.title}</h2><p style="color:#666;font-size:0.85rem;">קורס מאסטר NLP • שיעור ${currentMasterLessonIndex + 1} • ${new Date().toLocaleDateString('he-IL')}</p><hr style="border-color:#D4AF37;margin:1rem 0;"><div style="white-space:pre-wrap;line-height:1.8;font-size:1rem;">${content}</div></div>`;
+            const _info = getMasterModuleInfo(currentMasterLessonIndex);
+            const _ctx = _info ? `${_info.module.lessonTitle} • פרק ${_info.chapterIndex + 1}` : `שיעור ${currentMasterLessonIndex + 1}`;
+            const html = `<div dir="rtl" style="font-family:Heebo,sans-serif;padding:2rem;"><h2 style="color:#003B46;">הערות — ${lesson.title}</h2><p style="color:#666;font-size:0.85rem;">קורס מאסטר NLP • ${_ctx} • ${new Date().toLocaleDateString('he-IL')}</p><hr style="border-color:#D4AF37;margin:1rem 0;"><div style="white-space:pre-wrap;line-height:1.8;font-size:1rem;">${content}</div></div>`;
             if (typeof html2pdf !== 'undefined') {
                 html2pdf().set({ margin: 10, filename: `הערות_מאסטר_${lesson.title}.pdf`, html2canvas: { scale: 2 }, jsPDF: { direction: 'rtl' } }).from(html).save();
             }
@@ -5781,7 +5811,9 @@
             const lesson = masterLessons[currentMasterLessonIndex];
             const content = document.getElementById('masterNotesTextarea').value;
             if (!content.trim()) { alert('אין הערות לייצא'); return; }
-            const html = `<html dir="rtl"><head><meta charset="utf-8"><style>body{font-family:Heebo,sans-serif;padding:2rem;}h2{color:#003B46;}hr{border-color:#D4AF37;}</style></head><body><h2>הערות — ${lesson.title}</h2><p>קורס מאסטר NLP • שיעור ${currentMasterLessonIndex + 1} • ${new Date().toLocaleDateString('he-IL')}</p><hr><pre style="white-space:pre-wrap;line-height:1.8;">${content}</pre></body></html>`;
+            const _info = getMasterModuleInfo(currentMasterLessonIndex);
+            const _ctx = _info ? `${_info.module.lessonTitle} • פרק ${_info.chapterIndex + 1}` : `שיעור ${currentMasterLessonIndex + 1}`;
+            const html = `<html dir="rtl"><head><meta charset="utf-8"><style>body{font-family:Heebo,sans-serif;padding:2rem;}h2{color:#003B46;}hr{border-color:#D4AF37;}</style></head><body><h2>הערות — ${lesson.title}</h2><p>קורס מאסטר NLP • ${_ctx} • ${new Date().toLocaleDateString('he-IL')}</p><hr><pre style="white-space:pre-wrap;line-height:1.8;">${content}</pre></body></html>`;
             const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);

@@ -145,8 +145,8 @@ font-family: 'Frank Ruhl Libre';   /* display/headlines */
 ### Architecture
 ```
 course-library.html  → masterView (hidden by default)
-  ├── Sidebar: חלק א׳ ערכים (1-10) + חלק ב׳ היפנוזה וטראנס (11-20) + חוברות (6)
-  ├── Welcome grid: video cards split by part + workbook cards
+  ├── Sidebar: dynamic module per master session (מפגש N — title) + חוברות (6)
+  ├── Welcome grid: video cards grouped by module + workbook cards
   ├── Video player: YouTube embed + prev/next + tabs section
   │   ├── הערות אישיות — per-lesson notes (Supabase user_notes, key: notes_master_{videoId})
   │   ├── העוזר האישי — AI chat with master lesson context → ai-chat Edge Function
@@ -157,7 +157,10 @@ course-library.html  → masterView (hidden by default)
 
 ### Gating
 - `checkPaidRole()` queries `profiles.role` — shows master switcher only for `paid_customer` or `admin`
-- `masterLessons` array: 20 YouTube videos (from playlist PLupBH8H284loAoWV2O98enTuCFG3fs01J)
+- `masterModules` array: nested structure, one entry per master session (lessonNumber, lessonTitle, color, chapters[]). YouTube IDs from playlist PLupBH8H284loAoWV2O98enTuCFG3fs01J.
+- `masterLessons` derived flat list (`masterModules.flatMap(m => m.chapters)`) preserves the legacy `masterLessons[i]` API used by navigation, notes, and AI chat code.
+- `getMasterModuleInfo(flatIndex)` helper returns `{module, moduleIndex, chapterIndex, chapter}` — use whenever you need module context (label, notes metadata, exports).
+- New session is added by appending an entry to `masterModules`. Module 1 (מפגש 1) is staged but not yet inserted — pending YouTube upload.
 - `masterWorkbooks` array: 6 PDFs in private Supabase Storage bucket
 
 ### Related Files

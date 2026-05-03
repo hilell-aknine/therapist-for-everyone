@@ -51,6 +51,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('user-email').textContent = session.user.email;
         loadAllData();
     }
+
+    // Hash deeplink: jump to a specific tab when URL ends with #viewName.
+    // Used by nlp-retention sync ping → admin.html#retention.
+    const navigateFromHash = () => {
+        const h = window.location.hash.slice(1);
+        if (h && typeof VIEW_GROUPS !== 'undefined' && VIEW_GROUPS[h]) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const navItem = document.querySelector(`.nav-item[onclick*="switchView('${h}')"]`);
+            if (navItem) navItem.classList.add('active');
+            switchView(h);
+        }
+    };
+    if (window.location.hash) navigateFromHash();
+    window.addEventListener('hashchange', navigateFromHash);
 });
 
 async function logout() {

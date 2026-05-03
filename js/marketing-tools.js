@@ -509,6 +509,110 @@ window.sendEventToCAPI = async function (eventName, userData, customData) {
 };
 
 // ============================================================================
+// FULL ATTRIBUTION SAVE — PATCH lead_attribution with complete browser-side data
+// ----------------------------------------------------------------------------
+// Why this exists: portal-questionnaire.html and signup flows do direct INSERTs
+// and rely on a DB trigger to create the lead_attribution row. The trigger only
+// has access to columns the table itself stores (utm_*, how_found) — it cannot
+// see fbclid, landing_url, device, browser, or session_id which live in
+// localStorage on the client. Without this PATCH those fields stay NULL, and
+// any lead whose UTM was stripped en route (iOS in-app browser, ITP) shows up
+// with zero technical fingerprint and is misclassified as "organic".
+// ============================================================================
+// Get an authenticated bearer token if a Supabase session exists, else fall
+// back to the anonKey. Only the authenticated path can PATCH lead_attribution
+// (RLS denies anon UPDATE).
+async function _getBearerToken(anonKey) {
+    try {
+        if (window.supabaseClient && window.supabaseClient.auth && window.supabaseClient.auth.getSession) {
+            const { data } = await window.supabaseClient.auth.getSession();
+            const t = data && data.session && data.session.access_token;
+            if (t) return t;
+        }
+    } catch (e) { /* fall through */ }
+    return anonKey;
+}
+
+window.saveFullAttribution = async function (linkedTable, linkedId) {
+    try {
+        if (!window.SUPABASE_CONFIG || !linkedTable || !linkedId) return;
+        const supabaseUrl = window.SUPABASE_CONFIG.url;
+        const anonKey = window.SUPABASE_CONFIG.anonKey;
+        const attribution = window.getFullAttribution ? window.getFullAttribution() : null;
+        if (!attribution) return;
+
+        const f = attribution.first || {};
+        const l = attribution.last  || {};
+        const fbc = _buildFbc();
+        const fbp = _getCookie('_fbp');
+
+        const body = {
+            session_id: attribution.session_id || null,
+
+            first_utm_source:   f.utm_source   || null,
+            first_utm_medium:   f.utm_medium   || null,
+            first_utm_campaign: f.utm_campaign || null,
+            first_utm_term:     f.utm_term     || null,
+            first_utm_content:  f.utm_content  || null,
+            first_gclid:        f.gclid        || null,
+            first_fbclid:       f.fbclid       || null,
+            first_ttclid:       f.ttclid       || null,
+            first_msclkid:      f.msclkid      || null,
+            first_referrer_domain: f.referrer_domain || null,
+            first_landing_url:  f.landing_url  || null,
+            first_at:           f.at           || null,
+
+            last_utm_source:   l.utm_source   || null,
+            last_utm_medium:   l.utm_medium   || null,
+            last_utm_campaign: l.utm_campaign || null,
+            last_utm_term:     l.utm_term     || null,
+            last_utm_content:  l.utm_content  || null,
+            last_gclid:        l.gclid        || null,
+            last_fbclid:       l.fbclid       || null,
+            last_ttclid:       l.ttclid       || null,
+            last_msclkid:      l.msclkid      || null,
+            last_referrer_domain: l.referrer_domain || null,
+            last_landing_url:  l.landing_url  || null,
+            last_at:           l.at           || null,
+
+            device_type:  attribution.device_type  || null,
+            os_name:      attribution.os_name      || null,
+            browser_name: attribution.browser_name || null,
+            viewport_w:   attribution.viewport_w   || null,
+            viewport_h:   attribution.viewport_h   || null,
+            language:     attribution.language     || null,
+            timezone:     attribution.timezone     || null,
+            raw_ua:       attribution.raw_ua       || null,
+
+            meta_fbc: fbc || null,
+            meta_fbp: fbp || null,
+        };
+
+        // Strip nulls so PATCH doesn't overwrite existing data
+        const filtered = {};
+        for (const k in body) if (body[k] !== null && body[k] !== '') filtered[k] = body[k];
+        if (Object.keys(filtered).length === 0) return;
+
+        const bearer = await _getBearerToken(anonKey);
+        const filter = `linked_id=eq.${linkedId}&linked_table=eq.${linkedTable}`;
+        await fetch(`${supabaseUrl}/rest/v1/lead_attribution?${filter}&order=created_at.desc&limit=1`, {
+            method: 'PATCH',
+            headers: {
+                'apikey': anonKey,
+                'Authorization': `Bearer ${bearer}`,
+                'Content-Type': 'application/json',
+                'Accept-Profile': 'public',
+                'Content-Profile': 'public',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify(filtered)
+        });
+    } catch (e) {
+        // Non-critical — main lead INSERT already succeeded, this is enrichment only
+    }
+};
+
+// ============================================================================
 // CAPI BROWSER DATA — Save fbc/fbp to lead_attribution for server-side firing
 // ============================================================================
 window.saveCapiBrowserData = async function (linkedTable, linkedId, email, eventId) {
@@ -531,11 +635,12 @@ window.saveCapiBrowserData = async function (linkedTable, linkedId, email, event
         // Store event_id for dedup between browser pixel and server-side CAPI
         if (eventId) body.capi_event_id = eventId;
 
+        const bearer = await _getBearerToken(anonKey);
         await fetch(`${supabaseUrl}/rest/v1/lead_attribution?${filter}&order=created_at.desc&limit=1`, {
             method: 'PATCH',
             headers: {
                 'apikey': anonKey,
-                'Authorization': `Bearer ${anonKey}`,
+                'Authorization': `Bearer ${bearer}`,
                 'Content-Type': 'application/json',
                 'Accept-Profile': 'public',
                 'Content-Profile': 'public',

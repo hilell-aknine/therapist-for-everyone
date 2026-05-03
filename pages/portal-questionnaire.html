@@ -881,7 +881,7 @@
             // Insert questionnaire to dedicated table (with UTM data)
             // This triggers enqueue_qualified_lead() which uses the saved event_id
             const utm = window.getUtmData ? window.getUtmData() : {};
-            const { error: insertErr } = await supabaseClient
+            const { data: insertedQ, error: insertErr } = await supabaseClient
                 .from('portal_questionnaires')
                 .insert({
                     ...payload,
@@ -891,9 +891,21 @@
                     utm_campaign: utm.utm_campaign || null,
                     utm_content: utm.utm_content || null,
                     utm_term: utm.utm_term || null
-                });
+                })
+                .select('id')
+                .single();
 
             if (insertErr) throw insertErr;
+
+            // ── Backfill the trigger-created lead_attribution row with fbclid,
+            // landing_url, device, browser, fbc/fbp etc. that live only in
+            // localStorage. Without this PATCH the row stays mostly NULL and
+            // any lead whose UTM was stripped (iOS in-app browser) looks organic.
+            if (insertedQ?.id && window.saveFullAttribution) {
+                try {
+                    await window.saveFullAttribution('portal_questionnaires', insertedQ.id);
+                } catch (e) { /* non-critical */ }
+            }
 
             // Mark questionnaire as done in localStorage (for faster checks)
             localStorage.setItem('portal_questionnaire_done', 'true');

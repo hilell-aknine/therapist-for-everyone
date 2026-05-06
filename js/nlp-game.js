@@ -89,9 +89,25 @@ class GeminiMentor {
     constructor() {
         this.endpoint = `${window.SUPABASE_CONFIG?.url || 'https://eimcudmlfjlyxjyrdcgc.supabase.co'}/functions/v1/gemini-mentor`;
         this.systemPrompt = window.NLP_COURSE_KNOWLEDGE || 'אתה רם, מנטור NLP חם ומעודד. דבר בעברית בלבד.';
+        this.inFlight = null;
+    }
+
+    abortInFlight() {
+        if (this.inFlight) {
+            try { this.inFlight.abort(); } catch (e) { /* ignore */ }
+            this.inFlight = null;
+        }
     }
 
     async ask(userMessage, context = '') {
+        // Cancel any prior request — only one mentor reply is ever relevant at a time.
+        this.abortInFlight();
+        const controller = new AbortController();
+        this.inFlight = controller;
+
+        // 15s ceiling so a stalled Edge Function never leaves "רם חושב..." spinning.
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
         try {
             const messages = [];
             if (context) {
@@ -111,15 +127,19 @@ class GeminiMentor {
                 body: JSON.stringify({
                     messages,
                     systemPrompt: this.systemPrompt
-                })
+                }),
+                signal: controller.signal
             });
 
             if (!res.ok) return null;
             const data = await res.json();
             return data.text || null;
         } catch (e) {
-            console.warn('Mentor error:', e);
+            if (e?.name !== 'AbortError') console.warn('Mentor error:', e);
             return null;
+        } finally {
+            clearTimeout(timeoutId);
+            if (this.inFlight === controller) this.inFlight = null;
         }
     }
 
@@ -649,31 +669,49 @@ class StoryGame {
 
     async saveToSupabase() {
         if (!this.user) return;
+        const payload = {
+            xp: this.playerData.xp,
+            level: this.playerData.level,
+            hearts: this.playerData.hearts,
+            max_hearts: this.playerData.maxHearts,
+            streak: this.playerData.streak,
+            last_play_date: this.playerData.lastPlayDate,
+            last_heart_lost: this.playerData.lastHeartLost,
+            completed_lessons: this.playerData.completedLessons,
+            achievements: this.playerData.achievements,
+            total_correct: this.playerData.totalCorrectAnswers,
+            total_wrong: this.playerData.totalWrongAnswers,
+            stories_created: this.playerData.storiesCreated,
+            perfect_lessons: this.playerData.perfectLessons,
+            daily_challenge_completed: this.playerData.dailyChallengeCompleted,
+            migration_version: this.playerData.migrationVersion || 2,
+            perfect_lessons_list: this.playerData.perfectLessonsList || [],
+            weekly_activity: this.playerData.weeklyActivity || {},
+            module_accuracy: this.playerData.moduleAccuracy || {},
+            longest_streak: this.playerData.longestStreak || 0,
+            updated_at: new Date().toISOString()
+        };
+
+        const attempt = async () => {
+            const { error } = await window.supabaseClient
+                .from('nlp_game_players')
+                .update(payload)
+                .eq('user_id', this.user.id);
+            if (error) throw error;
+        };
+
         try {
-            await window.supabaseClient.from('nlp_game_players').update({
-                xp: this.playerData.xp,
-                level: this.playerData.level,
-                hearts: this.playerData.hearts,
-                max_hearts: this.playerData.maxHearts,
-                streak: this.playerData.streak,
-                last_play_date: this.playerData.lastPlayDate,
-                last_heart_lost: this.playerData.lastHeartLost,
-                completed_lessons: this.playerData.completedLessons,
-                achievements: this.playerData.achievements,
-                total_correct: this.playerData.totalCorrectAnswers,
-                total_wrong: this.playerData.totalWrongAnswers,
-                stories_created: this.playerData.storiesCreated,
-                perfect_lessons: this.playerData.perfectLessons,
-                daily_challenge_completed: this.playerData.dailyChallengeCompleted,
-                migration_version: this.playerData.migrationVersion || 2,
-                perfect_lessons_list: this.playerData.perfectLessonsList || [],
-                weekly_activity: this.playerData.weeklyActivity || {},
-                module_accuracy: this.playerData.moduleAccuracy || {},
-                longest_streak: this.playerData.longestStreak || 0,
-                updated_at: new Date().toISOString()
-            }).eq('user_id', this.user.id);
-        } catch (e) {
-            console.warn('Supabase save failed', e);
+            await attempt();
+        } catch (e1) {
+            // Single retry after 2s — covers transient network blips. localStorage
+            // already holds the latest state, so failing both attempts only delays
+            // cross-device sync until the next save.
+            await new Promise(r => setTimeout(r, 2000));
+            try {
+                await attempt();
+            } catch (e2) {
+                console.warn('Supabase save failed (retry exhausted)', e2);
+            }
         }
     }
 
@@ -2575,9 +2613,14 @@ ${answers.action || ''}`;
                 chip.classList.add('incorrect');
             }
         });
-        // Show correct word in blank if wrong
+        // Show correct word in blank if wrong.
+        // Store the timeout id so continueToNext() can cancel it — otherwise the
+        // delayed write fires after the next exercise has already mounted, and
+        // overwrites the new exercise's blank-slot with the previous correct word.
         if (!isCorrect && blankSlot) {
-            setTimeout(() => {
+            this.fillBlankFeedbackTimeout = setTimeout(() => {
+                this.fillBlankFeedbackTimeout = null;
+                if (!document.body.contains(blankSlot)) return;
                 blankSlot.textContent = correctWord;
                 blankSlot.classList.remove('incorrect');
                 blankSlot.classList.add('correct');
@@ -2701,6 +2744,15 @@ ${answers.action || ''}`;
 
     continueToNext() {
         document.getElementById('feedback-panel').classList.remove('show');
+
+        // Cancel anything that might still write to the closing exercise's DOM
+        // and corrupt the next one (fill-blank correction overlay; AI mentor
+        // response that arrived after the user already moved on).
+        if (this.fillBlankFeedbackTimeout) {
+            clearTimeout(this.fillBlankFeedbackTimeout);
+            this.fillBlankFeedbackTimeout = null;
+        }
+        this.gemini.abortInFlight();
 
         if (this.playerData.hearts <= 0) {
             this.showNoHeartsModal();

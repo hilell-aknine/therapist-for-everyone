@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>פורטל הלמידה · בית המטפלים</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#04161b">
+<link rel="icon" type="image/png" href="../assets/logo-square.png">
+<link rel="apple-touch-icon" href="../assets/logo-square.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+
+<style>
+  *{box-sizing:border-box;}
+  html{direction:rtl;}
+  html,body{margin:0;padding:0;background:#04161b;color:#fff;font-family:'Heebo',sans-serif;min-height:100vh;}
+
+  :root{
+    --petrol-deep:#04161b;
+    --petrol-bg:#062831;
+    --petrol-mid:#0a3d48;
+    --gold:#D4AF37;
+    --gold-light:#E6C65A;
+    --frost:#E8F1F2;
+  }
+
+  /* ATMOSPHERIC MESH BG */
+  .atmos{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+  .atmos__base{position:absolute;inset:0;background:
+    radial-gradient(ellipse at 12% 8%, rgba(230,198,90,.16), transparent 50%),
+    radial-gradient(ellipse at 88% 92%, rgba(47,133,146,.34), transparent 55%),
+    radial-gradient(ellipse at 78% 18%, rgba(63,170,187,.18), transparent 45%),
+    radial-gradient(ellipse at 22% 78%, rgba(139,75,12,.22), transparent 50%),
+    linear-gradient(160deg, #041d22 0%, #062831 38%, #0a3d48 78%, #0d4a56 100%);}
+  .atmos__blob{position:absolute;border-radius:50%;filter:blur(120px);mix-blend-mode:screen;will-change:transform;}
+  .atmos__blob--a{width:540px;height:540px;background:#E6C65A;opacity:.32;top:-160px;inset-inline-end:-160px;animation:floatA 26s ease-in-out infinite;}
+  .atmos__blob--b{width:480px;height:480px;background:#2F8592;opacity:.42;bottom:-180px;inset-inline-start:-150px;animation:floatB 32s ease-in-out infinite;}
+  .atmos__blob--c{width:380px;height:380px;background:#3FAABB;opacity:.22;top:38%;inset-inline-start:42%;animation:floatC 38s ease-in-out infinite;}
+  .atmos__blob--d{width:320px;height:320px;background:#D4AF37;opacity:.18;top:62%;inset-inline-end:24%;animation:floatD 28s ease-in-out infinite;}
+  @keyframes floatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,40px) scale(1.08)}}
+  @keyframes floatB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-40px) scale(1.06)}}
+  @keyframes floatC{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-70px,-50px) scale(1.12)}}
+  @keyframes floatD{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,60px) scale(.92)}}
+  .atmos__grid{position:absolute;inset:0;opacity:.06;mix-blend-mode:overlay;
+    background-image:
+      linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);}
+  .atmos__grain{position:absolute;inset:0;opacity:.045;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/></svg>");}
+  @media (prefers-reduced-motion: reduce){ .atmos__blob{animation:none;} }
+
+  .frame{position:relative;isolation:isolate;min-height:100vh;}
+  .frame > *:not(.atmos){position:relative;z-index:1;}
+
+  /* HEADER */
+  .lms-hd{
+    position:sticky; top:0; z-index:50;
+    display:grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(180px, 240px) minmax(280px, 360px) auto;
+    align-items:center; gap:1rem;
+    padding:.75rem 1.25rem;
+    margin:.75rem 1rem 0;
+    border-radius:18px;
+    background: linear-gradient(180deg, rgba(8,32,38,.72), rgba(6,22,28,.62));
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow: 0 12px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
+    isolation:isolate;
+  }
+  .lms-hd::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,.10) 0%, transparent 50%); }
+  .lms-hd__right{ display:flex; align-items:center; gap:.85rem; min-width:0; }
+  .lms-hd__brand{ flex:none; width:42px; height:42px; border-radius:12px; display:grid; place-items:center; background: linear-gradient(155deg, rgba(212,175,55,.16), rgba(212,175,55,.06)); border:1px solid rgba(212,175,55,.28); box-shadow: 0 4px 14px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.06); overflow:hidden; text-decoration:none; }
+  .lms-hd__brand img{ width:100%; height:100%; object-fit:cover; }
+  .lms-hd__course{ display:flex; align-items:center; gap:.6rem; min-width:0; }
+  .lms-hd__course-title{ color:#fff; font-weight:700; font-size:.95rem; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lms-hd__course-pill{ display:inline-flex; align-items:center; gap:.45rem; padding:.32rem .65rem; border-radius:999px; background: rgba(10,40,46,.55); border:1px solid rgba(212,175,55,.28); backdrop-filter: blur(10px) saturate(180%); -webkit-backdrop-filter: blur(10px) saturate(180%); font-size:.72rem; color:rgba(255,255,255,.92); font-weight:500; white-space:nowrap; }
+  .lms-hd__course-pill i{ color:#E6C65A; font-size:.45rem; }
+  .lms-hd__course-pill b{ color:#E6C65A; font-weight:600; }
+
+  .lms-hd__progress{ display:flex; flex-direction:column; gap:.35rem; min-width:0; }
+  .lms-hd__progress-bar{ position:relative; height:6px; border-radius:999px; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.06); overflow:hidden; }
+  .lms-hd__progress-bar > span{ position:absolute; inset:0 0 0 auto; display:block; height:100%; background: linear-gradient(90deg, #D4AF37, #E6C65A); box-shadow: 0 0 12px rgba(212,175,55,.5); border-radius:999px; }
+  .lms-hd__progress-label{ display:flex; align-items:center; justify-content:space-between; font-size:.72rem; color:rgba(255,255,255,.7); font-weight:500; }
+  .lms-hd__progress-label b{ color:#E6C65A; font-weight:700; }
+
+  .lms-hd__cta-wrap{ display:flex; flex-direction:column; align-items:flex-end; gap:.25rem; }
+  .lms-hd__cta-eyebrow{ font-size:.66rem; color:rgba(255,255,255,.55); letter-spacing:.04em; }
+  .lms-hd__cta{ display:inline-flex; align-items:center; gap:.7rem; padding:.6rem .55rem .6rem 1rem; border-radius:14px; cursor:pointer; background: linear-gradient(180deg, rgba(10,52,60,.92), rgba(6,32,38,.92)); border:1px solid rgba(212,175,55,.32); box-shadow: 0 8px 22px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.10); font-family:'Heebo',sans-serif; color:#fff; font-size:.92rem; font-weight:700; letter-spacing:-.01em; white-space:nowrap; transition: transform .2s, box-shadow .2s; }
+  .lms-hd__cta:hover{ transform:translateY(-1px); box-shadow: 0 12px 28px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.12); }
+  .lms-hd__cta-arrow{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background: linear-gradient(135deg,#E6C65A,#D4AF37); color:#1a1205; font-size:.7rem; box-shadow: 0 4px 10px rgba(212,175,55,.45), inset 0 0 0 1px rgba(255,255,255,.3); }
+  .lms-hd__cta-label{ max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .lms-hd__left{ display:flex; align-items:center; gap:.5rem; }
+  .lms-hd__cta-2{ display:inline-flex; align-items:center; gap:.5rem; padding:.55rem 1rem; border-radius:12px; background: rgba(212,175,55,.06); border:1px solid rgba(212,175,55,.45); color:#E6C65A; font-weight:600; font-size:.82rem; letter-spacing:-.01em; text-decoration:none; white-space:nowrap; backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); transition: background .2s, border-color .2s; }
+  .lms-hd__cta-2:hover{ background: rgba(212,175,55,.14); border-color: rgba(230,198,90,.7); }
+  .lms-hd__icon{ width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.85); cursor:pointer; font-size:.85rem; backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); transition: background .2s, color .2s, transform .2s; text-decoration:none; }
+  .lms-hd__icon:hover{ background: rgba(255,255,255,.12); color:#fff; transform:translateY(-1px); }
+  .lms-hd__hamburger{ display:none; }
+
+  /* BODY GRID */
+  .lms-body{ padding: 1.25rem 1rem 4rem; display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 1rem; align-items: start; }
+  .lms-main{ display:flex; flex-direction:column; gap:1rem; min-width:0; container-type: inline-size; }
+
+  /* SIDEBAR */
+  .lms-sb{
+    position: sticky; top: 90px; align-self: start;
+    display: flex; flex-direction: column; gap: .85rem;
+    padding: 1rem; border-radius: 20px;
+    background: rgba(255,255,255,.04);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 22px rgba(0,0,0,.22);
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.18) transparent;
+  }
+  .lms-sb::-webkit-scrollbar{ width: 6px; }
+  .lms-sb::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.18); border-radius: 6px; }
+
+  .lms-sb-prog{ display:flex; flex-direction:column; gap:.5rem; padding:.25rem; }
+  .lms-sb-prog__row{ display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; }
+  .lms-sb-prog__title{ margin:0; color:#fff; font-family:'Heebo',sans-serif; font-size:.92rem; font-weight:700; letter-spacing:-.01em; }
+  .lms-sb-prog__count{ font-size:.72rem; color:rgba(255,255,255,.55); font-weight:500; }
+  .lms-sb-prog__bar{ position:relative; height:6px; border-radius:999px; background: rgba(255,255,255,.08); overflow:hidden; }
+  .lms-sb-prog__bar > span{ position:absolute; inset:0 0 0 auto; display:block; height:100%; background: linear-gradient(90deg, #B8941F, #E6C65A); box-shadow: 0 0 10px rgba(212,175,55,.45); border-radius:999px; }
+  .lms-sb-prog__pct{ text-align: start; color:#E6C65A; font-size:.78rem; font-weight:700; }
+
+  .lms-sb-search{ display:flex; align-items:center; gap:.55rem; padding: .65rem .85rem; border-radius: 12px; background: rgba(0,0,0,.18); border: 1px solid rgba(255,255,255,.08); transition: border-color .2s, background .2s; }
+  .lms-sb-search:focus-within{ border-color: rgba(212,175,55,.4); background: rgba(0,0,0,.24); }
+  .lms-sb-search i{ color: rgba(255,255,255,.45); font-size:.82rem; }
+  .lms-sb-search input{ flex:1; min-width:0; border:0; outline:0; background:transparent; color:#fff; font-family:inherit; font-size:.85rem; font-weight:500; }
+  .lms-sb-search input::placeholder{ color: rgba(255,255,255,.4); }
+
+  .lms-sb-jump{ display:flex; align-items:center; justify-content:center; gap:.55rem; width:100%; padding: .7rem 1rem; border-radius: 12px; background: rgba(212,164,55,.14); border: 1px solid rgba(212,164,55,.28); color: #E6C65A; font-family: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
+  .lms-sb-jump:hover{ background: rgba(212,164,55,.22); border-color: rgba(230,198,90,.4); transform: translateY(-1px); }
+
+  .lms-sb__heading{ margin-top:.5rem; padding: 0 .25rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .14em; color: rgba(255,255,255,.5); font-weight: 600; }
+
+  .lms-sb-nav{ display:flex; flex-direction:column; gap:.3rem; }
+  .lms-sb-item{ display:flex; align-items:center; gap:.7rem; width:100%; padding: .7rem .85rem; border-radius: 12px; border: 1px solid transparent; background: transparent; color: rgba(255,255,255,.78); font-family: inherit; font-size: .88rem; font-weight: 500; text-align: start; text-decoration: none; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .lms-sb-item:hover{ background: rgba(255,255,255,.05); color: #fff; }
+  .lms-sb-item__icon{ flex:none; width: 28px; height: 28px; display:grid; place-items:center; border-radius: 8px; background: rgba(255,255,255,.06); color: rgba(255,255,255,.7); font-size: .8rem; }
+  .lms-sb-item__chev{ flex:none; width:28px; display:grid; place-items:center; color: rgba(230,198,90,.85); font-size: .72rem; transition: transform .2s; }
+  .lms-sb-item__label{ flex:1; min-width:0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lms-sb-item__count{ flex:none; font-size:.74rem; font-weight:700; color: rgba(230,198,90,.9); }
+  .lms-sb-item__badge{ flex:none; padding: .15rem .5rem; border-radius: 999px; background: linear-gradient(135deg, #E6C65A 0%, #D4A437 100%); color: #1a1205; font-size: .66rem; font-weight: 800; letter-spacing: .02em; box-shadow: 0 2px 6px rgba(212,164,55,.4); }
+  .lms-sb-item--active{ background: linear-gradient(135deg, rgba(230,198,90,.18) 0%, rgba(212,164,55,.10) 100%); border-color: rgba(212,164,55,.30); color: #fff; }
+  .lms-sb-item--active .lms-sb-item__icon{ background: linear-gradient(135deg, #E6C65A 0%, #D4A437 100%); color: #1a1205; box-shadow: inset 0 1px 0 rgba(255,255,255,.4); }
+
+  .lms-sb-mod{ margin-bottom:.1rem; }
+  .lms-sb-mod__lessons{ display:none; flex-direction:column; gap:.15rem; padding:.25rem 0 .35rem; }
+  .lms-sb-mod--open .lms-sb-mod__lessons{ display:flex; }
+  .lms-sb-mod--open .lms-sb-item__chev{ transform: rotate(180deg); }
+  .lms-sb-lesson{ display:flex; align-items:center; gap:.55rem; padding:.45rem .65rem .45rem 2.1rem; border-radius:9px; cursor:pointer; color: rgba(255,255,255,.72); font-size:.8rem; font-weight:500; background: transparent; border: 1px solid transparent; transition: background .15s, color .15s, border-color .15s; text-decoration:none; }
+  .lms-sb-lesson:hover{ background: rgba(255,255,255,.05); color:#fff; }
+  .lms-sb-lesson__status{ flex:none; width:18px; height:18px; display:grid; place-items:center; border-radius:50%; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.4); font-size:.55rem; }
+  .lms-sb-lesson--done .lms-sb-lesson__status{ background: linear-gradient(135deg, #E6C65A, #D4A437); color:#1a1205; border-color: rgba(212,175,55,.5); }
+  .lms-sb-lesson__title{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lms-sb-lesson__dur{ flex:none; font-size:.7rem; color: rgba(255,255,255,.4); font-variant-numeric: tabular-nums; }
+
+  /* HERO */
+  .lms-hero{ container-type: inline-size; position:relative; isolation:isolate; display:grid; grid-template-columns: minmax(0, 1fr) clamp(140px, 32%, 340px); align-items:stretch; gap:1.25rem; padding:1.5rem; margin-top:.25rem; border-radius:24px; overflow:hidden; background: radial-gradient(ellipse at 100% 0%, rgba(40,90,90,.45), transparent 55%), linear-gradient(180deg, #0F3D3E 0%, #0B3133 50%, #082728 100%); border:1px solid rgba(255,255,255,.06); box-shadow: 0 24px 60px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08); }
+  .lms-hero::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, transparent 30%); }
+  .lms-hero__glow{ position:absolute; inset:auto -100px -120px auto; width:380px; height:380px; border-radius:50%; background: radial-gradient(circle, rgba(212,175,55,.18), transparent 65%); filter: blur(60px); pointer-events:none; z-index:0; }
+  .lms-hero__copy{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:flex-start; gap:.7rem; min-width:0; text-align:start; }
+  .lms-hero__eyebrow{ font-size:.78rem; color:#E6C65A; font-weight:600; letter-spacing:.02em; }
+  .lms-hero__title{ margin:0; font-family:'Heebo',sans-serif; font-size: clamp(1.7rem, 2.6vw, 2rem); line-height:1.15; font-weight:800; color:#fff; letter-spacing:-.02em; }
+  .lms-hero__sub{ margin:0; font-size:.88rem; color:rgba(255,255,255,.62); font-weight:500; }
+  .lms-hero__bull{ color:rgba(212,175,55,.7); margin: 0 .25rem; }
+  .lms-hero__cta{ display:inline-flex; align-items:center; gap:.7rem; justify-content:center; margin-top:.85rem; width:280px; height:52px; padding:0 1.5rem; border:0; border-radius:12px; background: linear-gradient(180deg, #E6C65A 0%, #D4A437 100%); color:#1a1205; font-family:'Heebo',sans-serif; font-size:1.02rem; font-weight:700; letter-spacing:-.01em; cursor:pointer; white-space:nowrap; box-shadow: 0 10px 24px rgba(212,164,55,.38), inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 0 rgba(0,0,0,.06); transition: transform .2s, box-shadow .2s; }
+  .lms-hero__cta:hover{ transform: translateY(-2px); box-shadow: 0 14px 30px rgba(212,164,55,.48), inset 0 1px 0 rgba(255,255,255,.5); }
+  .lms-hero__progress{ margin-top:1.25rem; width:100%; display:flex; flex-direction:column; gap:.5rem; }
+  .lms-hero__progress-bar{ position:relative; height:3px; border-radius:999px; background: rgba(255,255,255,.12); overflow:hidden; }
+  .lms-hero__progress-bar > span{ position:absolute; inset:0 0 0 auto; display:block; height:100%; background: linear-gradient(90deg, #B8941F, #E6C65A); box-shadow: 0 0 8px rgba(212,175,55,.45); border-radius:999px; }
+  .lms-hero__progress-meta{ font-size:.78rem; color:rgba(255,255,255,.55); font-weight:500; text-align:start; }
+  .lms-hero__progress-meta b{ color:rgba(255,255,255,.85); font-weight:700; }
+  .lms-hero__video{ position:relative; z-index:1; display:block; width:100%; height:100%; min-height:220px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,.08); background:#1a2a2c; cursor:pointer; padding:0; box-shadow: 0 12px 28px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.04); transition: transform .25s; align-self:stretch; }
+  .lms-hero__video:hover{ transform: translateY(-2px); }
+  .lms-hero__video img{ width:100%; height:100%; object-fit:cover; display:block; filter: saturate(.85) contrast(.95); }
+  .lms-hero__video-scrim{ position:absolute; inset:0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,.65) 100%); }
+  .lms-hero__video-play{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:64px; height:64px; border-radius:50%; display:grid; place-items:center; background: linear-gradient(180deg,#E6C65A,#D4A437); color:rgba(26,18,5,.85); font-size:1.15rem; box-shadow: 0 10px 24px rgba(212,164,55,.5), inset 0 2px 0 rgba(255,255,255,.45), inset 0 -2px 0 rgba(0,0,0,.08); }
+  .lms-hero__video-caption{ position:absolute; left:12px; right:12px; bottom:10px; padding:.4rem .7rem; border-radius:8px; background: rgba(255,255,255,.08); backdrop-filter: blur(10px) saturate(180%); -webkit-backdrop-filter: blur(10px) saturate(180%); border:1px solid rgba(255,255,255,.12); color:#fff; font-size:.72rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; }
+  @media (max-width: 420px){ .lms-hero{ grid-template-columns: 1fr; gap:1rem; padding:1.25rem; } .lms-hero__cta{ width:100%; } .lms-hero__video{ min-height:160px; } }
+  @container (max-width: 720px){
+    .lms-hero__title{ font-size: clamp(1.15rem, 4.2cqw, 1.4rem); line-height:1.18; }
+    .lms-hero__sub{ font-size:.78rem; }
+    .lms-hero__eyebrow{ font-size:.7rem; }
+    .lms-hero__cta{ width:100%; max-width:240px; height:46px; font-size:.92rem; padding:0 1rem; }
+    .lms-hero__progress-meta{ font-size:.7rem; }
+    .lms-hero__video-play{ width:48px; height:48px; font-size:.9rem; }
+    .lms-hero__video-caption{ font-size:.65rem; padding:.3rem .5rem; left:8px; right:8px; bottom:8px; }
+  }
+
+  /* STATS */
+  .lms-stats{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: .25rem; container-type: inline-size; }
+  .lms-stat{ position:relative; isolation:isolate; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.55rem; padding: 1.4rem 1rem; border-radius: 16px; background: linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(248,246,240,.92) 100%); border: 1px solid rgba(15,61,62,.08); box-shadow: 0 8px 22px rgba(0,0,0,.18), 0 1px 0 rgba(255,255,255,.6) inset; text-align:center; transition: transform .2s, box-shadow .2s; }
+  .lms-stat::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,.5) 0%, transparent 30%); }
+  .lms-stat:hover{ transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,0,0,.22), 0 1px 0 rgba(255,255,255,.6) inset; }
+  .lms-stat__icon{ width: 44px; height: 44px; border-radius: 12px; display:grid; place-items:center; font-size: 1.1rem; position:relative; z-index:1; box-shadow: 0 4px 10px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.4); }
+  .lms-stat__icon--books{ background: linear-gradient(135deg, #4FB1C2 0%, #2F8592 60%, #1f6b76 100%); color:#fff; }
+  .lms-stat__icon--time{ background: linear-gradient(135deg, #E6C65A 0%, #D4AF37 100%); color:#1a1205; }
+  .lms-stat__icon--streak{ background: linear-gradient(135deg, #FF8A4D 0%, #E5572B 100%); color:#fff; }
+  .lms-stat__value{ font-family: 'Heebo', sans-serif; font-size: clamp(1.6rem, 4.5cqw, 1.9rem); font-weight: 800; color: #0F3D3E; letter-spacing: -.02em; line-height: 1; position:relative; z-index:1; display:inline-flex; align-items:baseline; gap:.06em; }
+  .lms-stat__value-of{ font-size: .65em; font-weight: 600; color: rgba(15,61,62,.5); }
+  .lms-stat__label{ font-size: .82rem; color: #6b7775; font-weight: 500; position:relative; z-index:1; }
+  @media (max-width: 480px){ .lms-stats{ grid-template-columns: 1fr; } .lms-stat{ flex-direction:row; gap:1rem; padding:1rem 1.2rem; text-align:start; } .lms-stat__icon{ flex:none; } .lms-stat__value{ margin-inline-start:auto; } }
+
+  /* ANNOUNCEMENTS */
+  .lms-ann{ position:relative; isolation:isolate; border-radius:20px; padding: 1.25rem 1.5rem 1.5rem; background: linear-gradient(180deg, rgba(255,255,255,.97) 0%, rgba(250,247,240,.94) 100%); border: 1px solid rgba(15,61,62,.08); box-shadow: 0 8px 22px rgba(0,0,0,.16), 0 1px 0 rgba(255,255,255,.6) inset; }
+  .lms-ann::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,.5) 0%, transparent 30%); }
+  .lms-ann__head{ position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-bottom:1rem; border-bottom: 1px solid rgba(15,61,62,.08); }
+  .lms-ann__title{ display:flex; align-items:center; gap:.7rem; min-width:0; }
+  .lms-ann__title h2{ margin:0; font-family: 'Heebo', sans-serif; font-size: 1.1rem; font-weight: 700; color: #0F3D3E; letter-spacing: -.01em; }
+  .lms-ann__icon{ flex:none; width: 36px; height: 36px; border-radius: 10px; display:grid; place-items:center; background: linear-gradient(135deg, rgba(230,198,90,.22) 0%, rgba(212,175,55,.14) 100%); border: 1px solid rgba(212,175,55,.28); color: #B8941F; font-size: .9rem; box-shadow: inset 0 1px 0 rgba(255,255,255,.5); }
+  .lms-ann__body{ position:relative; z-index:1; min-height: 96px; margin-top: 1rem; display:flex; flex-direction:column; gap:.65rem; }
+  .lms-ann-msg{ display:flex; align-items:center; gap:.85rem; padding: .85rem 1rem; border-radius: 12px; background: rgba(15,61,62,.04); border: 1px solid rgba(15,61,62,.07); color: #1A2D33; font-size: .92rem; font-weight: 500; line-height:1.4; transition: background .2s, transform .2s; }
+  .lms-ann-msg:hover{ background: rgba(15,61,62,.07); transform: translateX(-2px); }
+  .lms-ann-msg.is-gold{ background: linear-gradient(135deg, rgba(230,198,90,.18) 0%, rgba(212,175,55,.10) 100%); border-color: rgba(212,175,55,.32); }
+  .lms-ann-msg.is-clickable{ cursor:pointer; text-decoration:none; color:#1A2D33; }
+  .lms-ann-msg.is-clickable:visited{ color:#1A2D33; }
+  .lms-ann-msg.is-gold{ color:#3D2C0A; }
+  .lms-ann-msg__icon{ flex:none; width:32px; height:32px; border-radius:9px; display:grid; place-items:center; background: linear-gradient(135deg, #4FB1C2, #2F8592); color:#fff; font-size:.85rem; }
+  .lms-ann-msg.is-gold .lms-ann-msg__icon{ background: linear-gradient(135deg, #E6C65A, #D4A437); color:#1a1205; }
+
+  /* PARTNERS */
+  .lms-partners{ position:relative; isolation:isolate; display:flex; align-items:center; justify-content:space-between; gap: 1.25rem; padding: 1.25rem 1.5rem; border-radius: 20px; overflow:hidden; background: radial-gradient(ellipse at 100% 50%, rgba(40,90,90,.5), transparent 55%), linear-gradient(135deg, #0F3D3E 0%, #0B3133 60%, #082728 100%); border: 1px solid rgba(212,175,55,.18); box-shadow: 0 14px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08); }
+  .lms-partners::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, transparent 35%); }
+  .lms-partners__glow{ position:absolute; inset:auto auto -100px -100px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(212,175,55,.16), transparent 65%); filter: blur(50px); pointer-events:none; z-index: 0; }
+  .lms-partners__copy{ position:relative; z-index:1; display:flex; flex-direction:column; gap: .35rem; min-width: 0; text-align: start; }
+  .lms-partners__title{ display:flex; align-items:center; gap: .55rem; font-family: 'Heebo', sans-serif; font-size: clamp(1.05rem, 2.5cqw, 1.2rem); font-weight: 700; color: #fff; letter-spacing: -.01em; }
+  .lms-partners__heart{ font-size: 1.15em; line-height: 1; }
+  .lms-partners__sub{ margin: 0; font-size: .86rem; color: rgba(255,255,255,.72); font-weight: 500; line-height: 1.45; }
+  .lms-partners__cta{ position:relative; z-index:1; display:inline-flex; align-items:center; gap: .55rem; padding: .75rem 1.25rem; border-radius: 999px; background: linear-gradient(180deg, #E6C65A 0%, #D4A437 100%); color: #1a1205; font-family: 'Heebo', sans-serif; font-size: .92rem; font-weight: 700; letter-spacing: -.01em; text-decoration: none; white-space: nowrap; box-shadow: 0 8px 20px rgba(212,164,55,.36), inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 0 rgba(0,0,0,.06); transition: transform .2s, box-shadow .2s; }
+  .lms-partners__cta:hover{ transform: translateY(-2px); box-shadow: 0 12px 26px rgba(212,164,55,.46), inset 0 1px 0 rgba(255,255,255,.5); }
+  @container (max-width: 600px){ .lms-partners{ flex-direction:column; align-items:flex-start; gap:.85rem; padding:1.1rem 1.25rem; } .lms-partners__cta{ align-self: stretch; justify-content:center; } }
+
+  /* FAB */
+  .lms-fab{ position: fixed; bottom: 1.25rem; left: 1.25rem; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; border: 0; cursor: pointer; background: linear-gradient(135deg, #E6C65A 0%, #D4A437 100%); color: #1a1205; font-size: 1.2rem; z-index: 60; box-shadow: 0 14px 32px rgba(212,164,55,.45), 0 4px 10px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.08); transition: transform .2s, box-shadow .2s; }
+  .lms-fab:hover{ transform: translateY(-3px) scale(1.05); box-shadow: 0 18px 40px rgba(212,164,55,.55), 0 6px 14px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.55); }
+
+  /* ==================== PLAYER VIEW ==================== */
+  .lms-player{ display:none; flex-direction:column; gap:1rem; container-type: inline-size; }
+  body.view-player .lms-player{ display:flex; }
+  body.view-player .lms-welcome{ display:none; }
+
+  .lms-pl-bar{
+    display:flex; align-items:center; gap:.85rem;
+    padding: .85rem 1.1rem; border-radius: 16px;
+    background: linear-gradient(180deg, rgba(8,32,38,.72), rgba(6,22,28,.62));
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow: 0 12px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
+    color:#fff;
+  }
+  .lms-pl-bar__back{ flex:none; width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.85); cursor:pointer; transition: background .2s, color .2s; }
+  .lms-pl-bar__back:hover{ background: rgba(255,255,255,.12); color:#fff; }
+  .lms-pl-bar__title{ flex:1; min-width:0; display:flex; flex-direction:column; gap:.15rem; }
+  .lms-pl-bar__h{ margin:0; color:#fff; font-family:'Heebo',sans-serif; font-size:1rem; font-weight:700; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lms-pl-bar__sub{ font-size:.74rem; color:rgba(255,255,255,.6); }
+  .lms-pl-bar__sub b{ color:#E6C65A; font-weight:600; }
+  .lms-pl-bar__nav{ display:flex; gap:.4rem; align-items:center; }
+  .lms-pl-bar__btn{ display:inline-flex; align-items:center; gap:.45rem; padding:.5rem .85rem; border-radius:10px; cursor:pointer; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.85); font-family:inherit; font-size:.78rem; font-weight:600; transition: background .2s, color .2s, border-color .2s; }
+  .lms-pl-bar__btn:hover:not(:disabled){ background: rgba(255,255,255,.12); color:#fff; }
+  .lms-pl-bar__btn:disabled{ opacity:.35; cursor:not-allowed; }
+  .lms-pl-bar__btn--complete{ background: rgba(212,164,55,.14); border-color: rgba(212,164,55,.35); color:#E6C65A; }
+  .lms-pl-bar__btn--complete:hover{ background: rgba(212,164,55,.22); }
+  .lms-pl-bar__btn--complete.is-done{ background: linear-gradient(135deg, #E6C65A, #D4A437); color:#1a1205; border-color: rgba(212,175,55,.5); }
+
+  .lms-pl-video{
+    position:relative; width:100%;
+    aspect-ratio: 16/9;
+    border-radius:18px; overflow:hidden;
+    background:#000;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow: 0 24px 60px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+  .lms-pl-video iframe{ width:100%; height:100%; border:0; display:block; }
+  .lms-pl-video__loading{
+    position:absolute; inset:0; display:grid; place-items:center;
+    color: rgba(255,255,255,.7); font-size:.9rem; font-weight:500;
+    background: linear-gradient(180deg, #0F3D3E, #062831);
+  }
+  .lms-pl-video__loading.is-hidden{ display:none; }
+  .lms-pl-video__loading i{ margin-inline-end:.5rem; animation: spin 1.2s linear infinite; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .lms-pl-tip{ font-size:.78rem; color:rgba(255,255,255,.55); padding:0 .5rem; text-align:center; }
+
+  /* TABS */
+  .lms-tabs{ display:flex; gap:.4rem; padding:.4rem; border-radius:14px; background: rgba(8,32,38,.55); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border:1px solid rgba(255,255,255,.08); box-shadow: 0 8px 22px rgba(0,0,0,.22); }
+  .lms-tab{
+    flex:1; min-width:0; display:inline-flex; align-items:center; justify-content:center; gap:.45rem;
+    padding:.7rem .9rem; border-radius:10px; border:0; background:transparent;
+    color: rgba(255,255,255,.7); font-family:inherit; font-size:.85rem; font-weight:600;
+    cursor:pointer; transition: background .2s, color .2s;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .lms-tab:hover{ background: rgba(255,255,255,.06); color:#fff; }
+  .lms-tab.is-active{ background: linear-gradient(135deg, rgba(230,198,90,.22), rgba(212,164,55,.14)); color:#fff; box-shadow: inset 0 0 0 1px rgba(212,164,55,.35); }
+  .lms-tab i{ font-size:.85rem; }
+  .lms-tab--gold.is-active{ background: linear-gradient(135deg, #E6C65A 0%, #D4A437 100%); color:#1a1205; box-shadow: 0 4px 12px rgba(212,164,55,.4); }
+
+  .lms-tab-pane{ display:none; }
+  .lms-tab-pane.is-active{ display:block; }
+
+  /* NOTES PANE */
+  .lms-notes-card{
+    position:relative; border-radius:18px;
+    padding: 1.25rem 1.4rem;
+    background: linear-gradient(180deg, rgba(255,255,255,.97) 0%, rgba(250,247,240,.94) 100%);
+    border: 1px solid rgba(15,61,62,.08);
+    box-shadow: 0 8px 22px rgba(0,0,0,.16), 0 1px 0 rgba(255,255,255,.6) inset;
+  }
+  .lms-notes-card::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,.5) 0%, transparent 30%); }
+  .lms-notes-head{ position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:.85rem; }
+  .lms-notes-head h3{ margin:0; font-family:'Heebo',sans-serif; font-size:1rem; font-weight:700; color:#0F3D3E; letter-spacing:-.01em; }
+  .lms-notes-meta{ font-size:.75rem; color:#6b7775; }
+  .lms-notes-meta b{ color:#0F3D3E; font-weight:600; }
+  .lms-notes-textarea{
+    position:relative; z-index:1;
+    width:100%; min-height:280px; resize:vertical;
+    padding: 1rem 1.1rem;
+    border-radius:12px;
+    background: rgba(255,255,255,.7);
+    border:1px solid rgba(15,61,62,.12);
+    color:#1A2D33; font-family:inherit; font-size:.95rem; line-height:1.6;
+    outline:none;
+    transition: border-color .15s, background .15s;
+  }
+  .lms-notes-textarea:focus{ border-color: rgba(212,175,55,.45); background:#fff; box-shadow: 0 0 0 3px rgba(212,175,55,.12); }
+  .lms-notes-textarea::placeholder{ color:#94a3a0; }
+  .lms-notes-foot{ position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:.6rem; font-size:.78rem; color:#6b7775; }
+  .lms-notes-status{ display:inline-flex; align-items:center; gap:.4rem; }
+  .lms-notes-status.is-saving{ color:#B8941F; }
+  .lms-notes-status.is-saved{ color:#0F3D3E; }
+  .lms-notes-status.is-error{ color:#C62828; }
+
+  /* AI MENTOR PANE */
+  .lms-ai-card{
+    position:relative; border-radius:18px;
+    padding: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.97) 0%, rgba(250,247,240,.94) 100%);
+    border: 1px solid rgba(15,61,62,.08);
+    box-shadow: 0 8px 22px rgba(0,0,0,.16), 0 1px 0 rgba(255,255,255,.6) inset;
+    overflow: hidden;
+    display:flex; flex-direction:column;
+    min-height: 480px;
+  }
+  .lms-ai-head{ display:flex; align-items:center; gap:.85rem; padding: 1rem 1.25rem; border-bottom:1px solid rgba(15,61,62,.08); background: linear-gradient(180deg, rgba(255,255,255,.6) 0%, transparent 100%); }
+  .lms-ai-avatar{ flex:none; width:42px; height:42px; border-radius:50%; display:grid; place-items:center; background: linear-gradient(135deg, #E6C65A 0%, #D4A437 100%); color:#1a1205; font-size:1.05rem; box-shadow: 0 4px 10px rgba(212,164,55,.3), inset 0 1px 0 rgba(255,255,255,.4); }
+  .lms-ai-head__info{ flex:1; min-width:0; }
+  .lms-ai-head h4{ margin:0; font-family:'Heebo',sans-serif; font-size:.95rem; font-weight:700; color:#0F3D3E; letter-spacing:-.01em; }
+  .lms-ai-status{ display:inline-flex; align-items:center; gap:.4rem; font-size:.74rem; color:#0F8A5C; font-weight:500; }
+  .lms-ai-status::before{ content:''; width:6px; height:6px; border-radius:50%; background:#0F8A5C; box-shadow: 0 0 8px rgba(15,138,92,.5); }
+  .lms-ai-remaining{ font-size:.74rem; color:#6b7775; }
+  .lms-ai-remaining b{ color:#0F3D3E; font-weight:600; }
+
+  .lms-ai-msgs{ flex:1; padding: 1rem 1.25rem; overflow-y:auto; display:flex; flex-direction:column; gap:.7rem; max-height: 420px; }
+  .lms-ai-msgs::-webkit-scrollbar{ width:6px; }
+  .lms-ai-msgs::-webkit-scrollbar-thumb{ background: rgba(15,61,62,.18); border-radius:6px; }
+  .lms-ai-msg{ display:flex; gap:.6rem; align-items:flex-start; }
+  .lms-ai-msg__avatar{ flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:.78rem; }
+  .lms-ai-msg--bot .lms-ai-msg__avatar{ background: linear-gradient(135deg, #E6C65A, #D4A437); color:#1a1205; }
+  .lms-ai-msg--user .lms-ai-msg__avatar{ background: rgba(15,61,62,.1); color:#0F3D3E; }
+  .lms-ai-msg__bubble{
+    flex:1; min-width:0;
+    padding: .7rem .95rem; border-radius:14px;
+    font-size:.92rem; line-height:1.5;
+    color:#1A2D33;
+    background: rgba(255,255,255,.9);
+    border:1px solid rgba(15,61,62,.08);
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .lms-ai-msg--user .lms-ai-msg__bubble{ background: linear-gradient(135deg, rgba(230,198,90,.18), rgba(212,164,55,.10)); border-color: rgba(212,175,55,.28); color:#3D2C0A; }
+  .lms-ai-msg__bubble.is-typing{ display:inline-flex; gap:.3rem; }
+  .lms-ai-msg__bubble.is-typing span{ width:6px; height:6px; border-radius:50%; background:#0F3D3E; opacity:.4; animation: typing 1.4s infinite ease-in-out; }
+  .lms-ai-msg__bubble.is-typing span:nth-child(2){ animation-delay:.2s; }
+  .lms-ai-msg__bubble.is-typing span:nth-child(3){ animation-delay:.4s; }
+  @keyframes typing{ 0%,60%,100%{ opacity:.4; transform: translateY(0); } 30%{ opacity:1; transform: translateY(-4px); } }
+
+  .lms-ai-empty{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 2rem 1.5rem; color:#6b7775; gap:.75rem; }
+  .lms-ai-empty__icon{ width:56px; height:56px; border-radius:50%; display:grid; place-items:center; background: linear-gradient(135deg, rgba(230,198,90,.22), rgba(212,164,55,.14)); border:1px solid rgba(212,175,55,.28); color:#B8941F; font-size:1.4rem; }
+  .lms-ai-empty h3{ margin:0; font-family:'Heebo',sans-serif; font-size:1.05rem; font-weight:700; color:#0F3D3E; }
+  .lms-ai-empty p{ margin:0; font-size:.88rem; max-width:380px; line-height:1.5; }
+
+  .lms-ai-input{ display:flex; gap:.5rem; padding: .75rem 1rem 1rem; border-top:1px solid rgba(15,61,62,.08); background: rgba(255,255,255,.5); }
+  .lms-ai-input textarea{
+    flex:1; min-width:0; resize:none;
+    padding:.7rem .95rem; border-radius:12px;
+    background: #fff; border:1px solid rgba(15,61,62,.14);
+    color:#1A2D33; font-family:inherit; font-size:.92rem; line-height:1.4;
+    outline:none; min-height:42px; max-height:120px;
+  }
+  .lms-ai-input textarea:focus{ border-color: rgba(212,175,55,.45); box-shadow: 0 0 0 3px rgba(212,175,55,.12); }
+  .lms-ai-input button{
+    flex:none; width:46px; height:46px; border-radius:12px;
+    border:0; cursor:pointer;
+    background: linear-gradient(135deg, #E6C65A 0%, #D4A437 100%);
+    color:#1a1205; font-size:1rem;
+    box-shadow: 0 6px 16px rgba(212,164,55,.32), inset 0 1px 0 rgba(255,255,255,.4);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .lms-ai-input button:hover:not(:disabled){ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(212,164,55,.42); }
+  .lms-ai-input button:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+  /* RESOURCES PANE */
+  .lms-res-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:.85rem; }
+  .lms-res-card{
+    display:flex; align-items:center; gap:.85rem;
+    padding: 1rem 1.15rem; border-radius:14px;
+    background: linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(248,246,240,.92) 100%);
+    border:1px solid rgba(15,61,62,.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,.14), 0 1px 0 rgba(255,255,255,.55) inset;
+    color:#1A2D33; text-decoration:none;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .lms-res-card:hover{ transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.18), 0 1px 0 rgba(255,255,255,.6) inset; }
+  .lms-res-card__icon{ flex:none; width:42px; height:42px; border-radius:11px; display:grid; place-items:center; font-size:1.05rem; background: linear-gradient(135deg, #4FB1C2, #2F8592); color:#fff; box-shadow: 0 4px 10px rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.4); }
+  .lms-res-card--gold .lms-res-card__icon{ background: linear-gradient(135deg, #E6C65A, #D4A437); color:#1a1205; }
+  .lms-res-card__body{ flex:1; min-width:0; }
+  .lms-res-card__t{ font-size:.95rem; font-weight:700; color:#0F3D3E; }
+  .lms-res-card__s{ font-size:.78rem; color:#6b7775; margin-top:.2rem; }
+
+  /* GAME PANE */
+  .lms-game-cta{
+    position:relative; isolation:isolate;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:1.25rem; padding: 1.5rem 1.75rem; border-radius:20px;
+    overflow:hidden;
+    background: radial-gradient(ellipse at 100% 50%, rgba(40,90,90,.5), transparent 55%), linear-gradient(135deg, #0F3D3E 0%, #0B3133 60%, #082728 100%);
+    border:1px solid rgba(212,175,55,.25);
+    box-shadow: 0 14px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .lms-game-cta__copy{ position:relative; z-index:1; display:flex; flex-direction:column; gap:.4rem; max-width:520px; }
+  .lms-game-cta__t{ font-family:'Heebo',sans-serif; font-size: clamp(1.1rem, 2.5cqw, 1.35rem); font-weight:700; color:#fff; letter-spacing:-.01em; }
+  .lms-game-cta__s{ font-size:.9rem; color:rgba(255,255,255,.72); line-height:1.5; }
+  .lms-game-cta__btn{ position:relative; z-index:1; flex:none; display:inline-flex; align-items:center; gap:.55rem; padding:.85rem 1.5rem; border-radius:999px; background: linear-gradient(180deg, #E6C65A 0%, #D4A437 100%); color:#1a1205; font-family:inherit; font-size:.95rem; font-weight:700; text-decoration:none; box-shadow: 0 8px 20px rgba(212,164,55,.36), inset 0 1px 0 rgba(255,255,255,.45); transition: transform .2s; }
+  .lms-game-cta__btn:hover{ transform: translateY(-2px); }
+
+  @container (max-width: 600px){
+    .lms-game-cta{ flex-direction:column; align-items:flex-start; }
+    .lms-game-cta__btn{ align-self: stretch; justify-content:center; }
+  }
+  @media (max-width: 720px){
+    .lms-pl-bar{ flex-wrap: wrap; }
+    .lms-pl-bar__nav{ width: 100%; justify-content: space-between; }
+    .lms-tabs{ overflow-x: auto; flex-wrap: nowrap; }
+    .lms-tab span{ display: none; }
+    .lms-tab i{ font-size:1rem; }
+  }
+
+  /* RESPONSIVE GUARDS */
+  @media (max-width: 1280px){ .lms-hd{ grid-template-columns: 1fr auto auto auto; gap:.85rem; padding:.65rem 1rem; } .lms-hd__progress{ display:none; } }
+  @media (max-width: 980px){ .lms-hd__cta-wrap{ display:none; } .lms-hd__cta-2{ font-size:.74rem; padding:.5rem .8rem; } }
+  @media (max-width: 768px){
+    .lms-body{ grid-template-columns: 1fr; padding: 1rem .75rem 4rem; }
+    .lms-hd{ margin:.5rem .5rem 0; }
+    .lms-hd__hamburger{ display:grid; }
+    .lms-hd__cta-2{ display:none; }
+    .lms-sb{ position: fixed; top: 0; right: 0; bottom: 0; width: min(320px, 88vw); max-height: 100vh; height: 100vh; border-radius: 0; transform: translateX(100%); transition: transform .25s ease-out; z-index: 80; padding-top: 1.5rem; }
+    body.sb-open .lms-sb{ transform: translateX(0); box-shadow: -20px 0 60px rgba(0,0,0,.5); }
+    .sb-scrim{ display:none; position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px); z-index: 75; }
+    body.sb-open .sb-scrim{ display:block; }
+  }
+
+  @media (prefers-reduced-transparency: reduce){
+    .lms-hd, .lms-sb, .lms-hd__cta-2, .lms-hd__icon, .lms-hd__course-pill, .lms-hero__video-caption{
+      backdrop-filter:none !important;
+      -webkit-backdrop-filter:none !important;
+      background: rgba(10,40,46,.92) !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="atmos">
+    <div class="atmos__base"></div>
+    <div class="atmos__blob atmos__blob--a"></div>
+    <div class="atmos__blob atmos__blob--b"></div>
+    <div class="atmos__blob atmos__blob--c"></div>
+    <div class="atmos__blob atmos__blob--d"></div>
+    <div class="atmos__grid"></div>
+    <div class="atmos__grain"></div>
+  </div>
+
+  <header class="lms-hd">
+    <div class="lms-hd__right">
+      <a class="lms-hd__brand" href="../index.html" aria-label="בית המטפלים">
+        <img src="../assets/logo-square.png" alt="">
+      </a>
+      <div class="lms-hd__course">
+        <span class="lms-hd__course-title">קורס NLP — יסודות ומעשה</span>
+        <span class="lms-hd__course-pill">
+          <i class="fa-solid fa-circle"></i>
+          <span>NLP Practitioner</span>
+          <b>קורס</b>
+        </span>
+      </div>
+    </div>
+
+    <div class="lms-hd__progress">
+      <div class="lms-hd__progress-bar"><span id="hdProgressFill" style="width:0%"></span></div>
+      <div class="lms-hd__progress-label">
+        <b id="hdProgressPct">0%</b>
+        <span>התקדמות</span>
+      </div>
+    </div>
+
+    <div class="lms-hd__cta-wrap" id="hdCtaWrap">
+      <span class="lms-hd__cta-eyebrow">המשך בשיעור הבא</span>
+      <button class="lms-hd__cta" id="hdContinueBtn" type="button">
+        <span class="lms-hd__cta-arrow"><i class="fa-solid fa-play"></i></span>
+        <span class="lms-hd__cta-label" id="hdContinueLabel">המשך ללמוד</span>
+      </button>
+    </div>
+
+    <div class="lms-hd__left">
+      <a class="lms-hd__cta-2" href="learning-master.html">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>תוכנית ההכשרה</span>
+      </a>
+      <button class="lms-hd__icon lms-hd__hamburger" type="button" aria-label="תפריט" id="hdHamburger">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <a class="lms-hd__icon" href="profile.html" aria-label="הפרופיל שלי" title="הפרופיל שלי"><i class="fa-regular fa-user"></i></a>
+      <button class="lms-hd__icon" type="button" aria-label="התנתקות" id="hdLogoutBtn" title="התנתקות"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+    </div>
+  </header>
+
+  <div class="sb-scrim" id="sbScrim"></div>
+
+  <div class="lms-body">
+    <aside class="lms-sb" aria-label="ניווט הקורס">
+      <div class="lms-sb-prog">
+        <div class="lms-sb-prog__row">
+          <h3 class="lms-sb-prog__title">התקדמות בקורס</h3>
+          <span class="lms-sb-prog__count" id="sbCount">0/51 שיעורים</span>
+        </div>
+        <div class="lms-sb-prog__bar"><span id="sbProgressFill" style="width:0%"></span></div>
+        <div class="lms-sb-prog__pct" id="sbProgressPct">0%</div>
+      </div>
+
+      <label class="lms-sb-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" id="sbSearch" placeholder="חפש שיעור..." aria-label="חיפוש שיעור">
+      </label>
+
+      <button class="lms-sb-jump" type="button" id="sbJumpBtn">
+        <i class="fa-solid fa-arrow-down"></i>
+        <span>קפיצה לשיעור הנוכחי</span>
+      </button>
+
+      <div class="lms-sb__heading">תוכן הקורס</div>
+
+      <nav class="lms-sb-nav" id="sbNav"></nav>
+    </aside>
+
+    <main class="lms-main">
+      <div class="lms-welcome">
+      <section class="lms-hero" aria-label="השיעור הבא">
+        <div class="lms-hero__glow"></div>
+        <div class="lms-hero__copy">
+          <span class="lms-hero__eyebrow" id="heroEyebrow">השיעור הבא שלך</span>
+          <h1 class="lms-hero__title" id="heroTitle">טוען…</h1>
+          <p class="lms-hero__sub" id="heroSub">&nbsp;</p>
+          <button class="lms-hero__cta" type="button" id="heroCta">
+            <i class="fa-solid fa-play"></i>
+            <span id="heroCtaText">המשך ללמוד</span>
+          </button>
+          <div class="lms-hero__progress">
+            <div class="lms-hero__progress-bar"><span id="heroProgressFill" style="width:0%"></span></div>
+            <div class="lms-hero__progress-meta" id="heroProgressMeta">השלמת 0 מתוך 51 שיעורים • 0%</div>
+          </div>
+        </div>
+        <button class="lms-hero__video" id="heroVideo" type="button" aria-label="הפעל את השיעור">
+          <img id="heroThumb" src="" alt="">
+          <div class="lms-hero__video-scrim"></div>
+          <span class="lms-hero__video-play"><i class="fa-solid fa-play"></i></span>
+          <span class="lms-hero__video-caption" id="heroCaption">השיעור הבא</span>
+        </button>
+      </section>
+
+      <section class="lms-stats" aria-label="מדדי התקדמות">
+        <article class="lms-stat">
+          <div class="lms-stat__icon lms-stat__icon--books"><i class="fa-solid fa-book-open"></i></div>
+          <div class="lms-stat__value"><span id="statModule">0</span><span class="lms-stat__value-of" id="statModuleOf">/8</span></div>
+          <div class="lms-stat__label">במודול הנוכחי</div>
+        </article>
+        <article class="lms-stat">
+          <div class="lms-stat__icon lms-stat__icon--time"><i class="fa-regular fa-clock"></i></div>
+          <div class="lms-stat__value"><span id="statTime">~h</span></div>
+          <div class="lms-stat__label">זמן שנותר</div>
+        </article>
+        <article class="lms-stat">
+          <div class="lms-stat__icon lms-stat__icon--streak"><i class="fa-solid fa-fire"></i></div>
+          <div class="lms-stat__value"><span id="statStreak">0</span></div>
+          <div class="lms-stat__label">ימי רצף</div>
+        </article>
+      </section>
+
+      <section class="lms-ann" aria-label="לוח מודעות">
+        <header class="lms-ann__head">
+          <div class="lms-ann__title">
+            <span class="lms-ann__icon"><i class="fa-solid fa-bullhorn"></i></span>
+            <h2>לוח מודעות</h2>
+          </div>
+        </header>
+        <div class="lms-ann__body" id="annBody"></div>
+      </section>
+
+      <section class="lms-partners" aria-label="תוכנית השותפים">
+        <div class="lms-partners__glow"></div>
+        <div class="lms-partners__copy">
+          <div class="lms-partners__title">
+            <span class="lms-partners__heart">💛</span>
+            <span>קיבלת טוב? תחזיר טוב</span>
+          </div>
+          <p class="lms-partners__sub">שתפו את הפורטל עם חברים והצטרפו לתוכנית השותפים שלנו</p>
+        </div>
+        <a class="lms-partners__cta" href="course-library.html#ambassador">
+          <span>למידע נוסף</span>
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+      </section>
+      </div><!-- /.lms-welcome -->
+
+      <div class="lms-player">
+        <div class="lms-pl-bar">
+          <button class="lms-pl-bar__back" type="button" id="plBack" aria-label="חזרה לסקירה" title="חזרה"><i class="fa-solid fa-arrow-right"></i></button>
+          <div class="lms-pl-bar__title">
+            <h1 class="lms-pl-bar__h" id="plTitle">טוען…</h1>
+            <div class="lms-pl-bar__sub" id="plSub">&nbsp;</div>
+          </div>
+          <div class="lms-pl-bar__nav">
+            <button class="lms-pl-bar__btn" type="button" id="plPrev"><i class="fa-solid fa-chevron-right"></i><span>הקודם</span></button>
+            <button class="lms-pl-bar__btn lms-pl-bar__btn--complete" type="button" id="plComplete"><i class="fa-solid fa-circle-check"></i><span id="plCompleteLabel">סמן כהושלם</span></button>
+            <button class="lms-pl-bar__btn" type="button" id="plNext"><span>הבא</span><i class="fa-solid fa-chevron-left"></i></button>
+          </div>
+        </div>
+
+        <div class="lms-pl-video">
+          <div class="lms-pl-video__loading" id="plLoading"><i class="fa-solid fa-circle-notch"></i> טוען שיעור…</div>
+          <iframe id="plIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </div>
+        <div class="lms-pl-tip" id="plTip">השיעור יסומן אוטומטית אחרי 45 שניות צפייה — אפשר גם לסמן ידנית</div>
+
+        <div class="lms-tabs" role="tablist">
+          <button class="lms-tab is-active" data-tab="notes" role="tab" aria-selected="true"><i class="fa-solid fa-pen-to-square"></i><span>הערות</span></button>
+          <button class="lms-tab" data-tab="ai" role="tab" aria-selected="false"><i class="fa-solid fa-robot"></i><span>העוזר האישי</span></button>
+          <button class="lms-tab" data-tab="resources" role="tab" aria-selected="false"><i class="fa-solid fa-book-open"></i><span>חומרי עזר</span></button>
+          <button class="lms-tab lms-tab--gold" data-tab="game" role="tab" aria-selected="false"><i class="fa-solid fa-gamepad"></i><span>משחק תרגול</span></button>
+        </div>
+
+        <div class="lms-tab-pane is-active" data-pane="notes">
+          <div class="lms-notes-card">
+            <div class="lms-notes-head">
+              <h3>ההערות שלי לשיעור הזה</h3>
+              <span class="lms-notes-meta"><b id="notesWordCount">0</b> מילים</span>
+            </div>
+            <textarea class="lms-notes-textarea" id="notesArea" placeholder="כתבו כאן את ההערות שלכם לשיעור — תובנות, שאלות, ציטוטים מעוררי השראה…" aria-label="הערות לשיעור"></textarea>
+            <div class="lms-notes-foot">
+              <span class="lms-notes-status" id="notesStatus"><i class="fa-regular fa-circle"></i> מוכן</span>
+              <span>שמירה אוטומטית כל כמה שניות</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lms-tab-pane" data-pane="ai">
+          <div class="lms-ai-card">
+            <div class="lms-ai-head">
+              <div class="lms-ai-avatar"><i class="fa-solid fa-robot"></i></div>
+              <div class="lms-ai-head__info">
+                <h4>העוזר האישי שלך</h4>
+                <span class="lms-ai-status">מוכן לעזור</span>
+              </div>
+              <span class="lms-ai-remaining"><b id="aiRemaining">200/200</b> הודעות</span>
+            </div>
+            <div class="lms-ai-msgs" id="aiMsgs">
+              <div class="lms-ai-empty" id="aiEmpty">
+                <div class="lms-ai-empty__icon"><i class="fa-solid fa-comments"></i></div>
+                <h3>שאלו אותי על השיעור הזה</h3>
+                <p>אני מכיר את כל התכנים בקורס ויכול לעזור עם הסברים, דוגמאות מעשיות ותרגול. כתבו שאלה ונענה תוך כמה שניות.</p>
+              </div>
+            </div>
+            <div class="lms-ai-input">
+              <textarea id="aiInput" placeholder="שאלו על השיעור..." rows="1" aria-label="הקלידו הודעה"></textarea>
+              <button id="aiSendBtn" type="button" aria-label="שלח"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lms-tab-pane" data-pane="resources">
+          <div class="lms-res-grid" id="resGrid"></div>
+        </div>
+
+        <div class="lms-tab-pane" data-pane="game">
+          <div class="lms-game-cta">
+            <div class="lms-game-cta__copy">
+              <div class="lms-game-cta__t"><i class="fa-solid fa-gamepad" style="color:#E6C65A; margin-inline-end:.4rem;"></i>משחק תרגול NLP</div>
+              <p class="lms-game-cta__s">תרגילים אינטראקטיביים, XP, רמות והישגים — כל שיעור הופך לחוויית למידה משחקית. מתעדכן עם ההתקדמות שלכם בקורס.</p>
+            </div>
+            <a class="lms-game-cta__btn" id="gameBtn" href="nlp-game.html">
+              <i class="fa-solid fa-play"></i><span>פתח משחק</span>
+            </a>
+          </div>
+        </div>
+      </div><!-- /.lms-player -->
+    </main>
+  </div>
+
+  <button class="lms-fab" type="button" id="fabBtn" aria-label="טיפ מהיר" title="טיפ מהיר">
+    <i class="fa-regular fa-lightbulb"></i>
+  </button>
+</div>
+
+<script src="../js/supabase-client.js"></script>
+<script>
+(function(){
+  const params = new URLSearchParams(location.search);
+  const devBypass = params.get('dev') === '1';
+
+  async function authGate(){
+    if (devBypass) return true;
+    try {
+      const client = window.supabaseClient || (window.SUPABASE_CONFIG && window.supabase
+        ? window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey)
+        : null);
+      if (!client) return true;
+      const { data: { session } } = await client.auth.getSession();
+      if (!session && !location.hash.includes('access_token')){
+        sessionStorage.setItem('returnUrl', location.href);
+        location.replace('free-portal.html');
+        return false;
+      }
+      return true;
+    } catch(_){
+      sessionStorage.setItem('returnUrl', location.href);
+      location.replace('free-portal.html');
+      return false;
+    }
+  }
+
+  // Course data — TEMP duplication of course-library.html modules array.
+  const modules = [
+    { id: 1, title: 'מבוא ל-NLP', lessons: [
+      { id: 'HdJTrqV-8kw', title: 'איך NLP יכול לשנות את חייך?', duration: '20:20' },
+      { id: 'I4r3oERlZpc', title: 'מהן האמונות שמסתתרות בתת המודע?', duration: '21:40' },
+      { id: 'zGuxyfbYdUY', title: 'מה זה (תכל\'ס) NLP?', duration: '22:10' },
+      { id: 'fo90wrXPJjQ', title: 'שלוש הנחות יסוד משנות חיים', duration: '27:23' },
+      { id: 'kccllbuObhs', title: 'מודע, תת מודע ומודל התקשורת', duration: '24:28' },
+      { id: 'ahN0Q2wGVa0', title: 'תקשורת לא מילולית, קליברציה וחדות חושים', duration: '15:01' },
+      { id: 'Nt8MK8CNvYo', title: 'ראפור ויצירת כימיה ברמה הלא מודעת', duration: '24:19' },
+      { id: '-PMCuz1jiMk', title: 'סיכום השיעור ונקודות חשובות', duration: '19:46' }
+    ]},
+    { id: 2, title: 'עמדות תפיסה ומערכות יחסים', lessons: [
+      { id: '3u52ghUdM9E', title: 'מודל "רמות לוגיות"', duration: '24:07' },
+      { id: 'lfDEJFV3EO0', title: 'הנחות יסוד במערכות יחסים', duration: '16:22' },
+      { id: 'ldz6Kb9hqW8', title: 'מהי עמדת התפיסה הראשונה?', duration: '30:18' },
+      { id: '-qk4et9hKCc', title: 'עמדת תפיסה שנייה', duration: '7:56' },
+      { id: 'ZxpaiqBCN-A', title: 'עמדות תפיסה – עמדה שלישית', duration: '18:13' },
+      { id: 'NtzzbQKPfuQ', title: 'טכניקת טיול בין עמדות', duration: '32:09' }
+    ]},
+    { id: 3, title: 'שפה, שאלות והצבת מטרות', lessons: [
+      { id: '5EEb8n1rkk8', title: 'כלי ההשפעה העוצמתי ביותר', duration: '33:15' },
+      { id: 'JlRGFcHIlaY', title: 'שאלות של הכללות', duration: '24:39' },
+      { id: '9vOt4qMDErY', title: 'שאלות של השמטות', duration: '25:50' },
+      { id: 'M5WYHElp77Y', title: 'שאלות של עיוותים', duration: '35:08' },
+      { id: '_8wvtMUInNg', title: 'איך מציבים מטרה? 5 עקרונות זהב!', duration: '22:39' },
+      { id: 'HfeTbx94Z_A', title: 'מהו מודל SMART?', duration: '8:29' },
+      { id: 'wxswFMy0FFs', title: 'טכניקה עוצמתית להצבת מטרות (וולט דיסני)', duration: '25:16' }
+    ]},
+    { id: 4, title: 'השפה של המוח, מערכות ייצוג והרגלים', lessons: [
+      { id: 'bYgv5dLr5DU', title: 'השפה של המוח', duration: '28:15' },
+      { id: 'rfeUPA9HcU4', title: 'תפיסת ההתנהגויות', duration: '10:16' },
+      { id: 'deckGQrRYd4', title: 'מערכות הייצוג של המוח', duration: '17:31' },
+      { id: 'cSGrhFYSDmE', title: 'איך משתמשים במערכות ייצוג?', duration: '33:47' },
+      { id: 'gG-3I_TcHe4', title: 'חושים ותתי החושים שלנו (סמ"דים)', duration: '25:14' },
+      { id: 'b_b4hhclmR8', title: 'התניות ושינוי תפיסת המציאות', duration: '8:42' },
+      { id: 'itbteM8UjBE', title: 'איך לשנות הרגלים? וליצור התניות חדשות', duration: '21:18' }
+    ]},
+    { id: 5, title: 'צרכים אנושיים, אישיות והרגלים', lessons: [
+      { id: 'BNBPxr-Qec0', title: 'סיכום השיעורים האחרונים', duration: '10:39' },
+      { id: 'h7b8sX0z4nw', title: 'גמישות מחשבתית, כוונה חיובית ועוד אפשרויות', duration: '17:22' },
+      { id: 'mphxQlNsGYM', title: 'מודל הצרכים האנושיים', duration: '40:47' },
+      { id: 'Y8ulYYg5XDk', title: 'סיכום מודל הצרכים האנושיים', duration: '13:21' },
+      { id: 'dNKcCwvjVWk', title: 'מבנה האישיות בתת המודע', duration: '29:12' },
+      { id: 'Gp7gT4TC1n8', title: 'מהו הכוח של מחשבה נכונה?', duration: '30:31' },
+      { id: '5SDIvzco0K4', title: 'טכניקה לשינוי הרגלים', duration: '10:57' }
+    ]},
+    { id: 6, title: 'פרשנות, רגשות ומשאבים', lessons: [
+      { id: 'EeGfP30AiLs', title: 'איך פרשנות עובדת? (מסגור)', duration: '7:58' },
+      { id: 'I_tnGW-RYmE', title: 'איך לשנות פרשנות? (ריפריים)', duration: '11:53' },
+      { id: 'akbG-4zxER4', title: 'איך ליצור פרשנות? (פרי-פריים) השפעה ושכנוע', duration: '30:36' },
+      { id: 'AO6lf_seCqs', title: 'פוקוס, שחרור מחשבות וכל המשאבים להצלחה', duration: '20:39' },
+      { id: 'NcSAnR6WWD4', title: 'איך שולטים ברגשות? משולש "הסטייט"', duration: '34:34' },
+      { id: 'bceR1CAGv34', title: 'אסטרטגיה לשימוש במצבים רגשיים', duration: '16:56' },
+      { id: 'kndSAREj7qQ', title: 'איך להכנס לפוקוס ולשנות מצב רגשי?', duration: '14:23' },
+      { id: 'X9SUBv6maGs', title: 'יצירת התניות ועוגנים פסיכולוגיים', duration: '15:30' }
+    ]},
+    { id: 7, title: 'אמונות, שינוי זהות וציר הזמן', lessons: [
+      { id: '97cbIvdEz8Q', title: 'מודל רמות לוגיות – שינוי צורת חשיבה', duration: '27:56' },
+      { id: 'ieDGCAvev4w', title: 'לעשות הכי טוב ברגע נתון', duration: '17:16' },
+      { id: 'ySTzDrBml10', title: 'אין כישלון, יש משוב, צמיחה ולמידה', duration: '14:17' },
+      { id: 'zWKwwChuEfs', title: 'אמונות בתת המודע ואמונות מגבילות', duration: '29:26' },
+      { id: 'On9odKKss24', title: 'סוגי האמונות בתת המודע', duration: '21:37' },
+      { id: 'BE5RLAj1Be4', title: 'איך נוצרות אמונות בתת המודע?', duration: '22:06' },
+      { id: 'K_JGmX8Cq-I', title: 'דפוסי שפה וזיהוי אמונות', duration: '17:39' },
+      { id: 'EeFCN9Tddh8', title: 'טכניקת ציר הזמן', duration: '30:32' }
+    ]}
+  ];
+
+  const announcements = [
+    { icon: 'fa-solid fa-star', text: 'חדש! קורס NLP Practitioner מלא — 51 שיעורים בחינם' },
+    { icon: 'fa-solid fa-robot', text: 'מורה AI אישי זמין עכשיו בתוך הפורטל' },
+    { icon: 'fa-solid fa-download', text: 'חוברות עבודה וסיכומי שיעורים — להורדה חינם' },
+    { icon: 'fa-solid fa-gamepad', text: 'משחק תרגול מקצועי חדש — XP, רמות והישגים' },
+    { icon: 'fa-solid fa-rocket', text: 'קיבלת טוב? תחזיר טוב 🤍 הצטרפו לתוכנית השותפים שלנו', gold: true, href: 'course-library.html#ambassador' }
+  ];
+
+  const totalLessons = modules.reduce((s, m) => s + m.lessons.length, 0);
+  let completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+  let lastWatched = null;
+  let currentModuleIndex = -1;
+  let currentLessonIndex = -1;
+  let completionTimer = null;
+  // Reuse the singleton client created by supabase-client.js (avoids dual-client session split)
+  const supabaseClient = window.supabaseClient || (window.SUPABASE_CONFIG && window.supabase
+    ? window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey)
+    : null);
+
+  function parseDuration(str){
+    if (!str) return 0;
+    const parts = String(str).split(':').map(n => parseInt(n,10) || 0);
+    if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+    if (parts.length === 2) return parts[0]*60 + parts[1];
+    return parts[0] || 0;
+  }
+  function getRemainingTime(){
+    let secs = 0;
+    modules.forEach((mod, mIdx) => mod.lessons.forEach((les, lIdx) => {
+      if (!completedLessons.includes(`${mIdx}-${lIdx}`)) secs += parseDuration(les.duration);
+    }));
+    const hours = Math.floor(secs / 3600);
+    const mins  = Math.round((secs % 3600) / 60);
+    if (hours >= 1) return `~${hours}${mins >= 30 ? '.5' : ''}h`;
+    if (mins >= 1) return `${mins} דק׳`;
+    return '0';
+  }
+  function getNextLesson(){
+    if (lastWatched){
+      const m = lastWatched.moduleIndex, l = lastWatched.lessonIndex;
+      if (modules[m] && modules[m].lessons[l] && !completedLessons.includes(`${m}-${l}`)){
+        return { m, l, lesson: modules[m].lessons[l], isFirstStart: completedLessons.length === 0 };
+      }
+    }
+    for (let i = 0; i < modules.length; i++){
+      for (let j = 0; j < modules[i].lessons.length; j++){
+        if (!completedLessons.includes(`${i}-${j}`)){
+          return { m: i, l: j, lesson: modules[i].lessons[j], isFirstStart: completedLessons.length === 0 };
+        }
+      }
+    }
+    return { allDone: true };
+  }
+  function getCurrentModuleProgress(){
+    const next = getNextLesson();
+    if (next.allDone){
+      const last = modules.length - 1;
+      return { idx: last + 1, done: modules[last].lessons.length, total: modules[last].lessons.length };
+    }
+    const m = next.m;
+    const done = modules[m].lessons.filter((_, l) => completedLessons.includes(`${m}-${l}`)).length;
+    return { idx: m + 1, done, total: modules[m].lessons.length };
+  }
+  function getStudyStreak(){
+    try {
+      const raw = localStorage.getItem('study_streak');
+      const today = new Date().toISOString().slice(0,10);
+      let state = raw ? JSON.parse(raw) : { lastDate: null, days: 0 };
+      if (state.lastDate === today) return state.days || 1;
+      if (state.lastDate){
+        const last = new Date(state.lastDate);
+        const diffDays = Math.round((new Date(today) - last) / 86400000);
+        state.days = (diffDays === 1) ? (state.days || 0) + 1 : 1;
+      } else state.days = 1;
+      state.lastDate = today;
+      localStorage.setItem('study_streak', JSON.stringify(state));
+      return state.days;
+    } catch(_){ return 0; }
+  }
+  function lessonHash(m, l){ return `course-library.html#m${m+1}l${l+1}`; }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function renderProgress(){
+    const completed = completedLessons.length;
+    const pct = totalLessons ? Math.round((completed / totalLessons) * 100) : 0;
+    const pctStr = pct + '%';
+    document.getElementById('hdProgressFill').style.width = pctStr;
+    document.getElementById('hdProgressPct').textContent = pctStr;
+    document.getElementById('sbProgressFill').style.width = pctStr;
+    document.getElementById('sbProgressPct').textContent = pctStr;
+    document.getElementById('sbCount').textContent = `${completed}/${totalLessons} שיעורים`;
+    document.getElementById('heroProgressFill').style.width = pctStr;
+    document.getElementById('heroProgressMeta').innerHTML =
+      `השלמת <b>${completed}</b> מתוך <b>${totalLessons}</b> שיעורים <span class="lms-hero__bull">•</span> ${pct}%`;
+  }
+  function renderHero(){
+    const next = getNextLesson();
+    const eyebrow = document.getElementById('heroEyebrow');
+    const title   = document.getElementById('heroTitle');
+    const sub     = document.getElementById('heroSub');
+    const ctaTxt  = document.getElementById('heroCtaText');
+    const cta     = document.getElementById('heroCta');
+    const thumb   = document.getElementById('heroThumb');
+    const cap     = document.getElementById('heroCaption');
+    const video   = document.getElementById('heroVideo');
+    const hdBtn   = document.getElementById('hdContinueBtn');
+    const hdLbl   = document.getElementById('hdContinueLabel');
+    const hdWrap  = document.getElementById('hdCtaWrap');
+
+    if (next.allDone){
+      eyebrow.textContent = 'סיימת את הקורס';
+      title.textContent   = 'כל הכבוד! 🎉 סיימת את כל 51 השיעורים';
+      sub.textContent     = 'מומלץ לחזור למודולים שהכי משכו אותך — או לעבור למשחק התרגול';
+      ctaTxt.textContent  = 'חזרה לסקירה';
+      thumb.src = `https://img.youtube.com/vi/${modules[0].lessons[0].id}/mqdefault.jpg`;
+      cap.textContent = 'סיימת את כל השיעורים';
+      cta.onclick   = () => { location.href = 'course-library.html'; };
+      video.onclick = () => { location.href = 'course-library.html'; };
+      if (hdWrap) hdWrap.style.display = 'none';
+      return;
+    }
+
+    const mod = modules[next.m];
+    eyebrow.textContent = next.isFirstStart ? 'בואו נתחיל' : 'השיעור הבא שלך';
+    title.textContent   = next.isFirstStart ? `התחילו את המסע: ${next.lesson.title}` : next.lesson.title;
+    sub.innerHTML       = `מודול ${mod.id}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> ${next.lesson.duration} דק׳`;
+    ctaTxt.textContent  = next.isFirstStart ? 'התחל ללמוד' : 'המשך ללמוד';
+    thumb.src = `https://img.youtube.com/vi/${next.lesson.id}/mqdefault.jpg`;
+    thumb.onerror = function(){ this.style.display='none'; };
+    cap.textContent = `${next.isFirstStart ? 'התחלה' : 'השיעור הבא'} • ${next.lesson.title}`;
+    const goToLesson = () => { selectLesson(next.m, next.l); };
+    cta.onclick   = goToLesson;
+    video.onclick = goToLesson;
+    if (hdBtn && hdLbl){
+      hdLbl.textContent = next.lesson.title;
+      hdBtn.onclick = goToLesson;
+    }
+    if (hdWrap) hdWrap.style.display = '';
+  }
+  function renderStats(){
+    const mp = getCurrentModuleProgress();
+    document.getElementById('statModule').textContent = String(mp.done);
+    document.getElementById('statModuleOf').textContent = `/${mp.total}`;
+    document.getElementById('statTime').textContent = getRemainingTime();
+    document.getElementById('statStreak').textContent = String(getStudyStreak());
+  }
+  function renderAnnouncements(){
+    const body = document.getElementById('annBody');
+    body.innerHTML = announcements.map(msg => {
+      const cls = `lms-ann-msg${msg.gold ? ' is-gold' : ''}${msg.href ? ' is-clickable' : ''}`;
+      const open  = msg.href ? `<a href="${escapeHtml(msg.href)}" class="${cls}">` : `<div class="${cls}">`;
+      const close = msg.href ? `</a>` : `</div>`;
+      return `${open}<span class="lms-ann-msg__icon"><i class="${escapeHtml(msg.icon)}"></i></span><span>${escapeHtml(msg.text)}</span>${close}`;
+    }).join('');
+  }
+  function renderSidebarNav(filter){
+    const q = (filter || '').trim().toLowerCase();
+    const next = getNextLesson();
+    const nav = document.getElementById('sbNav');
+    const parts = [];
+
+    parts.push(`
+      <a class="lms-sb-item lms-sb-item--active" href="#" aria-current="page">
+        <span class="lms-sb-item__icon"><i class="fa-solid fa-house"></i></span>
+        <span class="lms-sb-item__label">ברוך הבא לפורטל</span>
+      </a>
+      <a class="lms-sb-item" href="course-library.html#ambassador">
+        <span class="lms-sb-item__icon"><i class="fa-solid fa-handshake"></i></span>
+        <span class="lms-sb-item__label">תוכנית השותפים</span>
+        <span class="lms-sb-item__badge">חדש</span>
+      </a>
+      <a class="lms-sb-item" href="course-library.html#community">
+        <span class="lms-sb-item__icon"><i class="fa-solid fa-user-group"></i></span>
+        <span class="lms-sb-item__label">קהילת NLP</span>
+      </a>
+      <div class="lms-sb__heading" style="margin-top:.85rem;">מודולים</div>
+    `);
+
+    modules.forEach((mod, mIdx) => {
+      const matched = mod.lessons.map((les, lIdx) => ({ les, lIdx }))
+        .filter(({ les }) => !q || les.title.toLowerCase().includes(q) || mod.title.toLowerCase().includes(q));
+      if (q && matched.length === 0) return;
+
+      const done = mod.lessons.filter((_, l) => completedLessons.includes(`${mIdx}-${l}`)).length;
+      const isCurrent = !next.allDone && next.m === mIdx;
+      const open = (q || isCurrent) ? ' lms-sb-mod--open' : '';
+
+      const lessonsHtml = matched.map(({ les, lIdx }) => {
+        const isDone = completedLessons.includes(`${mIdx}-${lIdx}`);
+        const status = isDone ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-regular fa-circle"></i>';
+        return `
+          <a class="lms-sb-lesson${isDone ? ' lms-sb-lesson--done' : ''}" href="${lessonHash(mIdx, lIdx)}">
+            <span class="lms-sb-lesson__status">${status}</span>
+            <span class="lms-sb-lesson__title">${escapeHtml(les.title)}</span>
+            <span class="lms-sb-lesson__dur">${les.duration}</span>
+          </a>`;
+      }).join('');
+
+      parts.push(`
+        <div class="lms-sb-mod${open}" data-module="${mIdx}">
+          <button class="lms-sb-item" type="button" aria-expanded="${open ? 'true' : 'false'}" data-toggle="${mIdx}">
+            <span class="lms-sb-item__chev"><i class="fa-solid fa-chevron-down"></i></span>
+            <span class="lms-sb-item__label">${escapeHtml(mod.title)}</span>
+            <span class="lms-sb-item__count">${done}/${mod.lessons.length}</span>
+          </button>
+          <div class="lms-sb-mod__lessons">${lessonsHtml}</div>
+        </div>
+      `);
+    });
+
+    nav.innerHTML = parts.join('');
+    nav.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        const wrap = btn.closest('.lms-sb-mod');
+        const isOpen = wrap.classList.toggle('lms-sb-mod--open');
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    });
+  }
+  function renderAll(){
+    renderProgress();
+    renderHero();
+    renderStats();
+    renderAnnouncements();
+    renderSidebarNav();
+  }
+
+  function setupSidebar(){
+    const search = document.getElementById('sbSearch');
+    let t;
+    search.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(() => renderSidebarNav(search.value), 120);
+    });
+    document.getElementById('sbJumpBtn').addEventListener('click', () => {
+      const next = getNextLesson();
+      if (next.allDone) return;
+      const wrap = document.querySelector(`.lms-sb-mod[data-module="${next.m}"]`);
+      if (wrap){
+        document.querySelectorAll('.lms-sb-mod').forEach(w => w.classList.remove('lms-sb-mod--open'));
+        wrap.classList.add('lms-sb-mod--open');
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }
+  function setupMobileDrawer(){
+    const ham   = document.getElementById('hdHamburger');
+    const scrim = document.getElementById('sbScrim');
+    const close = () => document.body.classList.remove('sb-open');
+    if (ham)   ham.addEventListener('click', () => document.body.classList.toggle('sb-open'));
+    if (scrim) scrim.addEventListener('click', close);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    document.querySelector('.lms-sb').addEventListener('click', e => { if (e.target.closest('a[href]')) close(); });
+  }
+  function setupLogout(){
+    const btn = document.getElementById('hdLogoutBtn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      try {
+        const cfg = window.SUPABASE_CONFIG;
+        if (cfg && window.supabase){
+          const c = window.supabase.createClient(cfg.url, cfg.anonKey);
+          await c.auth.signOut();
+        }
+      } catch(_){}
+      location.href = 'free-portal.html';
+    });
+  }
+  function setupFab(){
+    const tips = [
+      'שיעור ביום, רצף שלא נשבר — זה כל הסוד.',
+      'אחרי כל שיעור: רשמו שורה אחת — מה הכי הפתיע אתכם.',
+      'תרגול קטן עכשיו עדיף על שיעור גדול שלא תראו.',
+      'כשנתקעתם — חזרו לשיעור הקודם, לא תמיד עוברים קדימה.'
+    ];
+    document.getElementById('fabBtn').addEventListener('click', () => {
+      alert(tips[Math.floor(Math.random() * tips.length)]);
+    });
+  }
+  async function hydrateProgress(){
+    if (devBypass) return;
+    if (!window.CourseProgress) return;
+    try {
+      const ids = await window.CourseProgress.getCompletedVideoIds('nlp-practitioner');
+      if (ids && ids.size){
+        modules.forEach((mod, mIdx) => mod.lessons.forEach((les, lIdx) => {
+          if (ids.has(les.id)){
+            const key = `${mIdx}-${lIdx}`;
+            if (!completedLessons.includes(key)) completedLessons.push(key);
+          }
+        }));
+        localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+      }
+      const last = await window.CourseProgress.getLastWatched('nlp-practitioner');
+      if (last) lastWatched = last;
+    } catch(_){}
+    renderAll();
+  }
+
+  // ===== View switching =====
+  function showWelcome(skipPush){
+    document.body.classList.remove('view-player');
+    if (completionTimer){ clearTimeout(completionTimer); completionTimer = null; }
+    const iframe = document.getElementById('plIframe');
+    if (iframe) iframe.src = 'about:blank';
+    if (!skipPush && location.hash) history.pushState(null, '', location.pathname + location.search);
+    renderAll();
+  }
+  function selectLesson(m, l, skipPush){
+    if (!modules[m] || !modules[m].lessons[l]) return;
+    currentModuleIndex = m;
+    currentLessonIndex = l;
+    const mod = modules[m];
+    const lesson = mod.lessons[l];
+
+    document.body.classList.add('view-player');
+    document.getElementById('plTitle').textContent = lesson.title;
+    document.getElementById('plSub').innerHTML = `מודול ${mod.id}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> ${lesson.duration} דק׳`;
+
+    const loading = document.getElementById('plLoading');
+    const iframe  = document.getElementById('plIframe');
+    loading.classList.remove('is-hidden');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${lesson.id}?rel=0&modestbranding=1&autoplay=1`;
+    iframe.onload = () => {
+      loading.classList.add('is-hidden');
+      if (completionTimer) clearTimeout(completionTimer);
+      completionTimer = setTimeout(() => markLessonCompleted(m, l), 45000);
+    };
+
+    refreshCompleteBtn();
+    refreshNavBtns();
+    loadNotesForCurrent();
+    resetAiChat();
+    renderResources();
+    if (window.gameBtnUpdater) window.gameBtnUpdater();
+
+    // Persist last-watched
+    if (window.CourseProgress && !devBypass){
+      try { window.CourseProgress.saveLastWatched('nlp-practitioner', m, l); } catch(_){}
+    }
+
+    // Sidebar active state
+    document.querySelectorAll('.lms-sb-mod').forEach(w => w.classList.remove('lms-sb-mod--open'));
+    const wrap = document.querySelector(`.lms-sb-mod[data-module="${m}"]`);
+    if (wrap) wrap.classList.add('lms-sb-mod--open');
+
+    // URL hash
+    const hash = `#m${m+1}l${l+1}`;
+    if (!skipPush && location.hash !== hash) history.pushState(null, '', hash);
+
+    // Reset to notes tab on each lesson load
+    activateTab('notes');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function refreshNavBtns(){
+    const prev = document.getElementById('plPrev');
+    const next = document.getElementById('plNext');
+    const hasPrev = currentModuleIndex > 0 || currentLessonIndex > 0;
+    const last = modules[modules.length-1];
+    const isLast = currentModuleIndex === modules.length-1 && currentLessonIndex === last.lessons.length-1;
+    prev.disabled = !hasPrev;
+    next.disabled = isLast;
+    prev.onclick = () => {
+      if (!hasPrev) return;
+      let m = currentModuleIndex, l = currentLessonIndex - 1;
+      if (l < 0){ m -= 1; l = modules[m].lessons.length - 1; }
+      selectLesson(m, l);
+    };
+    next.onclick = () => {
+      if (isLast) return;
+      let m = currentModuleIndex, l = currentLessonIndex + 1;
+      if (l >= modules[m].lessons.length){ m += 1; l = 0; }
+      selectLesson(m, l);
+    };
+  }
+
+  function refreshCompleteBtn(){
+    const btn = document.getElementById('plComplete');
+    const lbl = document.getElementById('plCompleteLabel');
+    const key = `${currentModuleIndex}-${currentLessonIndex}`;
+    const isDone = completedLessons.includes(key);
+    btn.classList.toggle('is-done', isDone);
+    lbl.textContent = isDone ? 'הושלם ✓' : 'סמן כהושלם';
+    btn.onclick = () => {
+      if (completedLessons.includes(key)){
+        completedLessons = completedLessons.filter(k => k !== key);
+      } else {
+        markLessonCompleted(currentModuleIndex, currentLessonIndex);
+        return;
+      }
+      localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+      refreshCompleteBtn();
+      renderProgress();
+      renderSidebarNav(document.getElementById('sbSearch').value);
+    };
+  }
+
+  function markLessonCompleted(m, l){
+    const key = `${m}-${l}`;
+    if (!completedLessons.includes(key)){
+      completedLessons.push(key);
+      localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+    }
+    if (window.CourseProgress && !devBypass){
+      try { window.CourseProgress.markVideoWatched(modules[m].lessons[l].id, 'nlp-practitioner', l + 1); } catch(_){}
+    }
+    if (m === currentModuleIndex && l === currentLessonIndex) refreshCompleteBtn();
+    renderProgress();
+    renderSidebarNav(document.getElementById('sbSearch').value);
+  }
+
+  // ===== Tabs =====
+  function activateTab(name){
+    document.querySelectorAll('.lms-tab').forEach(t => {
+      const isActive = t.dataset.tab === name;
+      t.classList.toggle('is-active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    document.querySelectorAll('.lms-tab-pane').forEach(p => {
+      p.classList.toggle('is-active', p.dataset.pane === name);
+    });
+  }
+  function setupTabs(){
+    document.querySelectorAll('.lms-tab').forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
+  }
+
+  // ===== Notes =====
+  let notesDebounce = null;
+  let notesLoadedKey = null;
+  function loadNotesForCurrent(){
+    const area = document.getElementById('notesArea');
+    const key = `notes_nlp_${modules[currentModuleIndex].lessons[currentLessonIndex].id}`;
+    notesLoadedKey = key;
+    area.value = localStorage.getItem(key) || '';
+    updateNotesWordCount();
+    setNotesStatus('idle');
+    if (window.UserNotes && supabaseClient && !devBypass){
+      window.UserNotes.get(modules[currentModuleIndex].lessons[currentLessonIndex].id)
+        .then(note => {
+          if (note && note.content && (note.content.length > area.value.length)){
+            area.value = note.content;
+            localStorage.setItem(key, note.content);
+            updateNotesWordCount();
+          }
+        }).catch(()=>{});
+    }
+  }
+  function updateNotesWordCount(){
+    const v = document.getElementById('notesArea').value || '';
+    const words = v.trim() ? v.trim().split(/\s+/).length : 0;
+    document.getElementById('notesWordCount').textContent = String(words);
+  }
+  function setNotesStatus(state){
+    const el = document.getElementById('notesStatus');
+    el.classList.remove('is-saving','is-saved','is-error');
+    if (state === 'saving'){ el.classList.add('is-saving'); el.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> שומר…'; }
+    else if (state === 'saved'){ el.classList.add('is-saved'); el.innerHTML = '<i class="fa-solid fa-check"></i> נשמר'; }
+    else if (state === 'error'){ el.classList.add('is-error'); el.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> שגיאה — שמור מקומית'; }
+    else { el.innerHTML = '<i class="fa-regular fa-circle"></i> מוכן'; }
+  }
+  async function saveNotes(){
+    if (currentModuleIndex < 0) return;
+    const lesson = modules[currentModuleIndex].lessons[currentLessonIndex];
+    const mod = modules[currentModuleIndex];
+    const content = document.getElementById('notesArea').value;
+    const key = `notes_nlp_${lesson.id}`;
+    localStorage.setItem(key, content);
+    updateNotesWordCount();
+    if (!window.UserNotes || !supabaseClient || devBypass){ setNotesStatus('saved'); return; }
+    setNotesStatus('saving');
+    try {
+      await window.UserNotes.save(lesson.id, content, {
+        courseType: 'nlp-practitioner',
+        lessonTitle: lesson.title,
+        moduleTitle: mod.title,
+        lessonNumber: currentLessonIndex + 1
+      });
+      setNotesStatus('saved');
+    } catch(e){ setNotesStatus('error'); }
+  }
+  function setupNotes(){
+    const area = document.getElementById('notesArea');
+    area.addEventListener('input', () => {
+      updateNotesWordCount();
+      if (notesDebounce) clearTimeout(notesDebounce);
+      notesDebounce = setTimeout(saveNotes, 800);
+    });
+  }
+
+  // ===== AI Mentor =====
+  let aiHistory = [];
+  let aiBusy = false;
+  let aiRemaining = 200;
+  function resetAiChat(){
+    aiHistory = [];
+    const msgs = document.getElementById('aiMsgs');
+    msgs.innerHTML = `
+      <div class="lms-ai-empty" id="aiEmpty">
+        <div class="lms-ai-empty__icon"><i class="fa-solid fa-comments"></i></div>
+        <h3>שאלו אותי על השיעור הזה</h3>
+        <p>אני מכיר את כל התכנים בקורס ויכול לעזור עם הסברים, דוגמאות מעשיות ותרגול. כתבו שאלה ונענה תוך כמה שניות.</p>
+      </div>`;
+  }
+  function appendAiMsg(role, text){
+    const msgs = document.getElementById('aiMsgs');
+    const empty = document.getElementById('aiEmpty');
+    if (empty) empty.remove();
+    const div = document.createElement('div');
+    div.className = `lms-ai-msg lms-ai-msg--${role}`;
+    const icon = role === 'user' ? 'fa-solid fa-user' : 'fa-solid fa-robot';
+    div.innerHTML = `<div class="lms-ai-msg__avatar"><i class="${icon}"></i></div><div class="lms-ai-msg__bubble">${escapeHtml(text)}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  function showTyping(){
+    const msgs = document.getElementById('aiMsgs');
+    const div = document.createElement('div');
+    div.className = 'lms-ai-msg lms-ai-msg--bot';
+    div.id = 'aiTyping';
+    div.innerHTML = `<div class="lms-ai-msg__avatar"><i class="fa-solid fa-robot"></i></div><div class="lms-ai-msg__bubble is-typing"><span></span><span></span><span></span></div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  function hideTyping(){
+    const t = document.getElementById('aiTyping');
+    if (t) t.remove();
+  }
+  async function getAiToken(){
+    if (devBypass || !supabaseClient) return null;
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session?.access_token) return null;
+      const expiresAt = session.expires_at || 0;
+      const nowSec = Math.floor(Date.now() / 1000);
+      if (expiresAt > 0 && expiresAt - nowSec < 60){
+        const { data: { session: r } } = await supabaseClient.auth.refreshSession();
+        return r?.access_token || session.access_token;
+      }
+      return session.access_token;
+    } catch(_){ return null; }
+  }
+  async function sendAi(message){
+    if (aiBusy || !message.trim()) return;
+    if (devBypass){ appendAiMsg('user', message); appendAiMsg('bot', '(מצב פיתוח — ה-AI לא פעיל. ההודעה שלך התקבלה אבל לא נשלחת לשרת.)'); return; }
+    aiBusy = true;
+    const sendBtn = document.getElementById('aiSendBtn');
+    const input = document.getElementById('aiInput');
+    sendBtn.disabled = true; input.disabled = true;
+    appendAiMsg('user', message);
+    aiHistory.push({ role: 'user', content: message });
+    showTyping();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
+    try {
+      const token = await getAiToken();
+      if (!token){ hideTyping(); appendAiMsg('bot', 'נראה שהחיבור נותק. רעננו את הדף.'); return; }
+      const mod = modules[currentModuleIndex];
+      const lesson = mod?.lessons[currentLessonIndex];
+      const url = `${window.SUPABASE_CONFIG.url}/functions/v1/ai-chat`;
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': window.SUPABASE_CONFIG.anonKey },
+        body: JSON.stringify({
+          message,
+          history: aiHistory.slice(-10),
+          lessonContext: { moduleIndex: currentModuleIndex, moduleTitle: mod?.title || '', lessonTitle: lesson?.title || '' }
+        }),
+        signal: controller.signal
+      });
+      hideTyping();
+      if (!r.ok && r.status !== 429){ appendAiMsg('bot', 'שגיאה בתקשורת עם המורה AI. נסו שוב.'); return; }
+      const data = await r.json();
+      if (data.rateLimited){ appendAiMsg('bot', 'הגעתם לכמות ההודעות היומית. ננסה שוב מחר!'); return; }
+      if (data.error){ appendAiMsg('bot', data.error); return; }
+      const reply = data.reply || 'לא הצלחתי לענות. נסו שוב.';
+      appendAiMsg('bot', reply);
+      aiHistory.push({ role: 'model', content: reply });
+      if (data.remaining !== undefined){
+        aiRemaining = data.remaining;
+        document.getElementById('aiRemaining').textContent = `${data.remaining}/200`;
+      }
+    } catch(err){
+      hideTyping();
+      appendAiMsg('bot', err.name === 'AbortError' ? 'התשובה לוקחת זמן רב מדי — רעננו ונסו שוב.' : 'שגיאה בתקשורת. נסו שוב.');
+    } finally {
+      clearTimeout(timeout);
+      aiBusy = false; sendBtn.disabled = false; input.disabled = false; input.focus();
+    }
+  }
+  function setupAi(){
+    const btn = document.getElementById('aiSendBtn');
+    const input = document.getElementById('aiInput');
+    const send = () => { const v = input.value.trim(); if (!v) return; input.value = ''; input.style.height='auto'; sendAi(v); };
+    btn.addEventListener('click', send);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(120, input.scrollHeight) + 'px';
+    });
+  }
+
+  // ===== Resources =====
+  function renderResources(){
+    if (currentModuleIndex < 0) return;
+    const mod = modules[currentModuleIndex];
+    const lesson = mod.lessons[currentLessonIndex];
+    const grid = document.getElementById('resGrid');
+    const items = [
+      { icon:'fa-solid fa-file-lines', t:'סיכום השיעור', s:'תקציר טקסטואלי + תובנות מרכזיות', href:`summaries/module${mod.id}-lesson${currentLessonIndex+1}.html`, gold:false },
+      { icon:'fa-solid fa-book',       t:'חוברת עבודה', s:'תרגילים פרקטיים להעמקה',                     href:`course-library.html#m${currentModuleIndex+1}l${currentLessonIndex+1}`, gold:true },
+      { icon:'fa-solid fa-circle-question', t:'שאלות נפוצות', s:'שאלות חוזרות + תשובות מרם',           href:'course-library.html#community', gold:false },
+      { icon:'fa-solid fa-graduation-cap', t:'תוכנית הכשרה', s:'מעוניינים להפוך לפרקטישנר מוסמך?',      href:'learning-master.html', gold:true }
+    ];
+    grid.innerHTML = items.map(i => `
+      <a class="lms-res-card${i.gold ? ' lms-res-card--gold' : ''}" href="${escapeHtml(i.href)}">
+        <span class="lms-res-card__icon"><i class="${i.icon}"></i></span>
+        <div class="lms-res-card__body">
+          <div class="lms-res-card__t">${escapeHtml(i.t)}</div>
+          <div class="lms-res-card__s">${escapeHtml(i.s)}</div>
+        </div>
+      </a>`).join('');
+  }
+  function setupGameBtn(){
+    window.gameBtnUpdater = () => {
+      const btn = document.getElementById('gameBtn');
+      if (!btn || currentModuleIndex < 0) return;
+      btn.href = `nlp-game.html?m=${currentModuleIndex+1}&l=${currentLessonIndex+1}`;
+    };
+  }
+
+  // ===== Hash routing =====
+  function handleHash(skipPush){
+    const m = location.hash.match(/^#m(\d+)l(\d+)$/);
+    if (m){
+      const mIdx = parseInt(m[1],10) - 1;
+      const lIdx = parseInt(m[2],10) - 1;
+      if (modules[mIdx] && modules[mIdx].lessons[lIdx]){
+        selectLesson(mIdx, lIdx, true);
+        return true;
+      }
+    }
+    showWelcome(true);
+    return false;
+  }
+
+  // ===== Wire lesson clicks (sidebar + welcome hero) =====
+  function setupLessonNav(){
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href^="course-library.html#m"]');
+      if (a){
+        const m = a.getAttribute('href').match(/#m(\d+)l(\d+)/);
+        if (m){
+          e.preventDefault();
+          const mIdx = parseInt(m[1],10) - 1;
+          const lIdx = parseInt(m[2],10) - 1;
+          if (modules[mIdx] && modules[mIdx].lessons[lIdx]){
+            selectLesson(mIdx, lIdx);
+          }
+        }
+      }
+    });
+    document.getElementById('plBack').addEventListener('click', () => showWelcome());
+    window.addEventListener('popstate', () => handleHash(true));
+  }
+
+  (async function boot(){
+    const ok = await authGate();
+    if (!ok) return;
+    renderAll();
+    setupSidebar();
+    setupMobileDrawer();
+    setupLogout();
+    setupFab();
+    setupTabs();
+    setupNotes();
+    setupAi();
+    setupGameBtn();
+    setupLessonNav();
+    hydrateProgress();
+    handleHash(true);
+  })();
+})();
+</script>
+</body>
+</html>

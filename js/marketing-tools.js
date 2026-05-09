@@ -238,7 +238,9 @@ function getConsentLevel() {
 }
 
 function hasUserConsented() {
-    return getConsentLevel() === 'all';
+    // Implicit consent: tracking allowed unless user actively chose 'essential' (opt-out).
+    // 'all' or null (no choice yet) → tracking ON. Only explicit 'essential' blocks.
+    return getConsentLevel() !== 'essential';
 }
 
 function setUserConsent(level) {
@@ -272,6 +274,8 @@ function injectGoogleAnalytics() {
 
 function injectMetaPixel() {
     if (MARKETING_CONFIG.META_PIXEL_ID === '123456789') return;
+    // Skip if pixel was already initialized inline in <head> (free-portal.html does this for early firing).
+    if (window.__pixelInitedEarly || (window.fbq && window.fbq.loaded)) return;
     !function(f,b,e,v,n,t,s) {
         if(f.fbq) return;
         n = f.fbq = function() { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
@@ -301,10 +305,10 @@ function createConsentBanner() {
     banner.setAttribute('role', 'dialog');
     banner.setAttribute('aria-label', 'עוגיות');
     banner.innerHTML = `
-        <span class="cc-text">האתר משתמש בעוגיות. <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cc-link">פרטים</a></span>
+        <span class="cc-text">האתר משתמש בעוגיות לשיפור החוויה ולמדידת ביצועים. <a href="${MARKETING_CONFIG.PRIVACY_POLICY_URL}" class="cc-link">מדיניות הפרטיות</a></span>
         <div class="cc-btns">
-            <button id="cookie-accept-all" class="cc-btn cc-yes">אישור</button>
-            <button id="cookie-essential-only" class="cc-btn cc-no">ללא מעקב</button>
+            <button id="cookie-accept-all" class="cc-btn cc-yes">הבנתי</button>
+            <button id="cookie-essential-only" class="cc-btn cc-no">ביטול מעקב</button>
         </div>
     `;
 
@@ -378,7 +382,11 @@ function createConsentBanner() {
         setUserConsent('essential');
         dismissBanner();
         if (window.PopupManager) window.PopupManager.dismiss('cookie_consent');
-        // No tracking initialized — essential cookies only
+        // Tell Meta to stop browser-side data collection from this point onward.
+        // Earlier PageView already fired — that's unavoidable, but no further events will be tracked.
+        if (window.fbq) {
+            try { fbq('consent', 'revoke'); } catch(e) {}
+        }
     });
 }
 
@@ -675,21 +683,29 @@ window.saveCapiBrowserData = async function (linkedTable, linkedId, email, event
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Register cookie consent with PopupManager if available
-    if (window.PopupManager && !getConsentLevel()) {
-        window.PopupManager.register('cookie_consent', {
-            priority: 1,
-            category: 'critical',
-            show: function () { createConsentBanner(); },
-            hide: function () {
-                var b = document.getElementById('cookie-consent-banner');
-                if (b) { b.classList.add('hiding'); setTimeout(function() { b.remove(); }, 300); }
-            }
-        });
-        window.PopupManager.request('cookie_consent');
-    } else {
-        createConsentBanner();
-    }
+    // 1) Initialize tracking FIRST. With implicit consent, this fires for everyone
+    //    except explicit opt-outs. injectMetaPixel() is idempotent — skipped if
+    //    free-portal.html (or another page) already initialized the pixel inline in <head>.
     initializeTracking();
+
+    // 2) Show informational banner once if user hasn't made a choice yet.
+    //    The banner is informational — it does NOT gate tracking. Tracking is already on.
+    if (!getConsentLevel()) {
+        if (window.PopupManager) {
+            window.PopupManager.register('cookie_consent', {
+                priority: 1,
+                category: 'critical',
+                show: function () { createConsentBanner(); },
+                hide: function () {
+                    var b = document.getElementById('cookie-consent-banner');
+                    if (b) { b.classList.add('hiding'); setTimeout(function() { b.remove(); }, 300); }
+                }
+            });
+            window.PopupManager.request('cookie_consent');
+        } else {
+            createConsentBanner();
+        }
+    }
+
     createCookieSettingsButton();
 });

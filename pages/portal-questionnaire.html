@@ -29,7 +29,7 @@
                 }
                 // If questionnaire already filled — skip to course library
                 if (localStorage.getItem('portal_questionnaire_done')) {
-                    window.location.replace('course-library.html');
+                    window.location.replace('course-library-v2.html');
                     return;
                 }
                 // Double-check in DB (localStorage may have been cleared)
@@ -40,7 +40,7 @@
                     .limit(1);
                 if (qData && qData.length > 0) {
                     localStorage.setItem('portal_questionnaire_done', 'true');
-                    window.location.replace('course-library.html');
+                    window.location.replace('course-library-v2.html');
                     return;
                 }
             } catch (e) {
@@ -693,7 +693,7 @@
             </div>
             <h2>תודה רבה!</h2>
             <p>קיבלנו את התשובות שלך — עכשיו אפשר להתחיל את מסע הלמידה!<br>הפורטל המלא מחכה לך בפנים.</p>
-            <a href="course-library.html?completed=1" class="q-success-cta">
+            <a href="course-library-v2.html?completed=1" class="q-success-cta">
                 <i class="fa-solid fa-play"></i>
                 כניסה לפורטל הלמידה
             </a>
@@ -990,7 +990,7 @@
 
         // Auto-redirect after 4 seconds — with ?completed=1 for Meta Custom Conversion tracking
         setTimeout(() => {
-            window.location.href = 'course-library.html?completed=1';
+            window.location.href = 'course-library-v2.html?completed=1';
         }, 4000);
     }
 

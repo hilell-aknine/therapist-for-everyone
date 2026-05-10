@@ -1063,9 +1063,11 @@
     // ============================================================================
 
     const Referrals = {
-        /** Get referral link for the current user */
+        /** Get referral link for the current user.
+         *  Points at the marketing landing page (free-portal.html) — non-authenticated
+         *  visitors see the offer; authenticated visitors auto-redirect into the portal. */
         getLink(userId) {
-            return `https://www.therapist-home.com/pages/course-library.html?ref=${userId}`;
+            return `https://www.therapist-home.com/pages/free-portal.html?ref=${userId}`;
         },
 
         /** Get current user's referral count (last 30 days) */

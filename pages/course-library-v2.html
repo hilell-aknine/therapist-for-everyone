@@ -1813,12 +1813,12 @@
     const lesson = mod.lessons[currentLessonIndex];
     const grid = document.getElementById('resGrid');
     const items = [
-      { icon:'fa-solid fa-file-lines', t:'סיכום השיעור', s:'תקציר טקסטואלי + תובנות מרכזיות', href:`summaries/module${mod.id}-lesson${currentLessonIndex+1}.html`, gold:false },
-      { icon:'fa-solid fa-handshake', t:'תוכנית השותפים', s:'הזמינו חברים וקבלו זיכוי',                  href:'#ambassador', gold:false },
-      { icon:'fa-solid fa-graduation-cap', t:'תוכנית הכשרה', s:'מעוניינים להפוך לפרקטישנר מוסמך?',      href:'learning-master.html', gold:true }
+      { icon:'fa-solid fa-book-open', t:'חוברת NLP Practitioner', s:'7 מודולים, 50 פרקים — טכניקות, תרגולים ועקרונות',  href:'../docs/booklets/nlp-booklet-branded.pdf', gold:true,  blank:true },
+      { icon:'fa-solid fa-file-lines', t:'סיכום המודול',          s:`סיכום ותובנות מרכזיות ממודול ${mod.id}`,                  href:`summaries/lesson-${mod.id}.html`,            gold:false },
+      { icon:'fa-solid fa-list-check', t:'כל הסיכומים',            s:'מבט-על על כל 7 המודולים בקורס',                          href:'summaries/index.html',                        gold:false }
     ];
     grid.innerHTML = items.map(i => `
-      <a class="lms-res-card${i.gold ? ' lms-res-card--gold' : ''}" href="${escapeHtml(i.href)}">
+      <a class="lms-res-card${i.gold ? ' lms-res-card--gold' : ''}" href="${escapeHtml(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ''}>
         <span class="lms-res-card__icon"><i class="${i.icon}"></i></span>
         <div class="lms-res-card__body">
           <div class="lms-res-card__t">${escapeHtml(i.t)}</div>

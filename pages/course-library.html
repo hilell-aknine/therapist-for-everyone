@@ -6215,14 +6215,14 @@
                     priority: 2,
                     category: 'critical',
                     targetAudience: 'unauthenticated',
-                    show: function () { openModal(false); },
+                    show: function () { _activeAuthPopupId = 'auth_modal'; openModal(false); },
                     hide: function () { closeModal(); }
                 });
                 window.PopupManager.register('auth_wall', {
                     priority: 2,
                     category: 'critical',
                     targetAudience: 'unauthenticated',
-                    show: function () { openModal(true); },
+                    show: function () { _activeAuthPopupId = 'auth_wall'; openModal(true); },
                     hide: function () { closeModal(); }
                 });
                 window.PopupManager.register('ai_questionnaire', {
@@ -7355,7 +7355,8 @@
             const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
             const wallThreshold = Math.ceil(totalLessons * 0.5); // 26 out of 51
             if (completedLessons.length >= wallThreshold && !isAuthenticated) {
-                openModal(true);
+                if (window.PopupManager) window.PopupManager.request('auth_wall');
+                else openModal(true);
                 return;
             }
 
@@ -7783,7 +7784,8 @@
                 const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
                 const wallThreshold = Math.ceil(totalLessons * 0.5);
                 if (completedLessons.length >= wallThreshold && !isAuthenticated) {
-                    openModal(true);
+                    if (window.PopupManager) window.PopupManager.request('auth_wall');
+                    else openModal(true);
                 }
 
                 // Share prompt after 3rd lesson (via PopupManager)
@@ -8009,7 +8011,8 @@
         function switchTab(tabName) {
             // Gate premium tabs for guests
             if (PREMIUM_TABS.includes(tabName) && !isAuthenticated) {
-                openModal();
+                if (window.PopupManager) window.PopupManager.request('auth_modal');
+                else openModal();
                 return;
             }
 
@@ -8031,7 +8034,8 @@
         // ===== Handle Resource Click =====
         function handleResource(type) {
             if (!isAuthenticated) {
-                openModal();
+                if (window.PopupManager) window.PopupManager.request('auth_modal');
+                else openModal();
             } else {
                 if (type === 'workbook') {
                     window.open('../docs/booklets/nlp-booklet-branded.pdf', '_blank');
@@ -8044,7 +8048,8 @@
         // ===== Handle Locked Action =====
         function handleLockedAction(type) {
             if (!isAuthenticated) {
-                openModal();
+                if (window.PopupManager) window.PopupManager.request('auth_modal');
+                else openModal();
             } else if (type === 'ai') {
                 // Already authenticated — switch to AI tab
                 switchTab('ai');
@@ -8112,8 +8117,11 @@
             }
         });
 
-        // Alias for login button
-        function openAuthModal() { openModal(false); }
+        // Alias for login button — route through PopupManager so the 'shown' event is logged
+        function openAuthModal() {
+            if (window.PopupManager) window.PopupManager.request('auth_modal');
+            else openModal(false);
+        }
 
         // ===== Course Switcher Dropdown =====
         (function() {
@@ -8302,6 +8310,10 @@
         }
 
         // ===== Modal =====
+        // Tracks which auth popup is currently shown ('auth_modal' or 'auth_wall')
+        // so closeModal() dismisses the right one (was: dismissed BOTH on every close = phantom events)
+        let _activeAuthPopupId = null;
+
         function openModal(isWall = false) {
             const modal = document.getElementById('registrationModal');
             const subtitle = modal.querySelector('.subtitle');
@@ -8320,9 +8332,11 @@
         function closeModal() {
             document.getElementById('registrationModal').classList.remove('active');
             hideAuthError();
-            if (window.PopupManager) {
-                window.PopupManager.dismiss('auth_modal');
-                window.PopupManager.dismiss('auth_wall');
+            // Dismiss only the popup that was actually shown (was: dismissed both, creating phantom events)
+            if (window.PopupManager && _activeAuthPopupId) {
+                const idToDismiss = _activeAuthPopupId;
+                _activeAuthPopupId = null;
+                window.PopupManager.dismiss(idToDismiss);
             }
         }
 

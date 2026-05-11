@@ -473,6 +473,89 @@
             box-shadow: 0 6px 24px rgba(212, 175, 55, 0.45);
         }
 
+        /* ── Reminder opt-in block ── */
+        .q-consent {
+            display: none;
+            margin: 1.8rem auto 0;
+            max-width: 420px;
+            background: rgba(0, 59, 70, 0.06);
+            border: 1px solid rgba(0, 59, 70, 0.15);
+            border-radius: 14px;
+            padding: 1.4rem 1.6rem 1.2rem;
+            text-align: center;
+        }
+        .q-consent.visible { display: block; }
+        .q-consent-stat {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-bottom: 0.7rem;
+        }
+        .q-consent-stat__num {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--brand-gold);
+            line-height: 1;
+        }
+        .q-consent-stat__label {
+            font-size: 0.95rem;
+            color: var(--brand-primary);
+            font-weight: 600;
+        }
+        .q-consent-body {
+            font-size: 0.88rem;
+            color: var(--brand-text-soft);
+            line-height: 1.65;
+            margin: 0 0 1.1rem;
+        }
+        .q-consent-body strong { color: var(--brand-primary); }
+        .q-consent-toggle {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .q-consent-btn {
+            flex: 1;
+            max-width: 160px;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            border: 1.5px solid var(--brand-primary);
+            background: transparent;
+            color: var(--brand-primary);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            font-family: 'Heebo', sans-serif;
+        }
+        .q-consent-btn.active {
+            background: var(--brand-primary);
+            color: #fff;
+        }
+        .q-consent-enter {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
+            color: var(--brand-primary);
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Heebo', sans-serif;
+        }
+        .q-consent-enter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 22px rgba(212, 175, 55, 0.45);
+        }
+
         /* Spinner */
         .q-spinner {
             display: inline-block;
@@ -693,10 +776,30 @@
             </div>
             <h2>תודה רבה!</h2>
             <p>קיבלנו את התשובות שלך — עכשיו אפשר להתחיל את מסע הלמידה!<br>הפורטל המלא מחכה לך בפנים.</p>
-            <a href="course-library-v2.html?completed=1" class="q-success-cta">
-                <i class="fa-solid fa-play"></i>
-                כניסה לפורטל הלמידה
-            </a>
+
+            <!-- Reminder opt-in — shown after successful questionnaire INSERT -->
+            <div class="q-consent" id="remindersConsent">
+                <div class="q-consent-stat">
+                    <span class="q-consent-stat__num">10%</span>
+                    <span class="q-consent-stat__label">בלבד מסיימים קורס</span>
+                </div>
+                <p class="q-consent-body">
+                    ראינו שהדבר שעוזר ביותר ללומדים לסיים הוא <strong>תזכורת שבועית אחת</strong> —
+                    מותאמת לסיבה שלך ללמוד. נשלח לך הודעה קצרה פעם בשבוע. ניתן לבטל בכל עת.
+                </p>
+                <div class="q-consent-toggle">
+                    <button id="consentYes" class="q-consent-btn active" aria-pressed="true">
+                        כן, שלחו לי 📲
+                    </button>
+                    <button id="consentNo" class="q-consent-btn" aria-pressed="false">
+                        לא תודה
+                    </button>
+                </div>
+                <button id="enterPortalBtn" class="q-consent-enter">
+                    <i class="fa-solid fa-play"></i>
+                    כניסה לפורטל הלמידה
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -970,7 +1073,7 @@
                 console.warn('CAPI dispatch error:', capiErr);
             }
 
-            showSuccess();
+            showSuccess(insertedQ?.id);
 
         } catch (err) {
             console.error('Submit error:', err);
@@ -980,7 +1083,7 @@
         }
     }
 
-    function showSuccess() {
+    function showSuccess(questionnaireId) {
         form.style.display = 'none';
         navButtons.style.display = 'none';
         progressWrap.style.display = 'none';
@@ -990,10 +1093,45 @@
         // Note: CompleteRegistration + QualifiedLead are fired in submitForm() with a
         // shared event_id so browser pixel and Meta CAPI deduplicate properly.
 
-        // Auto-redirect after 4 seconds — with ?completed=1 for Meta Custom Conversion tracking
-        setTimeout(() => {
+        // Show reminder opt-in and let user choose before redirecting.
+        // No auto-redirect — portal entry is gated on the "כניסה לפורטל" button.
+        const consentBlock = document.getElementById('remindersConsent');
+        if (!consentBlock) {
             window.location.href = 'course-library-v2.html?completed=1';
-        }, 4000);
+            return;
+        }
+
+        consentBlock.classList.add('visible');
+        let _consentChoice = true; // default: yes
+
+        const btnYes = document.getElementById('consentYes');
+        const btnNo  = document.getElementById('consentNo');
+        const btnEnter = document.getElementById('enterPortalBtn');
+
+        function setChoice(val) {
+            _consentChoice = val;
+            btnYes.setAttribute('aria-pressed', val ? 'true' : 'false');
+            btnYes.classList.toggle('active', val);
+            btnNo.setAttribute('aria-pressed', val ? 'false' : 'true');
+            btnNo.classList.toggle('active', !val);
+        }
+
+        btnYes.addEventListener('click', () => setChoice(true));
+        btnNo.addEventListener('click', () => setChoice(false));
+
+        btnEnter.addEventListener('click', async () => {
+            btnEnter.disabled = true;
+            btnEnter.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            if (questionnaireId) {
+                try {
+                    await supabaseClient
+                        .from('portal_questionnaires')
+                        .update({ whatsapp_reminders_consent: _consentChoice })
+                        .eq('id', questionnaireId);
+                } catch (e) { /* non-critical — don't block portal entry on save failure */ }
+            }
+            window.location.href = 'course-library-v2.html?completed=1';
+        });
     }
 
     // Enter key = next step (except in textareas)

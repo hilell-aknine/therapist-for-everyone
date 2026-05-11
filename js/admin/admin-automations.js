@@ -92,6 +92,23 @@ const RULE_TEMPLATES = [
         ]},
         message: 'היי {{first_name}} 👋\nראיתי שנרשמת לפורטל לפני זמן קצר אבל עדיין לא מילאת את השאלון הקצר.\nזה לוקח שתי דקות ועוזר לנו להתאים לך בדיוק את התוכן שיעניין אותך:\nhttps://www.therapist-home.com/pages/portal-questionnaire.html',
     },
+    {
+        name: 'תזכורת שבועית מותאמת אישית (AI)',
+        description: 'שלישי 10:00 — AI כותב הודעה ייחודית לכל לומד לפי החזון שרשם בשאלון. רק למי שהסכים לתזכורות.',
+        cron: '0 10 * * 2',
+        cron_label: 'כל שלישי ב-10:00',
+        ai_personalized: true,
+        cooldown_days: 6,
+        daily_cap: 200,
+        filter: { all: [
+            { field: 'role',              op: '=',       value: 'student_lead' },
+            { field: 'reminders_consent', op: 'is_true'                        },
+            { field: 'whatsapp_opt_out',  op: 'is_false'                       },
+            { field: 'lessons_completed', op: '<',       value: 51             },
+            { field: 'has_phone',         op: 'is_true'                        },
+        ]},
+        message: 'היי {{first_name}} 👋\nהמשך ללמוד NLP — {{lessons_completed}} שיעורים מאחורייך!\nhttps://www.therapist-home.com/pages/course-library-v2.html\nלביטול ענה/י "הסר"',
+    },
 ];
 
 const CRON_PRESETS = [
@@ -539,7 +556,8 @@ function readEditorIntoState() {
     const customVal = document.getElementById('auto-cron-custom').value.trim();
     r.trigger_config = { cron: presetSel === '__custom__' ? customVal : presetSel };
 
-    r.action_config = { message_template: document.getElementById('auto-edit-message').value };
+    // Preserve non-UI fields like ai_personalized that don't have a form control
+    r.action_config = { ...(r.action_config || {}), message_template: document.getElementById('auto-edit-message').value };
     r.dry_run = document.getElementById('auto-dry-run').checked;
     r.daily_cap = parseInt(document.getElementById('auto-daily-cap').value, 10) || 100;
     r.cooldown_days = parseInt(document.getElementById('auto-cooldown').value, 10) || 9999;
@@ -923,9 +941,9 @@ function useAutomationTemplate(idx) {
         trigger_config: { cron: t.cron },
         audience_filter: t.filter,
         action_type: 'whatsapp',
-        action_config: { message_template: t.message },
-        cooldown_days: 9999,
-        daily_cap: 100,
+        action_config: { message_template: t.message, ...(t.ai_personalized ? { ai_personalized: true, fallback_template: t.message } : {}) },
+        cooldown_days: t.cooldown_days || 9999,
+        daily_cap: t.daily_cap || 100,
     };
     renderAutomationEditor();
     document.getElementById('automation-editor-modal').classList.add('active');

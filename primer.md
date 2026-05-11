@@ -1,9 +1,76 @@
 # Primer — Beit V'Metaplim
-> Last updated: 2026-05-09 by Claude Code (v2 portal consolidation — ambassador + basic master ported into v2, community dropped, free-portal/questionnaire redirect switched to v2 — deployed `c435f9b`)
+> Last updated: 2026-05-11 by Claude Code (WhatsApp reminder opt-in system — migration 20260511180000, portal-questionnaire.html consent UI, automation-engine.js AI personalization + opt-out, CRM bot optout handler, admin template. Awaiting git push + fly deploy approval.)
+
+## Last task completed (2026-05-11 #4): WhatsApp reminder opt-in system
+- **Migration** `20260511180000` — 2 עמודות חדשות: `portal_questionnaires.whatsapp_reminders_consent` (NULL/TRUE/FALSE) ו-`profiles.whatsapp_opt_out` (BOOLEAN). כבר הועלתה ל-Supabase.
+- **Frontend** `pages/portal-questionnaire.html` — מסך ההצלחה עוצר את ה-auto-redirect (היה 4 שניות). מציג בלוק "10% בלבד מסיימים קורס" עם "כן, שלחו לי" (ברירת מחדל) / "לא תודה". לחיצה על "כניסה לפורטל" שומרת consent ב-DB ורק אז מעבירה.
+- **CRM Bot** `src/services/automation-engine.js` — buildCandidates מביא `why_nlp + whatsapp_reminders_consent` מ-portal_questionnaires ו-`whatsapp_opt_out` מ-profiles. FIELD_REGISTRY קיבל 3 שדות חדשים. `generatePersonalizedMessage()` קוראת Groq עם context של `vision_one_year + motivation_tip + main_challenge` לכל מועמד. executeRule מדלג על opted-out ומשתמש ב-AI אם `action_config.ai_personalized = true`.
+- **CRM Bot** `src/intent.js` + `src/handlers/optout.js` + `src/router.js` — intent חדש `whatsapp_optout` לזיהוי "הסר" מלומדים. Handler מעדכן `profiles.whatsapp_opt_out = TRUE`. "חזרה" מאפס. מחובר לראוטר.
+- **Admin** `js/admin/admin-automations.js` — תבנית חדשה "תזכורת שבועית מותאמת אישית (AI)" עם `ai_personalized: true`, cron שלישי 10:00, פילטר `reminders_consent is_true + whatsapp_opt_out is_false`. תוקן `readEditorIntoState()` לשמור `ai_personalized` בעת עריכת rule.
+- **טרם deployed** — ממתין לאישור Hillel.
+
+## Last task completed (2026-05-11 #3, 09:25): Popup data-integrity fix
+- **Trigger.** Hillel asked to verify popups are working and appearing smartly. 3 parallel Explore agents mapped the system: 8 registered popups, robust admin dashboard, A/B infrastructure unused.
+- **9 diagnostic SQL queries** ran via Claude Chrome extension against `popup_events` (30-day window). Results:
+  - Only 2 popups actually firing in production: `cookie_consent` (570 impressions) and `share_prompt` (142 impressions, 85% dismiss rate — UX problem).
+  - 3 popups DEAD: `auth_wall`, `auth_modal`, `video_toast` — all show 0 impressions but `auth_modal`/`auth_wall` had 52 dismisses each (impossible).
+  - `ai_questionnaire`: 153 shown, 0 clicks, 57% dismiss (broken CTA or bad copy).
+- **Root cause — two bugs in `pages/course-library.html`.** (1) `closeModal()` lines 8320-8327 called `PopupManager.dismiss('auth_modal')` AND `PopupManager.dismiss('auth_wall')` on every close → double-counted. (2) 6 direct `openModal()`/`openModal(true)` call sites bypassed `PopupManager.request()` → no `shown` events ever logged.
+- **Fix (`697089d`).** Added `_activeAuthPopupId` tracking variable. Updated 2 register show() callbacks to set it. Updated `closeModal()` to dismiss only the active popup (sets to null first to prevent re-entry on hide-callback). Wrapped 6 direct openModal call sites with `if (window.PopupManager) request() else openModal()` fallback pattern. Sites: selectLesson paywall (7358), markLessonCompleted paywall (7786), switchTab premium gate (8012), handleResource (8034), handleLockedAction (8047), openAuthModal alias (8116).
+- **Impact (verify 24-48h).** shown_30d for auth popups climbs from 0 to real numbers. Dismissed counts halve. Admin dashboard analytics become trustworthy.
+- **Out of scope (per Hillel's explicit "א" choice — fix counting first, optimize later).** share_prompt 85% dismiss, ai_questionnaire 0% CTR, dead popups investigation, A/B variant experiments, legacy modals migration.
+
+## Last task completed (2026-05-11 #2): UTM persistence fix end-to-end
+- **Trigger.** Morning ads report at 08:00 said "Meta dיווחה 10 lid | 0 attributed in CRM" — Hillel saw a sustained mismatch and said "אסור להשאיר דבר כזה". Investigation revealed Meta IS appending UTM correctly; the leak was 100% client-side in beit-vmetaplim.
+- **Root cause.** `marketing-tools.js:200` `window.getUtmData()` read from legacy `localStorage('utm_data')` — written once on first signal, never refreshed. Users who landed organic first and later clicked a Meta ad got their UTM stripped at form INSERT time. Same pattern in 6 separate INSERT paths: patient-step4, therapist-step4, registration (x2), supabase-client.ensureProfile, portal-questionnaire.
+- **Secondary leak (patient-flow only).** `js/patient-flow.js:352` `mirrorData` for `contact_requests` was built without UTM fields. Edge Function `submit-lead` did have `backfillUtmFromAttribution()` but the schema needs to exist on the client payload first.
+- **Tertiary leak.** `js/patient-flow.js:382` `insertPatientRecord` (authenticated re-register path) did direct Supabase INSERT, bypassing the Edge Function and never capturing UTM.
+- **Fix (`6e50367`).**
+  - `js/marketing-tools.js` — rewrote `getUtmData()` to read `attribution_last_touch` first (refreshed every visit), fall back to legacy `utm_data` with 30-day TTL. Single change auto-fixes the 6 call sites.
+  - `js/patient-flow.js` — added `...utm` spread to `patientData` + `mirrorData` in `insertContactRequest`; added `utm` to `patientData` in `insertPatientRecord`.
+  - `pages/portal-questionnaire.html` — comment-only update reflecting the new behavior.
+- **Verification path.** Tomorrow's 08:00 daily ads report should show `meta_paid > 0` in the CRM breakdown (was 0 today). The `compute_meta_crm_gap` 3-day watchdog in `daily_health.py` will track recovery — gap was 100% on 5/10, should drop below 50% within 1-3 days as new leads come in via fixed paths.
+- **Out-of-scope (acknowledged gaps).** iOS in-app browser still strips UTM on ~30% of Meta-paid traffic — that's a Meta-side limitation, fbclid still passes through and ends up in `lead_attribution` for partial recovery. Cookie-cleared users still lose attribution.
+
+## Prior task completed (2026-05-11 #1): Questionnaire reminder audit + preventive fix
+- **Context preserved below — original entry from before the UTM fix:** audit of all automations after a lead complained about a wrong "didn't fill questionnaire" reminder — fixed source templates in `admin-automations.js` to require `role=student_lead`, added 2 SQL helpers under `sql/`, deployed `22329ba`. Audit verified ZERO leads were actually affected — the live rule in production already had the correct filter; the fix is preventive for future rules created from the templates.
+
+## Last task completed (2026-05-11): Questionnaire reminder audit + preventive fix
+- **Trigger.** A lead complained to Hillel that she received an automated WhatsApp saying "didn't fill the questionnaire" — but she never had a questionnaire. Concern was the reminder was being mis-targeted.
+- **Audit (5 parallel Explore agents).** Mapped the full automation ecosystem: 40+ active cron handlers in CRM bot (not 3 as CLAUDE.md said — those 3 are `subscription_*` only), 2 pg_cron jobs in Supabase (Meta-related), 5 Windows Scheduled Tasks, 8 Edge Functions. Found the suspect templates in `js/admin/admin-automations.js:65-89` — two reminder rules filtered only on `filled_questionnaire = false`, no positive check that the user is actually a portal registrant.
+- **Root cause analysis.** Engine's candidate pool comes from `profiles` table only (`crm-bot/src/services/automation-engine.js:117,212`). `role` field comes from `profiles.role`. A `student_lead` is the exact state for "registered to portal, hasn't filled questionnaire" — that's the right positive filter. Adding `role = 'student_lead'` to the filter excludes anyone in `profiles` without that role (admins, paid customers, or `null`/empty for orphan profiles).
+- **Fix (`22329ba`).** Added `{ field: 'role', op: '=', value: 'student_lead' }` to both reminder templates in `js/admin/admin-automations.js`. Created 2 SQL helpers under `sql/`: `fix_questionnaire_automation_audience.sql` (idempotent runtime UPDATE on `automation_rules.audience_filter` if the rules exist live) + `affected_leads_questionnaire_bug.sql` (audit query joining `automation_runs` × `profiles` to identify any leads with role ≠ `student_lead` who got the message).
+- **Verification — Hillel ran the SQL via Claude Chrome extension.**
+  1. Bad rule "מי שלא מילא שאלון פורטל" (daily 11AM) doesn't exist in `automation_rules` at all — never created from template.
+  2. Bad rule "תזכורת 30 דק׳ אחרי הרשמה למי שלא מילא שאלון" exists AND already had `role=student_lead` filter (someone fixed it before; not in git history I could find).
+  3. 36 sent runs in last 30 days, ALL with `role=student_lead`. **0 AFFECTED.**
+- **So why did the lead complain?** Not a targeting bug. Most likely UX: `portal-questionnaire.html` requires authentication; an unauthenticated `student_lead` clicking the link gets the login screen and perceives "no questionnaire". Message text also doesn't identify the sender or registration date — feels like spam.
+- **Out of scope (deferred to future sessions, per Hillel's explicit choice "רק הבאג הדחוף").**
+  - 40+ CRM bot automations audit — many fire daily/4×daily WhatsApp messages (birthday_greeting, satisfaction_survey, payment_reminders, post_treatment, etc.). Hillel asked for a recommendation table next session.
+  - **NightWorkSystem failing every night** — schtasks `NightWorkSystem` (02:00) exits with code 255. Bat file path or PATH issue.
+  - **Role escalation in crm-bot** `src/config.js:48,80` — any unknown phone defaults to `role='admin'`. Documented in CLAUDE.md, not fixed.
+  - Improve reminder message wording — add "צוות בית המטפלים" sender, registration date, opt-out line.
 
 ## Current State
 - **Status:** Active. course-library-v2.html is now the primary portal end-to-end: ambassador + master + lesson player + tabs + notes + AI chat all in one file. Free-portal.html and portal-questionnaire.html now redirect logged-in users to v2 (was: old course-library.html). Old course-library.html intentionally retained as fallback for existing bookmarks/email links — slated for decommission in 7-14 days once v2 is verified against real users. Free-portal paid-traffic attribution restored earlier today (Meta Pixel inline in head, implicit-consent model).
-- **Last task completed (2026-05-09):** v2 portal consolidation (`c435f9b`).
+- **Last task completed (2026-05-10):** Fixed two dead `learning-master.html` references in `course-library-v2.html` (`e1290b8`).
+  - **Symptom.** Hillel reported clicking "פרטים על תוכנית הכשרה" from the v2 portal → page broke. First screenshot was ambiguous (couldn't tell which UI element was the source). Second screenshot included DevTools console open showing `404 Not Found` on `/pages/learning-master.html` — root cause identified.
+  - **Root cause.** The file `pages/learning-master.html` was deleted in commit `dd61d29` ("remove unused pages: patient/therapist dashboards, catalog, learning-master") but two references in `course-library-v2.html` were never updated:
+    1. Line 785 — header CTA button "תוכנית ההכשרה" (`<a class="lms-hd__cta-2" href="learning-master.html">`).
+    2. Line 1978 — `showMasterView()` non-paying-customer redirect (`window.location.href = 'learning-master.html';`).
+  - **Fix.** Both replaced with `training.html` — the public training landing page that already exists, has the "השאירו פרטים" form, and was the same target the OLD `course-library.html` used (line 4281 there: `<a href="training.html" class="header-training-cta">`). One commit, 3 lines changed (3 insertions / 3 deletions).
+  - **Deploy.** `e1290b8` → master → Vercel. Verified live ~30s after push: production HTML now shows `href="training.html"` instead of `learning-master.html`.
+  - **Other dead `learning-master.html` references still in repo (NOT fixed — out of scope for this turn).** Hillel asked only about what he clicked. The remaining occurrences are either passive (sitemap/schema/admin dropdown) or low-traffic:
+    - `pages/learning-booklets.html:165` — visible link in nav.
+    - `sitemap.xml:88` — Google will get 404 on crawl.
+    - `pages/master-practice.html:463` + `pages/summaries-master/index.html:272` — schema.org breadcrumb `BreadcrumbList`.
+    - `pages/admin.html:2420` + `pages/admin_backup.html:2396,5865` — admin dropdown options for UTM destinations (not visitor-facing).
+    - `supabase/migrations/016_bot_utm_config.sql:48` — seed data for `bot_utm_configs` table; `backups/*/bot_utm_configs.json` files reflect this.
+    - `scripts/seo-batch-update.py:126,127,132,212,353` — SEO automation script.
+    - `CLAUDE.md:169` + `system_architecture.txt:211,1319` — docs claiming the file exists.
+    If a 404 complaint comes in from another path, batch-fix all of these in one pass: `learning-master.html` → `training.html` for HTML/sitemap/schema, and update the migration SQL + admin.html dropdown + docs.
+  - **Lesson learned.** When a cleanup commit deletes a file, run `grep -r "<filename>" .` over the repo before merging and either fix all references in the same commit or document the dangling pointers in primer.md as known-debt. The `dd61d29` commit didn't do this — Hillel hit one of those references 6 weeks later. Added to hindsight implicitly: cleanup commits need a "what links here" audit.
+- **Prior task completed (2026-05-09):** v2 portal consolidation (`c435f9b`).
   - **Trigger.** Hillel pushed back on the parallel-v2 architecture decision from 2026-05-01 ("היה אמור רק לקחת את העיצוב לא לבנות חדש לגמרי"). With zero paying customers yet, he asked for a single professional portal: v2 with ALL features, no data loss. Per his guidance: drop community, do basic master + ambassador now, then flip the redirect.
   - **Discovery — v2 was more complete than primer claimed.** Survey showed v2 already had the lesson player (YouTube iframe), 4 tabs (notes/AI/resources/game), `loadNotesForCurrent`, `resetAiChat`, `renderResources`, `markLessonCompleted` (45s timer), `selectLesson`, hash routing, mobile drawer, A11y. The 2026-05-01 entry that called v2 a "welcome dashboard MVP only" was outdated by 2026-05-07's UX/UI upgrade pass. So actual gap was ONLY: master section + ambassador + community (and community got dropped).
   - **Ambassador port — `course-library-v2.html`.** New in-page view, no deep-link to old portal. HTML: `.lms-amb` section after `.lms-player` with link card (referral URL pointing to `free-portal.html?ref=USER_ID`, copy button + WA share + copy-message buttons), `.lms-amb-stat` (gold-accented "X חברים שהזמנת"), `.lms-amb-loginNotice` for unauthenticated, leaderboard card with top 10 (medals + names + counts). CSS adds `body.view-ambassador` toggle that hides welcome/player/master + 100 lines of glass styling matching v2 design tokens. JS: `showAmbassadorView` (clears video state, sets body class, calls loadAmbassadorView, pushes `#ambassador` hash), `loadAmbassadorView` reads user via `supabaseClient.auth.getUser()` then `window.Referrals.getMyCount`/`getLeaderboard`. `setupAmbassador` wires copy/WA/msg buttons + back nav. Sidebar item: previously `href="course-library.html#ambassador"`, now `href="#ambassador" data-nav="ambassador"`. Partners CTA on welcome dashboard: same change.

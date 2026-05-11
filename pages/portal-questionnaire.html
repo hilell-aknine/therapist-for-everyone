@@ -879,7 +879,9 @@
             }
 
             // Insert questionnaire to dedicated table (with UTM data)
-            // This triggers enqueue_qualified_lead() which uses the saved event_id
+            // This triggers enqueue_qualified_lead() which uses the saved event_id.
+            // getUtmData() reads attribution_last_touch first (refreshed every visit),
+            // with utm_data 30-day fallback. See marketing-tools.js for details.
             const utm = window.getUtmData ? window.getUtmData() : {};
             const { data: insertedQ, error: insertErr } = await supabaseClient
                 .from('portal_questionnaires')

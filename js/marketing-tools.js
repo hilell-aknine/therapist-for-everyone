@@ -197,8 +197,36 @@ window.clearReferrerId = function () {
     try { localStorage.removeItem('referrer_data'); } catch (e) { /* silent */ }
 };
 
+// Read the user's latest UTM signal for INSERTs.
+//
+// Reads from `attribution_last_touch` first — that key is overwritten on every
+// visit by captureAttribution(), so it always reflects the most recent click that
+// carried a signal. Falls back to legacy `utm_data` (30-day TTL) only when no
+// last_touch exists yet.
+//
+// Pre-2026-05-11 this function read ONLY from `utm_data`, which was written once
+// per first-signal visit and never refreshed. Users who landed organic first and
+// later clicked a Meta ad had their ad UTM stripped on the form INSERT — those
+// leads showed up with NULL UTM in patients/therapists/contact_requests/profiles
+// despite the attribution layer capturing the signal correctly. Fixed by routing
+// through last_touch.
 window.getUtmData = function () {
+    const pick = (obj) => obj ? {
+        utm_source:   obj.utm_source   || null,
+        utm_medium:   obj.utm_medium   || null,
+        utm_campaign: obj.utm_campaign || null,
+        utm_content:  obj.utm_content  || null,
+        utm_term:     obj.utm_term     || null,
+    } : null;
+
     try {
+        let lastRaw = null;
+        try { lastRaw = JSON.parse(localStorage.getItem('attribution_last_touch') || 'null'); } catch (e) {}
+        if (lastRaw && (lastRaw.utm_source || lastRaw.utm_medium || lastRaw.utm_campaign)) {
+            return pick(lastRaw);
+        }
+
+        // Legacy fallback — only used when no attribution_last_touch has been recorded yet
         const raw = localStorage.getItem('utm_data');
         if (!raw) return {};
         const parsed = JSON.parse(raw);
@@ -207,13 +235,7 @@ window.getUtmData = function () {
             localStorage.removeItem('utm_data');
             return {};
         }
-        return {
-            utm_source: parsed.utm_source || null,
-            utm_medium: parsed.utm_medium || null,
-            utm_campaign: parsed.utm_campaign || null,
-            utm_content: parsed.utm_content || null,
-            utm_term: parsed.utm_term || null
-        };
+        return pick(parsed) || {};
     } catch (e) { return {}; }
 };
 

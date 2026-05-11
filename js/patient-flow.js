@@ -340,15 +340,22 @@
     // Insert anonymous patient via Turnstile-protected Edge Function
     // Single atomic call: patients + contact_requests (mirror) for CRM bot
     async function insertContactRequest(formData, turnstileToken) {
+        // getUtmData() reads attribution_last_touch (always fresh) with utm_data fallback.
+        // The Edge Function also runs backfillUtmFromAttribution as a second layer of defense.
+        const utm = window.getUtmData ? window.getUtmData() : {};
+
         const patientData = {
             full_name: formData.full_name,
             phone: formData.phone,
             email: formData.email || null,
             city: formData.city,
             main_concern: formData.main_concern,
-            status: 'new'
+            status: 'new',
+            ...utm
         };
 
+        // Mirror to contact_requests — utm must be on the payload, the Edge Function
+        // can backfill from attribution but only when the client sends the schema.
         const mirrorData = {
             name: formData.full_name,
             full_name: formData.full_name,
@@ -357,7 +364,8 @@
             city: formData.city,
             message: formData.main_concern,
             request_type: 'patient',
-            status: 'new'
+            status: 'new',
+            ...utm
         };
 
         await window.ContactRequests.submit(patientData, turnstileToken, 'patients', {
@@ -370,13 +378,19 @@
     }
 
     async function insertPatientRecord(userId, formData) {
+        // Authenticated path bypasses the Edge Function — capture UTM client-side so the
+        // patients row gets attribution. Without this, re-registering logged-in users
+        // create rows with NULL UTM regardless of where they came from.
+        const utm = window.getUtmData ? window.getUtmData() : {};
+
         const patientData = {
             full_name: formData.full_name,
             phone: formData.phone,
             email: null,
             city: formData.city,
             main_concern: formData.main_concern,
-            status: 'new'
+            status: 'new',
+            ...utm
         };
 
         const { error } = await window.supabaseClient

@@ -67,7 +67,10 @@ const RULE_TEMPLATES = [
         description: 'אחרי 3 ימים מההרשמה, מי שעדיין לא מילא את השאלון',
         cron: '0 11 * * *',
         cron_label: 'כל יום ב-11:00',
+        // role=student_lead נדרש כדי לא לשלוח ללידים שלא נרשמו לפורטל
+        // (טופס יצירת קשר/בקשת מטפל = profiles ללא role או role אחר → לא יקבלו)
         filter: { all: [
+            { field: 'role', op: '=', value: 'student_lead' },
             { field: 'days_since_signup', op: '>=', value: 3 },
             { field: 'filled_questionnaire', op: 'is_false' },
             { field: 'has_phone', op: 'is_true' },
@@ -79,7 +82,9 @@ const RULE_TEMPLATES = [
         description: 'שולחת WhatsApp אוטומטי כ-30 דקות אחרי שמישהו נרשם לפורטל אם הוא עדיין לא מילא את השאלון',
         cron: '*/5 * * * *',
         cron_label: 'כל 5 דקות',
+        // role=student_lead נדרש כדי לא לשלוח ללידים שלא נרשמו לפורטל
         filter: { all: [
+            { field: 'role', op: '=', value: 'student_lead' },
             { field: 'minutes_since_signup', op: '>=', value: 30 },
             { field: 'minutes_since_signup', op: '<',  value: 120 },
             { field: 'filled_questionnaire', op: 'is_false' },

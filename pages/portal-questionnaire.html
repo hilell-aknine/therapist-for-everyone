@@ -1012,6 +1012,21 @@
                 } catch (e) { /* non-critical */ }
             }
 
+            // Transactional welcome WhatsApp — fire-and-forget, never blocks portal entry.
+            // Idempotent server-side (welcome_sent_at column); safe even on retries/double-submit.
+            if (insertedQ?.id && window.SUPABASE_CONFIG?.url) {
+                try {
+                    fetch(`${window.SUPABASE_CONFIG.url}/functions/v1/send-welcome-whatsapp`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': window.SUPABASE_CONFIG.anonKey
+                        },
+                        body: JSON.stringify({ questionnaire_id: insertedQ.id })
+                    }).catch(() => {}); // silent — UX must not depend on this
+                } catch (e) { /* non-critical */ }
+            }
+
             // Mark questionnaire as done in localStorage (for faster checks)
             localStorage.setItem('portal_questionnaire_done', 'true');
 

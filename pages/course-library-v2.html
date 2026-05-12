@@ -594,6 +594,59 @@
     }
   }
 
+  /* ==================== MOBILE READABILITY + BOTTOM NAV ==================== */
+  @media (max-width: 900px){
+    /* Boost secondary text contrast on small screens — desktop value is too faint
+       on real mobile devices against glass surfaces */
+    :root{ --text-muted: #D8E0DF; }
+    /* Solidify glass card backgrounds carrying small text */
+    .lms-amb-bar{
+      background: linear-gradient(180deg, rgba(8,32,38,.94), rgba(6,22,28,.90));
+    }
+    .lms-amb-lb-card{
+      background: linear-gradient(180deg, rgba(8,32,38,.92), rgba(6,22,28,.86));
+    }
+    .lms-sb{ background: linear-gradient(180deg, rgba(14,42,43,.97), rgba(10,32,33,.96)); }
+    /* Reserve space at bottom so bnav doesn't cover content */
+    .lms-body{ padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  }
+
+  /* Bottom Nav — mobile only */
+  .lms-bnav{ display:none; }
+  @media (max-width: 900px){
+    .lms-bnav{
+      display:grid; grid-template-columns: repeat(3, 1fr); gap:.15rem;
+      position: fixed; left:0; right:0; bottom:0; z-index: 90;
+      background: rgba(10,40,46,.96);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding: .35rem .25rem calc(.4rem + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -8px 24px rgba(0,0,0,.35);
+    }
+    .lms-bnav__btn{
+      position: relative;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap: 3px; padding: .5rem .25rem;
+      background: transparent; border: 0; cursor: pointer;
+      color: var(--text-muted); text-decoration: none;
+      font-family: inherit; font-size: .72rem; font-weight: 600;
+      transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+      min-height: 48px;
+      border-radius: 12px;
+    }
+    .lms-bnav__btn i{ font-size: 1.2rem; line-height:1; }
+    .lms-bnav__btn:hover{ color: var(--text-primary); background: rgba(255,255,255,.04); }
+    .lms-bnav__btn.is-active{ color: var(--accent-gold); }
+    .lms-bnav__btn.is-active i{ filter: drop-shadow(0 0 6px rgba(233,185,73,.4)); }
+    .lms-bnav__badge{
+      position: absolute; top: 4px; right: calc(50% - 22px);
+      background: #E64545; color: #fff;
+      font-size: .56rem; line-height: 1; padding: 3px 5px;
+      border-radius: 999px; font-weight: 700; letter-spacing: .02em;
+    }
+  }
+
   /* ==================== AMBASSADOR VIEW ==================== */
   .lms-amb{ display:none; flex-direction:column; gap:1rem; container-type: inline-size; }
   body.view-ambassador .lms-amb{ display:flex; }
@@ -1048,6 +1101,23 @@
   </button>
 </div>
 
+<!-- Mobile bottom navigation — visible only on screens ≤900px -->
+<nav class="lms-bnav" aria-label="ניווט תחתון">
+  <a class="lms-bnav__btn" href="#" data-nav="welcome" id="bnavHome">
+    <i class="fa-solid fa-house"></i>
+    <span>בית</span>
+  </a>
+  <button class="lms-bnav__btn" type="button" id="bnavLessons">
+    <i class="fa-solid fa-list-check"></i>
+    <span>שיעורים</span>
+  </button>
+  <a class="lms-bnav__btn" href="#ambassador" data-nav="ambassador" id="bnavAmbassador">
+    <i class="fa-solid fa-heart"></i>
+    <span>שותפים</span>
+    <span class="lms-bnav__badge">חדש</span>
+  </a>
+</nav>
+
 <script src="../js/supabase-client.js"></script>
 <script>
 (function(){
@@ -1455,6 +1525,27 @@
     if (sb) sb.addEventListener('click', e => { if (e.target.closest('a[href]')) close(false); });
     // Initial state for screen readers when drawer is hidden by default on mobile
     if (sb) sb.setAttribute('aria-hidden', window.matchMedia('(max-width: 900px)').matches ? 'true' : 'false');
+
+    // Mobile bottom-nav "שיעורים" button — open the same drawer
+    const bnavLessons = document.getElementById('bnavLessons');
+    if (bnavLessons) bnavLessons.addEventListener('click', toggle);
+
+    // Sync bottom-nav active state with current view (body class)
+    const bnavHome = document.getElementById('bnavHome');
+    const bnavAmb  = document.getElementById('bnavAmbassador');
+    const syncBnav = () => {
+      if (!bnavHome || !bnavAmb) return;
+      const body = document.body;
+      bnavHome.classList.remove('is-active');
+      bnavAmb.classList.remove('is-active');
+      if (body.classList.contains('view-ambassador')) {
+        bnavAmb.classList.add('is-active');
+      } else if (!body.classList.contains('view-player') && !body.classList.contains('view-master')) {
+        bnavHome.classList.add('is-active');
+      }
+    };
+    syncBnav();
+    new MutationObserver(syncBnav).observe(document.body, { attributes: true, attributeFilter: ['class'] });
   }
   function setupLogout(){
     const btn = document.getElementById('hdLogoutBtn');

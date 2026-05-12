@@ -77,9 +77,38 @@ https://chat.whatsapp.com/Lp3MNZ7fmGu8dmUzaUluyx
 
 לביטול הודעות, ענה הסר`
 
-async function sendWhatsApp(phone972: string, message: string): Promise<{ ok: boolean; status: number; body: string }> {
+// Resolve phone → real WhatsApp chatId.
+// Critical: many Israeli numbers register with WhatsApp Business and return
+// `@lid` chat IDs (e.g. "73701722706116@lid") that differ from the raw phone.
+// Sending to "972XXXXXXXXX@c.us" for those numbers returns HTTP 466.
+// Mirrors crm-bot/src/whatsapp.js which already does this resolution.
+async function resolveChatId(phone972: string): Promise<{ chatId: string | null; existsOnWA: boolean; checkOk: boolean }> {
+  try {
+    const url = `${GREEN_API_URL}/waInstance${GREEN_API_INSTANCE}/checkWhatsapp/${GREEN_API_TOKEN}`
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phoneNumber: parseInt(phone972, 10) }),
+    })
+    const data = await res.json().catch(() => ({}))
+    // Green API returns { invokeStatus: { status: 'QUOTE_EXCEEDED', ... } } when monthly quota is hit.
+    // In that case existsWhatsapp is missing entirely — we MUST NOT mark these as "not_on_whatsapp"
+    // because we genuinely don't know. Return checkOk=false so the caller can fail loudly instead.
+    if (data?.invokeStatus?.status && data.invokeStatus.status !== 'ok') {
+      console.error('checkWhatsapp blocked:', data.invokeStatus)
+      return { chatId: null, existsOnWA: false, checkOk: false }
+    }
+    if (!data?.existsWhatsapp) return { chatId: null, existsOnWA: false, checkOk: true }
+    return { chatId: data.chatId || `${phone972}@c.us`, existsOnWA: true, checkOk: true }
+  } catch (e) {
+    console.error('checkWhatsapp error:', e)
+    return { chatId: null, existsOnWA: false, checkOk: false }
+  }
+}
+
+async function sendWhatsApp(chatId: string, message: string): Promise<{ ok: boolean; status: number; body: string }> {
   const url = `${GREEN_API_URL}/waInstance${GREEN_API_INSTANCE}/sendMessage/${GREEN_API_TOKEN}`
-  const payload = JSON.stringify({ chatId: `${phone972}@c.us`, message })
+  const payload = JSON.stringify({ chatId, message })
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -115,7 +144,7 @@ serve(async (req: Request) => {
     // 1. Lookup row — must exist + not already sent
     const { data: q, error: qErr } = await db
       .from('portal_questionnaires')
-      .select('id, user_id, phone, welcome_sent_at')
+      .select('id, user_id, phone, welcome_sent_at, created_at')
       .eq('id', questionnaire_id)
       .maybeSingle()
 
@@ -128,6 +157,18 @@ serve(async (req: Request) => {
     }
     if (q.welcome_sent_at) {
       return new Response(JSON.stringify({ sent: false, reason: 'already_sent' }), {
+        status: 200,
+        headers: { ...cors, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // 1.5 Rollout cutoff: feature launched 2026-05-12. Historical questionnaires
+    // (from before launch day, Israel time) should NEVER receive a welcome.
+    // Mark them as sent so they're permanently excluded.
+    const ROLLOUT_CUTOFF = new Date('2026-05-11T21:00:00Z') // 2026-05-12 00:00 Asia/Jerusalem
+    if (new Date(q.created_at) < ROLLOUT_CUTOFF) {
+      await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
+      return new Response(JSON.stringify({ sent: false, reason: 'pre_rollout' }), {
         status: 200,
         headers: { ...cors, 'Content-Type': 'application/json' },
       })
@@ -167,19 +208,38 @@ serve(async (req: Request) => {
       })
     }
 
-    // 3. Send
+    // 3. Resolve chatId via checkWhatsapp (handles @lid for WA Business users)
+    const { chatId, existsOnWA, checkOk } = await resolveChatId(phone972)
+    if (!checkOk) {
+      // checkWhatsapp itself failed (e.g. Green API quota exhausted). DO NOT mark sent
+      // — we don't actually know if this number is on WhatsApp. Caller can retry later.
+      return new Response(JSON.stringify({ sent: false, reason: 'check_unavailable' }), {
+        status: 503,
+        headers: { ...cors, 'Content-Type': 'application/json' },
+      })
+    }
+    if (!existsOnWA || !chatId) {
+      // Confirmed not on WhatsApp — mark sent so we don't keep retrying.
+      await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
+      return new Response(JSON.stringify({ sent: false, reason: 'not_on_whatsapp' }), {
+        status: 200,
+        headers: { ...cors, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // 4. Send
     const message = WELCOME_TEMPLATE(firstName(fullName))
-    const result = await sendWhatsApp(phone972, message)
+    const result = await sendWhatsApp(chatId, message)
 
     if (!result.ok) {
-      console.error('Green API send failed', { status: result.status, body: result.body, phone: phone972 })
+      console.error('Green API send failed', { status: result.status, body: result.body, chatId })
       return new Response(JSON.stringify({ sent: false, reason: 'green_api_error', status: result.status }), {
         status: 502,
         headers: { ...cors, 'Content-Type': 'application/json' },
       })
     }
 
-    // 4. Mark sent — only on confirmed Green API success
+    // 5. Mark sent — only on confirmed Green API success
     await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
 
     return new Response(JSON.stringify({ sent: true }), {

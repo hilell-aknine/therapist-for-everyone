@@ -679,11 +679,23 @@
        RESPONSIVE
        ================================================================ */
     @media (max-width: 768px) {
-      .fp-hero { min-height: auto; padding: 7.5rem 1.25rem 4rem; }
-      .fp-hero__h1 { font-size: clamp(1.8rem,7vw,2.6rem); }
-      .fp-hero__sub { font-size: .96rem; }
-      .fp-hero__stats { gap: 1rem; padding: 1rem 1.5rem; }
-      .fp-hero__stat-n { font-size: 1.45rem; }
+      /* Hero: start from top so CTA stays above the fold */
+      .fp-hero {
+        min-height: 100svh; min-height: 100vh;
+        align-items: flex-start;
+        padding: calc(72px + 2rem) 1.25rem 3rem;
+      }
+      .fp-hero__eyebrow { margin-bottom: .9rem; font-size: .78rem; }
+      .fp-hero__h1 { font-size: clamp(1.65rem,6.5vw,2.2rem); margin-bottom: .9rem; }
+      /* Truncate long subtitle to 3 lines so CTA stays in view */
+      .fp-hero__sub {
+        font-size: .9rem; margin-bottom: 1.4rem;
+        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .fp-hero__stats { gap: .9rem; padding: .85rem 1.4rem; margin-bottom: 1.4rem; }
+      .fp-hero__stat-n { font-size: 1.3rem; }
+      .fp-hero__stat-div { height: 30px; }
       .fp-hero__cta { width: 100%; max-width: 340px; justify-content: center; font-size: .97rem; }
       .fp-features, .fp-audience, .fp-register { padding: 4.5rem 1.25rem; }
       .fp-features-grid { grid-template-columns: 1fr; }
@@ -697,11 +709,13 @@
       .fp-footer__inner { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 480px) {
-      .fp-hero { padding: 7rem 1rem 3.5rem; }
-      .fp-hero__h1 { font-size: 1.6rem; }
-      .fp-hero__stats { gap: .8rem; padding: .9rem 1rem; }
-      .fp-hero__stat-n { font-size: 1.2rem; }
-      .fp-hero__stat-div { height: 28px; }
+      .fp-hero { padding: calc(72px + 1.5rem) 1rem 2.5rem; }
+      .fp-hero__h1 { font-size: 1.55rem; }
+      .fp-hero__sub { font-size: .86rem; -webkit-line-clamp: 3; margin-bottom: 1.2rem; }
+      .fp-hero__stats { gap: .6rem; padding: .75rem .9rem; margin-bottom: 1.2rem; flex-wrap: wrap; justify-content: center; }
+      .fp-hero__stat-n { font-size: 1.15rem; }
+      .fp-hero__stat-div { height: 24px; }
+      .fp-hero__cta { padding: .9rem 1.5rem; font-size: .93rem; }
       .fp-features, .fp-audience, .fp-register { padding: 3.5rem 1rem; }
       .fp-feature-card { padding: 1.5rem 1.3rem; }
       .fp-audience-card { padding: 1.8rem 1.4rem; }
@@ -1181,6 +1195,48 @@
     document.getElementById('reg-phone')?.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') { e.preventDefault(); document.getElementById('registerForm').requestSubmit(); }
     });
+
+    // Mobile hamburger menu
+    (function() {
+        const btn = document.getElementById('mobileMenuBtn');
+        const links = document.querySelector('.nav-glass__links');
+        if (!btn || !links) return;
+
+        const mobileMenu = document.createElement('div');
+        mobileMenu.style.cssText = `
+            position: fixed; top: 72px; inset-inline: 0; z-index: 99;
+            background: rgba(4,22,27,.95); backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,.09);
+            padding: 1.5rem 1.5rem 2rem;
+            display: none; flex-direction: column; gap: 1.2rem;
+        `;
+        const navLinks = links.querySelectorAll('a');
+        navLinks.forEach(a => {
+            const clone = a.cloneNode(true);
+            clone.style.cssText = 'font-size: 1.05rem; font-weight: 500; color: rgba(255,255,255,.8); padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); display: block;';
+            clone.addEventListener('click', () => { mobileMenu.style.display = 'none'; btn.innerHTML = '<i class="fa-solid fa-bars"></i>'; });
+            mobileMenu.appendChild(clone);
+        });
+        const ctaLink = document.createElement('a');
+        ctaLink.href = 'login.html';
+        ctaLink.textContent = 'התחברות';
+        ctaLink.style.cssText = 'display: block; text-align: center; padding: .85rem; border-radius: 10px; background: rgba(212,175,55,.15); border: 1px solid rgba(212,175,55,.35); color: #E6C65A; font-weight: 700; font-size: 1rem; margin-top: .5rem;';
+        mobileMenu.appendChild(ctaLink);
+        document.body.appendChild(mobileMenu);
+
+        btn.addEventListener('click', () => {
+            const open = mobileMenu.style.display === 'flex';
+            mobileMenu.style.display = open ? 'none' : 'flex';
+            btn.innerHTML = open ? '<i class="fa-solid fa-bars"></i>' : '<i class="fa-solid fa-xmark"></i>';
+        });
+        document.addEventListener('click', e => {
+            if (!mobileMenu.contains(e.target) && !btn.contains(e.target)) {
+                mobileMenu.style.display = 'none';
+                btn.innerHTML = '<i class="fa-solid fa-bars"></i>';
+            }
+        });
+    })();
 </script>
 </body>
 </html>

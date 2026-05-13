@@ -1,10 +1,23 @@
 // ============================================================================
 // Edge Function: send-welcome-whatsapp
-// Transactional one-shot welcome WhatsApp after portal questionnaire submit.
+// Transactional one-shot welcome WhatsApp on signup OR portal questionnaire.
 //
-// Called fire-and-forget from pages/portal-questionnaire.html immediately
-// after the INSERT into portal_questionnaires succeeds. Idempotent — the
-// `welcome_sent_at` column on portal_questionnaires is the lock.
+// Accepts EITHER:
+//   { questionnaire_id }  → reads portal_questionnaires, locks via welcome_sent_at
+//   { profile_id }        → reads profiles, locks via whatsapp_welcome_sent_at
+//
+// Called fire-and-forget from:
+//   - pages/portal-questionnaire.html  (after INSERT into portal_questionnaires)
+//   - pages/free-portal.html           (after profile upsert with phone)
+//   - pages/login-v2.html              (after savePendingProfile with phone)
+//   - js/supabase-client.js            (ensureProfile when phone present)
+//
+// Idempotent in two ways:
+//   1. Per-row lock — refuses to send if welcome_sent_at is already set.
+//   2. Cross-row dedup — questionnaire path checks profile.whatsapp_welcome_sent_at
+//      first; if profile already got the welcome, marks questionnaire sent and skips.
+//      This prevents a double-send when a user signs up (→ profile welcome) and
+//      then fills the questionnaire (→ would have been a second welcome).
 //
 // Does NOT enforce quiet hours: Hillel asked for an immediate transactional
 // send regardless of time of day. Reminders/promo automations continue to
@@ -119,138 +132,162 @@ async function sendWhatsApp(chatId: string, message: string): Promise<{ ok: bool
   return { ok: res.ok, status: res.status, body: text }
 }
 
+// Rollout cutoffs — historical rows from before launch are permanently excluded.
+const QUESTIONNAIRE_ROLLOUT_CUTOFF = new Date('2026-05-11T21:00:00Z') // 2026-05-12 00:00 Asia/Jerusalem
+const PROFILE_ROLLOUT_CUTOFF = new Date('2026-05-13T00:00:00Z')        // 2026-05-13 03:00 Asia/Jerusalem (rough — exact value doesn't matter; the migration UPDATEs all pre-existing profiles to NOW() anyway)
+
+// Source description for a welcome send. The handler builds one of these from
+// the request payload, then runs the shared opt-out/send/mark-sent pipeline.
+type SendSource = {
+  rowId: string
+  phoneRaw: string
+  fullName: string | null
+  optedOut: boolean
+  markSent: () => Promise<void>
+}
+
+function jsonResponse(payload: unknown, status: number, cors: Record<string, string>): Response {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { ...cors, 'Content-Type': 'application/json' },
+  })
+}
+
 serve(async (req: Request) => {
   const cors = getCorsHeaders(req)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'method_not_allowed' }), {
-      status: 405,
-      headers: { ...cors, 'Content-Type': 'application/json' },
-    })
-  }
+  if (req.method !== 'POST') return jsonResponse({ error: 'method_not_allowed' }, 405, cors)
 
   try {
     const body = await req.json().catch(() => ({}))
-    const questionnaire_id = body?.questionnaire_id
-    if (!questionnaire_id || typeof questionnaire_id !== 'string') {
-      return new Response(JSON.stringify({ error: 'missing_questionnaire_id' }), {
-        status: 400,
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      })
-    }
+    const questionnaire_id = typeof body?.questionnaire_id === 'string' ? body.questionnaire_id : null
+    const profile_id = typeof body?.profile_id === 'string' ? body.profile_id : null
+    if (!questionnaire_id && !profile_id) return jsonResponse({ error: 'missing_id' }, 400, cors)
 
     const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-    // 1. Lookup row — must exist + not already sent
-    const { data: q, error: qErr } = await db
-      .from('portal_questionnaires')
-      .select('id, user_id, phone, welcome_sent_at, created_at')
-      .eq('id', questionnaire_id)
-      .maybeSingle()
+    // ── Step 1: Resolve a SendSource from one of the two payload shapes.
+    // Each branch handles: lookup, exists check, already-sent lock, rollout
+    // cutoff, and prepares the markSent closure that the shared pipeline
+    // will invoke after a confirmed Green API send.
+    let source: SendSource | null = null
 
-    if (qErr) throw qErr
-    if (!q) {
-      return new Response(JSON.stringify({ sent: false, reason: 'not_found' }), {
-        status: 404,
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      })
-    }
-    if (q.welcome_sent_at) {
-      return new Response(JSON.stringify({ sent: false, reason: 'already_sent' }), {
-        status: 200,
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      })
-    }
-
-    // 1.5 Rollout cutoff: feature launched 2026-05-12. Historical questionnaires
-    // (from before launch day, Israel time) should NEVER receive a welcome.
-    // Mark them as sent so they're permanently excluded.
-    const ROLLOUT_CUTOFF = new Date('2026-05-11T21:00:00Z') // 2026-05-12 00:00 Asia/Jerusalem
-    if (new Date(q.created_at) < ROLLOUT_CUTOFF) {
-      await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
-      return new Response(JSON.stringify({ sent: false, reason: 'pre_rollout' }), {
-        status: 200,
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      })
-    }
-
-    // 2. Resolve phone + name + opt-out from profile (if user_id present)
-    let phoneRaw = q.phone || ''
-    let fullName: string | null = null
-    let optedOut = false
-    if (q.user_id) {
-      const { data: p } = await db
+    if (profile_id) {
+      const { data: p, error: pErr } = await db
         .from('profiles')
-        .select('phone, full_name, whatsapp_opt_out')
-        .eq('id', q.user_id)
+        .select('id, phone, full_name, whatsapp_opt_out, whatsapp_welcome_sent_at, created_at')
+        .eq('id', profile_id)
         .maybeSingle()
-      if (p) {
-        if (!phoneRaw) phoneRaw = p.phone || ''
-        fullName = p.full_name || null
-        optedOut = p.whatsapp_opt_out === true
+      if (pErr) throw pErr
+      if (!p) return jsonResponse({ sent: false, reason: 'not_found' }, 404, cors)
+      if (p.whatsapp_welcome_sent_at) return jsonResponse({ sent: false, reason: 'already_sent' }, 200, cors)
+      if (p.created_at && new Date(p.created_at) < PROFILE_ROLLOUT_CUTOFF) {
+        await db.from('profiles').update({ whatsapp_welcome_sent_at: new Date().toISOString() }).eq('id', p.id)
+        return jsonResponse({ sent: false, reason: 'pre_rollout' }, 200, cors)
+      }
+      source = {
+        rowId: p.id,
+        phoneRaw: p.phone || '',
+        fullName: p.full_name || null,
+        optedOut: p.whatsapp_opt_out === true,
+        markSent: async () => {
+          await db.from('profiles').update({ whatsapp_welcome_sent_at: new Date().toISOString() }).eq('id', p.id)
+        },
+      }
+    } else if (questionnaire_id) {
+      const { data: q, error: qErr } = await db
+        .from('portal_questionnaires')
+        .select('id, user_id, phone, welcome_sent_at, created_at')
+        .eq('id', questionnaire_id)
+        .maybeSingle()
+      if (qErr) throw qErr
+      if (!q) return jsonResponse({ sent: false, reason: 'not_found' }, 404, cors)
+      if (q.welcome_sent_at) return jsonResponse({ sent: false, reason: 'already_sent' }, 200, cors)
+      if (new Date(q.created_at) < QUESTIONNAIRE_ROLLOUT_CUTOFF) {
+        await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
+        return jsonResponse({ sent: false, reason: 'pre_rollout' }, 200, cors)
+      }
+
+      // Phone + name + opt-out come from the profile when available, falling
+      // back to questionnaire fields if there's no user_id (anonymous case).
+      let phoneRaw = q.phone || ''
+      let fullName: string | null = null
+      let optedOut = false
+      if (q.user_id) {
+        const { data: p } = await db
+          .from('profiles')
+          .select('phone, full_name, whatsapp_opt_out, whatsapp_welcome_sent_at')
+          .eq('id', q.user_id)
+          .maybeSingle()
+        if (p) {
+          // Cross-row dedup: if the profile already received the signup welcome,
+          // the questionnaire would be a second copy of the same message. Mark
+          // the questionnaire sent and exit silently.
+          if (p.whatsapp_welcome_sent_at) {
+            await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
+            return jsonResponse({ sent: false, reason: 'profile_already_welcomed' }, 200, cors)
+          }
+          if (!phoneRaw) phoneRaw = p.phone || ''
+          fullName = p.full_name || null
+          optedOut = p.whatsapp_opt_out === true
+        }
+      }
+
+      source = {
+        rowId: q.id,
+        phoneRaw,
+        fullName,
+        optedOut,
+        markSent: async () => {
+          await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
+          // Also mark the profile, so the user is permanently excluded from
+          // any future signup-side welcome attempts (e.g. ensureProfile retry).
+          if (q.user_id) {
+            await db.from('profiles').update({ whatsapp_welcome_sent_at: new Date().toISOString() }).eq('id', q.user_id)
+          }
+        },
       }
     }
 
-    if (optedOut) {
+    if (!source) return jsonResponse({ error: 'unresolved_source' }, 500, cors)
+
+    // ── Step 2: Shared pipeline — opt-out → normalize → resolveChatId → send → mark sent.
+    if (source.optedOut) {
       // Mark as sent so we don't keep retrying on every page reload
-      await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
-      return new Response(JSON.stringify({ sent: false, reason: 'opt_out' }), {
-        status: 200,
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      })
+      await source.markSent()
+      return jsonResponse({ sent: false, reason: 'opt_out' }, 200, cors)
     }
 
-    const phone972 = normalizePhone(phoneRaw)
+    const phone972 = normalizePhone(source.phoneRaw)
     if (!phone972 || phone972.length < 11) {
-      return new Response(JSON.stringify({ sent: false, reason: 'invalid_phone' }), {
-        status: 200,
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      })
+      return jsonResponse({ sent: false, reason: 'invalid_phone' }, 200, cors)
     }
 
-    // 3. Resolve chatId via checkWhatsapp (handles @lid for WA Business users)
+    // checkWhatsapp resolves @lid (WhatsApp Business) chat IDs.
     const { chatId, existsOnWA, checkOk } = await resolveChatId(phone972)
     if (!checkOk) {
-      // checkWhatsapp itself failed (e.g. Green API quota exhausted). DO NOT mark sent
-      // — we don't actually know if this number is on WhatsApp. Caller can retry later.
-      return new Response(JSON.stringify({ sent: false, reason: 'check_unavailable' }), {
-        status: 503,
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      })
+      // Green API itself errored (e.g. quota). DO NOT mark sent — unknown state, retryable.
+      return jsonResponse({ sent: false, reason: 'check_unavailable' }, 503, cors)
     }
     if (!existsOnWA || !chatId) {
       // Confirmed not on WhatsApp — mark sent so we don't keep retrying.
-      await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
-      return new Response(JSON.stringify({ sent: false, reason: 'not_on_whatsapp' }), {
-        status: 200,
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      })
+      await source.markSent()
+      return jsonResponse({ sent: false, reason: 'not_on_whatsapp' }, 200, cors)
     }
 
-    // 4. Send
-    const message = WELCOME_TEMPLATE(firstName(fullName))
+    const message = WELCOME_TEMPLATE(firstName(source.fullName))
     const result = await sendWhatsApp(chatId, message)
 
     if (!result.ok) {
       console.error('Green API send failed', { status: result.status, body: result.body, chatId })
-      return new Response(JSON.stringify({ sent: false, reason: 'green_api_error', status: result.status }), {
-        status: 502,
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      })
+      return jsonResponse({ sent: false, reason: 'green_api_error', status: result.status }, 502, cors)
     }
 
-    // 5. Mark sent — only on confirmed Green API success
-    await db.from('portal_questionnaires').update({ welcome_sent_at: new Date().toISOString() }).eq('id', q.id)
-
-    return new Response(JSON.stringify({ sent: true }), {
-      status: 200,
-      headers: { ...cors, 'Content-Type': 'application/json' },
-    })
+    // Mark sent — only on confirmed Green API success.
+    await source.markSent()
+    return jsonResponse({ sent: true }, 200, cors)
   } catch (e) {
     console.error('send-welcome-whatsapp unhandled error:', e)
-    return new Response(JSON.stringify({ error: 'internal_error' }), {
-      status: 500,
-      headers: { ...cors, 'Content-Type': 'application/json' },
-    })
+    return jsonResponse({ error: 'internal_error' }, 500, cors)
   }
 })

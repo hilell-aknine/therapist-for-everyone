@@ -947,7 +947,7 @@
         try {
             const { data: existing, error: fetchError } = await supabaseClient
                 .from('profiles')
-                .select('id, role, phone')
+                .select('id, role, phone, whatsapp_welcome_sent_at')
                 .eq('id', user.id)
                 .single();
 
@@ -962,6 +962,9 @@
                             user.email?.split('@')[0] ||
                             'משתמש חדש';
             const phone = user.user_metadata?.phone || null;
+            // Track the phone value that ends up on the DB row after this call —
+            // either it was already there, or we just inserted/updated it.
+            let phoneOnRow = existing?.phone || null;
 
             if (!existing) {
                 isNewProfile = true;
@@ -984,6 +987,8 @@
 
                 if (insertError) {
                     console.error('Profile create error:', insertError);
+                } else if (phone) {
+                    phoneOnRow = phone;
                 }
             } else if (phone && !existing.phone) {
                 // Profile exists but phone missing (e.g. trigger ran before metadata was available)
@@ -991,6 +996,25 @@
                     .from('profiles')
                     .update({ phone })
                     .eq('id', user.id);
+                phoneOnRow = phone;
+            }
+
+            // Fire-and-forget welcome WhatsApp — only when we have a phone AND
+            // the welcome hasn't been sent yet. Edge Function is idempotent via
+            // profiles.whatsapp_welcome_sent_at, so a duplicate request is safe.
+            // Google OAuth users have no phone here — they get the welcome later
+            // via the questionnaire path (or never, by design).
+            if (phoneOnRow && !existing?.whatsapp_welcome_sent_at) {
+                try {
+                    fetch(`${SUPABASE_URL}/functions/v1/send-welcome-whatsapp`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({ profile_id: user.id })
+                    }).catch(() => {}); // silent — never block auth flow
+                } catch (e) { /* non-critical */ }
             }
 
             // Save (or backfill) lead_attribution. Runs for both new profiles AND

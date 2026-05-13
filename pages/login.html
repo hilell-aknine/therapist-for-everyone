@@ -509,6 +509,22 @@
                     await supabaseClient.from('profiles').update(update).eq('id', user.id);
                     localStorage.removeItem('pending_phone');
                     localStorage.removeItem('pending_name');
+
+                    // Transactional welcome WhatsApp — fire-and-forget, never blocks login.
+                    // Only fires when we just persisted a phone. Idempotent server-side
+                    // (profiles.whatsapp_welcome_sent_at).
+                    if (pendingPhone && window.SUPABASE_CONFIG?.url) {
+                        try {
+                            fetch(`${window.SUPABASE_CONFIG.url}/functions/v1/send-welcome-whatsapp`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'apikey': window.SUPABASE_CONFIG.anonKey
+                                },
+                                body: JSON.stringify({ profile_id: user.id })
+                            }).catch(() => {});
+                        } catch (err) { /* non-critical */ }
+                    }
                 } catch (e) { /* will be caught by questionnaire */ }
             }
         }

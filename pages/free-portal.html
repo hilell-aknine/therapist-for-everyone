@@ -1148,6 +1148,21 @@
                     utm_campaign: utm.utm_campaign || null, utm_content: utm.utm_content || null,
                     utm_term: utm.utm_term || null
                 }, { onConflict: 'id' });
+
+                // Transactional welcome WhatsApp — fire-and-forget, never blocks signup.
+                // Idempotent server-side (profiles.whatsapp_welcome_sent_at).
+                if (window.SUPABASE_CONFIG?.url) {
+                    try {
+                        fetch(`${window.SUPABASE_CONFIG.url}/functions/v1/send-welcome-whatsapp`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'apikey': window.SUPABASE_CONFIG.anonKey
+                            },
+                            body: JSON.stringify({ profile_id: data.user.id })
+                        }).catch(() => {});
+                    } catch (e) { /* non-critical */ }
+                }
             }
 
             if (typeof gtag === 'function') {

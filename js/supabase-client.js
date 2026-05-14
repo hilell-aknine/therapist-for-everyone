@@ -1004,6 +1004,8 @@
             // profiles.whatsapp_welcome_sent_at, so a duplicate request is safe.
             // Google OAuth users have no phone here — they get the welcome later
             // via the questionnaire path (or never, by design).
+            // keepalive: true survives any imminent page navigation (auth-state
+            // redirects, etc.) so the fetch reaches the Edge Function.
             if (phoneOnRow && !existing?.whatsapp_welcome_sent_at) {
                 try {
                     fetch(`${SUPABASE_URL}/functions/v1/send-welcome-whatsapp`, {
@@ -1012,7 +1014,8 @@
                             'Content-Type': 'application/json',
                             'apikey': SUPABASE_ANON_KEY
                         },
-                        body: JSON.stringify({ profile_id: user.id })
+                        body: JSON.stringify({ profile_id: user.id }),
+                        keepalive: true
                     }).catch(() => {}); // silent — never block auth flow
                 } catch (e) { /* non-critical */ }
             }

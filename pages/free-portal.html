@@ -1151,6 +1151,9 @@
 
                 // Transactional welcome WhatsApp — fire-and-forget, never blocks signup.
                 // Idempotent server-side (profiles.whatsapp_welcome_sent_at).
+                // keepalive: true keeps the request alive past the immediate page
+                // navigation to portal-questionnaire.html below — otherwise the
+                // browser cancels the in-flight fetch and the Edge Function never runs.
                 if (window.SUPABASE_CONFIG?.url) {
                     try {
                         fetch(`${window.SUPABASE_CONFIG.url}/functions/v1/send-welcome-whatsapp`, {
@@ -1159,7 +1162,8 @@
                                 'Content-Type': 'application/json',
                                 'apikey': window.SUPABASE_CONFIG.anonKey
                             },
-                            body: JSON.stringify({ profile_id: data.user.id })
+                            body: JSON.stringify({ profile_id: data.user.id }),
+                            keepalive: true
                         }).catch(() => {});
                     } catch (e) { /* non-critical */ }
                 }

@@ -651,6 +651,7 @@
                 // Transactional welcome WhatsApp — fire-and-forget, never blocks login.
                 // Only fires when we just persisted a phone. Idempotent server-side
                 // (profiles.whatsapp_welcome_sent_at).
+                // keepalive: true survives the redirectLoggedInUser navigation.
                 if (pendingPhone && window.SUPABASE_CONFIG?.url) {
                     try {
                         fetch(`${window.SUPABASE_CONFIG.url}/functions/v1/send-welcome-whatsapp`, {
@@ -659,7 +660,8 @@
                                 'Content-Type': 'application/json',
                                 'apikey': window.SUPABASE_CONFIG.anonKey
                             },
-                            body: JSON.stringify({ profile_id: user.id })
+                            body: JSON.stringify({ profile_id: user.id }),
+                            keepalive: true
                         }).catch(() => {});
                     } catch (err) { /* non-critical */ }
                 }

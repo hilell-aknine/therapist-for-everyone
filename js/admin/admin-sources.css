@@ -183,7 +183,98 @@
 .sources-cell-na   { color: var(--text-secondary, #4B5563); }
 .sources-cell-small { color: var(--text-secondary, #4B5563); font-size: 0.78rem; }
 
+/* ─── Per-source expandable row ──────────────────────────────────────────── */
+
+/* Subtle highlight on the clickable source row */
+.sources-source-row:hover { background: rgba(212, 175, 55, 0.09); }
+
+/* Chevron — points left in RTL; rotates down when open */
+.sources-chevron {
+    color: var(--text-secondary, #4B5563);
+    font-size: 0.7rem;
+    margin-left: 0.5rem;
+    transition: transform 0.15s ease;
+    display: inline-block;
+    opacity: 0.7;
+}
+.sources-chevron.open {
+    transform: rotate(-90deg);
+    opacity: 1;
+    color: var(--gold, #D4AF37);
+}
+
+/* Hidden campaign row — inset background to visually nest under source row */
+.sources-campaign-row td {
+    padding: 0;
+    background: rgba(0, 59, 70, 0.04);
+    border-bottom: 2px solid var(--border, rgba(0,0,0,0.1));
+}
+
+/* Nested campaign sub-table */
+.campaign-subtable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.campaign-subtable th {
+    text-align: right;
+    padding: 0.5rem 1.25rem;
+    background: rgba(0, 59, 70, 0.08);
+    color: var(--text-secondary, #4B5563);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.1));
+    white-space: nowrap;
+    font-size: 0.8rem;
+}
+.campaign-subtable td {
+    text-align: right;
+    padding: 0.5rem 1.25rem;
+    color: var(--text, #1A2D33);
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.05));
+}
+.campaign-subtable tbody tr:hover { background: rgba(212, 175, 55, 0.05); }
+
+/* Medium type pills */
+.campaign-medium-pill {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 99px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.campaign-medium-organic {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+.campaign-medium-paid {
+    background: rgba(245, 158, 11, 0.12);
+    color: #D97706;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+.campaign-medium-na {
+    color: var(--text-secondary, #4B5563);
+}
+
+/* No-campaign name label */
+.sources-campaign-noname {
+    color: var(--text-secondary, #4B5563);
+    font-style: italic;
+    font-size: 0.83rem;
+}
+
+/* Empty state inside subtable */
+.sources-campaign-empty {
+    padding: 0.75rem 1.25rem;
+    margin: 0;
+    color: var(--text-secondary, #4B5563);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
 @media (max-width: 900px) {
     .sources-table { font-size: 0.8rem; }
     .sources-table th, .sources-table td { padding: 0.5rem 0.4rem; }
+    .campaign-subtable th, .campaign-subtable td { padding: 0.4rem 0.75rem; }
 }

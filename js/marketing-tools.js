@@ -644,13 +644,21 @@ window.saveFullAttribution = async function (linkedTable, linkedId) {
         let updated = [];
         try { updated = await patchRes.json(); } catch (e) {}
         if (!Array.isArray(updated) || updated.length === 0) {
-            // No row to update — INSERT instead. Required fields per RLS auth_insert_own:
-            // linked_table='profiles' AND linked_id=auth.uid(). For other tables we rely
-            // on the auth_update_own_q_attr policy (UPDATE only — INSERT may 401 here).
+            // The PATCH above already updated the row WHEN ONE EXISTED — but
+            // lead_attribution has no SELECT policy for authenticated users, so
+            // `return=representation` always comes back []. We therefore cannot
+            // tell "row updated" from "row missing" from the response alone.
+            //
+            // The INSERT below is made idempotent regardless: on_conflict +
+            // resolution=ignore-duplicates means it creates a row only when
+            // none exists, and is a harmless no-op when the PATCH already
+            // handled an existing row. Without this, a logged-in user created
+            // one duplicate row PER PAGE LOAD (see migration 20260520120000).
+            // Requires the unique index uq_lead_attribution_linked.
             const insertBody = { ...filtered, linked_table: linkedTable, linked_id: linkedId };
-            await fetch(`${supabaseUrl}/rest/v1/lead_attribution`, {
+            await fetch(`${supabaseUrl}/rest/v1/lead_attribution?on_conflict=linked_table,linked_id`, {
                 method: 'POST',
-                headers: { ...baseHeaders, 'Prefer': 'return=minimal' },
+                headers: { ...baseHeaders, 'Prefer': 'return=minimal,resolution=ignore-duplicates' },
                 body: JSON.stringify(insertBody)
             });
         }

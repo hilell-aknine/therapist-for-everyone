@@ -181,6 +181,7 @@ function _mergeFunnelWithVisitors(funnel, ga4, ga4Error) {
         },
         all_time_totals: funnel.all_time_totals || { leads_total: 0, registrations_total: 0, paid_total: 0 },
         per_source: perSource,
+        per_campaign: funnel.per_campaign || [],
         mismatches: funnel.mismatches || [],
         ga4_error:  ga4Error,
     };
@@ -324,9 +325,12 @@ function _renderSourcesTable(rows) {
             ${row.mismatch_count > 0 ? ` · <span title="לידים שבהם UTM ו&quot;איך הגעת&quot; סותרים" style="color:#F59E0B;">⚠ סתירה ${row.mismatch_count}</span>` : ''}
         `;
 
+        const safeSource = escapeHtml(row.source);
+
         return `
-            <tr>
+            <tr class="sources-source-row" onclick="toggleSourceCampaigns('${row.source}')" style="cursor:pointer;" id="source-row-${safeSource}">
                 <td>
+                    <i class="fa-solid fa-chevron-left sources-chevron" id="chevron-${safeSource}"></i>
                     <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${meta.color};margin-left:0.5rem;"></span>
                     <i class="${meta.icon}" style="color:${meta.color};margin-left:0.4rem;"></i>
                     ${escapeHtml(meta.he)}
@@ -341,10 +345,81 @@ function _renderSourcesTable(rows) {
                 <td class="${r2pClass}">${_fmtPct(row.r_to_p)}</td>
                 <td style="font-size:0.8rem;">${breakdown}</td>
             </tr>
+            <tr class="sources-campaign-row" id="campaigns-row-${safeSource}" style="display:none;">
+                <td colspan="9">${_renderCampaignSubTable(row.source)}</td>
+            </tr>
         `;
     }).join('');
 
     return `<table class="sources-table">${headerRow}<tbody>${bodyRows}</tbody></table>`;
+}
+
+// ─── Per-campaign breakdown toggle ────────────────────────────────────────
+function toggleSourceCampaigns(source) {
+    const row = document.getElementById('campaigns-row-' + source);
+    const chevron = document.getElementById('chevron-' + source);
+    if (!row) return;
+    const isOpen = row.style.display !== 'none';
+    row.style.display = isOpen ? 'none' : '';
+    if (chevron) {
+        if (isOpen) chevron.classList.remove('open');
+        else        chevron.classList.add('open');
+    }
+}
+
+function _renderCampaignSubTable(source) {
+    if (!_sourcesCache || !_sourcesCache.per_campaign) {
+        return '<p class="sources-campaign-empty">אין פירוט קמפיינים למקור זה</p>';
+    }
+    const campaigns = _sourcesCache.per_campaign
+        .filter(c => c.source === source)
+        .sort((a, b) => (b.leads || 0) - (a.leads || 0));
+
+    if (!campaigns.length) {
+        return '<p class="sources-campaign-empty">אין פירוט קמפיינים למקור זה</p>';
+    }
+
+    const _mediumLabel = (medium) => {
+        if (!medium) return '<span class="campaign-medium-na">—</span>';
+        const m = medium.toLowerCase();
+        if (m === 'organic-social' || m === 'organic') {
+            return `<span class="campaign-medium-pill campaign-medium-organic">אורגני</span>`;
+        }
+        if (m.includes('paid') || m.includes('cpc')) {
+            return `<span class="campaign-medium-pill campaign-medium-paid">ממומן</span>`;
+        }
+        return `<span style="color:var(--text-secondary,#4B5563);">${escapeHtml(medium)}</span>`;
+    };
+
+    const campaignRows = campaigns.map(c => {
+        const nameCell = c.campaign
+            ? escapeHtml(c.campaign)
+            : `<span class="sources-campaign-noname">ללא שם קמפיין · תנועה ישירה</span>`;
+        return `
+            <tr>
+                <td>${nameCell}</td>
+                <td>${_mediumLabel(c.medium)}</td>
+                <td><strong>${(c.leads || 0).toLocaleString()}</strong></td>
+                <td>${(c.registrations || 0).toLocaleString()}</td>
+                <td>${(c.paid || 0).toLocaleString()}</td>
+            </tr>
+        `;
+    }).join('');
+
+    return `
+        <table class="campaign-subtable">
+            <thead>
+                <tr>
+                    <th>קמפיין</th>
+                    <th>סוג</th>
+                    <th>לידים</th>
+                    <th>רשומים</th>
+                    <th>משלמים</th>
+                </tr>
+            </thead>
+            <tbody>${campaignRows}</tbody>
+        </table>
+    `;
 }
 
 function _flagClass(value, range) {

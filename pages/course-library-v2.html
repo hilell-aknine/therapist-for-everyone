@@ -788,6 +788,32 @@
   }
   .lms-master-viewer-bar button:hover, .lms-master-viewer-bar a:hover{ background: rgba(255,255,255,.14); }
   .lms-master-viewer-frame{ flex:1; width:100%; border:0; background:#fff; }
+  /* Engagement popups — toasts driven by PopupManager */
+  .lms-toast {
+    position: fixed; bottom: 24px; left: 24px; z-index: 9000;
+    max-width: 360px; padding: 16px 20px 16px 36px;
+    background: var(--bg-surface, #103638);
+    border: 1px solid var(--accent-gold, #E9B949);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    display: flex; gap: 12px; align-items: flex-start;
+    animation: lmsToastIn 280ms cubic-bezier(.2,.8,.2,1);
+    font-family: 'Heebo', sans-serif;
+  }
+  .lms-toast[hidden] { display: none; }
+  .lms-toast__icon { font-size: 28px; line-height: 1; flex-shrink: 0; }
+  .lms-toast__body strong { color: var(--accent-gold); display: block; margin-bottom: 4px; font-size: 15px; }
+  .lms-toast__body p { color: var(--text-primary, #F4F1EA); margin: 0; font-size: 14px; line-height: 1.5; }
+  .lms-toast__close {
+    position: absolute; top: 6px; left: 8px;
+    background: none; border: none; color: var(--text-muted, #B7C4C2);
+    font-size: 22px; cursor: pointer; padding: 4px 8px; line-height: 1;
+  }
+  .lms-toast__close:hover { color: var(--accent-gold); }
+  @keyframes lmsToastIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: none; } }
+  @media (max-width: 900px) {
+    .lms-toast { left: 12px; right: 12px; bottom: 80px; max-width: none; }
+  }
 </style>
 </head>
 <body>
@@ -1118,11 +1144,120 @@
   </a>
 </nav>
 
+<!-- Engagement popups (PopupManager-driven) -->
+<div id="lmsToastTopPercentile" class="lms-toast" role="status" aria-live="polite" hidden>
+  <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
+  <div class="lms-toast__icon">🎯</div>
+  <div class="lms-toast__body">
+    <strong>השלמת 2 שיעורים השבוע!</strong>
+    <p>הנתון הזה מכניס אותך ל-15% העליונים של הלומדים הפעילים בפורטל.</p>
+  </div>
+</div>
+<div id="lmsToastStreak" class="lms-toast" role="status" aria-live="polite" hidden>
+  <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
+  <div class="lms-toast__icon">🔥</div>
+  <div class="lms-toast__body">
+    <strong data-streak-title>זה השבוע השני ברציפות שאתה נכנס!</strong>
+    <p>רק 20% מהנרשמים שומרים על רצף כזה. אל תעצור עכשיו!</p>
+  </div>
+</div>
+
+<script src="../js/marketing-tools.js"></script>
+<script src="../js/popup-manager.js"></script>
 <script src="../js/supabase-client.js"></script>
 <script>
 (function(){
   const params = new URLSearchParams(location.search);
   const devBypass = params.get('dev') === '1';
+
+  // ===== Engagement tracking for motivation popups =====
+  const ENGAGEMENT_KEY = 'lms_engagement_v1';
+  function isoWeekKey(d){
+    d = d || new Date();
+    const t = new Date(d.valueOf());
+    t.setHours(0,0,0,0);
+    t.setDate(t.getDate() + 4 - (t.getDay() || 7));
+    const yearStart = new Date(t.getFullYear(), 0, 1);
+    const week = Math.ceil((((t - yearStart) / 86400000) + 1) / 7);
+    return t.getFullYear() + '-W' + String(week).padStart(2,'0');
+  }
+  function getEngagement(){
+    try { return JSON.parse(localStorage.getItem(ENGAGEMENT_KEY) || '{}'); } catch { return {}; }
+  }
+  function setEngagement(o){ try { localStorage.setItem(ENGAGEMENT_KEY, JSON.stringify(o)); } catch {} }
+  function recordWeeklyVisit(){
+    const e = getEngagement();
+    const wk = isoWeekKey();
+    e.weeksVisited = e.weeksVisited || [];
+    if (!e.weeksVisited.includes(wk)){
+      e.weeksVisited.push(wk);
+      e.weeksVisited = e.weeksVisited.slice(-12);
+      setEngagement(e);
+    }
+  }
+  function recordLessonCompletion(){
+    const e = getEngagement();
+    const wk = isoWeekKey();
+    e.lessonsByWeek = e.lessonsByWeek || {};
+    e.lessonsByWeek[wk] = (e.lessonsByWeek[wk] || 0) + 1;
+    const keep = Object.keys(e.lessonsByWeek).sort().slice(-4);
+    e.lessonsByWeek = Object.fromEntries(keep.map(k => [k, e.lessonsByWeek[k]]));
+    setEngagement(e);
+    return e.lessonsByWeek[wk];
+  }
+  function consecutiveWeekStreak(){
+    const e = getEngagement();
+    const weeks = (e.weeksVisited || []).slice().sort();
+    if (weeks.length < 2) return weeks.length;
+    let count = 1;
+    let probe = new Date();
+    let curKey = isoWeekKey(probe);
+    if (!weeks.includes(curKey)) return 0;
+    while (true){
+      probe = new Date(probe.getTime() - 7*86400000);
+      const prevKey = isoWeekKey(probe);
+      if (weeks.includes(prevKey)){ count++; } else { break; }
+    }
+    return count;
+  }
+  function showLmsToast(elId, autoHideMs){
+    autoHideMs = autoHideMs || 8000;
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.hidden = false;
+    const closeBtn = el.querySelector('.lms-toast__close');
+    const popupId = elId === 'lmsToastTopPercentile' ? 'top_percentile_v2' : 'weekly_streak_v2';
+    let timer = null;
+    const dismiss = () => {
+      el.hidden = true;
+      if (timer) clearTimeout(timer);
+      if (window.PopupManager) window.PopupManager.dismiss(popupId);
+    };
+    if (closeBtn) closeBtn.onclick = dismiss;
+    timer = setTimeout(dismiss, autoHideMs);
+  }
+  function hideLmsToast(elId){
+    const el = document.getElementById(elId);
+    if (el) el.hidden = true;
+  }
+  function registerEngagementPopups(){
+    if (!window.PopupManager) return;
+    window.PopupManager.register('top_percentile_v2', {
+      priority: 3, category: 'engagement', targetAudience: 'authenticated',
+      show: () => showLmsToast('lmsToastTopPercentile'),
+      hide: () => hideLmsToast('lmsToastTopPercentile'),
+      maxPerDay: 1,
+      cooldownMs: 60*60*1000
+    });
+    window.PopupManager.register('weekly_streak_v2', {
+      priority: 3, category: 'engagement', targetAudience: 'authenticated',
+      show: () => showLmsToast('lmsToastStreak'),
+      hide: () => hideLmsToast('lmsToastStreak'),
+      maxPerDay: 1,
+      cooldownMs: 60*60*1000
+    });
+  }
+  registerEngagementPopups();
 
   async function authGate(){
     if (devBypass) return true;
@@ -1137,6 +1272,21 @@
         location.replace('free-portal.html');
         return false;
       }
+      try {
+        recordWeeklyVisit();
+        const streak = consecutiveWeekStreak();
+        if (window.PopupManager){
+          window.PopupManager.setUser({ isAuthenticated: true, role: 'student_lead' });
+        }
+        if (streak >= 2 && window.PopupManager){
+          const titleEl = document.querySelector('#lmsToastStreak [data-streak-title]');
+          if (titleEl){
+            const ordinal = streak === 2 ? 'השני' : streak === 3 ? 'השלישי' : 'ה-' + streak;
+            titleEl.textContent = 'זה השבוע ' + ordinal + ' ברציפות שאתה נכנס!';
+          }
+          setTimeout(() => window.PopupManager.request('weekly_streak_v2'), 1500);
+        }
+      } catch(_){}
       return true;
     } catch(_){
       sessionStorage.setItem('returnUrl', location.href);
@@ -1702,6 +1852,12 @@
     if (window.CourseProgress && !devBypass){
       try { window.CourseProgress.markVideoWatched(modules[m].lessons[l].id, 'nlp-practitioner', l + 1); } catch(_){}
     }
+    try {
+      const weeklyCount = recordLessonCompletion();
+      if (weeklyCount === 2 && window.PopupManager){
+        setTimeout(() => window.PopupManager.request('top_percentile_v2'), 600);
+      }
+    } catch(_){}
     if (m === currentModuleIndex && l === currentLessonIndex) refreshCompleteBtn();
     renderProgress();
     renderSidebarNav(document.getElementById('sbSearch').value);

@@ -4278,10 +4278,6 @@
                     <span class="header-continue-lesson" id="headerContinueLessonName">—</span>
                 </span>
             </button>
-            <a href="training.html" class="header-training-cta">
-                <i class="fa-solid fa-graduation-cap"></i>
-                <span>לקבלת פרטים לתוכנית הכשרה</span>
-            </a>
             <a href="../index.html" class="back-to-site" title="חזרה לאתר" aria-label="חזרה לאתר">
                 <i class="fa-solid fa-arrow-right"></i>
                 <span>חזרה לאתר</span>
@@ -5339,25 +5335,6 @@
         </div>
     </div>
 
-    <!-- Training CTA Popup -->
-    <div class="modal-overlay" id="trainingCtaOverlay" onclick="if(event.target===this)hideTrainingCta()" style="display:none;z-index:9999;">
-        <div class="modal-box" onclick="event.stopPropagation()" style="max-width:460px;text-align:center;padding:2.5rem 2rem;border-radius:20px;position:relative;">
-            <button onclick="hideTrainingCta()" style="position:absolute;top:12px;left:12px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-secondary,#999);line-height:1;" aria-label="סגור">✕</button>
-            <div style="font-size:2.5rem;margin-bottom:0.8rem;">🎉</div>
-            <h2 style="color:var(--deep-petrol,#003B46);font-size:1.4rem;margin-bottom:0.6rem;">כל הכבוד! סיימת 5 שיעורים</h2>
-            <p style="color:var(--text-secondary,#555);font-size:1rem;line-height:1.7;margin-bottom:1.5rem;">
-                רואים שהתוכן מדבר אליך.<br>
-                רוצה להעמיק עוד יותר ולהפוך את הידע לכלי מקצועי?<br>
-                <strong>התוכנית שלנו כוללת הכשרה מקצועית מקיפה והסמכה.</strong>
-            </p>
-            <a href="training.html" style="display:inline-block;padding:0.9rem 2rem;background:linear-gradient(135deg,#D4AF37,#c9a227);color:#003B46;font-weight:700;border-radius:12px;text-decoration:none;font-size:1.05rem;transition:all 0.2s;box-shadow:0 4px 15px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-                לפרטים על תוכנית ההכשרה ←
-            </a>
-            <div style="margin-top:1rem;">
-                <button onclick="hideTrainingCta()" style="background:none;border:none;color:var(--text-secondary,#999);cursor:pointer;font-size:0.9rem;font-family:inherit;">אמשיך ללמוד בחינם</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Toast -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -6259,7 +6236,8 @@
                     maxPerDay: 1,
                     cooldownMs: 5 * 60 * 1000  // 5 min cooldown
                 });
-                window.PopupManager.register('training_cta', {
+                // training_cta disabled 2026-05-24 — Master marketing hidden from site
+                /* window.PopupManager.register('training_cta', {
                     priority: 3,
                     category: 'engagement',
                     targetAudience: 'free_user',
@@ -6267,7 +6245,7 @@
                     hide: function () { hideTrainingCta(); },
                     maxPerDay: 1,
                     cooldownMs: 24 * 60 * 60 * 1000
-                });
+                }); */
                 window.PopupManager.register('referral_toast', {
                     priority: 5,
                     category: 'info',
@@ -7306,14 +7284,12 @@
             if (window.PopupManager) window.PopupManager.dismiss('share_prompt');
         }
 
+        // training_cta disabled 2026-05-24 — overlay removed, Master marketing hidden from site
         function showTrainingCta() {
-            const overlay = document.getElementById('trainingCtaOverlay');
-            if (overlay) overlay.style.display = 'flex';
+            // disabled — overlay no longer exists
         }
         function hideTrainingCta() {
-            const overlay = document.getElementById('trainingCtaOverlay');
-            if (overlay) overlay.style.display = 'none';
-            if (window.PopupManager) window.PopupManager.dismiss('training_cta');
+            // disabled — overlay no longer exists
         }
 
         function sharePromptWhatsApp() {

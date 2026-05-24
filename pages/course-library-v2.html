@@ -814,6 +814,156 @@
   @media (max-width: 900px) {
     .lms-toast { left: 12px; right: 12px; bottom: 80px; max-width: none; }
   }
+
+  /* ===== LMS Modal — full-screen overlay + centered card ===== */
+  .lms-modal-overlay {
+    position: fixed; inset: 0; z-index: 9500;
+    background: rgba(6,18,20,0.82);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    animation: lmsModalOverlayIn 220ms ease;
+  }
+  .lms-modal-overlay[hidden] { display: none; }
+  @keyframes lmsModalOverlayIn { from { opacity:0; } to { opacity:1; } }
+
+  .lms-modal {
+    position: relative;
+    width: 100%; max-width: 480px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 32px 28px 28px;
+    animation: lmsModalIn 260ms cubic-bezier(.2,.8,.2,1);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+  @keyframes lmsModalIn { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: none; } }
+
+  .lms-modal__close {
+    position: absolute; top: 12px; inset-inline-start: 14px;
+    background: none; border: none;
+    color: var(--text-muted); font-size: 24px; cursor: pointer;
+    padding: 4px 8px; line-height: 1; border-radius: var(--radius-sm);
+  }
+  .lms-modal__close:hover { color: var(--accent-gold); }
+
+  .lms-modal__head { text-align: center; margin-bottom: 20px; }
+  .lms-modal__head h2 {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: var(--fs-xl); color: var(--text-primary);
+    margin: 0 0 8px 0;
+  }
+  .lms-modal__head p {
+    color: var(--text-muted); font-size: var(--fs-sm); margin: 0;
+  }
+
+  .lms-modal__body { display: flex; flex-direction: column; gap: 14px; }
+
+  .lms-modal__benefits {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .lms-modal__benefits li {
+    display: flex; align-items: center; gap: 8px;
+    font-size: var(--fs-sm); color: var(--text-primary);
+  }
+  .lms-modal__benefits li::before {
+    content: '✓';
+    color: var(--accent-gold); font-weight: 700; flex-shrink: 0;
+  }
+
+  .lms-modal__tabs {
+    display: flex; gap: 8px; border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 12px; margin-bottom: 4px;
+  }
+  .lms-modal__tab {
+    flex: 1; padding: 8px; background: none; border: 1px solid var(--border-subtle);
+    color: var(--text-muted); border-radius: var(--radius-sm);
+    cursor: pointer; font-family: inherit; font-size: var(--fs-sm); font-weight: 500;
+    transition: background var(--dur-fast), color var(--dur-fast);
+  }
+  .lms-modal__tab:hover,
+  .lms-modal__tab.is-active { background: var(--bg-elevated); color: var(--accent-gold); border-color: var(--accent-gold); }
+
+  .lms-modal__social {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .lms-modal__google-btn {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 12px; border-radius: var(--radius-md);
+    background: #fff; border: 1px solid #dadce0; cursor: pointer;
+    font-family: inherit; font-size: var(--fs-base); font-weight: 600; color: #3c4043;
+    transition: box-shadow var(--dur-fast);
+  }
+  .lms-modal__google-btn:hover { box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+
+  .lms-modal__form {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .lms-modal__form input,
+  .lms-modal__form select,
+  .lms-modal__form textarea {
+    width: 100%; padding: 10px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary); font-family: inherit; font-size: var(--fs-sm);
+    outline: none; resize: vertical;
+    transition: border-color var(--dur-fast);
+  }
+  .lms-modal__form input:focus,
+  .lms-modal__form select:focus,
+  .lms-modal__form textarea:focus { border-color: var(--accent-gold); }
+  .lms-modal__form label {
+    font-size: var(--fs-xs); color: var(--text-muted); margin-bottom: 2px; display: block;
+  }
+  .lms-modal__form select option { background: var(--bg-elevated); }
+
+  .lms-modal__submit {
+    width: 100%; padding: 12px;
+    background: var(--accent-gold); color: var(--text-on-gold);
+    border: none; border-radius: var(--radius-md);
+    font-family: inherit; font-size: var(--fs-base); font-weight: 700;
+    cursor: pointer; transition: background var(--dur-fast);
+  }
+  .lms-modal__submit:hover { background: var(--accent-gold-hover); }
+  .lms-modal__submit:disabled { opacity: .6; cursor: not-allowed; }
+
+  .lms-modal__link-btn {
+    background: none; border: none; color: var(--accent-gold);
+    font-family: inherit; font-size: var(--fs-sm); cursor: pointer;
+    text-align: center; padding: 4px; text-decoration: underline;
+  }
+  .lms-modal__link-btn:hover { color: var(--accent-gold-hover); }
+
+  .lms-modal__error {
+    color: #ff6b6b; font-size: var(--fs-sm); text-align: center; padding: 4px 0;
+  }
+  .lms-modal__success {
+    color: var(--success); font-size: var(--fs-sm); text-align: center; padding: 8px 0;
+  }
+
+  .lms-modal__action-row {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .lms-modal__action-btn {
+    flex: 1; min-width: 120px; padding: 10px 14px;
+    border-radius: var(--radius-md); cursor: pointer;
+    font-family: inherit; font-size: var(--fs-sm); font-weight: 600;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-elevated); color: var(--text-primary);
+    transition: background var(--dur-fast);
+  }
+  .lms-modal__action-btn:hover { background: rgba(255,255,255,.08); }
+  .lms-modal__action-btn--gold {
+    background: var(--accent-gold); color: var(--text-on-gold); border-color: var(--accent-gold);
+  }
+  .lms-modal__action-btn--gold:hover { background: var(--accent-gold-hover); border-color: var(--accent-gold-hover); }
+
+  @media (max-width: 600px) {
+    .lms-modal { padding: 24px 16px 20px; max-width: none; }
+  }
 </style>
 </head>
 <body>
@@ -861,10 +1011,6 @@
     </div>
 
     <div class="lms-hd__left">
-      <a class="lms-hd__cta-2" href="training.html">
-        <i class="fa-solid fa-graduation-cap"></i>
-        <span>תוכנית ההכשרה</span>
-      </a>
       <button class="lms-hd__icon lms-hd__hamburger" type="button" aria-label="תפריט" id="hdHamburger">
         <i class="fa-solid fa-bars"></i>
       </button>
@@ -1145,7 +1291,7 @@
 </nav>
 
 <!-- Engagement popups (PopupManager-driven) -->
-<div id="lmsToastTopPercentile" class="lms-toast" role="status" aria-live="polite" hidden>
+<div id="lmsToastTopPercentile" class="lms-toast" role="status" aria-live="polite" data-popup-id="top_percentile_v2" hidden>
   <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
   <div class="lms-toast__icon">🎯</div>
   <div class="lms-toast__body">
@@ -1153,12 +1299,183 @@
     <p>הנתון הזה מכניס אותך ל-15% העליונים של הלומדים הפעילים בפורטל.</p>
   </div>
 </div>
-<div id="lmsToastStreak" class="lms-toast" role="status" aria-live="polite" hidden>
+<div id="lmsToastStreak" class="lms-toast" role="status" aria-live="polite" data-popup-id="weekly_streak_v2" hidden>
   <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
   <div class="lms-toast__icon">🔥</div>
   <div class="lms-toast__body">
     <strong data-streak-title>זה השבוע השני ברציפות שאתה נכנס!</strong>
     <p>רק 20% מהנרשמים שומרים על רצף כזה. אל תעצור עכשיו!</p>
+  </div>
+</div>
+
+<!-- video_toast: shows 60s after guest starts watching a lesson -->
+<div id="lmsToastVideo" class="lms-toast" role="status" aria-live="polite" data-popup-id="video_toast" hidden>
+  <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
+  <div class="lms-toast__icon">🎬</div>
+  <div class="lms-toast__body">
+    <strong>אהבת את השיעור?</strong>
+    <p>הירשמו חינם כדי לקבל גישה לכל הקורס.
+      <button type="button" onclick="openLmsAuthModal('modal')" style="display:inline;background:none;border:none;color:var(--accent-gold);font-family:inherit;font-size:inherit;cursor:pointer;padding:0;text-decoration:underline;">להירשם</button>
+    </p>
+  </div>
+</div>
+
+<!-- share_prompt: fires after lesson_complete (3+ lessons) -->
+<div id="lmsToastShare" class="lms-toast" role="status" aria-live="polite" data-popup-id="share_prompt" hidden>
+  <button type="button" class="lms-toast__close" aria-label="סגור" onclick="hideLmsToast('lmsToastShare');if(window.PopupManager)window.PopupManager.dismiss('share_prompt');">×</button>
+  <div class="lms-toast__icon">💛</div>
+  <div class="lms-toast__body">
+    <strong>נהנית מהשיעור?</strong>
+    <p style="margin-bottom:10px;">שתפו חברים וקבלו עוד תכנים בחינם</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" class="lms-modal__action-btn lms-modal__action-btn--gold" onclick="lmsShareWhatsApp()" style="font-size:13px;padding:7px 12px;">
+        <i class="fa-brands fa-whatsapp"></i> שיתוף בוואטסאפ
+      </button>
+      <button type="button" class="lms-modal__action-btn" onclick="lmsShareCopy()" style="font-size:13px;padding:7px 12px;">
+        <i class="fa-solid fa-link"></i> העתקת קישור
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- referral_toast: fires when new referrals detected in ambassador tab -->
+<div id="lmsToastReferral" class="lms-toast" role="status" aria-live="polite" data-popup-id="referral_toast" hidden>
+  <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
+  <div class="lms-toast__icon">🎉</div>
+  <div class="lms-toast__body">
+    <strong>יש לכם הפניה חדשה!</strong>
+    <p>מישהו שהפניתם הצטרף לפורטל. כל הכבוד!</p>
+  </div>
+</div>
+
+<!-- auth_modal / auth_wall: shared modal, content set dynamically -->
+<div id="lmsAuthModal" class="lms-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lmsAuthTitle" hidden>
+  <div class="lms-modal">
+    <button type="button" class="lms-modal__close" aria-label="סגור" onclick="closeLmsAuthModal()">×</button>
+    <div class="lms-modal__head">
+      <h2 id="lmsAuthTitle" data-auth-title>קבלו גישה מלאה בחינם!</h2>
+      <p data-auth-subtitle>התחברו כדי לקבל גישה לכל התכנים הבונוס</p>
+    </div>
+    <div class="lms-modal__body">
+      <ul class="lms-modal__benefits">
+        <li>חוברת עבודה להורדה</li>
+        <li>מורה AI אישי לכל שיעור</li>
+        <li>שמירת התקדמות אוטומטית</li>
+        <li>גישה לכל 51 השיעורים</li>
+      </ul>
+      <div class="lms-modal__tabs" role="tablist">
+        <button type="button" class="lms-modal__tab is-active" role="tab" onclick="lmsSwitchAuthTab('social')">
+          <i class="fa-brands fa-google"></i> Google
+        </button>
+        <button type="button" class="lms-modal__tab" role="tab" onclick="lmsSwitchAuthTab('email')">
+          <i class="fa-solid fa-envelope"></i> דוא"ל
+        </button>
+      </div>
+      <!-- Social panel -->
+      <div id="lmsAuthSocialPanel" class="lms-modal__social">
+        <button type="button" class="lms-modal__google-btn" onclick="lmsSignInWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          כניסה עם Google
+        </button>
+        <p style="text-align:center;font-size:12px;color:var(--text-muted);">מהירה ובטוחה — ללא סיסמה</p>
+      </div>
+      <!-- Email panel -->
+      <div id="lmsAuthEmailPanel" class="lms-modal__social" hidden>
+        <form class="lms-modal__form" onsubmit="lmsHandleEmailAuth(event)">
+          <div>
+            <label for="lmsAuthName">שם מלא</label>
+            <input type="text" id="lmsAuthName" autocomplete="name" placeholder="ישראל ישראלי">
+          </div>
+          <div>
+            <label for="lmsAuthEmail">כתובת דוא"ל</label>
+            <input type="email" id="lmsAuthEmail" autocomplete="email" placeholder="me@example.com" required>
+          </div>
+          <div>
+            <label for="lmsAuthPassword">סיסמה</label>
+            <input type="password" id="lmsAuthPassword" autocomplete="current-password" placeholder="לפחות 6 תווים" required>
+          </div>
+          <div id="lmsAuthError" class="lms-modal__error" hidden></div>
+          <button type="submit" class="lms-modal__submit">כניסה</button>
+          <button type="button" class="lms-modal__link-btn" onclick="lmsHandleSignup(event)">אין לי חשבון — הרשמה</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ai_questionnaire modal -->
+<div id="lmsQuestionnaireModal" class="lms-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lmsQTitle" hidden>
+  <div class="lms-modal">
+    <button type="button" class="lms-modal__close" aria-label="סגור" onclick="closeLmsQuestionnaire()">×</button>
+    <div class="lms-modal__head">
+      <h2 id="lmsQTitle">התאמת המורה האישי לך</h2>
+      <p>שאלון קצר (2 דק׳) כדי שנוכל לתת לך חוויית לימוד מותאמת אישית</p>
+    </div>
+    <div class="lms-modal__body">
+      <form id="lmsQForm" class="lms-modal__form" onsubmit="submitLmsQuestionnaire(event)">
+        <div>
+          <label for="lmsQMotivation">מה מביא אותך ללמוד NLP? (בכמה מילים)</label>
+          <textarea id="lmsQMotivation" rows="2" placeholder="למשל: לשפר את יכולות התקשורת שלי..."></textarea>
+        </div>
+        <div>
+          <label for="lmsQExperience">רמת הניסיון שלך ב-NLP</label>
+          <select id="lmsQExperience">
+            <option value="">בחר/י...</option>
+            <option value="none">מתחיל — אין לי ניסיון</option>
+            <option value="basic">בסיסי — קראתי קצת</option>
+            <option value="intermediate">בינוני — למדתי קצת</option>
+            <option value="advanced">מתקדם — יש לי ניסיון</option>
+          </select>
+        </div>
+        <div>
+          <label for="lmsQCertification">האם אתה/את מעוניין/ת בהסמכה?</label>
+          <select id="lmsQCertification">
+            <option value="">בחר/י...</option>
+            <option value="yes_near">כן, בשנה הקרובה</option>
+            <option value="yes_later">כן, בעתיד</option>
+            <option value="maybe">לא בטוח/ה</option>
+            <option value="no">לא, לימוד עצמי בלבד</option>
+          </select>
+        </div>
+        <div>
+          <label for="lmsQLearning">סגנון הלמידה המועדף עלייך</label>
+          <select id="lmsQLearning">
+            <option value="">בחר/י...</option>
+            <option value="video">וידאו</option>
+            <option value="reading">קריאה</option>
+            <option value="practice">תרגול מעשי</option>
+            <option value="mixed">שילוב של הכל</option>
+          </select>
+        </div>
+        <div>
+          <label for="lmsQSource">איך הגעת אלינו?</label>
+          <select id="lmsQSource">
+            <option value="">בחר/י...</option>
+            <option value="instagram">אינסטגרם</option>
+            <option value="facebook">פייסבוק</option>
+            <option value="google">גוגל</option>
+            <option value="friend">המלצת חבר/ה</option>
+            <option value="other">אחר</option>
+          </select>
+        </div>
+        <div>
+          <label for="lmsQPhone">מספר טלפון (לא חובה)</label>
+          <input type="tel" id="lmsQPhone" placeholder="050-0000000" dir="ltr">
+        </div>
+        <div>
+          <label for="lmsQNotes">הערות נוספות (לא חובה)</label>
+          <textarea id="lmsQNotes" rows="2" placeholder="כל דבר שתרצה/י שנדע..."></textarea>
+        </div>
+        <div id="lmsQError" class="lms-modal__error" hidden></div>
+        <div class="lms-modal__action-row">
+          <button type="submit" id="lmsQSubmit" class="lms-modal__action-btn lms-modal__action-btn--gold">שלח/י</button>
+          <button type="button" class="lms-modal__action-btn" onclick="skipLmsQuestionnaire()">אחר כך</button>
+        </div>
+      </form>
+      <div id="lmsQSuccess" class="lms-modal__success" hidden>
+        <i class="fa-solid fa-check-circle"></i> תודה! ממליץ לך להמשיך לשיעור הבא.
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1226,14 +1543,15 @@
     if (!el) return;
     el.hidden = false;
     const closeBtn = el.querySelector('.lms-toast__close');
-    const popupId = elId === 'lmsToastTopPercentile' ? 'top_percentile_v2' : 'weekly_streak_v2';
+    // Use data-popup-id attribute for dynamic mapping (replaces old hardcoded map)
+    const popupId = el.dataset.popupId || '';
     let timer = null;
     const dismiss = () => {
       el.hidden = true;
       if (timer) clearTimeout(timer);
-      if (window.PopupManager) window.PopupManager.dismiss(popupId);
+      if (popupId && window.PopupManager) window.PopupManager.dismiss(popupId);
     };
-    if (closeBtn) closeBtn.onclick = dismiss;
+    if (closeBtn && !closeBtn.onclick) closeBtn.onclick = dismiss;
     timer = setTimeout(dismiss, autoHideMs);
   }
   function hideLmsToast(elId){
@@ -1258,6 +1576,204 @@
     });
   }
   registerEngagementPopups();
+
+  // ===== Auth modal helpers (auth_modal + auth_wall share one DOM element) =====
+  let _lmsActiveAuthPopup = null;
+  function openLmsAuthModal(mode){
+    _lmsActiveAuthPopup = mode === 'wall' ? 'auth_wall' : 'auth_modal';
+    const modal = document.getElementById('lmsAuthModal');
+    if (!modal) return;
+    const title = modal.querySelector('[data-auth-title]');
+    const sub   = modal.querySelector('[data-auth-subtitle]');
+    if (mode === 'wall'){
+      if (title) title.textContent = 'הגעת לחצי מהקורס! 🎉';
+      if (sub)   sub.textContent   = 'כדי להמשיך ללמוד, נשמח שתירשמו — זה חינם!';
+    } else {
+      if (title) title.textContent = 'קבלו גישה מלאה בחינם!';
+      if (sub)   sub.textContent   = 'התחברו כדי לקבל גישה לכל התכנים הבונוס';
+    }
+    modal.hidden = false;
+  }
+  function closeLmsAuthModal(){
+    const modal = document.getElementById('lmsAuthModal');
+    if (modal) modal.hidden = true;
+    if (_lmsActiveAuthPopup && window.PopupManager){
+      window.PopupManager.dismiss(_lmsActiveAuthPopup);
+      _lmsActiveAuthPopup = null;
+    }
+  }
+  async function lmsSignInWithGoogle(){
+    const client = window.supabaseClient;
+    if (!client) return;
+    try {
+      await client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+    } catch(e){ console.error('Google sign-in', e); }
+  }
+  async function lmsHandleEmailAuth(event){
+    event && event.preventDefault();
+    const client = window.supabaseClient;
+    if (!client) return;
+    const email = (document.getElementById('lmsAuthEmail') || {}).value;
+    const pw    = (document.getElementById('lmsAuthPassword') || {}).value;
+    if (!email || !pw) return;
+    const errEl = document.getElementById('lmsAuthError');
+    try {
+      const { error } = await client.auth.signInWithPassword({ email, password: pw });
+      if (error){
+        if (errEl){ errEl.textContent = 'שגיאת התחברות: ' + (error.message || ''); errEl.hidden = false; }
+        return;
+      }
+      closeLmsAuthModal();
+      location.reload();
+    } catch(e){ if (errEl){ errEl.textContent = 'שגיאת רשת'; errEl.hidden = false; } }
+  }
+  async function lmsHandleSignup(event){
+    event && event.preventDefault();
+    const client = window.supabaseClient;
+    if (!client) return;
+    const name  = (document.getElementById('lmsAuthName') || {}).value;
+    const email = (document.getElementById('lmsAuthEmail') || {}).value;
+    const pw    = (document.getElementById('lmsAuthPassword') || {}).value;
+    if (!email || !pw) return;
+    const errEl = document.getElementById('lmsAuthError');
+    try {
+      const { error } = await client.auth.signUp({ email, password: pw, options: { data: { full_name: name || '' } } });
+      if (error){
+        if (errEl){ errEl.textContent = 'שגיאת הרשמה: ' + (error.message || ''); errEl.hidden = false; }
+        return;
+      }
+      closeLmsAuthModal();
+      location.reload();
+    } catch(e){ if (errEl){ errEl.textContent = 'שגיאת רשת'; errEl.hidden = false; } }
+  }
+  function lmsSwitchAuthTab(tab){
+    const social = document.getElementById('lmsAuthSocialPanel');
+    const email  = document.getElementById('lmsAuthEmailPanel');
+    if (social) social.hidden = (tab !== 'social');
+    if (email)  email.hidden  = (tab !== 'email');
+    // Update tab active states
+    const tabs = document.querySelectorAll('#lmsAuthModal .lms-modal__tab');
+    tabs.forEach((t, i) => {
+      const isActive = (i === 0 && tab === 'social') || (i === 1 && tab === 'email');
+      t.classList.toggle('is-active', isActive);
+    });
+  }
+
+  // ===== Questionnaire modal helpers =====
+  function openLmsQuestionnaire(){
+    const m = document.getElementById('lmsQuestionnaireModal');
+    if (m) m.hidden = false;
+  }
+  function closeLmsQuestionnaire(){
+    const m = document.getElementById('lmsQuestionnaireModal');
+    if (m) m.hidden = true;
+  }
+  function skipLmsQuestionnaire(){
+    try { localStorage.setItem('questionnaireCompleted', 'true'); } catch {}
+    closeLmsQuestionnaire();
+    if (window.PopupManager) window.PopupManager.dismiss('ai_questionnaire');
+  }
+  async function submitLmsQuestionnaire(event){
+    event && event.preventDefault();
+    const btn = document.getElementById('lmsQSubmit');
+    if (btn) btn.disabled = true;
+    try {
+      const client = window.supabaseClient;
+      if (client){
+        const { data: { user } } = await client.auth.getUser().catch(() => ({ data: { user: null } }));
+        const payload = {
+          user_id: user ? user.id : null,
+          course_slug: 'nlp-practitioner',
+          full_name: (user && user.user_metadata && user.user_metadata.full_name) || '',
+          email: user ? user.email : '',
+          phone: (document.getElementById('lmsQPhone') || {}).value || null,
+          motivation: (document.getElementById('lmsQMotivation') || {}).value || null,
+          experience_level: (document.getElementById('lmsQExperience') || {}).value || null,
+          interest_certification: (document.getElementById('lmsQCertification') || {}).value || null,
+          preferred_learning: (document.getElementById('lmsQLearning') || {}).value || null,
+          how_found_us: (document.getElementById('lmsQSource') || {}).value || null,
+          notes: (document.getElementById('lmsQNotes') || {}).value || null
+        };
+        await client.from('course_questionnaires').insert(payload);
+      }
+      try { localStorage.setItem('questionnaireCompleted', 'true'); } catch {}
+      const success = document.getElementById('lmsQSuccess');
+      const form    = document.getElementById('lmsQForm');
+      if (form) form.style.display = 'none';
+      if (success) success.hidden = false;
+      setTimeout(closeLmsQuestionnaire, 2000);
+    } catch(e){ closeLmsQuestionnaire(); }
+  }
+
+  // ===== Share prompt helpers =====
+  async function lmsShareWhatsApp(){
+    let url = location.origin + '/';
+    try {
+      const client = window.supabaseClient;
+      const { data: { user } } = await client.auth.getUser();
+      if (user && window.Referrals && window.Referrals.getLink){
+        url = await window.Referrals.getLink(user.id);
+      }
+    } catch {}
+    const msg = encodeURIComponent('היי! מצאתי קורס NLP חינמי מעולה שאני חושב/ת שיעניין אותך: ' + url);
+    window.open('https://wa.me/?text=' + msg, '_blank');
+    if (window.PopupManager){ window.PopupManager.click('share_prompt'); window.PopupManager.dismiss('share_prompt'); }
+    hideLmsToast('lmsToastShare');
+  }
+  async function lmsShareCopy(){
+    let url = location.origin + '/';
+    try {
+      const client = window.supabaseClient;
+      const { data: { user } } = await client.auth.getUser();
+      if (user && window.Referrals && window.Referrals.getLink){
+        url = await window.Referrals.getLink(user.id);
+      }
+    } catch {}
+    try { await navigator.clipboard.writeText(url); } catch {}
+    if (window.PopupManager){ window.PopupManager.click('share_prompt'); window.PopupManager.dismiss('share_prompt'); }
+    hideLmsToast('lmsToastShare');
+  }
+
+  // ===== Register all 6 ported popups =====
+  function registerPortedPopups(){
+    if (!window.PopupManager) return;
+    window.PopupManager.register('auth_modal', {
+      priority: 2, category: 'critical', targetAudience: 'unauthenticated',
+      show: () => openLmsAuthModal('modal'),
+      hide: () => closeLmsAuthModal()
+    });
+    window.PopupManager.register('auth_wall', {
+      priority: 2, category: 'critical', targetAudience: 'unauthenticated',
+      show: () => openLmsAuthModal('wall'),
+      hide: () => closeLmsAuthModal()
+    });
+    window.PopupManager.register('ai_questionnaire', {
+      priority: 3, category: 'engagement', targetAudience: 'free_user',
+      show: () => openLmsQuestionnaire(),
+      hide: () => closeLmsQuestionnaire(),
+      maxPerDay: 1,
+      condition: () => { try { return localStorage.getItem('questionnaireCompleted') !== 'true'; } catch { return true; } }
+    });
+    window.PopupManager.register('video_toast', {
+      priority: 5, category: 'info', targetAudience: 'unauthenticated',
+      show: () => showLmsToast('lmsToastVideo', 12000),
+      hide: () => hideLmsToast('lmsToastVideo')
+    });
+    window.PopupManager.register('share_prompt', {
+      priority: 4, category: 'engagement', targetAudience: 'free_user',
+      show: () => showLmsToast('lmsToastShare', 15000),
+      hide: () => hideLmsToast('lmsToastShare'),
+      maxPerDay: 1,
+      cooldownMs: 5 * 60 * 1000
+    });
+    window.PopupManager.register('referral_toast', {
+      priority: 5, category: 'info', targetAudience: 'authenticated',
+      show: () => showLmsToast('lmsToastReferral', 6000),
+      hide: () => hideLmsToast('lmsToastReferral'),
+      maxPerDay: 2
+    });
+  }
+  registerPortedPopups();
 
   async function authGate(){
     if (devBypass) return true;
@@ -1378,6 +1894,7 @@
   let currentModuleIndex = -1;
   let currentLessonIndex = -1;
   let completionTimer = null;
+  let _videoToastTimer = null; // video_toast: 60s timer for unauthenticated guests
   // Reuse the singleton client created by supabase-client.js (avoids dual-client session split)
   const supabaseClient = window.supabaseClient || (window.SUPABASE_CONFIG && window.supabase
     ? window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey)
@@ -1775,6 +2292,24 @@
       completionTimer = setTimeout(() => markLessonCompleted(m, l), 45000);
     };
 
+    // video_toast: for unauthenticated guests, fire after 60s of watching
+    if (_videoToastTimer) clearTimeout(_videoToastTimer);
+    _videoToastTimer = null;
+    if (!devBypass && window.PopupManager){
+      // Check auth state asynchronously; only fire toast for guests
+      (async () => {
+        try {
+          const client = window.supabaseClient;
+          const { data: { session } } = client ? await client.auth.getSession() : { data: { session: null } };
+          if (!session){
+            _videoToastTimer = setTimeout(() => {
+              if (window.PopupManager) window.PopupManager.request('video_toast');
+            }, 60000);
+          }
+        } catch {}
+      })();
+    }
+
     refreshCompleteBtn();
     refreshNavBtns();
     loadNotesForCurrent();
@@ -1856,6 +2391,10 @@
       const weeklyCount = recordLessonCompletion();
       if (weeklyCount === 2 && window.PopupManager){
         setTimeout(() => window.PopupManager.request('top_percentile_v2'), 600);
+      }
+      // share_prompt: fires after 3rd completed lesson (authenticated users)
+      if (completedLessons.length >= 3 && window.PopupManager){
+        setTimeout(() => window.PopupManager.request('share_prompt'), 2000);
       }
     } catch(_){}
     if (m === currentModuleIndex && l === currentLessonIndex) refreshCompleteBtn();
@@ -2221,8 +2760,8 @@
 
   async function showMasterView(skipPush){
     if (!_isPaidCustomer){
-      // Non-paying user → redirect to public training program page
-      window.location.href = 'training.html';
+      // Master marketing hidden 2026-05-24 — was: window.location.href = 'training.html';
+      console.info('Master access requires paid membership.');
       return;
     }
     document.body.classList.remove('view-player', 'view-ambassador');

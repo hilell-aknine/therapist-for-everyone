@@ -403,6 +403,25 @@
             return data;
         },
 
+        // Append-only completion event → lesson_completion_events (audit-2026-06-01, P0 #3).
+        // The reliable write: awaited, returns true ONLY on a confirmed DB insert,
+        // throws on error (caller decides what to do — no silent drop).
+        // `lessonIdentifier` = YouTube ID (source 'video') or "module-lesson" key (source 'game').
+        async logCompletionEvent(lessonIdentifier, source) {
+            const user = await Auth.getCurrentUser();
+            if (!user) throw new Error('not_authenticated');
+
+            const { error } = await supabaseClient
+                .from('lesson_completion_events')
+                .insert({
+                    user_id: user.id,
+                    lesson_identifier: lessonIdentifier,
+                    source: source
+                });
+            if (error) throw error;
+            return true;
+        },
+
         async updateWatchTime(videoId, seconds) {
             const user = await Auth.getCurrentUser();
             if (!user) return;

@@ -1605,6 +1605,7 @@
   async function lmsSignInWithGoogle(){
     const client = window.supabaseClient;
     if (!client) return;
+    if (window.PopupManager && _lmsActiveAuthPopup) window.PopupManager.click(_lmsActiveAuthPopup);
     try {
       await client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
     } catch(e){ console.error('Google sign-in', e); }
@@ -1616,6 +1617,7 @@
     const email = (document.getElementById('lmsAuthEmail') || {}).value;
     const pw    = (document.getElementById('lmsAuthPassword') || {}).value;
     if (!email || !pw) return;
+    if (window.PopupManager && _lmsActiveAuthPopup) window.PopupManager.click(_lmsActiveAuthPopup);
     const errEl = document.getElementById('lmsAuthError');
     try {
       const { error } = await client.auth.signInWithPassword({ email, password: pw });
@@ -1635,6 +1637,7 @@
     const email = (document.getElementById('lmsAuthEmail') || {}).value;
     const pw    = (document.getElementById('lmsAuthPassword') || {}).value;
     if (!email || !pw) return;
+    if (window.PopupManager && _lmsActiveAuthPopup) window.PopupManager.click(_lmsActiveAuthPopup);
     const errEl = document.getElementById('lmsAuthError');
     try {
       const { error } = await client.auth.signUp({ email, password: pw, options: { data: { full_name: name || '' } } });
@@ -2282,6 +2285,9 @@
     document.getElementById('plTitle').textContent = lesson.title;
     document.getElementById('plSub').innerHTML = `מודול ${mod.id}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> ${lesson.duration} דק׳`;
 
+    // Lesson context for popup_events (auth_modal/video_toast/etc. carry this).
+    if (window.PopupManager) window.PopupManager.setLessonContext(lesson.id);
+
     const loading = document.getElementById('plLoading');
     const iframe  = document.getElementById('plIframe');
     loading.classList.remove('is-hidden');
@@ -2378,15 +2384,49 @@
     };
   }
 
-  function markLessonCompleted(m, l){
+  async function markLessonCompleted(m, l){
     const key = `${m}-${l}`;
-    if (!completedLessons.includes(key)){
+    const lessonId = (modules[m] && modules[m].lessons[l] && modules[m].lessons[l].id) || key;
+    const alreadyDone = completedLessons.includes(key);
+
+    // Authenticated users: require a CONFIRMED append-only write to
+    // lesson_completion_events BEFORE showing any completion UI/popups.
+    // Replaces the old fire-and-forget course_progress upsert that silently
+    // dropped completions on a network error (audit-2026-06-01, P0 #2/#3).
+    if (!alreadyDone && window.CourseProgress && !devBypass){
+      let confirmed = false;
+      try {
+        confirmed = await window.CourseProgress.logCompletionEvent(lessonId, 'video');
+      } catch(_){ confirmed = false; }
+
+      if (!confirmed){
+        // Do NOT swallow the failure: leave the lesson un-completed so the
+        // "סמן כהושלם" button stays available for a retry, and tell the user.
+        try { if (window.UI) window.UI.showToast('לא הצלחנו לשמור את ההתקדמות. בדוק חיבור ונסה שוב.', 'error'); } catch(_){}
+        refreshCompleteBtn();
+        return;
+      }
+
+      // Best-effort legacy mirror so the existing course_progress-based admin
+      // learner dashboard keeps seeing v2 completions (non-gating, secondary).
+      try { window.CourseProgress.markVideoWatched(lessonId, 'nlp-practitioner', l + 1); } catch(_){}
+    }
+
+    // Confirmed (or guest / devBypass): record locally, then fire completion UI.
+    if (!alreadyDone){
       completedLessons.push(key);
       localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
     }
-    if (window.CourseProgress && !devBypass){
-      try { window.CourseProgress.markVideoWatched(modules[m].lessons[l].id, 'nlp-practitioner', l + 1); } catch(_){}
+
+    // Keep PopupManager's lesson context + count current, then run the
+    // server-driven 'lesson_complete' trigger scan. setLessonCount() and
+    // notifyLessonComplete() were entirely missing on v2 (audit-2026-06-01, P1).
+    if (window.PopupManager){
+      window.PopupManager.setLessonContext(lessonId);
+      window.PopupManager.setLessonCount(completedLessons.length);
+      window.PopupManager.notifyLessonComplete();
     }
+
     try {
       const weeklyCount = recordLessonCompletion();
       if (weeklyCount === 2 && window.PopupManager){

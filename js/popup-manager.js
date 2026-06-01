@@ -27,6 +27,7 @@
     // --- Internal state ---
     const registry = {};       // { id: { priority, category, show, hide, condition, ... } }
     let activePopupId = null;  // currently showing popup id (or null)
+    let currentLessonIdentifier = null;  // lesson context for popup_events (set by the page)
     let queue = [];            // pending requests sorted by priority
     let processing = false;
 
@@ -226,7 +227,10 @@
                 const payload = {
                     popup_id: popupId,
                     event_type: eventType,
-                    variant: variant
+                    variant: variant,
+                    // Lesson context so every event (shown/clicked/dismissed) is
+                    // attributable to the lesson the user was on (audit-2026-06-01).
+                    lesson_identifier: currentLessonIdentifier
                 };
                 if (data?.user) {
                     payload.user_id = data.user.id;
@@ -478,6 +482,12 @@
 
         setLessonCount(n) {
             userContext.lessonCount = n || 0;
+        },
+
+        // Set the lesson the user is currently on, so popup_events rows
+        // (shown/clicked/dismissed) carry lesson_identifier context.
+        setLessonContext(identifier) {
+            currentLessonIdentifier = identifier || null;
         },
 
         getUser() {

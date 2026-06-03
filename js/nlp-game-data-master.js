@@ -14,5 +14,6 @@ const MODULES = [
     window.MODULE_6_MASTER,
     window.MODULE_7_MASTER,
     window.MODULE_8_MASTER,
-    window.MODULE_9_MASTER
+    window.MODULE_9_MASTER,
+    window.MODULE_10_MASTER
 ].filter(Boolean);

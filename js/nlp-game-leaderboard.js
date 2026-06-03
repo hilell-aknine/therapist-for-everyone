@@ -389,6 +389,8 @@
         async syncScore(playerData) {
             if (!window.supabaseClient || !this._currentUserId) return;
 
+            const course = window.GAME_COURSE || 'practitioner';
+
             try {
                 const lessonsCount = playerData.completedLessons
                     ? Object.keys(playerData.completedLessons).length
@@ -409,6 +411,7 @@
 
                 const row = {
                     user_id: this._currentUserId,
+                    course_id: course,
                     display_name: displayName,
                     total_xp: playerData.xp || 0,
                     level: playerData.level || 1,
@@ -421,7 +424,7 @@
 
                 await window.supabaseClient
                     .from('nlp_game_leaderboard')
-                    .upsert(row, { onConflict: 'user_id' });
+                    .upsert(row, { onConflict: 'user_id,course_id' });
             } catch (err) {
                 console.warn('[Leaderboard] syncScore error:', err);
             }
@@ -430,10 +433,12 @@
         // ─── Fetch Leaderboard ───
         async fetchLeaderboard(period) {
             if (!window.supabaseClient) return [];
+            const course = window.GAME_COURSE || 'practitioner';
             try {
                 let query = window.supabaseClient
                     .from('nlp_game_leaderboard')
                     .select('*')
+                    .eq('course_id', course)
                     .order('total_xp', { ascending: false })
                     .limit(20);
 
@@ -459,12 +464,14 @@
         // ─── Get Player Rank ───
         async getPlayerRank(userId) {
             if (!window.supabaseClient || !userId) return null;
+            const course = window.GAME_COURSE || 'practitioner';
             try {
                 // Get user's XP
                 const { data: me } = await window.supabaseClient
                     .from('nlp_game_leaderboard')
                     .select('total_xp')
                     .eq('user_id', userId)
+                    .eq('course_id', course)
                     .single();
 
                 if (!me) return null;
@@ -473,6 +480,7 @@
                 const { count } = await window.supabaseClient
                     .from('nlp_game_leaderboard')
                     .select('*', { count: 'exact', head: true })
+                    .eq('course_id', course)
                     .gt('total_xp', me.total_xp);
 
                 return (count || 0) + 1;

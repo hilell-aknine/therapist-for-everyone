@@ -168,6 +168,12 @@ class GeminiMentor {
 // ═══════════════════════════════════════
 class StoryGame {
     constructor() {
+        // Course identity — lets a Master variant reuse this engine without
+        // colliding with the free practitioner game's saves/leaderboard.
+        // Default MUST stay 'practitioner' so the existing free game is unaffected.
+        const courseId = (typeof window !== 'undefined' && window.GAME_COURSE) ? window.GAME_COURSE : 'practitioner';
+        this.courseId = courseId;
+
         this.currentScreen = 'home';
         this.currentModule = null;
         this.currentLesson = null;
@@ -559,6 +565,7 @@ class StoryGame {
                     .from('nlp_game_players')
                     .select('*')
                     .eq('user_id', user.id)
+                    .eq('course_id', this.courseId)
                     .single();
 
                 if (data && !error) {
@@ -631,6 +638,7 @@ class StoryGame {
         try {
             await window.supabaseClient.from('nlp_game_players').upsert({
                 user_id: user.id,
+                course_id: this.courseId,
                 xp: this.playerData.xp,
                 level: this.playerData.level,
                 hearts: this.playerData.hearts,
@@ -650,7 +658,7 @@ class StoryGame {
                 weekly_activity: this.playerData.weeklyActivity || {},
                 module_accuracy: this.playerData.moduleAccuracy || {},
                 longest_streak: this.playerData.longestStreak || 0
-            }, { onConflict: 'user_id' });
+            }, { onConflict: 'user_id,course_id' });
         } catch (e) {
             console.warn('Failed to create Supabase row', e);
         }
@@ -696,7 +704,8 @@ class StoryGame {
             const { error } = await window.supabaseClient
                 .from('nlp_game_players')
                 .update(payload)
-                .eq('user_id', this.user.id);
+                .eq('user_id', this.user.id)
+                .eq('course_id', this.courseId);
             if (error) throw error;
         };
 

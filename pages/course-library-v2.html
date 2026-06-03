@@ -992,7 +992,7 @@
           <b>קורס</b>
           <i class="fa-solid fa-chevron-down" style="font-size:.62em;margin-inline-start:.35rem;opacity:.85;"></i>
         </button>
-        <div id="courseSwitchMenu" role="menu" style="display:none;position:absolute;top:calc(100% + 6px);inset-inline-end:0;min-width:210px;background:#0a282e;border:1px solid rgba(212,175,55,.32);border-radius:12px;padding:6px;z-index:300;box-shadow:0 14px 36px rgba(0,0,0,.55);">
+        <div id="courseSwitchMenu" role="menu" style="display:none;position:fixed;min-width:210px;background:#0a282e;border:1px solid rgba(212,175,55,.32);border-radius:12px;padding:6px;z-index:9999;box-shadow:0 14px 36px rgba(0,0,0,.6);">
           <button class="lms-cs-opt" type="button" data-course="nlp-practitioner" role="menuitem" style="display:flex;align-items:center;gap:.5rem;width:100%;text-align:right;background:none;border:none;color:#E8F1F2;font:inherit;font-size:.9rem;padding:.55rem .7rem;border-radius:8px;cursor:pointer;"><i class="fa-solid fa-graduation-cap" style="color:#D4AF37;width:1.1em;"></i><span>NLP Practitioner</span></button>
           <button class="lms-cs-opt" id="courseSwitchMaster" type="button" data-course="nlp-master" role="menuitem" style="display:none;align-items:center;gap:.5rem;width:100%;text-align:right;background:none;border:none;color:#E8F1F2;font:inherit;font-size:.9rem;padding:.55rem .7rem;border-radius:8px;cursor:pointer;"><i class="fa-solid fa-crown" style="color:#D4AF37;width:1.1em;"></i><span>NLP מאסטר</span></button>
         </div>
@@ -2194,6 +2194,12 @@
     btn.addEventListener('click', e => {
       e.stopPropagation();
       const open = menu.style.display === 'block';
+      if (!open){
+        const r = btn.getBoundingClientRect();
+        menu.style.top = (r.bottom + 6) + 'px';
+        menu.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
+        menu.style.left = 'auto';
+      }
       menu.style.display = open ? 'none' : 'block';
       btn.setAttribute('aria-expanded', open ? 'false' : 'true');
     });

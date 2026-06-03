@@ -984,13 +984,18 @@
       <a class="lms-hd__brand" href="../index.html" aria-label="בית המטפלים">
         <img src="../assets/logo-square.png" alt="">
       </a>
-      <div class="lms-hd__course">
-        <span class="lms-hd__course-title">קורס NLP — יסודות ומעשה</span>
-        <span class="lms-hd__course-pill">
+      <div class="lms-hd__course" style="position:relative;">
+        <span class="lms-hd__course-title" id="courseTitleLabel">קורס NLP — יסודות ומעשה</span>
+        <button class="lms-hd__course-pill" id="courseSwitchBtn" type="button" aria-haspopup="true" aria-expanded="false" style="cursor:pointer;font:inherit;color:inherit;">
           <i class="fa-solid fa-circle"></i>
-          <span>NLP Practitioner</span>
+          <span id="coursePillLabel">NLP Practitioner</span>
           <b>קורס</b>
-        </span>
+          <i class="fa-solid fa-chevron-down" style="font-size:.62em;margin-inline-start:.35rem;opacity:.85;"></i>
+        </button>
+        <div id="courseSwitchMenu" role="menu" style="display:none;position:absolute;top:calc(100% + 6px);inset-inline-end:0;min-width:210px;background:#0a282e;border:1px solid rgba(212,175,55,.32);border-radius:12px;padding:6px;z-index:300;box-shadow:0 14px 36px rgba(0,0,0,.55);">
+          <button class="lms-cs-opt" type="button" data-course="nlp-practitioner" role="menuitem" style="display:flex;align-items:center;gap:.5rem;width:100%;text-align:right;background:none;border:none;color:#E8F1F2;font:inherit;font-size:.9rem;padding:.55rem .7rem;border-radius:8px;cursor:pointer;"><i class="fa-solid fa-graduation-cap" style="color:#D4AF37;width:1.1em;"></i><span>NLP Practitioner</span></button>
+          <button class="lms-cs-opt" id="courseSwitchMaster" type="button" data-course="nlp-master" role="menuitem" style="display:none;align-items:center;gap:.5rem;width:100%;text-align:right;background:none;border:none;color:#E8F1F2;font:inherit;font-size:.9rem;padding:.55rem .7rem;border-radius:8px;cursor:pointer;"><i class="fa-solid fa-crown" style="color:#D4AF37;width:1.1em;"></i><span>NLP מאסטר</span></button>
+        </div>
       </div>
     </div>
 
@@ -1814,8 +1819,9 @@
     }
   }
 
-  // Course data — TEMP duplication of course-library.html modules array.
-  const modules = [
+  // Course data. PRACTITIONER_MODULES is the free course; `modules` is the ACTIVE
+  // course (swapped to the master catalog by setCourse() — same player, course-aware).
+  const PRACTITIONER_MODULES = [
     { id: 1, title: 'מבוא ל-NLP', lessons: [
       { id: 'HdJTrqV-8kw', title: 'איך NLP יכול לשנות את חייך?', duration: '20:20' },
       { id: 'I4r3oERlZpc', title: 'מהן האמונות שמסתתרות בתת המודע?', duration: '21:40' },
@@ -1882,6 +1888,7 @@
       { id: 'EeFCN9Tddh8', title: 'טכניקת ציר הזמן', duration: '30:32' }
     ]}
   ];
+  let modules = PRACTITIONER_MODULES;  // active course (see setCourse)
 
   // Ambassador item removed — appears as dedicated .lms-partners card; no double promotion
   const announcements = [
@@ -1891,8 +1898,10 @@
     { icon: 'fa-solid fa-gamepad', text: 'משחק תרגול חדש — XP ורמות' }
   ];
 
-  const totalLessons = modules.reduce((s, m) => s + m.lessons.length, 0);
-  let completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+  let totalLessons = modules.reduce((s, m) => s + m.lessons.length, 0);
+  let courseType = 'nlp-practitioner';  // 'nlp-practitioner' | 'nlp-master'
+  function completedKey(){ return courseType === 'nlp-master' ? 'completedLessons_master' : 'completedLessons'; }
+  let completedLessons = JSON.parse(localStorage.getItem(completedKey()) || '[]');
   let lastWatched = null;
   let currentModuleIndex = -1;
   let currentLessonIndex = -1;
@@ -2153,6 +2162,51 @@
     renderSidebarNav();
   }
 
+  // ===== Course switching (Practitioner ⇄ Master) — same player, course-aware =====
+  function getMasterAsModules(){
+    // MASTER_MODULES {lessonNumber,lessonTitle,chapters[]} → player shape {id,title,lessons[]}
+    return MASTER_MODULES.map((m, i) => ({ id: i + 1, title: m.lessonTitle, lessons: m.chapters }));
+  }
+  function setCourse(c){
+    if (c !== 'nlp-master' && c !== 'nlp-practitioner') return;
+    if (c === 'nlp-master' && !_isPaidCustomer) return;
+    if (c === courseType){ document.body.classList.remove('view-player','view-ambassador','view-master'); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+    courseType = c;
+    modules = (c === 'nlp-master') ? getMasterAsModules() : PRACTITIONER_MODULES;
+    totalLessons = modules.reduce((s, m) => s + m.lessons.length, 0);
+    completedLessons = JSON.parse(localStorage.getItem(completedKey()) || '[]');
+    currentModuleIndex = -1; currentLessonIndex = -1; lastWatched = null;
+    try { localStorage.setItem('activeCourse', c); } catch(_){}
+    const pill = document.getElementById('coursePillLabel');
+    const ttl  = document.getElementById('courseTitleLabel');
+    if (pill) pill.textContent = (c === 'nlp-master') ? 'NLP מאסטר' : 'NLP Practitioner';
+    if (ttl)  ttl.textContent  = (c === 'nlp-master') ? 'קורס המאסטר — תוכנית הכשרה' : 'קורס NLP — יסודות ומעשה';
+    document.body.classList.remove('view-player','view-ambassador','view-master');
+    try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setupCourseSwitcher(){
+    const btn = document.getElementById('courseSwitchBtn');
+    const menu = document.getElementById('courseSwitchMenu');
+    if (!btn || !menu) return;
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = menu.style.display === 'block';
+      menu.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+    });
+    menu.querySelectorAll('.lms-cs-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        menu.style.display = 'none';
+        btn.setAttribute('aria-expanded', 'false');
+        setCourse(opt.getAttribute('data-course'));
+      });
+    });
+    document.addEventListener('click', () => { menu.style.display = 'none'; btn.setAttribute('aria-expanded','false'); });
+  }
+
   function setupSidebar(){
     const search = document.getElementById('sbSearch');
     let t;
@@ -2254,7 +2308,7 @@
             if (!completedLessons.includes(key)) completedLessons.push(key);
           }
         }));
-        localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+        localStorage.setItem(completedKey(), JSON.stringify(completedLessons));
       }
       const last = await window.CourseProgress.getLastWatched('nlp-practitioner');
       if (last) lastWatched = last;
@@ -2325,7 +2379,7 @@
 
     // Persist last-watched
     if (window.CourseProgress && !devBypass){
-      try { window.CourseProgress.saveLastWatched('nlp-practitioner', m, l); } catch(_){}
+      try { window.CourseProgress.saveLastWatched(courseType, m, l); } catch(_){}
     }
 
     // Sidebar active state — re-render to apply aria-current + open the right module
@@ -2377,7 +2431,7 @@
         markLessonCompleted(currentModuleIndex, currentLessonIndex);
         return;
       }
-      localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+      localStorage.setItem(completedKey(), JSON.stringify(completedLessons));
       refreshCompleteBtn();
       renderProgress();
       renderSidebarNav(document.getElementById('sbSearch').value);
@@ -2409,13 +2463,13 @@
 
       // Best-effort legacy mirror so the existing course_progress-based admin
       // learner dashboard keeps seeing v2 completions (non-gating, secondary).
-      try { window.CourseProgress.markVideoWatched(lessonId, 'nlp-practitioner', l + 1); } catch(_){}
+      try { window.CourseProgress.markVideoWatched(lessonId, courseType, l + 1); } catch(_){}
     }
 
     // Confirmed (or guest / devBypass): record locally, then fire completion UI.
     if (!alreadyDone){
       completedLessons.push(key);
-      localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+      localStorage.setItem(completedKey(), JSON.stringify(completedLessons));
     }
 
     // Keep PopupManager's lesson context + count current, then run the
@@ -2462,7 +2516,7 @@
   let notesLoadedKey = null;
   function loadNotesForCurrent(){
     const area = document.getElementById('notesArea');
-    const key = `notes_nlp_${modules[currentModuleIndex].lessons[currentLessonIndex].id}`;
+    const key = `notes_${courseType==='nlp-master'?'master':'nlp'}_${modules[currentModuleIndex].lessons[currentLessonIndex].id}`;
     notesLoadedKey = key;
     area.value = localStorage.getItem(key) || '';
     updateNotesWordCount();
@@ -2496,14 +2550,14 @@
     const lesson = modules[currentModuleIndex].lessons[currentLessonIndex];
     const mod = modules[currentModuleIndex];
     const content = document.getElementById('notesArea').value;
-    const key = `notes_nlp_${lesson.id}`;
+    const key = `notes_${courseType==='nlp-master'?'master':'nlp'}_${lesson.id}`;
     localStorage.setItem(key, content);
     updateNotesWordCount();
     if (!window.UserNotes || !supabaseClient || devBypass){ setNotesStatus('saved'); return; }
     setNotesStatus('saving');
     try {
       await window.UserNotes.save(lesson.id, content, {
-        courseType: 'nlp-practitioner',
+        courseType: courseType,
         lessonTitle: lesson.title,
         moduleTitle: mod.title,
         lessonNumber: currentLessonIndex + 1
@@ -2596,7 +2650,7 @@
         body: JSON.stringify({
           message,
           history: aiHistory.slice(-10),
-          lessonContext: { moduleIndex: currentModuleIndex, moduleTitle: mod?.title || '', lessonTitle: lesson?.title || '' }
+          lessonContext: { moduleIndex: currentModuleIndex, moduleTitle: mod?.title || '', lessonTitle: lesson?.title || '', courseType: (courseType === 'nlp-master' ? 'master' : 'practitioner') }
         }),
         signal: controller.signal
       });
@@ -2638,7 +2692,11 @@
     const mod = modules[currentModuleIndex];
     const lesson = mod.lessons[currentLessonIndex];
     const grid = document.getElementById('resGrid');
-    const items = [
+    const items = (courseType === 'nlp-master') ? [
+      { icon:'fa-solid fa-file-lines',   t:'סיכומי המאסטר',        s:'סיכומי המפגשים והנקודות המרכזיות',          href:'summaries-master/index.html', gold:true },
+      { icon:'fa-solid fa-gamepad',      t:'משחק תרגול — מאסטר',   s:'תרגול אינטראקטיבי על תוכן המאסטר',          href:'nlp-game-master.html',        gold:false, blank:true },
+      { icon:'fa-solid fa-clapperboard', t:'קליפים לתרגול',        s:'קליפי תרגול קצרים לפי נושא',                href:'master-practice.html',        gold:false, blank:true }
+    ] : [
       { icon:'fa-solid fa-book-open', t:'חוברת NLP Practitioner', s:'7 מודולים, 50 פרקים — טכניקות, תרגולים ועקרונות',  href:'../docs/booklets/nlp-booklet-branded.pdf', gold:true,  blank:true },
       { icon:'fa-solid fa-file-lines', t:'סיכום המודול',          s:`סיכום ותובנות מרכזיות ממודול ${mod.id}`,                  href:`summaries/lesson-${mod.id}.html`,            gold:false },
       { icon:'fa-solid fa-list-check', t:'כל הסיכומים',            s:'מבט-על על כל 7 המודולים בקורס',                          href:'summaries/index.html',                        gold:false }
@@ -2656,7 +2714,9 @@
     window.gameBtnUpdater = () => {
       const btn = document.getElementById('gameBtn');
       if (!btn || currentModuleIndex < 0) return;
-      btn.href = `nlp-game.html?m=${currentModuleIndex+1}&l=${currentLessonIndex+1}`;
+      btn.href = (courseType === 'nlp-master')
+        ? 'nlp-game-master.html'
+        : `nlp-game.html?m=${currentModuleIndex+1}&l=${currentLessonIndex+1}`;
     };
   }
 
@@ -2932,6 +2992,8 @@
         _isPaidCustomer = true;
         const sb = document.getElementById('sbMasterItem');
         if (sb) sb.style.display = '';
+        const csm = document.getElementById('courseSwitchMaster');
+        if (csm) csm.style.display = 'flex';
       }
     } catch(_){}
   }
@@ -3097,7 +3159,8 @@
       }
     }
     if (location.hash === '#ambassador'){ showAmbassadorView(true); return true; }
-    if (location.hash === '#master'){ showMasterView(true); return true; }
+    if (location.hash === '#master'){ setCourse('nlp-master'); return true; }
+    if (location.hash === '#master-workbooks'){ showMasterView(true); return true; }
     showWelcome(true);
     return false;
   }
@@ -3122,7 +3185,8 @@
       if (navAnchor){
         const target = navAnchor.getAttribute('data-nav') || navAnchor.getAttribute('href').replace('#','');
         if (target === 'ambassador'){ e.preventDefault(); showAmbassadorView(); return; }
-        if (target === 'master'){ e.preventDefault(); showMasterView(); return; }
+        if (target === 'master'){ e.preventDefault(); setCourse('nlp-master'); return; }
+        if (target === 'master-workbooks'){ e.preventDefault(); showMasterView(); return; }
         if (target === 'welcome'){ e.preventDefault(); showWelcome(); return; }
       }
     });
@@ -3135,6 +3199,7 @@
     if (!ok) return;
     renderAll();
     setupSidebar();
+    setupCourseSwitcher();
     setupMobileDrawer();
     setupLogout();
     setupFab();

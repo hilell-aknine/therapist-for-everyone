@@ -984,18 +984,13 @@
       <a class="lms-hd__brand" href="../index.html" aria-label="בית המטפלים">
         <img src="../assets/logo-square.png" alt="">
       </a>
-      <div class="lms-hd__course" style="position:relative;">
+      <div class="lms-hd__course">
         <span class="lms-hd__course-title" id="courseTitleLabel">קורס NLP — יסודות ומעשה</span>
-        <button class="lms-hd__course-pill" id="courseSwitchBtn" type="button" aria-haspopup="true" aria-expanded="false" style="cursor:pointer;font:inherit;color:inherit;">
+        <span class="lms-hd__course-pill">
           <i class="fa-solid fa-circle"></i>
           <span id="coursePillLabel">NLP Practitioner</span>
           <b>קורס</b>
-          <i class="fa-solid fa-chevron-down" style="font-size:.62em;margin-inline-start:.35rem;opacity:.85;"></i>
-        </button>
-        <div id="courseSwitchMenu" role="menu" style="display:none;position:fixed;min-width:210px;background:#0a282e;border:1px solid rgba(212,175,55,.32);border-radius:12px;padding:6px;z-index:9999;box-shadow:0 14px 36px rgba(0,0,0,.6);">
-          <button class="lms-cs-opt" type="button" data-course="nlp-practitioner" role="menuitem" style="display:flex;align-items:center;gap:.5rem;width:100%;text-align:right;background:none;border:none;color:#E8F1F2;font:inherit;font-size:.9rem;padding:.55rem .7rem;border-radius:8px;cursor:pointer;"><i class="fa-solid fa-graduation-cap" style="color:#D4AF37;width:1.1em;"></i><span>NLP Practitioner</span></button>
-          <button class="lms-cs-opt" id="courseSwitchMaster" type="button" data-course="nlp-master" role="menuitem" style="display:none;align-items:center;gap:.5rem;width:100%;text-align:right;background:none;border:none;color:#E8F1F2;font:inherit;font-size:.9rem;padding:.55rem .7rem;border-radius:8px;cursor:pointer;"><i class="fa-solid fa-crown" style="color:#D4AF37;width:1.1em;"></i><span>NLP מאסטר</span></button>
-        </div>
+        </span>
       </div>
     </div>
 
@@ -1016,6 +1011,10 @@
     </div>
 
     <div class="lms-hd__left">
+      <button id="masterTab" type="button" title="קורס המאסטר" style="display:none;align-items:center;gap:.4rem;padding:.5rem .9rem;background:linear-gradient(180deg,#E6C65A,#D4AF37);color:#003B46;font-family:inherit;font-weight:800;font-size:.85rem;border:none;border-radius:999px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 16px rgba(212,175,55,.4);">
+        <i class="fa-solid fa-crown"></i>
+        <span id="masterTabLabel">קורס המאסטר</span>
+      </button>
       <button class="lms-hd__icon lms-hd__hamburger" type="button" aria-label="תפריט" id="hdHamburger">
         <i class="fa-solid fa-bars"></i>
       </button>
@@ -2181,6 +2180,8 @@
     const ttl  = document.getElementById('courseTitleLabel');
     if (pill) pill.textContent = (c === 'nlp-master') ? 'NLP מאסטר' : 'NLP Practitioner';
     if (ttl)  ttl.textContent  = (c === 'nlp-master') ? 'קורס המאסטר — תוכנית הכשרה' : 'קורס NLP — יסודות ומעשה';
+    const mtl = document.getElementById('masterTabLabel');
+    if (mtl) mtl.textContent = (c === 'nlp-master') ? 'חזרה לפרקטישנר' : 'קורס המאסטר';
     document.body.classList.remove('view-player','view-ambassador','view-master');
     try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
     renderAll();
@@ -2188,29 +2189,11 @@
   }
 
   function setupCourseSwitcher(){
-    const btn = document.getElementById('courseSwitchBtn');
-    const menu = document.getElementById('courseSwitchMenu');
-    if (!btn || !menu) return;
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const open = menu.style.display === 'block';
-      if (!open){
-        const r = btn.getBoundingClientRect();
-        menu.style.top = (r.bottom + 6) + 'px';
-        menu.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
-        menu.style.left = 'auto';
-      }
-      menu.style.display = open ? 'none' : 'block';
-      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+    const tab = document.getElementById('masterTab');
+    if (!tab) return;
+    tab.addEventListener('click', () => {
+      setCourse(courseType === 'nlp-master' ? 'nlp-practitioner' : 'nlp-master');
     });
-    menu.querySelectorAll('.lms-cs-opt').forEach(opt => {
-      opt.addEventListener('click', () => {
-        menu.style.display = 'none';
-        btn.setAttribute('aria-expanded', 'false');
-        setCourse(opt.getAttribute('data-course'));
-      });
-    });
-    document.addEventListener('click', () => { menu.style.display = 'none'; btn.setAttribute('aria-expanded','false'); });
   }
 
   function setupSidebar(){
@@ -2998,8 +2981,8 @@
         _isPaidCustomer = true;
         const sb = document.getElementById('sbMasterItem');
         if (sb) sb.style.display = '';
-        const csm = document.getElementById('courseSwitchMaster');
-        if (csm) csm.style.display = 'flex';
+        const mt = document.getElementById('masterTab');
+        if (mt) mt.style.display = 'inline-flex';
       }
     } catch(_){}
   }

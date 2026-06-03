@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <meta name="theme-color" content="#003B46">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="../assets/logo-square.png">
+    <title>משחק NLP מאסטר - בית המטפלים</title>
+    <meta name="description" content="משחק NLP אינטראקטיבי — בחנו את הידע שלכם בתכנות עצבי-לשוני בדרך כיפית.">
+    <meta property="og:title" content="משחק NLP — בית המטפלים">
+    <meta property="og:description" content="משחק NLP אינטראקטיבי — בחנו את הידע שלכם">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.therapist-home.com/pages/nlp-game-master.html">
+    <meta property="og:image" content="https://www.therapist-home.com/assets/logo.png">
+    <meta property="og:locale" content="he_IL">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/nlp-game.css">
+    <style>
+        /* Page-level layout overrides */
+        .page-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--t-bg-card, #fff);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            z-index: 150;
+            border-bottom: 1px solid var(--t-border, #e5e7eb);
+            box-shadow: var(--t-shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: var(--t-text, #111);
+        }
+
+        .header-brand-icon {
+            width: 36px; height: 36px;
+            background: var(--t-gradient-gold, linear-gradient(135deg, #D4AF37, #E1B13F));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--t-sidebar-bg, #0a3a42);
+        }
+
+        .header-brand-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--t-deep-petrol, #003B46);
+        }
+
+        .header-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--t-border, #e5e7eb);
+        }
+
+        .header-page-name {
+            font-size: 0.9rem;
+            color: var(--t-text-secondary, #6b7280);
+            font-weight: 500;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .back-to-portal {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--t-gold, #D4AF37);
+            background: none;
+            border: 1px solid var(--t-border, #e5e7eb);
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            font-family: 'Heebo', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-to-portal:hover {
+            background: var(--t-bg-secondary, #f3f4f6);
+            border-color: var(--t-gold, #D4AF37);
+        }
+
+        .theme-toggle-btn {
+            background: none;
+            border: 1px solid var(--t-border, #e5e7eb);
+            border-radius: 8px;
+            width: 36px; height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--t-text-secondary, #6b7280);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--t-bg-secondary, #f3f4f6);
+        }
+
+        /* Body offset for fixed page header */
+        .page-body {
+            padding-top: 64px;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--t-deep-petrol, #003B46);
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            white-space: normal;
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 640px) {
+            .page-header {
+                padding: 0 1rem;
+            }
+            .header-brand-text,
+            .header-separator,
+            .header-page-name {
+                display: none;
+            }
+        }
+    </style>
+
+    <!-- === SEO Tags (auto-generated) === -->
+    <link rel="canonical" href="https://www.therapist-home.com/pages/nlp-game.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="משחק NLP — בית המטפלים">
+    <meta name="twitter:description" content="משחק NLP אינטראקטיבי — בחנו את הידע שלכם">
+    <meta name="twitter:image" content="https://www.therapist-home.com/assets/logo.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "דף הבית",
+                "item": "https://www.therapist-home.com/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "ספריית הקורסים",
+                "item": "https://www.therapist-home.com/pages/course-library.html"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "משחק NLP",
+                "item": "https://www.therapist-home.com/pages/nlp-game.html"
+            }
+        ]
+    }
+    </script>
+    <!-- === /SEO Tags === -->
+</head>
+<body>
+
+    <!-- Welcome Gate -->
+    <div id="welcome-gate" class="welcome-gate">
+        <video src="../assets/game/videos/welcome-brain.mp4" autoplay muted loop playsinline class="welcome-gate-hero"></video>
+        <div class="welcome-gate-content">
+            <div class="welcome-gate-brand">
+                <span class="welcome-gate-brand-text">בית המטפלים</span>
+                <span style="background:#D4AF37;color:#003B46;font-size:0.7rem;font-weight:800;padding:3px 12px;border-radius:999px;margin-inline-start:8px;letter-spacing:2px;vertical-align:middle;">מאסטר</span>
+            </div>
+            <div style="color:#D4AF37;font-weight:800;letter-spacing:3px;font-size:0.95rem;margin-bottom:10px;">🎓 קורס NLP מאסטר · למתקדמים</div>
+            <h1 class="welcome-gate-title">שליטה במוח.<br/>שליטה בחיים.</h1>
+            <p class="welcome-gate-desc">תרגלו את עקרונות ה-NLP המתקדמים דרך משחק אינטראקטיבי עם מנטור אישי, קטעי קריאה ותרגילים מעשיים מתוך קורס המאסטר של אלעזר.</p>
+            <div class="welcome-gate-stats">
+                <div class="welcome-gate-stat">
+                    <span class="welcome-gate-stat-num">56</span>
+                    <span class="welcome-gate-stat-label">שיעורים</span>
+                </div>
+                <div class="welcome-gate-stat">
+                    <span class="welcome-gate-stat-num">288</span>
+                    <span class="welcome-gate-stat-label">תרגילים</span>
+                </div>
+                <div class="welcome-gate-stat">
+                    <span class="welcome-gate-stat-num">9</span>
+                    <span class="welcome-gate-stat-label">מפגשים</span>
+                </div>
+            </div>
+            <button id="welcome-gate-btn" class="welcome-gate-btn">התחילו עכשיו</button>
+            <p class="welcome-gate-footer">קורס המאסטר &bull; לתלמידי הקורס &bull; <a href="https://www.therapist-home.com">www.therapist-home.com</a></p>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <!-- Page Body (no page-header — bottom nav handles navigation) -->
+    <div class="page-body" style="padding-top: 0;">
+
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen" style="display: none;">
+            <div class="loading-content">
+                <div class="loading-spinner-large"></div>
+                <p class="loading-text">טוען את המשחק...</p>
+            </div>
+        </div>
+
+        <!-- Onboarding Overlay -->
+        <div id="onboarding-overlay" class="onboarding-overlay" style="display: none;">
+            <div class="onboarding-card">
+                <button class="onboarding-skip" onclick="game.skipOnboarding()">דלג</button>
+                <div class="onboarding-step" id="onboarding-step-content"></div>
+                <div class="onboarding-dots" id="onboarding-dots"></div>
+                <button class="btn btn-primary btn-full" id="onboarding-btn" onclick="game.nextOnboardingStep()">הבא</button>
+            </div>
+        </div>
+
+        <!-- Game Header (stats bar) -->
+        <header class="header" id="app-header" style="display: none;">
+            <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="logo">🎓 NLP מאסטר <span style="background:#D4AF37;color:#003B46;font-size:0.6em;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:1px;vertical-align:middle;">למתקדמים</span></div>
+                <div class="stats-bar">
+                    <div class="stat-item xp">
+                        <span class="icon">⭐</span>
+                        <span id="xp-value">0</span>
+                    </div>
+                    <div class="stat-item streak">
+                        <span class="icon">🔥</span>
+                        <span id="streak-value">0</span>
+                    </div>
+                    <div class="stat-item hearts">
+                        <div class="hearts-display" id="hearts-container">
+                            <span class="heart">❤️</span>
+                            <span class="heart">❤️</span>
+                            <span class="heart">❤️</span>
+                            <span class="heart">❤️</span>
+                            <span class="heart">❤️</span>
+                        </div>
+                    </div>
+                    <button class="sound-toggle" id="sound-toggle" onclick="game.toggleSound()" title="השתק/הפעל צלילים">
+                        🔊
+                    </button>
+                </div>
+            </div>
+            <!-- Heart Recovery Timer -->
+            <div class="heart-timer-bar" id="heart-timer-bar" style="display: none;">
+                <div class="container">
+                    <span class="heart-timer-text" id="heart-timer-text">❤️ +1 בעוד 20:00</span>
+                    <div class="heart-timer-progress">
+                        <div class="heart-timer-fill" id="heart-timer-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav" id="bottom-nav" style="display: none;">
+            <button class="bottom-nav-item active" id="nav-home" onclick="game.navTo('home')" aria-label="דף הבית">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>בית</span>
+            </button>
+            <button class="bottom-nav-item" id="nav-stats" onclick="game.navTo('stats')" aria-label="סטטיסטיקות">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>סטטיסטיקה</span>
+            </button>
+            <button class="bottom-nav-item" id="nav-leaderboard" onclick="game.navTo('leaderboard')" aria-label="טבלת מובילים">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                <span>גביע</span>
+            </button>
+            <button class="bottom-nav-item" id="nav-profile" onclick="game.navTo('profile')" aria-label="פרופיל">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>פרופיל</span>
+            </button>
+        </nav>
+
+        <!-- Level Up Overlay -->
+        <div class="level-up-overlay" id="level-up-overlay" style="display: none;">
+            <div class="level-up-text" id="level-up-text"></div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="container" id="progress-wrapper" style="display: none;">
+            <div class="progress-container" id="progress-container" style="display: none;">
+                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="container" id="main-content" style="display: none;">
+            <div id="game-container">
+                <!-- Dynamic game content renders here -->
+            </div>
+        </main>
+
+        <!-- Footer Actions -->
+        <div class="footer-actions" id="footer-actions" style="display: none;">
+            <div class="container">
+                <button class="btn btn-secondary" onclick="game.exitLesson()">יציאה</button>
+                <button class="btn btn-primary" id="check-btn" disabled onclick="game.checkAnswer()">בדיקה</button>
+            </div>
+        </div>
+
+        <!-- Feedback Panel -->
+        <div class="feedback-panel" id="feedback-panel">
+            <div class="feedback-content">
+                <div class="feedback-header">
+                    <span class="feedback-icon" id="feedback-icon">🎉</span>
+                    <span class="feedback-title" id="feedback-title">מעולה!</span>
+                </div>
+                <div class="feedback-explanation" id="feedback-explanation"></div>
+                <button class="feedback-btn" id="feedback-btn" onclick="game.continueToNext()">המשך</button>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-icon" id="modal-icon">🚪</div>
+                <div class="modal-title" id="modal-title"></div>
+                <div class="modal-text" id="modal-text"></div>
+                <div class="modal-buttons" id="modal-buttons"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Ram Chat FAB -->
+    <div class="ram-chat-fab" id="ram-chat-fab" onclick="game.toggleRamChat()" style="display:none;">
+        <img src="../assets/mentor-ram.png" alt="רם" class="ram-fab-img" />
+    </div>
+
+    <!-- Ram Chat Panel -->
+    <div class="ram-chat-panel" id="ram-chat-panel" style="display:none;">
+        <div class="ram-chat-header">
+            <img src="../assets/mentor-ram.png" alt="רם" class="ram-chat-avatar" />
+            <div>
+                <div class="ram-chat-name">שאל את רם</div>
+                <div class="ram-chat-status">מנטור NLP • AI</div>
+            </div>
+            <button class="ram-chat-close" onclick="game.toggleRamChat()">✕</button>
+        </div>
+        <div class="ram-chat-messages" id="ram-chat-messages">
+            <div class="ram-msg ram-msg-ai">היי! אני רם 🧑‍🏫 שאלו אותי כל שאלה על NLP ואשמח לעזור!</div>
+            <div class="ram-chat-suggestions" id="ram-chat-suggestions">
+                <button class="ram-suggestion-btn" onclick="game.sendRamSuggestion(this)">מהו NLP?</button>
+                <button class="ram-suggestion-btn" onclick="game.sendRamSuggestion(this)">איך אפשר לשנות אמונה מגבילה?</button>
+                <button class="ram-suggestion-btn" onclick="game.sendRamSuggestion(this)">הסבר לי על המטא-מודל</button>
+                <button class="ram-suggestion-btn" onclick="game.sendRamSuggestion(this)">תן לי תרגיל מעשי</button>
+            </div>
+        </div>
+        <div class="ram-chat-input-area">
+            <input type="text" id="ram-chat-input" class="ram-chat-input" placeholder="שאלו אותי על NLP..." onkeydown="if(event.key==='Enter')game.sendRamChat()" />
+            <button class="ram-chat-send" onclick="game.sendRamChat()">➤</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/supabase-client.js"></script>
+    <!-- MASTER course mode — separates saves/leaderboard from the free practitioner game -->
+    <script>window.GAME_COURSE = 'master';</script>
+    <script src="../js/nlp-game-data-master-m1.js"></script>
+    <script src="../js/nlp-game-data-master-m2.js"></script>
+    <script src="../js/nlp-game-data-master-m3.js"></script>
+    <script src="../js/nlp-game-data-master-m4.js"></script>
+    <script src="../js/nlp-game-data-master-m5.js"></script>
+    <script src="../js/nlp-game-data-master-m6.js"></script>
+    <script src="../js/nlp-game-data-master-m7.js"></script>
+    <script src="../js/nlp-game-data-master-m8.js"></script>
+    <script src="../js/nlp-game-data-master-m9.js"></script>
+    <script src="../js/nlp-game-data-master.js"></script>
+    <script src="../js/nlp-game-knowledge-master.js"></script>
+    <script src="../js/nlp-game.js"></script>
+    <script src="../js/nlp-game-leaderboard.js"></script>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('beit-theme', next);
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const btn = document.getElementById('themeToggleBtn');
+            if (!btn) return;
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            btn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        }
+
+        updateThemeIcon();
+
+        // Toast utility
+        function showToast(msg, duration) {
+            duration = duration || 3000;
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(function() { t.classList.remove('show'); }, duration);
+        }
+
+        // Check for login_required redirect
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('msg') === 'login_required') {
+                showToast('יש להירשם כדי לגשת למשחק');
+                history.replaceState(null, '', window.location.pathname);
+            }
+        })();
+
+        // Register Service Worker for PWA install
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('../sw.js').catch(function() {});
+        }
+
+        // PWA Install Prompt
+        var deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+        });
+        window.installApp = function() {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                deferredInstallPrompt.userChoice.then(function() { deferredInstallPrompt = null; });
+            } else {
+                // iOS: show instructions
+                showToast('לחצו על "שיתוף" → "הוסף למסך הבית"', 5000);
+            }
+        };
+    </script>
+    <!-- Marketing & Analytics (UTM capture + consent-gated GA4/Meta Pixel) -->
+    <script src="../js/marketing-tools.js"></script>
+    <!-- Site Credit Footer -->
+    <style>
+      .site-credit { background: #E8F1F2; text-align: center; padding: 14px 16px; font-size: 13px; color: #003B46; border-top: 1px solid rgba(0, 59, 70, 0.08); font-family: 'Heebo', sans-serif; direction: rtl; width: 100%; box-sizing: border-box; margin: 0; }
+      .site-credit p { margin: 0; line-height: 1.6; }
+      .site-credit a { color: #003B46; text-decoration: none; font-weight: 600; }
+      .site-credit a:hover { text-decoration: underline; }
+    </style>
+    <footer class="site-credit" role="contentinfo">
+      <p>נוצר ע"י הילל אקנין · לפרויקטים: <a href="tel:+972549116092" dir="ltr">054-9116092</a></p>
+    </footer>
+  </body>
+</html>

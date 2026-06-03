@@ -1,0 +1,124 @@
+/* master-hero.css — premium scroll-scrub + 3D hero for the paid Master experience.
+   Two modes via [data-mode]: "scroll" (portal masterView) and "static" (game welcome gate).
+   Mobile-first, RTL, respects prefers-reduced-motion. Brand: petrol #003B46 + gold #D4AF37. */
+
+.master-hero{
+  --mh-petrol:#003B46; --mh-petrol-2:#00606B; --mh-gold:#D4AF37; --mh-frost:#E8F1F2;
+  position:relative; width:100%; margin:0 0 1.5rem; isolation:isolate;
+  background:#021f25; overflow:clip; direction:rtl;
+}
+
+/* ---- scroll mode: tall stage with sticky stage so the canvas scrubs over scroll ---- */
+.master-hero[data-mode="scroll"]{ height:200vh; }
+.master-hero__sticky{
+  position:sticky; top:0; height:100vh; min-height:520px;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.master-hero[data-mode="static"] .master-hero__sticky{ position:relative; height:clamp(420px,72vh,720px); }
+
+/* base 3D still — always present (also the reduced-motion / no-JS fallback) */
+.master-hero__3d{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  z-index:1; will-change:transform; transform:translateZ(0) scale(1.08);
+  transition:transform .2s ease-out;
+}
+/* scrub canvas — drawn on top of the still, animated by scroll */
+.master-hero__canvas{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  z-index:2; transform:translateZ(0); opacity:1;
+}
+.master-hero.is-static-fallback .master-hero__canvas{ display:none; }
+
+/* legibility gradient over the media */
+.master-hero__scrim{
+  position:absolute; inset:0; z-index:3; pointer-events:none;
+  background:
+    radial-gradient(130% 90% at 50% 30%, transparent 0%, rgba(2,31,37,.16) 55%, rgba(2,31,37,.60) 100%),
+    linear-gradient(to top, rgba(2,31,37,.94) 0%, rgba(2,31,37,.32) 38%, rgba(2,31,37,.04) 100%);
+}
+
+/* text overlay */
+.master-hero__overlay{
+  position:relative; z-index:4; text-align:center; color:var(--mh-frost);
+  padding:1.5rem; max-width:760px; margin:0 auto;
+}
+.master-hero__eyebrow{
+  display:inline-block; font-family:'Heebo',sans-serif; font-weight:800;
+  letter-spacing:3px; font-size:.82rem; color:var(--mh-gold);
+  background:rgba(212,175,55,.10); border:1px solid rgba(212,175,55,.35);
+  padding:6px 16px; border-radius:999px; margin-bottom:1rem;
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+}
+.master-hero__title{
+  font-family:'Frank Ruhl Libre',serif; font-weight:800; line-height:1.05;
+  font-size:clamp(2.1rem,8vw,4.2rem); margin:0 0 .6rem;
+  text-shadow:0 4px 30px rgba(0,0,0,.55), 0 0 60px rgba(212,175,55,.12);
+}
+.master-hero__sub{
+  font-family:'Heebo',sans-serif; font-size:clamp(.95rem,3.4vw,1.2rem);
+  color:rgba(232,241,242,.9); margin:0 auto; max-width:32ch;
+}
+.master-hero__cue{
+  position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+  z-index:4; color:var(--mh-gold); font-size:1.6rem; opacity:.8;
+  animation:mh-bounce 1.8s ease-in-out infinite;
+}
+@keyframes mh-bounce{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,9px)}}
+
+/* gold CTA — clear next action from the hero */
+.master-hero__cta{
+  margin-top:1.6rem; display:inline-flex; align-items:center; gap:.5rem;
+  font-family:'Heebo',sans-serif; font-weight:800; font-size:1.02rem; color:#003B46;
+  background:linear-gradient(135deg,#E6C65A,#D4AF37); border:none; border-radius:999px;
+  padding:14px 32px; min-height:48px; cursor:pointer;
+  box-shadow:0 10px 30px rgba(212,175,55,.35); transition:transform .2s ease, box-shadow .2s ease;
+}
+.master-hero__cta:hover{ transform:translateY(-2px); box-shadow:0 14px 40px rgba(212,175,55,.5); }
+.master-hero__cta:active{ transform:translateY(0); }
+
+/* desktop: scale the hero up so it fills wide screens */
+@media (min-width:1024px){
+  .master-hero__title{ font-size:clamp(3.2rem,5.2vw,5rem); }
+  .master-hero__eyebrow{ font-size:.95rem; padding:8px 20px; letter-spacing:4px; }
+  .master-hero__sub{ font-size:1.25rem; }
+}
+
+/* loading shimmer while frames preload */
+.master-hero__loader{
+  position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(110deg,#021f25 30%,#063038 50%,#021f25 70%);
+  background-size:200% 100%; animation:mh-shimmer 1.4s linear infinite; color:var(--mh-gold);
+  font-family:'Heebo',sans-serif; font-size:.85rem; letter-spacing:2px;
+}
+.master-hero.is-ready .master-hero__loader{ opacity:0; pointer-events:none; transition:opacity .4s ease; }
+@keyframes mh-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ---- scroll-driven reveals for content below the hero (cards etc.) ---- */
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion:no-preference){
+    [data-mh-reveal]{
+      animation:mh-reveal linear both; animation-timeline:view();
+      animation-range:entry 0% entry 55%;
+    }
+  }
+}
+@keyframes mh-reveal{ from{opacity:0;transform:translateY(26px)} to{opacity:1;transform:none} }
+/* JS fallback (no CSS scroll-timeline support) */
+[data-mh-reveal].mh-js-reveal{ opacity:0; transform:translateY(26px); transition:opacity .6s ease,transform .6s ease; }
+[data-mh-reveal].mh-js-reveal.is-visible{ opacity:1; transform:none; }
+
+/* ---- mobile ---- */
+@media (max-width:768px){
+  .master-hero[data-mode="scroll"]{ height:180vh; }
+  .master-hero__sticky{ min-height:480px; }
+  .master-hero__3d{ transform:translateZ(0) scale(1.04); }
+}
+
+/* ---- accessibility: reduced motion → static still, no scrub, no bounce ---- */
+@media (prefers-reduced-motion:reduce){
+  .master-hero[data-mode="scroll"]{ height:auto; }
+  .master-hero__sticky{ position:relative; height:clamp(420px,70vh,640px); }
+  .master-hero__canvas{ display:none; }
+  .master-hero__cue{ animation:none; }
+  .master-hero__3d{ transform:none; }
+}

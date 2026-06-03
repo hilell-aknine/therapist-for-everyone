@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { NLP_KNOWLEDGE } from './knowledge.ts'
+import { MASTER_KNOWLEDGE } from './knowledge-master.ts'
 
 const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
@@ -39,11 +40,40 @@ const SYSTEM_PROMPT_RULES = `## כללים:
 8. כשאתה לא בטוח — הודה בזה.
 9. אם התלמיד מבקש תרגול — תן תרגול מעשי שאפשר לעשות לבד.`
 
+// ===== MASTER COURSE SYSTEM PROMPT =====
+// Used when courseType === 'master'. Tone is advanced/practitioner-trainer level.
+// The Master course is taught by אלעזר (HNLP Trainer). Students are Practitioner graduates.
+const SYSTEM_PROMPT_MASTER_HEADER = `אתה אלעזר — המנחה המקצועי של קורס NLP מאסטר בפורטל "בית המטפלים". אתה מומחה HNLP (Humanistic NLP) עם שנים של ניסיון בהכשרת מאמנים ומטפלים ברמת מאסטר פרקטישינר.
+
+## התפקיד שלך:
+- אתה מלווה מקצועי לבוגרי קורס פרקטישינר שמעמיקים ברמת מאסטר.
+- אתה עוזר לתלמידים לשלב כלים מתקדמים בקליניקה ובחיי היומיום.
+- אתה מרצה מנוסה שמדבר כ"עמית מקצועי" — מתוך הנחה שהתלמיד כבר שולט בבסיס.
+
+## הסגנון שלך:
+- מקצועי, מעמיק ומדויק — כאילו אתה מדבר עם מאמן/מטפל מתמחה
+- מתייחס לשאלות ברמת הניואנס: "למה הטכניקה עובדת כך?" "מתי לבחור בזה לעומת אחר?"
+- מחבר בין תיאוריה לפרקטיקה של קליניקה
+- מעודד חשיבה ביקורתית ולא שינון`
+
+const SYSTEM_PROMPT_MASTER_RULES = `## כללים:
+1. הניח שהתלמיד מכיר את הבסיס (פרקטישינר) — אל תסביר מושגים בסיסיים אלא אם נשאל.
+2. ענה על בסיס בסיס הידע שלמעלה. אם מידע לא מופיע בבסיס הידע — ציין זאת, ותן תשובה מקצועית מניסיונך ב-NLP.
+3. לעולם אל תמציא שמות חוקרים, ציטוטים או מחקרים ספציפיים.
+4. ענה תמיד בעברית, בשפה מקצועית ועניינית.
+5. תן תשובות מעמיקות עם ניואנסים — ברמת "מאמן מכשיר מאמן".
+6. כשמסביר טכניקה — כלול שיקולים קליניים: מתי כן, מתי לא, טעויות נפוצות.
+7. אם שאלה יוצאת מגדר נושאי הקורס — ענה בקצרה והחזר לחומר.
+8. כשאתה לא בטוח — הודה בזה בכנות מקצועית.
+9. אם מבקשים תרגול — תן תרגול ברמת "אפשר להשתמש בקליניקה מחר".`
+
 // ===== Knowledge base scoping =====
-// Parse NLP_KNOWLEDGE ONCE at module load into: a small preamble, per-module
-// sections (keyed by module number 1..7 from "## מודול N" headings) and the
-// shared appendices (glossary + quotes — small + broadly useful, always kept).
-function splitKnowledge(src: string) {
+// Parse a knowledge base string ONCE at module load into: a small preamble,
+// per-section text (keyed by section number), and shared appendices.
+// sectionPattern: regex to extract section number from a "## ..." heading.
+//   Practitioner KB: /^מודול\s+(\d+)/
+//   Master KB:       /^מפגש\s+(\d+)/
+function splitKnowledge(src: string, sectionPattern: RegExp) {
   const lines = src.split('\n')
   const heads: Array<{ title: string; start: number }> = []
   lines.forEach((ln, i) => {
@@ -53,39 +83,48 @@ function splitKnowledge(src: string) {
   const firstStart = heads.length ? heads[0].start : lines.length
   const preamble = lines.slice(0, firstStart).join('\n').trim()
 
-  const moduleText: Record<number, string> = {}
+  const sectionText: Record<number, string> = {}
   let appendix = ''
   heads.forEach((sec, idx) => {
     const end = idx + 1 < heads.length ? heads[idx + 1].start : lines.length
     const body = lines.slice(sec.start, end).join('\n').trim()
-    const m = sec.title.match(/^מודול\s+(\d+)/)
+    const m = sec.title.match(sectionPattern)
     if (m) {
-      moduleText[parseInt(m[1], 10)] = body
+      sectionText[parseInt(m[1], 10)] = body
     } else {
       appendix += (appendix ? '\n\n' : '') + body  // appendices (glossary, quotes)
     }
   })
 
-  return { preamble, moduleText, appendix }
+  return { preamble, sectionText, appendix }
 }
 
-const KB = splitKnowledge(NLP_KNOWLEDGE)
+// Parse both KBs once at module load.
+const KB_PRACTITIONER = splitKnowledge(NLP_KNOWLEDGE, /^מודול\s+(\d+)/)
+const KB_MASTER = splitKnowledge(MASTER_KNOWLEDGE, /^מפגש\s+(\d+)/)
 
 // Pick the slice of the knowledge base relevant to the lesson the user is on.
-// Returns the full base as a safe fallback when no reliable module is known
-// (e.g. the Master course sends a string context), so answer quality never drops.
-function selectKnowledge(lessonContext: unknown): { text: string; scope: string } {
-  let moduleNum: number | null = null
+// isMaster: selects master KB and section pattern; defaults to practitioner.
+// Returns the full KB as a safe fallback when no reliable section is known.
+function selectKnowledge(
+  lessonContext: unknown,
+  isMaster: boolean
+): { text: string; scope: string } {
+  const kb = isMaster ? KB_MASTER : KB_PRACTITIONER
+  const fullSrc = isMaster ? MASTER_KNOWLEDGE : NLP_KNOWLEDGE
+  const sectionLabel = isMaster ? 'session' : 'module'
+
+  let sectionNum: number | null = null
   if (lessonContext && typeof lessonContext === 'object') {
     const mi = (lessonContext as { moduleIndex?: unknown }).moduleIndex
-    if (typeof mi === 'number' && Number.isInteger(mi) && mi >= 0) moduleNum = mi + 1
+    if (typeof mi === 'number' && Number.isInteger(mi) && mi >= 0) sectionNum = mi + 1
   }
 
-  if (moduleNum && KB.moduleText[moduleNum]) {
-    const text = [KB.preamble, KB.moduleText[moduleNum], KB.appendix].filter(Boolean).join('\n\n')
-    return { text, scope: `module_${moduleNum}` }
+  if (sectionNum && kb.sectionText[sectionNum]) {
+    const text = [kb.preamble, kb.sectionText[sectionNum], kb.appendix].filter(Boolean).join('\n\n')
+    return { text, scope: `${sectionLabel}_${sectionNum}` }
   }
-  return { text: NLP_KNOWLEDGE, scope: 'full' }
+  return { text: fullSrc, scope: 'full' }
 }
 
 const ALLOWED_ORIGINS = [
@@ -132,7 +171,13 @@ serve(async (req) => {
     }
 
     // --- Parse request ---
-    const { message, history = [], lessonContext } = await req.json()
+    // courseType: 'master' activates the master KB and master system prompt.
+    // The client sends this either as a top-level field or nested in lessonContext.
+    const { message, history = [], lessonContext, courseType: topLevelCourseType } = await req.json()
+    const lessonCourseType = (lessonContext && typeof lessonContext === 'object')
+      ? (lessonContext as { courseType?: unknown }).courseType
+      : undefined
+    const isMaster = topLevelCourseType === 'master' || lessonCourseType === 'master'
 
     if (!message) {
       return new Response(
@@ -197,19 +242,33 @@ serve(async (req) => {
     }
 
     // --- Build context ---
-    const contextNote = (lessonContext && typeof lessonContext === 'object' && typeof lessonContext.moduleIndex === 'number')
-      ? `\n\n[התלמיד לומד כרגע: מודול ${lessonContext.moduleIndex + 1} — "${lessonContext.moduleTitle}", שיעור: "${lessonContext.lessonTitle}". התמקד בנושא זה.]`
-      : (typeof lessonContext === 'string' && lessonContext)
-        ? `\n\n[הקשר השיעור: ${lessonContext}. התמקד בנושא זה.]`
-        : ''
+    // Build a context note describing which session/module the student is currently on.
+    let contextNote = ''
+    if (lessonContext && typeof lessonContext === 'object') {
+      const lc = lessonContext as { moduleIndex?: unknown; moduleTitle?: unknown; lessonTitle?: unknown }
+      if (typeof lc.moduleIndex === 'number') {
+        const sectionLabel = isMaster ? 'מפגש' : 'מודול'
+        const titlePart = lc.moduleTitle ? ` — "${lc.moduleTitle}"` : ''
+        const lessonPart = lc.lessonTitle ? `, שיעור: "${lc.lessonTitle}"` : ''
+        contextNote = `\n\n[התלמיד לומד כרגע: ${sectionLabel} ${lc.moduleIndex + 1}${titlePart}${lessonPart}. התמקד בנושא זה.]`
+      }
+    } else if (typeof lessonContext === 'string' && lessonContext) {
+      contextNote = `\n\n[הקשר השיעור: ${lessonContext}. התמקד בנושא זה.]`
+    }
 
     // Scope the knowledge base to the current lesson/module (token-bloat fix).
-    const knowledge = selectKnowledge(lessonContext)
+    // Route to master KB when isMaster, otherwise use practitioner KB (unchanged behaviour).
+    const knowledge = selectKnowledge(lessonContext, isMaster)
+
+    // Assemble system prompt: header (role/tone) + KB + rules + student profile + context.
+    // Master course uses dedicated header and rules; practitioner path is byte-for-byte unchanged.
+    const promptHeader = isMaster ? SYSTEM_PROMPT_MASTER_HEADER : SYSTEM_PROMPT_HEADER
+    const promptRules = isMaster ? SYSTEM_PROMPT_MASTER_RULES : SYSTEM_PROMPT_RULES
 
     const fullSystemPrompt =
-      SYSTEM_PROMPT_HEADER +
+      promptHeader +
       '\n\n## בסיס הידע שלך:\n' + knowledge.text +
-      '\n\n' + SYSTEM_PROMPT_RULES +
+      '\n\n' + promptRules +
       studentProfile + contextNote
 
     // --- Build messages for OpenRouter (OpenAI-compatible format) ---

@@ -417,7 +417,9 @@
                     level: playerData.level || 1,
                     lessons_completed: lessonsCount,
                     current_streak: playerData.streak || 0,
-                    best_streak: playerData.bestStreak || 0,
+                    // engine stores the all-time best as `longestStreak` (nlp-game.js);
+                    // `bestStreak` never existed → every row was silently saving 0.
+                    best_streak: playerData.longestStreak || 0,
                     last_active: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };

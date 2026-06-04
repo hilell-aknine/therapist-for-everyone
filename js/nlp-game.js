@@ -320,6 +320,9 @@ class StoryGame {
         // Init swipe-to-dismiss on bottom sheets
         this.initSwipeDismiss();
 
+        // ESC-to-dismiss for keyboard users (parity with swipe)
+        this.initKeyboardDismiss();
+
         // Flush pending Supabase save when the tab is being closed
         this.initBeforeUnload();
 
@@ -396,6 +399,34 @@ class StoryGame {
         }
     }
 
+    initKeyboardDismiss() {
+        // ESC closes the top-most open overlay (keyboard parity with swipe-to-dismiss).
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const ram = document.getElementById('ram-chat-panel');
+            const modal = document.getElementById('modal-overlay');
+            const feedback = document.getElementById('feedback-panel');
+            if (ram && ram.style.display !== 'none' && ram.style.display !== '') {
+                this.toggleRamChat();
+            } else if (modal && modal.classList.contains('show')) {
+                this.closeModal();
+            } else if (feedback && feedback.classList.contains('show')) {
+                this.continueToNext();
+            }
+        });
+
+        // The Ram FAB is a div[role=button]; give it Enter/Space activation.
+        const fab = document.getElementById('ram-chat-fab');
+        if (fab) {
+            fab.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.toggleRamChat();
+                }
+            });
+        }
+    }
+
     // ═══════════════════════════════════════
     // Auth Flow
     // ═══════════════════════════════════════
@@ -462,8 +493,29 @@ class StoryGame {
         // Show loading screen
         document.getElementById('loading-screen').style.display = 'flex';
 
+        // Paid-content gate — Master game only (window.GAME_REQUIRE_PAID set in nlp-game-master.html).
+        // The free practitioner game never sets the flag, so this block is a no-op there.
+        if (window.GAME_REQUIRE_PAID) {
+            const allowed = await this.verifyPaidAccess(user);
+            if (!allowed) { this.lockOutPaidContent(); return; }
+        }
+
         // Load player data
         await this.loadPlayerData(user);
+
+        // Fail-safe: if the course data files failed to load (e.g. a syntax error
+        // in a data file — a documented failure mode), show a clear message instead
+        // of letting every render call crash on an undefined MODULES.
+        if (!this.validateModules()) {
+            const loading = document.getElementById('loading-screen');
+            if (loading) {
+                loading.style.display = 'flex';
+                loading.innerHTML = '<div style="text-align:center;padding:2rem;color:#E8F1F2;">'
+                    + '<p style="font-size:1.1rem;font-weight:700;">אופס, התוכן לא נטען כמו שצריך.</p>'
+                    + '<p style="opacity:.8;margin-top:.5rem;">נסו לרענן את הדף. אם זה חוזר — כתבו לנו.</p></div>';
+            }
+            return;
+        }
 
         // Hide loading, show game
         document.getElementById('loading-screen').style.display = 'none';
@@ -497,6 +549,76 @@ class StoryGame {
         } else {
             this.renderHomeScreen();
         }
+    }
+
+    // ═══════════════════════════════════════
+    // Paid-content access gate (Master game)
+    // ═══════════════════════════════════════
+    // Returns true only for paying customers / admins. Fails CLOSED: a guest,
+    // a missing profile, or any error all deny access — paid content is never
+    // exposed on an unverified check. Mirrors checkPaidRole() in course-library.html.
+    async verifyPaidAccess(user) {
+        if (!user || !window.supabaseClient) return false;
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+            if (error || !data) return false;
+            return data.role === 'paid_customer' || data.role === 'admin';
+        } catch (e) {
+            console.warn('Paid access check failed (denying):', e);
+            return false;
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // Course-data integrity check (runs once at startup)
+    // ═══════════════════════════════════════
+    // Returns false if MODULES is missing/empty (a data file failed to parse).
+    // Also logs — but does NOT throw on — individual lessons/exercises that are
+    // missing required fields, so one bad row degrades gracefully instead of
+    // silently breaking mid-lesson.
+    validateModules() {
+        if (typeof MODULES === 'undefined' || !Array.isArray(MODULES) || MODULES.length === 0) {
+            console.error('[NLP Game] MODULES is missing or empty — a course data file likely failed to load.');
+            return false;
+        }
+        try {
+            MODULES.forEach((mod, mi) => {
+                if (!mod || !Array.isArray(mod.lessons)) {
+                    console.warn(`[NLP Game] module #${mi} (${mod && mod.id}) has no lessons array.`);
+                    return;
+                }
+                mod.lessons.forEach((lesson, li) => {
+                    if (!lesson || !Array.isArray(lesson.exercises)) {
+                        console.warn(`[NLP Game] ${mod.id} / lesson #${li} has no exercises array.`);
+                        return;
+                    }
+                    lesson.exercises.forEach((ex, ei) => {
+                        if (ex && ex.type === 'identify' && !Array.isArray(ex.correctRange)) {
+                            console.warn(`[NLP Game] ${mod.id} / lesson #${li} / exercise #${ei}: identify exercise missing correctRange.`);
+                        }
+                    });
+                });
+            });
+        } catch (e) {
+            console.warn('[NLP Game] validateModules scan error (non-fatal):', e);
+        }
+        return true;
+    }
+
+    // Deny path: hide the game, show a Hebrew toast, then redirect to the portal.
+    lockOutPaidContent() {
+        const loading = document.getElementById('loading-screen');
+        if (loading) loading.style.display = 'none';
+        const toast = document.getElementById('toast');
+        if (toast) {
+            toast.textContent = 'התוכן הזה זמין למנויי NLP Master בלבד';
+            toast.classList.add('show');
+        }
+        setTimeout(() => { window.location.href = 'course-library.html'; }, 1800);
     }
 
     // ═══════════════════════════════════════
@@ -561,12 +683,20 @@ class StoryGame {
         // Try Supabase first if logged in
         if (user) {
             try {
-                const { data, error } = await window.supabaseClient
+                // Guard against a hung/slow Supabase call: if it doesn't resolve
+                // within 6s, throw so we fall back to localStorage below and the
+                // loading screen never gets stuck.
+                const query = window.supabaseClient
                     .from('nlp_game_players')
                     .select('*')
                     .eq('user_id', user.id)
                     .eq('course_id', this.courseId)
                     .single();
+                const { data, error } = await Promise.race([
+                    query,
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Supabase load timeout')), 6000))
+                ]);
 
                 if (data && !error) {
                     // Map DB fields to local playerData. Every field from
@@ -1907,6 +2037,27 @@ ${answers.action || ''}`;
         if (exercise.type === 'order') {
             this.enableCheckButton();
         }
+
+        // One-time mechanics tip for a brand-new player's very first exercise.
+        this.maybeShowFirstExerciseTip();
+    }
+
+    // Shows a single onboarding tip (basic game loop) the first time a player
+    // ever reaches an exercise. Uses localStorage so it never repeats.
+    maybeShowFirstExerciseTip() {
+        try {
+            const key = 'nlpGameFirstExerciseTip_' + this.courseId;
+            if (localStorage.getItem(key)) return;
+            const completed = this.playerData && this.playerData.completedLessons
+                ? Object.keys(this.playerData.completedLessons).length : 0;
+            if (completed > 0) return; // not a first-timer
+            localStorage.setItem(key, '1');
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = 'טיפ: בחרו תשובה ואז לחצו "בדיקה". כל לב הוא ניסיון — אל דאגה, אפשר לטעות וללמוד.';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 6000);
+        } catch (e) { /* localStorage unavailable — skip the tip */ }
     }
 
     getExerciseTypeIcon(exerciseType) {
@@ -1942,7 +2093,7 @@ ${answers.action || ''}`;
             <div class="exercise-container">
                 <div class="exercise-type">${this.getExerciseTypeIcon('multiple-choice')} שאלת בחירה</div>
                 <div class="exercise-question">${exercise.question}</div>
-                <div class="options-list">
+                <div class="options-list" role="group" aria-label="אפשרויות תשובה">
                     ${optionsHtml}
                 </div>
                 <div class="mentor-tip">
@@ -1978,7 +2129,7 @@ ${answers.action || ''}`;
                 <div class="exercise-type">${this.getExerciseTypeIcon('scenario')} תרחיש</div>
                 <div class="exercise-question">${exercise.question}</div>
                 ${exercise.context ? `<div class="scenario-context"><div class="scenario-context-label">📋 הקשר:</div><div class="scenario-context-text">${exercise.context}</div></div>` : ''}
-                <div class="options-list">
+                <div class="options-list" role="group" aria-label="אפשרויות תשובה">
                     ${optionsHtml}
                 </div>
             </div>
@@ -2276,7 +2427,7 @@ ${answers.action || ''}`;
                     <div class="improve-original-label">המשפט המקורי:</div>
                     <div class="improve-original-text">${exercise.original}</div>
                 </div>
-                <div class="options-list">
+                <div class="options-list" role="group" aria-label="אפשרויות תשובה">
                     ${optionsHtml}
                 </div>
                 <div class="mentor-tip">
@@ -2329,8 +2480,13 @@ ${answers.action || ''}`;
 
     selectMatchItem(side, index) {
         if (this.exerciseAnswered) return;
-        // Don't select already matched items
-        if (this.matchState.matches.some(m => m[side === 'left' ? 0 : 1] === index)) return;
+        // Clicking an already-matched item releases that pair, so a wrong
+        // pairing is never a dead-end (previously this click was ignored).
+        const slot = side === 'left' ? 0 : 1;
+        if (this.matchState.matches.some(m => m[slot] === index)) {
+            this.unmatchPair(side, index);
+            return;
+        }
 
         this.sound.play('click');
 
@@ -2373,6 +2529,27 @@ ${answers.action || ''}`;
                 this.enableCheckButton();
             }
         }
+    }
+
+    // Release a previously-made pair (user clicked a matched item to fix a misclick).
+    unmatchPair(side, index) {
+        const slot = side === 'left' ? 0 : 1;
+        const pairIdx = this.matchState.matches.findIndex(m => m[slot] === index);
+        if (pairIdx === -1) return;
+        this.sound.play('click');
+        const [leftIdx, rightIdx] = this.matchState.matches[pairIdx];
+        this.matchState.matches.splice(pairIdx, 1);
+
+        [['.match-left', leftIdx], ['.match-right', rightIdx]].forEach(([sel, idx]) => {
+            const el = document.querySelector(`${sel}[data-index="${idx}"]`);
+            if (!el) return;
+            el.classList.remove('matched', 'selected');
+            el.style.borderColor = '';
+            el.style.background = '';
+        });
+
+        // No longer fully matched → can't check yet.
+        this.disableCheckButton();
     }
 
     checkMatchAnswer(exercise) {
@@ -2589,6 +2766,11 @@ ${answers.action || ''}`;
 
     checkIdentifyAnswer(exercise) {
         if (!this.selectedAnswer) return false;
+        // Guard: malformed/missing correctRange must not crash the whole lesson.
+        if (!Array.isArray(exercise.correctRange) || exercise.correctRange.length < 2) {
+            console.warn('identify exercise has invalid correctRange:', exercise);
+            return false;
+        }
         const [correctStart, correctEnd] = exercise.correctRange;
         const { start, end } = this.selectedAnswer;
         const overlapStart = Math.max(start, correctStart);
@@ -3390,6 +3572,10 @@ ${answers.action || ''}`;
         const panel = document.getElementById('ram-chat-panel');
         const isOpen = panel.style.display !== 'none';
         panel.style.display = isOpen ? 'none' : 'flex';
+
+        // Reflect open/closed state for screen readers
+        const fab = document.getElementById('ram-chat-fab');
+        if (fab) fab.setAttribute('aria-expanded', String(!isOpen));
 
         // Backdrop for mobile
         let backdrop = document.getElementById('ram-chat-backdrop');

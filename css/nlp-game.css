@@ -3360,9 +3360,9 @@ body.game-fullscreen #game-container {
     margin-bottom: 0;
 }
 
-/* Zigzag offset */
-.path-node-row:nth-child(odd) { padding-right: 40px; padding-left: 0; }
-.path-node-row:nth-child(even) { padding-left: 40px; padding-right: 0; }
+/* Zigzag offset — logical properties so the zigzag mirrors correctly in RTL */
+.path-node-row:nth-child(odd) { padding-inline-start: 40px; padding-inline-end: 0; }
+.path-node-row:nth-child(even) { padding-inline-end: 40px; padding-inline-start: 0; }
 
 .path-connector {
     position: absolute;
@@ -4376,9 +4376,10 @@ video.welcome-gate-hero {
 }
 
 .welcome-gate-title {
-    font-family: var(--font-heading);
+    /* Brand display font for the hero headline only — UI chrome stays on Heebo. */
+    font-family: 'Frank Ruhl Libre', var(--font-heading);
     font-size: 2.2rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--color-primary-100);
     margin: 0 0 var(--space-4);
     line-height: 1.2;

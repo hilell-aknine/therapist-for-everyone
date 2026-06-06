@@ -2442,7 +2442,9 @@
     const loading = document.getElementById('plLoading');
     const iframe  = document.getElementById('plIframe');
     loading.classList.remove('is-hidden');
-    iframe.src = `https://www.youtube-nocookie.com/embed/${lesson.id}?rel=0&modestbranding=1&autoplay=1`;
+    // Workshop chapters that are timestamp-segments of one video carry `start` (seconds) → deep-link.
+    const startParam = Number.isFinite(lesson.start) ? `&start=${lesson.start}` : '';
+    iframe.src = `https://www.youtube-nocookie.com/embed/${lesson.id}?rel=0&modestbranding=1&autoplay=1${startParam}`;
     iframe.onload = () => {
       loading.classList.add('is-hidden');
       if (completionTimer) clearTimeout(completionTimer);

@@ -3091,6 +3091,22 @@
                     { id: 'XvynUFtXzn8', title: 'מטראומה לתשוקה — רגשות חיוביים וסיכום', duration: '24:27' },
                 ]
             },
+            {
+                lessonNumber: 12,
+                lessonTitle: 'סדנת סגנונות תקשורת — איך לתקשר עם כל אחד',
+                color: 'var(--accent-gold-hover)',
+                // Single full-workshop video (KryXIuiM57Y) split into chapters by timestamp via `start` (seconds).
+                chapters: [
+                    { id: 'KryXIuiM57Y', title: 'למה להכיר את עצמך לפני שאתה משפיע על אחרים', duration: '10:25', start: 7 },
+                    { id: 'KryXIuiM57Y', title: 'ארבעת סגנונות התקשורת — מבוא ותמונה כללית', duration: '5:27', start: 632 },
+                    { id: 'KryXIuiM57Y', title: 'מילוי השאלון וחישוב הסגנון הראשי שלך', duration: '31:24', start: 959 },
+                    { id: 'KryXIuiM57Y', title: 'לאתר את הסגנון שלך על המפה ולא להיכבל לזהות', duration: '8:40', start: 2843 },
+                    { id: 'KryXIuiM57Y', title: 'פרופיל מלא של ארבעת הסגנונות: משימתי, מקדם, תומך, מנתח', duration: '19:22', start: 3363 },
+                    { id: 'KryXIuiM57Y', title: 'גילוי הסגנון המשני שלך וסיכום ראשוני', duration: '6:45', start: 4525 },
+                    { id: 'KryXIuiM57Y', title: 'רפור — הכלי החזק ביותר ליצירת חיבור לא-מודע', duration: '24:07', start: 4930 },
+                    { id: 'KryXIuiM57Y', title: 'מרכיבי הרפור בפועל: שפת גוף, טונציה ומילים — ומשימות לדרך', duration: '28:05', start: 6377 },
+                ]
+            },
         ];
 
   async function checkPaidRole(){
@@ -3234,7 +3250,9 @@
     const ch = allChapters[flatIdx];
     const viewer = document.getElementById('masterViewer');
     document.getElementById('masterViewerTitle').textContent = ch?.title || 'שיעור מאסטר';
-    document.getElementById('masterViewerFrame').src = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1`;
+    // Chapters that are timestamp-segments of one video carry `start` (seconds) → deep-link into that point.
+    const startParam = (ch && Number.isFinite(ch.start)) ? `&start=${ch.start}` : '';
+    document.getElementById('masterViewerFrame').src = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1${startParam}`;
     document.getElementById('masterViewerDownload').style.display = 'none';
     viewer.classList.add('is-open');
   }

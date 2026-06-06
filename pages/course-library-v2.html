@@ -742,6 +742,23 @@
   body.view-master .lms-player,
   body.view-master .lms-amb{ display:none; }
 
+  /* ==================== MASTER SALES (admin-only preview) ==================== */
+  .lms-master-sales{ display:none; flex-direction:column; gap:1rem; container-type: inline-size; }
+  body.view-master-sales .lms-master-sales{ display:flex; }
+  body.view-master-sales .lms-welcome,
+  body.view-master-sales .lms-player,
+  body.view-master-sales .lms-amb,
+  body.view-master-sales .lms-master{ display:none; }
+  .lms-ms-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:.9rem; }
+  .lms-ms-topic{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); border-top:3px solid var(--accent-gold-hover,#D4AF37); border-radius:14px; padding:1rem 1.1rem; }
+  .lms-ms-topic h4{ margin:0 0 .35rem 0; color:var(--accent-gold-hover,#D4AF37); font-size:.98rem; }
+  .lms-ms-topic p{ margin:0; font-size:.86rem; line-height:1.7; color:rgba(255,255,255,.78); }
+  .lms-ms-price{ text-align:center; }
+  .lms-ms-price__old{ color:rgba(255,255,255,.55); text-decoration:line-through; }
+  .lms-ms-price__now{ font-size:2.6rem; font-weight:800; color:var(--accent-gold-hover,#D4AF37); line-height:1.1; margin:.25rem 0; }
+  .lms-ms-cta{ display:inline-block; margin-top:1rem; background:var(--accent-gold-hover,#D4AF37); color:#04232a; font-weight:800; padding:.85rem 2.2rem; border-radius:999px; text-decoration:none; font-size:1.05rem; }
+  .lms-ms-letter p{ line-height:1.9; color:rgba(255,255,255,.86); }
+
   .lms-master-section{ background: linear-gradient(180deg, rgba(8,32,38,.62), rgba(6,22,28,.52)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border:1px solid rgba(255,255,255,.10); border-radius:18px; padding:1.4rem 1.5rem; box-shadow: 0 10px 24px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08); }
   .lms-master-section h2{ margin:0 0 1rem 0; font-family:'Frank Ruhl Libre','Heebo',serif; font-size:1.2rem; color:#fff; display:flex; align-items:center; gap:.5rem; }
   .lms-master-section h2 i{ color:var(--accent-gold-hover); }
@@ -1259,6 +1276,91 @@
           <div id="masterLessonsHost"></div>
         </section>
       </div><!-- /.lms-master -->
+
+      <!-- ===== Master SALES page (NLP MASTER upsell) — ADMIN-ONLY preview until launch ===== -->
+      <div class="lms-master-sales" id="masterSalesView">
+        <header class="lms-amb-bar">
+          <button class="lms-pl-bar__back" type="button" id="masterSalesBack" aria-label="חזרה לסקירה" title="חזרה" onclick="showWelcome()"><i class="fa-solid fa-arrow-right"></i></button>
+          <div class="lms-amb-bar__title">
+            <h1 class="lms-amb-bar__h"><i class="fa-solid fa-crown" style="color:var(--accent-gold-hover);margin-inline-end:.4rem;"></i>קורס NLP MASTER — דף מכירה</h1>
+            <div class="lms-amb-bar__sub">תצוגה מקדימה (אדמין בלבד) · לא גלוי למשתמשים</div>
+          </div>
+        </header>
+
+        <section class="lms-master-section" style="text-align:center;">
+          <div style="display:inline-block;background:var(--accent-gold-hover,#D4AF37);color:#04232a;font-weight:800;padding:.4rem 1.1rem;border-radius:999px;font-size:.85rem;margin-bottom:.9rem;">⏳ לזמן מוגבל · 70% הנחה על תוכנית ההכשרה המלאה</div>
+          <h2 style="color:#fff;line-height:1.45;margin:.2rem 0;">התוכנית שתהפוך אותך מ״עוד מישהו שלמד NLP״<br><span style="color:var(--accent-gold-hover,#D4AF37);">ל-MASTER בתחום</span></h2>
+          <p style="color:rgba(255,255,255,.85);max-width:680px;margin:.6rem auto 0;">שיודע ליצור פריצות דרך אמיתיות בחיים שלך ושל הסובבים אותך</p>
+          <div style="max-width:700px;margin:1.3rem auto 0;aspect-ratio:16/9;background:rgba(255,255,255,.04);border:2px dashed rgba(255,255,255,.18);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;color:rgba(255,255,255,.7);">
+            <i class="fa-solid fa-circle-play" style="font-size:2.4rem;opacity:.8;"></i>
+            <span style="font-weight:700;">סרטון מבוא · רם אלוס</span>
+            <span style="font-size:.78rem;opacity:.7;">(להטמעה בהמשך)</span>
+          </div>
+        </section>
+
+        <section class="lms-master-section lms-ms-price">
+          <div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.6rem;">קורס NLP MASTER · לאנשים שרוצים להבין איך תת המודע עובד באמת</div>
+          <div class="lms-ms-price__old">עלות מלאה: 6,700 ₪</div>
+          <div class="lms-ms-price__now">1,900 ₪</div>
+          <div style="color:rgba(255,255,255,.85);font-weight:600;">מחיר מבצע · בונוסים בשווי אלפי ₪!</div>
+          <a href="#" data-cta="master-checkout" class="lms-ms-cta" onclick="return false;">קניתם אותי, אני בפנים! ←</a>
+          <div style="font-size:.74rem;color:rgba(255,255,255,.55);margin-top:.6rem;">* קישור הרכישה יחובר בהשקה</div>
+        </section>
+
+        <section class="lms-master-section lms-ms-letter">
+          <h2><i class="fa-solid fa-pen-nib"></i>מכתב אישי מרם אלוס · מרצה הקורס</h2>
+          <p>היי חברים, אם הגעתם לכאן כנראה שיש לכם קריאה פנימית להעמיק ולהבין יותר את ״מערכת ההפעלה״ שבאנו איתה לעולם. לי הייתה קריאה כזו בגיל 21 — תמיד רציתי להבין איך המוח עובד ולמה אנשים פועלים כמו שהם פועלים.</p>
+          <p>בסוף השירות הצבאי נחשפתי לטוני רובינס וגיליתי שהוא משתמש בעיקר בטכניקות NLP כדי ליצור שינויים פורצי דרך. זה התחיל אצלי מקורס PRACTITIONER, משם ל-MASTER, עד פתיחת קליניקה, הקמת ביה״ס והשתתפות בכל הסמינרים של טוני רובינס בעולם.</p>
+          <p>בכנות, NLP שינה לי את החיים. היכולת להבין באמת את עצמי ואת מה שקורה בתת המודע שלי עזרה לי לפעול בחופשיות, לנצח פחדים, לרפא טראומות וליצור שלום עם הרגשות שלי. לכן נתתי את קורס PRACTITIONER בחינם — היום יש בו מעל 30,000 צפיות.</p>
+          <p>אבל יש הבדל בין מי ש״למד NLP" לבין מי ש״חי NLP". קורס PRACTITIONER נהדר, אך הוא לא נוגע בעומק של אמונות ליבה, ערכים ושינוי זהות. אם אתם רוצים להעמיק ולהטמיע את השיטה ברמת הזהות — קורס NLP MASTER הוא הקורס עבורכם. זה לבל אחר של עומק, תוכן ופרקטיקה.</p>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.6);">גילוי נאות: שילמתי על 2 הקורסים בשנת 2021 מחיר של 11,800 ₪ (אחרי הנחה…).</p>
+        </section>
+
+        <section class="lms-master-section">
+          <h2><i class="fa-solid fa-layer-group"></i>מה לומדים לעומק בקורס</h2>
+          <div class="lms-ms-grid">
+            <div class="lms-ms-topic"><h4>שינוי אמונות ליבה</h4><p>איך אמונה נוצרת בילדות, למה המוח נאחז בה, ואיך יוצרים ״ספק בריא״ באמונה תוקעת כדי לבנות במקומה אמונה מקדמת.</p></div>
+            <div class="lms-ms-topic"><h4>תשאול סיבובי</h4><p>אחד הכלים העוצמתיים בקורס: לשאול שאלות שמגיעות לשורש הבעיה במקום הסיפור הראשוני שהאדם מספר לעצמו.</p></div>
+            <div class="lms-ms-topic"><h4>הטבעה מחודשת והחלטות מפתח</h4><p>איך רגעים מהעבר הופכים ל״חוקים פנימיים״ שמנהלים אותנו, ואיך דרך דמיון מודרך משנים את ההשפעה שלהם מהשורש.</p></div>
+            <div class="lms-ms-topic"><h4>הילד הפנימי וציר הזמן</h4><p>״התותח הכבד״ של ה-NLP: עבודה עם חלקים רגשיים מודחקים, פחדים, כאבים וזיכרונות שתוקעים אותנו.</p></div>
+            <div class="lms-ms-topic"><h4>ערכים וזהות</h4><p>להכיר את עצמך ברובד העמוק ביותר, להבין מה באמת חשוב לך ומהם המניעים האמיתיים שלך, וליצור ״זהות חדשה״.</p></div>
+            <div class="lms-ms-topic"><h4>סו״מים · זריזות לשון</h4><p>7 טכניקות לשוניות עמוקות שפועלות ישירות על תת המודע, לשינוי אמונות ולהשפעה בכל סיטואציה.</p></div>
+            <div class="lms-ms-topic"><h4>הבנת מסרים מרגשות</h4><p>להפסיק לראות רגשות כבעיה, ולהבין מה תת המודע רוצה להגיד דרך כעס, פחד, עצב, אשמה, אהבה ושמחה.</p></div>
+            <div class="lms-ms-topic"><h4>שחרור כעס וטינה</h4><p>איך לשחרר כעס או טינה על אדם, חבר או משפחה אחת ולתמיד, כדי שיהיה לך ״חופש רגשי״.</p></div>
+            <div class="lms-ms-topic"><h4>תלות רגשית</h4><p>זיהוי תלות רגשית באנשים או בישויות אחרות (מסכים, אוכל, כסף, מיניות, התמכרויות) וכיצד לשחרר אותן.</p></div>
+            <div class="lms-ms-topic"><h4>אסטרטגיות ומודלינג</h4><p>להבין איך אדם מייצר תוצאה (פחד, דחיינות, מוטיבציה, ביטחון, הצלחה) ואז לשנות או לשכפל את האסטרטגיה.</p></div>
+            <div class="lms-ms-topic"><h4>טראנס · דייב אלמן · מילטון מודל</h4><p>עבודה עם מצבי רגיעה עמוקים ושפה שמדברת ישירות לתת-המודע, בצורה מקצוענית ולא מניפולטיבית.</p></div>
+          </div>
+        </section>
+
+        <section class="lms-master-section">
+          <h2><i class="fa-solid fa-arrows-to-circle"></i>הקורס עובד ב-3 רבדים</h2>
+          <div class="lms-ms-grid">
+            <div class="lms-ms-topic"><h4>לאבחן</h4><p>להבין איפה באמת נמצאת הבעיה.</p></div>
+            <div class="lms-ms-topic"><h4>להוביל</h4><p>לבנות תהליך שינוי שלם, לא רק טכניקה בודדת.</p></div>
+            <div class="lms-ms-topic"><h4>להעמיק</h4><p>לעבוד עם אמונות, ערכים, זהות, רגשות, אסטרטגיות ותת-מודע.</p></div>
+          </div>
+        </section>
+
+        <section class="lms-master-section">
+          <h2><i class="fa-solid fa-box-open"></i>החבילה שלכם</h2>
+          <ul style="list-style:none;padding:0;margin:0;line-height:2.1;color:rgba(255,255,255,.9);">
+            <li>✅ קורס NLP MASTER מלא (רמה בינלאומית)</li>
+            <li>✅ כל הטכניקות המוקלטות של קורסי PRACTITIONER + MASTER</li>
+            <li>✅ 2 חוברות טכניקות יישום מלאות מ-2 הקורסים</li>
+            <li>🎁 בונוס 1 · סדנת מסרים מרגשות</li>
+            <li>🎁 בונוס 2 · סדנת סגנונות תקשורת</li>
+            <li>🎁 בונוס 3 · כלי AI לתרגול ויישום</li>
+          </ul>
+        </section>
+
+        <section class="lms-master-section lms-ms-price">
+          <div class="lms-ms-price__old">עלות מלאה: 6,700 ₪</div>
+          <div class="lms-ms-price__now">1,900 ₪</div>
+          <div style="color:rgba(255,255,255,.85);font-weight:600;margin-bottom:.3rem;">בונוסים בשווי אלפי ₪!</div>
+          <a href="#" data-cta="master-checkout" class="lms-ms-cta" onclick="return false;">קניתם אותי, אני בפנים! ←</a>
+        </section>
+      </div><!-- /.lms-master-sales -->
 
       <div class="lms-master-viewer" id="masterViewer">
         <div class="lms-master-viewer-bar">
@@ -2093,6 +2195,11 @@
         <span class="lms-sb-item__label">תוכנית השותפים</span>
         <span class="lms-sb-item__badge">חדש</span>
       </a>
+      <a class="lms-sb-item" href="#master-sales" data-nav="master-sales" id="sbMasterSalesItem" style="display:${_isAdmin ? '' : 'none'};">
+        <span class="lms-sb-item__icon"><i class="fa-solid fa-crown" style="color:var(--accent-gold-hover);"></i></span>
+        <span class="lms-sb-item__label">דף מכירה — מאסטר</span>
+        <span class="lms-sb-item__badge" style="background:rgba(212,175,55,.2);color:var(--accent-gold-hover);">אדמין</span>
+      </a>
       <a class="lms-sb-item" href="#master" data-nav="master" id="sbMasterItem" style="display:none;">
         <span class="lms-sb-item__icon"><i class="fa-solid fa-crown"></i></span>
         <span class="lms-sb-item__label">קורס המאסטר</span>
@@ -2169,7 +2276,7 @@
   function setCourse(c){
     if (c !== 'nlp-master' && c !== 'nlp-practitioner') return;
     if (c === 'nlp-master' && !_isPaidCustomer) return;
-    if (c === courseType){ document.body.classList.remove('view-player','view-ambassador','view-master'); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+    if (c === courseType){ document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales'); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); return; }
     courseType = c;
     modules = (c === 'nlp-master') ? getMasterAsModules() : PRACTITIONER_MODULES;
     totalLessons = modules.reduce((s, m) => s + m.lessons.length, 0);
@@ -2182,7 +2289,7 @@
     if (ttl)  ttl.textContent  = (c === 'nlp-master') ? 'קורס המאסטר — תוכנית הכשרה' : 'קורס NLP — יסודות ומעשה';
     const mtl = document.getElementById('masterTabLabel');
     if (mtl) mtl.textContent = (c === 'nlp-master') ? 'חזרה לפרקטישנר' : 'קורס המאסטר';
-    document.body.classList.remove('view-player','view-ambassador','view-master');
+    document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales');
     try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
     renderAll();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2312,7 +2419,7 @@
     if (iframe) iframe.src = 'about:blank';
   }
   function showWelcome(skipPush){
-    document.body.classList.remove('view-player', 'view-ambassador', 'view-master');
+    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales');
     clearVideoState();
     if (!skipPush && location.hash) history.pushState(null, '', location.pathname + location.search);
     renderAll();
@@ -2324,6 +2431,7 @@
     const mod = modules[m];
     const lesson = mod.lessons[l];
 
+    document.body.classList.remove('view-master-sales');
     document.body.classList.add('view-player');
     document.getElementById('plTitle').textContent = lesson.title;
     document.getElementById('plSub').innerHTML = `מודול ${mod.id}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> ${lesson.duration} דק׳`;
@@ -2711,7 +2819,7 @@
 
   // ===== Ambassador view =====
   async function showAmbassadorView(skipPush){
-    document.body.classList.remove('view-player', 'view-master');
+    document.body.classList.remove('view-player', 'view-master', 'view-master-sales');
     document.body.classList.add('view-ambassador');
     clearVideoState();
     if (!skipPush && location.hash !== '#ambassador') history.pushState(null, '', '#ambassador');
@@ -2806,6 +2914,7 @@
 
   // ===== Master view (paid customers / admin) =====
   let _isPaidCustomer = false;
+  let _isAdmin = false; // gates the admin-only Master SALES preview
 
   const MASTER_WORKBOOKS = [
     { name: 'nlp-practitioner-main-workbook.pdf', title: 'חוברת ראשית — NLP Practitioner', icon: 'fa-solid fa-book-open' },
@@ -2990,6 +3099,13 @@
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (!user) return;
       const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single();
+      // Master SALES preview — ADMIN ONLY for now (hidden from everyone else, incl. paid_customer)
+      if (profile && profile.role === 'admin'){
+        _isAdmin = true;
+        const ss = document.getElementById('sbMasterSalesItem');
+        if (ss) ss.style.display = '';
+        else if (typeof renderSidebarNav === 'function') renderSidebarNav(document.getElementById('sbSearch')?.value || '');
+      }
       if (profile && (profile.role === 'paid_customer' || profile.role === 'admin')){
         _isPaidCustomer = true;
         const sb = document.getElementById('sbMasterItem');
@@ -3006,11 +3122,21 @@
       console.info('Master access requires paid membership.');
       return;
     }
-    document.body.classList.remove('view-player', 'view-ambassador');
+    document.body.classList.remove('view-player', 'view-ambassador', 'view-master-sales');
     document.body.classList.add('view-master');
     clearVideoState();
     if (!skipPush && location.hash !== '#master') history.pushState(null, '', '#master');
     loadMaster();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ===== Master SALES view (admin-only preview of the upsell landing page) =====
+  function showMasterSalesView(skipPush){
+    if (!_isAdmin) return; // safety: only admins can open the preview
+    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales');
+    document.body.classList.add('view-master-sales');
+    if (typeof clearVideoState === 'function') clearVideoState();
+    if (!skipPush && location.hash !== '#master-sales') history.pushState(null, '', '#master-sales');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -3161,6 +3287,7 @@
       }
     }
     if (location.hash === '#ambassador'){ showAmbassadorView(true); return true; }
+    if (location.hash === '#master-sales'){ if (_isAdmin){ showMasterSalesView(true); return true; } }
     if (location.hash === '#master'){ setCourse('nlp-master'); return true; }
     if (location.hash === '#master-workbooks'){ showMasterView(true); return true; }
     showWelcome(true);
@@ -3187,6 +3314,7 @@
       if (navAnchor){
         const target = navAnchor.getAttribute('data-nav') || navAnchor.getAttribute('href').replace('#','');
         if (target === 'ambassador'){ e.preventDefault(); showAmbassadorView(); return; }
+        if (target === 'master-sales'){ e.preventDefault(); showMasterSalesView(); return; }
         if (target === 'master'){ e.preventDefault(); setCourse('nlp-master'); return; }
         if (target === 'master-workbooks'){ e.preventDefault(); showMasterView(); return; }
         if (target === 'welcome'){ e.preventDefault(); showWelcome(); return; }

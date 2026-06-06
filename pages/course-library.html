@@ -5501,6 +5501,7 @@
 
         // ===== Master Course — Paid Customer Section =====
         let _isPaidCustomer = false;
+        let _isAdmin = false; // controls admin-only visibility of the Master SALES preview
 
         const masterWorkbooks = [
             { name: 'nlp-practitioner-main-workbook.pdf', title: 'חוברת ראשית — NLP Practitioner', icon: 'fa-solid fa-book-open' },
@@ -5705,8 +5706,12 @@
                 }
                 // Master SALES page (NLP MASTER upsell) — visible to ADMIN ONLY for now (preview before launch)
                 if (profile && profile.role === 'admin') {
+                    _isAdmin = true;
+                    // Reveal now if the sidebar is already rendered...
                     const msItem = document.getElementById('masterSalesSidebarItem');
                     if (msItem) msItem.style.display = '';
+                    // ...and re-render the sidebar so a later rebuild keeps it visible (renderSyllabus reads _isAdmin).
+                    if (typeof renderSyllabus === 'function') renderSyllabus();
                 }
                 if (profile && (profile.role === 'paid_customer' || profile.role === 'admin')) {
                     _isPaidCustomer = true;
@@ -6938,8 +6943,8 @@
                     <span>תוכנית השותפים</span>
                     <span class="amb-badge-new" id="ambBadgeNew">חדש</span>
                 </div>
-                <!-- HIDDEN until Master launch — remove style="display:none" to reveal -->
-                <div class="ambassador-sidebar-item" id="masterSalesSidebarItem" onclick="showMasterSales()" style="display:none;">
+                <!-- Admin-only preview until Master launch (visibility driven by _isAdmin) -->
+                <div class="ambassador-sidebar-item" id="masterSalesSidebarItem" onclick="showMasterSales()" style="display:${_isAdmin ? '' : 'none'};">
                     <i class="fa-solid fa-crown" style="color:var(--gold,#D4AF37);"></i>
                     <span>קורס NLP MASTER</span>
                 </div>

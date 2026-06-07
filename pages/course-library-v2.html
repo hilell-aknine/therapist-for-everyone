@@ -2391,6 +2391,99 @@
     } catch(_){ return ''; }
   }
 
+  // ===================== #4 RESUME: remember & restore video position =====================
+  let _ytPlayer = null, _posPoll = null, _curLessonId = null, _curML = { m:-1, l:-1 };
+  function fmtTime(sec){ const s=Math.floor(sec); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+  function posKey(id){ return `vidpos_${courseType==='nlp-master'?'master':'nlp'}_${id}`; }
+  function getSavedPos(id){ const v = parseInt(localStorage.getItem(posKey(id))||'0',10); return (Number.isFinite(v) && v>0) ? v : 0; }
+  function savePos(id, sec){ try { if (sec>5) localStorage.setItem(posKey(id), String(Math.floor(sec))); } catch(_){} }
+  function clearPos(id){ try { localStorage.removeItem(posKey(id)); } catch(_){} }
+  function stopPosPoll(){ if (_posPoll){ clearInterval(_posPoll); _posPoll=null; } }
+  function startPosPoll(){
+    stopPosPoll();
+    _posPoll = setInterval(() => {
+      try {
+        if (_ytPlayer && _ytPlayer.getCurrentTime){
+          const t = _ytPlayer.getCurrentTime();
+          const d = _ytPlayer.getDuration ? _ytPlayer.getDuration() : 0;
+          if (t > 0 && _curLessonId){
+            if (d && t > d - 15) clearPos(_curLessonId);  // near the end → don't resume next time
+            else savePos(_curLessonId, t);
+          }
+        }
+      } catch(_){}
+    }, 5000);
+  }
+  function loadYtApi(){
+    if (window.YT && window.YT.Player) return;
+    if (document.getElementById('yt-iframe-api')) return;
+    const s = document.createElement('script'); s.id = 'yt-iframe-api'; s.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(s);
+  }
+  function _hideLoading(){ const el = document.getElementById('plLoading'); if (el) el.classList.add('is-hidden'); }
+  function _ytInit(lesson, m, l, startSec){
+    try {
+      _ytPlayer = new YT.Player('plIframe', {
+        host: 'https://www.youtube-nocookie.com',
+        videoId: lesson.id,
+        playerVars: { rel:0, modestbranding:1, start: startSec||0, autoplay:1, playsinline:1, origin: location.origin },
+        events: {
+          onReady: () => { _hideLoading(); startPosPoll(); },
+          onStateChange: (e) => {
+            if (e.data === YT.PlayerState.BUFFERING || e.data === YT.PlayerState.PLAYING) _hideLoading();
+            if (e.data === YT.PlayerState.PLAYING) startPosPoll();
+            if (e.data === YT.PlayerState.ENDED){ if (_curLessonId) clearPos(_curLessonId); markLessonCompleted(_curML.m, _curML.l); }
+          }
+        }
+      });
+    } catch(err){ _fallbackIframe(lesson, startSec); }
+  }
+  function _fallbackIframe(lesson, startSec){
+    let iframe = document.getElementById('plIframe');
+    if (!iframe){
+      const hostEl = document.querySelector('.lms-pl-video');
+      iframe = document.createElement('iframe'); iframe.id = 'plIframe';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.setAttribute('allowfullscreen',''); iframe.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
+      if (hostEl) hostEl.appendChild(iframe);
+    }
+    const startParam = startSec>0 ? `&start=${startSec}` : '';
+    iframe.src = `https://www.youtube-nocookie.com/embed/${lesson.id}?rel=0&modestbranding=1&autoplay=1${startParam}`;
+    iframe.onload = _hideLoading;
+  }
+  function loadLessonVideo(lesson, m, l){
+    const loading = document.getElementById('plLoading'); if (loading) loading.classList.remove('is-hidden');
+    _curLessonId = lesson.id; _curML = { m, l };
+    const saved = getSavedPos(lesson.id);
+    // Workshop chapters carry a fixed `start`; otherwise resume from the saved position.
+    const startSec = Number.isFinite(lesson.start) ? lesson.start : (saved > 10 ? saved : 0);
+    if (completionTimer) clearTimeout(completionTimer);
+    completionTimer = setTimeout(() => markLessonCompleted(m, l), 45000);
+    if (!Number.isFinite(lesson.start) && saved > 10){ try { showCelebToast(`ממשיך מ-${fmtTime(saved)}`); } catch(_){} }
+    loadYtApi();
+    stopPosPoll();
+    if (window.YT && window.YT.Player){
+      if (_ytPlayer && _ytPlayer.loadVideoById){
+        try { _ytPlayer.loadVideoById({ videoId: lesson.id, startSeconds: startSec||0 }); startPosPoll(); }
+        catch(_){ try { _ytPlayer.destroy(); } catch(__){} _ytPlayer = null; _fallbackIframe(lesson, startSec); }
+      } else {
+        _ytInit(lesson, m, l, startSec);
+      }
+    } else {
+      // API not ready yet → safe manual iframe now; later lessons upgrade to the API path.
+      _fallbackIframe(lesson, startSec);
+    }
+  }
+  window.addEventListener('pagehide', () => {
+    try {
+      if (_ytPlayer && _ytPlayer.getCurrentTime && _curLessonId){
+        const t = _ytPlayer.getCurrentTime();
+        const d = _ytPlayer.getDuration ? _ytPlayer.getDuration() : 0;
+        if (t > 5 && (!d || t < d - 15)) savePos(_curLessonId, t);
+      }
+    } catch(_){}
+  });
+
   function renderSidebarNav(filter){
     const q = (filter || '').trim().toLowerCase();
     const next = getNextLesson();
@@ -2659,17 +2752,8 @@
     // Lesson context for popup_events (auth_modal/video_toast/etc. carry this).
     if (window.PopupManager) window.PopupManager.setLessonContext(lesson.id);
 
-    const loading = document.getElementById('plLoading');
-    const iframe  = document.getElementById('plIframe');
-    loading.classList.remove('is-hidden');
-    // Workshop chapters that are timestamp-segments of one video carry `start` (seconds) → deep-link.
-    const startParam = Number.isFinite(lesson.start) ? `&start=${lesson.start}` : '';
-    iframe.src = `https://www.youtube-nocookie.com/embed/${lesson.id}?rel=0&modestbranding=1&autoplay=1${startParam}`;
-    iframe.onload = () => {
-      loading.classList.add('is-hidden');
-      if (completionTimer) clearTimeout(completionTimer);
-      completionTimer = setTimeout(() => markLessonCompleted(m, l), 45000);
-    };
+    // #4 Resume-aware video load (YouTube IFrame API + safe manual-iframe fallback).
+    loadLessonVideo(lesson, m, l);
 
     // video_toast: for unauthenticated guests, fire after 60s of watching
     if (_videoToastTimer) clearTimeout(_videoToastTimer);
@@ -2811,6 +2895,7 @@
       }
     } catch(_){}
     if (m === currentModuleIndex && l === currentLessonIndex) refreshCompleteBtn();
+    try { if (modules[m] && modules[m].lessons[l]) clearPos(modules[m].lessons[l].id); } catch(_){}
     renderProgress();
     try { renderJourney(); } catch(_){}
     if (!alreadyDone){ try { celebrateCompletion(m, l); } catch(_){} }

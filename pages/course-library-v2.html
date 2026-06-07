@@ -2470,6 +2470,8 @@
   }
   function loadLessonVideo(lesson, m, l){
     const loading = document.getElementById('plLoading'); if (loading) loading.classList.remove('is-hidden');
+    // גיבוי בטיחות: לעולם לא להשאיר את ספינר "טוען שיעור…" תקוע אם משהו משתבש בדרך
+    if (loading){ clearTimeout(window._plLoadingGuard); window._plLoadingGuard = setTimeout(() => loading.classList.add('is-hidden'), 6000); }
     _curLessonId = lesson.id; _curML = { m, l };
     const saved = getSavedPos(lesson.id);
     // Workshop chapters carry a fixed `start`; otherwise resume from the saved position.

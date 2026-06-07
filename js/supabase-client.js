@@ -377,9 +377,9 @@
                 .select('completed')
                 .eq('user_id', user.id)
                 .eq('video_id', videoId)
-                .single();
+                .maybeSingle();
 
-            if (error && error.code !== 'PGRST116') throw error;
+            if (error) throw error;
             return data?.completed || false;
         },
 
@@ -468,9 +468,9 @@
                 .select('lesson_number, watched_seconds')
                 .eq('user_id', user.id)
                 .eq('video_id', `last_watched_${courseType}`)
-                .single();
+                .maybeSingle();
 
-            if (error && error.code !== 'PGRST116') return null;
+            if (error) return null;
             if (!data) return null;
             // watched_seconds = moduleIndex, lesson_number = lessonIndex
             return { moduleIndex: data.watched_seconds, lessonIndex: data.lesson_number };
@@ -530,8 +530,8 @@
                 .select('*')
                 .eq('user_id', user.id)
                 .eq('video_id', videoId)
-                .single();
-            if (error && error.code !== 'PGRST116') throw error;
+                .maybeSingle();
+            if (error) throw error;
             return data;
         },
 

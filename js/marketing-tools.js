@@ -643,7 +643,9 @@ window.saveFullAttribution = async function (linkedTable, linkedId) {
 
         let updated = [];
         try { updated = await patchRes.json(); } catch (e) {}
-        if (!Array.isArray(updated) || updated.length === 0) {
+        // INSERT רק עבור anon — למשתמש מחובר אין INSERT policy על lead_attribution
+        // (תמיד 403 מרעיש), וה-row שלו כבר קיים מה-signup, אז ה-PATCH למעלה מטפל בו.
+        if ((!Array.isArray(updated) || updated.length === 0) && bearer === anonKey) {
             // The PATCH above already updated the row WHEN ONE EXISTED — but
             // lead_attribution has no SELECT policy for authenticated users, so
             // `return=representation` always comes back []. We therefore cannot

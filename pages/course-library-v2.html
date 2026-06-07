@@ -2500,7 +2500,8 @@
     if (!host){ loadLessonVideo(lesson, m, l); return; }
     try { if (_ytPlayer && _ytPlayer.destroy) _ytPlayer.destroy(); } catch(_){}
     _ytPlayer = null; stopPosPoll();
-    const ifr = document.getElementById('plIframe'); if (ifr){ try { ifr.src = 'about:blank'; } catch(_){} }
+    // החלפת ה-iframe ב-iframe נקי (במקום about:blank) — מונעת spam של postMessage מנגן ישן
+    const ifr = document.getElementById('plIframe'); if (ifr){ const fresh = ifr.cloneNode(false); fresh.removeAttribute('src'); ifr.replaceWith(fresh); }
     const loading = document.getElementById('plLoading'); if (loading) loading.classList.add('is-hidden');
     const old = host.querySelector('.lms-pl-facade'); if (old) old.remove();
     const fac = document.createElement('button');

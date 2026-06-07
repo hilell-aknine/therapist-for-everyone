@@ -170,6 +170,23 @@ serve(async (req) => {
       )
     }
 
+    // --- Paid-only gate (cost control) ---
+    // The AI mentor is a paid Master benefit. The client UI is locked for non-paid
+    // users; this is the authoritative server-side enforcement so the costly API
+    // can't be reached by bypassing the browser. Only paid_customer / admin pass.
+    const { data: roleRow } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle()
+    const role = roleRow?.role
+    if (role !== 'paid_customer' && role !== 'admin') {
+      return new Response(
+        JSON.stringify({ error: 'העוזר האישי זמין לחברי קורס המאסטר 👑', paidOnly: true }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // --- Parse request ---
     // courseType: 'master' activates the master KB and master system prompt.
     // The client sends this either as a top-level field or nested in lessonContext.

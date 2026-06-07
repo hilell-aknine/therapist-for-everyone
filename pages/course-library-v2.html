@@ -759,6 +759,16 @@
   .lms-ms-cta{ display:inline-block; margin-top:1rem; background:var(--accent-gold-hover,#D4AF37); color:#04232a; font-weight:800; padding:.85rem 2.2rem; border-radius:999px; text-decoration:none; font-size:1.05rem; }
   .lms-ms-letter p{ line-height:1.9; color:rgba(255,255,255,.86); }
 
+  /* ==================== BONUS WORKSHOP DISTINCTION (premium, not core course) ==================== */
+  .lms-sb__heading--bonus{ color: var(--accent-gold-hover,#D4AF37); }
+  .lms-sb-mod--bonus > .lms-sb-item{ box-shadow: inset 2px 0 0 var(--accent-gold-hover,#D4AF37); }
+  .lms-sb-bonus-tag{ font-size:.58rem; font-weight:800; color:#04232a; background:var(--accent-gold-hover,#D4AF37); border-radius:999px; padding:.05rem .45rem; margin-inline-start:.4rem; vertical-align:middle; }
+  .lms-master-bonus{ border:1px solid rgba(212,175,55,.45); background:linear-gradient(180deg, rgba(212,175,55,.09), rgba(212,175,55,.02)); }
+  .lms-master-bonus__head{ margin-bottom:1rem; }
+  .lms-master-bonus__sub{ margin:.25rem 0 0; font-size:.82rem; color:rgba(255,255,255,.72); }
+  .lms-bonus-badge{ font-size:.6rem; font-weight:800; color:#04232a; background:var(--accent-gold-hover,#D4AF37); border-radius:999px; padding:.12rem .55rem; margin-inline-start:.4rem; vertical-align:middle; white-space:nowrap; }
+  .lms-master-card--bonus{ outline:1px solid rgba(212,175,55,.40); outline-offset:-1px; }
+
   .lms-master-section{ background: linear-gradient(180deg, rgba(8,32,38,.62), rgba(6,22,28,.52)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border:1px solid rgba(255,255,255,.10); border-radius:18px; padding:1.4rem 1.5rem; box-shadow: 0 10px 24px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08); }
   .lms-master-section h2{ margin:0 0 1rem 0; font-family:'Frank Ruhl Libre','Heebo',serif; font-size:1.2rem; color:#fff; display:flex; align-items:center; gap:.5rem; }
   .lms-master-section h2 i{ color:var(--accent-gold-hover); }
@@ -1274,6 +1284,14 @@
         <section class="lms-master-section" id="masterLessonsSection">
           <h2><i class="fa-solid fa-video"></i>שיעורי וידאו — מאסטר</h2>
           <div id="masterLessonsHost"></div>
+        </section>
+
+        <section class="lms-master-section lms-master-bonus" id="masterBonusSection" style="display:none;">
+          <div class="lms-master-bonus__head">
+            <h2 style="border:0;margin:0;padding:0;"><span style="font-size:1.25em;">🎁</span> בונוסים בלעדיים למשתתפי המאסטר</h2>
+            <p class="lms-master-bonus__sub">סדנאות מלאות שאינן חלק מ-10 מפגשי הקורס — מתנה לחברי התוכנית, בשווי אלפי ₪.</p>
+          </div>
+          <div id="masterBonusHost"></div>
         </section>
       </div><!-- /.lms-master -->
 
@@ -2215,10 +2233,17 @@
       return escapeHtml(text).replace(re, '<mark>$1</mark>');
     };
 
+    let bonusHeadingShown = false;
     modules.forEach((mod, mIdx) => {
       const matched = mod.lessons.map((les, lIdx) => ({ les, lIdx }))
         .filter(({ les }) => !q || les.title.toLowerCase().includes(q) || mod.title.toLowerCase().includes(q));
       if (q && matched.length === 0) return;
+
+      // Separate bonus workshops from course sessions with their own gold heading.
+      if (mod.isBonus && !bonusHeadingShown){
+        parts.push(`<div class="lms-sb__heading lms-sb__heading--bonus" style="margin-top:1rem;">🎁 בונוסים בלעדיים</div>`);
+        bonusHeadingShown = true;
+      }
 
       const done = mod.lessons.filter((_, l) => completedLessons.includes(`${mIdx}-${l}`)).length;
       const isCurrentModule = !next.allDone && next.m === mIdx;
@@ -2239,10 +2264,10 @@
       }).join('');
 
       parts.push(`
-        <div class="lms-sb-mod${open}" data-module="${mIdx}">
+        <div class="lms-sb-mod${open}${mod.isBonus ? ' lms-sb-mod--bonus' : ''}" data-module="${mIdx}">
           <button class="lms-sb-item" type="button" aria-expanded="${open ? 'true' : 'false'}" data-toggle="${mIdx}">
             <span class="lms-sb-item__chev"><i class="fa-solid fa-chevron-down"></i></span>
-            <span class="lms-sb-item__label">${escapeHtml(mod.title)}</span>
+            <span class="lms-sb-item__label">${escapeHtml(mod.title)}${mod.isBonus ? '<span class="lms-sb-bonus-tag">בונוס</span>' : ''}</span>
             <span class="lms-sb-item__count">${done}/${mod.lessons.length}</span>
           </button>
           <div class="lms-sb-mod__lessons">${lessonsHtml}</div>
@@ -2271,7 +2296,7 @@
   // ===== Course switching (Practitioner ⇄ Master) — same player, course-aware =====
   function getMasterAsModules(){
     // MASTER_MODULES {lessonNumber,lessonTitle,chapters[]} → player shape {id,title,lessons[]}
-    return MASTER_MODULES.map((m, i) => ({ id: i + 1, title: m.lessonTitle, lessons: m.chapters }));
+    return MASTER_MODULES.map((m, i) => ({ id: i + 1, title: m.lessonTitle, lessons: m.chapters, isBonus: !!m.isBonus }));
   }
   function setCourse(c){
     if (c !== 'nlp-master' && c !== 'nlp-practitioner') return;
@@ -3084,6 +3109,7 @@
                 lessonNumber: 11,
                 lessonTitle: 'סדנת רגשות — הבנת מסרים מרגשות',
                 color: 'var(--gold)',
+                isBonus: true,
                 chapters: [
                     { id: 'xVN1XcyIaGU', title: 'רגשות ומודל מרפת — למה יש לנו רגשות', duration: '22:40' },
                     { id: 'QRrEA0ExxFA', title: 'הרגש כמסר מתת-המודע — פוקוס, הכרת תודה ומילים', duration: '23:53' },
@@ -3097,6 +3123,7 @@
                 lessonNumber: 12,
                 lessonTitle: 'סדנת סגנונות תקשורת — איך לתקשר עם כל אחד',
                 color: 'var(--accent-gold-hover)',
+                isBonus: true,
                 // Single full-workshop video (KryXIuiM57Y) split into chapters by timestamp via `start` (seconds).
                 chapters: [
                     { id: 'KryXIuiM57Y', title: 'למה להכיר את עצמך לפני שאתה משפיע על אחרים', duration: '10:25', start: 7 },
@@ -3191,30 +3218,48 @@
       return;
     }
 
-    const totalChapters = MASTER_MODULES.reduce((n, m) => n + m.chapters.length, 0);
-    if (subtitle) subtitle.textContent = `${totalChapters} פרקי וידאו ב-${MASTER_MODULES.length} מפגשים + 6 חוברות עבודה`;
+    // Split course sessions from bonus workshops so bonuses read as premium extras, not core content.
+    const regularMods = MASTER_MODULES.filter(m => !m.isBonus);
+    const bonusMods   = MASTER_MODULES.filter(m => m.isBonus);
+    const regularChapters = regularMods.reduce((n, m) => n + m.chapters.length, 0);
+    if (subtitle){
+      let txt = `${regularChapters} פרקי וידאו ב-${regularMods.length} מפגשים + 6 חוברות עבודה`;
+      if (bonusMods.length) txt += ` · ${bonusMods.length} סדנאות בונוס`;
+      subtitle.textContent = txt;
+    }
 
+    // Global flat index must match MASTER_MODULES.flatMap order (used by playMasterLesson), so iterate in order.
     let flatIdx = 0;
-    lessonsHost.innerHTML = MASTER_MODULES.map(mod => {
-      const chaptersHtml = mod.chapters.map(ch => {
-        const idx = flatIdx++;
-        return `
-          <div class="lms-master-card" data-mvid="${escapeHtml(ch.id)}" data-midx="${idx}">
+    const card = (ch, idx, isBonus, subLabel) => `
+          <div class="lms-master-card${isBonus ? ' lms-master-card--bonus' : ''}" data-mvid="${escapeHtml(ch.id)}" data-midx="${idx}">
             <div class="lms-master-card__thumb">
               <img src="https://img.youtube.com/vi/${escapeHtml(ch.id)}/mqdefault.jpg" alt="" loading="lazy">
               <i class="fa-solid fa-play"></i>
               <span class="lms-master-card__duration">${escapeHtml(ch.duration)}</span>
             </div>
             <div class="lms-master-card__title">${escapeHtml(ch.title)}</div>
-            <div class="lms-master-card__sub">${escapeHtml(mod.lessonTitle)}</div>
+            <div class="lms-master-card__sub">${escapeHtml(subLabel || '')}</div>
           </div>`;
-      }).join('');
-      return `
-        <div style="margin-bottom:1.2rem;">
-          <h3 style="margin:0 0 .7rem 0; color:#fff; font-family:'Heebo',sans-serif; font-size:.95rem; font-weight:600;">${escapeHtml(mod.lessonTitle)}</h3>
+    const regularBlocks = [];
+    const bonusBlocks = [];
+    MASTER_MODULES.forEach(mod => {
+      const isBonus = !!mod.isBonus;
+      const chaptersHtml = mod.chapters.map(ch => card(ch, flatIdx++, isBonus, mod.lessonTitle)).join('');
+      const heading = isBonus
+        ? `<h3 style="margin:0 0 .7rem 0; color:var(--accent-gold-hover); font-family:'Heebo',sans-serif; font-size:1rem; font-weight:700;">🎁 ${escapeHtml(mod.lessonTitle)} <span class="lms-bonus-badge">בונוס בלעדי</span></h3>`
+        : `<h3 style="margin:0 0 .7rem 0; color:#fff; font-family:'Heebo',sans-serif; font-size:.95rem; font-weight:600;">${escapeHtml(mod.lessonTitle)}</h3>`;
+      const block = `
+        <div style="margin-bottom:1.4rem;">
+          ${heading}
           <div class="lms-master-grid">${chaptersHtml}</div>
         </div>`;
-    }).join('');
+      (isBonus ? bonusBlocks : regularBlocks).push(block);
+    });
+    lessonsHost.innerHTML = regularBlocks.join('');
+    const bonusHost = document.getElementById('masterBonusHost');
+    const bonusSection = document.getElementById('masterBonusSection');
+    if (bonusHost) bonusHost.innerHTML = bonusBlocks.join('');
+    if (bonusSection) bonusSection.style.display = bonusBlocks.length ? '' : 'none';
   }
 
   async function openMasterWorkbook(i){

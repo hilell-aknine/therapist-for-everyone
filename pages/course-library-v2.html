@@ -2987,6 +2987,22 @@
   function resetAiChat(){
     aiHistory = [];
     const msgs = document.getElementById('aiMsgs');
+    const input = document.getElementById('aiInput');
+    const sendBtn = document.getElementById('aiSendBtn');
+    // Cost-bearing feature → Master members (paid) / admin only.
+    if (!_isPaidCustomer && !devBypass){
+      msgs.innerHTML = `
+        <div class="lms-ai-empty" id="aiEmpty">
+          <div class="lms-ai-empty__icon"><i class="fa-solid fa-lock" style="color:var(--accent-gold-hover);"></i></div>
+          <h3>העוזר האישי — בלעדי לחברי המאסטר 👑</h3>
+          <p>מורה AI שמכיר את כל תכני הקורס וזמין לכל שאלה הוא חלק מתוכנית המאסטר. שדרגו כדי לפתוח אותו.</p>
+        </div>`;
+      if (input){ input.disabled = true; input.placeholder = 'זמין לחברי המאסטר 👑'; }
+      if (sendBtn) sendBtn.disabled = true;
+      return;
+    }
+    if (input){ input.disabled = false; input.placeholder = 'שאלו על השיעור...'; }
+    if (sendBtn) sendBtn.disabled = false;
     msgs.innerHTML = `
       <div class="lms-ai-empty" id="aiEmpty">
         <div class="lms-ai-empty__icon"><i class="fa-solid fa-comments"></i></div>
@@ -3034,6 +3050,8 @@
   }
   async function sendAi(message){
     if (aiBusy || !message.trim()) return;
+    // Paid-only (cost-bearing). UI is already locked for non-paid; this guards programmatic calls too.
+    if (!_isPaidCustomer && !devBypass){ appendAiMsg('bot', 'העוזר האישי זמין לחברי קורס המאסטר 👑'); return; }
     if (devBypass){ appendAiMsg('user', message); appendAiMsg('bot', '(מצב פיתוח — ה-AI לא פעיל. ההודעה שלך התקבלה אבל לא נשלחת לשרת.)'); return; }
     aiBusy = true;
     const sendBtn = document.getElementById('aiSendBtn');
@@ -3443,6 +3461,8 @@
         if (sb) sb.style.display = '';
         const mt = document.getElementById('masterTab');
         if (mt) mt.style.display = 'inline-flex';
+        // Unlock the AI mentor pane if a lesson was opened before the role resolved.
+        try { if (typeof resetAiChat === 'function' && aiHistory.length === 0) resetAiChat(); } catch(_){}
       }
     } catch(_){}
   }

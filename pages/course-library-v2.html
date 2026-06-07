@@ -1358,7 +1358,7 @@
           <div class="lms-ms-price__old">עלות מלאה: 6,700 ₪</div>
           <div class="lms-ms-price__now">1,900 ₪</div>
           <div style="color:rgba(255,255,255,.85);font-weight:600;">מחיר מבצע · בונוסים בשווי אלפי ₪!</div>
-          <a href="#" data-cta="master-checkout" class="lms-ms-cta" onclick="return false;">קניתם אותי, אני בפנים! ←</a>
+          <a href="#" data-cta="master-checkout" class="lms-ms-cta">קניתם אותי, אני בפנים! ←</a>
           <div style="font-size:.74rem;color:rgba(255,255,255,.55);margin-top:.6rem;">* קישור הרכישה יחובר בהשקה</div>
         </section>
 
@@ -1413,7 +1413,7 @@
           <div class="lms-ms-price__old">עלות מלאה: 6,700 ₪</div>
           <div class="lms-ms-price__now">1,900 ₪</div>
           <div style="color:rgba(255,255,255,.85);font-weight:600;margin-bottom:.3rem;">בונוסים בשווי אלפי ₪!</div>
-          <a href="#" data-cta="master-checkout" class="lms-ms-cta" onclick="return false;">קניתם אותי, אני בפנים! ←</a>
+          <a href="#" data-cta="master-checkout" class="lms-ms-cta">קניתם אותי, אני בפנים! ←</a>
         </section>
       </div><!-- /.lms-master-sales -->
 
@@ -3491,6 +3491,23 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // ===== Master CHECKOUT (Cardcom) — נקודת החיבור היחידה לקראדקום =====
+  // ⬇️⬇️ הדבק כאן את כתובת עמוד התשלום של Cardcom (מרם) ושמור. זה מחבר אוטומטית את שני כפתורי "קניתם אותי".
+  //      כל עוד ריק — הכפתורים מציגים הודעת "בקרוב" אלגנטית במקום קליק מת.
+  const MASTER_CHECKOUT_URL = '';
+  function goToMasterCheckout(){
+    if (MASTER_CHECKOUT_URL){ window.location.href = MASTER_CHECKOUT_URL; return; }
+    showCheckoutSoonToast('עמוד הרכישה ייפתח עם ההשקה 🚀');
+  }
+  function showCheckoutSoonToast(msg){
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.setAttribute('role', 'status');
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#003B46;color:#fff;padding:14px 22px;border-radius:12px;font-family:Heebo,sans-serif;font-weight:600;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:90vw;text-align:center;';
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.transition = 'opacity .4s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 420); }, 3000);
+  }
+
   function loadMaster(){
     const wbGrid = document.getElementById('masterWorkbooksGrid');
     if (wbGrid){
@@ -3668,6 +3685,9 @@
   // ===== Wire lesson clicks (sidebar + welcome hero) =====
   function setupLessonNav(){
     document.addEventListener('click', e => {
+      // Master purchase CTA (Cardcom) — wired via MASTER_CHECKOUT_URL
+      const checkoutBtn = e.target.closest('[data-cta="master-checkout"]');
+      if (checkoutBtn){ e.preventDefault(); goToMasterCheckout(); return; }
       // Lesson deep-link from old portal style
       const lessonAnchor = e.target.closest('a[href^="course-library.html#m"]');
       if (lessonAnchor){

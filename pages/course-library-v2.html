@@ -2481,17 +2481,10 @@
     if (!Number.isFinite(lesson.start) && saved > 10){ try { showCelebToast(`ממשיך מ-${fmtTime(saved)}`); } catch(_){} }
     loadYtApi();
     stopPosPoll();
-    if (window.YT && window.YT.Player){
-      if (_ytPlayer && _ytPlayer.loadVideoById){
-        try { _ytPlayer.loadVideoById({ videoId: lesson.id, startSeconds: startSec||0 }); startPosPoll(); }
-        catch(_){ try { _ytPlayer.destroy(); } catch(__){} _ytPlayer = null; _fallbackIframe(lesson, startSec); }
-      } else {
-        _ytInit(lesson, m, l, startSec);
-      }
-    } else {
-      // API not ready yet → safe manual iframe now; later lessons upgrade to the API path.
-      _fallbackIframe(lesson, startSec);
-    }
+    // טעינה ישירה של ה-embed ל-iframe — אמין בכל מצב.
+    // (YT.Player API נכשל בשקט כשה-iframe כבר על about:blank: הוא לא מזריק את
+    //  כתובת ה-embed ל-iframe קיים, ולכן נשאר מסך שחור. ה-iframe הישיר תמיד עובד.)
+    _fallbackIframe(lesson, startSec);
   }
   // ⚡ Facade: מציג פוסטר + כפתור נגינה, וטוען את נגן ה-YouTube הכבד רק כשלוחצים.
   //    כך הכניסה לשיעור מיידית, וה-2.6 שניות של YouTube קורות אחרי לחיצה (מרגיש טבעי).

@@ -2886,22 +2886,20 @@
     // Replaces the old fire-and-forget course_progress upsert that silently
     // dropped completions on a network error (audit-2026-06-01, P0 #2/#3).
     if (!alreadyDone && window.CourseProgress && !devBypass){
-      let confirmed = false;
-      try {
-        confirmed = await window.CourseProgress.logCompletionEvent(lessonId, 'video');
-      } catch(_){ confirmed = false; }
+      // עמידוּת: כותבים גם ל-lesson_completion_events (analytics/timeline) וגם
+      // ל-course_progress (מקור-האמת של דשבורד ההתקדמות). מספיק שאחת מהשתיים
+      // תצליח כדי שההתקדמות תיחשב שמורה — כך כשל בטבלת ה-analytics לבדה
+      // (RLS/טבלה חסרה בפרודקשן) לא חוסם את המשתמש ולא מקפיץ שגיאה.
+      let savedEvents = false, savedProgress = false;
+      try { savedEvents = await window.CourseProgress.logCompletionEvent(lessonId, 'video'); } catch(_){ savedEvents = false; }
+      try { await window.CourseProgress.markVideoWatched(lessonId, courseType, l + 1); savedProgress = true; } catch(_){ savedProgress = false; }
 
-      if (!confirmed){
-        // Do NOT swallow the failure: leave the lesson un-completed so the
-        // "סמן כהושלם" button stays available for a retry, and tell the user.
+      if (!savedEvents && !savedProgress){
+        // רק אם שתי הכתיבות נכשלו — באמת לא נשמר (לרוב: המשתמש לא מחובר)
         try { if (window.UI) window.UI.showToast('לא הצלחנו לשמור את ההתקדמות. בדוק חיבור ונסה שוב.', 'error'); } catch(_){}
         refreshCompleteBtn();
         return;
       }
-
-      // Best-effort legacy mirror so the existing course_progress-based admin
-      // learner dashboard keeps seeing v2 completions (non-gating, secondary).
-      try { window.CourseProgress.markVideoWatched(lessonId, courseType, l + 1); } catch(_){}
     }
 
     // Confirmed (or guest / devBypass): record locally, then fire completion UI.

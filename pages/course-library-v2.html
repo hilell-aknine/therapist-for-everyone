@@ -2429,6 +2429,9 @@
     const s = document.createElement('script'); s.id = 'yt-iframe-api'; s.src = 'https://www.youtube.com/iframe_api';
     document.head.appendChild(s);
   }
+  // ⚡ חימום מוקדם: ברגע שהדפדפן פנוי אחרי טעינת הפורטל, מורידים את ה-YouTube API מראש
+  //    כך שכשלוחצים על שיעור, הנגן כבר מוכן ועולה כמעט מיד (במקום להוריד אותו בלחיצה).
+  (window.requestIdleCallback || function(cb){ return setTimeout(cb, 1800); })(function(){ try { loadYtApi(); } catch(_){} });
   function _hideLoading(){ const el = document.getElementById('plLoading'); if (el) el.classList.add('is-hidden'); }
   function _ytInit(lesson, m, l, startSec){
     try {

@@ -827,6 +827,36 @@
   .lms-master-section{ background: linear-gradient(180deg, rgba(8,32,38,.62), rgba(6,22,28,.52)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border:1px solid rgba(255,255,255,.10); border-radius:18px; padding:1.4rem 1.5rem; box-shadow: 0 10px 24px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08); }
   .lms-master-section h2{ margin:0 0 1rem 0; font-family:'Frank Ruhl Libre','Heebo',serif; font-size:1.2rem; color:#fff; display:flex; align-items:center; gap:.5rem; }
   .lms-master-section h2 i{ color:var(--accent-gold-hover); }
+  /* ===== Master-sales Hero (fix: base h2 is display:flex for icon titles; hero must be block) ===== */
+  .lms-master-section h2.lms-ms-hero__h{ display:block !important; }
+  .lms-ms-hero{ text-align:center; }
+  .lms-ms-badge{ display:inline-block; background:var(--accent-gold-hover,#D4AF37); color:#04232a; font-weight:800; padding:.45rem 1.15rem; border-radius:999px; font-size:.85rem; margin-bottom:1rem; line-height:1.4; max-width:100%; }
+  .lms-ms-hero__h{ color:#fff; font-family:"Frank Ruhl Libre",Heebo,serif; font-size:2rem; line-height:1.45; margin:.2rem auto; max-width:24ch; text-wrap:balance; font-weight:800; }
+  .lms-ms-hero__gold{ color:var(--accent-gold-hover,#D4AF37); white-space:nowrap; }
+  .lms-ms-hero__sub{ color:rgba(255,255,255,.9); max-width:620px; margin:.8rem auto 0; font-size:1.1rem; line-height:1.6; }
+  .lms-ms-video{ margin:1.6rem auto 0; max-width:680px; aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; background:rgba(0,0,0,.28); border:1px dashed rgba(255,255,255,.22); border-radius:16px; color:rgba(255,255,255,.85); }
+  .lms-ms-video i{ font-size:3rem; color:var(--accent-gold-hover,#D4AF37); }
+  .lms-ms-video__s{ font-size:.82rem; color:rgba(255,255,255,.55); }
+  @container (max-width:560px){
+    .lms-master-section{ padding:1.15rem 1.1rem; border-radius:16px; }
+    .lms-ms-hero__h{ font-size:1.5rem; line-height:1.4; max-width:18ch; }
+    .lms-ms-hero__sub{ font-size:1rem; }
+    .lms-ms-price__now{ font-size:2.1rem !important; }
+    .lms-ms-cta{ display:block !important; width:100%; padding:1rem !important; font-size:1.05rem; text-align:center; box-sizing:border-box; }
+    .lms-ms-grid{ grid-template-columns:1fr !important; }
+    .lms-ms-letter__portrait{ float:none !important; display:block; margin:0 auto 1rem !important; }
+  }
+  @media (max-width:560px){
+    .lms-ms-hero__h{ font-size:1.5rem; }
+    .lms-ms-price__now{ font-size:2.1rem !important; }
+    .lms-ms-cta{ display:block !important; width:100%; box-sizing:border-box; text-align:center; }
+    .lms-ms-grid{ grid-template-columns:1fr !important; }
+  }
+  @media (max-width:900px){
+    body.view-master-sales .lms-body{ display:flex; flex-direction:column; }
+    body.view-master-sales .lms-main{ order:0; }
+    body.view-master-sales .lms-sb{ order:1; }
+  }
   .lms-master-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:.85rem; }
 
   .lms-master-card{
@@ -1362,14 +1392,18 @@
           </div>
         </header>
 
-        <section class="lms-master-section" style="text-align:center;">
-          <div style="display:inline-block;background:var(--accent-gold-hover,#D4AF37);color:#04232a;font-weight:800;padding:.4rem 1.1rem;border-radius:999px;font-size:.85rem;margin-bottom:.9rem;">⏳ לזמן מוגבל · 70% הנחה על תוכנית ההכשרה המלאה</div>
-          <h2 style="color:#fff;line-height:1.5;margin:.2rem 0;font-size:1.6rem;">התוכנית שתהפוך אותך מ״עוד מישהו שלמד NLP״<br><span style="color:var(--accent-gold-hover,#D4AF37);">ל-MASTER <span class="lms-ms-u">בתחום</span></span> שיודע ליצור פריצות דרך</h2>
-          <p style="color:rgba(255,255,255,.9);max-width:680px;margin:.6rem auto 0;font-size:1.05rem;"><span class="lms-ms-u">בחיים שלך ושל הסובבים אותך</span></p>
-          <div style="max-width:700px;margin:1.3rem auto 0;aspect-ratio:16/9;background:rgba(255,255,255,.04);border:2px dashed rgba(255,255,255,.18);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;color:rgba(255,255,255,.7);">
-            <i class="fa-solid fa-circle-play" style="font-size:2.4rem;opacity:.8;"></i>
-            <span style="font-weight:700;">סרטון מבוא · רם אלוס</span>
-            <span style="font-size:.78rem;opacity:.7;">(להטמעה בהמשך)</span>
+        <section class="lms-master-section lms-ms-hero">
+          <div class="lms-ms-badge">⏳ לזמן מוגבל · 70% הנחה על תוכנית ההכשרה המלאה</div>
+          <h2 class="lms-ms-hero__h">
+            התוכנית שתהפוך אותך מ״עוד מישהו שלמד NLP״<br>
+            <span class="lms-ms-hero__gold">ל־MASTER <span class="lms-ms-u">בתחום</span></span>
+            שיודע ליצור פריצות דרך
+          </h2>
+          <p class="lms-ms-hero__sub"><span class="lms-ms-u">בחיים שלך ושל הסובבים אותך</span></p>
+          <div class="lms-ms-video">
+            <i class="fa-solid fa-circle-play"></i>
+            <span class="lms-ms-video__t">סרטון מבוא · רם אלוס</span>
+            <span class="lms-ms-video__s">(להטמעה בהמשך)</span>
           </div>
         </section>
 
@@ -1387,7 +1421,7 @@
           <p>היי חברים, אם הגעתם לכאן כנראה שיש לכם קריאה פנימית להעמיק ולהבין יותר את ״מערכת ההפעלה״ שבאנו איתה לעולם. לי הייתה קריאה כזו בגיל 21 — תמיד רציתי להבין איך המוח עובד ולמה אנשים פועלים כמו שהם פועלים.</p>
           <p>בסוף השירות הצבאי נחשפתי לטוני רובינס וגיליתי שהוא משתמש בעיקר בטכניקות NLP כדי ליצור שינויים פורצי דרך. זה התחיל אצלי מקורס PRACTITIONER, משם ל-MASTER, עד פתיחת קליניקה, הקמת ביה״ס והשתתפות בכל הסמינרים של טוני רובינס בעולם.</p>
           <p>בכנות, NLP שינה לי את החיים. היכולת להבין באמת את עצמי ואת מה שקורה בתת המודע שלי עזרה לי לפעול בחופשיות, לנצח פחדים, לרפא טראומות וליצור שלום עם הרגשות שלי. לכן נתתי את קורס PRACTITIONER בחינם — היום יש בו מעל 30,000 צפיות.</p>
-          <p>אבל יש הבדל בין מי ש״למד NLP" לבין מי ש״חי NLP". קורס PRACTITIONER נהדר, אך הוא לא נוגע בעומק של אמונות ליבה, ערכים ושינוי זהות. אם אתם רוצים להעמיק ולהטמיע את השיטה ברמת הזהות — קורס NLP MASTER הוא הקורס עבורכם. זה לבל אחר של עומק, תוכן ופרקטיקה.</p>
+          <p>אבל יש הבדל בין מי ש״למד NLP" לבין מי ש״חי NLP". קורס PRACTITIONER נהדר, אך הוא לא נוגע בעומק של אמונות ליבה, ערכים ושינוי זהות. אם אתם רוצים להעמיק ולהטמיע את השיטה ברמת הזהות — קורס NLP MASTER הוא הקורס עבורכם. זו רמה אחרת של עומק, תוכן ופרקטיקה.</p>
           <p style="font-size:.85rem;color:rgba(255,255,255,.6);">גילוי נאות: שילמתי על 2 הקורסים בשנת 2021 מחיר של 11,800 ₪ (אחרי הנחה…).</p>
         </section>
 

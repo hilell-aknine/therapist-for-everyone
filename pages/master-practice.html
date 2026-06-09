@@ -754,8 +754,10 @@
                 window.supabaseClient.from('profiles').select('role').eq('id', userId).maybeSingle()
             ]);
 
-            const isAdmin = profileResult.data?.role === 'admin';
-            const hasAccess = accessResult.data || isAdmin;
+            const role = profileResult.data?.role;
+            const isAdmin = role === 'admin';
+            const isPaidCustomer = role === 'paid_customer';
+            const hasAccess = accessResult.data || isAdmin || isPaidCustomer;
 
             loading.style.display = 'none';
             if (hasAccess) {

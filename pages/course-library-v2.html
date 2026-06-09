@@ -26,6 +26,13 @@
   *{box-sizing:border-box;}
   html{direction:rtl;}
   html,body{margin:0;padding:0;background:var(--bg-primary);color:#fff;font-family:'Heebo',sans-serif;min-height:100vh;}
+  /* Contain the off-canvas sidebar (position:fixed, translateX(100%)) so it can't
+     add page width → no horizontal scroll on mobile. `clip` (not `hidden`) is used
+     deliberately: the header is position:sticky, and overflow:hidden would establish
+     a scroll container and break sticky. `clip` prevents the overflow WITHOUT creating
+     a scroll container, so the sticky header (and the fixed sidebar when OPEN) keep
+     working. Supported on iOS Safari 16+. */
+  html,body{overflow-x:clip;}
 
   :root{
     /* Color */
@@ -161,7 +168,7 @@
   .lms-hd__left{ display:flex; align-items:center; gap:.5rem; }
   .lms-hd__cta-2{ display:inline-flex; align-items:center; gap:.5rem; padding:.55rem 1rem; border-radius:12px; background: rgba(212,175,55,.06); border:1px solid rgba(212,175,55,.45); color:var(--accent-gold-hover); font-weight:600; font-size:.82rem; letter-spacing:-.01em; text-decoration:none; white-space:nowrap; backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); transition: background .2s, border-color .2s; }
   .lms-hd__cta-2:hover{ background: rgba(212,175,55,.14); border-color: rgba(230,198,90,.7); }
-  .lms-hd__icon{ width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:var(--text-primary); cursor:pointer; font-size:.85rem; backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); transition: background .2s, color .2s, transform .2s; text-decoration:none; }
+  .lms-hd__icon{ width:44px; height:44px; border-radius:50%; display:grid; place-items:center; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:var(--text-primary); cursor:pointer; font-size:.85rem; backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); transition: background .2s, color .2s, transform .2s; text-decoration:none; }
   .lms-hd__icon:hover{ background: rgba(255,255,255,.12); color:#fff; transform:translateY(-1px); }
   .lms-hd__hamburger{ display:none; }
 
@@ -387,7 +394,7 @@
   .lms-pl-bar__sub{ font-size:.74rem; color:var(--text-muted); }
   .lms-pl-bar__sub b{ color:var(--accent-gold-hover); font-weight:600; }
   .lms-pl-bar__nav{ display:flex; gap:.4rem; align-items:center; }
-  .lms-pl-bar__btn{ display:inline-flex; align-items:center; gap:.45rem; padding:.5rem .85rem; border-radius:10px; cursor:pointer; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:var(--text-primary); font-family:inherit; font-size:.78rem; font-weight:600; transition: background .2s, color .2s, border-color .2s; }
+  .lms-pl-bar__btn{ display:inline-flex; align-items:center; gap:.45rem; padding:.5rem .85rem; min-height:44px; border-radius:10px; cursor:pointer; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:var(--text-primary); font-family:inherit; font-size:.78rem; font-weight:600; transition: background .2s, color .2s, border-color .2s; }
   .lms-pl-bar__btn:hover:not(:disabled){ background: rgba(255,255,255,.12); color:#fff; }
   .lms-pl-bar__btn:disabled{ opacity:.35; cursor:not-allowed; }
   .lms-pl-bar__btn--complete{ background: rgba(212,164,55,.14); border-color: rgba(212,164,55,.35); color:var(--accent-gold-hover); }
@@ -589,12 +596,18 @@
     .lms-hd{ margin:.5rem .5rem 0; }
     .lms-hd__hamburger{ display:grid; }
     .lms-hd__cta-2{ display:none; }
+    /* Course-switcher buttons (#masterTab / #techniquesTab) are toggled to
+       display:inline-flex via JS inline style → need !important to collapse them
+       on mobile so the header row doesn't overflow. The course switch stays
+       reachable from inside the off-canvas menu (hamburger). */
+    #masterTab, #techniquesTab{ display:none !important; }
     .lms-sb{ position: fixed; top: 0; right: 0; bottom: 0; width: min(340px, 90vw); max-height: 100vh; height: 100vh; border-radius: 0; transform: translateX(100%); transition: transform var(--dur-base) var(--ease-out); z-index: 80; padding-top: 1.5rem; }
     body.sb-open .lms-sb{ transform: translateX(0); box-shadow: -20px 0 60px rgba(0,0,0,.5); }
     .sb-scrim{ display:none; position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px); z-index: 75; }
     body.sb-open .sb-scrim{ display:block; }
     /* Hamburger stays visible on top while scrolling the page */
     .lms-hd{ position: sticky; top: 0; }
+    .lms-sb-lesson{ min-height:44px; }
   }
 
   @media (prefers-reduced-transparency: reduce){
@@ -770,6 +783,11 @@
   .lms-ms-cta{ display:inline-block; margin-top:1rem; background:#FF8A00; color:#1a1208; font-weight:900; padding:.9rem 2.4rem; border-radius:999px; text-decoration:none; font-size:1.08rem; box-shadow:0 12px 26px rgba(255,138,0,.38); transition:transform .15s ease, box-shadow .15s ease, background .15s ease; }
   .lms-ms-cta:hover{ background:#ef7f00; transform:translateY(-2px); box-shadow:0 16px 32px rgba(255,138,0,.46); }
   .lms-ms-cta:active{ transform:translateY(0); }
+  .lms-ms-consent{ display:flex; align-items:flex-start; gap:.55rem; justify-content:center; max-width:480px; margin:1.1rem auto 0; padding:.7rem .9rem; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); text-align:start; transition:border-color .15s ease, box-shadow .15s ease; }
+  .lms-ms-consent input[type="checkbox"]{ flex:0 0 auto; width:18px; height:18px; margin-top:.18rem; accent-color:var(--gold); cursor:pointer; }
+  .lms-ms-consent label{ color:rgba(232,241,242,.85); font-size:.92rem; font-weight:500; line-height:1.5; cursor:pointer; }
+  .lms-ms-consent a{ color:var(--accent-gold-hover,#D4AF37); font-weight:700; text-decoration:underline; }
+  .lms-ms-consent.lms-ms-consent--flash{ border-color:var(--accent-gold-hover,#D4AF37); box-shadow:0 0 0 3px rgba(212,175,55,.28); }
   .lms-ms-u{ text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:5px; text-decoration-color:currentColor; }
   .lms-ms-letter p{ line-height:1.9; color:rgba(255,255,255,.86); }
   .lms-ms-letter__portrait{ width:100%; max-width:320px; aspect-ratio:3/4; object-fit:cover; object-position:center 18%; border-radius:14px; margin:0 auto 1.1rem; display:block; border:1px solid rgba(255,255,255,.14); box-shadow:0 10px 26px rgba(0,0,0,.35); }
@@ -1416,6 +1434,10 @@
           <div class="lms-ms-price__old">עלות מלאה: 6,700 ₪</div>
           <div class="lms-ms-price__now">1,900 ₪</div>
           <div style="color:rgba(255,255,255,.85);font-weight:600;">מחיר מבצע · בונוסים בשווי אלפי ₪!</div>
+          <div class="lms-ms-consent">
+            <input type="checkbox" id="masterTermsConsent1" data-master-consent>
+            <label for="masterTermsConsent1">קראתי ואני מסכים ל<a href="master-terms.html" target="_blank" rel="noopener">תנאי הרכישה והשימוש</a></label>
+          </div>
           <a href="#" data-cta="master-checkout" class="lms-ms-cta">קניתם אותי, אני בפנים! ←</a>
         </section>
 
@@ -1481,6 +1503,10 @@
           <div class="lms-ms-price__old">עלות מלאה: 6,700 ₪</div>
           <div class="lms-ms-price__now">1,900 ₪</div>
           <div style="color:rgba(255,255,255,.85);font-weight:600;margin-bottom:.3rem;">בונוסים בשווי אלפי ₪!</div>
+          <div class="lms-ms-consent">
+            <input type="checkbox" id="masterTermsConsent2" data-master-consent>
+            <label for="masterTermsConsent2">קראתי ואני מסכים ל<a href="master-terms.html" target="_blank" rel="noopener">תנאי הרכישה והשימוש</a></label>
+          </div>
           <a href="#" data-cta="master-checkout" class="lms-ms-cta">קניתם אותי, אני בפנים! ←</a>
         </section>
       </div><!-- /.lms-master-sales -->
@@ -3806,7 +3832,26 @@
     document.addEventListener('click', e => {
       // Master purchase CTA (Cardcom) — wired via MASTER_CHECKOUT_URL
       const checkoutBtn = e.target.closest('[data-cta="master-checkout"]');
-      if (checkoutBtn){ e.preventDefault(); goToMasterCheckout(); return; }
+      if (checkoutBtn){
+        e.preventDefault();
+        // Gate: require terms acceptance. Find the consent box near THIS CTA, fall back to any unchecked.
+        const section = checkoutBtn.closest('.lms-ms-price') || document;
+        const consent = section.querySelector('[data-master-consent]')
+          || document.querySelector('[data-master-consent]:not(:checked)')
+          || document.querySelector('[data-master-consent]');
+        if (consent && !consent.checked){
+          showCheckoutSoonToast('יש לאשר את תנאי הרכישה כדי להמשיך');
+          const box = consent.closest('.lms-ms-consent');
+          if (box){
+            box.classList.add('lms-ms-consent--flash');
+            setTimeout(() => box.classList.remove('lms-ms-consent--flash'), 1800);
+          }
+          consent.focus();
+          return;
+        }
+        goToMasterCheckout();
+        return;
+      }
       // Lesson deep-link from old portal style
       const lessonAnchor = e.target.closest('a[href^="course-library.html#m"]');
       if (lessonAnchor){

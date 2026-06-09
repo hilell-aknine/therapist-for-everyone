@@ -1016,7 +1016,7 @@
             // Idempotent server-side (welcome_sent_at column); safe even on retries/double-submit.
             if (insertedQ?.id && window.SUPABASE_CONFIG?.url) {
                 try {
-                    fetch(`${window.SUPABASE_CONFIG.url}/functions/v1/send-welcome-whatsapp`, {
+                    fetch(`${window.SUPABASE_CONFIG.url}/functions/v1/enqueue-welcome`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

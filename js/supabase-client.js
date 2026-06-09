@@ -1027,7 +1027,7 @@
             // redirects, etc.) so the fetch reaches the Edge Function.
             if (phoneOnRow && !existing?.whatsapp_welcome_sent_at) {
                 try {
-                    fetch(`${SUPABASE_URL}/functions/v1/send-welcome-whatsapp`, {
+                    fetch(`${SUPABASE_URL}/functions/v1/enqueue-welcome`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

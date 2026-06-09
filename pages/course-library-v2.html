@@ -837,6 +837,8 @@
   .lms-ms-video{ margin:1.6rem auto 0; max-width:680px; aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; background:rgba(0,0,0,.28); border:1px dashed rgba(255,255,255,.22); border-radius:16px; color:rgba(255,255,255,.85); }
   .lms-ms-video i{ font-size:3rem; color:var(--accent-gold-hover,#D4AF37); }
   .lms-ms-video__s{ font-size:.82rem; color:rgba(255,255,255,.55); }
+  .lms-ms-video--live{ padding:0 !important; border:none !important; background:#000; overflow:hidden; display:block; }
+  .lms-ms-video--live iframe{ width:100%; height:100%; border:0; display:block; border-radius:16px; }
   @container (max-width:560px){
     .lms-master-section{ padding:1.15rem 1.1rem; border-radius:16px; }
     .lms-ms-hero__h{ font-size:1.5rem; line-height:1.4; max-width:18ch; }
@@ -1127,6 +1129,10 @@
         <i class="fa-solid fa-crown"></i>
         <span id="masterTabLabel">קורס המאסטר</span>
       </button>
+      <button id="techniquesTab" type="button" title="טכניקות פרקטישנר · הדגמות חיות" style="display:none;align-items:center;gap:.4rem;padding:.5rem .9rem;background:linear-gradient(180deg,#2F8592,#00606B);color:#E8F1F2;font-family:inherit;font-weight:800;font-size:.85rem;border:none;border-radius:999px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 16px rgba(47,133,146,.4);">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span id="techTabLabel">טכניקות פרקטישנר</span>
+      </button>
       <button class="lms-hd__icon lms-hd__hamburger" type="button" aria-label="תפריט" id="hdHamburger">
         <i class="fa-solid fa-bars"></i>
       </button>
@@ -1388,7 +1394,7 @@
           <button class="lms-pl-bar__back" type="button" id="masterSalesBack" aria-label="חזרה לסקירה" title="חזרה" onclick="showWelcome()"><i class="fa-solid fa-arrow-right"></i></button>
           <div class="lms-amb-bar__title">
             <h1 class="lms-amb-bar__h"><i class="fa-solid fa-crown" style="color:var(--accent-gold-hover);margin-inline-end:.4rem;"></i>תוכנית המאסטרים שלנו</h1>
-            <div class="lms-amb-bar__sub">תצוגה מקדימה (אדמין בלבד) · לא גלוי למשתמשים</div>
+            <div class="lms-amb-bar__sub">ההצעה המיוחדת שלנו לחברי הפורטל</div>
           </div>
         </header>
 
@@ -1400,10 +1406,8 @@
             שיודע ליצור פריצות דרך
           </h2>
           <p class="lms-ms-hero__sub"><span class="lms-ms-u">בחיים שלך ושל הסובבים אותך</span></p>
-          <div class="lms-ms-video">
-            <i class="fa-solid fa-circle-play"></i>
-            <span class="lms-ms-video__t">סרטון מבוא · רם אלוס</span>
-            <span class="lms-ms-video__s">(להטמעה בהמשך)</span>
+          <div class="lms-ms-video lms-ms-video--live">
+            <iframe src="https://www.youtube.com/embed/Kktx3L-3uqs" title="סרטון מבוא · קורס NLP MASTER — רם אלוס" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
           </div>
         </section>
 
@@ -2122,8 +2126,8 @@
   ];
 
   let totalLessons = modules.reduce((s, m) => s + m.lessons.length, 0);
-  let courseType = 'nlp-practitioner';  // 'nlp-practitioner' | 'nlp-master'
-  function completedKey(){ return courseType === 'nlp-master' ? 'completedLessons_master' : 'completedLessons'; }
+  let courseType = 'nlp-practitioner';  // 'nlp-practitioner' | 'nlp-master' | 'nlp-techniques'
+  function completedKey(){ return courseType === 'nlp-master' ? 'completedLessons_master' : courseType === 'nlp-techniques' ? 'completedLessons_techniques' : 'completedLessons'; }
   let completedLessons = JSON.parse(localStorage.getItem(completedKey()) || '[]');
   let lastWatched = null;
   let currentModuleIndex = -1;
@@ -2581,10 +2585,10 @@
         <span class="lms-sb-item__label">תוכנית השותפים</span>
         <span class="lms-sb-item__badge">חדש</span>
       </a>
-      <a class="lms-sb-item" href="#master-sales" data-nav="master-sales" id="sbMasterSalesItem" style="display:${_isAdmin ? '' : 'none'};">
+      <a class="lms-sb-item" href="#master-sales" data-nav="master-sales" id="sbMasterSalesItem">
         <span class="lms-sb-item__icon"><i class="fa-solid fa-crown" style="color:var(--accent-gold-hover);"></i></span>
         <span class="lms-sb-item__label">תוכנית המאסטרים שלנו</span>
-        <span class="lms-sb-item__badge" style="background:rgba(212,175,55,.2);color:var(--accent-gold-hover);">אדמין</span>
+        <span class="lms-sb-item__badge" style="background:rgba(212,175,55,.2);color:var(--accent-gold-hover);">מבצע</span>
       </a>
       <a class="lms-sb-item" href="#master" data-nav="master" id="sbMasterItem" style="display:none;">
         <span class="lms-sb-item__icon"><i class="fa-solid fa-crown"></i></span>
@@ -2667,22 +2671,28 @@
     // MASTER_MODULES {lessonNumber,lessonTitle,chapters[]} → player shape {id,title,lessons[]}
     return MASTER_MODULES.map((m, i) => ({ id: i + 1, title: m.lessonTitle, lessons: m.chapters, isBonus: !!m.isBonus }));
   }
+  function getTechniquesAsModules(){
+    // TECHNIQUES_MODULES {lessonNumber,lessonTitle,chapters[]} → player shape {id,title,lessons[]}
+    return TECHNIQUES_MODULES.map((m, i) => ({ id: i + 1, title: m.lessonTitle, lessons: m.chapters }));
+  }
   function setCourse(c){
-    if (c !== 'nlp-master' && c !== 'nlp-practitioner') return;
-    if (c === 'nlp-master' && !_isPaidCustomer) return;
+    if (c !== 'nlp-master' && c !== 'nlp-practitioner' && c !== 'nlp-techniques') return;
+    if ((c === 'nlp-master' || c === 'nlp-techniques') && !_isPaidCustomer) return;
     if (c === courseType){ document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales'); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); return; }
     courseType = c;
-    modules = (c === 'nlp-master') ? getMasterAsModules() : PRACTITIONER_MODULES;
+    modules = (c === 'nlp-master') ? getMasterAsModules() : (c === 'nlp-techniques') ? getTechniquesAsModules() : PRACTITIONER_MODULES;
     totalLessons = modules.reduce((s, m) => s + m.lessons.length, 0);
     completedLessons = JSON.parse(localStorage.getItem(completedKey()) || '[]');
     currentModuleIndex = -1; currentLessonIndex = -1; lastWatched = null;
     try { localStorage.setItem('activeCourse', c); } catch(_){}
     const pill = document.getElementById('coursePillLabel');
     const ttl  = document.getElementById('courseTitleLabel');
-    if (pill) pill.textContent = (c === 'nlp-master') ? 'NLP מאסטר' : 'NLP Practitioner';
-    if (ttl)  ttl.textContent  = (c === 'nlp-master') ? 'קורס המאסטר — תוכנית הכשרה' : 'קורס NLP — יסודות ומעשה';
+    if (pill) pill.textContent = (c === 'nlp-master') ? 'NLP מאסטר' : (c === 'nlp-techniques') ? 'טכניקות פרקטישנר' : 'NLP Practitioner';
+    if (ttl)  ttl.textContent  = (c === 'nlp-master') ? 'קורס המאסטר · תוכנית הכשרה' : (c === 'nlp-techniques') ? 'טכניקות פרקטישנר · הדגמות חיות' : 'קורס NLP · יסודות ומעשה';
     const mtl = document.getElementById('masterTabLabel');
     if (mtl) mtl.textContent = (c === 'nlp-master') ? 'חזרה לפרקטישנר' : 'קורס המאסטר';
+    const ttl2 = document.getElementById('techTabLabel');
+    if (ttl2) ttl2.textContent = (c === 'nlp-techniques') ? 'חזרה לפרקטישנר' : 'טכניקות פרקטישנר';
     document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales');
     try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
     renderAll();
@@ -2691,9 +2701,12 @@
 
   function setupCourseSwitcher(){
     const tab = document.getElementById('masterTab');
-    if (!tab) return;
-    tab.addEventListener('click', () => {
+    if (tab) tab.addEventListener('click', () => {
       setCourse(courseType === 'nlp-master' ? 'nlp-practitioner' : 'nlp-master');
+    });
+    const techTab = document.getElementById('techniquesTab');
+    if (techTab) techTab.addEventListener('click', () => {
+      setCourse(courseType === 'nlp-techniques' ? 'nlp-practitioner' : 'nlp-techniques');
     });
   }
 
@@ -3335,6 +3348,32 @@
     { name: 'bonus-emotions-messages.pdf',         title: 'חוברת בונוס — מסרים מרגשות',      icon: 'fa-solid fa-heart' }
   ];
 
+  // ===== Practitioner technique demos (paid catalog) — live demonstrations cut from
+  // the practitioner sessions, grouped by source lesson. Unlisted YouTube, gated to paid. =====
+  const TECHNIQUES_MODULES = [
+    { lessonNumber: 2, lessonTitle: 'שיעור 2 · עמדות תפיסה', color: 'var(--dusty-aqua)', chapters: [
+      { id: 'J3-E2b9zi9E', title: 'טכניקת טיול בין עמדות · הדגמה חיה', duration: '1:03:41' },
+    ]},
+    { lessonNumber: 4, lessonTitle: 'שיעור 4 · מערכות ייצוג והרגלים', color: 'var(--muted-teal)', chapters: [
+      { id: 'H1Vy9X6oZh4', title: 'טכניקת מערכות ייצוג · הדגמה חיה', duration: '4:46' },
+      { id: 'YbGJry_hEdU', title: 'טכניקת דרייבר · הדגמה חיה', duration: '2:48' },
+      { id: 'pLhVfzEPxcQ', title: 'טכניקת MAP ACROSS · הדגמה חיה', duration: '1:02:36' },
+      { id: 'yc8FagzPaMA', title: 'טכניקת סוויש · הדגמה חיה', duration: '34:34' },
+    ]},
+    { lessonNumber: 6, lessonTitle: 'שיעור 6 · רגשות ומשאבים', color: 'var(--gold)', chapters: [
+      { id: 'w3WXQZjVFbw', title: 'טכניקת 6 שלבים · הדגמה חיה', duration: '38:08' },
+    ]},
+    { lessonNumber: 7, lessonTitle: 'שיעור 7 · אמונות ועוגנים', color: 'var(--dusty-aqua)', chapters: [
+      { id: 'Zw4CrM7sYA4', title: 'טכניקת יצירת עוגן · הדגמה חיה', duration: '9:04' },
+    ]},
+    { lessonNumber: 8, lessonTitle: 'שיעור 8 · ציר הזמן (קבוצתי)', color: 'var(--muted-teal)', chapters: [
+      { id: 'u4zrb0JtDCg', title: 'טכניקת ציר זמן · הדגמה קבוצתית', duration: '31:52' },
+    ]},
+    { lessonNumber: 9, lessonTitle: 'שיעור 9 · ציר הזמן', color: 'var(--gold)', chapters: [
+      { id: 'pVE6_ERar2Y', title: 'טכניקת ציר זמן · הדגמה חיה', duration: '32:00' },
+    ]},
+  ];
+
   const MASTER_MODULES = [
             {
                 lessonNumber: 1,
@@ -3540,6 +3579,8 @@
         if (sb) sb.style.display = '';
         const mt = document.getElementById('masterTab');
         if (mt) mt.style.display = 'inline-flex';
+        const tt = document.getElementById('techniquesTab');
+        if (tt) tt.style.display = 'inline-flex';
         // Unlock the AI mentor pane if a lesson was opened before the role resolved.
         try { if (typeof resetAiChat === 'function' && aiHistory.length === 0) resetAiChat(); } catch(_){}
       }
@@ -3560,9 +3601,8 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ===== Master SALES view (admin-only preview of the upsell landing page) =====
+  // ===== Master SALES view (upsell landing page — open to all portal members) =====
   function showMasterSalesView(skipPush){
-    if (!_isAdmin) return; // safety: only admins can open the preview
     document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales');
     document.body.classList.add('view-master-sales');
     if (typeof clearVideoState === 'function') clearVideoState();
@@ -3754,7 +3794,7 @@
       }
     }
     if (location.hash === '#ambassador'){ showAmbassadorView(true); return true; }
-    if (location.hash === '#master-sales'){ if (_isAdmin){ showMasterSalesView(true); return true; } }
+    if (location.hash === '#master-sales'){ showMasterSalesView(true); return true; }
     if (location.hash === '#master'){ setCourse('nlp-master'); return true; }
     if (location.hash === '#master-workbooks'){ showMasterView(true); return true; }
     showWelcome(true);

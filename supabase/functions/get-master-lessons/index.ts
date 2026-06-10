@@ -194,6 +194,34 @@ const MASTER_MODULES = [
             },
         ]
 
+// ===== Practitioner technique demos (paid catalog) =====
+// Moved server-side (2026-06-10) so the paid practitioner technique YouTube IDs are
+// no longer hardcoded client-side in course-library-v2.html. Returned ONLY to
+// authenticated paid_customer / admin users. Copied VERBATIM from the page.
+const TECHNIQUES_MODULES = [
+    { lessonNumber: 2, lessonTitle: 'שיעור 2 · עמדות תפיסה', color: 'var(--dusty-aqua)', chapters: [
+      { id: 'J3-E2b9zi9E', title: 'טכניקת טיול בין עמדות · הדגמה חיה', duration: '1:03:41' },
+    ]},
+    { lessonNumber: 4, lessonTitle: 'שיעור 4 · מערכות ייצוג והרגלים', color: 'var(--muted-teal)', chapters: [
+      { id: 'H1Vy9X6oZh4', title: 'טכניקת מערכות ייצוג · הדגמה חיה', duration: '4:46' },
+      { id: 'YbGJry_hEdU', title: 'טכניקת דרייבר · הדגמה חיה', duration: '2:48' },
+      { id: 'pLhVfzEPxcQ', title: 'טכניקת MAP ACROSS · הדגמה חיה', duration: '1:02:36' },
+      { id: 'yc8FagzPaMA', title: 'טכניקת סוויש · הדגמה חיה', duration: '34:34' },
+    ]},
+    { lessonNumber: 6, lessonTitle: 'שיעור 6 · רגשות ומשאבים', color: 'var(--gold)', chapters: [
+      { id: 'w3WXQZjVFbw', title: 'טכניקת 6 שלבים · הדגמה חיה', duration: '38:08' },
+    ]},
+    { lessonNumber: 7, lessonTitle: 'שיעור 7 · אמונות ועוגנים', color: 'var(--dusty-aqua)', chapters: [
+      { id: 'Zw4CrM7sYA4', title: 'טכניקת יצירת עוגן · הדגמה חיה', duration: '9:04' },
+    ]},
+    { lessonNumber: 8, lessonTitle: 'שיעור 8 · ציר הזמן (קבוצתי)', color: 'var(--muted-teal)', chapters: [
+      { id: 'u4zrb0JtDCg', title: 'טכניקת ציר זמן · הדגמה קבוצתית', duration: '31:52' },
+    ]},
+    { lessonNumber: 9, lessonTitle: 'שיעור 9 · ציר הזמן', color: 'var(--gold)', chapters: [
+      { id: 'pVE6_ERar2Y', title: 'טכניקת ציר זמן · הדגמה חיה', duration: '32:00' },
+    ]},
+  ]
+
 const ALLOWED_ORIGINS = [
   'https://www.therapist-home.com',
   'https://therapist-home.com',
@@ -256,7 +284,7 @@ serve(async (req) => {
 
     // --- Authorized: return the full master modules payload ---
     return new Response(
-      JSON.stringify({ modules: MASTER_MODULES }),
+      JSON.stringify({ modules: MASTER_MODULES, techniques: TECHNIQUES_MODULES }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 

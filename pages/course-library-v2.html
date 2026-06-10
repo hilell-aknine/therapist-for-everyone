@@ -3427,31 +3427,15 @@
     { name: 'bonus-emotions-messages.pdf',         title: 'חוברת בונוס — מסרים מרגשות',      icon: 'fa-solid fa-heart' }
   ];
 
-  // ===== Practitioner technique demos (paid catalog) — live demonstrations cut from
-  // the practitioner sessions, grouped by source lesson. Unlisted YouTube, gated to paid. =====
-  const TECHNIQUES_MODULES = [
-    { lessonNumber: 2, lessonTitle: 'שיעור 2 · עמדות תפיסה', color: 'var(--dusty-aqua)', chapters: [
-      { id: 'J3-E2b9zi9E', title: 'טכניקת טיול בין עמדות · הדגמה חיה', duration: '1:03:41' },
-    ]},
-    { lessonNumber: 4, lessonTitle: 'שיעור 4 · מערכות ייצוג והרגלים', color: 'var(--muted-teal)', chapters: [
-      { id: 'H1Vy9X6oZh4', title: 'טכניקת מערכות ייצוג · הדגמה חיה', duration: '4:46' },
-      { id: 'YbGJry_hEdU', title: 'טכניקת דרייבר · הדגמה חיה', duration: '2:48' },
-      { id: 'pLhVfzEPxcQ', title: 'טכניקת MAP ACROSS · הדגמה חיה', duration: '1:02:36' },
-      { id: 'yc8FagzPaMA', title: 'טכניקת סוויש · הדגמה חיה', duration: '34:34' },
-    ]},
-    { lessonNumber: 6, lessonTitle: 'שיעור 6 · רגשות ומשאבים', color: 'var(--gold)', chapters: [
-      { id: 'w3WXQZjVFbw', title: 'טכניקת 6 שלבים · הדגמה חיה', duration: '38:08' },
-    ]},
-    { lessonNumber: 7, lessonTitle: 'שיעור 7 · אמונות ועוגנים', color: 'var(--dusty-aqua)', chapters: [
-      { id: 'Zw4CrM7sYA4', title: 'טכניקת יצירת עוגן · הדגמה חיה', duration: '9:04' },
-    ]},
-    { lessonNumber: 8, lessonTitle: 'שיעור 8 · ציר הזמן (קבוצתי)', color: 'var(--muted-teal)', chapters: [
-      { id: 'u4zrb0JtDCg', title: 'טכניקת ציר זמן · הדגמה קבוצתית', duration: '31:52' },
-    ]},
-    { lessonNumber: 9, lessonTitle: 'שיעור 9 · ציר הזמן', color: 'var(--gold)', chapters: [
-      { id: 'pVE6_ERar2Y', title: 'טכניקת ציר זמן · הדגמה חיה', duration: '32:00' },
-    ]},
-  ];
+  // ===== Practitioner technique demos (paid catalog) — loaded from the server (paid-only) =====
+  // SECURITY (2026-06-10): the practitioner technique YouTube IDs used to be hardcoded here.
+  // They are now served by the `get-master-lessons` Edge Function (key: `techniques`), which
+  // enforces paid_customer/admin server-side. We start empty and populate AFTER checkPaidRole()
+  // confirms the user is paid (see fetchMasterModules() in boot). Fails closed: on any error
+  // the techniques tab/section stays empty, exactly like a non-paid user. Consumed directly via
+  // getTechniquesAsModules() (no derived flat list) — only on an interactive techniquesTab click,
+  // which can't fire until boot (checkPaidRole + fetchMasterModules) has completed.
+  let TECHNIQUES_MODULES = [];
 
   // ===== Master course modules — loaded from the server (paid-only) =====
   // SECURITY (2026-06-10): the Master course YouTube IDs used to be hardcoded here.
@@ -3480,6 +3464,9 @@
       if (!data || !Array.isArray(data.modules)){ console.error('[master] unexpected payload'); return false; }
       MASTER_MODULES = data.modules;
       masterLessons = MASTER_MODULES.flatMap(m => m.chapters);
+      // Practitioner techniques catalog — same gated payload. Consumed directly by
+      // getTechniquesAsModules() (no derived flat list needed). Falls closed to [].
+      TECHNIQUES_MODULES = Array.isArray(data.techniques) ? data.techniques : [];
       return true;
     } catch (e){
       console.error('[master] lessons fetch error:', e);

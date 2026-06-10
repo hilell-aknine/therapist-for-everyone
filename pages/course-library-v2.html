@@ -3897,7 +3897,21 @@
     // section renders its "content updating" empty state, identical to no access.
     if (_isPaidCustomer){ await fetchMasterModules(); }
     renderAll(); // re-render so sidebar shows master item if paid
-    handleHash(true);
+    // Direct-to-Master entry (?view=master) — used by the post-purchase WhatsApp
+    // magic link. A #master fragment can't be used there: Supabase appends its own
+    // #access_token fragment to the redirect, producing a broken double-hash.
+    // Checked ONCE at boot (not in handleHash) so popstate navigation isn't hijacked;
+    // the param is stripped from the URL either way. Fails closed via setCourse's
+    // own _isPaidCustomer guard.
+    const _wantsMaster = new URLSearchParams(location.search).get('view') === 'master';
+    if (_wantsMaster){
+      try {
+        const _u = new URL(location.href); _u.searchParams.delete('view');
+        history.replaceState(null, '', _u.pathname + _u.search + location.hash);
+      } catch(_){}
+    }
+    if (_wantsMaster && _isPaidCustomer){ setCourse('nlp-master'); }
+    else handleHash(true);
   })();
 })();
 </script>

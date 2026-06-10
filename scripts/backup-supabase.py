@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import shutil
+import time
 import traceback
 import zipfile
 import urllib.request
@@ -74,13 +75,16 @@ TABLES = [
     # Game
     "nlp_game_leaderboard",
     "nlp_game_players",
+    # Paid customer system (restored from _archive_* back to live names in June 2026 restore)
+    "subscriptions",
+    "signed_contracts",
     # Archived 2026-05-17 (renamed via migration 20260517100000_archive_dead_tables.sql).
     # Kept in backup so the rows remain captured. Move to a separate archive bucket later.
+    # NOTE: _archive_subscriptions + _archive_signed_contracts were renamed BACK to
+    # subscriptions/signed_contracts during the June 2026 restore — removed from this list.
     "_archive_patients",
     "_archive_therapists",
     "_archive_appointments",
-    "_archive_subscriptions",
-    "_archive_signed_contracts",
     "_archive_sales_leads",
     "_archive_questionnaire_submissions",
     "_archive_crm_notes",
@@ -104,11 +108,12 @@ STORAGE_BUCKETS = [
     "ig-publishing",
 ]
 
-# Backup root — inside OneDrive for auto-sync
-BACKUP_ROOT = Path.home() / "OneDrive" / "שולחן העבודה" / "beit-vmetaplim" / "backups"
+# Backup root — OFF OneDrive (2026-06-03): patient PII must NOT sync to cloud.
+# Off-site redundancy is preserved via the Google Drive upload below (DRIVE_FOLDER_NAME).
+BACKUP_ROOT = Path(r"C:\AtomicBusiness\backups\beit-vmetaplim-backups")
 
-# Keep last N backups
-MAX_BACKUPS = 30
+# Keep last N backups (reduced 30→14: each snapshot ~130MB; Drive holds the rest)
+MAX_BACKUPS = 14
 
 # Google Drive folder name for backups
 DRIVE_FOLDER_NAME = "beit-vmetaplim-backups"
@@ -411,7 +416,22 @@ def cleanup_old_backups():
         print(f"  🗑 Deleted old ZIP: {old_zip.name}")
 
 
+def check_connectivity():
+    """Preflight: verify Supabase is reachable (DNS + TCP). Raises URLError if not.
+
+    Without this, a dead network gets swallowed by the per-table try/excepts and
+    the run ends as a useless 0-row PARTIAL instead of triggering the retry loop.
+    An HTTPError (e.g. 401) means the host resolved and responded — that's fine.
+    """
+    url = f"{SUPABASE_URL}/rest/v1/"
+    try:
+        urllib.request.urlopen(urllib.request.Request(url, headers={"apikey": SERVICE_KEY}), timeout=20)
+    except urllib.error.HTTPError:
+        pass  # reachable — auth/status irrelevant for the preflight
+
+
 def main():
+    check_connectivity()
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
     backup_dir = BACKUP_ROOT / timestamp
     backup_dir.mkdir(parents=True, exist_ok=True)
@@ -521,10 +541,25 @@ def _safe_stdout():
         pass
 
 
+# Retry policy for transient network failures (e.g. Wi-Fi not yet up at 07:00 wake —
+# caused repeated "getaddrinfo failed" fatals 2026-06-03..06-10).
+MAX_ATTEMPTS = 3
+RETRY_DELAY_SECONDS = 60
+
+
 if __name__ == "__main__":
     _safe_stdout()
     try:
-        main()
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            try:
+                main()
+                break
+            except urllib.error.URLError as e:
+                if attempt >= MAX_ATTEMPTS:
+                    raise
+                print(f"\n⚠ Network error (attempt {attempt}/{MAX_ATTEMPTS}): {e} — retrying in {RETRY_DELAY_SECONDS}s...")
+                append_run_log("RETRY", f"attempt {attempt}/{MAX_ATTEMPTS}: {type(e).__name__}: {str(e)[:150]} | retrying in {RETRY_DELAY_SECONDS}s")
+                time.sleep(RETRY_DELAY_SECONDS)
     except Exception as e:
         tb = traceback.format_exc()
         print(f"\n❌ FATAL: {e}\n{tb}")

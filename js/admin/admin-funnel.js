@@ -359,14 +359,13 @@ async function updateStageFromModal(userId, stage) {
 }
 
 async function quickActivate(userId, phone) {
-    if (!confirm('להפעיל גישה בתשלום ללקוח זה?')) return;
+    if (!confirm('להפעיל גישה בתשלום (מאסטר ₪1,900 — לכל החיים) ללקוח זה?')) return;
     try {
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + 12);
-
+        // Lifetime access = far-future end_date (subscriptions.end_date is NOT NULL,
+        // and the nightly expiry crons compare end_date to now() — 2099 never expires)
         await db.from('subscriptions').insert({
-            user_id: userId, plan: 'master_course', price: 8880,
-            start_date: new Date().toISOString(), end_date: endDate.toISOString(),
+            user_id: userId, plan: 'master_course', price: 1900,
+            start_date: new Date().toISOString(), end_date: '2099-01-01T00:00:00.000Z',
             activated_by: 'admin_dashboard', status: 'active'
         });
         await db.from('profiles').update({ role: 'paid_customer', sales_stage: 'won', sales_updated_at: new Date().toISOString() }).eq('id', userId);

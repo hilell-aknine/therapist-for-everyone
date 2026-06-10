@@ -17,6 +17,14 @@ const STATUS_LABELS_PAID = {
     'suspended': { text: 'מושהה', color: '#f59e0b' }
 };
 
+// Lifetime access is modeled as a far-future end_date (subscriptions.end_date is NOT NULL,
+// and the nightly expiry crons compare end_date to now() — a 2099 date never expires).
+const LIFETIME_END_DATE = '2099-01-01T00:00:00.000Z';
+
+function isLifetimeSub(endDate) {
+    return !!endDate && new Date(endDate).getFullYear() >= 2099;
+}
+
 function daysRemaining(endDate) {
     return Math.max(0, Math.ceil((new Date(endDate) - new Date()) / (24 * 60 * 60 * 1000)));
 }
@@ -47,7 +55,7 @@ async function loadPaidCustomers() {
 function renderPaidCustomers(subs) {
     const active = subs.filter(s => s.status === 'active');
     const d30 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    const expiringSoon = active.filter(s => new Date(s.end_date) <= d30);
+    const expiringSoon = active.filter(s => !isLifetimeSub(s.end_date) && new Date(s.end_date) <= d30);
     const totalRevenue = active.reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0);
 
     setText('paid-active-count', active.length);
@@ -69,12 +77,13 @@ function renderPaidCustomers(subs) {
 
     tbody.innerHTML = subs.map(s => {
         const profile = s.profiles || {};
+        const lifetime = isLifetimeSub(s.end_date);
         const days = daysRemaining(s.end_date);
         const status = STATUS_LABELS_PAID[s.status] || { text: s.status, color: '#6b7280' };
         const plan = PLAN_LABELS[s.plan] || s.plan;
         const start = s.start_date ? new Date(s.start_date).toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' }) : '—';
-        const end = s.end_date ? new Date(s.end_date).toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' }) : '—';
-        const daysColor = s.status === 'active' ? (days <= 30 ? '#f85149' : days <= 90 ? '#f59e0b' : '#22c55e') : '#6b7280';
+        const end = lifetime ? 'לכל החיים' : (s.end_date ? new Date(s.end_date).toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' }) : '—');
+        const daysColor = s.status === 'active' ? (lifetime ? '#22c55e' : (days <= 30 ? '#f85149' : days <= 90 ? '#f59e0b' : '#22c55e')) : '#6b7280';
 
         const safeName = escapeHtml(profile.full_name || 'ללא שם');
         const safePhone = escapeHtml(profile.phone || '—');
@@ -87,7 +96,7 @@ function renderPaidCustomers(subs) {
             <td><strong>${parseFloat(s.price).toLocaleString()} ₪</strong></td>
             <td style="font-size:0.85rem;">${start}</td>
             <td style="font-size:0.85rem;">${end}</td>
-            <td><span style="color:${daysColor};font-weight:600;">${s.status === 'active' ? days : '—'}</span></td>
+            <td><span style="color:${daysColor};font-weight:600;">${s.status === 'active' ? (lifetime ? '∞' : days) : '—'}</span></td>
             <td><span style="font-size:0.75rem;background:${status.color}22;color:${status.color};padding:2px 8px;border-radius:10px;">${status.text}</span></td>
             <td>${s.contract_url ? `<a href="${safeContractUrl}" target="_blank" style="color:var(--gold);"><i class="fa-solid fa-file-contract"></i></a>` : `<button onclick="uploadContract('${s.id}')" class="btn-sm" style="font-size:0.7rem;padding:2px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text-secondary);" title="העלאת חוזה"><i class="fa-solid fa-upload"></i></button>`}</td>
             <td>
@@ -105,8 +114,8 @@ function showActivateModal() {
     const modal = document.getElementById('paid-activate-modal');
     modal.classList.add('active');
     document.getElementById('activate-phone').value = '';
-    document.getElementById('activate-months').value = '12';
-    document.getElementById('activate-price').value = '8880';
+    document.getElementById('activate-months').value = 'lifetime';
+    document.getElementById('activate-price').value = '1900';
     document.getElementById('activate-notes').value = '';
     document.getElementById('activate-result').textContent = '';
 }
@@ -117,8 +126,10 @@ function closeActivateModal() {
 
 async function activateNewCustomer() {
     const phone = document.getElementById('activate-phone').value.trim();
-    const months = parseInt(document.getElementById('activate-months').value) || 12;
-    const price = parseFloat(document.getElementById('activate-price').value) || 8880;
+    const monthsRaw = document.getElementById('activate-months').value;
+    const lifetime = monthsRaw === 'lifetime';
+    const months = lifetime ? null : (parseInt(monthsRaw) || 12);
+    const price = parseFloat(document.getElementById('activate-price').value) || 1900;
     const notes = document.getElementById('activate-notes').value.trim();
     const resultEl = document.getElementById('activate-result');
 
@@ -151,16 +162,22 @@ async function activateNewCustomer() {
 
         resultEl.textContent = `מפעיל גישה ל-${user.full_name}...`;
 
-        // Create subscription
-        const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + months);
+        // Create subscription (lifetime = far-future end_date; column is NOT NULL)
+        let endDateIso;
+        if (lifetime) {
+            endDateIso = LIFETIME_END_DATE;
+        } else {
+            const endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + months);
+            endDateIso = endDate.toISOString();
+        }
 
         const { data: sub, error: sErr } = await db.from('subscriptions').insert({
             user_id: user.id,
             plan: 'master_course',
             price,
             start_date: new Date().toISOString(),
-            end_date: endDate.toISOString(),
+            end_date: endDateIso,
             activated_by: 'admin_dashboard',
             notes: notes || null,
             status: 'active'
@@ -171,7 +188,7 @@ async function activateNewCustomer() {
         // Update role
         await db.from('profiles').update({ role: 'paid_customer' }).eq('id', user.id);
 
-        resultEl.innerHTML = `<span style="color:#22c55e;">&#x2705; ${escapeHtml(user.full_name)} — גישה הופעלה ל-${months} חודשים!</span>`;
+        resultEl.innerHTML = `<span style="color:#22c55e;">&#x2705; ${escapeHtml(user.full_name)} — גישה הופעלה ${lifetime ? 'לכל החיים' : `ל-${months} חודשים`}!</span>`;
 
         // Refresh table
         paidCache = null;
@@ -260,8 +277,8 @@ async function syncToGoogleSheets() {
                 'תוכנית': PLAN_LABELS[s.plan] || s.plan,
                 'מחיר': s.price,
                 'תאריך התחלה': s.start_date ? new Date(s.start_date).toLocaleDateString('he-IL') : '',
-                'תאריך סיום': s.end_date ? new Date(s.end_date).toLocaleDateString('he-IL') : '',
-                'ימים נותרו': s.status === 'active' ? days : 0,
+                'תאריך סיום': isLifetimeSub(s.end_date) ? 'לכל החיים' : (s.end_date ? new Date(s.end_date).toLocaleDateString('he-IL') : ''),
+                'ימים נותרו': s.status === 'active' ? (isLifetimeSub(s.end_date) ? '∞' : days) : 0,
                 'סטטוס': (STATUS_LABELS_PAID[s.status] || {}).text || s.status,
                 'חוזה': s.contract_url ? 'חתום' : 'חסר',
                 'הערות': s.notes || ''
@@ -325,7 +342,7 @@ function editSub(id) {
                         </select>
                     </label>
                     <label style="font-size:0.85rem;font-weight:600;flex:1;">מחיר (₪)
-                        <input type="number" id="edit-sub-price" value="${s.price||8880}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                        <input type="number" id="edit-sub-price" value="${s.price||1900}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
                     </label>
                 </div>
                 <div style="display:flex;gap:0.7rem;">
@@ -333,7 +350,10 @@ function editSub(id) {
                         <input type="date" id="edit-sub-start" value="${fmtDate(s.start_date)}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
                     </label>
                     <label style="font-size:0.85rem;font-weight:600;flex:1;">תאריך סיום
-                        <input type="date" id="edit-sub-end" value="${fmtDate(s.end_date)}" style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                        <input type="date" id="edit-sub-end" value="${fmtDate(s.end_date)}" ${isLifetimeSub(s.end_date)?'disabled':''} style="width:100%;padding:8px;border:1px solid var(--border,#ddd);border-radius:6px;font-size:0.95rem;margin-top:4px;">
+                        <span style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:0.8rem;margin-top:4px;">
+                            <input type="checkbox" id="edit-sub-lifetime" ${isLifetimeSub(s.end_date)?'checked':''} onchange="document.getElementById('edit-sub-end').disabled=this.checked;"> לכל החיים
+                        </span>
                     </label>
                 </div>
                 <label style="font-size:0.85rem;font-weight:600;">סטטוס
@@ -388,11 +408,12 @@ async function saveEditSub(subId, userId) {
         }).eq('id', userId);
 
         const newStatus = document.getElementById('edit-sub-status').value;
+        const lifetimeChecked = document.getElementById('edit-sub-lifetime')?.checked;
         await db.from('subscriptions').update({
             plan: document.getElementById('edit-sub-plan').value,
-            price: parseFloat(document.getElementById('edit-sub-price').value) || 8880,
+            price: parseFloat(document.getElementById('edit-sub-price').value) || 1900,
             start_date: new Date(document.getElementById('edit-sub-start').value).toISOString(),
-            end_date: new Date(document.getElementById('edit-sub-end').value).toISOString(),
+            end_date: lifetimeChecked ? LIFETIME_END_DATE : new Date(document.getElementById('edit-sub-end').value).toISOString(),
             status: newStatus,
             notes: document.getElementById('edit-sub-notes').value.trim() || null,
         }).eq('id', subId);

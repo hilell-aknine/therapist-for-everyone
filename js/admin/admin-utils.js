@@ -5,7 +5,7 @@ const VIEW_GROUPS = {
     'overview': { views: ['overview'], header: null, default: 'overview' },
     'mizum':    { views: ['patients', 'therapists', 'matches'], header: 'mizum-header', default: 'patients' },
     'funnel':   { views: ['pipeline'], header: null, default: 'pipeline' },
-    'learning': { views: ['portal-q'], header: null, default: 'portal-q' },
+    'learning': { views: ['leads', 'learners', 'portal-q'], header: 'learning-header', default: 'portal-q' },
     'bot':      { views: ['bot'], header: null, default: 'bot' },
     'paid':     { views: ['paid'], header: null, default: 'paid' },
     'referrals':{ views: ['referrals'], header: null, default: 'referrals' },

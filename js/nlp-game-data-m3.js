@@ -331,7 +331,10 @@ const MODULE_3 = {
                     },
                     correct: 1,
                     explanation: "תגובה B פורקת את הנומינליזציה על ידי שאלות ספציפיות — ומגלה שה'מרדנות' מוגבלת להקשרים מסוימים. תגובה A גורמת להגנה.",
-                    wrongExplanations: [null, null, null, null]
+                    wrongExplanations: [
+                        "התגובה הזו מתווכחת עם האמירה וגורמת להתגוננות, במקום לפרק אותה בשאלות מדויקות.",
+                        null
+                    ]
                 },
                 {
                     type: "scenario",
@@ -580,7 +583,10 @@ const MODULE_3 = {
                     },
                     correct: 1,
                     explanation: "מטרה B היא חיובית, ספציפית, מדידה, תלויה בעצמה ותחומה בזמן. מטרה A תלויה בהתנהגות של אחר ואינה ספציפית.",
-                    wrongExplanations: [null, null, null, null]
+                    wrongExplanations: [
+                        "המטרה הזו כללית ותלויה בהתנהגות של אדם אחר, ואי אפשר למדוד אותה.",
+                        null
+                    ]
                 },
                 {
                     type: "multiple-choice",
@@ -828,7 +834,10 @@ const MODULE_3 = {
                     },
                     correct: 1,
                     explanation: "שאלת הביקורתי עוסקת במכשולים, סיכונים ובעיות פוטנציאליות. שאלת החולם מתמקדת באידיאל ובאפשרויות. כל שאלה שייכת לשלב שלה.",
-                    wrongExplanations: [null, null, null, null]
+                    wrongExplanations: [
+                        "זו שאלת חולם קלאסית, היא פותחת אפשרויות במקום לבחון מכשולים.",
+                        null
+                    ]
                 },
                 {
                     type: "fill-blank",

@@ -1,5 +1,9 @@
 // admin-leads.js — Leads + Contact Requests + Questionnaires
 
+// escapeHtml (admin-utils.js) does NOT escape quotes — these wrappers cover attribute / inline-JS-string contexts.
+function escAttr(v) { return escapeHtml(v == null ? '' : String(v)).replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+function escJsStr(v) { return escapeHtml(String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/'/g, "\\'")).replace(/"/g, '&quot;'); }
+
 async function loadLeads() {
     const { data } = await db.from('profiles').select('*').order('created_at', { ascending: false });
     leads = data || [];
@@ -34,9 +38,9 @@ function renderLeads() {
         html += items.map(l => `
             <tr>
                 <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('leads')"></td>
-                <td><strong>${l.full_name || '-'}</strong></td>
-                <td>${l.phone ? `<a href="tel:${l.phone}">${l.phone}</a>` : '-'}</td>
-                <td>${l.email || '-'}</td>
+                <td><strong>${escapeHtml(l.full_name || '-')}</strong></td>
+                <td>${l.phone ? `<a href="tel:${escAttr(l.phone)}">${escapeHtml(l.phone)}</a>` : '-'}</td>
+                <td>${escapeHtml(l.email || '-')}</td>
                 <td>${l.role ? `<span class="role-badge role-${l.role}">${roleLabel(l.role)}</span>` : ''}</td>
                 <td>${renderSourceChip(l, attributionMap.get('profiles:' + l.id))}</td>
                 <td>${formatDate(l.created_at)}</td>
@@ -45,7 +49,7 @@ function renderLeads() {
                         <button class="row-menu-btn" onclick="toggleRowMenu('menu-l-${l.id}')">⋮</button>
                         <div class="row-menu-dropdown">
                             <button class="row-menu-item" onclick="openEditModal('profiles','${l.id}');closeAllMenus()"><i class="fa-solid fa-pen"></i> עריכה</button>
-                            <button class="row-menu-item danger" onclick="deleteEntity('profiles','${l.id}','${(l.full_name||'').replace(/'/g,"\\'")}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
+                            <button class="row-menu-item danger" onclick="deleteEntity('profiles','${l.id}','${escJsStr(l.full_name || '')}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
                         </div>
                     </div>
                 </td>
@@ -132,10 +136,10 @@ function renderContactLeads() {
         html += items.map(l => `
             <tr>
                 <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('contact-leads')"></td>
-                <td><strong>${l.name || l.full_name || 'אנונימי'}</strong></td>
-                <td>${l.phone ? `<a href="tel:${l.phone}" style="color:var(--info);text-decoration:none;">${l.phone}</a>` : '-'}</td>
-                <td><span class="stat-icon ${requestTypeClass(l.request_type)}" style="width:auto;height:auto;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;display:inline-flex;">${requestTypeLabel(l.request_type)}</span></td>
-                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(l.message || '').replace(/"/g, '&quot;')}">${l.message || '-'}</td>
+                <td><strong>${escapeHtml(l.name || l.full_name || 'אנונימי')}</strong></td>
+                <td>${l.phone ? `<a href="tel:${escAttr(l.phone)}" style="color:var(--info);text-decoration:none;">${escapeHtml(l.phone)}</a>` : '-'}</td>
+                <td><span class="stat-icon ${requestTypeClass(l.request_type)}" style="width:auto;height:auto;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;display:inline-flex;">${escapeHtml(requestTypeLabel(l.request_type))}</span></td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escAttr(l.message || '')}">${escapeHtml(l.message || '-')}</td>
                 <td>${renderSourceChip(l, attributionMap.get('contact_requests:' + l.id))}</td>
                 <td><span class="status-badge status-${l.status}">${statusLabel(l.status)}</span></td>
                 <td>${formatDate(l.created_at)}</td>
@@ -143,10 +147,10 @@ function renderContactLeads() {
                     <div class="row-menu" id="menu-cl-${l.id}">
                         <button class="row-menu-btn" onclick="toggleRowMenu('menu-cl-${l.id}')">⋮</button>
                         <div class="row-menu-dropdown">
-                            ${l.phone ? `<button class="row-menu-item" onclick="window.open('https://wa.me/${l.phone.replace(/^0/,'972')}','_blank');closeAllMenus()"><i class="fa-brands fa-whatsapp" style="color:var(--success);"></i> WhatsApp</button>` : ''}
+                            ${l.phone ? `<button class="row-menu-item" onclick="window.open('https://wa.me/${escJsStr(l.phone.replace(/^0/,'972'))}','_blank');closeAllMenus()"><i class="fa-brands fa-whatsapp" style="color:var(--success);"></i> WhatsApp</button>` : ''}
                             ${l.status === 'new' ? `<button class="row-menu-item" onclick="markContactLeadContacted('${l.id}');closeAllMenus()"><i class="fa-solid fa-check" style="color:var(--success);"></i> סמן כטופל</button>` : ''}
                             <button class="row-menu-item" onclick="openEditModal('contact_requests','${l.id}');closeAllMenus()"><i class="fa-solid fa-pen"></i> עריכה</button>
-                            <button class="row-menu-item danger" onclick="deleteEntity('contact_requests','${l.id}','${(l.name || l.full_name || 'אנונימי').replace(/'/g,"\\'")}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
+                            <button class="row-menu-item danger" onclick="deleteEntity('contact_requests','${l.id}','${escJsStr(l.name || l.full_name || 'אנונימי')}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
                         </div>
                     </div>
                 </td>
@@ -244,10 +248,10 @@ function renderQuestionnaires() {
         html += items.map(q => `
             <tr style="cursor:pointer;" onclick="openQuestionnaireDetail('${q.id}')">
                 <td class="lead-checkbox" onclick="event.stopPropagation()"><input type="checkbox" value="${q.id}" onchange="updateBulkBarFor('questionnaires')"></td>
-                <td><strong>${q.full_name || 'אנונימי'}</strong></td>
-                <td>${q.phone ? `<a href="tel:${q.phone}" style="color:var(--info);text-decoration:none;" onclick="event.stopPropagation()">${q.phone}</a>` : '-'}</td>
-                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.email || '-'}</td>
-                <td>${q.occupation || '-'}</td>
+                <td><strong>${escapeHtml(q.full_name || 'אנונימי')}</strong></td>
+                <td>${q.phone ? `<a href="tel:${escAttr(q.phone)}" style="color:var(--info);text-decoration:none;" onclick="event.stopPropagation()">${escapeHtml(q.phone)}</a>` : '-'}</td>
+                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(q.email || '-')}</td>
+                <td>${escapeHtml(q.occupation || '-')}</td>
                 <td><span class="status-badge ${qStatusClass(q.status)}">${qStatusLabel(q.status)}</span></td>
                 <td>${formatDate(q.created_at)}</td>
                 <td class="action-btns" onclick="event.stopPropagation()">
@@ -255,8 +259,8 @@ function renderQuestionnaires() {
                         <button class="row-menu-btn" onclick="toggleRowMenu('menu-q-${q.id}')">⋮</button>
                         <div class="row-menu-dropdown">
                             <button class="row-menu-item" onclick="openQuestionnaireDetail('${q.id}');closeAllMenus()"><i class="fa-solid fa-eye"></i> צפייה</button>
-                            ${q.phone ? `<button class="row-menu-item" onclick="window.open('https://wa.me/${q.phone.replace(/^0/,'972')}','_blank');closeAllMenus()"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> WhatsApp</button>` : ''}
-                            <button class="row-menu-item danger" onclick="deleteEntity('questionnaire_submissions','${q.id}','${(q.full_name || 'אנונימי').replace(/'/g,"\\'")}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
+                            ${q.phone ? `<button class="row-menu-item" onclick="window.open('https://wa.me/${escJsStr(q.phone.replace(/^0/,'972'))}','_blank');closeAllMenus()"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> WhatsApp</button>` : ''}
+                            <button class="row-menu-item danger" onclick="deleteEntity('questionnaire_submissions','${q.id}','${escJsStr(q.full_name || 'אנונימי')}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
                         </div>
                     </div>
                 </td>
@@ -305,7 +309,7 @@ function openQuestionnaireDetail(id) {
             <div style="background:var(--bg);border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;border-right:4px solid var(--gold);">
                 <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
                     <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#c9a227);display:flex;align-items:center;justify-content:center;color:white;font-size:1.3rem;font-weight:700;">
-                        ${(q.full_name || '?')[0]}
+                        ${escapeHtml((q.full_name || '?')[0])}
                     </div>
                     <div>
                         <h3 style="margin:0;color:var(--text-primary);font-size:1.1rem;">${escapeHtml(q.full_name || 'ללא שם')}</h3>

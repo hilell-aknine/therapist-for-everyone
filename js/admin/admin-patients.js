@@ -1,4 +1,8 @@
 // admin-patients.js — Patients + Matches: load, render, filter, view, createMatch
+// Note: escAttr / escJsStr (attribute-safe wrappers around escapeHtml) are defined in admin-leads.js;
+// identical declarations here keep this module self-contained regardless of load order.
+function escAttr(v) { return escapeHtml(v == null ? '' : String(v)).replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+function escJsStr(v) { return escapeHtml(String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/'/g, "\\'")).replace(/"/g, '&quot;'); }
 
 async function loadPatients() {
     const { data } = await db.from('patients').select('*').order('created_at', { ascending: false });
@@ -42,9 +46,9 @@ function renderPatients() {
         html += items.map(p => `
             <tr>
                 <td class="lead-checkbox"><input type="checkbox" value="${p.id}" onchange="updateBulkBarFor('patients')"></td>
-                <td><strong>${p.full_name}</strong></td>
-                <td><a href="tel:${p.phone}" style="color:var(--info);text-decoration:none;">${p.phone || '-'}</a></td>
-                <td>${p.city || '-'}</td>
+                <td><strong>${escapeHtml(p.full_name)}</strong></td>
+                <td><a href="tel:${escAttr(p.phone)}" style="color:var(--info);text-decoration:none;">${escapeHtml(p.phone || '-')}</a></td>
+                <td>${escapeHtml(p.city || '-')}</td>
                 <td>${renderSourceChip(p, attributionMap.get('patients:' + p.id))}</td>
                 <td>${p.agreement_signed_at ? '<span style="color:#27ae60;">✅</span>' : '<span style="color:rgba(232,241,242,0.4);">⚠️</span>'}</td>
                 <td><span class="status-badge status-${p.status}">${statusLabel(p.status)}</span></td>
@@ -55,7 +59,7 @@ function renderPatients() {
                         <div class="row-menu-dropdown">
                             <button class="row-menu-item" onclick="viewPatient('${p.id}');closeAllMenus()"><i class="fa-solid fa-eye"></i> צפייה</button>
                             <button class="row-menu-item" onclick="openEditModal('patients','${p.id}');closeAllMenus()"><i class="fa-solid fa-pen"></i> עריכה</button>
-                            <button class="row-menu-item danger" onclick="deleteEntity('patients','${p.id}','${(p.full_name||'').replace(/'/g,"\\'")}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
+                            <button class="row-menu-item danger" onclick="deleteEntity('patients','${p.id}','${escJsStr(p.full_name || '')}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
                         </div>
                     </div>
                 </td>
@@ -83,8 +87,8 @@ function renderMatches() {
         html += items.map(m => `
             <tr>
                 <td class="lead-checkbox"><input type="checkbox" value="${m.id}" onchange="updateBulkBarFor('matches')"></td>
-                <td>${m.patients?.full_name || '-'}</td>
-                <td>${m.therapists?.full_name || '-'}</td>
+                <td>${escapeHtml(m.patients?.full_name || '-')}</td>
+                <td>${escapeHtml(m.therapists?.full_name || '-')}</td>
                 <td><span class="status-badge status-${m.status}">${statusLabel(m.status)}</span></td>
                 <td>${m.session_count || 0}</td>
                 <td>${formatDate(m.created_at)}</td>
@@ -140,19 +144,19 @@ function viewPatient(id) {
     document.getElementById('patient-modal-body').innerHTML = `
         <!-- PERSONAL INFO -->
         <div class="modal-section-divider"><i class="fa-solid fa-user"></i> פרטים אישיים</div>
-        <div class="detail-row"><div class="detail-label">טלפון</div><div class="detail-value"><a href="tel:${p.phone}" style="color:var(--info);">${p.phone || '-'}</a></div></div>
+        <div class="detail-row"><div class="detail-label">טלפון</div><div class="detail-value"><a href="tel:${escAttr(p.phone)}" style="color:var(--info);">${escapeHtml(p.phone || '-')}</a></div></div>
         <div class="detail-row"><div class="detail-label">אימייל</div><div class="detail-value">${escapeHtml(p.email || '-')}</div></div>
         <div class="detail-row"><div class="detail-label">עיר</div><div class="detail-value">${escapeHtml(p.city || '-')}</div></div>
         ${p.birth_date ? `<div class="detail-row"><div class="detail-label">תאריך לידה</div><div class="detail-value">${formatDate(p.birth_date)}</div></div>` : ''}
-        ${p.gender ? `<div class="detail-row"><div class="detail-label">מגדר</div><div class="detail-value">${genderDisplayLabel(p.gender)}</div></div>` : ''}
-        ${p.marital_status ? `<div class="detail-row"><div class="detail-label">מצב משפחתי</div><div class="detail-value">${maritalLabels[p.marital_status] || p.marital_status}</div></div>` : ''}
+        ${p.gender ? `<div class="detail-row"><div class="detail-label">מגדר</div><div class="detail-value">${escapeHtml(genderDisplayLabel(p.gender))}</div></div>` : ''}
+        ${p.marital_status ? `<div class="detail-row"><div class="detail-label">מצב משפחתי</div><div class="detail-value">${escapeHtml(maritalLabels[p.marital_status] || p.marital_status)}</div></div>` : ''}
         ${p.occupation ? `<div class="detail-row"><div class="detail-label">תעסוקה</div><div class="detail-value">${escapeHtml(p.occupation)}</div></div>` : ''}
-        ${p.military_service ? `<div class="detail-row"><div class="detail-label">שירות צבאי</div><div class="detail-value">${militaryLabels[p.military_service] || p.military_service}</div></div>` : ''}
+        ${p.military_service ? `<div class="detail-row"><div class="detail-label">שירות צבאי</div><div class="detail-value">${escapeHtml(militaryLabels[p.military_service] || p.military_service)}</div></div>` : ''}
 
         <!-- PREFERENCES -->
         <div class="modal-section-divider"><i class="fa-solid fa-sliders"></i> העדפות טיפול</div>
-        <div class="detail-row"><div class="detail-label">סוג טיפול</div><div class="detail-value">${therapyTypeLabel(p.therapy_type)}</div></div>
-        <div class="detail-row"><div class="detail-label">העדפת מטפל</div><div class="detail-value">${genderLabel(p.therapist_gender_preference)}</div></div>
+        <div class="detail-row"><div class="detail-label">סוג טיפול</div><div class="detail-value">${escapeHtml(therapyTypeLabel(p.therapy_type))}</div></div>
+        <div class="detail-row"><div class="detail-label">העדפת מטפל</div><div class="detail-value">${escapeHtml(genderLabel(p.therapist_gender_preference))}</div></div>
 
         <!-- REASON & EXPECTATIONS -->
         ${q.main_reason ? `<div class="modal-section-divider"><i class="fa-solid fa-comment-medical"></i> סיבת הפנייה</div><div class="questionnaire-answer">${escapeHtml(q.main_reason)}</div>` : ''}
@@ -227,7 +231,7 @@ function viewPatient(id) {
                 <select id="match-therapist-select">
                     <option value="">בחר מטפל...</option>
                     ${therapists.filter(t => t.status === 'active' || t.status === 'approved').map(t =>
-                        `<option value="${t.id}">${t.full_name} - ${(t.specializations || [t.specialization]).filter(Boolean).join(', ') || 'כללי'}</option>`
+                        `<option value="${t.id}">${escapeHtml(t.full_name)} - ${escapeHtml((t.specializations || [t.specialization]).filter(Boolean).join(', ') || 'כללי')}</option>`
                     ).join('')}
                 </select>
             </div>
@@ -240,7 +244,7 @@ function viewPatient(id) {
         ${p.signature_data ? `
         <div class="modal-section-divider" style="margin-top: 1.5rem;"><i class="fa-solid fa-signature"></i> חתימה דיגיטלית</div>
         <div style="background: #fff; padding: 15px; border-radius: 8px; text-align: center;">
-            <img src="${p.signature_data}" alt="חתימה דיגיטלית" style="max-width: 100%; height: auto; max-height: 150px;">
+            <img src="${escAttr(p.signature_data)}" alt="חתימה דיגיטלית" style="max-width: 100%; height: auto; max-height: 150px;">
         </div>
         <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
             <i class="fa-solid fa-clock"></i> נחתם בתאריך: ${formatDateTime(p.created_at)}

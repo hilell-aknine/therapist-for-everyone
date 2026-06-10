@@ -149,7 +149,7 @@ function renderInstagramData(allLeads) {
             const pct = allLeads.length > 0 ? Math.round((count / allLeads.length) * 100) : 0;
             const displayName = IG_CAMPAIGN_NAMES[camp] || camp;
             return `<tr>
-                <td><i class="fa-solid fa-tag" style="color:var(--gold);margin-left:0.4rem;font-size:0.8rem;"></i> ${displayName}</td>
+                <td><i class="fa-solid fa-tag" style="color:var(--gold);margin-left:0.4rem;font-size:0.8rem;"></i> ${escapeHtml(displayName)}</td>
                 <td><strong>${count}</strong></td>
                 <td>
                     <div style="display:flex;align-items:center;gap:0.5rem;">
@@ -176,9 +176,9 @@ function renderInstagramData(allLeads) {
             const typeColor = IG_TYPE_COLORS[l.type] || '#6b7280';
             const camp = IG_CAMPAIGN_NAMES[l.utm_campaign] || l.utm_campaign || '—';
             return `<tr>
-                <td><strong>${l.full_name || 'ללא שם'}</strong></td>
+                <td><strong>${escapeHtml(l.full_name || 'ללא שם')}</strong></td>
                 <td><span style="font-size:0.75rem;background:${typeColor}22;color:${typeColor};padding:2px 8px;border-radius:10px;">${l.type}</span></td>
-                <td><span style="font-size:0.75rem;background:var(--bg);padding:2px 8px;border-radius:10px;">${camp}</span></td>
+                <td><span style="font-size:0.75rem;background:var(--bg);padding:2px 8px;border-radius:10px;">${escapeHtml(camp)}</span></td>
                 <td style="font-size:0.85rem;color:var(--text-secondary);">${dateStr} ${timeStr}</td>
             </tr>`;
         }).join('');

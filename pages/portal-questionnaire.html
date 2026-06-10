@@ -1039,7 +1039,8 @@
                 });
             }
             // Meta Pixel: track questionnaire completion as Lead
-            if (window.trackFormSubmission) window.trackFormSubmission('portal_questionnaire');
+            try { if (window.trackFormSubmission) window.trackFormSubmission('portal_questionnaire'); }
+            catch (trackErr) { console.warn('trackFormSubmission failed (non-critical):', trackErr); }
 
             // ── Meta Conversions API: dedup-paired CompleteRegistration + QualifiedLead
             // Browser pixel and server CAPI share the same event_id so Meta counts once.
@@ -1088,9 +1089,18 @@
                 console.warn('CAPI dispatch error:', capiErr);
             }
 
-            showSuccess(insertedQ?.id);
+            // Submission is already saved at this point. A failure in the success
+            // UI must NEVER surface as "submission failed" — fall back to the portal.
+            try {
+                showSuccess(insertedQ?.id);
+            } catch (uiErr) {
+                console.error('Post-submit UI error (questionnaire WAS saved):', uiErr);
+                localStorage.setItem('portal_questionnaire_done', 'true');
+                window.location.href = 'course-library-v2.html?completed=1';
+            }
 
         } catch (err) {
+            // Only reached if the actual save (or session) failed — a real error.
             console.error('Submit error:', err);
             alert('אירעה שגיאה בשליחת השאלון. אנא נסו שוב.');
             btnNext.disabled = false;

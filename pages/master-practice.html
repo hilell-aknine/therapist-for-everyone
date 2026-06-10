@@ -494,11 +494,11 @@
             </nav>
             <div class="header-badge"><i class="fas fa-crown"></i> MASTER</div>
             <h1>תרגולים פרקטיים - קורס מאסטר NLP</h1>
-            <p>49 קליפים מעשיים מ-10 שיעורי המאסטר, מאורגנים לפי נושא. הדגמות חיות, תרגולים מודרכים ודמיון מודרך.</p>
+            <p><span id="headerClipCount">49</span> קליפים מעשיים מ-<span id="headerLessonCount">10</span> שיעורי המאסטר, מאורגנים לפי נושא. הדגמות חיות, תרגולים מודרכים ודמיון מודרך.</p>
             <div class="stats-row">
-                <span class="stat-item"><strong>49</strong> קליפים</span>
-                <span class="stat-item"><strong>15</strong> קטגוריות</span>
-                <span class="stat-item"><strong>10</strong> שיעורים</span>
+                <span class="stat-item"><strong id="statClips">49</strong> קליפים</span>
+                <span class="stat-item"><strong id="statCategories">15</strong> קטגוריות</span>
+                <span class="stat-item"><strong id="statLessons">10</strong> שיעורים</span>
             </div>
         </header>
 
@@ -537,8 +537,10 @@
 
     <script>
     // =========================================================================
-    // Data: 15 categories, 49 clips
+    // Data: 15 categories, 49 clips (44 with real YouTube IDs)
     // Each clip: { id: YouTube ID, title, type, desc, lesson }
+    // קליפים עם id שמתחיל ב-PLACEHOLDER מסוננים אוטומטית מהתצוגה ומהמונים,
+    // ויופיעו מעצמם ברגע שיודבק מזהה יוטיוב אמיתי.
     // =========================================================================
     const COURSE_SLUG = 'nlp-master-practice';
 
@@ -655,6 +657,7 @@
             color: '#636e72',
             clips: [
                 { id: 't9xzUkBcC0Y', title: 'על מה מגיע לי כל הכבוד', type: 'guided', desc: 'תרגול הערכה עצמית: זיהוי הצלחות והישגים אישיים.', lesson: 5 },
+                // ממתין למזהה יוטיוב אמיתי — מסונן מהתצוגה אוטומטית
                 { id: 'PLACEHOLDER_9_8', title: 'תרגול זוגות - שיבוש, סוויש ודיקנס', type: 'pairs', desc: 'תרגול משולב בזוגות של שלוש טכניקות: שיבוש אסטרטגיה, סוויש ודיקנס.', lesson: 9 }
             ]
         },
@@ -698,6 +701,7 @@
             color: '#6c5ce7',
             clips: [
                 { id: 'oWqPhfy4XAA', title: 'הנחיות שיבוש אסטרטגיה', type: 'instructions', desc: 'הסבר שלבי: מציאת אסטרטגיה, זיהוי טריגרים VAK, שיבוש עם קול מצחיק (בובספוג).', lesson: 9 },
+                // ממתין למזהה יוטיוב אמיתי — מסונן מהתצוגה אוטומטית
                 { id: 'PLACEHOLDER_9_7', title: 'הדגמת שיבוש - דיבור עצמי שלילי', type: 'demo', desc: 'הדגמה חיה: שיבוש אסטרטגיה של דיבור עצמי שלילי בעסק. החלפת קול פנימי לקול בובספוג.', lesson: 9 }
             ]
         },
@@ -707,6 +711,7 @@
             icon: 'fa-person-walking',
             color: '#0984e3',
             clips: [
+                // ממתינים למזהי יוטיוב אמיתיים — מסוננים מהתצוגה אוטומטית
                 { id: 'PLACEHOLDER_10_1', title: 'הדגמת מחולל התנהגות - קימה בבוקר', type: 'demo', desc: 'הדגמה מלאה: דיסוציאציה, בחירת מודל חיקוי, החלפה עצמית, אסוציאציה, הכללה ל-5 תרחישים.', lesson: 10 },
                 { id: 'PLACEHOLDER_10_2', title: 'הנחיות - שלבי מחולל ההתנהגות', type: 'instructions', desc: 'פירוט 11 שלבים על הלוח: זיהוי, דיסוציאציה, מודל, בדיקת התנגדות, החלפה, אסוציאציה, שבירה, בדיקה, הכללה.', lesson: 10 },
                 { id: 'PLACEHOLDER_10_3', title: 'תרגול זוגות - מחולל התנהגות', type: 'pairs', desc: 'תרגול בזוגות: 15 דקות לכל צד לביצוע מחולל התנהגות מלא.', lesson: 10 }
@@ -775,6 +780,29 @@
     }
 
     // =========================================================================
+    // Placeholder filter — clips waiting for real YouTube IDs are hidden
+    // =========================================================================
+    function isRenderable(clip) {
+        return !String(clip.id).startsWith('PLACEHOLDER');
+    }
+
+    function updateHeaderStats() {
+        const renderable = categories.flatMap(cat => cat.clips.filter(isRenderable));
+        const catCount = categories.filter(cat => cat.clips.some(isRenderable)).length;
+        const lessonCount = new Set(renderable.map(c => c.lesson)).size;
+        const set = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        };
+        set('headerClipCount', renderable.length);
+        set('headerLessonCount', lessonCount);
+        set('statClips', renderable.length);
+        set('statCategories', catCount);
+        set('statLessons', lessonCount);
+        set('searchCount', renderable.length + ' תרגולים');
+    }
+
+    // =========================================================================
     // Render
     // =========================================================================
     function renderCategories(filter = '') {
@@ -788,11 +816,13 @@
 
         categories.forEach((cat, catIdx) => {
             const filteredClips = cat.clips.filter(c =>
-                !lowerFilter ||
-                c.title.includes(lowerFilter) ||
-                c.desc.includes(lowerFilter) ||
-                cat.title.includes(lowerFilter) ||
-                (typeMap[c.type]?.label || '').includes(lowerFilter)
+                isRenderable(c) && (
+                    !lowerFilter ||
+                    c.title.includes(lowerFilter) ||
+                    c.desc.includes(lowerFilter) ||
+                    cat.title.includes(lowerFilter) ||
+                    (typeMap[c.type]?.label || '').includes(lowerFilter)
+                )
             );
 
             if (filteredClips.length === 0) return;
@@ -918,6 +948,7 @@
     // =========================================================================
     // Init
     // =========================================================================
+    updateHeaderStats();
     checkAccess();
     </script>
     <!-- Site Credit Footer -->

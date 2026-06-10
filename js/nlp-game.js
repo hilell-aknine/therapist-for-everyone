@@ -1105,7 +1105,7 @@ class StoryGame {
         return `
             <div class="mentor-container mentor-enter">
                 <div class="mentor-avatar mentor-${mood}">
-                    <img src="../assets/mentor-ram.png" alt="רם" />
+                    <img src="../assets/mentor-ram.webp" alt="רם" />
                 </div>
                 <div class="mentor-bubble">
                     ${showName ? '<div class="mentor-name">רם - המנטור שלך</div>' : ''}
@@ -1611,7 +1611,7 @@ class StoryGame {
         // Show as a toast notification
         const toast = document.createElement('div');
         toast.className = 'ram-coaching-toast';
-        toast.innerHTML = `<img src="../assets/mentor-ram.png" class="ram-toast-img" /><div class="ram-toast-text">${response}</div>`;
+        toast.innerHTML = `<img src="../assets/mentor-ram.webp" class="ram-toast-img" /><div class="ram-toast-text">${response}</div>`;
         document.body.appendChild(toast);
         setTimeout(() => toast.classList.add('show'), 50);
         setTimeout(() => {

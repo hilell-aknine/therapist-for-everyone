@@ -1,5 +1,5 @@
 // Service Worker for NLP Game PWA
-const CACHE_NAME = 'nlp-game-v1';
+const CACHE_NAME = 'nlp-game-v2';
 const ASSETS_TO_CACHE = [
     '/pages/nlp-game.html',
     '/css/nlp-game.css',
@@ -15,7 +15,7 @@ const ASSETS_TO_CACHE = [
     '/js/nlp-game-data-m7.js',
     '/js/nlp-game-leaderboard.js',
     '/assets/logo-square.png',
-    '/assets/mentor-ram.png'
+    '/assets/mentor-ram.webp'
 ];
 
 self.addEventListener('install', (event) => {

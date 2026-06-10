@@ -1,4 +1,7 @@
 // admin-export.js — CSV export modal, print signed document
+// escAttr: attribute-safe escape (escapeHtml from admin-utils.js does not escape quotes).
+// Same declaration also exists in admin-leads.js / admin-patients.js — identical, load-order independent.
+function escAttr(v) { return escapeHtml(v == null ? '' : String(v)).replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
 function exportPipelineCSV() {
     if (pipelineLeads.length === 0) { showToast('אין נתונים לייצוא', 'warning'); return; }
@@ -258,16 +261,16 @@ function printSignedDocument(type) {
         const commitment = q.commitment || {};
 
         detailsHTML = `
-            <tr><td class="label">שם מלא:</td><td class="value">${data.full_name || '-'}</td></tr>
-            <tr><td class="label">טלפון:</td><td class="value">${data.phone || '-'}</td></tr>
-            <tr><td class="label">אימייל:</td><td class="value">${data.email || '-'}</td></tr>
-            <tr><td class="label">עיר מגורים:</td><td class="value">${data.city || '-'}</td></tr>
-            <tr><td class="label">תחום התמחות:</td><td class="value">${data.specialization || '-'}</td></tr>
-            <tr><td class="label">שנות ניסיון:</td><td class="value">${data.experience_years || 0}</td></tr>
-            <tr><td class="label">מספר רישיון:</td><td class="value">${data.license_number || '-'}</td></tr>
+            <tr><td class="label">שם מלא:</td><td class="value">${escapeHtml(data.full_name || '-')}</td></tr>
+            <tr><td class="label">טלפון:</td><td class="value">${escapeHtml(data.phone || '-')}</td></tr>
+            <tr><td class="label">אימייל:</td><td class="value">${escapeHtml(data.email || '-')}</td></tr>
+            <tr><td class="label">עיר מגורים:</td><td class="value">${escapeHtml(data.city || '-')}</td></tr>
+            <tr><td class="label">תחום התמחות:</td><td class="value">${escapeHtml(data.specialization || '-')}</td></tr>
+            <tr><td class="label">שנות ניסיון:</td><td class="value">${escapeHtml(data.experience_years || 0)}</td></tr>
+            <tr><td class="label">מספר רישיון:</td><td class="value">${escapeHtml(data.license_number || '-')}</td></tr>
             <tr><td class="label">אופן טיפול:</td><td class="value">${data.works_online ? 'זום' : ''} ${data.works_in_person ? 'פרונטלי' : ''}</td></tr>
-            <tr><td class="label">שעות התחייבות בחודש:</td><td class="value">${commitment.monthly_hours || '-'}</td></tr>
-            <tr><td class="label">תקופת התחייבות:</td><td class="value">${commitment.duration_months || '-'}</td></tr>
+            <tr><td class="label">שעות התחייבות בחודש:</td><td class="value">${escapeHtml(commitment.monthly_hours || '-')}</td></tr>
+            <tr><td class="label">תקופת התחייבות:</td><td class="value">${escapeHtml(commitment.duration_months || '-')}</td></tr>
         `;
 
         additionalInfo = `
@@ -285,20 +288,20 @@ function printSignedDocument(type) {
         const q = data.questionnaire || {};
 
         detailsHTML = `
-            <tr><td class="label">שם מלא:</td><td class="value">${data.full_name || '-'}</td></tr>
-            <tr><td class="label">טלפון:</td><td class="value">${data.phone || '-'}</td></tr>
-            <tr><td class="label">אימייל:</td><td class="value">${data.email || '-'}</td></tr>
-            <tr><td class="label">עיר מגורים:</td><td class="value">${data.city || '-'}</td></tr>
-            <tr><td class="label">העדפת טיפול:</td><td class="value">${therapyTypeLabel(data.therapy_type)}</td></tr>
-            <tr><td class="label">העדפת מטפל/ת:</td><td class="value">${genderLabel(data.therapist_gender_preference)}</td></tr>
-            <tr><td class="label">איש קשר לחירום:</td><td class="value">${q.emergency_contact || '-'}</td></tr>
+            <tr><td class="label">שם מלא:</td><td class="value">${escapeHtml(data.full_name || '-')}</td></tr>
+            <tr><td class="label">טלפון:</td><td class="value">${escapeHtml(data.phone || '-')}</td></tr>
+            <tr><td class="label">אימייל:</td><td class="value">${escapeHtml(data.email || '-')}</td></tr>
+            <tr><td class="label">עיר מגורים:</td><td class="value">${escapeHtml(data.city || '-')}</td></tr>
+            <tr><td class="label">העדפת טיפול:</td><td class="value">${escapeHtml(therapyTypeLabel(data.therapy_type))}</td></tr>
+            <tr><td class="label">העדפת מטפל/ת:</td><td class="value">${escapeHtml(genderLabel(data.therapist_gender_preference))}</td></tr>
+            <tr><td class="label">איש קשר לחירום:</td><td class="value">${escapeHtml(q.emergency_contact || '-')}</td></tr>
         `;
 
         if (q.main_reason) {
             additionalInfo = `
                 <div class="section">
                     <h3>סיבת הפנייה</h3>
-                    <p>${q.main_reason}</p>
+                    <p>${escapeHtml(q.main_reason)}</p>
                 </div>
             `;
         }
@@ -311,7 +314,7 @@ function printSignedDocument(type) {
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>${typeTitle} - ${data.full_name}</title>
+    <title>${typeTitle} - ${escapeHtml(data.full_name || '')}</title>
     <style>
 @import url('https://fonts.googleapis.com/css2?family=David+Libre:wght@400;500;700&family=Heebo:wght@400;500;700&display=swap');
 
@@ -568,7 +571,7 @@ ${additionalInfo}
     <h3>חתימה דיגיטלית</h3>
     <div class="signature-box">
         ${data.signature_data
-            ? `<img src="${data.signature_data}" alt="חתימה דיגיטלית">`
+            ? `<img src="${escAttr(data.signature_data)}" alt="חתימה דיגיטלית">`
             : '<div class="no-signature">לא נמצאה חתימה דיגיטלית</div>'
         }
         <div class="signature-date">נחתם בתאריך: ${signedDate}</div>

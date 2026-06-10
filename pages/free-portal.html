@@ -55,7 +55,14 @@
                 const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
                 const { data: { session } } = await sb.auth.getSession();
                 if (session?.user) {
-                    const done = localStorage.getItem('portal_questionnaire_done');
+                    let done = localStorage.getItem('portal_questionnaire_done');
+                    if (!done) {
+                        // admin/paid_customer never fill the lead questionnaire — let them through
+                        try {
+                            const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
+                            if (profile && (profile.role === 'admin' || profile.role === 'paid_customer')) done = true;
+                        } catch (e2) {}
+                    }
                     var dest = done ? 'course-library-v2.html' : 'portal-questionnaire.html';
                     var ref = new URLSearchParams(location.search).get('ref');
                     if (ref) dest += (dest.includes('?') ? '&' : '?') + 'ref=' + encodeURIComponent(ref);

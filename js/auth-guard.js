@@ -305,7 +305,8 @@
         redirectByRole(role) {
             switch (role) {
                 case 'admin':
-                    window.location.href = 'pages/admin.html';
+                    // Admin home = the portal (CRM reachable via the portal header icon)
+                    window.location.href = 'pages/course-library-v2.html';
                     break;
                 case 'therapist':
                     window.location.href = 'therapist-dashboard.html';

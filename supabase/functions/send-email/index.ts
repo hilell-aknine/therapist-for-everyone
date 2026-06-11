@@ -1,22 +1,25 @@
 // ============================================================================
 // Edge Function: send-email
-// Sends a branded Hebrew (RTL) email through the existing Gmail Apps Script
-// web app. The Apps Script token never reaches the browser — the dashboard
-// calls this with the admin's own JWT (same gate as admin-delete-user).
+// Sends a branded Hebrew (RTL) email. Admin-JWT gated (same gate as
+// admin-delete-user) — the delivery credentials never reach the browser.
 //
 // Accepts: { to, subject, message }
 //   to      — recipient email address
 //   subject — plain text, max 200 chars
 //   message — plain text, max 2000 chars (newlines become <br>)
 //
-// Delivery channel: GET to the Apps Script /exec endpoint (POST to Apps
-// Script web apps breaks on Google's redirect — documented project lesson).
-// Hebrew text is URL-encoded; the 2000-char cap keeps the URL well under
-// the size that the daily backup report already sends successfully.
+// Delivery (provider chain):
+//   1. Resend (if RESEND_API_KEY secret is set) — sends from the verified
+//      domain (no-reply@therapist-home.com), replies go to REPLY_TO.
+//   2. Gmail Apps Script web app — automatic fallback if Resend is not
+//      configured or returns an error (e.g. domain not verified yet).
+//      GET only — POST to Apps Script breaks on Google's redirect
+//      (documented project lesson). Action contract: action=send + html
+//      param (see hindsight 2026-06-11).
 //
-// Quota awareness: consumer Gmail ≈ 100 recipients/day, Apps Script proxy
-// rate-limited ~10 sends/min. Fine for transactional/CRM use — NOT for
-// broadcast. Every send is audited in crm_activity_log.
+// Quota awareness: Resend free tier = 3,000/month, 100/day. Gmail fallback
+// ≈ 100 recipients/day, ~10 sends/min. CRM/transactional use — NOT broadcast.
+// Every send is audited in crm_activity_log with the provider used.
 // ============================================================================
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -26,6 +29,9 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const GMAIL_API_URL = Deno.env.get('GMAIL_API_URL')!
 const GMAIL_API_TOKEN = Deno.env.get('GMAIL_API_TOKEN')!
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
+const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'בית המטפלים <no-reply@therapist-home.com>'
+const REPLY_TO = Deno.env.get('EMAIL_REPLY_TO') || 'htjewelry.a474@gmail.com'
 
 const SENDER_NAME = 'בית המטפלים'
 const MAX_SUBJECT = 200
@@ -64,8 +70,8 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;')
 }
 
-// Lean branded wrapper — kept small on purpose (the whole email travels in a
-// GET URL). Brand: deep-petrol header, gold accent, Heebo-ish system stack.
+// Lean branded wrapper — kept small on purpose (the Gmail fallback carries the
+// whole email in a GET URL). Brand: deep-petrol header, gold accent.
 function buildBrandedHtml(message: string): string {
   const body = escapeHtml(message).replace(/\r?\n/g, '<br>')
   return `<div dir="rtl" style="background:#E8F1F2;padding:24px 12px;font-family:'Heebo',Arial,sans-serif;">
@@ -79,6 +85,64 @@ function buildBrandedHtml(message: string): string {
 </div>
 </div>
 </div>`
+}
+
+async function sendViaResend(to: string, subject: string, message: string, html: string):
+    Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: RESEND_FROM,
+        to: [to],
+        reply_to: REPLY_TO,
+        subject,
+        text: message,
+        html,
+      }),
+      signal: AbortSignal.timeout(20000),
+    })
+    if (res.ok) return { ok: true }
+    const detail = await res.text()
+    console.error('Resend send failed:', res.status, detail.slice(0, 300))
+    return { ok: false, error: `resend_${res.status}` }
+  } catch (e) {
+    console.error('Resend send threw:', e)
+    return { ok: false, error: 'resend_unreachable' }
+  }
+}
+
+async function sendViaGmail(to: string, subject: string, message: string, html: string):
+    Promise<{ ok: boolean; error?: string }> {
+  const params = new URLSearchParams({
+    token: GMAIL_API_TOKEN,
+    action: 'send',
+    to,
+    subject,
+    body: message,
+    html,
+    name: SENDER_NAME,
+  })
+  try {
+    const res = await fetch(`${GMAIL_API_URL}?${params.toString()}`, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: AbortSignal.timeout(25000),
+    })
+    const text = await res.text()
+    let result: { success?: boolean; error?: string } = {}
+    try { result = JSON.parse(text) } catch { /* non-JSON = Apps Script error page */ }
+    if (res.ok && result.success) return { ok: true }
+    console.error('Gmail Apps Script send failed:', res.status, text.slice(0, 300))
+    return { ok: false, error: result.error || 'gmail_send_failed' }
+  } catch (e) {
+    console.error('Gmail send threw:', e)
+    return { ok: false, error: 'gmail_unreachable' }
+  }
 }
 
 serve(async (req: Request) => {
@@ -113,29 +177,26 @@ serve(async (req: Request) => {
     if (!subject || subject.length > MAX_SUBJECT) return jsonResponse({ error: 'invalid_subject' }, 400, cors)
     if (!message || message.length > MAX_MESSAGE) return jsonResponse({ error: 'invalid_message' }, 400, cors)
 
-    // ── Send via the Gmail Apps Script web app ──
-    const params = new URLSearchParams({
-      token: GMAIL_API_TOKEN,
-      action: 'send',
-      to,
-      subject,
-      body: message,
-      html: buildBrandedHtml(message),
-      name: SENDER_NAME,
-    })
+    // ── Send: Resend first (when configured), Gmail as automatic fallback ──
+    const html = buildBrandedHtml(message)
+    let provider = ''
+    let sendResult: { ok: boolean; error?: string } = { ok: false }
 
-    const gmailRes = await fetch(`${GMAIL_API_URL}?${params.toString()}`, {
-      method: 'GET',
-      redirect: 'follow',
-      signal: AbortSignal.timeout(25000),
-    })
-    const gmailText = await gmailRes.text()
-    let gmailResult: { success?: boolean; error?: string } = {}
-    try { gmailResult = JSON.parse(gmailText) } catch { /* non-JSON = Apps Script error page */ }
+    if (RESEND_API_KEY) {
+      provider = 'resend'
+      sendResult = await sendViaResend(to, subject, message, html)
+    }
+    if (!sendResult.ok) {
+      const resendError = sendResult.error
+      provider = 'gmail'
+      sendResult = await sendViaGmail(to, subject, message, html)
+      if (sendResult.ok && resendError) {
+        console.warn(`Resend failed (${resendError}) — delivered via Gmail fallback`)
+      }
+    }
 
-    if (!gmailRes.ok || !gmailResult.success) {
-      console.error('Gmail Apps Script send failed:', gmailRes.status, gmailText.slice(0, 300))
-      return jsonResponse({ success: false, error: gmailResult.error || 'gmail_send_failed' }, 502, cors)
+    if (!sendResult.ok) {
+      return jsonResponse({ success: false, error: sendResult.error || 'send_failed' }, 502, cors)
     }
 
     // ── Audit ──
@@ -145,10 +206,10 @@ serve(async (req: Request) => {
       action: 'admin_send_email',
       entity_type: 'email',
       entity_id: null,
-      details: { to, subject },
+      details: { to, subject, provider },
     })
 
-    return jsonResponse({ success: true, to, subject }, 200, cors)
+    return jsonResponse({ success: true, to, subject, provider }, 200, cors)
   } catch (e) {
     console.error('send-email unhandled error:', e)
     return jsonResponse({ error: 'internal_error', detail: e instanceof Error ? e.message : String(e) }, 500, cors)

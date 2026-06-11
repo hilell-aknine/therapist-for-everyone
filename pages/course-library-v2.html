@@ -1763,6 +1763,31 @@
   </div>
 </div>
 
+<!-- master_welcome_pitch: first-registration Master offer (new free users, once ever). CTA → in-portal sales page -->
+<div id="lmsMasterPitchModal" class="lms-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lmsMasterPitchTitle" hidden>
+  <div class="lms-modal">
+    <button type="button" class="lms-modal__close" aria-label="סגור" onclick="closeMasterPitch()">×</button>
+    <div class="lms-modal__head">
+      <div style="font-size:2.4rem;line-height:1;margin-bottom:.4rem;">👑</div>
+      <h2 id="lmsMasterPitchTitle">רגע לפני שמתחילים — מילה מרם</h2>
+    </div>
+    <div class="lms-modal__body" style="max-height:55vh;overflow-y:auto;font-size:.95rem;line-height:1.65;">
+      <p>אם יצא לכם לצפות בקורס <bdi>PRACTITIONER</bdi> והתחברתם לתוכן,<br>אני יכול להבטיח לכם שאתם תתאהבו בקורס <bdi>MASTER</bdi> 💜</p>
+      <p>מהסיבה שהקורס הזה נכנס לרבדים פי כמה וכמה יותר עמוקים בכל מה שקשור לתת המודע שלנו כמו: אמונות שורש וליבה, ערכים, זהות, רגשות, דפוסי שפה, התמכרויות, תלות רגשית ועוד המון !</p>
+      <p>הקורס הזה הוא מסע מאוד עמוק,<br>והוא מבקש ממי שלומד אותו להיות רציני ומחוייב<br>ולכן אני לא אפיץ אותו בחינם לקהל הרחב.</p>
+      <p>אני בזמנו שילמתי על קורסי <bdi>PRACTITIONER + MASTER</bdi><br>מחיר של 11,600 ש״ח (אחרי הנחה)<br>והאמת? זה היה שווה כל שקל :)</p>
+      <p>אתם קיבלתם את ה-<bdi>PRACTITIONER</bdi> בחינם,<br>ואת ה-<bdi>MASTER</bdi> החלטתי לתמחר היום ב-1,900 ש״ח<br>+ לתת לא מעט בונוסים מאוד שווים ממני 🎁</p>
+      <p>אני יודע כמה זה מחיר נמוך לתוכן הזה<br>(כמעט 40 שעות של תוכן משנה חיים + בונוסים...)<br>ולכן המחיר לא ישאר ככה להרבה זמן.</p>
+      <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:1.1rem;">
+        <button type="button" class="lms-modal__action-btn lms-modal__action-btn--gold" onclick="masterPitchCta()" style="justify-content:center;font-size:15px;padding:12px 16px;">
+          <i class="fa-solid fa-crown"></i> ספרו לי עוד על המאסטר
+        </button>
+        <button type="button" class="lms-modal__link-btn" onclick="closeMasterPitch()" style="background:none;border:none;color:var(--text-muted);font-family:inherit;font-size:13px;cursor:pointer;">אולי בפעם אחרת</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ai_questionnaire modal -->
 <div id="lmsQuestionnaireModal" class="lms-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lmsQTitle" hidden>
   <div class="lms-modal">
@@ -1959,6 +1984,25 @@
         } catch(_) { return true; }
       }
     });
+    // master_welcome_pitch: first-registration Master offer. Requested explicitly
+    // from checkPaidRole() (role + signup date known there) — trigger_event='manual'
+    // in the DB row. Shows ONCE EVER per user (localStorage key set in showMasterPitch,
+    // keyed by user id via window._masterPitchSeenKey). CTA → in-portal sales page.
+    window.PopupManager.register('master_welcome_pitch', {
+      priority: 3, category: 'engagement', targetAudience: 'free_user',
+      show: () => showMasterPitch(),
+      hide: () => hideMasterPitch(),
+      maxPerDay: 1,
+      condition: () => {
+        try {
+          const u = window.PopupManager.getUser ? window.PopupManager.getUser() : {};
+          if (u.role === 'paid_customer' || u.role === 'admin') return false;
+          // Fails closed: only shows when checkPaidRole armed the per-user key
+          // (new registrant, free role) and it was never shown before.
+          return !!window._masterPitchSeenKey && !localStorage.getItem(window._masterPitchSeenKey);
+        } catch(_) { return false; }
+      }
+    });
   }
   registerEngagementPopups();
 
@@ -1981,9 +2025,50 @@
       window.PopupManager.close('training_cta');
     }
     hideTrainingCta();
-    // CTA goes straight to Cardcom (does NOT depend on the admin-only Master sales view).
-    if (typeof goToMasterCheckout === 'function') goToMasterCheckout();
+    // CTA goes straight to Cardcom. goToMasterCheckout lives in the main portal IIFE
+    // (separate scope) — reachable only via window (was silently a no-op before).
+    if (typeof window.goToMasterCheckout === 'function') window.goToMasterCheckout();
   }
+
+  // ===== master_welcome_pitch (first-registration Master offer) helpers =====
+  function showMasterPitch(){
+    const m = document.getElementById('lmsMasterPitchModal');
+    if (m) m.hidden = false;
+    // Once ever: mark as seen the moment it's shown (not only on dismiss).
+    try { if (window._masterPitchSeenKey) localStorage.setItem(window._masterPitchSeenKey, '1'); } catch(_){}
+  }
+  function hideMasterPitch(){
+    const m = document.getElementById('lmsMasterPitchModal');
+    if (m) m.hidden = true;
+  }
+  function closeMasterPitch(){
+    hideMasterPitch();
+    if (window.PopupManager) window.PopupManager.dismiss('master_welcome_pitch');
+  }
+  function masterPitchCta(){
+    if (window.PopupManager){
+      window.PopupManager.click('master_welcome_pitch');
+      window.PopupManager.close('master_welcome_pitch');
+    }
+    hideMasterPitch();
+    // CTA → the in-portal Master sales page. showMasterSalesView lives in the main
+    // portal IIFE (separate scope) — reachable only via window.
+    if (typeof window.showMasterSalesView === 'function') window.showMasterSalesView();
+    else location.hash = '#master-sales';
+  }
+
+  // HTML inline handlers (onclick/onsubmit) resolve against window, but this page's
+  // logic lives inside IIFEs — without explicit exposure EVERY inline handler throws
+  // ReferenceError. Found 2026-06-11 while wiring master_welcome_pitch: the auth modal
+  // (signup!), questionnaire, training_cta and share buttons were ALL dead in prod.
+  Object.assign(window, {
+    openLmsAuthModal, closeLmsAuthModal, lmsSignInWithGoogle, lmsHandleSignup,
+    lmsHandleEmailAuth, lmsSwitchAuthTab,
+    closeLmsQuestionnaire, skipLmsQuestionnaire, submitLmsQuestionnaire,
+    hideLmsToast, lmsShareCopy, lmsShareWhatsApp,
+    closeTrainingCta, trainingCtaCheckout,
+    showMasterPitch, closeMasterPitch, masterPitchCta
+  });
 
   // ===== Auth modal helpers (auth_modal + auth_wall share one DOM element) =====
   let _lmsActiveAuthPopup = null;
@@ -2996,6 +3081,8 @@
     if (!skipPush && location.hash) history.pushState(null, '', location.pathname + location.search);
     renderAll();
   }
+  // Inline onclick handlers resolve against window — expose (this IIFE is a separate scope).
+  window.showWelcome = showWelcome;
   function selectLesson(m, l, skipPush){
     if (!modules[m] || !modules[m].lessons[l]) return;
     currentModuleIndex = m;
@@ -3600,6 +3687,22 @@
         // Unlock the AI mentor pane if a lesson was opened before the role resolved.
         try { if (typeof resetAiChat === 'function' && aiHistory.length === 0) resetAiChat(); } catch(_){}
       }
+      // master_welcome_pitch — first-registration Master offer (Hillel 2026-06-11).
+      // Arms ONLY for free-role users whose auth account was created on/after the
+      // launch date (new registrants, not the existing member base), once ever
+      // (per-user localStorage key, set in showMasterPitch). 10s delay so the new
+      // member lands in the portal before the pitch. Eligibility is re-checked in
+      // the popup's condition() + the DB row (status/audience) at show time.
+      try {
+        const PITCH_LAUNCH = new Date('2026-06-11T00:00:00Z');
+        const isFreeRole = !profile || (profile.role !== 'paid_customer' && profile.role !== 'admin');
+        const isNewReg = user.created_at && new Date(user.created_at) >= PITCH_LAUNCH;
+        const seenKey = 'lms_master_pitch_seen_' + user.id;
+        if (isFreeRole && isNewReg && !localStorage.getItem(seenKey)){
+          window._masterPitchSeenKey = seenKey;
+          setTimeout(() => { try { window.PopupManager && window.PopupManager.request('master_welcome_pitch'); } catch(_){} }, 10000);
+        }
+      } catch(_){}
     } catch(_){}
   }
 
@@ -3634,6 +3737,10 @@
     if (MASTER_CHECKOUT_URL){ window.location.href = MASTER_CHECKOUT_URL; return; }
     showCheckoutSoonToast('עמוד הרכישה ייפתח עם ההשקה 🚀');
   }
+  // Cross-IIFE consumers (training_cta + master_welcome_pitch modals live in the
+  // engagement IIFE) reach these only via window.
+  window.showMasterSalesView = showMasterSalesView;
+  window.goToMasterCheckout = goToMasterCheckout;
   function showCheckoutSoonToast(msg){
     const t = document.createElement('div');
     t.textContent = msg;

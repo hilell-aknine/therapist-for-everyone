@@ -11,7 +11,92 @@ Each entry:
 
 ---
 
+### 2026-06-11 — course-library-v2: ALL inline onclick/onsubmit handlers were dead (IIFE scope)
+- **Date:** 2026-06-11
+- **Problem:** While wiring the new `master_welcome_pitch` popup, a headless probe showed `typeof window.closeTrainingCta === 'undefined'` — and the same for EVERY inline handler on the page (18 functions): auth modal signup/Google login, questionnaire submit, training_cta buttons, share buttons. Every click threw ReferenceError in prod; training_cta's CTA additionally called `goToMasterCheckout` across IIFE boundaries (silent no-op even internally).
+- **Root Cause:** The page's entire logic lives inside 3 separate IIFEs, but HTML inline handlers (`onclick="fn()"`) resolve against `window`. Nothing exposed the functions. Nobody noticed because these specific modals were never browser-verified (primer item (d) stayed open).
+- **Fix:** Explicit `Object.assign(window, {...})` exposure block at the end of the engagement IIFE + `window.showWelcome`/`window.showMasterSalesView`/`window.goToMasterCheckout` in the other two. Cross-IIFE calls now go through `window.*`. Verified headless: 18/18 functions global, popup CTA lands on the sales view.
+- **Rule:** In course-library-v2.html, any function referenced from an HTML attribute (onclick/onsubmit) or from ANOTHER IIFE must be explicitly exposed on `window` — add it to the exposure block. Smoke-test new UI with `scripts/smoke_master_pitch.py`-style headless probes (serve repo + `?dev=1` + `typeof window.fn`) before assuming buttons work.
+
+### 2026-06-11 — Gmail Apps Script action names + false-OK success check
+- **Date:** 2026-06-11
+- **Problem:** New `send-email` Edge Function got `{"success":false,"error":"Unknown action"}` from the Gmail Apps Script. Worse: the daily backup's email report had been silently failing forever while printing "OK".
+- **Root Cause:** The deployed Apps Script (`desine md\gmail-api\Code.js`) expects `action=send` with an `html` param — NOT `action=sendEmail` / `htmlBody` (those names came from stale code in `backup-supabase.py`). The backup's success check was `if "success" in result.lower()` — the FAILURE response contains the word "success" too, so errors counted as OK.
+- **Fix:** `action=send` + `html` param everywhere (send-email fn, backup-supabase.py, check_green_api_quota.py); success check now parses JSON and requires `success === true`.
+- **Rule:** The Gmail Apps Script API contract is `desine md\gmail-api\CLAUDE.md` (actions: send/inbox/draft/markRead, params to/subject/body/html/name). Never substring-match "success" on a JSON response — parse it. Also: Supabase CLI auth in sandboxed sessions can't read Windows Credential Manager — pull the `Supabase CLI:supabase` generic credential via CredRead P/Invoke into `SUPABASE_ACCESS_TOKEN`.
+
+### 2026-06-09 — Previewing gated standalone pages locally
+- **Date:** 2026-06-09
+- **Problem:** Needed to visually verify the redesigned `summaries-master/*.html` locally, but every page redirected away / stayed blank.
+- **Root Cause:** Those pages load `paid-gate.js`, which **fails closed** — no paid session → `location.replace('../course-library-v2.html#master')` and `<style id="pg-hide">` keeps the page hidden. There is no `?dev=` bypass in paid-gate.
+- **Fix:** Built gate-stripped copies in `%TEMP%\sm_preview` (a sibling tree with `css/` copied so `../../css/...` resolves), served via `python -m http.server`. NEVER leave gate-stripped copies inside the repo — they'd deploy and expose paid content.
+- **Rule:** To preview a `paid-gate.js` page, strip the 3 gate tags (`pg-hide` style + supabase-js + supabase-config + paid-gate scripts) into a TEMP copy outside the deploy tree. For `course-library-v2.html` use the built-in `?dev=1` flag instead (bypasses `authGate`).
+
+### 2026-06-09 — Summaries-master design is now ONE shared stylesheet
+- **Date:** 2026-06-09
+- **Problem:** The 8 summaries pages each carried a large duplicated inline `<style>` block (flat-white cheap-template look), inconsistent with the dark-glass portal.
+- **Root Cause:** No shared stylesheet existed; every page was standalone with its own copy of the CSS.
+- **Fix:** Created `css/summaries-master.css` (premium dark-glass, single source of truth) and replaced each page's inline `<style>` with a `<link>` to it (script `scripts/restyle_summaries.py`, originals in `summaries-master/_backup/`).
+- **Rule:** To restyle any summaries-master page, edit `css/summaries-master.css` ONLY — do not reintroduce per-page inline styles. The `.site-credit` footer and homework-marker are styled there too (homework uses a CSS gold-diamond, not the old 🎁 emoji).
+
+---
+
 ## Entries
+
+### 2026-06-10 — Magic-link redirect with a #fragment silently breaks login
+- **Date:** 2026-06-10
+- **Problem:** The post-purchase welcome WhatsApp sent a magic link redirecting to `...course-library.html#master`. The buyer would land on a URL with a DOUBLE fragment (`#master#access_token=...`) — supabase-js can't parse the token out of that, so the "one-click login" link could land the buyer logged OUT.
+- **Root Cause:** GoTrue appends its own `#access_token=...` fragment to the `redirect_to` URL after verifying a magic link. A fragment in `redirect_to` therefore always collides. Two adjacent gotchas: (1) the raw REST `POST /auth/v1/admin/generate_link` expects `redirect_to` at the TOP level of the body — a nested `options.redirect_to` is silently ignored and falls back to SITE_URL (supabase-js's `generateLink({options:{redirectTo}})` maps it correctly; don't misdiagnose by testing raw with the nested shape). (2) Query params DO survive the redirect cleanly.
+- **Fix:** Deep-link via query param instead of hash: `course-library-v2.html?view=master`. v2 boot checks the param ONCE (not inside handleHash, so popstate isn't hijacked), strips it with replaceState, and calls `setCourse('nlp-master')` which fails closed for non-paid.
+- **Rule:** Never put a `#fragment` in a Supabase magic-link/OAuth `redirect_to`. Deep-link state goes in a query param the destination page strips after reading. Verify any auth-link change by following the link in a real headless browser against the live site — a curl of the 302 Location is not proof the session gets established.
+
+### 2026-06-10 — Green API: "no one answered" needs deep history (sendByApi=false)
+- **Date:** 2026-06-10
+- **Problem:** Concluded a paying customer's messages were unanswered. Hillel corrected: they DID answer him. The first 30 messages of `getChatHistory` happened to be all-incoming.
+- **Root Cause:** Replies typed on the phone itself appear as `type=outgoing, sendByApi=false` — they exist in history but you must fetch enough of it (count=200) and look at the whole relationship, not the recent window. Replies from a DIFFERENT number (Hillel's personal line) are invisible to this instance entirely.
+- **Rule:** Before reporting "unanswered/ignored" on any WhatsApp line, fetch deep history, filter `type=outgoing` regardless of `sendByApi`, and caveat that other numbers/channels are out of view.
+
+### 2026-06-10 — "Submission failed" shown even though the row was saved
+- **Date:** 2026-06-10
+- **Problem:** Hillel reported an error on questionnaire submit. The data was actually being saved (rows landing in `portal_questionnaires`), yet users saw "אירעה שגיאה בשליחת השאלון".
+- **Root Cause:** `submitForm()` in `portal-questionnaire.html` wrapped the INSERT **and** all post-save work (analytics, `trackFormSubmission`, `showSuccess`) in ONE `try`. Any throw AFTER a successful insert (a missing DOM el in showSuccess, an ad-blocked tracker, etc.) fell into the same `catch` → generic false error. Proven by reproducing the full submit in headless Playwright as a real logged-in user — it SUCCEEDS end-to-end.
+- **Fix:** Wrapped `showSuccess()` (on failure: mark done + redirect to portal, never an error) and `trackFormSubmission()` in their own try/catch. The outer `catch`/alert now fires ONLY for a genuine insert/session failure.
+- **Rule:** Once the data is written, the success/analytics/UI tail must be best-effort and CANNOT revert to a "save failed" message. Put the user-facing error alert in scope of the SAVE only, not the whole flow.
+
+### 2026-06-10 — Registration silently dropped UTM (`roles` vs `role`)
+- **Date:** 2026-06-10
+- **Problem:** New signups had no UTM attribution on their profile.
+- **Root Cause:** `free-portal.html` registration did `profiles.upsert({..., roles: ['student_lead'], utm_*})`. There is no `roles` column (it's singular `role`) → PostgREST **PGRST204** rejected the ENTIRE upsert silently (the result `error` was never checked/thrown), so email/phone/UTM never saved. Role still looked correct only because the `handle_new_user` DB trigger sets it.
+- **Fix:** Removed the `roles` field from the upsert (role is owned by the trigger). Verified the upsert now succeeds and `utm_source` is saved.
+- **Rule:** A Supabase `.upsert()`/`.insert()` with ONE unknown column fails the whole write. Always check the returned `error`. Don't have the client set `role` (RLS/escalation) — let `handle_new_user` own it.
+
+### 2026-06-10 — Diagnostic gotchas on this project's Supabase
+- **Date:** 2026-06-10
+- **REST default schema is NOT `public`** — an unqualified REST call resolves to `graphql_public` and 404s (even `profiles`). **supabase-js sends `Accept-Profile: public` automatically**, so the app is fine; only raw `curl`/`fetch` to `/rest/v1/...` must add `Accept-Profile: public` (GET) / `Content-Profile: public` (write).
+- **Deleting an auth user 500s ("Database error deleting user") while a `profiles` row exists** — `profiles.id → auth.users.id` has no `ON DELETE CASCADE`. To delete a (test) user: delete its `profiles` row (and other FK refs) FIRST, then `admin.deleteUser`.
+- **`prevent_double_submit()` is a silent no-op** — it does `IF FOUND` after `EXECUTE 'SELECT 1 …'`, but plain `EXECUTE` of a SELECT (no INTO) never sets `FOUND`. The same-phone-24h duplicate guard never actually blocks. (Harmless today; know it before relying on it.)
+- **Rule:** When a Supabase write "should work" per the migrations but fails live, the live DB may have diverged — reproduce as a real authenticated user (admin-create temp user → inject `localStorage['sb-<ref>-auth-token']` → drive the live page in Playwright) rather than trusting migration files.
+
+### Reported features "missing" from a stale primer/memory — they were already built
+- **Date:** 2026-06-07
+- **Problem:** When mapping the paid Master flow, I first told Hillel the purchase automation was missing and the price was wrong (8,880 instead of 1,900) — based on old primer/memory notes. Both were already done: `crm-bot/src/services/cardcom.js` + the `/api/cardcom-webhook` route are built and deployed to Fly, and the price is 1,900 everywhere.
+- **Root Cause:** Trusted `primer.md` / Claude-memory snapshots (which capture a moment in time) as current truth, instead of checking the live code + DB. The notes were written before later sessions shipped the automation and fixed the price.
+- **Fix:** Re-verified against the actual repo (`grep` for 8880/cardcom, read `cardcom.js` + `server.js` route) and the live DB before finalizing. Corrected the report.
+- **Rule:** primer/memory are hypotheses, not truth. Before reporting anything is "missing/broken" on a Tier-1 money path, verify against live code + DB. (Mirrors Hillel's own instinct: check the real state, not the report.)
+
+### Paid-core tables were archived by the May cleanup — restore is a plain RENAME
+- **Date:** 2026-06-07
+- **Problem:** `subscriptions` and `signed_contracts` returned 404 from PostgREST; they existed only as `_archive_subscriptions` / `_archive_signed_contracts`. The bot's subscription writes and contract signing would have failed.
+- **Root Cause:** The May DB cleanup ("18 dead tables identified for archival") renamed these two live paid-core tables to `_archive_*`, even though they're not dead. Both were empty at the time, so nothing visibly broke until the paid flow was needed.
+- **Fix:** Both archives kept all RLS/policies/FKs/constraints, so restored with `ALTER TABLE public._archive_X RENAME TO X;` + `NOTIFY pgrst, 'reload schema';` via the Management API (token from `.secrets/soul-code.env`, same main account). Verified 200 via REST.
+- **Rule:** A table archived by rename restores fully with a rename back — no schema rebuild needed (grants/policies/FKs ride along). But: never archive a table whose name is referenced by live Edge Functions / the bot without repointing them first. The DB-tech-debt FREEZE allows manual idempotent SQL like this; it forbids migration refactors.
+
+### Edited the wrong portal file — course-library.html is RETIRED, the live portal is course-library-v2.html
+- **Date:** 2026-06-06
+- **Problem:** Added the Master sales section to `pages/course-library.html`, pushed, and confirmed via `curl` that the new code was live at `https://www.therapist-home.com/pages/course-library.html`. Hillel still saw nothing. Two deploy cycles wasted before Claude Chrome inspected the live DOM and revealed entirely different element IDs (`sbMasterItem`, `window.Auth`, no `currentUser`) than the file I edited.
+- **Root Cause:** `pages/course-library.html` is retired. Its `<head>` (around line 32) runs `<script>location.replace('course-library-v2.html' + location.search + location.hash);</script>` — it bounces to v2 *before rendering anything*. The real, rendered portal is **`pages/course-library-v2.html`** (different architecture: `body.view-*` view classes, `window.Auth`, `lms-` class system, `sbMasterItem`). `curl` only proves the *source* of a URL is deployed, not which file the browser ends up rendering.
+- **Fix:** Reimplemented the Master sales section in `course-library-v2.html` (view `body.view-master-sales`, `showMasterSalesView()`, `#master-sales` route, `_isAdmin` gate in `checkPaidRole()`), reverted the dead edits in the old file.
+- **Rule:** **All live portal work goes in `course-library-v2.html`, NOT `course-library.html`.** Before editing any portal page, check the top of the file for a `location.replace(...)` bounce. When a deploy is curl-verified but the user "doesn't see it", verify the live **DOM identity** (which file/IDs actually render — use Claude Chrome) before assuming a cache problem. The repo CLAUDE.md still documents `course-library.html` as the portal — it is stale on this point.
 
 ### nlp_game_players table never created — silent Supabase fallback for years
 - **Date:** 2026-05-03
@@ -157,3 +242,17 @@ Each entry:
 - **Root Cause:** Different tables created at different times by different code paths. `portal_questionnaires` was built around a "caller workflow" mental model (last_called_at, call_count). `contact_requests` was built around a "lead lifecycle" model (status, last_contacted_at, contacted_by). Both fields are conceptually identical but have different names, and now the same business action ("admin called this person") would write to different physical columns based on which table the lead landed in.
 - **Fix:** Migration adds only `heat_level` / `call_count` / `caller_notes` to `contact_requests` — fields the table genuinely lacks. Reuses existing `last_contacted_at` / `contacted_by`. Admin JS maps internally: `last_called_at` (UI/portal_questionnaires) ↔ `last_contacted_at` (contact_requests/bot). Status semantics also mapped (`potential`→`contacted`, `client`→`converted`) so a status-change visible in admin is meaningful in WhatsApp `פרטי ליד` and vice-versa.
 - **Rule:** Before adding any timestamp/status column to a lead-related table, search both repos for an existing column with the same meaning: `grep -rn "last_.*_at\|contacted\|called" beit-vmetaplim/js/admin crm-bot/src`. If two writers write to two columns for the same business event, you've created data drift on day one. Map field names in code, not in schema.
+
+### Page load very slow — multi-MB PNGs were the cause
+- **Date:** 2026-06-10
+- **Problem:** Hillel reported pages loading very slowly, esp. mobile. Homepage transferred 2.8MB; free-portal landing loaded a single 8MB PNG hero background. Total of loaded images ≈ 15.4MB. Two more 6.8MB PNGs (`hillel-photo.png`, `explainer-thumbnail.png`) sat in the repo, 13.6MB, referenced by NOTHING (a free user never sees them, but they bloat the repo).
+- **Root Cause:** Hero/photo assets were exported as oversized PNGs (free-portal-hero 3040×1408 RGBA = 8MB; hillel/ram photos 2048px) and used as-is. PNG is the wrong format for photographic content, and dimensions were 2-3× larger than any display size. No build step optimizes images on this static site, so whatever is committed ships raw.
+- **Fix:** Converted the 6 *actually-loaded* images to WebP via Pillow (`Image.save(dst,'WEBP',quality=80-86,method=6)`), downscaling oversized ones (hero→1920w, photos→900w). 15.4MB → 554KB (96%). Kept original PNGs as rollback (unreferenced ⇒ zero perf cost). Updated all `.png`→`.webp` refs across html/css/js with one `sed -E` pass, bumped `sw.js` CACHE_NAME v1→v2. Deleted the 2 unused 6.8MB PNGs. Verified live: webp serves 200, deleted png 404.
+- **Rule:** On this static (no-build) site, any committed image ships at full weight. Before committing a hero/photo asset, convert to WebP (q80-85) and cap dimensions at ~1920 (hero) / ~900 (portrait). Audit with `find assets -iname '*.png' -size +300k`. WebP is safe on all current iOS/Android/desktop. Check a `.png` is actually referenced (`grep -rn name.png`) before assuming it affects load — and before deleting.
+
+### Master lesson-1 video had 11 min of baked-in black — and standard blackdetect missed it
+- **Date:** 2026-06-11
+- **Problem:** The published first Master-course video (`Rab2Wzcon34`, 29:16) contained black video from 8:54-16:08 and 23:05-end (audio fine, single bright frame every ~20s at keyframes). It played broken for every paid customer. Discovered only while re-editing the intro.
+- **Root Cause (two layers):** (1) The Master_Final production step re-encoded while reading the source from OneDrive — the decode silently produced black inter-frames (same OneDrive-placeholder failure mode as NightAuditor). Upstream files (raw + Cleaned + Trimmed_v2) are all clean. (2) The damage survived QA because the black is *video-range* black (Y=16): `blackdetect` default-ish `pix_th=0.05` means luma<12.75, so Y=16 reads as "not black". Sequential scans reported a clean file while a third of it was black.
+- **Fix:** Rebuilt the video from the clean raw source (`מפגש 1 - מאסטר.mp4`, segments 4:35-6:13 + 7:53-35:54 per master_L01_editor.py recipe), new branded intro + hook-first opening, acompressor+loudnorm=-14 LUFS to match the series. Uploaded `I3qjx4Xi62s`, swapped in get-master-lessons Edge Function + course-library.html + master-practice.html, deployed. Old video left unlisted as backup.
+- **Rule:** When QA-scanning video for black/corruption use `blackdetect=d=2:pix_th=0.10` (catches Y=16 video-range black), and ALWAYS spot-check actual frame luma (`signalstats` YAVG) at multiple points. Never trust a single blackdetect pass with default threshold. Also: never re-encode video reading directly from OneDrive — copy local first.

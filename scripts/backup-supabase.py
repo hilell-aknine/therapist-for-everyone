@@ -373,12 +373,16 @@ def send_email_report(timestamp, total_rows, total_files, table_details, drive_o
     lines = "\n".join([f"{name}: {count} rows" if count >= 0 else f"{name}: FAILED" for name, count in table_details.items()])
     html_body = f"<div dir='rtl' style='font-family:Heebo,sans-serif;'><h2>גיבוי בית המטפלים — {timestamp}</h2><p><b>{total_rows}</b> שורות | <b>{total_files}</b> קבצים</p><p>{drive_status}</p><pre>{lines}</pre></div>"
 
+    # Apps Script action is 'send' with an 'html' param (NOT 'sendEmail'/'htmlBody'
+    # — those returned {"success":false,"error":"Unknown action"} and the old
+    # substring check counted that as OK, so reports silently never sent).
     params = urllib.parse.urlencode({
-        "action": "sendEmail",
+        "action": "send",
         "token": GMAIL_API_TOKEN,
         "to": NOTIFY_EMAIL,
-        "subject": f"🔒 גיבוי בית המטפלים — {timestamp} — {total_rows} שורות",
-        "htmlBody": html_body,
+        "subject": f"גיבוי בית המטפלים — {timestamp} — {total_rows} שורות",
+        "body": f"גיבוי בית המטפלים {timestamp}: {total_rows} שורות, {total_files} קבצים.",
+        "html": html_body,
     })
 
     url = f"{GMAIL_API_URL}?{params}"
@@ -387,7 +391,11 @@ def send_email_report(timestamp, total_rows, total_files, table_details, drive_o
     try:
         resp = urllib.request.urlopen(req)
         result = resp.read().decode("utf-8")
-        if "success" in result.lower() or resp.status == 200:
+        try:
+            ok = json.loads(result).get("success") is True
+        except ValueError:
+            ok = False
+        if ok:
             print("OK")
             return True
         else:

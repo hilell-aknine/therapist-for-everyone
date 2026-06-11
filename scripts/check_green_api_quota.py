@@ -108,12 +108,14 @@ def probe_green_api():
 
 
 def send_email(subject, html_body):
+    # Apps Script action is 'send' with an 'html' param (NOT 'sendEmail'/'htmlBody')
     params = urllib.parse.urlencode({
-        "action": "sendEmail",
+        "action": "send",
         "token": GMAIL_API_TOKEN,
         "to": NOTIFY_EMAIL,
         "subject": subject,
-        "htmlBody": html_body,
+        "body": subject,
+        "html": html_body,
     })
     url = f"{GMAIL_API_URL}?{params}"
     req = urllib.request.Request(url)
@@ -122,7 +124,8 @@ def send_email(subject, html_body):
 
 
 def alert_broken(reason):
-    subject = f"🚨 Green API נשבר — אוטומציית welcome WhatsApp לא עובדת"
+    # No emoji in subject — gmail-api project rule (URL encoding gotcha)
+    subject = "Green API נשבר — אוטומציית welcome WhatsApp לא עובדת"
     body = f"""
     <div dir='rtl' style='font-family:Heebo,sans-serif;max-width:600px;'>
       <h2 style='color:#dc3545;'>🚨 Green API portal instance לא מגיב כצפוי</h2>

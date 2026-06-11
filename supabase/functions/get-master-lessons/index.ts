@@ -14,7 +14,7 @@ const MASTER_MODULES = [
                 lessonTitle: 'מפגש 1 — רמות לוגיות וזהות',
                 color: 'var(--muted-teal)',
                 chapters: [
-                    { id: 'Rab2Wzcon34', title: 'רמות לוגיות — מבוא ושינוי זהות', duration: '29:16' },
+                    { id: 'I3qjx4Xi62s', title: 'רמות לוגיות — מבוא ושינוי זהות', duration: '29:42' },
                     { id: 'wTRmW4IEYf8', title: 'חזרת פרקטישנר ואמונות הקורס', duration: '29:33' },
                     { id: 'a1uXGOBBYV4', title: 'רמות לוגיות בפירוט והרחבת זהות', duration: '19:41' },
                     { id: 'oHSrRYHLWhw', title: 'חזון ואפקט הפרפר', duration: '32:12' },

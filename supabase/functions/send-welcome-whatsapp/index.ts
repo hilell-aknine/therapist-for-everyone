@@ -121,7 +121,10 @@ async function resolveChatId(phone972: string): Promise<{ chatId: string | null;
 
 async function sendWhatsApp(chatId: string, message: string): Promise<{ ok: boolean; status: number; body: string }> {
   const url = `${GREEN_API_URL}/waInstance${GREEN_API_INSTANCE}/sendMessage/${GREEN_API_TOKEN}`
-  const payload = JSON.stringify({ chatId, message })
+  // linkPreview:false — Green API's preview prefetch CONSUMES one-time links
+  // (burned a buyer's magic link 2026-06-11). Template links are static today,
+  // but this must stay off so a future link change can't silently break.
+  const payload = JSON.stringify({ chatId, message, linkPreview: false })
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -101,6 +101,7 @@ function renderPaidCustomers(subs) {
             <td>${s.contract_url ? `<a href="${safeContractUrl}" target="_blank" style="color:var(--gold);"><i class="fa-solid fa-file-contract"></i></a>` : `<button onclick="uploadContract('${s.id}')" class="btn-sm" style="font-size:0.7rem;padding:2px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text-secondary);" title="העלאת חוזה"><i class="fa-solid fa-upload"></i></button>`}</td>
             <td>
                 <div style="display:flex;gap:4px;">
+                    ${profile.email ? `<button onclick="emailSub('${s.id}')" style="font-size:0.65rem;padding:2px 6px;background:rgba(212,175,55,0.12);border:1px solid var(--gold,#D4AF37);border-radius:4px;cursor:pointer;color:var(--gold,#D4AF37);" title="שליחת מייל">📧</button>` : ''}
                     <button onclick="editSub('${s.id}')" style="font-size:0.65rem;padding:2px 6px;background:rgba(59,130,246,0.1);border:1px solid #3b82f6;border-radius:4px;cursor:pointer;color:#3b82f6;" title="עריכה">✏️</button>
                     <button data-delete-sub="${s.id}" data-delete-name="${safeName}" onclick="deleteSub(this.dataset.deleteSub, this.dataset.deleteName)" style="font-size:0.65rem;padding:2px 6px;background:rgba(248,81,73,0.1);border:1px solid #f85149;border-radius:4px;cursor:pointer;color:#f85149;" title="מחיקה">🗑️</button>
                 </div>
@@ -307,6 +308,14 @@ async function syncToGoogleSheets() {
     } finally {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-table"></i> Sheets'; }
     }
+}
+
+// === Send email to a paid customer (shared compose modal, admin-email.js) ===
+function emailSub(id) {
+    const s = paidCache?.find(x => x.id === id);
+    const p = s?.profiles || {};
+    if (!p.email) { showToast('ללא כתובת מייל ללקוח זה', 'error'); return; }
+    openEmailCompose({ to: p.email, name: p.full_name || '' });
 }
 
 // === Edit subscription — full modal ===

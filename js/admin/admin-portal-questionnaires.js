@@ -572,6 +572,7 @@ function viewPortalQ(id) {
             <button class="pq-btn pq-btn-docx" onclick="downloadPortalQDocx('${q.id}')"><i class="fa-solid fa-file-word"></i> הורד כמסמך</button>
             <button class="pq-btn pq-btn-whatsapp" onclick="window.open('https://wa.me/${(q.phone||'').replace(/^0/,'972').replace(/[^0-9]/g,'')}','_blank')"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
             <button class="pq-btn pq-btn-pipeline" onclick="movePortalQToPipeline('${q.id}')"><i class="fa-solid fa-filter-circle-dollar"></i> העבר ל-Pipeline</button>
+            ${q.email ? `<button class="pq-btn" onclick="emailPortalLead('${q.id}')" style="background:rgba(212,175,55,0.1);border:1px solid var(--gold,#D4AF37);color:var(--gold,#D4AF37);"><i class="fa-solid fa-envelope"></i> שלח מייל</button>` : ''}
             <button class="pq-btn" onclick="deletePortalLead('${q.id}')" style="background:rgba(248,81,73,0.1);border:1px solid #f85149;color:#f85149;"><i class="fa-solid fa-trash"></i> מחק משתמש</button>
         </div>`;
 
@@ -624,6 +625,19 @@ async function movePortalQToPipeline(id) {
         document.getElementById('portal-q-modal').classList.remove('active');
         showToast(`${q.full_name} הועבר/ה ל-Pipeline!`, 'success');
     } catch (err) { showToast('שגיאה בהעברה', 'error'); }
+}
+
+// ============================================================================
+// EMAIL
+// ============================================================================
+
+// Opens the shared compose modal (js/admin/admin-email.js) prefilled with the
+// lead's address — resolved by id here so no email/name strings travel
+// through onclick attributes (XSS-safe, same reasoning as deletePortalLead).
+function emailPortalLead(id) {
+    const q = portalQuestionnaires.find(x => x.id === id);
+    if (!q || !q.email) { showToast('ללא כתובת מייל לליד זה', 'error'); return; }
+    openEmailCompose({ to: q.email, name: q.full_name || '' });
 }
 
 // ============================================================================

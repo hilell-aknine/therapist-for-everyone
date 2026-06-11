@@ -11,6 +11,13 @@ Each entry:
 
 ---
 
+### 2026-06-11 — WhatsApp link preview CONSUMES one-time magic links
+- **Date:** 2026-06-11
+- **Problem:** Buyer (David Sarusi) clicked his post-purchase magic link and landed on the portal as a GUEST (saw the sales/landing experience) instead of logged-in Master access.
+- **Root Cause:** Green API fetches every URL in an outgoing message to build the WhatsApp link preview. Supabase magic links (`/auth/v1/verify?token=...`) are ONE-TIME — the preview fetch consumed the token before the buyer ever clicked. By click time: `otp_expired` → no session → fails-closed guest view.
+- **Fix:** `crm-bot/src/whatsapp.js` `sendMessage` now always sends `linkPreview: false` (deployed v95). Fresh link resent to the buyer + pointed him to Google login (same Gmail) for permanent access.
+- **Rule:** NEVER send one-time/auth links through any channel that generates link previews without disabling the preview. For WhatsApp via Green API: `linkPreview: false` on the payload. Long-term buyer access should not depend on the magic link — Google login with the purchase email is the durable path.
+
 ### 2026-06-11 — course-library-v2: ALL inline onclick/onsubmit handlers were dead (IIFE scope)
 - **Date:** 2026-06-11
 - **Problem:** While wiring the new `master_welcome_pitch` popup, a headless probe showed `typeof window.closeTrainingCta === 'undefined'` — and the same for EVERY inline handler on the page (18 functions): auth modal signup/Google login, questionnaire submit, training_cta buttons, share buttons. Every click threw ReferenceError in prod; training_cta's CTA additionally called `goToMasterCheckout` across IIFE boundaries (silent no-op even internally).

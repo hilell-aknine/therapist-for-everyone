@@ -352,6 +352,7 @@ function renderPortalQuestionnaires() {
                     <td onclick="event.stopPropagation();" style="white-space:nowrap;">
                         ${q.phone ? `<a href="https://wa.me/${(q.phone||'').replace(/^0/,'972').replace(/[^0-9]/g,'')}" target="_blank" title="WhatsApp" style="color:#25D366;margin-left:0.4rem;font-size:1.05rem;"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
                         ${st !== 'client' ? `<button onclick="movePortalQToPipeline('${q.id}')" title="העבר ל-Pipeline" style="background:none;border:none;cursor:pointer;color:#D4AF37;font-size:1rem;padding:0.2rem;"><i class="fa-solid fa-filter-circle-dollar"></i></button>` : '<span style="color:rgba(232,241,242,0.3);font-size:0.75rem;">לקוח</span>'}
+                        <button onclick="deletePortalLead('${q.id}')" title="מחיקת משתמש" style="background:none;border:none;cursor:pointer;color:#f85149;font-size:0.95rem;padding:0.2rem;margin-right:0.3rem;"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>`;
         }).join('');
@@ -571,6 +572,7 @@ function viewPortalQ(id) {
             <button class="pq-btn pq-btn-docx" onclick="downloadPortalQDocx('${q.id}')"><i class="fa-solid fa-file-word"></i> הורד כמסמך</button>
             <button class="pq-btn pq-btn-whatsapp" onclick="window.open('https://wa.me/${(q.phone||'').replace(/^0/,'972').replace(/[^0-9]/g,'')}','_blank')"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
             <button class="pq-btn pq-btn-pipeline" onclick="movePortalQToPipeline('${q.id}')"><i class="fa-solid fa-filter-circle-dollar"></i> העבר ל-Pipeline</button>
+            <button class="pq-btn" onclick="deletePortalLead('${q.id}')" style="background:rgba(248,81,73,0.1);border:1px solid #f85149;color:#f85149;"><i class="fa-solid fa-trash"></i> מחק משתמש</button>
         </div>`;
 
     document.getElementById('portal-q-modal').classList.add('active');
@@ -622,6 +624,58 @@ async function movePortalQToPipeline(id) {
         document.getElementById('portal-q-modal').classList.remove('active');
         showToast(`${q.full_name} הועבר/ה ל-Pipeline!`, 'success');
     } catch (err) { showToast('שגיאה בהעברה', 'error'); }
+}
+
+// ============================================================================
+// DELETE USER / LEAD
+// ============================================================================
+
+// Routes ALL deletions through the admin-delete-user Edge Function (service
+// role, admin-JWT verified). Never deletes client-side — RLS would silently
+// deny and auth.users requires the admin API anyway.
+async function deletePortalLead(id) {
+    const q = portalQuestionnaires.find(x => x.id === id);
+    if (!q) return;
+    const name = q.full_name || q.email || q.phone || 'הנרשם';
+    const warning = q.user_id
+        ? `למחוק לצמיתות את המשתמש ${name}?\n\nיימחקו: חשבון ההתחברות, הפרופיל, השאלון, התקדמות הלמידה, ההערות, נתוני המשחק והמנויים שלו.\n\nפעולה זו בלתי הפיכה.`
+        : `למחוק לצמיתות את הליד ${name}?\n\nפעולה זו בלתי הפיכה.`;
+    if (!confirm(warning)) return;
+
+    try {
+        const { data: { session } } = await db.auth.getSession();
+        const token = session?.access_token;
+        if (!token) { showToast('לא מחובר — יש להתחבר מחדש', 'error'); return; }
+
+        const payload = q.user_id
+            ? { user_id: q.user_id }
+            : (q.lead_source === 'contact_form' ? { contact_request_id: q.id } : { questionnaire_id: q.id });
+
+        const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl || 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+        const res = await fetch(`${functionsUrl}/admin-delete-user`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(20000)
+        });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok || !result.deleted) {
+            const reason = result.reason || result.error || `HTTP ${res.status}`;
+            const msg = reason === 'cannot_delete_admin' ? 'אי אפשר למחוק משתמש אדמין' : `המחיקה נכשלה (${reason})`;
+            showToast(msg, 'error');
+            return;
+        }
+
+        portalQuestionnaires = portalQuestionnaires.filter(x => x.id !== id);
+        document.getElementById('portal-q-modal')?.classList.remove('active');
+        updatePqStats();
+        renderPortalQuestionnaires();
+        updateFunnelStats();
+        showToast(`${name} נמחק לצמיתות`, 'success');
+    } catch (err) {
+        console.error('deletePortalLead error:', err);
+        showToast('שגיאה במחיקה', 'error');
+    }
 }
 
 // ============================================================================

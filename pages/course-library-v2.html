@@ -2271,6 +2271,10 @@
 
   async function authGate(){
     if (devBypass) return true;
+    // Guest pass: the Master SALES view (#master-sales) is a public marketing page —
+    // anyone may see it and buy (purchase does not require portal registration).
+    // Everything else in the portal still requires login.
+    const guestSalesPass = location.hash === '#master-sales';
     try {
       const client = window.supabaseClient || (window.SUPABASE_CONFIG && window.supabase
         ? window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey)
@@ -2278,6 +2282,12 @@
       if (!client) return true;
       const { data: { session } } = await client.auth.getSession();
       if (!session && !location.hash.includes('access_token')){
+        if (guestSalesPass){
+          // Anonymous viewer on the sales page: mark as guest for popup targeting,
+          // skip member-only bookkeeping (weekly visit / streak).
+          try { if (window.PopupManager) window.PopupManager.setUser({ isAuthenticated: false, role: 'guest' }); } catch(_){}
+          return true;
+        }
         sessionStorage.setItem('returnUrl', location.href);
         location.replace('free-portal.html');
         return false;
@@ -2299,6 +2309,7 @@
       } catch(_){}
       return true;
     } catch(_){
+      if (guestSalesPass) return true;
       sessionStorage.setItem('returnUrl', location.href);
       location.replace('free-portal.html');
       return false;

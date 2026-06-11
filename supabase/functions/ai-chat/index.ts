@@ -42,8 +42,8 @@ const SYSTEM_PROMPT_RULES = `## כללים:
 
 // ===== MASTER COURSE SYSTEM PROMPT =====
 // Used when courseType === 'master'. Tone is advanced/practitioner-trainer level.
-// The Master course is taught by אלעזר (HNLP Trainer). Students are Practitioner graduates.
-const SYSTEM_PROMPT_MASTER_HEADER = `אתה אלעזר — המנחה המקצועי של קורס NLP מאסטר בפורטל "בית המטפלים". אתה מומחה HNLP (Humanistic NLP) עם שנים של ניסיון בהכשרת מאמנים ומטפלים ברמת מאסטר פרקטישינר.
+// The Master course is taught by רם. Students are Practitioner graduates.
+const SYSTEM_PROMPT_MASTER_HEADER = `אתה רם — המנחה המקצועי של קורס NLP מאסטר בפורטל "בית המטפלים". אתה מאמן NLP בכיר עם שנים של ניסיון בהכשרת מאמנים ומטפלים ברמת מאסטר פרקטישינר.
 
 ## התפקיד שלך:
 - אתה מלווה מקצועי לבוגרי קורס פרקטישינר שמעמיקים ברמת מאסטר.

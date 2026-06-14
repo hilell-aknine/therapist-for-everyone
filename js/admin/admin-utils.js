@@ -5,6 +5,7 @@ const VIEW_GROUPS = {
     'overview': { views: ['overview'], header: null, default: 'overview' },
     'mizum':    { views: ['patients', 'therapists', 'matches'], header: 'mizum-header', default: 'patients' },
     'funnel':   { views: ['pipeline'], header: null, default: 'pipeline' },
+    'outreach': { views: ['outreach'], header: null, default: 'outreach' },
     'learning': { views: ['leads', 'learners', 'portal-q'], header: 'learning-header', default: 'portal-q' },
     'bot':      { views: ['bot'], header: null, default: 'bot' },
     'paid':     { views: ['paid'], header: null, default: 'paid' },
@@ -60,6 +61,7 @@ function switchView(view) {
     if (view === 'learning' || group.default === 'portal-q') { if (!portalQLoaded && typeof loadPortalQuestionnaires === 'function') loadPortalQuestionnaires(); }
     if (view === 'bot' || group.default === 'bot') loadBotView();
     if (view === 'funnel' || group.default === 'pipeline') { if (typeof loadPipeline === 'function') loadPipeline(); }
+    if (view === 'outreach') { if (typeof loadOutreach === 'function') loadOutreach(); }
     if (view === 'paid' || group.default === 'paid') loadPaidCustomers();
     if (view === 'referrals' || group.default === 'referrals') loadReferralAnalytics();
     if (view === 'popups' || group.default === 'popups') loadPopupConfigs();

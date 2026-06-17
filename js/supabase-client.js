@@ -568,6 +568,74 @@
     };
 
     // ============================================================================
+    // AI Chat History Functions (Supabase-synced per-lesson AI chat memory)
+    // Mirrors UserNotes: same client, same Auth.getCurrentUser() → auth.uid(),
+    // no-op when signed out, RLS-safe (DB enforces auth.uid()).
+    // ============================================================================
+
+    const AiChatHistory = {
+        // Returns the user's messages for a lesson, oldest-first, max 100.
+        // [] when signed out or on error.
+        async load(lessonId) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return [];
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('ai_chat_messages')
+                    .select('role, content, created_at')
+                    .eq('user_id', user.id)
+                    .eq('lesson_id', lessonId)
+                    .order('created_at', { ascending: true })
+                    .limit(100);
+                if (error) throw error;
+                return data || [];
+            } catch (err) {
+                console.error('AiChatHistory.load error:', err);
+                return [];
+            }
+        },
+
+        // Inserts a single message row. Silent no-op when signed out; never throws.
+        async append(lessonId, role, content, meta) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('ai_chat_messages')
+                    .insert({
+                        user_id: user.id,
+                        lesson_id: lessonId,
+                        role: role,
+                        content: content,
+                        course_type: (meta && meta.courseType) || null
+                    });
+                if (error) throw error;
+            } catch (err) {
+                console.error('AiChatHistory.append error:', err);
+            }
+        },
+
+        // Deletes the current user's messages for a lesson. Never throws.
+        async clear(lessonId) {
+            const user = await Auth.getCurrentUser();
+            if (!user) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('ai_chat_messages')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('lesson_id', lessonId);
+                if (error) throw error;
+            } catch (err) {
+                console.error('AiChatHistory.clear error:', err);
+            }
+        }
+    };
+
+    // ============================================================================
     // Contact Requests Functions
     // ============================================================================
 
@@ -1166,6 +1234,7 @@
     window.ContactRequests = ContactRequests;
     window.Certifications = Certifications;
     window.UserNotes = UserNotes;
+    window.AiChatHistory = AiChatHistory;
     window.Referrals = Referrals;
     window.UI = UI;
     window.translateError = translateError;
@@ -1184,6 +1253,7 @@
         ContactRequests: ContactRequests,
         Certifications: Certifications,
         UserNotes: UserNotes,
+        AiChatHistory: AiChatHistory,
         Referrals: Referrals,
         UI: UI
     };

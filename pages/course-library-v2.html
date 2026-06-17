@@ -3467,6 +3467,25 @@
         <h3>שאלו אותי על השיעור הזה</h3>
         <p>אני מכיר את כל התכנים בקורס ויכול לעזור עם הסברים, דוגמאות מעשיות ותרגול. כתבו שאלה ונענה תוך כמה שניות.</p>
       </div>`;
+    // Per-lesson memory: load prior conversation for this lesson (paid only).
+    loadAiHistoryForCurrent();
+  }
+  function courseTypeShort(){ return courseType==='nlp-master'?'master':courseType==='nlp-techniques'?'techniques':'practitioner'; }
+  async function loadAiHistoryForCurrent(){
+    try {
+      if (currentModuleIndex < 0 || !supabaseClient || devBypass || !_isPaidCustomer) return;
+      if (!window.AiChatHistory) return;
+      const lessonId = modules[currentModuleIndex].lessons[currentLessonIndex].id;
+      const msgs = await window.AiChatHistory.load(lessonId).catch(()=>[]);
+      // Guard against lesson-switch race: bail if the user already navigated away.
+      if (!(modules[currentModuleIndex] && modules[currentModuleIndex].lessons[currentLessonIndex] && modules[currentModuleIndex].lessons[currentLessonIndex].id === lessonId)) return;
+      if (msgs && msgs.length){
+        const empty = document.getElementById('aiEmpty');
+        if (empty) empty.remove();
+        msgs.forEach(m => appendAiMsg(m.role==='user'?'user':'bot', m.content));
+        aiHistory = msgs.map(m=>({ role:m.role, content:m.content }));
+      }
+    } catch(_){}
   }
   function appendAiMsg(role, text){
     const msgs = document.getElementById('aiMsgs');
@@ -3512,11 +3531,14 @@
     if (!_isPaidCustomer && !devBypass){ appendAiMsg('bot', 'העוזר האישי זמין לחברי קורס המאסטר 👑'); return; }
     if (devBypass){ appendAiMsg('user', message); appendAiMsg('bot', '(מצב פיתוח — ה-AI לא פעיל. ההודעה שלך התקבלה אבל לא נשלחת לשרת.)'); return; }
     aiBusy = true;
+    const persistLessonId = modules[currentModuleIndex]?.lessons[currentLessonIndex]?.id;
     const sendBtn = document.getElementById('aiSendBtn');
     const input = document.getElementById('aiInput');
     sendBtn.disabled = true; input.disabled = true;
     appendAiMsg('user', message);
     aiHistory.push({ role: 'user', content: message });
+    // Persist the clean user message (not serverMessage, which carries learnerCtx). Fire-and-forget.
+    try { if (window.AiChatHistory && persistLessonId) window.AiChatHistory.append(persistLessonId, 'user', message, { courseType: courseTypeShort() }); } catch(_){}
     showTyping();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 45000);
@@ -3548,6 +3570,7 @@
       const reply = data.reply || 'לא הצלחתי לענות. נסו שוב.';
       appendAiMsg('bot', reply);
       aiHistory.push({ role: 'model', content: reply });
+      try { if (window.AiChatHistory && persistLessonId) window.AiChatHistory.append(persistLessonId, 'model', reply, { courseType: courseTypeShort() }); } catch(_){}
       if (data.remaining !== undefined){
         aiRemaining = data.remaining;
         document.getElementById('aiRemaining').textContent = `${data.remaining}/200`;

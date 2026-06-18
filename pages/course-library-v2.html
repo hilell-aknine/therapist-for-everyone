@@ -491,7 +491,8 @@
   .lms-notes-foot{ position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:.6rem; font-size:.78rem; color:var(--text-on-light-muted); }
   .lms-notes-status{ display:inline-flex; align-items:center; gap:.4rem; }
   .lms-notes-status.is-saving{ color:var(--accent-gold-deep); }
-  .lms-notes-status.is-saved{ color:var(--text-on-light-strong); }
+  .lms-notes-status.is-saved{ color:var(--text-on-light-strong); animation: notesSavedPulse .45s ease; }
+  @keyframes notesSavedPulse{ 0%{ transform:scale(.88); opacity:.45; } 45%{ transform:scale(1.06); opacity:1; } 100%{ transform:scale(1); opacity:1; } }
   .lms-notes-status.is-error{ color:#C62828; }
 
   /* AI MENTOR PANE */
@@ -696,7 +697,7 @@
     .lms-bnav__btn.is-active i{ filter: drop-shadow(0 0 6px rgba(233,185,73,.4)); }
     .lms-bnav__badge{
       position: absolute; top: 4px; right: calc(50% - 22px);
-      background: #E64545; color: #fff;
+      background: #C72C2C; color: #fff;
       font-size: .68rem; line-height: 1; padding: 3px 5px;
       border-radius: 999px; font-weight: 700; letter-spacing: .02em;
     }
@@ -868,7 +869,7 @@
   .lms-jxpbar{ height:6px; border-radius:999px; background:rgba(255,255,255,.1); overflow:hidden; margin-top:.6rem; }
   .lms-jxpbar > span{ display:block; height:100%; background:linear-gradient(90deg,var(--accent-gold-deep),var(--accent-gold-hover)); border-radius:999px; }
   .lms-journey__badges{ display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
-  .lms-jbadge{ display:flex; align-items:center; gap:.4rem; font-size:.72rem; padding:.35rem .7rem; border-radius:999px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:var(--text-muted); opacity:.5; }
+  .lms-jbadge{ display:flex; align-items:center; gap:.4rem; font-size:.72rem; padding:.35rem .7rem; border-radius:999px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:var(--text-muted); opacity:.85; }
   .lms-jbadge i{ font-size:.8rem; }
   .lms-jbadge.is-earned{ opacity:1; color:#04232a; background:linear-gradient(135deg,var(--accent-gold-hover),var(--accent-gold)); border-color:transparent; font-weight:700; }
 
@@ -1372,10 +1373,10 @@
         <div class="lms-pl-tip" id="plTip">השיעור יסומן אוטומטית אחרי 45 שניות צפייה — אפשר גם לסמן ידנית</div>
 
         <div class="lms-tabs" role="tablist">
-          <button class="lms-tab is-active" data-tab="notes" role="tab" aria-selected="true"><i class="fa-solid fa-pen-to-square"></i><span>הערות</span></button>
-          <button class="lms-tab" data-tab="ai" role="tab" aria-selected="false"><i class="fa-solid fa-robot"></i><span>העוזר האישי</span></button>
-          <button class="lms-tab" data-tab="resources" role="tab" aria-selected="false"><i class="fa-solid fa-book-open"></i><span>חומרי עזר</span></button>
-          <button class="lms-tab lms-tab--gold" data-tab="game" role="tab" aria-selected="false"><i class="fa-solid fa-gamepad"></i><span>משחק תרגול</span></button>
+          <button class="lms-tab is-active" data-tab="notes" role="tab" aria-selected="true" aria-label="הערות"><i class="fa-solid fa-pen-to-square"></i><span>הערות</span></button>
+          <button class="lms-tab" data-tab="ai" role="tab" aria-selected="false" aria-label="העוזר האישי"><i class="fa-solid fa-robot"></i><span>העוזר האישי</span></button>
+          <button class="lms-tab" data-tab="resources" role="tab" aria-selected="false" aria-label="חומרי עזר"><i class="fa-solid fa-book-open"></i><span>חומרי עזר</span></button>
+          <button class="lms-tab lms-tab--gold" data-tab="game" role="tab" aria-selected="false" aria-label="משחק תרגול"><i class="fa-solid fa-gamepad"></i><span>משחק תרגול</span></button>
         </div>
 
         <div class="lms-tab-pane is-active" data-pane="notes">
@@ -1787,7 +1788,7 @@
         <li>קהילת לומדים שצומחת יחד</li>
       </ul>
       <div style="text-align:center;margin:1.1rem 0 .9rem;">
-        <div style="font-size:.9rem;color:var(--text-muted);text-decoration:line-through;opacity:.7;">6,200 ₪</div>
+        <div style="font-size:.9rem;color:var(--text-muted);text-decoration:line-through;opacity:.88;">6,200 ₪</div>
         <div style="font-size:2rem;font-weight:800;color:var(--accent-gold-hover);line-height:1.1;">1,900 ₪</div>
         <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem;">הצטרפות לתכנית המלאה</div>
       </div>
@@ -2565,7 +2566,7 @@
 
     eyebrow.textContent = next.isFirstStart ? 'בואו נתחיל' : 'השיעור הבא שלך';
     title.textContent   = next.isFirstStart ? `התחילו את המסע: ${next.lesson.title}` : next.lesson.title;
-    sub.innerHTML       = `מודול ${mod.id} מתוך ${totalMods}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> ≈${next.lesson.duration} דק׳`;
+    sub.innerHTML       = `מודול ${mod.id} מתוך ${totalMods}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> ≈<bdi>${next.lesson.duration}</bdi> דק׳`;
     ctaTxt.textContent  = next.isFirstStart ? 'התחל ללמוד' : 'המשך ללמוד';
     thumb.src = `https://img.youtube.com/vi/${next.lesson.id}/mqdefault.jpg`;
     thumb.onerror = function(){ this.style.display='none'; };
@@ -2798,6 +2799,44 @@
       } catch(_){}
     }, 5000);
   }
+  let _watchClock = null, _watchedSecs = 0;
+  function stopWatchClock(){ if (_watchClock){ clearInterval(_watchClock); _watchClock = null; } }
+  function startWatchClock(m, l){
+    if (_watchClock) return;
+    _watchClock = setInterval(() => {
+      _watchedSecs++;
+      let d = 0; try { d = (_ytPlayer && _ytPlayer.getDuration) ? _ytPlayer.getDuration() : 0; } catch(_){ d = 0; }
+      // Complete on 80% of REAL watch time (or a 45s floor of actual PLAYING time for very short clips) — never on page load.
+      if ((d > 0 && _watchedSecs >= Math.min(d * 0.8, d - 5)) || (!d && _watchedSecs >= 45)){
+        stopWatchClock();
+        markLessonCompleted(m, l);
+      }
+    }, 1000);
+  }
+  // Attach a YouTube state-reader to the freshly-built iframe (enablejsapi) WITHOUT reloading it,
+  // so completion is gated on real playback. Safe-fails to "no auto-complete" if the API never readies
+  // (the manual "סמן כהושלם" button still works) — strictly better than the old false-positive timer.
+  function _armWatchTracker(m, l){
+    let tries = 0;
+    (function attach(){
+      const ifr = document.getElementById('plIframe');
+      if (window.YT && window.YT.Player && ifr){
+        try {
+          _ytPlayer = new YT.Player('plIframe', {
+            events: {
+              onStateChange: (e) => {
+                if (e.data === YT.PlayerState.PLAYING){ startPosPoll(); startWatchClock(m, l); }
+                else { stopWatchClock(); }
+                if (e.data === YT.PlayerState.ENDED){ if (_curLessonId) clearPos(_curLessonId); markLessonCompleted(m, l); }
+              }
+            }
+          });
+        } catch(_){ /* leave auto-complete disabled; manual button still works */ }
+        return;
+      }
+      if (tries++ < 40) setTimeout(attach, 150);
+    })();
+  }
   function loadYtApi(){
     if (window.YT && window.YT.Player) return;
     if (document.getElementById('yt-iframe-api')) return;
@@ -2826,16 +2865,17 @@
     } catch(err){ _fallbackIframe(lesson, startSec); }
   }
   function _fallbackIframe(lesson, startSec){
-    let iframe = document.getElementById('plIframe');
-    if (!iframe){
-      const hostEl = document.querySelector('.lms-pl-video');
-      iframe = document.createElement('iframe'); iframe.id = 'plIframe';
-      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-      iframe.setAttribute('allowfullscreen',''); iframe.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
-      if (hostEl) hostEl.appendChild(iframe);
-    }
+    const hostEl = document.querySelector('.lms-pl-video');
+    // Always rebuild a FRESH iframe. Reusing an iframe left on about:blank is exactly what black-screened
+    // the old facade flow; a fresh element avoids that AND lets us attach a YT state-reader (enablejsapi)
+    // for real watch-gating. autoplay removed → entering a lesson no longer blasts sound on load.
+    const old = document.getElementById('plIframe'); if (old) old.remove();
+    const iframe = document.createElement('iframe'); iframe.id = 'plIframe';
+    iframe.allow = 'accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.setAttribute('allowfullscreen',''); iframe.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
+    if (hostEl) hostEl.appendChild(iframe);
     const startParam = startSec>0 ? `&start=${startSec}` : '';
-    iframe.src = `https://www.youtube-nocookie.com/embed/${lesson.id}?rel=0&modestbranding=1&autoplay=1${startParam}`;
+    iframe.src = `https://www.youtube-nocookie.com/embed/${lesson.id}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}${startParam}`;
     iframe.onload = _hideLoading;
   }
   function loadLessonVideo(lesson, m, l){
@@ -2846,15 +2886,20 @@
     const saved = getSavedPos(lesson.id);
     // Workshop chapters carry a fixed `start`; otherwise resume from the saved position.
     const startSec = Number.isFinite(lesson.start) ? lesson.start : (saved > 10 ? saved : 0);
-    if (completionTimer) clearTimeout(completionTimer);
-    completionTimer = setTimeout(() => markLessonCompleted(m, l), 45000);
+    // Completion is gated on REAL watch time via _armWatchTracker — NOT a blind page-load timer.
+    // (The old setTimeout(...,45000) marked lessons "done" at 0:00 without any watching.)
+    if (completionTimer){ clearTimeout(completionTimer); completionTimer = null; }
+    _watchedSecs = 0; stopWatchClock();
     if (!Number.isFinite(lesson.start) && saved > 10){ try { showCelebToast(`ממשיך מ-${fmtTime(saved)}`); } catch(_){} }
     loadYtApi();
     stopPosPoll();
-    // טעינה ישירה של ה-embed ל-iframe — אמין בכל מצב.
-    // (YT.Player API נכשל בשקט כשה-iframe כבר על about:blank: הוא לא מזריק את
-    //  כתובת ה-embed ל-iframe קיים, ולכן נשאר מסך שחור. ה-iframe הישיר תמיד עובד.)
+    // Tear down any previous player so the fresh iframe isn't shadowed by a stale YT.Player wrapper.
+    try { if (_ytPlayer && _ytPlayer.destroy) _ytPlayer.destroy(); } catch(_){}
+    _ytPlayer = null;
+    // Direct embed load into a FRESH iframe — reliable in every state (see _fallbackIframe).
     _fallbackIframe(lesson, startSec);
+    // Attach the watch-tracker that gates completion on real playback (80% watched / video ended).
+    _armWatchTracker(m, l);
   }
   // ⚡ Facade: מציג פוסטר + כפתור נגינה, וטוען את נגן ה-YouTube הכבד רק כשלוחצים.
   //    כך הכניסה לשיעור מיידית, וה-2.6 שניות של YouTube קורות אחרי לחיצה (מרגיש טבעי).
@@ -2944,7 +2989,7 @@
           <a class="${cls}" href="${lessonHash(mIdx, lIdx)}"${ariaCurrent}>
             <span class="lms-sb-lesson__status">${status}</span>
             <span class="lms-sb-lesson__title">${highlight(les.title)}</span>
-            <span class="lms-sb-lesson__dur">${les.duration}</span>
+            <span class="lms-sb-lesson__dur"><bdi>${les.duration}</bdi></span>
           </a>`;
       }).join('');
 
@@ -3212,7 +3257,7 @@
     document.body.classList.remove('view-master-sales');
     document.body.classList.add('view-player');
     document.getElementById('plTitle').textContent = lesson.title;
-    document.getElementById('plSub').innerHTML = `מודול ${mod.id}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> ${lesson.duration} דק׳`;
+    document.getElementById('plSub').innerHTML = `מודול ${mod.id}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> <bdi>${lesson.duration}</bdi> דק׳`;
 
     // Lesson context for popup_events (auth_modal/video_toast/etc. carry this).
     if (window.PopupManager) window.PopupManager.setLessonContext(lesson.id);
@@ -3541,6 +3586,8 @@
     const input = document.getElementById('aiInput');
     sendBtn.disabled = true; input.disabled = true;
     appendAiMsg('user', message);
+    // Clear the input only now that we've committed to sending — the early-returns above (busy / not-paid / no-token) keep the user's draft instead of silently eating it.
+    input.value = ''; input.style.height = 'auto';
     aiHistory.push({ role: 'user', content: message });
     // Persist the clean user message (not serverMessage, which carries learnerCtx). Fire-and-forget.
     try { if (window.AiChatHistory && persistLessonId) window.AiChatHistory.append(persistLessonId, 'user', message, { courseType: courseTypeShort() }); } catch(_){}
@@ -3591,7 +3638,7 @@
   function setupAi(){
     const btn = document.getElementById('aiSendBtn');
     const input = document.getElementById('aiInput');
-    const send = () => { const v = input.value.trim(); if (!v) return; input.value = ''; input.style.height='auto'; sendAi(v); };
+    const send = () => { const v = input.value.trim(); if (!v) return; sendAi(v); };
     btn.addEventListener('click', send);
     input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
     input.addEventListener('input', () => {
@@ -3945,7 +3992,7 @@
             <div class="lms-master-card__thumb">
               <img src="https://img.youtube.com/vi/${escapeHtml(ch.id)}/mqdefault.jpg" alt="" loading="lazy">
               <i class="fa-solid fa-play"></i>
-              <span class="lms-master-card__duration">${escapeHtml(ch.duration)}</span>
+              <span class="lms-master-card__duration"><bdi>${escapeHtml(ch.duration)}</bdi></span>
             </div>
             <div class="lms-master-card__title">${escapeHtml(ch.title)}</div>
             <div class="lms-master-card__sub">${escapeHtml(subLabel || '')}</div>
@@ -4008,7 +4055,7 @@
     document.getElementById('masterViewerTitle').textContent = ch?.title || 'שיעור מאסטר';
     // Chapters that are timestamp-segments of one video carry `start` (seconds) → deep-link into that point.
     const startParam = (ch && Number.isFinite(ch.start)) ? `&start=${ch.start}` : '';
-    document.getElementById('masterViewerFrame').src = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1${startParam}`;
+    document.getElementById('masterViewerFrame').src = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&autoplay=1${startParam}`;
     document.getElementById('masterViewerDownload').style.display = 'none';
     viewer.classList.add('is-open');
   }

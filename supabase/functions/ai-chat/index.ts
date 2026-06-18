@@ -3,12 +3,15 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { NLP_KNOWLEDGE } from './knowledge.ts'
 import { MASTER_KNOWLEDGE } from './knowledge-master.ts'
 
-const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY')!
+const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') || ''
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || ''
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const DAILY_LIMIT = 200
 const MODEL = 'stepfun/step-3.5-flash:free'
+const OPENROUTER_FALLBACK = 'nvidia/nemotron-3-nano-30b-a3b:free'
+const GEMINI_MODEL = 'gemini-2.0-flash'
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 // ===== SYSTEM PROMPT =====
@@ -140,6 +143,47 @@ function getCorsHeaders(req: Request) {
     'Access-Control-Allow-Origin': allowed,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   }
+}
+
+// ── AI providers: Gemini direct (primary) + OpenRouter (free + fallback) ──
+// Each returns { reply, promptTokens, completionTokens, provider } or null on failure,
+// so the handler can try them in order and degrade gracefully instead of dying on one outage.
+async function callGemini(systemPrompt: string, convo: Array<{ role: string; content: string }>) {
+  if (!GEMINI_API_KEY || !GEMINI_API_KEY.startsWith('AIza')) return null
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`
+  const body: Record<string, unknown> = {
+    contents: convo.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    generationConfig: { temperature: 0.4, maxOutputTokens: 4096, topP: 0.9 },
+  }
+  const call = () => fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  let res = await call()
+  if (res.status === 429) { await new Promise(r => setTimeout(r, 3000)); res = await call() }   // one retry on rate-limit
+  if (!res.ok) { console.error(`[Gemini] ${res.status}: ${await res.text()}`); return null }
+  const data = await res.json()
+  const reply = data.candidates?.[0]?.content?.parts?.[0]?.text
+  if (!reply) return null
+  const um = data.usageMetadata || {}
+  return { reply, promptTokens: Number(um.promptTokenCount) || 0, completionTokens: Number(um.candidatesTokenCount) || 0, provider: 'gemini' }
+}
+
+async function callOpenRouter(messages: Array<{ role: string; content: string }>, model: string) {
+  if (!OPENROUTER_API_KEY) return null
+  const res = await fetch(OPENROUTER_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://www.therapist-home.com',
+      'X-Title': 'Beit HaMetaplim - NLP Portal',
+    },
+    body: JSON.stringify({ model, max_tokens: 4096, temperature: 0.4, messages }),
+  })
+  if (!res.ok) { console.error(`[OpenRouter/${model}] ${res.status}: ${await res.text()}`); return null }
+  const data = await res.json()
+  const reply = data.choices?.[0]?.message?.content
+  if (!reply) return null
+  return { reply, promptTokens: Number(data.usage?.prompt_tokens) || 0, completionTokens: Number(data.usage?.completion_tokens) || 0, provider: `openrouter:${model}` }
 }
 
 serve(async (req) => {
@@ -298,47 +342,29 @@ serve(async (req) => {
     }
     messages.push({ role: 'user', content: message })
 
-    // --- Call OpenRouter ---
-    const response = await fetch(OPENROUTER_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://www.therapist-home.com',
-        'X-Title': 'Beit HaMetaplim - NLP Portal'
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 4096,
-        temperature: 0.4,
-        messages
-      })
-    })
+    // --- Call AI: Gemini (primary, free + generous) → OpenRouter free → OpenRouter fallback ---
+    // Mirrors the resilient dual-provider pattern proven in gemini-mentor. The OpenAI-format
+    // `messages` array holds [system, ...history, user]; Gemini wants the system prompt separate
+    // from the convo turns, so split them out for that path only.
+    const systemContent = messages[0].content
+    const convo = messages.slice(1)
 
-    if (!response.ok) {
-      const errBody = await response.text()
-      console.error(`[OpenRouter] ${response.status}: ${errBody}`)
+    let result = await callGemini(systemContent, convo)
+    if (!result) { console.log('[ai-chat] Gemini unavailable → OpenRouter primary'); result = await callOpenRouter(messages, MODEL) }
+    if (!result) { console.log('[ai-chat] OpenRouter primary failed → OpenRouter fallback'); result = await callOpenRouter(messages, OPENROUTER_FALLBACK) }
+
+    if (!result) {
+      console.error('[ai-chat] All providers failed (Gemini + OpenRouter x2)')
       return new Response(
-        JSON.stringify({ reply: 'שגיאה זמנית בשירות ה-AI. נסו שוב בעוד כמה שניות.' }),
+        JSON.stringify({ reply: 'העוזר עמוס כרגע. נסו שוב בעוד רגע 🙏' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const data = await response.json()
-    const reply = data.choices?.[0]?.message?.content
-
-    if (!reply) {
-      console.error('[OpenRouter] Empty response:', JSON.stringify(data))
-      return new Response(
-        JSON.stringify({ reply: 'לא התקבלה תשובה. נסו שוב.' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
+    const reply = result.reply
     // --- Usage accounting (efficiency monitoring) ---
-    // Token counts let us verify the knowledge-scoping actually cut input cost.
-    const promptTokens = Number(data.usage?.prompt_tokens) || 0
-    const completionTokens = Number(data.usage?.completion_tokens) || 0
+    const promptTokens = result.promptTokens
+    const completionTokens = result.completionTokens
 
     // --- Increment quota + token totals ONLY after successful response ---
     if (usage) {
@@ -369,7 +395,7 @@ serve(async (req) => {
       JSON.stringify({
         reply,
         remaining: DAILY_LIMIT - (currentCount + 1),
-        provider: 'openrouter',
+        provider: result.provider,
         personalized: studentProfile !== '',
         knowledgeScope: knowledge.scope,
         usage: { prompt_tokens: promptTokens, completion_tokens: completionTokens }

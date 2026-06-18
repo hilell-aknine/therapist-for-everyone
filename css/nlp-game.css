@@ -4887,6 +4887,15 @@ body.animations-paused *::before,
 body.animations-paused *::after {
     animation-play-state: paused !important;
 }
+/* A one-shot ENTRANCE fade must resolve to its visible end-state even while paused —
+   otherwise content rendered while the tab is hidden (animations-paused active) is
+   stranded at opacity:0 and the user sees a blank screen. Disable the entrance animation
+   for these containers when paused so their resting (visible) state shows immediately. */
+body.animations-paused .reading-section {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
 
 /* ═══════════════════════════════════════════════════════
    Reduced Motion

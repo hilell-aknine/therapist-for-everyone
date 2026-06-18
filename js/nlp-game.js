@@ -543,11 +543,33 @@ class StoryGame {
             this.startHeartTimer();
         } catch (e) { console.warn('Game init warning:', e); }
 
-        // Always render home screen
+        // Render home screen — unless the portal deep-linked to a specific lesson's practice.
         if (!this.playerData.onboardingComplete) {
             this.showOnboarding();
-        } else {
+        } else if (!this.tryDeepLink()) {
             this.renderHomeScreen();
+        }
+    }
+
+    // Deep-link from the portal's practice button: nlp-game.html?m=<moduleId>&l=<lessonPosition>.
+    // Routes straight to that module — and the specific lesson — even if the journey has not
+    // unlocked it yet, because the user arrived directly from watching that lesson's video.
+    // Returns true if it navigated (so the caller skips the home screen); false → render home.
+    tryDeepLink() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const m = parseInt(params.get('m') || '', 10);
+            const l = parseInt(params.get('l') || '', 10);
+            if (!Number.isInteger(m)) return false;
+            const mod = MODULES.find(x => x.id === m);
+            if (!mod) return false;
+            this.openModule(m);   // openModule never checks the lock → works for locked modules too
+            if (Number.isInteger(l) && mod.lessons && mod.lessons[l - 1]) {
+                this.startLesson(mod.lessons[l - 1].id);
+            }
+            return true;
+        } catch (_e) {
+            return false;
         }
     }
 

@@ -1372,6 +1372,45 @@
         </div>
         <div class="lms-pl-tip" id="plTip">השיעור יסומן אוטומטית אחרי 45 שניות צפייה — אפשר גם לסמן ידנית</div>
 
+        <!-- Practice clips for the CURRENT master lesson — surfaced directly under the
+             video so paying users actually discover them (was buried in master-practice.html). -->
+        <style>
+          .lms-practice{margin:1.4rem 0 .4rem;}
+          .lms-practice__head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.25rem;}
+          .lms-practice__h{display:flex;align-items:center;gap:.5rem;font-size:1.15rem;margin:0;color:var(--gold,#D4AF37);}
+          .lms-practice__count{font-size:.85rem;opacity:.7;white-space:nowrap;}
+          .lms-practice__sub{margin:0 0 .9rem;font-size:.9rem;opacity:.72;}
+          .lms-practice__row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(190px,1fr);gap:.85rem;overflow-x:auto;padding-bottom:.6rem;scroll-snap-type:x proximity;}
+          .lms-practice__row::-webkit-scrollbar{height:7px;}
+          .lms-practice__row::-webkit-scrollbar-thumb{background:rgba(212,175,55,.35);border-radius:99px;}
+          .lms-clip{scroll-snap-align:start;display:flex;flex-direction:column;gap:.55rem;background:rgba(255,255,255,.04);border:1px solid rgba(212,175,55,.18);border-radius:14px;padding:.55rem;cursor:pointer;text-align:right;transition:transform .15s ease,border-color .15s ease,background .15s ease;font:inherit;color:inherit;}
+          .lms-clip:hover{transform:translateY(-3px);border-color:rgba(212,175,55,.55);background:rgba(212,175,55,.08);}
+          .lms-clip__thumb{position:relative;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000;}
+          .lms-clip__thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+          .lms-clip__play{position:absolute;inset:0;margin:auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.55);color:#fff;font-size:1rem;backdrop-filter:blur(2px);transition:background .15s ease,transform .15s ease;}
+          .lms-clip:hover .lms-clip__play{background:var(--gold,#D4AF37);color:#1a1a1a;transform:scale(1.08);}
+          .lms-clip__badge{position:absolute;inset-block-end:.4rem;inset-inline-start:.4rem;background:rgba(0,0,0,.7);color:#fff;font-size:.7rem;padding:.15rem .5rem;border-radius:99px;}
+          .lms-clip__t{font-size:.88rem;line-height:1.35;font-weight:600;}
+          .lms-clip-modal{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:1rem;}
+          .lms-clip-modal[hidden]{display:none;}
+          .lms-clip-modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.78);}
+          .lms-clip-modal__box{position:relative;width:min(960px,100%);background:#101315;border:1px solid rgba(212,175,55,.25);border-radius:16px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.6);}
+          .lms-clip-modal__bar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.7rem 1rem;}
+          .lms-clip-modal__bar h4{margin:0;font-size:1rem;color:var(--gold,#D4AF37);}
+          .lms-clip-modal__x{background:rgba(255,255,255,.08);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;}
+          .lms-clip-modal__x:hover{background:rgba(255,255,255,.18);}
+          .lms-clip-modal__video{aspect-ratio:16/9;background:#000;}
+          .lms-clip-modal__video iframe{width:100%;height:100%;border:0;display:block;}
+        </style>
+        <section class="lms-practice" id="lessonPractice" hidden>
+          <div class="lms-practice__head">
+            <h3 class="lms-practice__h"><i class="fa-solid fa-clapperboard"></i> תרגולים מהמפגש הזה</h3>
+            <span class="lms-practice__count" id="practiceCount"></span>
+          </div>
+          <p class="lms-practice__sub">הדגמות חיות ותרגולים מעשיים שצולמו במפגש — לחזרה ולתרגול עצמי.</p>
+          <div class="lms-practice__row" id="practiceRow"></div>
+        </section>
+
         <div class="lms-tabs" role="tablist">
           <button class="lms-tab is-active" data-tab="notes" role="tab" aria-selected="true" aria-label="הערות"><i class="fa-solid fa-pen-to-square"></i><span>הערות</span></button>
           <button class="lms-tab" data-tab="ai" role="tab" aria-selected="false" aria-label="העוזר האישי"><i class="fa-solid fa-robot"></i><span>העוזר האישי</span></button>
@@ -1433,6 +1472,20 @@
           </div>
         </div>
       </div><!-- /.lms-player -->
+
+      <!-- Lightbox for playing a practice clip in-context (without leaving the lesson) -->
+      <div class="lms-clip-modal" id="clipModal" hidden>
+        <div class="lms-clip-modal__backdrop" data-close></div>
+        <div class="lms-clip-modal__box" role="dialog" aria-modal="true" aria-labelledby="clipModalTitle">
+          <div class="lms-clip-modal__bar">
+            <h4 id="clipModalTitle"></h4>
+            <button type="button" class="lms-clip-modal__x" data-close aria-label="סגור"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="lms-clip-modal__video">
+            <iframe id="clipModalIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          </div>
+        </div>
+      </div>
 
       <div class="lms-amb">
         <header class="lms-amb-bar">
@@ -3288,6 +3341,7 @@
     loadNotesForCurrent();
     resetAiChat();
     renderResources();
+    renderLessonPractice();
     if (window.gameBtnUpdater) window.gameBtnUpdater();
 
     // Persist last-watched
@@ -3647,6 +3701,105 @@
     });
   }
 
+  // ===== Master practice clips =====
+  // 1-based ordinal of the current lesson among NON-bonus master sessions. This is the
+  // number both the per-lesson summary files and the practice-clip `lesson` tags key off.
+  function masterLessonOrdinal(){
+    if (currentModuleIndex < 0) return 0;
+    return modules.slice(0, currentModuleIndex + 1).filter(m => !m.isBonus).length;
+  }
+
+  // MIRRORS the real-YouTube clips in master-practice.html (the source of truth).
+  // PLACEHOLDER_* clips are intentionally omitted here. Keep in sync if clips change.
+  const MASTER_PRACTICE_TYPES = { demo:'הדגמה חיה', guided:'תרגול מודרך', pairs:'תרגול זוגות', instructions:'הנחיות טכניקה', visualization:'דמיון מודרך' };
+  const MASTER_PRACTICE_CLIPS = [
+    { id:'dy7xtarGHpw', t:'תשאול סיבובי - הדגמה על אלמוג', k:'demo', lesson:1 },
+    { id:'BEPEtGFGp00', t:'תשאול סיבובי - תרגול זוגות', k:'pairs', lesson:1 },
+    { id:'I3qjx4Xi62s', t:'כתיבה מודרכת - למה אני כאן?', k:'guided', lesson:1 },
+    { id:'VTLoSz-e_e8', t:'הצבת מטרה ברמות לוגיות', k:'guided', lesson:1 },
+    { id:'fad_UafRAp8', t:'צריבת מטרה בנוירונים - דמיון מודרך', k:'visualization', lesson:1 },
+    { id:'2jamFOJnaho', t:'הסבר טכניקת צריבת מטרה', k:'instructions', lesson:1 },
+    { id:'wyiQqdxGgkI', t:'תשאול סיבובי - "לא קם בבוקר"', k:'demo', lesson:2 },
+    { id:'_y1oBOmjtTo', t:'חילוץ ערכים - הדגמה על איגל', k:'demo', lesson:2 },
+    { id:'OFhJloYsiLk', t:'דירוג סולם ערכים - איגל', k:'demo', lesson:2 },
+    { id:'xofxgtdZr3I', t:'חילוץ ודירוג ערכים - עודיה', k:'demo', lesson:2 },
+    { id:'7Nq2NOHSkCc', t:'שיתוף תוצאות תרגול זוגות', k:'guided', lesson:2 },
+    { id:'1VSnknLzd-0', t:'קריטריונים לערכים ומשימות', k:'instructions', lesson:2 },
+    { id:'HFl8YJAMbMc', t:'קטלפסיה שרירים - תרגול כיתתי', k:'guided', lesson:3 },
+    { id:'ES3NkLUdOy0', t:'שלב ראשון אינדוקציה - הדגמה', k:'demo', lesson:3 },
+    { id:'JYlyAOdONBs', t:'תרגול זוגות - שלב ראשון', k:'pairs', lesson:3 },
+    { id:'BY8nU5LOX-Y', t:'אינדוקציית דייב אלמן - הדגמה על ליאל', k:'demo', lesson:3 },
+    { id:'mECBLK6Jaj0', t:'אינדוקציית דייב אלמן - הדגמה על ניסים', k:'demo', lesson:4 },
+    { id:'c-IqZczIJ5g', t:'תרגול זוגות - הכנסה לטראנס', k:'pairs', lesson:4 },
+    { id:'gt__JCnt9pI', t:'מציאת הרגש הבעייתי', k:'guided', lesson:4 },
+    { id:'OpUy6q5g7DU', t:'ציר זמן - ריפוי ילד פנימי', k:'demo', lesson:4 },
+    { id:'HTVAJyAFJDA', t:'הרגש כמסר - דמיון מודרך', k:'visualization', lesson:5 },
+    { id:'NsfmQYJ_LcY', t:'שיתוף זוגות - הרגש כמסר', k:'pairs', lesson:5 },
+    { id:'Q3l-xJ6GJ1I', t:'חמש שאלות לפחד', k:'guided', lesson:5 },
+    { id:'4LgCzl8AJN8', t:'דמיון מודרך + כתיבה אינטואיטיבית - פחד', k:'visualization', lesson:5 },
+    { id:'JjhvhSPiCfM', t:'שיתוף זוגות - התחייבות מול פחד', k:'pairs', lesson:5 },
+    { id:'ZEdfxIn6G1A', t:'שיתופי התחייבות על הבמה', k:'guided', lesson:5 },
+    { id:'YrP8Kjgc-6Y', t:'על מה מגיע לי כל הכבוד', k:'guided', lesson:5 },
+    { id:'T8bHNeIGYJg', t:'חילוץ אסטרטגיה - הדגמה על יגאל ואדיר', k:'demo', lesson:6 },
+    { id:'16KH-IMBcgc', t:'חילוץ אסטרטגיה - קלאוסטרופוביה (דנה)', k:'demo', lesson:6 },
+    { id:'G_I6HAYopzs', t:'דיגום אסטרטגיות - תרגול זוגות', k:'pairs', lesson:6 },
+    { id:'Oj__DbdRZ_8', t:'כתיבת הכנה - שחרור טינה', k:'guided', lesson:7 },
+    { id:'YUff3iYAOeI', t:'שחרור טינה - הדגמה על הוזיאל', k:'demo', lesson:7 },
+    { id:'Nl0E0vP4Moo', t:'מכתב שחרור טינה - תרגול', k:'guided', lesson:7 },
+    { id:'Ya5w7XQKy88', t:'שינוי סטייט פיזיולוגי', k:'guided', lesson:7 },
+    { id:'sCR0gGyTMGU', t:'כתיבת אמונה מגבילה', k:'guided', lesson:8 },
+    { id:'tPYUZ6pnkY0', t:'סום #1: היררכיית ערכים', k:'guided', lesson:8 },
+    { id:'qfcUQcfck8M', t:'סום #2: היררכיית מטרות', k:'guided', lesson:8 },
+    { id:'HRnubwHc_B0', t:'סום #3: כוונה חיובית + תסריטים', k:'guided', lesson:8 },
+    { id:'RzkFmMWL6FM', t:'הדגמת סוויש - אכילת מתוקים', k:'demo', lesson:9 },
+    { id:'24QYOZTYF6w', t:'דגשים וטיפים לביצוע סוויש', k:'instructions', lesson:9 },
+    { id:'Arxq-rS-rXU', t:'תרגול זוגות - סוויש', k:'pairs', lesson:9 },
+    { id:'yEopD-V9i8U', t:'הנחיות טכניקת דיקנס', k:'instructions', lesson:9 },
+    { id:'SS4f0kB6pKk', t:'הדגמת דיקנס - אמונה על כסף', k:'demo', lesson:9 },
+    { id:'cRzoVWXUOW8', t:'הנחיות שיבוש אסטרטגיה', k:'instructions', lesson:9 }
+  ];
+
+  function renderLessonPractice(){
+    const sec = document.getElementById('lessonPractice');
+    if (!sec) return;
+    const row = document.getElementById('practiceRow');
+    const mod = currentModuleIndex >= 0 ? modules[currentModuleIndex] : null;
+    const ord = masterLessonOrdinal();
+    const clips = (courseType === 'nlp-master' && mod && !mod.isBonus)
+      ? MASTER_PRACTICE_CLIPS.filter(c => c.lesson === ord) : [];
+    if (!clips.length){ sec.hidden = true; row.innerHTML = ''; return; }
+    document.getElementById('practiceCount').textContent = `${clips.length} ${clips.length === 1 ? 'תרגול' : 'תרגולים'}`;
+    row.innerHTML = clips.map(c => `
+      <button type="button" class="lms-clip" data-id="${escapeHtml(c.id)}" data-title="${escapeHtml(c.t)}">
+        <span class="lms-clip__thumb">
+          <img src="https://i.ytimg.com/vi/${escapeHtml(c.id)}/mqdefault.jpg" alt="" loading="lazy">
+          <span class="lms-clip__play"><i class="fa-solid fa-play"></i></span>
+          <span class="lms-clip__badge">${escapeHtml(MASTER_PRACTICE_TYPES[c.k] || 'תרגול')}</span>
+        </span>
+        <span class="lms-clip__t">${escapeHtml(c.t)}</span>
+      </button>`).join('');
+    sec.hidden = false;
+  }
+
+  function setupPracticeClips(){
+    const row = document.getElementById('practiceRow');
+    const modal = document.getElementById('clipModal');
+    if (!row || !modal) return;
+    const iframe = document.getElementById('clipModalIframe');
+    const titleEl = document.getElementById('clipModalTitle');
+    const close = () => { modal.hidden = true; iframe.src = ''; document.body.style.overflow = ''; };
+    row.addEventListener('click', e => {
+      const card = e.target.closest('.lms-clip');
+      if (!card) return;
+      titleEl.textContent = card.dataset.title || '';
+      iframe.src = `https://www.youtube.com/embed/${card.dataset.id}?rel=0&autoplay=1`;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+    });
+    modal.addEventListener('click', e => { if (e.target.closest('[data-close]')) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
+  }
+
   // ===== Resources =====
   function renderResources(){
     if (currentModuleIndex < 0) return;
@@ -3656,7 +3809,7 @@
     // Master: show ONLY the summary booklet for THIS lesson (not generic master-wide
     // links). Summary files exist per regular session: summaries-master/master-lesson-1..7.html.
     // Bonus workshops have no per-lesson summary → fall back to the general index.
-    const masterRegularOrdinal = modules.slice(0, currentModuleIndex + 1).filter(m => !m.isBonus).length;
+    const masterRegularOrdinal = masterLessonOrdinal();
     const masterHasSummary = !mod.isBonus && masterRegularOrdinal >= 1 && masterRegularOrdinal <= 7;
     const items = (courseType === 'nlp-master') ? (masterHasSummary ? [
       { icon:'fa-solid fa-file-lines', t:'סיכום השיעור', s:`סיכום ותובנות מרכזיות מ${mod.title}`, href:`summaries-master/master-lesson-${masterRegularOrdinal}.html`, gold:true }
@@ -4190,6 +4343,7 @@
     setupNotes();
     setupAi();
     setupGameBtn();
+    setupPracticeClips();
     setupLessonNav();
     setupAmbassador();
     setupMaster();

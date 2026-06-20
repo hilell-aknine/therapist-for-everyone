@@ -3653,11 +3653,16 @@
     const mod = modules[currentModuleIndex];
     const lesson = mod.lessons[currentLessonIndex];
     const grid = document.getElementById('resGrid');
-    const items = (courseType === 'nlp-master') ? [
-      { icon:'fa-solid fa-file-lines',   t:'סיכומי המאסטר',        s:'סיכומי המפגשים והנקודות המרכזיות',          href:'summaries-master/index.html', gold:true },
-      { icon:'fa-solid fa-gamepad',      t:'משחק תרגול — מאסטר',   s:'תרגול אינטראקטיבי על תוכן המאסטר',          href:'nlp-game-master.html',        gold:false, blank:true },
-      { icon:'fa-solid fa-clapperboard', t:'קליפים לתרגול',        s:'קליפי תרגול קצרים לפי נושא',                href:'master-practice.html',        gold:false, blank:true }
+    // Master: show ONLY the summary booklet for THIS lesson (not generic master-wide
+    // links). Summary files exist per regular session: summaries-master/master-lesson-1..7.html.
+    // Bonus workshops have no per-lesson summary → fall back to the general index.
+    const masterRegularOrdinal = modules.slice(0, currentModuleIndex + 1).filter(m => !m.isBonus).length;
+    const masterHasSummary = !mod.isBonus && masterRegularOrdinal >= 1 && masterRegularOrdinal <= 7;
+    const items = (courseType === 'nlp-master') ? (masterHasSummary ? [
+      { icon:'fa-solid fa-file-lines', t:'סיכום השיעור', s:`סיכום ותובנות מרכזיות מ${mod.title}`, href:`summaries-master/master-lesson-${masterRegularOrdinal}.html`, gold:true }
     ] : [
+      { icon:'fa-solid fa-file-lines', t:'סיכומי המאסטר', s:'סיכומי המפגשים והנקודות המרכזיות', href:'summaries-master/index.html', gold:true }
+    ]) : [
       { icon:'fa-solid fa-book-open', t:'חוברת NLP Practitioner', s:'7 מודולים, 50 פרקים — טכניקות, תרגולים ועקרונות',  href:'../docs/booklets/nlp-booklet-branded.pdf', gold:true,  blank:true },
       { icon:'fa-solid fa-file-lines', t:'סיכום המודול',          s:`סיכום ותובנות מרכזיות ממודול ${mod.id}`,                  href:`summaries/lesson-${mod.id}.html`,            gold:false },
       { icon:'fa-solid fa-list-check', t:'כל הסיכומים',            s:'מבט-על על כל 7 המודולים בקורס',                          href:'summaries/index.html',                        gold:false }

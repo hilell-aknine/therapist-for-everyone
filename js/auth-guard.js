@@ -315,10 +315,10 @@
                     window.location.href = 'patient-dashboard.html';
                     break;
                 case 'student_lead':
-                    window.location.href = 'pages/course-library.html';
+                    window.location.href = 'pages/course-library-v2.html';
                     break;
                 default:
-                    window.location.href = 'pages/course-library.html';
+                    window.location.href = 'pages/course-library-v2.html';
             }
         },
 

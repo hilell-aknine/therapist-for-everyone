@@ -73,6 +73,13 @@
     /* Motion */
     --ease-out:cubic-bezier(.2,.8,.2,1);
     --dur-fast:150ms; --dur-base:240ms;
+    /* Motion-pass tokens (2026-06-23) — premium easing + duration scale */
+    --ease-standard: cubic-bezier(.2,0,0,1);
+    --ease-decelerate: cubic-bezier(.16,1,.3,1);
+    --ease-accelerate: cubic-bezier(.4,0,1,1);
+    --ease-emphasis: cubic-bezier(.34,1.4,.5,1);
+    --ease-anticipate: cubic-bezier(.5,-0.35,.7,.45);
+    --dur-1:.12s; --dur-2:.2s; --dur-3:.32s; --dur-4:.5s; --dur-5:.7s; --stagger:60ms;
 
     /* Legacy aliases — תאימות לאחור עד החלפה מלאה בכל ה-style block */
     --petrol-deep: var(--bg-primary);
@@ -1171,6 +1178,131 @@
 
   @media (max-width: 600px) {
     .lms-modal { padding: 24px 16px 20px; max-width: none; }
+  }
+
+  /* ============================================================
+     MOTION PASS (2026-06-23) — tasteful, premium, fast.
+     All new motion is disabled in the reduced-motion block below.
+     ============================================================ */
+
+  /* ---- Shared keyframes ---- */
+  @keyframes mpRiseIn { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: none; } }
+  @keyframes mpPanelIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+  @keyframes mpCardPop { 0% { opacity:0; transform: scale(.92); } 60% { opacity:1; } 100% { opacity:1; transform: scale(1); } }
+  @keyframes mpBackdropIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes mpBuyPulse {
+    0%, 100% { box-shadow: 0 12px 26px rgba(255,138,0,.38); }
+    50%      { box-shadow: 0 12px 26px rgba(255,138,0,.38), 0 0 0 6px rgba(255,138,0,.10); }
+  }
+
+  /* ---- Sidebar nav: smoother transitions + active indicator slide ---- */
+  .lms-sb-item, .lms-sb-lesson{
+    transition: background var(--dur-2) var(--ease-standard),
+                color var(--dur-2) var(--ease-standard),
+                border-color var(--dur-2) var(--ease-standard),
+                transform var(--dur-2) var(--ease-standard);
+  }
+  .lms-sb-item:active, .lms-sb-lesson:active{ transform: scale(.985); }
+  .lms-sb-item{ position: relative; }
+  .lms-sb-item::after{
+    content:''; position:absolute; inset-inline-start:0; top:50%;
+    width:3px; height:0; border-radius:0 3px 3px 0;
+    background: var(--accent-gold-hover);
+    transform: translateY(-50%);
+    transition: height var(--dur-3) var(--ease-decelerate);
+    pointer-events:none;
+  }
+  .lms-sb-item--active::after{ height:60%; }
+
+  /* ---- Lesson list (sidebar) staggered rise-in on render ---- */
+  .lms-sb-nav .lms-sb-mod{ animation: mpRiseIn var(--dur-3) var(--ease-decelerate) both; }
+  .lms-sb-nav .lms-sb-mod:nth-child(1){ animation-delay: 0ms; }
+  .lms-sb-nav .lms-sb-mod:nth-child(2){ animation-delay: 50ms; }
+  .lms-sb-nav .lms-sb-mod:nth-child(3){ animation-delay: 100ms; }
+  .lms-sb-nav .lms-sb-mod:nth-child(4){ animation-delay: 150ms; }
+  .lms-sb-nav .lms-sb-mod:nth-child(5){ animation-delay: 200ms; }
+  .lms-sb-nav .lms-sb-mod:nth-child(6){ animation-delay: 250ms; }
+  .lms-sb-nav .lms-sb-mod:nth-child(7){ animation-delay: 300ms; }
+  .lms-sb-nav .lms-sb-mod:nth-child(n+8){ animation-delay: 350ms; }
+
+  /* ---- Master video / workbook cards: staggered rise-in + refined hover lift ---- */
+  .lms-master-grid .lms-master-card{ animation: mpRiseIn var(--dur-3) var(--ease-decelerate) both; }
+  .lms-master-grid .lms-master-card:nth-child(1){ animation-delay: 0ms; }
+  .lms-master-grid .lms-master-card:nth-child(2){ animation-delay: 55ms; }
+  .lms-master-grid .lms-master-card:nth-child(3){ animation-delay: 110ms; }
+  .lms-master-grid .lms-master-card:nth-child(4){ animation-delay: 165ms; }
+  .lms-master-grid .lms-master-card:nth-child(5){ animation-delay: 220ms; }
+  .lms-master-grid .lms-master-card:nth-child(6){ animation-delay: 275ms; }
+  .lms-master-grid .lms-master-card:nth-child(7){ animation-delay: 330ms; }
+  .lms-master-grid .lms-master-card:nth-child(n+8){ animation-delay: 385ms; }
+  .lms-master-card{ transition: transform var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard), border-top-color var(--dur-2) var(--ease-standard); }
+  .lms-master-card:hover{ transform: translateY(-3px); }
+  .lms-master-card:active{ transform: translateY(-1px) scale(.995); }
+
+  /* ---- Journey stat tiles: gentle staggered rise-in ---- */
+  .lms-journey__grid > *{ animation: mpRiseIn var(--dur-3) var(--ease-decelerate) both; }
+  .lms-journey__grid > *:nth-child(2){ animation-delay: 50ms; }
+  .lms-journey__grid > *:nth-child(3){ animation-delay: 100ms; }
+  .lms-journey__grid > *:nth-child(4){ animation-delay: 150ms; }
+  .lms-journey__grid > *:nth-child(n+5){ animation-delay: 200ms; }
+
+  /* ---- Video player TABS: panel fade/rise on switch ---- */
+  .lms-tab-pane.is-active{ animation: mpPanelIn var(--dur-2) var(--ease-decelerate) both; }
+  .lms-tab{ transition: background var(--dur-2) var(--ease-standard), color var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard), transform var(--dur-1) var(--ease-standard); }
+  .lms-tab:active{ transform: scale(.97); }
+
+  /* ---- Modals: backdrop fade + card pop-in with slight overshoot ---- */
+  .lms-modal-overlay{ animation: mpBackdropIn var(--dur-3) var(--ease-standard); }
+  .lms-modal{ animation: mpCardPop var(--dur-3) var(--ease-emphasis) both; }
+
+  /* ---- CTA buttons: press micro-interaction ---- */
+  .lms-hero__cta:active,
+  .lms-partners__cta:active,
+  .lms-sb-jump:active,
+  .lms-modal__submit:active,
+  .lms-modal__action-btn:active,
+  .lms-master-card__btn:active{ transform: scale(.97); }
+  .lms-modal__submit{ transition: background var(--dur-fast), transform var(--dur-1) var(--ease-standard); }
+  .lms-modal__action-btn{ transition: background var(--dur-fast), transform var(--dur-1) var(--ease-standard); }
+
+  /* ---- Sticky buy-bar + primary buy CTA: press + barely-there attention pulse ---- */
+  .lms-ms-cta:active,
+  .lms-ms-stickybar__cta:active{ transform: translateY(0) scale(.97); }
+  .lms-ms-cta{ animation: mpBuyPulse 3.4s var(--ease-standard) infinite; }
+  .lms-ms-cta:hover{ animation: none; }
+  .lms-ms-stickybar__cta{ transition: transform var(--dur-1) var(--ease-standard); }
+
+  /* ---- Master sales view: gentle rise-in of hero on view show ---- */
+  body.view-master-sales .lms-ms-badge{ animation: mpRiseIn var(--dur-4) var(--ease-decelerate) both; animation-delay: 40ms; }
+  body.view-master-sales .lms-ms-hero__h{ animation: mpRiseIn var(--dur-4) var(--ease-decelerate) both; animation-delay: 110ms; }
+  body.view-master-sales .lms-ms-hero__sub{ animation: mpRiseIn var(--dur-4) var(--ease-decelerate) both; animation-delay: 180ms; }
+  body.view-master-sales .lms-ms-video{ animation: mpRiseIn var(--dur-4) var(--ease-decelerate) both; animation-delay: 250ms; }
+
+  /* ---- Bottom-nav: tap feedback + smoother active transition ---- */
+  .lms-bnav__btn:active{ transform: scale(.93); }
+
+  /* ---- Reduced-motion: disable ALL motion-pass additions ---- */
+  @media (prefers-reduced-motion: reduce){
+    .lms-sb-nav .lms-sb-mod,
+    .lms-master-grid .lms-master-card,
+    .lms-journey__grid > *,
+    .lms-tab-pane.is-active,
+    .lms-modal-overlay,
+    .lms-modal,
+    .lms-ms-cta,
+    body.view-master-sales .lms-ms-badge,
+    body.view-master-sales .lms-ms-hero__h,
+    body.view-master-sales .lms-ms-hero__sub,
+    body.view-master-sales .lms-ms-video{
+      animation: none !important;
+    }
+    .lms-sb-item:active, .lms-sb-lesson:active,
+    .lms-tab:active, .lms-bnav__btn:active,
+    .lms-hero__cta:active, .lms-partners__cta:active, .lms-sb-jump:active,
+    .lms-modal__submit:active, .lms-modal__action-btn:active,
+    .lms-master-card:active, .lms-master-card__btn:active,
+    .lms-ms-cta:active, .lms-ms-stickybar__cta:active{ transform: none !important; }
+    .lms-sb-item::after{ transition: none !important; }
   }
 </style>
 </head>

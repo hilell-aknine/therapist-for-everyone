@@ -61,6 +61,15 @@
 
             --danger: #f87171;
             --success: #34d399;
+
+            /* ===== MOTION TOKENS (mirrors theme.css; this page is self-contained) ===== */
+            --ease-standard:   cubic-bezier(.2, 0, 0, 1);
+            --ease-decelerate: cubic-bezier(.16, 1, .3, 1);
+            --ease-accelerate: cubic-bezier(.4, 0, 1, 1);
+            --ease-emphasis:   cubic-bezier(.34, 1.4, .5, 1);
+            --ease-anticipate: cubic-bezier(.5, -0.35, .7, .45);
+            --dur-1: .12s; --dur-2: .2s; --dur-3: .32s; --dur-4: .5s; --dur-5: .7s;
+            --stagger: 60ms;
         }
 
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -144,6 +153,14 @@
         }
         @media (prefers-reduced-motion: reduce) {
             .atmos__blob { animation: none; }
+            .login-wrap,
+            .login-card > .login-header,
+            .login-card > .auth-tabs,
+            .login-card > .auth-form-panel.active,
+            .login-card > .divider,
+            .login-card > .btn-google,
+            .alert.show { animation: none !important; opacity: 1 !important; transform: none !important; }
+            .btn-primary, .btn-google, .form-group input { transition: none !important; }
         }
 
         /* ===== GLASS CARD ===== */
@@ -153,12 +170,32 @@
             width: 100%;
             max-width: 460px;
             padding: 1.25rem;
-            animation: cardIn .55s cubic-bezier(.22,.68,0,1.2) both;
+            animation: cardIn var(--dur-4) var(--ease-emphasis) both;
         }
 
         @keyframes cardIn {
-            from { opacity:0; transform:translateY(28px) scale(.96); }
+            from { opacity:0; transform:translateY(24px) scale(.965); }
             to   { opacity:1; transform:translateY(0)    scale(1);   }
+        }
+
+        /* Staggered content reveal inside the card */
+        .login-card > .login-header,
+        .login-card > .auth-tabs,
+        .login-card > .auth-form-panel.active,
+        .login-card > .divider,
+        .login-card > .btn-google {
+            opacity: 0;
+            animation: contentRise var(--dur-3) var(--ease-decelerate) forwards;
+        }
+        .login-card > .login-header   { animation-delay: calc(var(--stagger) * 1); }
+        .login-card > .auth-tabs      { animation-delay: calc(var(--stagger) * 2); }
+        .login-card > .auth-form-panel.active { animation-delay: calc(var(--stagger) * 3); }
+        .login-card > .divider        { animation-delay: calc(var(--stagger) * 4); }
+        .login-card > .btn-google     { animation-delay: calc(var(--stagger) * 5); }
+
+        @keyframes contentRise {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .login-card {
@@ -315,7 +352,14 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
-        .alert.show { display: flex; }
+        .alert.show {
+            display: flex;
+            animation: alertRise var(--dur-3) var(--ease-decelerate) both;
+        }
+        @keyframes alertRise {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
         .alert--error {
             background: rgba(248,113,113,.12);
             border: 1px solid rgba(248,113,113,.3);
@@ -405,7 +449,7 @@
             box-shadow: 0 12px 28px rgba(212,175,55,.38), inset 0 1px 0 rgba(255,255,255,.28);
             background: linear-gradient(135deg, rgba(230,198,90,.74), rgba(212,175,55,.56));
         }
-        .btn-primary:active:not(:disabled) { transform: translateY(0); }
+        .btn-primary:active:not(:disabled) { transform: scale(.97); transition-duration: var(--dur-1); }
         .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
 
         .divider {
@@ -451,6 +495,7 @@
             color: #fff;
             transform: translateY(-1px);
         }
+        .btn-google:active { transform: scale(.97); transition-duration: var(--dur-1); }
         .btn-google svg { width: 20px; height: 20px; flex-shrink:0; }
 
         .footer-link {

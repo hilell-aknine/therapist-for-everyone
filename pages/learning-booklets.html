@@ -71,10 +71,16 @@
 
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; }
 
-        .content-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; position: relative; }
-        .content-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 12px 12px 0 0; background: var(--gold); opacity: 0; transition: opacity 0.3s; }
-        .content-card:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3); }
+        .content-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; transition: transform var(--dur-3, .32s) var(--ease-standard, cubic-bezier(.2,0,0,1)), border-color var(--dur-3, .32s) var(--ease-standard, cubic-bezier(.2,0,0,1)), box-shadow var(--dur-3, .32s) var(--ease-standard, cubic-bezier(.2,0,0,1)); cursor: pointer; position: relative; opacity: 0; animation: bk-rise-in var(--dur-4, .5s) var(--ease-decelerate, cubic-bezier(.16,1,.3,1)) both; animation-delay: 60ms; }
+        @keyframes bk-rise-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .cards-grid .content-card:nth-child(2) { animation-delay: calc(60ms + var(--stagger, 60ms)); }
+        .cards-grid .content-card:nth-child(3) { animation-delay: calc(60ms + var(--stagger, 60ms) * 2); }
+        .cards-grid .content-card:nth-child(4) { animation-delay: calc(60ms + var(--stagger, 60ms) * 3); }
+        .cards-grid .content-card:nth-child(n+5) { animation-delay: calc(60ms + var(--stagger, 60ms) * 4); }
+        .content-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 12px 12px 0 0; background: var(--gold); opacity: 0; transition: opacity var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1)); }
+        .content-card:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 14px 44px rgba(0, 0, 0, 0.3); }
         .content-card:hover::before { opacity: 1; }
+        .content-card:active { transform: translateY(-2px); transition-duration: var(--dur-1, .12s); }
         .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
         .card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; background: rgba(212, 175, 55, 0.12); color: var(--gold); }
         .card-badge { padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; background: rgba(212, 175, 55, 0.15); color: var(--gold); }
@@ -82,15 +88,21 @@
         .card-description { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; margin-bottom: 1rem; }
         .card-actions { display: flex; gap: 0.6rem; }
         .btn-view { flex: 1; padding: 0.6rem 1rem; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border: none; border-radius: var(--t-btn-radius, 10px); color: var(--bg-dark); font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+        .btn-view { transition: transform var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1)), box-shadow var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1)); }
         .btn-view:hover { transform: translateY(-1px); box-shadow: 0 4px 15px var(--gold-glow); }
+        .btn-view:active { transform: translateY(0) scale(.97); transition-duration: var(--dur-1, .12s); }
+        .btn-download:active { transform: scale(.97); transition-duration: var(--dur-1, .12s); }
         .btn-download { padding: 0.6rem 0.9rem; background: transparent; border: 1px solid var(--border-color); border-radius: var(--t-btn-radius, 10px); color: var(--text-secondary); font-family: inherit; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: flex; align-items: center; gap: 0.3rem; }
         .btn-download:hover { border-color: var(--gold); color: var(--gold); }
 
         /* Modal */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
-        .modal-overlay.active { display: flex; }
-        .modal-content { width: 100%; max-width: 900px; height: 85vh; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; animation: modalIn 0.3s ease-out; }
+        .modal-overlay.active { display: flex; animation: modalBackdropIn var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1)); }
+        @keyframes modalBackdropIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { width: 100%; max-width: 900px; height: 85vh; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; animation: modalIn var(--dur-3, .32s) var(--ease-emphasis, cubic-bezier(.34,1.4,.5,1)); }
         @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .btn-close-modal { transition: background .2s, border-color .2s, color .2s, transform var(--dur-1, .12s) var(--ease-standard, cubic-bezier(.2,0,0,1)); }
+        .btn-close-modal:active { transform: scale(.92); }
         .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); }
         .modal-header h3 { font-size: 1.1rem; font-weight: 600; }
         .modal-header-actions { display: flex; gap: 0.5rem; }
@@ -113,6 +125,11 @@
             .portal-content { padding: 1.2rem; }
             .cards-grid { grid-template-columns: 1fr; }
             .modal-content { height: 95vh; border-radius: 12px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .content-card, .modal-overlay.active, .modal-content { animation: none !important; opacity: 1 !important; transform: none !important; }
+            .content-card, .btn-view, .btn-download, .btn-close-modal { transition-duration: .01ms !important; }
         }
     </style>
 

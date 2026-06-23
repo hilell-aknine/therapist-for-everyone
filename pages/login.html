@@ -87,6 +87,13 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 2.5rem;
+            opacity: 0;
+            animation: cardRise var(--dur-4, .5s) var(--ease-decelerate, cubic-bezier(.16,1,.3,1)) forwards;
+        }
+
+        @keyframes cardRise {
+            from { opacity: 0; transform: translateY(20px) scale(.985); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .login-header {
@@ -141,12 +148,14 @@
             color: var(--text);
             font-family: inherit;
             font-size: 1rem;
-            transition: border-color 0.2s;
+            transition: border-color var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1)),
+                        box-shadow var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1));
         }
 
         .form-group input:focus {
             outline: none;
             border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow, rgba(212,175,55,.18));
         }
 
         .form-group input::placeholder {
@@ -167,6 +176,12 @@
 
         .error-message.show {
             display: block;
+            animation: msgRise var(--dur-3, .32s) var(--ease-decelerate, cubic-bezier(.16,1,.3,1)) both;
+        }
+
+        @keyframes msgRise {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .success-message {
@@ -182,6 +197,7 @@
 
         .success-message.show {
             display: block;
+            animation: msgRise var(--dur-3, .32s) var(--ease-decelerate, cubic-bezier(.16,1,.3,1)) both;
         }
 
         .btn-login {
@@ -195,7 +211,7 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1)), box-shadow var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -205,6 +221,11 @@
         .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-login:active:not(:disabled) {
+            transform: scale(.97);
+            transition-duration: var(--dur-1, .12s);
         }
 
         .btn-login:disabled {
@@ -247,7 +268,7 @@
             font-size: 0.95rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -257,6 +278,12 @@
         .btn-google:hover {
             border-color: var(--text-secondary);
             background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .btn-google:active {
+            transform: scale(.97);
+            transition-duration: var(--dur-1, .12s);
         }
 
         .btn-google svg {
@@ -343,6 +370,14 @@
         }
         .auth-form-panel { display: none; }
         .auth-form-panel.active { display: block; }
+
+        /* Reduced-motion safety net (page-local; theme.css also covers globally) */
+        @media (prefers-reduced-motion: reduce) {
+            .login-card,
+            .error-message.show,
+            .success-message.show { animation: none !important; opacity: 1 !important; }
+            .btn-login, .btn-google { transition: none !important; }
+        }
     </style>
 
     <!-- === SEO Tags (auto-generated) === -->

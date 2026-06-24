@@ -4,6 +4,7 @@ let portalQuestionnaires = [];
 let portalQLoaded = false;
 let pqFilters = { dateRange: 'all', status: 'all', howFound: 'all', whyNlp: 'all', heat: 'all', sortBy: 'score', gender: 'all', city: 'all', ageMin: '', ageMax: '', dateFrom: '', dateTo: '', occupationSearch: '', lessons: 'all', requestType: 'all' };
 let pqEngagementMap = {};
+let pqGameXpMap = {}; // user_id -> total_xp from the practice game (feature-usage signal)
 let pqCurrentSubView = 'table'; // 'table' | 'caller'
 
 // ============================================================================
@@ -12,9 +13,10 @@ let pqCurrentSubView = 'table'; // 'table' | 'caller'
 
 async function loadPortalQuestionnaires() {
     try {
-        const [allLeadsRes, progRes] = await Promise.all([
+        const [allLeadsRes, progRes, gameRes] = await Promise.all([
             db.rpc('admin_get_all_leads'),
-            db.from('course_progress').select('user_id, completed, watched_seconds, completed_at, updated_at, created_at, video_id').order('completed_at', { ascending: false })
+            db.from('course_progress').select('user_id, completed, watched_seconds, completed_at, updated_at, created_at, video_id').order('completed_at', { ascending: false }),
+            db.from('nlp_game_leaderboard').select('user_id, total_xp')
         ]);
 
         if (allLeadsRes.error) {
@@ -43,6 +45,13 @@ async function loadPortalQuestionnaires() {
             u.watched_seconds += r.watched_seconds || 0;
             const act = r.completed_at || r.updated_at || r.created_at;
             if (act && (!u.last_activity || act > u.last_activity)) u.last_activity = act;
+        });
+
+        // Practice-game usage per user (feature-usage signal; admin_full RLS lets admin read all rows)
+        pqGameXpMap = {};
+        (gameRes?.data || []).forEach(r => {
+            const xp = r.total_xp || 0;
+            if (!pqGameXpMap[r.user_id] || xp > pqGameXpMap[r.user_id]) pqGameXpMap[r.user_id] = xp;
         });
 
         portalQuestionnaires = (allLeadsRes.data || []).map(row => {
@@ -84,7 +93,10 @@ async function loadPortalQuestionnaires() {
                 fitScore: 0
             };
         });
-        portalQuestionnaires.forEach(q => { q.fitScore = calculateFitScore(q); });
+        portalQuestionnaires.forEach(q => {
+            q.fitScore = calculateFitScore(q);
+            if (!q.heat_level) q.heat_level = autoHeatFromActivity(q.fitScore);
+        });
 
         portalQLoaded = true;
         updatePqStats();
@@ -98,15 +110,29 @@ async function loadPortalQuestionnaires() {
 // FIT SCORE
 // ============================================================================
 
+// Activity / engagement score (0-100) — digital-course model: how much they LEARN + how RECENTLY active + FEATURE usage.
+// Replaced the old sales-fit score (clinic / knows-Ram / why-NLP) which is irrelevant now that we sell a digital course.
 function calculateFitScore(q) {
     let s = 0;
-    if (q.why_nlp === 'קליניקה') s += 30; else if (q.why_nlp === 'שילוב בעסק') s += 20; else if (q.why_nlp === 'התפתחות אישית') s += 10;
-    if (q.study_time === 'יותר מ-2 שעות') s += 20; else if (q.study_time === '1-2 שעות') s += 15; else if (q.study_time === '30 דק - שעה') s += 10; else s += 5;
-    if (q.knew_ram === 'כן') s += 10;
-    if (q.motivation_tip?.length > 5) s += 10;
-    if (q.vision_one_year?.length > 5) s += 10;
-    s += Math.min((q.completed_count || 0), 10) * 2;
+    // Learning — up to 50 pts (2 per completed lesson, capped at 25 lessons)
+    s += Math.min(q.completed_count || 0, 25) * 2;
+    // Recency — up to 30 pts (active now vs dormant)
+    if (q.last_activity) {
+        const days = (Date.now() - new Date(q.last_activity).getTime()) / 86400000;
+        if (days <= 7) s += 30; else if (days <= 30) s += 20; else if (days <= 90) s += 10;
+    }
+    // Practice-game usage — up to 20 pts (played +10, scaled by XP up to +10)
+    const xp = (typeof pqGameXpMap !== 'undefined' && pqGameXpMap[q.user_id]) || 0;
+    if (xp > 0) s += 10 + Math.min(Math.floor(xp / 200), 10);
     return Math.min(s, 100);
+}
+
+// Derive a heat level from the activity score (a manual heat_level stored in the DB still overrides this).
+function autoHeatFromActivity(score) {
+    if (score >= 70) return 'hot';
+    if (score >= 40) return 'warm';
+    if (score >= 15) return 'cold';
+    return null; // registered but ~zero engagement — the truly dormant
 }
 
 function scoreClass(s) { return s >= 70 ? 'pq-score-high' : s >= 40 ? 'pq-score-mid' : 'pq-score-low'; }

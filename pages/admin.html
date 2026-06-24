@@ -497,7 +497,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon gold"><i class="fa-solid fa-star"></i></div>
-                            <div><div class="stat-value" id="stat-portal-q-avg-score">0</div><div class="stat-label">ציון ממוצע</div></div>
+                            <div><div class="stat-value" id="stat-portal-q-avg-score">0</div><div class="stat-label">פעילות ממוצעת</div></div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon" style="background:rgba(248,81,73,0.12);color:#f85149;"><i class="fa-solid fa-fire"></i></div>
@@ -544,6 +544,29 @@
                             <option value="cold">❄️ קר</option>
                             <option value="none">לא סווג</option>
                         </select>
+                        <select id="pq-filter-lessons" onchange="applyPqFilters()">
+                            <option value="all">שיעורים: הכל</option>
+                            <option value="silent">🔇 שקטים (לא הזיזו אצבע)</option>
+                            <option value="0">לא למד עדיין (0)</option>
+                            <option value="1-5">1-5 שיעורים</option>
+                            <option value="6-10">6-10 שיעורים</option>
+                            <option value="11+">11+ שיעורים</option>
+                        </select>
+                        <select id="pq-filter-sort" onchange="applyPqFilters()">
+                            <option value="score">מיון: פעילות</option>
+                            <option value="heat">מיון: חום</option>
+                            <option value="views">מיון: צפיות</option>
+                            <option value="date">מיון: תאריך</option>
+                        </select>
+                        <button class="pq-btn" onclick="document.getElementById('pq-advanced-row').classList.toggle('open')" style="font-size:0.75rem;padding:0.3rem 0.6rem;background:rgba(212,175,55,0.08);color:#D4AF37;border:1px solid rgba(212,175,55,0.25);border-radius:8px;cursor:pointer;">
+                            <i class="fa-solid fa-sliders"></i> סינון מתקדם
+                        </button>
+                        <button class="pq-btn" onclick="resetPqFilters()" style="font-size:0.75rem;padding:0.3rem 0.6rem;background:rgba(232,241,242,0.06);color:rgba(232,241,242,0.5);border:1px solid rgba(232,241,242,0.1);border-radius:8px;cursor:pointer;">
+                            <i class="fa-solid fa-rotate-left"></i> נקה
+                        </button>
+                        <span id="pq-results-count" style="font-size:0.8rem;color:rgba(232,241,242,0.5);"></span>
+                    </div>
+                    <div id="pq-advanced-row" class="pq-advanced-filters">
                         <select id="pq-filter-source" onchange="applyPqFilters()">
                             <option value="all">מקור: הכל</option>
                         </select>
@@ -558,29 +581,6 @@
                         <select id="pq-filter-why" onchange="applyPqFilters()">
                             <option value="all">למה NLP: הכל</option>
                         </select>
-                        <select id="pq-filter-lessons" onchange="applyPqFilters()">
-                            <option value="all">שיעורים: הכל</option>
-                            <option value="silent">🔇 שקטים (לא הזיזו אצבע)</option>
-                            <option value="0">לא למד עדיין (0)</option>
-                            <option value="1-5">1-5 שיעורים</option>
-                            <option value="6-10">6-10 שיעורים</option>
-                            <option value="11+">11+ שיעורים</option>
-                        </select>
-                        <select id="pq-filter-sort" onchange="applyPqFilters()">
-                            <option value="score">מיון: ציון</option>
-                            <option value="heat">מיון: חום</option>
-                            <option value="views">מיון: צפיות</option>
-                            <option value="date">מיון: תאריך</option>
-                        </select>
-                        <button class="pq-btn" onclick="document.getElementById('pq-advanced-row').classList.toggle('open')" style="font-size:0.75rem;padding:0.3rem 0.6rem;background:rgba(212,175,55,0.08);color:#D4AF37;border:1px solid rgba(212,175,55,0.25);border-radius:8px;cursor:pointer;">
-                            <i class="fa-solid fa-sliders"></i> סינון מתקדם
-                        </button>
-                        <button class="pq-btn" onclick="resetPqFilters()" style="font-size:0.75rem;padding:0.3rem 0.6rem;background:rgba(232,241,242,0.06);color:rgba(232,241,242,0.5);border:1px solid rgba(232,241,242,0.1);border-radius:8px;cursor:pointer;">
-                            <i class="fa-solid fa-rotate-left"></i> נקה
-                        </button>
-                        <span id="pq-results-count" style="font-size:0.8rem;color:rgba(232,241,242,0.5);"></span>
-                    </div>
-                    <div id="pq-advanced-row" class="pq-advanced-filters">
                         <select id="pq-filter-gender" onchange="applyPqFilters()">
                             <option value="all">מין: הכל</option>
                         </select>
@@ -605,9 +605,6 @@
                                     <i class="fa-solid fa-search"></i>
                                     <input type="text" placeholder="חיפוש..." id="portal-q-search" oninput="renderPortalQuestionnaires()">
                                 </div>
-                                <select id="portal-q-source-filter" class="source-filter" onchange="setSourceFilter('portal_q', this.value)" title="סינון לפי מקור">
-                                    <option value="all">כל המקורות</option>
-                                </select>
                             </div>
                             <table>
                                 <thead>
@@ -616,7 +613,7 @@
                                         <th>מקור</th>
                                         <th>טלפון</th>
                                         <th>עיר</th>
-                                        <th>ציון</th>
+                                        <th>פעילות</th>
                                         <th>חום</th>
                                         <th>שיעורים</th>
                                         <th>סטטוס</th>

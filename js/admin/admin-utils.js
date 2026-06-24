@@ -9,6 +9,8 @@ const VIEW_GROUPS = {
     'learning': { views: ['leads', 'learners', 'portal-q'], header: 'learning-header', default: 'portal-q' },
     'bot':      { views: ['bot'], header: null, default: 'bot' },
     'paid':     { views: ['paid'], header: null, default: 'paid' },
+    'ai-cost':  { views: ['ai-cost'], header: null, default: 'ai-cost' },
+    'mentor-insights': { views: ['mentor-insights'], header: null, default: 'mentor-insights' },
     'referrals':{ views: ['referrals'], header: null, default: 'referrals' },
     'popups':   { views: ['popups'], header: null, default: 'popups' },
     'segments': { views: ['segments'], header: null, default: 'segments' },
@@ -63,6 +65,8 @@ function switchView(view) {
     if (view === 'funnel' || group.default === 'pipeline') { if (typeof loadPipeline === 'function') loadPipeline(); }
     if (view === 'outreach') { if (typeof loadOutreach === 'function') loadOutreach(); }
     if (view === 'paid' || group.default === 'paid') loadPaidCustomers();
+    if (view === 'ai-cost') { if (typeof loadAiCost === 'function') loadAiCost(); }
+    if (view === 'mentor-insights') { if (typeof loadInsights === 'function') loadInsights(); }
     if (view === 'referrals' || group.default === 'referrals') loadReferralAnalytics();
     if (view === 'popups' || group.default === 'popups') loadPopupConfigs();
     if (view === 'segments' || group.default === 'segments') loadSegments();

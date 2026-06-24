@@ -14,6 +14,18 @@ const OPENROUTER_FALLBACK = 'nvidia/nemotron-3-nano-30b-a3b:free'
 const GEMINI_MODEL = 'gemini-2.0-flash'
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
+// ===== Claude Sonnet (primary smart model) + monthly budget cap =====
+// The mentor now answers with claude-sonnet-4-6. A hard monthly ₪ ceiling,
+// shared across both mentors (ai-chat + gemini-mentor), protects spend: once
+// the month's Sonnet cost reaches the cap we silently fall back to Gemini.
+// Cost is derived from tokens logged on source='chat-sonnet'/'mentor-sonnet'.
+const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY') || ''
+const SONNET_MODEL = 'claude-sonnet-4-6'
+const SONNET_IN_USD = Number(Deno.env.get('SONNET_IN_USD')) || 3      // $/1M input tokens
+const SONNET_OUT_USD = Number(Deno.env.get('SONNET_OUT_USD')) || 15   // $/1M output tokens
+const USD_ILS = Number(Deno.env.get('USD_ILS')) || 3.8               // conservative FX (cap never overshoots)
+const AI_MONTHLY_CAP_ILS = Number(Deno.env.get('AI_MONTHLY_CAP_ILS')) || 100
+
 // ===== SYSTEM PROMPT =====
 // Split into HEADER (role/style) + RULES so the knowledge base can be injected
 // PER REQUEST, scoped to the current lesson — instead of baking the full ~65KB
@@ -41,7 +53,9 @@ const SYSTEM_PROMPT_RULES = `## כללים:
 6. השתמש בדוגמאות ובסיפורים מהקורס כדי להמחיש נקודות.
 7. אם התלמיד שואל מחוץ לנושאי NLP — ענה בקצרה והפנה בעדינות חזרה לחומר.
 8. כשאתה לא בטוח — הודה בזה.
-9. אם התלמיד מבקש תרגול — תן תרגול מעשי שאפשר לעשות לבד.`
+9. אם התלמיד מבקש תרגול — תן תרגול מעשי שאפשר לעשות לבד.
+10. הישאר אך ורק בתוך תוכן הקורס וה-NLP. אם השאלה אינה קשורה לקורס — דחה בנימוס במשפט אחד והחזר את התלמיד לחומר. אל תיגרר לנושאים אחרים.
+11. כשמתאים פדגוגית (התלמיד אומר שהבין, או מתקשה במושג) — אתה רשאי להציע *כשאלה* קצרה: "רוצה לבדוק שהבנת דרך דמות או סצנה מסדרה/סרט שאתה מכיר?" וקשר את המושג מהקורס לדוגמה שהתלמיד מכיר, כדי להכניס אותו לחיי היומיום. הצע זאת רק כשזה תורם, לא בכל הודעה, ותמיד מתוך מושגי הקורס.`
 
 // ===== MASTER COURSE SYSTEM PROMPT =====
 // Used when courseType === 'master'. Tone is advanced/practitioner-trainer level.
@@ -68,7 +82,9 @@ const SYSTEM_PROMPT_MASTER_RULES = `## כללים:
 6. כשמסביר טכניקה — כלול שיקולים קליניים: מתי כן, מתי לא, טעויות נפוצות.
 7. אם שאלה יוצאת מגדר נושאי הקורס — ענה בקצרה והחזר לחומר.
 8. כשאתה לא בטוח — הודה בזה בכנות מקצועית.
-9. אם מבקשים תרגול — תן תרגול ברמת "אפשר להשתמש בקליניקה מחר".`
+9. אם מבקשים תרגול — תן תרגול ברמת "אפשר להשתמש בקליניקה מחר".
+10. הישאר אך ורק בתוך תוכן הקורס וה-NLP. שאלה שאינה קשורה לקורס — דחה בנימוס במשפט אחד והחזר לחומר.
+11. כשמתאים פדגוגית — אתה רשאי להציע *כשאלה* לבדוק הבנה דרך דמות/סצנה מסדרה או סרט שהתלמיד מכיר, כדי לחבר את המושג לחיי היומיום. רק כשזה תורם, לא בכל הודעה, ותמיד מתוך מושגי הקורס.`
 
 // ===== Knowledge base scoping =====
 // Parse a knowledge base string ONCE at module load into: a small preamble,
@@ -186,6 +202,65 @@ async function callOpenRouter(messages: Array<{ role: string; content: string }>
   return { reply, promptTokens: Number(data.usage?.prompt_tokens) || 0, completionTokens: Number(data.usage?.completion_tokens) || 0, provider: `openrouter:${model}` }
 }
 
+// ── Claude Sonnet (primary). System is split into a STABLE block (role + scoped
+// knowledge + rules) that is prompt-cached, and a VOLATILE block (per-student
+// profile + lesson note) that is not — so repeat questions on the same lesson
+// read the big knowledge block from cache (~10x cheaper input). ──
+async function callSonnet(systemStable: string, systemVolatile: string, convo: Array<{ role: string; content: string }>) {
+  if (!ANTHROPIC_API_KEY) return null
+  const system: Array<Record<string, unknown>> = [
+    { type: 'text', text: systemStable, cache_control: { type: 'ephemeral' } },
+  ]
+  if (systemVolatile && systemVolatile.trim()) system.push({ type: 'text', text: systemVolatile })
+  const messages = convo.map(m => ({
+    role: (m.role === 'assistant' || m.role === 'model') ? 'assistant' : 'user',
+    content: m.content,
+  }))
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ model: SONNET_MODEL, max_tokens: 4096, thinking: { type: 'disabled' }, system, messages }),
+    })
+    if (!res.ok) { console.error(`[Sonnet] ${res.status}: ${await res.text()}`); return null }
+    const data = await res.json()
+    const reply = (data.content || []).filter((b: { type?: string }) => b.type === 'text').map((b: { text?: string }) => b.text || '').join('').trim()
+    if (!reply) return null
+    const u = data.usage || {}
+    // prompt_tokens = all input (fresh + cache write + cache read); priced conservatively at full input rate.
+    const promptTokens = (Number(u.input_tokens) || 0) + (Number(u.cache_creation_input_tokens) || 0) + (Number(u.cache_read_input_tokens) || 0)
+    const completionTokens = Number(u.output_tokens) || 0
+    return { reply, promptTokens, completionTokens, provider: 'sonnet' }
+  } catch (e) { console.error('[Sonnet] error', e); return null }
+}
+
+// First day of the current month in Asia/Jerusalem, as 'YYYY-MM-01' (DATE compare).
+function monthStartIsrael(): string {
+  const ym = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit' }).format(new Date())
+  return `${ym}-01`
+}
+
+// Month-to-date Sonnet spend in ₪, shared across both mentors. Conservative:
+// every input token billed at full input rate (cache reads are actually cheaper),
+// so the real spend is always ≤ this number → the cap can never be overshot.
+// deno-lint-ignore no-explicit-any
+async function monthlyCostShekel(supabaseAdmin: any): Promise<number> {
+  const since = monthStartIsrael()
+  const { data } = await supabaseAdmin
+    .from('ai_chat_usage')
+    .select('prompt_tokens, completion_tokens')
+    .in('source', ['chat-sonnet', 'mentor-sonnet'])
+    .gte('date', since)
+  let pt = 0, ct = 0
+  for (const r of (data || []) as Array<{ prompt_tokens?: number; completion_tokens?: number }>) { pt += Number(r.prompt_tokens) || 0; ct += Number(r.completion_tokens) || 0 }
+  const usd = (pt * SONNET_IN_USD + ct * SONNET_OUT_USD) / 1_000_000
+  return usd * USD_ILS
+}
+
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req)
 
@@ -247,19 +322,20 @@ serve(async (req) => {
       )
     }
 
-    // --- Rate limiting ---
+    // --- Rate limiting (daily, per user) ---
+    // Count BOTH model rows for this mentor: 'chat' (Gemini fallback) + 'chat-sonnet'
+    // (Sonnet). The daily limit is on total messages regardless of which model answered.
     const today = new Date().toISOString().split('T')[0]
-    // Scope to source='chat' — gemini-mentor writes source='mentor' rows for the
-    // same (user, date), which previously made this .single() match 2 rows.
-    const { data: usage } = await supabaseAdmin
+    const { data: usageRows } = await supabaseAdmin
       .from('ai_chat_usage')
-      .select('message_count, prompt_tokens, completion_tokens')
+      .select('source, message_count, prompt_tokens, completion_tokens')
       .eq('user_id', user.id)
       .eq('date', today)
-      .eq('source', 'chat')
-      .maybeSingle()
+      .in('source', ['chat', 'chat-sonnet'])
 
-    const currentCount = usage?.message_count || 0
+    const rowBySource: Record<string, { message_count?: number; prompt_tokens?: number; completion_tokens?: number }> = {}
+    let currentCount = 0
+    for (const r of (usageRows || [])) { rowBySource[r.source] = r; currentCount += Number(r.message_count) || 0 }
 
     if (currentCount >= DAILY_LIMIT) {
       return new Response(
@@ -321,37 +397,42 @@ serve(async (req) => {
     // Route to master KB when isMaster, otherwise use practitioner KB (unchanged behaviour).
     const knowledge = selectKnowledge(lessonContext, isMaster)
 
-    // Assemble system prompt: header (role/tone) + KB + rules + student profile + context.
-    // Master course uses dedicated header and rules; practitioner path is byte-for-byte unchanged.
+    // Assemble system prompt. STABLE block (cached by Sonnet across users on the same
+    // lesson) = header + scoped KB + rules. VOLATILE block = per-student profile +
+    // current-lesson note (changes per request, so it sits after the cache breakpoint).
     const promptHeader = isMaster ? SYSTEM_PROMPT_MASTER_HEADER : SYSTEM_PROMPT_HEADER
     const promptRules = isMaster ? SYSTEM_PROMPT_MASTER_RULES : SYSTEM_PROMPT_RULES
 
-    const fullSystemPrompt =
+    const stableSystem =
       promptHeader +
       '\n\n## בסיס הידע שלך:\n' + knowledge.text +
-      '\n\n' + promptRules +
-      studentProfile + contextNote
+      '\n\n' + promptRules
+    const volatileSystem = (studentProfile + contextNote).trim()
+    const fullSystemPrompt = volatileSystem ? stableSystem + '\n' + volatileSystem : stableSystem
 
-    // --- Build messages for OpenRouter (OpenAI-compatible format) ---
-    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
-      { role: 'system', content: fullSystemPrompt }
-    ]
+    // Conversation turns (history + new question), shared by every provider.
+    const convo: Array<{ role: string; content: string }> = []
     for (const m of history) {
-      const role = (m.role === 'model' || m.role === 'assistant') ? 'assistant' as const : 'user' as const
-      messages.push({ role, content: m.content })
+      const role = (m.role === 'model' || m.role === 'assistant') ? 'assistant' : 'user'
+      convo.push({ role, content: m.content })
     }
-    messages.push({ role: 'user', content: message })
+    convo.push({ role: 'user', content: message })
 
-    // --- Call AI: Gemini (primary, free + generous) → OpenRouter free → OpenRouter fallback ---
-    // Mirrors the resilient dual-provider pattern proven in gemini-mentor. The OpenAI-format
-    // `messages` array holds [system, ...history, user]; Gemini wants the system prompt separate
-    // from the convo turns, so split them out for that path only.
-    const systemContent = messages[0].content
-    const convo = messages.slice(1)
+    // OpenRouter (OpenAI-compatible) wants the system prompt as the first message.
+    const messagesForOR: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+      { role: 'system', content: fullSystemPrompt },
+      ...convo.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+    ]
 
-    let result = await callGemini(systemContent, convo)
-    if (!result) { console.log('[ai-chat] Gemini unavailable → OpenRouter primary'); result = await callOpenRouter(messages, MODEL) }
-    if (!result) { console.log('[ai-chat] OpenRouter primary failed → OpenRouter fallback'); result = await callOpenRouter(messages, OPENROUTER_FALLBACK) }
+    // --- Call AI: Sonnet (primary, smart) within budget → Gemini → OpenRouter x2 ---
+    // Budget gate: once the month's shared Sonnet spend reaches the cap, skip Sonnet
+    // and serve from the free model so the mentor keeps working at zero extra cost.
+    const overBudget = (await monthlyCostShekel(supabaseAdmin)) >= AI_MONTHLY_CAP_ILS
+
+    let result = overBudget ? null : await callSonnet(stableSystem, volatileSystem, convo)
+    if (!result) { if (!overBudget) console.log('[ai-chat] Sonnet unavailable → Gemini'); result = await callGemini(fullSystemPrompt, convo) }
+    if (!result) { console.log('[ai-chat] Gemini failed → OpenRouter primary'); result = await callOpenRouter(messagesForOR, MODEL) }
+    if (!result) { console.log('[ai-chat] OpenRouter primary failed → OpenRouter fallback'); result = await callOpenRouter(messagesForOR, OPENROUTER_FALLBACK) }
 
     if (!result) {
       console.error('[ai-chat] All providers failed (Gemini + OpenRouter x2)')
@@ -362,34 +443,24 @@ serve(async (req) => {
     }
 
     const reply = result.reply
-    // --- Usage accounting (efficiency monitoring) ---
     const promptTokens = result.promptTokens
     const completionTokens = result.completionTokens
 
-    // --- Increment quota + token totals ONLY after successful response ---
-    if (usage) {
-      await supabaseAdmin
-        .from('ai_chat_usage')
-        .update({
-          message_count: currentCount + 1,
-          prompt_tokens: (usage.prompt_tokens || 0) + promptTokens,
-          completion_tokens: (usage.completion_tokens || 0) + completionTokens
-        })
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .eq('source', 'chat')
-    } else {
-      await supabaseAdmin
-        .from('ai_chat_usage')
-        .insert({
-          user_id: user.id,
-          message_count: 1,
-          date: today,
-          source: 'chat',
-          prompt_tokens: promptTokens,
-          completion_tokens: completionTokens
-        })
-    }
+    // --- Log usage to the row matching the model that answered ---
+    // Sonnet → 'chat-sonnet' (the billable rows the budget cap + cost panel read);
+    // Gemini/OpenRouter fallback → 'chat' (free). Each source keeps its own totals.
+    const logSource = result.provider === 'sonnet' ? 'chat-sonnet' : 'chat'
+    const prev = rowBySource[logSource] || {}
+    await supabaseAdmin
+      .from('ai_chat_usage')
+      .upsert({
+        user_id: user.id,
+        date: today,
+        source: logSource,
+        message_count: (Number(prev.message_count) || 0) + 1,
+        prompt_tokens: (Number(prev.prompt_tokens) || 0) + promptTokens,
+        completion_tokens: (Number(prev.completion_tokens) || 0) + completionTokens,
+      }, { onConflict: 'user_id,date,source' })
 
     return new Response(
       JSON.stringify({

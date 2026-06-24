@@ -218,9 +218,19 @@
   }
 
   // ---- networking ----
+  // `db` is a top-level `const` in admin-state.js → it's a global LEXICAL binding
+  // (bare `db`), NOT a property on window. Resolve it safely across both forms.
+  function getDb() {
+    try { if (typeof db !== 'undefined' && db) return db; } catch (e) { /* TDZ / not defined */ }
+    if (window.db) return window.db;                            // in case it's on window
+    return null;
+  }
+
   async function getToken() {
     try {
-      var s = await window.db.auth.getSession();
+      var client = getDb();
+      if (!client) return null;
+      var s = await client.auth.getSession();
       return s && s.data && s.data.session ? s.data.session.access_token : null;
     } catch (e) { return null; }
   }
@@ -293,8 +303,10 @@
   }
 
   // ---- boot ----
+  var bootTries = 0;
   function boot() {
-    if (!window.db) {            // admin-state.js not ready yet — retry briefly
+    if (!getDb() && bootTries < 40) {   // admin-state.js not ready yet — retry briefly (~12s max)
+      bootTries++;
       return setTimeout(boot, 300);
     }
     injectStyles();

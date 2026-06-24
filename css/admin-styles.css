@@ -42,51 +42,92 @@ body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--tex
 
 .main { display: flex; min-height: calc(100vh - 60px); }
 
+/* ── Piano-style icon rail — fixed narrow width, always dark, icons + tiny
+   labels, gold "pressed-key" hover. Never cuts text (no wide text column). ── */
 .sidebar {
-    width: 220px;
-    background: var(--card);
-    border-left: 1px solid var(--border);
-    padding: 1.5rem 1rem;
+    width: 76px;
+    flex-shrink: 0;
+    background: #15191c;
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0.6rem 0;
     overflow-y: auto;
+    overflow-x: hidden;
     max-height: calc(100vh - 60px);
-}
-.nav-item {
     display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 0.8rem 1rem;
-    color: var(--text-secondary);
-    text-decoration: none;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
-.nav-item:hover, .nav-item.active { background: rgba(212, 175, 55, 0.1); color: var(--gold); }
-.nav-item .badge {
-    margin-right: auto;
-    background: var(--gold);
-    color: var(--bg);
-    padding: 0.1rem 0.5rem;
+.sidebar::-webkit-scrollbar { width: 5px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+
+.nav-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 0.5rem 0.2rem;
+    margin: 0 0.35rem;
+    color: rgba(232, 241, 242, 0.55);
+    text-decoration: none;
     border-radius: 10px;
-    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease;
+    text-align: center;
+}
+.nav-item i { font-size: 1.05rem; }
+.nav-item span:not(.badge) {
+    font-size: 0.6rem;
+    line-height: 1.15;
+    font-weight: 600;
+    max-width: 66px;
+    white-space: normal;
+    word-break: break-word;
+}
+.nav-item:hover { background: rgba(212, 175, 55, 0.12); color: #D4AF37; }
+.nav-item.active { background: rgba(212, 175, 55, 0.18); color: #D4AF37; }
+/* gold "pressed key" accent on the inner (right, RTL) edge */
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 18%;
+    bottom: 18%;
+    width: 3px;
+    border-radius: 3px;
+    background: #D4AF37;
+}
+.nav-item .badge {
+    position: absolute;
+    top: 3px;
+    left: 6px;
+    margin: 0;
+    background: var(--gold);
+    color: #15191c;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    font-size: 0.6rem;
     font-weight: 700;
+    text-align: center;
 }
 
+/* section headers collapse to a thin divider in the narrow rail */
 .nav-section {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--gold);
-    letter-spacing: 0.03em;
-    padding: 0.5rem 1rem 0.25rem;
-    margin-top: 0.7rem;
-    opacity: 0.75;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
+    height: 0;
+    font-size: 0;
+    padding: 0;
+    margin: 0.5rem 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
 }
-.nav-section:first-child { margin-top: 0; }
-.nav-section i { font-size: 0.65rem; }
+.nav-section i { display: none; }
+.nav-section:first-child { display: none; }
 
 /* Sub-tabs within combined views */
 .view-group-header {
@@ -1417,76 +1458,21 @@ th { background: #003B46 !important; color: #fff !important; }
 .pipeline-radio-group label:hover { border-color: var(--gold); }
 .pipeline-radio-group input[type="radio"] { accent-color: var(--gold); }
 
-/* ── Mobile sidebar drawer ───────────────────────────────
-   Desktop: sidebar is always visible (unchanged); hamburger + backdrop hidden.
-   Mobile (≤768px): the fixed-width sidebar used to be squeezed by the flex row
-   into a thin strip with truncated Hebrew. Now it slides in as a clean drawer
-   from the right (RTL), toggled by the header hamburger, over a dim backdrop. */
-.nav-toggle { display: none; }
-.sidebar-backdrop { display: none; }
+/* ── The piano rail is always visible and narrow, so the old hamburger/
+   off-canvas drawer is no longer needed — keep both hidden. ── */
+.nav-toggle { display: none !important; }
+.sidebar-backdrop { display: none !important; }
 
 @media (max-width: 768px) {
-    /* Keep the header (and its hamburger) reachable while content scrolls */
-    .header {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        padding: 0.7rem 1rem;
-    }
-    .nav-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        color: var(--gold);
-        font-size: 1.4rem;
-        cursor: pointer;
-        padding: 0.2rem 0.4rem;
-        margin-inline-end: 0.4rem;
-        line-height: 1;
-    }
-
-    /* Stop the flex row from shrinking the sidebar; content goes full width */
-    .main { display: block; }
-    .content { padding: 1.2rem 1rem; }
-    /* The off-canvas drawer (translateX past the right edge) must not create a
-       horizontal-scroll gutter while closed. Clip at the root too. */
+    .header { position: sticky; top: 0; z-index: 100; padding: 0.7rem 0.8rem; }
+    .content { padding: 1.2rem 0.8rem; }
+    .sidebar { width: 62px; }
+    .nav-item span:not(.badge) { font-size: 0.55rem; max-width: 52px; }
     html, body { overflow-x: hidden; max-width: 100%; }
-
-    .sidebar {
-        position: fixed;
-        top: 0;
-        right: 0;
-        height: 100vh;
-        height: 100dvh;
-        width: min(82vw, 300px);
-        max-height: none;
-        transform: translateX(100%);          /* off-canvas to the right (RTL) */
-        transition: transform 0.28s ease;
-        z-index: 300;
-        box-shadow: -8px 0 28px rgba(0, 0, 0, 0.22);
-        padding-top: 1rem;
-    }
-    .sidebar.open { transform: translateX(0); }
-
-    .sidebar-backdrop {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.28s ease, visibility 0.28s ease;
-        z-index: 250;
-    }
-    .sidebar-backdrop.open { opacity: 1; visibility: visible; }
-
-    body.sidebar-open { overflow: hidden; }   /* lock background scroll while open */
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .sidebar, .sidebar-backdrop { transition: none; }
+    .nav-item { transition: none; }
 }
 
 /* ── "ניהול לידים" (portal-q) filter bar — shipped fully UNSTYLED, so the

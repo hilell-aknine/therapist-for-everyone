@@ -72,42 +72,15 @@
                     <span>ניהול לידים</span>
                     <span class="badge" id="learning-count">…</span>
                 </div>
-                <div class="nav-item" onclick="enterTrainingLeadsView()">
-                    <i class="fa-solid fa-graduation-cap" style="color:#D4AF37;"></i>
-                    <span>לידי הכשרה</span>
-                    <span class="badge" id="training-leads-badge" style="background:#D4AF37;color:#003B46;">…</span>
-                </div>
                 <div class="nav-item" onclick="switchView('funnel')">
                     <i class="fa-solid fa-filter-circle-dollar"></i>
                     <span>Pipeline</span>
                     <span class="badge" id="funnel-count">…</span>
                 </div>
-                <div class="nav-item" onclick="switchView('outreach')">
-                    <i class="fa-solid fa-bullhorn" style="color:#D4AF37;"></i>
-                    <span>פנייה מחדש</span>
-                    <span class="badge" id="outreach-count" style="background:#D4AF37;color:#003B46;">…</span>
-                </div>
                 <div class="nav-item" onclick="switchView('paid')">
                     <i class="fa-solid fa-crown" style="color:#D4AF37;"></i>
                     <span>לקוחות משלמים</span>
                     <span class="badge" id="paid-count-badge" style="background:#D4AF37;color:#003B46;">…</span>
-                </div>
-
-                <div class="nav-section"><i class="fa-solid fa-brain"></i> מורה AI</div>
-                <div class="nav-item" onclick="switchView('ai-cost')">
-                    <i class="fa-solid fa-shekel-sign" style="color:#D4AF37;"></i>
-                    <span>עלות מורה AI</span>
-                </div>
-                <div class="nav-item" onclick="switchView('mentor-insights')">
-                    <i class="fa-solid fa-lightbulb" style="color:#D4AF37;"></i>
-                    <span>תובנות מהמורה</span>
-                </div>
-
-                <div class="nav-section"><i class="fa-solid fa-hand-holding-heart"></i> מיזם חברתי</div>
-                <div class="nav-item" onclick="switchView('mizum')">
-                    <i class="fa-solid fa-heart-pulse"></i>
-                    <span>מיזם</span>
-                    <span class="badge" id="mizum-count">…</span>
                 </div>
 
                 <div class="nav-section"><i class="fa-solid fa-chart-line"></i> תנועה ונתונים</div>
@@ -129,10 +102,6 @@
                 <div class="nav-item" onclick="switchView('popups')">
                     <i class="fa-solid fa-window-restore" style="color:#2F8592;"></i>
                     <span>פופאפים</span>
-                </div>
-                <div class="nav-item" onclick="switchView('segments')">
-                    <i class="fa-solid fa-chart-pie" style="color:#D4AF37;"></i>
-                    <span>פילוח ופילטרים</span>
                 </div>
                 <div class="nav-item" onclick="switchView('automations')">
                     <i class="fa-solid fa-bolt" style="color:#D4AF37;"></i>
@@ -156,20 +125,6 @@
                 <div id="overview-view">
                     <h1 class="page-title"><i class="fa-solid fa-house" style="color:var(--gold);margin-left:0.5rem;"></i> סקירה כללית</h1>
                     <div class="overview-grid">
-                        <div class="overview-card" onclick="enterTrainingLeadsView()" style="border:1px solid rgba(212,175,55,0.35);">
-                            <div class="overview-card-icon" style="background:rgba(212,175,55,0.18);color:var(--gold);">
-                                <i class="fa-solid fa-graduation-cap"></i>
-                            </div>
-                            <div class="overview-card-body">
-                                <div class="overview-card-title">לידי הכשרה <span id="ov-training-new-badge" style="display:none;background:#f85149;color:#fff;font-size:0.7rem;padding:0.1rem 0.45rem;border-radius:10px;margin-right:0.4rem;font-weight:600;">חדש</span></div>
-                                <div class="overview-card-stats">
-                                    <span><strong id="ov-training-total">0</strong> בקשות</span>
-                                    <span><strong id="ov-training-week">0</strong> השבוע</span>
-                                    <span><strong id="ov-training-uncalled">0</strong> ממתינים לחזרה</span>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
-                        </div>
                         <div class="overview-card" onclick="enterAllLeadsView()">
                             <div class="overview-card-icon" style="background:rgba(212,175,55,0.12);color:var(--gold);">
                                 <i class="fa-solid fa-clipboard-list"></i>
@@ -193,20 +148,6 @@
                                 <div class="overview-card-title">לקוחות משלמים</div>
                                 <div class="overview-card-stats">
                                     <span><strong id="ov-paid-count">…</strong> מנויים פעילים</span>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
-                        </div>
-                        <div class="overview-card" onclick="switchView('mizum')">
-                            <div class="overview-card-icon" style="background:rgba(0,96,107,0.12);color:var(--muted-teal);">
-                                <i class="fa-solid fa-hand-holding-heart"></i>
-                            </div>
-                            <div class="overview-card-body">
-                                <div class="overview-card-title">מיזם חברתי</div>
-                                <div class="overview-card-stats">
-                                    <span><strong id="ov-patients">0</strong> מטופלים</span>
-                                    <span><strong id="ov-therapists">0</strong> מטפלים</span>
-                                    <span><strong id="ov-matches">0</strong> שידוכים</span>
                                 </div>
                             </div>
                             <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
@@ -608,7 +549,6 @@
                         </select>
                         <select id="pq-filter-request-type" onchange="applyPqFilters()">
                             <option value="all">סוג ליד: הכל</option>
-                            <option value="training">🎓 הכשרה</option>
                             <option value="patient">מטופל</option>
                             <option value="general">כללי</option>
                             <option value="whatsapp_manual">📱 בוט (WhatsApp)</option>
@@ -2233,7 +2173,6 @@
                                 </div>
                                 <select id="setting-default-view" class="settings-input">
                                     <option value="overview" selected>דף בית</option>
-                                    <option value="mizum">מיזם חברתי</option>
                                     <option value="sales">לידים ומכירות</option>
                                     <option value="learning">לומדים</option>
                                     <option value="bot">בוט CRM</option>
@@ -2453,7 +2392,6 @@
                                     <option value="https://www.therapist-home.com/">דף הבית</option>
                                     <option value="https://www.therapist-home.com/pages/free-portal.html">פורטל חינמי</option>
                                     <option value="https://www.therapist-home.com/pages/course-library-v2.html">ספריית הקורסים</option>
-                                    <option value="https://www.therapist-home.com/pages/about.html">המיזם החברתי</option>
                                 </select>
                             </div>
                             <div class="settings-row">

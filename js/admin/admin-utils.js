@@ -156,11 +156,6 @@ function updateOverview() {
     if (hotLeads > 0) recentItems.push(`<i class="fa-solid fa-fire" style="color:#f85149;"></i> ${hotLeads} לידים רותחים ממתינים לטיפול`);
     const potential = pq.filter(q => q.status === 'potential').length;
     if (potential > 0) recentItems.push(`<i class="fa-solid fa-star" style="color:var(--gold);"></i> ${potential} לידים פוטנציאליים`);
-    // Social cause
-    const newPatients = patients.filter(p => p.status === 'new').length;
-    const newTherapists = therapists.filter(t => t.status === 'new').length;
-    if (newPatients > 0) recentItems.push(`<i class="fa-solid fa-user-injured" style="color:var(--muted-teal);"></i> ${newPatients} מטופלים חדשים ממתינים`);
-    if (newTherapists > 0) recentItems.push(`<i class="fa-solid fa-user-doctor" style="color:var(--muted-teal);"></i> ${newTherapists} מטפלים חדשים ממתינים לאישור`);
     if (recentItems.length === 0) recentItems.push('אין פעילות חדשה');
 
     recentEl.innerHTML = recentItems.map(item => `<div style="padding:0.5rem 0;border-bottom:1px solid var(--border);">${item}</div>`).join('');

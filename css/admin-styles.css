@@ -1416,3 +1416,75 @@ th { background: #003B46 !important; color: #fff !important; }
 .pipeline-radio-group label { display: flex; align-items: center; gap: 0.3rem; padding: 0.4rem 0.8rem; background: var(--bg); border-radius: 20px; cursor: pointer; font-size: 0.85rem; border: 1px solid var(--border); transition: all 0.2s; }
 .pipeline-radio-group label:hover { border-color: var(--gold); }
 .pipeline-radio-group input[type="radio"] { accent-color: var(--gold); }
+
+/* ── Mobile sidebar drawer ───────────────────────────────
+   Desktop: sidebar is always visible (unchanged); hamburger + backdrop hidden.
+   Mobile (≤768px): the fixed-width sidebar used to be squeezed by the flex row
+   into a thin strip with truncated Hebrew. Now it slides in as a clean drawer
+   from the right (RTL), toggled by the header hamburger, over a dim backdrop. */
+.nav-toggle { display: none; }
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 768px) {
+    /* Keep the header (and its hamburger) reachable while content scrolls */
+    .header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 0.7rem 1rem;
+    }
+    .nav-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: var(--gold);
+        font-size: 1.4rem;
+        cursor: pointer;
+        padding: 0.2rem 0.4rem;
+        margin-inline-end: 0.4rem;
+        line-height: 1;
+    }
+
+    /* Stop the flex row from shrinking the sidebar; content goes full width */
+    .main { display: block; }
+    .content { padding: 1.2rem 1rem; }
+    /* The off-canvas drawer (translateX past the right edge) must not create a
+       horizontal-scroll gutter while closed. Clip at the root too. */
+    html, body { overflow-x: hidden; max-width: 100%; }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100vh;
+        height: 100dvh;
+        width: min(82vw, 300px);
+        max-height: none;
+        transform: translateX(100%);          /* off-canvas to the right (RTL) */
+        transition: transform 0.28s ease;
+        z-index: 300;
+        box-shadow: -8px 0 28px rgba(0, 0, 0, 0.22);
+        padding-top: 1rem;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.28s ease, visibility 0.28s ease;
+        z-index: 250;
+    }
+    .sidebar-backdrop.open { opacity: 1; visibility: visible; }
+
+    body.sidebar-open { overflow: hidden; }   /* lock background scroll while open */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar, .sidebar-backdrop { transition: none; }
+}

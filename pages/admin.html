@@ -40,6 +40,9 @@
     <!-- Dashboard -->
     <div id="dashboard">
         <header class="header">
+            <button class="nav-toggle" onclick="toggleSidebar()" aria-label="פתח תפריט" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <div class="logo">
                 <img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle">
                 <span>בית המטפלים - CRM</span>
@@ -145,6 +148,8 @@
                     <span>הגדרות</span>
                 </div>
             </nav>
+
+            <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar(false)" aria-hidden="true"></div>
 
             <main class="content" id="main-content">
                 <!-- Overview View -->
@@ -2890,5 +2895,31 @@
 
     <!-- Marketing & Analytics -->
     <script src="../js/marketing-tools.js"></script>
+
+    <!-- Mobile sidebar drawer (open/close) -->
+    <script>
+    function toggleSidebar(open) {
+        var sb = document.querySelector('.sidebar');
+        var bd = document.getElementById('sidebarBackdrop');
+        var btn = document.querySelector('.nav-toggle');
+        if (!sb) return;
+        var show = (open === undefined) ? !sb.classList.contains('open') : open;
+        sb.classList.toggle('open', show);
+        if (bd) bd.classList.toggle('open', show);
+        if (btn) btn.setAttribute('aria-expanded', show ? 'true' : 'false');
+        document.body.classList.toggle('sidebar-open', show);
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var sb = document.querySelector('.sidebar');
+        // Tapping any nav item navigates — close the drawer right after.
+        if (sb) sb.addEventListener('click', function (e) {
+            if (e.target.closest('.nav-item')) toggleSidebar(false);
+        });
+        // Esc closes it.
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') toggleSidebar(false);
+        });
+    });
+    </script>
 </body>
 </html>

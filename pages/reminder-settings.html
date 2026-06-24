@@ -101,6 +101,13 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
     <label class="switch"><input type="checkbox" id="on"><span class="slider"></span></label>
   </div>
 
+  <div class="sec" id="secGoal">
+    <h2><i class="fa-solid fa-bullseye"></i> מה הכי בא לך להשיג?</h2>
+    <input id="goal" type="text" maxlength="120" placeholder="למשל: ביטחון עצמי, שליטה ברגשות, להתגבר על דחיינות…"
+      style="width:100%;background:var(--glass-2);backdrop-filter:blur(10px);border:1px solid var(--edge);border-radius:14px;
+      padding:13px 16px;color:var(--text-primary);font-family:inherit;font-size:14px;box-shadow:var(--spec)">
+  </div>
+
   <div class="sec" id="secDays">
     <h2><i class="fa-solid fa-calendar-week"></i> באילו ימים?</h2>
     <div class="chips" id="days">
@@ -155,6 +162,7 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
 
   // --- populate UI ---
   $('on').checked = !!prefs.on;
+  $('goal').value = prefs.goal || '';
   (prefs.days||[]).forEach(d => { const c=document.querySelector(`#days .chip[data-d="${d}"]`); if(c) c.classList.add('on'); });
   const presetHours = [8,10,12,20,21];
   (prefs.hours||[]).forEach(h => {
@@ -166,7 +174,7 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
   dim(); render();
 
   // --- interactions ---
-  function dim(){ const off=!$('on').checked; $('secDays').classList.toggle('off',off); $('secHours').classList.toggle('off',off); }
+  function dim(){ const off=!$('on').checked; $('secGoal').classList.toggle('off',off); $('secDays').classList.toggle('off',off); $('secHours').classList.toggle('off',off); }
   function toggleChip(e){ if(e.target.classList.contains('chip')){ e.target.classList.toggle('on'); render(); } }
   $('days').addEventListener('click', toggleChip);
   $('hours').addEventListener('click', toggleChip);
@@ -177,7 +185,7 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
     const days=[...document.querySelectorAll('#days .chip.on')].map(c=>+c.dataset.d).sort((a,b)=>a-b);
     const hours=[...document.querySelectorAll('#hours .chip.on')].map(c=>+c.dataset.h);
     const ch=$('customHour').value; if(ch){ const h=parseInt(ch.split(':')[0],10); if(!hours.includes(h)) hours.push(h); }
-    return { on: $('on').checked, days, hours: hours.sort((a,b)=>a-b) };
+    return { on: $('on').checked, goal: $('goal').value.trim(), days, hours: hours.sort((a,b)=>a-b) };
   }
   function render(){
     const s=$('summary'); const p=collect();

@@ -22,6 +22,14 @@ const INSIGHTS_BUCKET = 'workbooks'
 const INSIGHTS_PATH = 'mentor-insights/latest.json'
 const SONNET_SOURCES = ['chat-sonnet', 'mentor-sonnet']
 
+// Weekly WhatsApp digest (action=digest) — reuses the project's existing Green API
+// secrets. Secret-gated so a scheduler can call it without an admin login.
+const GREEN_API_URL = Deno.env.get('GREEN_API_URL') || 'https://api.green-api.com'
+const GREEN_API_INSTANCE = Deno.env.get('GREEN_API_INSTANCE') || ''
+const GREEN_API_TOKEN = Deno.env.get('GREEN_API_TOKEN') || ''
+const ALERT_PHONE = Deno.env.get('ALERT_PHONE') || '972549116092'
+const CRON_SECRET = Deno.env.get('CRON_SECRET') || ''
+
 const ALLOWED_ORIGINS = [
   'https://www.therapist-home.com',
   'https://therapist-home.com',
@@ -190,12 +198,57 @@ async function readCachedInsights(db: any) {
   } catch { return null }
 }
 
+async function sendWhatsApp(phone: string, message: string): Promise<{ ok: boolean; status: number }> {
+  if (!GREEN_API_INSTANCE || !GREEN_API_TOKEN) return { ok: false, status: 0 }
+  const url = `${GREEN_API_URL}/waInstance${GREEN_API_INSTANCE}/sendMessage/${GREEN_API_TOKEN}`
+  try {
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: `${phone}@c.us`, message }) })
+    return { ok: res.ok, status: res.status }
+  } catch { return { ok: false, status: 0 } }
+}
+
+// deno-lint-ignore no-explicit-any
+function buildDigest(ins: any, days: number): string {
+  const themes = (ins.themes || []).slice(0, 3)
+  const TAG: Record<string, string> = { pain: 'כאב', desire: 'רצון', objection: 'התנגדות', confusion: 'בלבול' }
+  const lines = [
+    '📊 תובנות מהמורה — סיכום שבועי',
+    `${ins.total_questions || 0} שאלות ב-${days} הימים האחרונים.`,
+    '',
+    '🔥 השאלות שחוזרות:',
+  ]
+  themes.forEach((t: { title?: string; marketing_tag?: string; count?: number }, i: number) => {
+    lines.push(`${i + 1}. ${t.title} (${TAG[t.marketing_tag || ''] || t.marketing_tag || ''} · ${t.count || 0})`)
+  })
+  const angle = themes[0]?.marketing_angle
+  if (angle) { lines.push('', '💡 זווית מוכנה למודעה:', `"${angle}"`) }
+  const off = (ins.off_course_topics || [])[0]
+  if (off) lines.push('', `🧭 ביקוש מחוץ-לקורס: ${off}`)
+  lines.push('', 'לפירוט מלא: דשבורד ← מורה AI ← תובנות מהמורה.')
+  return lines.join('\n')
+}
+
 serve(async (req) => {
   const cors = getCorsHeaders(req)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
 
   try {
+    const url = new URL(req.url)
+    const action = url.searchParams.get('action') || 'cost'
+
+    // Scheduled weekly digest: secret-gated (no admin JWT) so a cron job can call it.
+    if (action === 'digest') {
+      const key = url.searchParams.get('key') || req.headers.get('x-cron-secret') || ''
+      if (!CRON_SECRET || key !== CRON_SECRET) return json({ error: 'forbidden' }, 403)
+      const sdb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+      const days = Math.min(180, Math.max(7, Number(url.searchParams.get('days')) || 7))
+      const insights = await runInsights(sdb, days)
+      const sent = await sendWhatsApp(ALERT_PHONE, buildDigest(insights, days))
+      return json({ ok: sent.ok, status: sent.status, sent_to: ALERT_PHONE, themes: (insights.themes || []).length })
+    }
+
+    // Everything else is admin-only.
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) return json({ error: 'Missing authorization' }, 401)
 
@@ -204,12 +257,8 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await db.auth.getUser(token)
     if (authError || !user) return json({ error: 'Invalid token' }, 401)
 
-    // Admin-only
     const { data: roleRow } = await db.from('profiles').select('role').eq('id', user.id).maybeSingle()
     if (roleRow?.role !== 'admin') return json({ error: 'Admin only' }, 403)
-
-    const url = new URL(req.url)
-    const action = url.searchParams.get('action') || 'cost'
 
     if (action === 'cost') {
       const month = url.searchParams.get('month') || israelMonth()

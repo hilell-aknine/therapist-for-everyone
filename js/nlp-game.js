@@ -523,8 +523,14 @@ class StoryGame {
         document.getElementById('main-content').style.display = 'block';
         document.getElementById('progress-wrapper').style.display = 'block';
 
-        // Show bottom navigation (via class, not inline style — inline would override game-fullscreen CSS)
-        document.getElementById('bottom-nav').classList.add('nav-visible');
+        // Show bottom navigation. The element ships with an inline style="display:none"
+        // so it stays hidden before auth. An inline style beats a class rule, so adding
+        // .nav-visible alone could never win — the whole bar (incl. the leaderboard tab)
+        // stayed invisible in production. Remove the inline display first, then add the
+        // class. game-fullscreen still hides it during exercises via `display:none !important`.
+        const navEl = document.getElementById('bottom-nav');
+        navEl.style.removeProperty('display');
+        navEl.classList.add('nav-visible');
 
         // Update sound toggle
         document.getElementById('sound-toggle').textContent = this.sound.enabled ? '🔊' : '🔇';

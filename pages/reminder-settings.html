@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>התזכורות שלי | בית המטפלים</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Frank+Ruhl+Libre:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --accent-gold:#E9B949; --accent-gold-hover:#F2C766; --text-on-gold:#1A1205;
+  --text-primary:#F4F1EA; --text-muted:#C2D0CE;
+  --font-display:'Frank Ruhl Libre','Heebo',serif; --font-body:'Heebo',sans-serif;
+  --glass:rgba(255,255,255,.065); --glass-2:rgba(255,255,255,.09);
+  --edge:rgba(255,255,255,.16); --spec:inset 0 1px 0 rgba(255,255,255,.28);
+  --blur:saturate(180%) blur(30px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;padding:2.5rem 1rem;display:flex;justify-content:center;
+  background:#06181c;position:relative;overflow-x:hidden}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.55;z-index:0;pointer-events:none;animation:float 14s ease-in-out infinite}
+.orb.g{width:340px;height:340px;background:#E9B949;top:-80px;right:-40px}
+.orb.t{width:380px;height:380px;background:#1f8c93;bottom:-120px;left:-60px;animation-delay:-5s}
+.orb.p{width:300px;height:300px;background:#0e5b66;top:38%;left:42%;opacity:.4;animation-delay:-9s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-26px,30px) scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}}
+
+.card{position:relative;z-index:2;width:100%;max-width:560px;align-self:flex-start;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--edge);border-radius:26px;padding:32px 28px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45), var(--spec), 0 0 0 .5px rgba(255,255,255,.04)}
+.head{text-align:center;margin-bottom:1.7rem}
+.head .ic{display:inline-flex;width:56px;height:56px;align-items:center;justify-content:center;border-radius:18px;margin-bottom:.6rem;
+  background:rgba(233,185,73,.14);border:1px solid rgba(233,185,73,.4);backdrop-filter:blur(8px);font-size:1.5rem;color:var(--accent-gold-hover);box-shadow:var(--spec)}
+.head h1{font-family:var(--font-display);font-size:25px;font-weight:700;margin-bottom:.35rem}
+.head p{color:var(--text-muted);font-size:14px;line-height:1.55;max-width:400px;margin:0 auto}
+
+.row{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--edge);border-radius:18px;padding:15px 18px;margin-bottom:1.5rem;box-shadow:var(--spec)}
+.row .lbl{font-weight:700;font-size:15px}
+.row .sub{color:var(--text-muted);font-size:12.5px;margin-top:.15rem}
+.switch{position:relative;width:54px;height:31px;flex-shrink:0;cursor:pointer}
+.switch input{display:none}
+.slider{position:absolute;inset:0;background:rgba(255,255,255,.12);border:1px solid var(--edge);border-radius:999px;transition:.25s;box-shadow:var(--spec)}
+.slider::before{content:"";position:absolute;width:23px;height:23px;border-radius:50%;background:#fff;top:3px;right:3px;transition:.25s;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.switch input:checked + .slider{background:linear-gradient(180deg,#F2C766,#D4A437);border-color:rgba(233,185,73,.7)}
+.switch input:checked + .slider::before{transform:translateX(-23px)}
+
+.sec{margin-bottom:1.6rem;transition:opacity .25s,filter .25s}
+.sec.off{opacity:.32;filter:grayscale(.4);pointer-events:none}
+.sec h2{font-size:14px;font-weight:700;margin-bottom:.8rem;display:flex;align-items:center;gap:.45rem}
+.sec h2 i{color:var(--accent-gold)}
+.chips{display:flex;flex-wrap:wrap;gap:.55rem}
+.chip{padding:.55rem 1rem;border-radius:999px;border:1px solid var(--edge);background:var(--glass-2);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--text-primary);font-family:inherit;font-size:14px;font-weight:600;
+  cursor:pointer;transition:.18s;user-select:none;box-shadow:var(--spec)}
+.chip.day{min-width:46px;text-align:center}
+.chip:hover{border-color:rgba(233,185,73,.55);transform:translateY(-1px)}
+.chip.on{background:linear-gradient(180deg,rgba(242,199,102,.32),rgba(212,164,55,.2));border-color:rgba(233,185,73,.75);color:#fff;
+  box-shadow:var(--spec),0 4px 16px rgba(233,185,73,.3)}
+.custom{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .8rem;border:1px dashed rgba(233,185,73,.6);border-radius:999px;
+  color:var(--accent-gold-hover);font-size:13px;cursor:pointer;background:var(--glass);backdrop-filter:blur(10px)}
+.custom input{background:transparent;border:none;color:var(--text-primary);font-family:inherit;font-size:14px;width:70px}
+.custom input::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(4) hue-rotate(5deg)}
+
+.summary{text-align:center;border-radius:14px;padding:.8rem;margin:1.3rem 0;font-size:13.5px;color:var(--text-primary);
+  background:rgba(233,185,73,.1);border:1px solid rgba(233,185,73,.3);backdrop-filter:blur(10px);box-shadow:var(--spec)}
+.summary b{color:var(--accent-gold-hover)}
+
+.save{display:flex;align-items:center;justify-content:center;gap:.55rem;width:100%;
+  background:linear-gradient(180deg,#F2C766,#D4A437);color:var(--text-on-gold);border:1px solid rgba(255,255,255,.35);
+  font-family:inherit;font-weight:800;font-size:16px;padding:15px;border-radius:16px;cursor:pointer;
+  box-shadow:0 10px 30px rgba(233,185,73,.4),var(--spec);transition:.2s}
+.save:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(233,185,73,.5),var(--spec)}
+.save:disabled{opacity:.6;cursor:default;transform:none}
+.note{text-align:center;color:var(--text-muted);font-size:12px;margin-top:1rem;line-height:1.5}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);z-index:50;opacity:0;transition:.25s;
+  background:rgba(20,70,74,.85);backdrop-filter:blur(16px);border:1px solid var(--edge);border-radius:12px;padding:12px 20px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:rgba(120,30,30,.85)}
+#loader{position:relative;z-index:2;align-self:center;color:var(--text-muted)}
+</style>
+</head>
+<body>
+<div class="orb g"></div><div class="orb t"></div><div class="orb p"></div>
+
+<div id="loader"><i class="fa-solid fa-spinner fa-spin"></i> טוען…</div>
+
+<div class="card" id="card" style="display:none">
+  <div class="head">
+    <div class="ic"><i class="fa-solid fa-bell"></i></div>
+    <h1>התזכורות שלי</h1>
+    <p>בחר/י מתי נוח לך לקבל תזכורת עדינה לחזור ללמוד ולתרגל. נשלח רק בזמנים שתבחר/י.</p>
+  </div>
+
+  <div class="row">
+    <div><div class="lbl">אני רוצה לקבל תזכורות</div><div class="sub">אפשר לכבות בכל רגע — בלי הצפה.</div></div>
+    <label class="switch"><input type="checkbox" id="on"><span class="slider"></span></label>
+  </div>
+
+  <div class="sec" id="secDays">
+    <h2><i class="fa-solid fa-calendar-week"></i> באילו ימים?</h2>
+    <div class="chips" id="days">
+      <div class="chip day" data-d="0">א׳</div><div class="chip day" data-d="1">ב׳</div>
+      <div class="chip day" data-d="2">ג׳</div><div class="chip day" data-d="3">ד׳</div>
+      <div class="chip day" data-d="4">ה׳</div><div class="chip day" data-d="5">ו׳</div>
+      <div class="chip day" data-d="6">ש׳</div>
+    </div>
+  </div>
+
+  <div class="sec" id="secHours">
+    <h2><i class="fa-solid fa-clock"></i> באילו שעות?</h2>
+    <div class="chips" id="hours">
+      <div class="chip h" data-h="8">08:00</div><div class="chip h" data-h="10">10:00</div>
+      <div class="chip h" data-h="12">12:00</div><div class="chip h" data-h="20">20:00</div>
+      <div class="chip h" data-h="21">21:00</div>
+      <label class="custom"><i class="fa-solid fa-plus"></i><input type="time" id="customHour"></label>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+  <button class="save" id="saveBtn"><i class="fa-solid fa-check"></i> שמירה</button>
+  <div class="note">בכל שלב אפשר להגיב "הסר" בוואטסאפ ונפסיק מיד. נבנה ע״י הלל.</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/auth-guard.js"></script>
+<script>
+(async function(){
+  const cfg = window.SUPABASE_CONFIG;
+  const db = window.supabase.createClient(cfg.url, cfg.anonKey);
+  const DAY = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  const $ = id => document.getElementById(id);
+
+  function toast(msg, err){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); setTimeout(()=>t.classList.remove('show'),2600); }
+
+  // --- auth gate ---
+  let user = null;
+  try { user = await window.AuthGuard.getCurrentUser(); } catch(_){}
+  if (!user) { location.href = 'login.html?return=' + encodeURIComponent('reminder-settings.html'); return; }
+
+  // --- load existing prefs ---
+  let prefs = { on:false, days:[], hours:[] };
+  try {
+    const { data } = await db.from('profiles').select('reminder_prefs').eq('id', user.id).maybeSingle();
+    if (data && data.reminder_prefs) prefs = Object.assign(prefs, data.reminder_prefs);
+  } catch(_){}
+
+  // --- populate UI ---
+  $('on').checked = !!prefs.on;
+  (prefs.days||[]).forEach(d => { const c=document.querySelector(`#days .chip[data-d="${d}"]`); if(c) c.classList.add('on'); });
+  const presetHours = [8,10,12,20,21];
+  (prefs.hours||[]).forEach(h => {
+    const c=document.querySelector(`#hours .chip[data-h="${h}"]`);
+    if(c) c.classList.add('on');
+    else if(!presetHours.includes(h)) $('customHour').value = String(h).padStart(2,'0')+':00';
+  });
+  $('loader').style.display='none'; $('card').style.display='';
+  dim(); render();
+
+  // --- interactions ---
+  function dim(){ const off=!$('on').checked; $('secDays').classList.toggle('off',off); $('secHours').classList.toggle('off',off); }
+  function toggleChip(e){ if(e.target.classList.contains('chip')){ e.target.classList.toggle('on'); render(); } }
+  $('days').addEventListener('click', toggleChip);
+  $('hours').addEventListener('click', toggleChip);
+  $('on').addEventListener('change', ()=>{ dim(); render(); });
+  $('customHour').addEventListener('change', render);
+
+  function collect(){
+    const days=[...document.querySelectorAll('#days .chip.on')].map(c=>+c.dataset.d).sort((a,b)=>a-b);
+    const hours=[...document.querySelectorAll('#hours .chip.on')].map(c=>+c.dataset.h);
+    const ch=$('customHour').value; if(ch){ const h=parseInt(ch.split(':')[0],10); if(!hours.includes(h)) hours.push(h); }
+    return { on: $('on').checked, days, hours: hours.sort((a,b)=>a-b) };
+  }
+  function render(){
+    const s=$('summary'); const p=collect();
+    if(!p.on){ s.textContent='התזכורות כבויות.'; return; }
+    if(!p.days.length||!p.hours.length){ s.textContent='בחר/י לפחות יום אחד ושעה אחת.'; return; }
+    s.innerHTML='נשלח לך תזכורת בימי <b>'+p.days.map(d=>DAY[d]).join(', ')+'</b> בשעות <b>'+p.hours.map(h=>String(h).padStart(2,'0')+':00').join(', ')+'</b>.';
+  }
+
+  // --- save ---
+  $('saveBtn').addEventListener('click', async ()=>{
+    const p = collect();
+    if(p.on && (!p.days.length || !p.hours.length)){ toast('בחר/י לפחות יום אחד ושעה אחת',true); return; }
+    const btn=$('saveBtn'); btn.disabled=true;
+    try {
+      const { error } = await db.from('profiles').update({ reminder_prefs: p }).eq('id', user.id);
+      if (error) throw error;
+      toast('נשמר ✓ ' + (p.on ? 'נתחיל לתזכר אותך בזמנים שבחרת' : 'התזכורות כבויות'));
+    } catch(err){ toast('שגיאה בשמירה, נסה/י שוב', true); }
+    finally { btn.disabled=false; }
+  });
+})();
+</script>
+</body>
+</html>

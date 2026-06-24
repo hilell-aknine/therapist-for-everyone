@@ -3948,14 +3948,18 @@
     // Bonus workshops have no per-lesson summary → fall back to the general index.
     const masterRegularOrdinal = masterLessonOrdinal();
     const masterHasSummary = !mod.isBonus && masterRegularOrdinal >= 1 && masterRegularOrdinal <= 7;
+    // Summaries open in a NEW TAB (blank:true) so the portal stays open behind —
+    // closing the tab returns to the course instead of dumping the learner on the
+    // standalone summaries-list page. Labels kept distinct so the workbook/this-lesson/
+    // all-lessons items can't be confused with each other.
     const items = (courseType === 'nlp-master') ? (masterHasSummary ? [
-      { icon:'fa-solid fa-file-lines', t:'סיכום השיעור', s:`סיכום ותובנות מרכזיות מ${mod.title}`, href:`summaries-master/master-lesson-${masterRegularOrdinal}.html`, gold:true }
+      { icon:'fa-solid fa-file-lines', t:'סיכום השיעור הזה', s:`נקודות המפתח מ${mod.title}`, href:`summaries-master/master-lesson-${masterRegularOrdinal}.html`, gold:true, blank:true }
     ] : [
-      { icon:'fa-solid fa-file-lines', t:'סיכומי המאסטר', s:'סיכומי המפגשים והנקודות המרכזיות', href:'summaries-master/index.html', gold:true }
+      { icon:'fa-solid fa-file-lines', t:'כל סיכומי המאסטר', s:'רשימת סיכומי כל המפגשים', href:'summaries-master/index.html', gold:true, blank:true }
     ]) : [
-      { icon:'fa-solid fa-book-open', t:'חוברת NLP Practitioner', s:'7 מודולים, 50 פרקים — טכניקות, תרגולים ועקרונות',  href:'../docs/booklets/nlp-booklet-branded.pdf', gold:true,  blank:true },
-      { icon:'fa-solid fa-file-lines', t:'סיכום המודול',          s:`סיכום ותובנות מרכזיות ממודול ${mod.id}`,                  href:`summaries/lesson-${mod.id}.html`,            gold:false },
-      { icon:'fa-solid fa-list-check', t:'כל הסיכומים',            s:'מבט-על על כל 7 המודולים בקורס',                          href:'summaries/index.html',                        gold:false }
+      { icon:'fa-solid fa-book-open', t:'חוברת הקורס (PDF)',     s:'7 מודולים, 50 פרקים — להורדה',           href:'../docs/booklets/nlp-booklet-branded.pdf', gold:true,  blank:true },
+      { icon:'fa-solid fa-file-lines', t:'סיכום השיעור הזה',     s:`נקודות המפתח ממודול ${mod.id}`,           href:`summaries/lesson-${mod.id}.html`,            gold:false, blank:true },
+      { icon:'fa-solid fa-list-check', t:'כל סיכומי השיעורים',   s:'רשימת כל 7 הסיכומים',                     href:'summaries/index.html',                        gold:false, blank:true }
     ];
     grid.innerHTML = items.map(i => `
       <a class="lms-res-card${i.gold ? ' lms-res-card--gold' : ''}" href="${escapeHtml(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ''}>

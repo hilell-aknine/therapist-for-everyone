@@ -265,7 +265,7 @@ td strong { font-weight: 600; color: var(--text); }
 .status-badge { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; display: inline-block; border: 1px solid transparent; }
 .utm-badge { display: inline-block; background: #2F8592; color: #fff; font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.55rem; border-radius: 12px; margin-top: 0.3rem; }
 .source-chip { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 12px; font-size: 0.72rem; font-weight: 600; color: #fff; white-space: nowrap; line-height: 1.4; max-width: 200px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
-.source-filter { background: var(--bg-card, #1a2733); color: var(--text, #E8F1F2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.4rem 0.75rem; font-size: 0.85rem; cursor: pointer; min-width: 150px; }
+.source-filter { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.75rem; font-size: 0.85rem; cursor: pointer; min-width: 150px; }
 .source-filter:hover { border-color: rgba(212,175,55,0.4); }
 .source-filter:focus { outline: none; border-color: var(--gold, #D4AF37); }
 .status-new { background: rgba(212, 175, 55, 0.12); color: var(--gold); border-color: rgba(212, 175, 55, 0.25); }
@@ -1488,3 +1488,85 @@ th { background: #003B46 !important; color: #fff !important; }
 @media (prefers-reduced-motion: reduce) {
     .sidebar, .sidebar-backdrop { transition: none; }
 }
+
+/* ── "ניהול לידים" (portal-q) filter bar — shipped fully UNSTYLED, so the
+   <select> filters rendered as dark, label-less bars that read as empty
+   placeholders. Style them as clear, interactive dropdowns. ── */
+.pq-filter-bar,
+.pq-advanced-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+.pq-advanced-filters {
+    display: none;
+    padding: 0.8rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+.pq-advanced-filters.open { display: flex; }
+
+.pq-filter-bar select,
+.pq-filter-bar input,
+.pq-advanced-filters select,
+.pq-advanced-filters input {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.45rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+/* gold chevron on the LEFT (RTL end) so each control reads as a dropdown */
+.pq-filter-bar select,
+.pq-advanced-filters select {
+    padding-left: 1.9rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23D4AF37' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left 0.6rem center;
+    background-size: 0.7rem;
+}
+.pq-filter-bar select:hover,
+.pq-advanced-filters select:hover { border-color: var(--gold); }
+.pq-filter-bar select:focus,
+.pq-filter-bar input:focus,
+.pq-advanced-filters select:focus,
+.pq-advanced-filters input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.18);
+}
+.pq-filter-bar input,
+.pq-advanced-filters input { cursor: text; }
+
+/* View tabs (טבלה / תצוגת מתקשר) — were unstyled raw buttons */
+.pq-view-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    background: var(--bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.pq-view-tab:hover { border-color: var(--gold); color: var(--gold); }
+.pq-view-tab.active { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+
+/* #7 — make the table search a bit more present + a gold focus ring */
+.search-box { transition: border-color 0.15s, box-shadow 0.15s; }
+.search-box:focus-within { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15); }
+.search-box input { width: 240px; max-width: 46vw; }

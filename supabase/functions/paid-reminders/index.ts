@@ -14,7 +14,9 @@ const GREEN_API_INSTANCE = Deno.env.get('GREEN_API_INSTANCE') || ''
 const GREEN_API_TOKEN = Deno.env.get('GREEN_API_TOKEN') || ''
 const CRON_SECRET = Deno.env.get('CRON_SECRET') || ''
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY') || ''
+const ALERT_PHONE = Deno.env.get('ALERT_PHONE') || '972549116092'
 const SONNET_MODEL = 'claude-sonnet-4-6'
+const DAY_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 
 interface NextLesson { title: string; module: string }
 
@@ -103,6 +105,27 @@ serve(async (req) => {
     const msg = await writeMessage('הלל', 'ביטחון עצמי ושליטה ברגשות', { title: MASTER_LESSONS[0].title, module: MASTER_LESSONS[0].module })
     const ok = await sendWhatsApp(testPhone.replace(/\D/g, ''), msg)
     return json({ test: true, phone: testPhone, sent: ok, sample_message: msg })
+  }
+
+  // Status report to Hillel: who activated reminders, their goal + chosen times.
+  if (url.searchParams.get('report') === '1') {
+    const { data } = await db.from('profiles').select('full_name, reminder_prefs, whatsapp_opt_out').eq('role', 'paid_customer')
+    const on: string[] = [], off: string[] = []
+    for (const r of (data || [])) {
+      const p = r.reminder_prefs || {}
+      const name = (r.full_name || 'לקוח').trim()
+      if (p.on && Array.isArray(p.days) && p.days.length && Array.isArray(p.hours) && p.hours.length) {
+        const days = p.days.map((d: number) => DAY_HE[d] || d).join(',')
+        const hours = p.hours.map((h: number) => String(h).padStart(2, '0') + ':00').join(',')
+        const goal = (p.goal || '').trim()
+        on.push(`• ${name}${goal ? ' — ' + goal : ''}\n   ימים ${days} · שעות ${hours}`)
+      } else { off.push(name) }
+    }
+    const msg = `🔔 סטטוס תזכורות — לקוחות משלמים\n\n` +
+      `✅ הפעילו (${on.length}):\n${on.length ? on.join('\n') : '—'}\n\n` +
+      `⏳ טרם הפעילו (${off.length}): ${off.length ? off.join(', ') : '—'}`
+    const sent = await sendWhatsApp(ALERT_PHONE.replace(/\D/g, ''), msg)
+    return json({ report: true, active: on.length, pending: off.length, sent })
   }
 
   const dry = url.searchParams.get('dry') === '1'

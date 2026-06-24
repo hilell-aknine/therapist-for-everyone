@@ -35,13 +35,24 @@ const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || ''
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY') || ''
 
 const SONNET_MODEL = 'claude-sonnet-4-6'
+const HAIKU_MODEL = 'claude-haiku-4-5-20251001'
+// Smart-intent triggers → use Sonnet (analysis / composition / automations).
+// Everything else (plain data lookups) → fast Haiku. Quality where it matters,
+// speed where it doesn't.
+const SMART_RE = /(נתח|ניתוח|מנתח|המלץ|המלצ|אסטרטג|תכנן|תכנון|אוטומצ|נסח|כתוב|קמפיין|רעיון|הצע|שכנע|מייל|וואטסאפ|הודע|השווה|השוו|תובנ|מסקנ|סכם|נסכם|פתח גישה|למה |מדוע)/
+function pickModel(message: string): string {
+  return SMART_RE.test(message || '') ? SONNET_MODEL : HAIKU_MODEL
+}
 const SONNET_IN_USD = Number(Deno.env.get('SONNET_IN_USD')) || 3
 const SONNET_OUT_USD = Number(Deno.env.get('SONNET_OUT_USD')) || 15
 const USD_ILS = Number(Deno.env.get('USD_ILS')) || 3.8
 // Independent monthly ceiling for THIS owner tool (separate from the customer-facing
 // mentor cap). Generous — it only guards against a runaway loop, not normal use.
 const AGENT_MONTHLY_CAP_ILS = Number(Deno.env.get('AGENT_MONTHLY_CAP_ILS')) || 150
-const AGENT_SOURCE = 'admin-agent'
+const HAIKU_IN_USD = Number(Deno.env.get('HAIKU_IN_USD')) || 1
+const HAIKU_OUT_USD = Number(Deno.env.get('HAIKU_OUT_USD')) || 5
+const AGENT_SOURCE = 'admin-agent'              // Sonnet turns
+const AGENT_SOURCE_HAIKU = 'admin-agent-haiku'  // Haiku turns (priced cheaper)
 
 const GREEN_API_URL = Deno.env.get('GREEN_API_URL') || 'https://api.green-api.com'
 const GREEN_API_INSTANCE = Deno.env.get('GREEN_API_INSTANCE') || ''
@@ -69,6 +80,9 @@ function getCorsHeaders(req: Request) {
 
 function ils(pt: number, ct: number): number {
   return Math.round(((pt * SONNET_IN_USD + ct * SONNET_OUT_USD) / 1_000_000) * USD_ILS * 100) / 100
+}
+function ilsHaiku(pt: number, ct: number): number {
+  return Math.round(((pt * HAIKU_IN_USD + ct * HAIKU_OUT_USD) / 1_000_000) * USD_ILS * 100) / 100
 }
 
 function monthStartIsrael(): string {
@@ -99,28 +113,29 @@ function isValidPhone(raw: string): boolean {
 async function agentMonthlyCostShekel(admin: any): Promise<number> {
   const { data } = await admin
     .from('ai_chat_usage')
-    .select('prompt_tokens, completion_tokens')
-    .eq('source', AGENT_SOURCE)
+    .select('source, prompt_tokens, completion_tokens')
+    .in('source', [AGENT_SOURCE, AGENT_SOURCE_HAIKU])
     .gte('date', monthStartIsrael())
-  let pt = 0, ct = 0
-  for (const r of (data || []) as Array<{ prompt_tokens?: number; completion_tokens?: number }>) {
-    pt += Number(r.prompt_tokens) || 0; ct += Number(r.completion_tokens) || 0
+  let total = 0
+  for (const r of (data || []) as Array<{ source?: string; prompt_tokens?: number; completion_tokens?: number }>) {
+    const pt = Number(r.prompt_tokens) || 0, ct = Number(r.completion_tokens) || 0
+    total += r.source === AGENT_SOURCE_HAIKU ? ilsHaiku(pt, ct) : ils(pt, ct)
   }
-  return ils(pt, ct)
+  return Math.round(total * 100) / 100
 }
 
 // deno-lint-ignore no-explicit-any
-async function logAgentUsage(admin: any, userId: string, pt: number, ct: number) {
+async function logAgentUsage(admin: any, userId: string, pt: number, ct: number, source: string) {
   const date = todayIsrael()
   const { data: prev } = await admin
     .from('ai_chat_usage')
     .select('message_count, prompt_tokens, completion_tokens')
-    .eq('user_id', userId).eq('date', date).eq('source', AGENT_SOURCE)
+    .eq('user_id', userId).eq('date', date).eq('source', source)
     .maybeSingle()
   await admin.from('ai_chat_usage').upsert({
     user_id: userId,
     date,
-    source: AGENT_SOURCE,
+    source,
     message_count: (Number(prev?.message_count) || 0) + 1,
     prompt_tokens: (Number(prev?.prompt_tokens) || 0) + pt,
     completion_tokens: (Number(prev?.completion_tokens) || 0) + ct,
@@ -610,13 +625,15 @@ async function handleRead(name: string, input: any, ctx: { admin: any; userClien
       const [y, m] = ym.split('-').map(Number)
       const end = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, '0')}-01`
       const { data } = await admin.from('ai_chat_usage').select('source, prompt_tokens, completion_tokens').gte('date', start).lt('date', end)
-      let mentorPt = 0, mentorCt = 0, agentPt = 0, agentCt = 0
+      let mentorPt = 0, mentorCt = 0, agentIls = 0
       for (const r of (data || [])) {
         const pt = Number(r.prompt_tokens) || 0, ct = Number(r.completion_tokens) || 0
         if (r.source === 'chat-sonnet' || r.source === 'mentor-sonnet') { mentorPt += pt; mentorCt += ct }
-        else if (r.source === AGENT_SOURCE) { agentPt += pt; agentCt += ct }
+        else if (r.source === AGENT_SOURCE) { agentIls += ils(pt, ct) }
+        else if (r.source === AGENT_SOURCE_HAIKU) { agentIls += ilsHaiku(pt, ct) }
       }
-      const mentorIls = ils(mentorPt, mentorCt), agentIls = ils(agentPt, agentCt)
+      const mentorIls = ils(mentorPt, mentorCt)
+      agentIls = Math.round(agentIls * 100) / 100
       return {
         model: `AI cost ${ym}: mentor=${mentorIls}₪, agent=${agentIls}₪.`,
         card: { kind: 'kpis', title: `💰 עלות AI · ${ym}`, items: [
@@ -798,30 +815,78 @@ async function executeAction(pa: any, ctx: { admin: any; userClient: any; token:
 // ============================================================================
 // Sonnet tool-use loop
 // ============================================================================
+// Streamed Anthropic call with tool-use. Forwards each text delta to onText()
+// for live typing, accumulates tool_use blocks, and returns the assembled
+// content + stop_reason + token usage when the stream ends.
 // deno-lint-ignore no-explicit-any
-async function callSonnetTools(messages: any[]) {
+async function streamAnthropic(messages: any[], model: string, onText: (t: string) => void): Promise<{ content: any[]; stop_reason: string; pt: number; ct: number }> {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
     body: JSON.stringify({
-      model: SONNET_MODEL,
-      max_tokens: 4096,
+      model,
+      max_tokens: 2048,
       thinking: { type: 'disabled' },
+      stream: true,
       system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       tools: TOOLS,
       messages,
     }),
   })
-  if (!res.ok) throw new Error(`Sonnet ${res.status}: ${await res.text()}`)
-  return await res.json()
-}
+  if (!res.ok || !res.body) throw new Error(`Anthropic ${res.status}: ${await res.text().catch(() => '')}`)
 
-// deno-lint-ignore no-explicit-any
-function usageTokens(u: any): { pt: number; ct: number } {
-  return {
-    pt: (Number(u?.input_tokens) || 0) + (Number(u?.cache_creation_input_tokens) || 0) + (Number(u?.cache_read_input_tokens) || 0),
-    ct: Number(u?.output_tokens) || 0,
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buf = ''
+  // deno-lint-ignore no-explicit-any
+  const blocks: Record<number, any> = {}
+  let stopReason = 'end_turn'
+  let pt = 0, ct = 0
+
+  // deno-lint-ignore no-explicit-any
+  const handle = (evt: any) => {
+    const t = evt.type
+    if (t === 'message_start') {
+      const u = evt.message?.usage || {}
+      pt += (Number(u.input_tokens) || 0) + (Number(u.cache_creation_input_tokens) || 0) + (Number(u.cache_read_input_tokens) || 0)
+    } else if (t === 'content_block_start') {
+      const cb = evt.content_block || {}
+      blocks[evt.index] = cb.type === 'tool_use'
+        ? { type: 'tool_use', id: cb.id, name: cb.name, _json: '' }
+        : { type: 'text', text: '' }
+    } else if (t === 'content_block_delta') {
+      const d = evt.delta || {}
+      const b = blocks[evt.index]
+      if (d.type === 'text_delta') { if (b) b.text += d.text; if (d.text) onText(d.text) }
+      else if (d.type === 'input_json_delta') { if (b) b._json += (d.partial_json || '') }
+    } else if (t === 'message_delta') {
+      if (evt.delta?.stop_reason) stopReason = evt.delta.stop_reason
+      ct += Number(evt.usage?.output_tokens) || 0
+    }
   }
+
+  while (true) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buf += decoder.decode(value, { stream: true })
+    const lines = buf.split('\n')
+    buf = lines.pop() || ''
+    for (const ln of lines) {
+      const s = ln.trim()
+      if (!s.startsWith('data:')) continue
+      const payload = s.slice(5).trim()
+      if (!payload || payload === '[DONE]') continue
+      try { handle(JSON.parse(payload)) } catch { /* ignore partial */ }
+    }
+  }
+
+  // deno-lint-ignore no-explicit-any
+  const content: any[] = Object.keys(blocks).map(k => Number(k)).sort((a, b) => a - b).map(i => {
+    const b = blocks[i]
+    if (b.type === 'tool_use') { let input = {}; try { input = JSON.parse(b._json || '{}') } catch { input = {} } return { type: 'tool_use', id: b.id, name: b.name, input } }
+    return { type: 'text', text: b.text }
+  })
+  return { content, stop_reason: stopReason, pt, ct }
 }
 
 serve(async (req) => {
@@ -860,14 +925,18 @@ serve(async (req) => {
       return json(result)
     }
 
-    // ---- CHAT (tool-use loop) ----
+    // ---- CHAT (streamed tool-use loop) ----
     if (!ANTHROPIC_API_KEY) return json({ error: 'מפתח Anthropic לא מוגדר.' }, 500)
     if (await agentMonthlyCostShekel(admin) >= AGENT_MONTHLY_CAP_ILS) {
-      return json({ reply: `הגעת לתקרת העלות החודשית של הסוכן (${AGENT_MONTHLY_CAP_ILS}₪). אפשר להעלות אותה בהגדרות.`, cards: [], pending_action: null })
+      return json({ error: `הגעת לתקרת העלות החודשית של הסוכן (${AGENT_MONTHLY_CAP_ILS}₪). אפשר להעלות אותה בהגדרות.` }, 402)
     }
 
     const message = String(body.message || '').trim()
     if (!message) return json({ error: 'חסרה הודעה.' }, 400)
+
+    // Fast model for plain lookups, smart model for analysis / composition / actions.
+    const model = pickModel(message)
+    const logSource = model === SONNET_MODEL ? AGENT_SOURCE : AGENT_SOURCE_HAIKU
 
     // Rebuild conversation from client-sent history (text only).
     // deno-lint-ignore no-explicit-any
@@ -879,65 +948,67 @@ serve(async (req) => {
     }
     messages.push({ role: 'user', content: message })
 
-    const cards: any[] = []
-    let pendingAction: any = null
-    let totalPt = 0, totalCt = 0
-    let replyText = ''
-
-    for (let iter = 0; iter < MAX_TOOL_ITERS; iter++) {
-      const data = await callSonnetTools(messages)
-      const u = usageTokens(data.usage); totalPt += u.pt; totalCt += u.ct
-      const content = data.content || []
-      const textBlocks = content.filter((b: any) => b.type === 'text').map((b: any) => b.text || '').join('').trim()
-      if (textBlocks) replyText = textBlocks
-      const toolUses = content.filter((b: any) => b.type === 'tool_use')
-
-      if (!toolUses.length || data.stop_reason !== 'tool_use') break
-
-      messages.push({ role: 'assistant', content })
-
-      // A write tool: prepare a pending_action, do NOT execute, then ask the model
-      // for a one-line closing message and stop.
-      const writeUse = toolUses.find((t: any) => WRITE_TOOLS.has(t.name))
-      if (writeUse) {
-        const prep = await prepareWrite(writeUse.name, writeUse.input, admin)
-        const toolResults = toolUses.map((t: any) => {
-          if (t.id === writeUse.id) {
-            return { type: 'tool_result', tool_use_id: t.id, content: prep.error
-              ? `שגיאה: ${prep.error}`
-              : `הפעולה הוכנה והוצגה למנהל לאישור: ${prep.pending.summary}. אל תקרא לעוד כלים — אמור במשפט אחד מה ימתין לאישור.` }
-          }
-          return { type: 'tool_result', tool_use_id: t.id, content: 'דולג (טופלה פעולת כתיבה).' }
-        })
-        messages.push({ role: 'user', content: toolResults })
-        if (!prep.error) pendingAction = prep.pending
-        // Final no-tools call for the closing sentence.
-        const final = await callSonnetTools(messages)   // tools still allowed but model instructed to stop
-        const fu = usageTokens(final.usage); totalPt += fu.pt; totalCt += fu.ct
-        const ft = (final.content || []).filter((b: any) => b.type === 'text').map((b: any) => b.text || '').join('').trim()
-        if (ft) replyText = ft
-        break
-      }
-
-      // Read tools: execute all, feed results back, loop.
-      const toolResults: any[] = []
-      for (const t of toolUses) {
+    // Stream the answer as NDJSON: {type:'delta',text} live tokens, {type:'card',card}
+    // as each read tool resolves, {type:'meta',pending_action} at the end, {type:'error'}.
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        // deno-lint-ignore no-explicit-any
+        const sendEvt = (obj: any) => { try { controller.enqueue(encoder.encode(JSON.stringify(obj) + '\n')) } catch (_e) { /* closed */ } }
+        // deno-lint-ignore no-explicit-any
+        let pendingAction: any = null
+        let totalPt = 0, totalCt = 0
+        let sawText = false
+        let anyCard = false
         try {
-          const r = await handleRead(t.name, t.input, { admin, userClient, token })
-          if (r.card) cards.push(r.card)
-          toolResults.push({ type: 'tool_result', tool_use_id: t.id, content: r.model })
+          for (let iter = 0; iter < MAX_TOOL_ITERS; iter++) {
+            const r = await streamAnthropic(messages, model, (t) => { sawText = true; sendEvt({ type: 'delta', text: t }) })
+            totalPt += r.pt; totalCt += r.ct
+
+            if (r.stop_reason !== 'tool_use') break   // final answer already streamed
+
+            messages.push({ role: 'assistant', content: r.content })
+            const toolUses = r.content.filter((b: any) => b.type === 'tool_use')
+
+            // Write tool → prepare pending_action (no mutation), then one closing turn.
+            const writeUse = toolUses.find((t: any) => WRITE_TOOLS.has(t.name))
+            if (writeUse) {
+              const prep = await prepareWrite(writeUse.name, writeUse.input, admin)
+              const toolResults = toolUses.map((t: any) => t.id === writeUse.id
+                ? { type: 'tool_result', tool_use_id: t.id, content: prep.error ? `שגיאה: ${prep.error}` : `הפעולה הוכנה והוצגה למנהל לאישור: ${prep.pending.summary}. אל תקרא לעוד כלים — אמור במשפט אחד מה ימתין לאישור.` }
+                : { type: 'tool_result', tool_use_id: t.id, content: 'דולג (טופלה פעולת כתיבה).' })
+              messages.push({ role: 'user', content: toolResults })
+              if (!prep.error) pendingAction = prep.pending
+              const fin = await streamAnthropic(messages, model, (t) => { sawText = true; sendEvt({ type: 'delta', text: t }) })
+              totalPt += fin.pt; totalCt += fin.ct
+              break
+            }
+
+            // Read tools → execute, push cards live, feed results back, loop (next turn narrates).
+            const toolResults: any[] = []
+            for (const t of toolUses) {
+              try {
+                const rr = await handleRead(t.name, t.input, { admin, userClient, token })
+                if (rr.card) { anyCard = true; sendEvt({ type: 'card', card: rr.card }) }
+                toolResults.push({ type: 'tool_result', tool_use_id: t.id, content: rr.model })
+              } catch (e) {
+                toolResults.push({ type: 'tool_result', tool_use_id: t.id, content: `שגיאה בכלי: ${e}` })
+              }
+            }
+            messages.push({ role: 'user', content: toolResults })
+          }
+
+          if (!sawText) sendEvt({ type: 'delta', text: anyCard ? 'הנה הנתונים 👇' : 'לא הצלחתי לעבד את הבקשה — נסה לנסח אחרת.' })
+          sendEvt({ type: 'meta', pending_action: pendingAction })
         } catch (e) {
-          toolResults.push({ type: 'tool_result', tool_use_id: t.id, content: `שגיאה בכלי: ${e}` })
+          sendEvt({ type: 'error', error: String((e as Error)?.message || e) })
+        } finally {
+          try { await logAgentUsage(admin, user.id, totalPt, totalCt, logSource) } catch (_e) { /* best-effort */ }
+          controller.close()
         }
-      }
-      messages.push({ role: 'user', content: toolResults })
-    }
-
-    if (!replyText) replyText = cards.length ? 'הנה הנתונים:' : 'לא הצלחתי לעבד את הבקשה — נסה לנסח אחרת.'
-
-    await logAgentUsage(admin, user.id, totalPt, totalCt)
-
-    return json({ reply: replyText, cards, pending_action: pendingAction })
+      },
+    })
+    return new Response(stream, { headers: { ...cors, 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-cache' } })
   } catch (error) {
     console.error('[admin-agent] error:', error)
     return json({ error: String((error as Error)?.message || error) }, 500)

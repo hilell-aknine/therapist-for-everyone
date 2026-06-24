@@ -247,26 +247,60 @@
     persist();
 
     busy = true; elSend.disabled = true; showTyping(true);
+
+    var botBubble = null;          // current streaming text bubble (reset after a card)
+    var assembled = '';            // full assistant text (for history)
+    function ensureBubble() {
+      if (!botBubble) { showTyping(false); botBubble = document.createElement('div'); botBubble.className = 'aa-msg bot'; elBody.appendChild(botBubble); }
+      return botBubble;
+    }
+    function appendText(t) { assembled += t; var b = ensureBubble(); b.textContent += t; scrollDown(); }
+
     try {
       var token = await getToken();
       if (!token) { showTyping(false); addMsg('bot', 'יש להתחבר מחדש.'); return; }
+
       var res = await fetch(FN + '/admin-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({ message: text, history: history.slice(-20) }),
       });
-      var data = await res.json().catch(function () { return {}; });
-      showTyping(false);
-      if (!res.ok) { addMsg('bot', data.error || ('שגיאה ' + res.status)); return; }
 
-      if (data.reply) { addMsg('bot', data.reply); history.push({ role: 'assistant', content: data.reply }); persist(); }
-      (data.cards || []).forEach(renderCard);
-      if (data.pending_action) renderConfirm(data.pending_action);
+      if (!res.ok || !res.body) {
+        showTyping(false);
+        var j = await res.json().catch(function () { return {}; });
+        addMsg('bot', j.error || ('שגיאה ' + res.status));
+        return;
+      }
+
+      // Stream NDJSON events.
+      var reader = res.body.getReader();
+      var dec = new TextDecoder();
+      var buf = '';
+      while (true) {
+        var chunk = await reader.read();
+        if (chunk.done) break;
+        buf += dec.decode(chunk.value, { stream: true });
+        var lines = buf.split('\n');
+        buf = lines.pop();
+        for (var i = 0; i < lines.length; i++) {
+          var ln = lines[i].trim();
+          if (!ln) continue;
+          var evt;
+          try { evt = JSON.parse(ln); } catch (e) { continue; }
+          if (evt.type === 'delta') { appendText(evt.text || ''); }
+          else if (evt.type === 'card') { showTyping(false); renderCard(evt.card); botBubble = null; }
+          else if (evt.type === 'meta') { if (evt.pending_action) renderConfirm(evt.pending_action); }
+          else if (evt.type === 'error') { showTyping(false); appendText('\n⚠️ ' + (evt.error || 'שגיאה')); }
+        }
+      }
+
+      if (assembled.trim()) { history.push({ role: 'assistant', content: assembled.trim() }); persist(); }
     } catch (e) {
       showTyping(false);
-      addMsg('bot', 'שגיאת רשת. נסה שוב.');
+      if (!assembled) addMsg('bot', 'שגיאת רשת. נסה שוב.');
     } finally {
-      busy = false; elSend.disabled = false;
+      busy = false; elSend.disabled = false; showTyping(false);
     }
   }
 

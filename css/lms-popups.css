@@ -1,0 +1,81 @@
+/* lms-popups.css — the REAL portal popup chrome (toast + modal), shared so the
+   admin preview (popup-preview.html) renders pixel-faithful to course-library-v2.html.
+   Copied verbatim from course-library-v2.html's inline styles. Relies on the CSS
+   variables defined in theme.css (load theme.css before this file).
+   NOTE: the live portal still carries these rules inline; if it ever links this file
+   too, delete the inline copy so there's a single source of truth. */
+
+/* ===== LMS Toast — small bottom-left card ===== */
+.lms-toast {
+  position: fixed; bottom: 24px; left: 24px; z-index: 9000;
+  max-width: 360px; padding: 16px 20px 16px 36px;
+  background: var(--bg-surface, #103638);
+  border: 1px solid var(--accent-gold, #E9B949);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  display: flex; gap: 12px; align-items: flex-start;
+  animation: lmsToastIn 280ms cubic-bezier(.2,.8,.2,1);
+  font-family: 'Heebo', sans-serif;
+}
+.lms-toast[hidden] { display: none; }
+.lms-toast__icon { font-size: 28px; line-height: 1; flex-shrink: 0; }
+.lms-toast__body strong { color: var(--accent-gold); display: block; margin-bottom: 4px; font-size: 15px; }
+.lms-toast__body p { color: var(--text-primary, #F4F1EA); margin: 0; font-size: 14px; line-height: 1.5; }
+.lms-toast__close {
+  position: absolute; top: 6px; left: 8px;
+  background: none; border: none; color: var(--text-muted, #B7C4C2);
+  font-size: 22px; cursor: pointer; padding: 4px 8px; line-height: 1;
+}
+.lms-toast__close:hover { color: var(--accent-gold); }
+@keyframes lmsToastIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: none; } }
+
+/* ===== LMS Modal — full-screen overlay + centered card ===== */
+.lms-modal-overlay {
+  position: fixed; inset: 0; z-index: 9500;
+  background: rgba(6,18,20,0.82);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.lms-modal-overlay[hidden] { display: none; }
+.lms-modal {
+  position: relative;
+  width: 100%; max-width: 480px;
+  background: var(--bg-surface, #103638);
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-md, 0 12px 40px rgba(0,0,0,0.45));
+  padding: 32px 28px 28px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+.lms-modal__close {
+  position: absolute; top: 12px; inset-inline-start: 14px;
+  background: none; border: none;
+  color: var(--text-muted, #B7C4C2); font-size: 24px; cursor: pointer;
+  padding: 4px 8px; line-height: 1; border-radius: var(--radius-sm, 8px);
+}
+.lms-modal__head { text-align: center; margin-bottom: 20px; }
+.lms-modal__head h2 {
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: var(--fs-xl, 1.5rem); color: var(--text-primary, #F4F1EA);
+  margin: 0 0 8px 0;
+}
+.lms-modal__head p { color: var(--text-muted, #B7C4C2); font-size: var(--fs-sm, 0.9rem); margin: 0; }
+.lms-modal__body { display: flex; flex-direction: column; gap: 14px; }
+.lms-modal__benefits { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.lms-modal__benefits li { display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm, 0.9rem); color: var(--text-primary, #F4F1EA); }
+.lms-modal__benefits li::before { content: '✓'; color: var(--accent-gold, #E9B949); font-weight: 700; flex-shrink: 0; }
+.lms-modal__action-btn {
+  flex: 1; min-width: 120px; padding: 10px 14px;
+  border-radius: var(--radius-md, 12px); cursor: pointer;
+  font-family: inherit; font-size: var(--fs-sm, 0.9rem); font-weight: 600;
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+  background: var(--bg-elevated, #16484a); color: var(--text-primary, #F4F1EA);
+}
+.lms-modal__action-btn--gold {
+  background: var(--accent-gold, #E9B949); color: var(--text-on-gold, #1a1205); border-color: var(--accent-gold, #E9B949);
+}
+.lms-modal__link-btn {
+  background: none; border: none; color: var(--text-muted, #B7C4C2);
+  font-family: inherit; font-size: 13px; cursor: pointer; text-align: center; padding: 4px;
+}

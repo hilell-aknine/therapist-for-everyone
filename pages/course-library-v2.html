@@ -1865,8 +1865,8 @@
   <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
   <div class="lms-toast__icon">🎯</div>
   <div class="lms-toast__body">
-    <strong>השלמת 2 שיעורים השבוע!</strong>
-    <p>הנתון הזה מכניס אותך ל-15% העליונים של הלומדים הפעילים בפורטל.</p>
+    <strong data-pc-title>השלמת 2 שיעורים השבוע!</strong>
+    <p data-pc-message>הנתון הזה מכניס אותך ל-15% העליונים של הלומדים הפעילים בפורטל.</p>
   </div>
 </div>
 <div id="lmsToastStreak" class="lms-toast" role="status" aria-live="polite" data-popup-id="weekly_streak_v2" hidden>
@@ -1874,7 +1874,7 @@
   <div class="lms-toast__icon">🔥</div>
   <div class="lms-toast__body">
     <strong data-streak-title>זה השבוע השני ברציפות שאתה נכנס!</strong>
-    <p>רק 20% מהנרשמים שומרים על רצף כזה. אל תעצור עכשיו!</p>
+    <p data-pc-message>רק 20% מהנרשמים שומרים על רצף כזה. אל תעצור עכשיו!</p>
   </div>
 </div>
 
@@ -1883,7 +1883,7 @@
   <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
   <div class="lms-toast__icon">🎬</div>
   <div class="lms-toast__body">
-    <strong>אהבת את השיעור?</strong>
+    <strong data-pc-title>אהבת את השיעור?</strong>
     <p>הירשמו חינם כדי לקבל גישה לכל הקורס.
       <button type="button" onclick="openLmsAuthModal('modal')" style="display:inline;background:none;border:none;color:var(--accent-gold);font-family:inherit;font-size:inherit;cursor:pointer;padding:0;text-decoration:underline;">להירשם</button>
     </p>
@@ -1895,7 +1895,7 @@
   <button type="button" class="lms-toast__close" aria-label="סגור" onclick="hideLmsToast('lmsToastShare');if(window.PopupManager)window.PopupManager.dismiss('share_prompt');">×</button>
   <div class="lms-toast__icon">💛</div>
   <div class="lms-toast__body">
-    <strong>נהנית מהשיעור?</strong>
+    <strong data-pc-title>נהנית מהשיעור?</strong>
     <p style="margin-bottom:10px;">שתפו חברים וקבלו עוד תכנים בחינם</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button type="button" class="lms-modal__action-btn lms-modal__action-btn--gold" onclick="lmsShareWhatsApp()" style="font-size:13px;padding:7px 12px;">
@@ -1913,8 +1913,8 @@
   <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
   <div class="lms-toast__icon">🎉</div>
   <div class="lms-toast__body">
-    <strong>יש לכם הפניה חדשה!</strong>
-    <p>מישהו שהפניתם הצטרף לפורטל. כל הכבוד!</p>
+    <strong data-pc-title>יש לכם הפניה חדשה!</strong>
+    <p data-pc-message>מישהו שהפניתם הצטרף לפורטל. כל הכבוד!</p>
   </div>
 </div>
 
@@ -1979,8 +1979,8 @@
     <button type="button" class="lms-modal__close" aria-label="סגור" onclick="closeTrainingCta()">×</button>
     <div class="lms-modal__head">
       <div style="font-size:2.4rem;line-height:1;margin-bottom:.4rem;">👑</div>
-      <h2 id="lmsTrainingCtaTitle">מוכן לעלות שלב?</h2>
-      <p>סיימת עוד שיעור — כל הכבוד 🙌 תכנית ה-Master לוקחת אותך עמוק יותר אל תוך עצמך, אל השינוי האמיתי בחיים, בקשרים ובראש.</p>
+      <h2 id="lmsTrainingCtaTitle" data-pc-title>מוכן לעלות שלב?</h2>
+      <p data-pc-message>סיימת עוד שיעור — כל הכבוד 🙌 תכנית ה-Master לוקחת אותך עמוק יותר אל תוך עצמך, אל השינוי האמיתי בחיים, בקשרים ובראש.</p>
     </div>
     <div class="lms-modal__body">
       <ul class="lms-modal__benefits">
@@ -1996,7 +1996,7 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:.6rem;">
         <button type="button" class="lms-modal__action-btn lms-modal__action-btn--gold" onclick="trainingCtaCheckout()" style="justify-content:center;font-size:15px;padding:12px 16px;">
-          <i class="fa-solid fa-crown"></i> לפרטים על תכנית המאסטר ←
+          <i class="fa-solid fa-crown"></i> <span data-pc-cta>לפרטים על תכנית המאסטר ←</span>
         </button>
         <button type="button" class="lms-modal__link-btn" onclick="closeTrainingCta()" style="background:none;border:none;color:var(--text-muted);font-family:inherit;font-size:13px;cursor:pointer;">אולי בפעם אחרת</button>
       </div>
@@ -2161,6 +2161,20 @@
     }
     return count;
   }
+  // Inject admin-editable content (popup_configs) into a popup's slots.
+  // Only overrides when the admin set a NON-EMPTY value — otherwise the
+  // hardcoded markup stays untouched (zero change to current behavior).
+  function applyPopupContent(el, popupId){
+    if (!el || !popupId || !window.PopupManager || !window.PopupManager.getContent) return;
+    const c = window.PopupManager.getContent(popupId);
+    if (!c) return;
+    const setSlot = (sel, val) => { if (!val) return; const n = el.querySelector(sel); if (n) n.textContent = val; };
+    setSlot('[data-pc-title]', c.title);
+    setSlot('[data-pc-message]', c.message);
+    setSlot('[data-pc-cta]', c.cta_text);
+    if (c.cta_link) { const a = el.querySelector('[data-pc-cta]'); if (a && a.tagName === 'A') a.setAttribute('href', c.cta_link); }
+  }
+
   function showLmsToast(elId, autoHideMs){
     autoHideMs = autoHideMs || 8000;
     const el = document.getElementById(elId);
@@ -2169,6 +2183,7 @@
     const closeBtn = el.querySelector('.lms-toast__close');
     // Use data-popup-id attribute for dynamic mapping (replaces old hardcoded map)
     const popupId = el.dataset.popupId || '';
+    applyPopupContent(el, popupId);
     let timer = null;
     const dismiss = () => {
       el.hidden = true;
@@ -2244,7 +2259,9 @@
   // ===== training_cta (Master upsell) helpers =====
   function showTrainingCta(){
     const m = document.getElementById('lmsTrainingCtaModal');
-    if (m) m.hidden = false;
+    if (!m) return;
+    applyPopupContent(m, 'training_cta');
+    m.hidden = false;
   }
   function hideTrainingCta(){
     const m = document.getElementById('lmsTrainingCtaModal');

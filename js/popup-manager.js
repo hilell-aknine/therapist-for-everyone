@@ -540,6 +540,20 @@
             return h[id] || { lastShown: 0, countToday: 0, totalShown: 0, dismissed: false };
         },
 
+        // Editable content from the popup_configs row (admin-controlled).
+        // Returns only non-empty fields the admin actually set; the portal/preview
+        // fall back to the hardcoded markup whenever a field is empty.
+        getContent(popupId) {
+            const c = serverConfigs[popupId];
+            if (!c) return null;
+            return {
+                title: c.title || '',
+                message: c.message || '',
+                cta_text: c.cta_text || '',
+                cta_link: c.cta_link || ''
+            };
+        },
+
         reset() {
             localStorage.removeItem(STORAGE_KEY);
             localStorage.removeItem(DAILY_RESET_KEY);

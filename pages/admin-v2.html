@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית המטפלים · ניהול (v2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/v2/theme.css">
+<link rel="stylesheet" href="../css/v2/theme-bvm.css">
+<link rel="stylesheet" href="../css/v2/admin-shell.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-brand"><span class="brand-mark">ב</span><span>בית המטפלים</span></div>
+      <button class="sidebar-collapse" onclick="document.getElementById('sidebar').classList.toggle('collapsed')"><i class="fa-solid fa-angles-right"></i></button>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item" data-world="overview" style="--w:#003B46" onclick="go('overview')"><i class="nav-ico fa-solid fa-gauge-high"></i><span>סקירה</span></button>
+      <button class="nav-item" data-world="crm" style="--w:#00606B" onclick="go('crm')"><i class="nav-ico fa-solid fa-filter-circle-dollar"></i><span>לידים · CRM</span></button>
+      <button class="nav-item" data-world="learners" style="--w:#2F8592" onclick="go('learners')"><i class="nav-ico fa-solid fa-user-graduate"></i><span>לומדים</span></button>
+      <div class="nav-group-label">מעורבות והתמדה</div>
+      <div class="nav-sub">
+        <button class="nav-item active" data-world="popups" style="--w:#B8860B" onclick="go('popups')"><i class="nav-ico fa-solid fa-window-restore"></i><span>פופאפים</span></button>
+        <button class="nav-item" data-world="automations" style="--w:#8B6914" onclick="go('automations')"><i class="nav-ico fa-solid fa-bolt"></i><span>אוטומציות</span></button>
+        <button class="nav-item" data-world="bot" style="--w:#00606B" onclick="go('bot')"><i class="nav-ico fa-solid fa-robot"></i><span>בוט · סוכן</span></button>
+        <button class="nav-item" data-world="retention" style="--w:#9A3B3B" onclick="go('retention')"><i class="nav-ico fa-solid fa-bell"></i><span>שימור נוטשים</span></button>
+      </div>
+      <div class="nav-group-label">שיווק וצמיחה</div>
+      <div class="nav-sub">
+        <button class="nav-item" data-world="marketing" style="--w:#1F6E7A" onclick="go('marketing')"><i class="nav-ico fa-solid fa-bullhorn"></i><span>שיווק ונתונים</span></button>
+        <button class="nav-item" data-world="referrals" style="--w:#9A7B1B" onclick="go('referrals')"><i class="nav-ico fa-solid fa-rocket"></i><span>שותפים</span></button>
+      </div>
+      <div class="nav-group-label">מערכת</div>
+      <button class="nav-item" data-world="settings" style="--w:#44565B" onclick="go('settings')"><i class="nav-ico fa-solid fa-gear"></i><span>הגדרות</span></button>
+    </nav>
+    <div class="sidebar-foot">
+      <button class="nav-item" onclick="toggleTheme()"><i class="nav-ico fa-solid fa-circle-half-stroke"></i><span>מצב כהה / בהיר</span></button>
+      <div class="sidebar-user"><div class="u-avatar">ה</div><div class="u-meta"><div class="u-name">הילל אקנין</div><div class="u-role">מנהל המערכת</div></div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ===== פופאפים (מחובר לדאטה) ===== -->
+    <section class="world active" id="w-popups">
+      <div class="hero" style="--w:#B8860B">
+        <i class="hero-art fa-solid fa-window-restore"></i>
+        <h1>ניהול פופאפים</h1>
+        <p>צור, ערוך והפעל הודעות עידוד — אתה שולט מתי כל פופאפ מופיע, למי, וכמה</p>
+      </div>
+      <div id="popups-banner" style="display:none"></div>
+      <div class="actionbar">
+        <button class="btn btn-primary" onclick="alert('יצירת פופאפ — בשלב הבא של המיגרציה')"><i class="fa-solid fa-plus"></i> פופאפ חדש</button>
+        <span class="spacer"></span>
+        <span class="filter-pill"><i class="fa-solid fa-layer-group"></i> קטגוריה</span>
+        <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="חיפוש פופאפ..." oninput="filterPopups(this.value)"></div>
+      </div>
+      <div class="pop-grid" id="popups-grid"></div>
+
+      <h2 class="section-title">עריכת פופאפ + אלגוריתם הצגה</h2>
+      <div class="split">
+        <div class="panel">
+          <h3>תוכן הפופאפ</h3><div class="panel-sub">מה הלומד רואה</div>
+          <div class="field"><label>כותרת</label><input value="זמן לחזור ללמוד 💪"></div>
+          <div class="field"><label>תוכן ההודעה</label><textarea rows="3">כבר עברו כמה ימים. הפרק הבא מחכה לך, וזה ייקח רק 6 דקות.</textarea></div>
+          <div class="field-row"><div class="field"><label>טקסט כפתור</label><input value="המשך ללמוד"></div><div class="field"><label>קישור</label><input value="/course"></div></div>
+        </div>
+        <div class="panel">
+          <h3>אלגוריתם הצגה</h3><div class="panel-sub">מתי, למי וכמה</div>
+          <div class="toggle-line"><div class="tl-meta"><b>קהל יעד</b><div>למי מוצג</div></div><select style="max-width:160px;padding:8px;border-radius:8px;border:1px solid var(--t-border);background:var(--t-bg)"><option>לא פעילים</option><option>כל הלומדים</option><option>חדשים</option></select></div>
+          <div class="toggle-line"><div class="tl-meta"><b>טריגר</b><div>מה מפעיל</div></div><select style="max-width:160px;padding:8px;border-radius:8px;border:1px solid var(--t-border);background:var(--t-bg)"><option>לא נכנס 7 ימים</option><option>סיום שיעור</option><option>רצף נשבר</option></select></div>
+          <div class="toggle-line"><div class="tl-meta"><b>הצג שוב לא לפני</b><div>Cooldown</div></div><select style="max-width:160px;padding:8px;border-radius:8px;border:1px solid var(--t-border);background:var(--t-bg)"><option>3 ימים</option><option>שבוע</option><option>פעם אחת</option></select></div>
+          <div class="minigrid" style="margin-top:16px"><div class="ms"><div class="v" id="algo-shown">—</div><div class="l">הצגות</div></div><div class="ms"><div class="v" id="algo-ctr">—</div><div class="l">CTR</div></div><div class="ms"><div class="v" id="algo-dismiss">—</div><div class="l">סגירות</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== עולמות נוספים (מעטפת — מיגרציה בשלב הבא) ===== -->
+    <section class="world" id="w-overview">
+  <div class="hero" style="--w:#003B46">
+    <i class="hero-art fa-solid fa-gauge-high"></i>
+    <h1>בוקר טוב 👋</h1>
+    <p>תמונת מצב של בית המטפלים · נכון לעכשיו</p>
+    <div class="hero-actions">
+      <span class="chip"><i class="fa-solid fa-user-plus"></i>ליד חדש</span>
+      <span class="chip"><i class="fa-solid fa-graduation-cap"></i>הוסף תלמיד</span>
+      <span class="chip"><i class="fa-solid fa-chart-line"></i>סטטיסטיקות</span>
+    </div>
+  </div>
+
+  <div class="grid grid-kpi">
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#1F6E7A;--accent-soft:rgba(31,110,122,.12)"><i class="fa-solid fa-user-plus"></i></div>
+      <div>
+        <div class="kpi-val">24</div>
+        <div class="kpi-label">לידים חדשים</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#2F8592;--accent-soft:rgba(47,133,146,.12)"><i class="fa-solid fa-users"></i></div>
+      <div>
+        <div class="kpi-val">310</div>
+        <div class="kpi-label">לומדים פעילים</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#8B6914;--accent-soft:rgba(139,105,20,.12)"><i class="fa-solid fa-circle-check"></i></div>
+      <div>
+        <div class="kpi-val">38%</div>
+        <div class="kpi-label">אחוז סיום <span class="badge">המדד הראשי</span></div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#B8860B;--accent-soft:rgba(184,134,11,.12)"><i class="fa-solid fa-crown"></i></div>
+      <div>
+        <div class="kpi-val">12</div>
+        <div class="kpi-label">לקוחות משלמים</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#003B46;--accent-soft:rgba(0,59,70,.12)"><i class="fa-solid fa-shekel-sign"></i></div>
+      <div>
+        <div class="kpi-val">₪14,200</div>
+        <div class="kpi-label">הכנסה החודש</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title">משפך לידים</h2>
+  <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="card">
+      <div class="kpi-val">540</div>
+      <div class="kpi-label">נרשמו</div>
+    </div>
+    <div class="card">
+      <div class="kpi-val">310</div>
+      <div class="kpi-label">לומדים</div>
+    </div>
+    <div class="card">
+      <div class="kpi-val">47</div>
+      <div class="kpi-label">לידים חמים</div>
+    </div>
+    <div class="card">
+      <div class="kpi-val">12</div>
+      <div class="kpi-label">לקוחות</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">פעילות אחרונה</h2>
+  <div class="card">
+    <div class="grid" style="grid-template-columns:1fr">
+      <div><i class="fa-solid fa-circle-check"></i> דנה לוי השלימה שיעור 7 <span class="badge gray">לפני שעה</span></div>
+      <div><i class="fa-solid fa-user-plus"></i> ליד חדש מאינסטגרם <span class="badge gray">לפני 3 שעות</span></div>
+      <div><i class="fa-solid fa-file-signature"></i> יוסי כהן חתם חוזה <span class="badge green">אתמול</span></div>
+      <div><i class="fa-solid fa-fire"></i> רצף 5 ימים — מירב <span class="badge gray">אתמול</span></div>
+      <div><i class="fa-solid fa-window-restore"></i> פופאפ 'חזרה ללמידה' הוצג 18 פעם <span class="badge gray">היום</span></div>
+    </div>
+  </div>
+</section>
+    <section class="world" id="w-crm">
+  <div class="hero" style="--w:#00606B">
+    <div class="hero-art"><i class="fa-solid fa-filter-circle-dollar"></i></div>
+    <h1>לידים · מכירות · CRM</h1>
+    <p>כל ליד, באיזה שלב הוא, ומתי דיברתם</p>
+  </div>
+
+  <div class="subtabs">
+    <div class="subtab active"><i class="fa-solid fa-chart-simple"></i>Pipeline</div>
+    <div class="subtab"><i class="fa-solid fa-users"></i>כל הלידים</div>
+    <div class="subtab"><i class="fa-solid fa-credit-card"></i>לקוחות משלמים</div>
+    <div class="subtab"><i class="fa-solid fa-clipboard-question"></i>שאלוני היכרות</div>
+  </div>
+
+  <div class="grid grid-kpi">
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#00606B;--accent-soft:rgba(0,96,107,.12)"><i class="fa-solid fa-bolt"></i></div>
+      <div>
+        <div class="kpi-val">47</div>
+        <div class="kpi-label">פעילים במשפך</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#8B6914;--accent-soft:rgba(139,105,20,.12)"><i class="fa-solid fa-handshake"></i></div>
+      <div>
+        <div class="kpi-val">8</div>
+        <div class="kpi-label">משא ומתן</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#1F6E7A;--accent-soft:rgba(31,110,122,.12)"><i class="fa-solid fa-phone-volume"></i></div>
+      <div>
+        <div class="kpi-val">15</div>
+        <div class="kpi-label">פולו-אפ</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#44565B;--accent-soft:rgba(68,86,91,.12)"><i class="fa-solid fa-user-plus"></i></div>
+      <div>
+        <div class="kpi-val">19</div>
+        <div class="kpi-label">חדשים</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#2F8592;--accent-soft:rgba(47,133,146,.12)"><i class="fa-solid fa-circle-check"></i></div>
+      <div>
+        <div class="kpi-val">12</div>
+        <div class="kpi-label">נסגרו</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actionbar">
+    <button class="btn btn-primary"><i class="fa-solid fa-plus"></i>ליד חדש</button>
+    <button class="btn btn-ghost"><i class="fa-solid fa-file-export"></i>ייצוא</button>
+    <div class="spacer"></div>
+    <div class="filter-pill"><i class="fa-solid fa-layer-group"></i>שלב</div>
+    <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="חיפוש ליד..."></div>
+  </div>
+
+  <table class="dtable">
+    <thead>
+      <tr>
+        <th>שם</th>
+        <th>טלפון</th>
+        <th>שלב</th>
+        <th>מקור</th>
+        <th>נרשם</th>
+        <th>פעולות</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>נועה בן דוד</td>
+        <td>054-7821934</td>
+        <td><span class="badge gray">חדש</span></td>
+        <td>אינסטגרם</td>
+        <td>24.06.2026</td>
+        <td>
+          <span class="btn btn-ghost"><i class="fa-solid fa-pen"></i></span>
+          <span class="btn btn-ghost"><i class="fa-solid fa-eye"></i></span>
+        </td>
+      </tr>
+      <tr>
+        <td>איתי שרעבי</td>
+        <td>052-3349087</td>
+        <td><span class="badge">נוצר קשר</span></td>
+        <td>פייסבוק</td>
+        <td>22.06.2026</td>
+        <td>
+          <span class="btn btn-ghost"><i class="fa-solid fa-pen"></i></span>
+          <span class="btn btn-ghost"><i class="fa-solid fa-eye"></i></span>
+        </td>
+      </tr>
+      <tr>
+        <td>מיכל אזולאי</td>
+        <td>053-9012776</td>
+        <td><span class="badge">פולו-אפ</span></td>
+        <td>אורגני</td>
+        <td>19.06.2026</td>
+        <td>
+          <span class="btn btn-ghost"><i class="fa-solid fa-pen"></i></span>
+          <span class="btn btn-ghost"><i class="fa-solid fa-eye"></i></span>
+        </td>
+      </tr>
+      <tr>
+        <td>דניאל כהן</td>
+        <td>050-4458120</td>
+        <td><span class="badge green">משא ומתן</span></td>
+        <td>הפניה</td>
+        <td>15.06.2026</td>
+        <td>
+          <span class="btn btn-ghost"><i class="fa-solid fa-pen"></i></span>
+          <span class="btn btn-ghost"><i class="fa-solid fa-eye"></i></span>
+        </td>
+      </tr>
+      <tr>
+        <td>שירה פרץ</td>
+        <td>054-6673491</td>
+        <td><span class="badge">פולו-אפ</span></td>
+        <td>אינסטגרם</td>
+        <td>12.06.2026</td>
+        <td>
+          <span class="btn btn-ghost"><i class="fa-solid fa-pen"></i></span>
+          <span class="btn btn-ghost"><i class="fa-solid fa-eye"></i></span>
+        </td>
+      </tr>
+      <tr>
+        <td>אבי מזרחי</td>
+        <td>052-7790215</td>
+        <td><span class="badge green">נסגר</span></td>
+        <td>הפניה</td>
+        <td>08.06.2026</td>
+        <td>
+          <span class="btn btn-ghost"><i class="fa-solid fa-pen"></i></span>
+          <span class="btn btn-ghost"><i class="fa-solid fa-eye"></i></span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+    <section class="world" id="w-learners">
+      <div class="hero" style="--w:#2F8592"><i class="hero-art fa-solid fa-user-graduate"></i><h1>לומדים</h1><p>מי למד אצלנו, כמה, ומתי — מעקב אחרי כל לומד</p></div>
+      <div class="grid grid-kpi">
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#2F8592;--accent-soft:rgba(47,133,146,.12)"><i class="fa-solid fa-users"></i></div><div><div class="kpi-val" id="lrn-total">—</div><div class="kpi-label">סה״כ לומדים</div></div></div>
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#16A34A;--accent-soft:rgba(22,163,74,.12)"><i class="fa-solid fa-bolt"></i></div><div><div class="kpi-val" id="lrn-active">—</div><div class="kpi-label">פעילים ב-7 ימים</div></div></div>
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#B8860B;--accent-soft:rgba(184,134,11,.12)"><i class="fa-solid fa-graduation-cap"></i></div><div><div class="kpi-val" id="lrn-completed">—</div><div class="kpi-label">השלימו שיעורים</div></div></div>
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#003B46;--accent-soft:rgba(0,59,70,.12)"><i class="fa-solid fa-clock"></i></div><div><div class="kpi-val" id="lrn-hours">—</div><div class="kpi-label">שעות צפייה</div></div></div>
+      </div>
+      <div class="actionbar" style="margin-top:18px">
+        <button class="btn btn-ghost"><i class="fa-solid fa-file-export"></i> ייצוא</button>
+        <span class="spacer"></span>
+        <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="חיפוש לומד..." oninput="filterLearners(this.value)"></div>
+      </div>
+      <table class="dtable">
+        <thead><tr><th>שם</th><th>קשר</th><th>שיעורים שהושלמו</th><th>זמן צפייה</th><th>פעילות אחרונה</th><th>סטטוס</th></tr></thead>
+        <tbody id="learners-tbody"></tbody>
+      </table>
+    </section>
+    <section class="world" id="w-automations">
+      <div class="hero" style="--w:#8B6914"><i class="hero-art fa-solid fa-bolt"></i><h1>אוטומציות</h1><p>בנה תהליכים אוטומטיים בלי קוד: בחר מתי, בחר מה קורה, שמור</p></div>
+      <div class="card" style="padding:14px 18px;margin-bottom:18px;color:var(--t-text-secondary);font-size:.88rem"><i class="fa-solid fa-circle-info" style="color:#8B6914"></i> כל אוטומציה היא חוק פשוט: אם מתקיים תנאי, אז יוצאת פעולה. הפעל/כבה בלחיצה, בלי לגעת בקוד. מצב "טיוטה" (dry-run) רץ בלי לשלוח באמת.</div>
+      <div class="actionbar">
+        <button class="btn btn-primary" onclick="alert('בונה אוטומציה — בשלב הבא')"><i class="fa-solid fa-plus"></i> אוטומציה חדשה</button>
+        <span class="spacer"></span>
+        <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="חיפוש אוטומציה..."></div>
+      </div>
+      <div id="automations-list"></div>
+    </section>
+    <section class="world" id="w-bot"><div class="hero" style="--w:#00606B"><i class="hero-art fa-solid fa-robot"></i><h1>בוט · סוכן</h1><p>עולם זה יעבור מיגרציה בשלב הבא</p></div></section>
+    <section class="world" id="w-retention">
+  <div class="hero" style="--w:#9A3B3B">
+    <div class="hero-art"><i class="fa-solid fa-bell"></i></div>
+    <h1>שימור נוטשי קורס</h1>
+    <p>המערכת מזהה מי נעלם ומכינה הודעה אישית — אתה רק מאשר</p>
+  </div>
+
+  <div class="card" style="padding:18px">
+    סריקה יומית מזהה תלמידים שלא התקדמו 3+ ימים ומייצרת טיוטת וואטסאפ אישית לכל אחד. שום הודעה לא נשלחת בלי אישור שלך. אישור = נכנס לתור · דחייה = לא יישלח.
+    <div style="margin-top:14px">
+      <button class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> סרוק נוטשים → ייצר טיוטות</button>
+    </div>
+  </div>
+
+  <div class="subtabs">
+    <div class="subtab active">הכל</div>
+    <div class="subtab">טיוטות</div>
+    <div class="subtab">אושרו</div>
+    <div class="subtab">נשלחו</div>
+    <div class="subtab">נדחו</div>
+  </div>
+
+  <div class="grid grid-kpi">
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#9A3B3B;--accent-soft:#9A3B3B22"><i class="fa-solid fa-hourglass-half"></i></div>
+      <div>
+        <div class="kpi-val">14</div>
+        <div class="kpi-label">ממתינים לאישור</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#B8860B;--accent-soft:#B8860B22"><i class="fa-solid fa-list-check"></i></div>
+      <div>
+        <div class="kpi-val">6</div>
+        <div class="kpi-label">אושרו (בתור)</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#2F8592;--accent-soft:#2F859222"><i class="fa-solid fa-paper-plane"></i></div>
+      <div>
+        <div class="kpi-val">22</div>
+        <div class="kpi-label">נשלחו</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#44565B;--accent-soft:#44565B22"><i class="fa-solid fa-ban"></i></div>
+      <div>
+        <div class="kpi-val">3</div>
+        <div class="kpi-label">נדחו</div>
+      </div>
+    </div>
+  </div>
+
+  <table class="dtable">
+    <thead>
+      <tr>
+        <th>תלמיד</th>
+        <th>טלפון</th>
+        <th>סיבת נטישה (מהשאלון)</th>
+        <th>שיעור הבא</th>
+        <th>ימים לא פעיל</th>
+        <th>סטטוס</th>
+        <th>פעולות</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>נועה ברקוביץ'</td>
+        <td>054-7781234</td>
+        <td>חוסר זמן</td>
+        <td>שיעור 4 — עוגנים</td>
+        <td>5</td>
+        <td><span class="badge gray">טיוטה</span></td>
+        <td>
+          <span>
+            <i class="fa-solid fa-check" style="color:#2F8592"></i>
+            <i class="fa-solid fa-xmark"></i>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>אלון מזרחי</td>
+        <td>052-3349876</td>
+        <td>נתקע בתרגול</td>
+        <td>שיעור 3 — מודלינג</td>
+        <td>7</td>
+        <td><span class="badge gray">טיוטה</span></td>
+        <td>
+          <span>
+            <i class="fa-solid fa-check" style="color:#2F8592"></i>
+            <i class="fa-solid fa-xmark"></i>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>שירה לוי</td>
+        <td>050-6612045</td>
+        <td>לא ברור איך ממשיכים</td>
+        <td>שיעור 6 — מסגור מחדש</td>
+        <td>4</td>
+        <td><span class="badge gray">טיוטה</span></td>
+        <td>
+          <span>
+            <i class="fa-solid fa-check" style="color:#2F8592"></i>
+            <i class="fa-solid fa-xmark"></i>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>דניאל כהן</td>
+        <td>053-9920871</td>
+        <td>חוסר זמן</td>
+        <td>שיעור 2 — קשב וכיול</td>
+        <td>9</td>
+        <td><span class="badge gray">טיוטה</span></td>
+        <td>
+          <span>
+            <i class="fa-solid fa-check" style="color:#2F8592"></i>
+            <i class="fa-solid fa-xmark"></i>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>מאיה פרץ</td>
+        <td>058-4435567</td>
+        <td>נתקע בתרגול</td>
+        <td>שיעור 5 — קווי זמן</td>
+        <td>6</td>
+        <td><span class="badge gray">טיוטה</span></td>
+        <td>
+          <span>
+            <i class="fa-solid fa-check" style="color:#2F8592"></i>
+            <i class="fa-solid fa-xmark"></i>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+    <section class="world" id="w-marketing">
+  <div class="hero" style="--w:#1F6E7A">
+    <div class="hero-art"><i class="fa-solid fa-bullhorn"></i></div>
+    <h1>שיווק ומקורות תנועה</h1>
+    <p>מאיפה מגיע כל ליד וכל תלמיד — תמונת ייחוס מלאה (UTM)</p>
+  </div>
+
+  <div class="subtabs">
+    <div class="subtab active">מקורות תנועה</div>
+    <div class="subtab">קמפיינים</div>
+    <div class="subtab">UTM</div>
+  </div>
+
+  <div class="grid grid-kpi">
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#1F6E7A;--accent-soft:rgba(31,110,122,.12)"><i class="fa-solid fa-users"></i></div>
+      <div>
+        <div class="kpi-val">3,400</div>
+        <div class="kpi-label">מבקרים החודש</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#2F8592;--accent-soft:rgba(47,133,146,.12)"><i class="fa-solid fa-user-plus"></i></div>
+      <div>
+        <div class="kpi-val">210</div>
+        <div class="kpi-label">לידים</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#8B6914;--accent-soft:rgba(139,105,20,.12)"><i class="fa-solid fa-percent"></i></div>
+      <div>
+        <div class="kpi-val">6.2%</div>
+        <div class="kpi-label">אחוז המרה</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#B8860B;--accent-soft:rgba(184,134,11,.12)"><i class="fa-solid fa-instagram"></i></div>
+      <div>
+        <div class="kpi-val">אינסטגרם</div>
+        <div class="kpi-label">מקור מוביל</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">ייחוס לפי מקור</div>
+  <table class="dtable">
+    <thead>
+      <tr>
+        <th>מקור</th>
+        <th>מבקרים</th>
+        <th>לידים</th>
+        <th>אחוז המרה</th>
+        <th>מגמה</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>אינסטגרם</td>
+        <td>1,400</td>
+        <td>96</td>
+        <td><div class="progressbar"><i style="width:69%"></i></div>6.9%</td>
+        <td><span class="badge green">עולה</span></td>
+      </tr>
+      <tr>
+        <td>פייסבוק</td>
+        <td>820</td>
+        <td>54</td>
+        <td><div class="progressbar"><i style="width:66%"></i></div>6.6%</td>
+        <td><span class="badge gray">יציב</span></td>
+      </tr>
+      <tr>
+        <td>אורגני/גוגל</td>
+        <td>610</td>
+        <td>28</td>
+        <td><div class="progressbar"><i style="width:46%"></i></div>4.6%</td>
+        <td><span class="badge green">עולה</span></td>
+      </tr>
+      <tr>
+        <td>ישיר</td>
+        <td>320</td>
+        <td>14</td>
+        <td><div class="progressbar"><i style="width:44%"></i></div>4.4%</td>
+        <td><span class="badge gray">יציב</span></td>
+      </tr>
+      <tr>
+        <td>וואטסאפ</td>
+        <td>180</td>
+        <td>13</td>
+        <td><div class="progressbar"><i style="width:72%"></i></div>7.2%</td>
+        <td><span class="badge green">עולה</span></td>
+      </tr>
+      <tr>
+        <td>הפניות</td>
+        <td>70</td>
+        <td>5</td>
+        <td><div class="progressbar"><i style="width:71%"></i></div>7.1%</td>
+        <td><span class="badge gray">יציב</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+    <section class="world" id="w-referrals">
+  <div class="hero" style="--w:#9A7B1B">
+    <div class="hero-art"><i class="fa-solid fa-rocket"></i></div>
+    <h1>שותפים והפניות</h1>
+    <p>מי מביא לקוחות — לוח מובילים של שגרירי הקהילה</p>
+  </div>
+
+  <div class="grid grid-kpi">
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#9A7B1B;--accent-soft:rgba(154,123,27,.12)"><i class="fa-solid fa-share-nodes"></i></div>
+      <div>
+        <div class="kpi-val">58</div>
+        <div class="kpi-label">סה"כ הפניות</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#2F8592;--accent-soft:rgba(47,133,146,.12)"><i class="fa-solid fa-calendar-day"></i></div>
+      <div>
+        <div class="kpi-val">12</div>
+        <div class="kpi-label">החודש</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-ico" style="--accent:#1F6E7A;--accent-soft:rgba(31,110,122,.12)"><i class="fa-solid fa-user-group"></i></div>
+      <div>
+        <div class="kpi-val">9</div>
+        <div class="kpi-label">שותפים פעילים</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title">לוח מובילי הפניות</h2>
+  <table class="dtable">
+    <thead>
+      <tr>
+        <th>מקום</th>
+        <th>שם שותף</th>
+        <th>הפניות</th>
+        <th>נרשמו</th>
+        <th>סטטוס</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>🥇 1</td>
+        <td>נועה ברקוביץ'</td>
+        <td>14</td>
+        <td>11</td>
+        <td><span class="badge green">פעיל</span></td>
+      </tr>
+      <tr>
+        <td>🥈 2</td>
+        <td>איתי שרון</td>
+        <td>11</td>
+        <td>8</td>
+        <td><span class="badge green">פעיל</span></td>
+      </tr>
+      <tr>
+        <td>🥉 3</td>
+        <td>מירב כהן</td>
+        <td>9</td>
+        <td>7</td>
+        <td><span class="badge green">פעיל</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>דניאל לוי</td>
+        <td>7</td>
+        <td>5</td>
+        <td><span class="badge green">פעיל</span></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>שירה אברהם</td>
+        <td>5</td>
+        <td>4</td>
+        <td><span class="badge green">פעיל</span></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>יואב פרידמן</td>
+        <td>4</td>
+        <td>3</td>
+        <td><span class="badge green">פעיל</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="section-title">הפניות אחרונות</h2>
+  <div class="card">
+    <div class="ref-row"><i class="fa-solid fa-user-plus"></i> תמר גולן הצטרפה דרך נועה ברקוביץ' · לפני 2 שעות</div>
+    <div class="ref-row"><i class="fa-solid fa-user-plus"></i> אורי בן-דוד הצטרף דרך איתי שרון · לפני 5 שעות</div>
+    <div class="ref-row"><i class="fa-solid fa-user-plus"></i> רוני שמש הצטרפה דרך מירב כהן · אתמול</div>
+    <div class="ref-row"><i class="fa-solid fa-user-plus"></i> אלון נחמיאס הצטרף דרך דניאל לוי · לפני יומיים</div>
+  </div>
+</section>
+    <section class="world" id="w-settings" style="--w:#44565B;--accent:#44565B;--accent-soft:rgba(68,86,91,.12)">
+  <div class="hero" style="--w:#44565B">
+    <div class="hero-art"><i class="fa-solid fa-gear"></i></div>
+    <h1>הגדרות</h1>
+    <p>התאם את הפורטל שלך: מיתוג, דומיין, צוות ואינטגרציות</p>
+  </div>
+
+  <div class="subtabs">
+    <div class="subtab active">מיתוג ועיצוב</div>
+    <div class="subtab">דומיין</div>
+    <div class="subtab">צוות</div>
+    <div class="subtab">אינטגרציות</div>
+    <div class="subtab">תשלומים</div>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <h3>מיתוג ועיצוב</h3>
+      <div class="panel-sub">המראה של כל הפורטל</div>
+
+      <div class="field">
+        <label>שם האקדמיה</label>
+        <input type="text" value="בית המטפלים">
+      </div>
+
+      <div class="field">
+        <label>צבע ראשי</label>
+        <input type="color" value="#5B5BD6">
+        <div class="hint">כל המערכת מתעדכנת אוטומטית מהצבע הזה (token-driven)</div>
+      </div>
+
+      <div class="field">
+        <label>לוגו</label>
+        <input type="file">
+      </div>
+
+      <button class="btn btn-primary">שמור</button>
+    </div>
+
+    <div class="panel">
+      <h3>אינטגרציות</h3>
+      <div class="panel-sub">חיבורים חיצוניים</div>
+
+      <div class="toggle-line">
+        <div class="tl-meta">
+          <b>וואטסאפ (Green API)</b>
+          <div>שליחת הודעות והתראות ללקוחות</div>
+        </div>
+        <button class="switch on"></button>
+      </div>
+
+      <div class="toggle-line">
+        <div class="tl-meta">
+          <b>Google Analytics 4</b>
+          <div>מעקב תנועה והתנהגות גולשים</div>
+        </div>
+        <button class="switch on"></button>
+      </div>
+
+      <div class="toggle-line">
+        <div class="tl-meta">
+          <b>Meta Pixel</b>
+          <div>מעקב המרות וקמפיינים בפייסבוק</div>
+        </div>
+        <button class="switch on"></button>
+      </div>
+
+      <div class="toggle-line">
+        <div class="tl-meta">
+          <b>Supabase</b>
+          <div>מסד נתונים ואימות משתמשים</div>
+        </div>
+        <button class="switch on"></button>
+      </div>
+
+      <div class="toggle-line">
+        <div class="tl-meta">
+          <b>סליקת אשראי</b>
+          <div>קבלת תשלומים אונליין בפורטל</div>
+        </div>
+        <button class="switch"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+  </main>
+</div>
+
+<script>
+  // ---- ניווט ----
+  function go(world){
+    document.querySelectorAll('.world').forEach(w => w.classList.remove('active'));
+    var el = document.getElementById('w-'+world); if(el) el.classList.add('active');
+    document.querySelectorAll('.nav-item[data-world]').forEach(n => n.classList.toggle('active', n.dataset.world === world));
+    window.scrollTo(0,0);
+  }
+  function toggleTheme(){ var h=document.documentElement; h.setAttribute('data-theme', h.getAttribute('data-theme')==='dark'?'light':'dark'); }
+
+  // ---- צבעים לפי קטגוריה (פלטת מותג) ----
+  const CAT = {
+    engagement:{c:'#00606B',i:'fa-heart'}, achievement:{c:'#B8860B',i:'fa-star'},
+    milestone:{c:'#2F8592',i:'fa-flag-checkered'}, celebration:{c:'#8B6914',i:'fa-trophy'},
+    encouragement:{c:'#9A3B3B',i:'fa-fire'}, _default:{c:'#003B46',i:'fa-window-restore'}
+  };
+  function soft(hex){ const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},.12)`; }
+
+  // ---- נתוני דמו (למצב preview / file://) ----
+  const SAMPLE = [
+    {id:1,title:'חזרה ללמידה',description_he:'שלח למי שלא נכנס שבוע',category:'engagement',is_active:true,shown:1240,ctr:18,dismiss:6},
+    {id:2,title:'ברוכים הבאים לקורס',description_he:'מוצג בכניסה ראשונה',category:'engagement',is_active:true,shown:540,ctr:42,dismiss:3},
+    {id:3,title:'השלמת 5 שיעורים',description_he:'חגיגת אבן דרך',category:'achievement',is_active:true,shown:310,ctr:28,dismiss:5},
+    {id:4,title:'השלמת 10 שיעורים',description_he:'אבן דרך מתקדמת',category:'achievement',is_active:true,shown:180,ctr:31,dismiss:4},
+    {id:5,title:'רצף 3 ימים',description_he:'עידוד רצף יומי',category:'encouragement',is_active:true,shown:220,ctr:24,dismiss:7},
+    {id:6,title:'סיום שיעור ראשון',description_he:'דחיפה אחרי שיעור 1',category:'milestone',is_active:false,shown:95,ctr:36,dismiss:5},
+    {id:7,title:'סיום קורס',description_he:'ברכה + הצעת המשך',category:'celebration',is_active:false,shown:42,ctr:50,dismiss:2},
+    {id:8,title:'חזון הקורס',description_he:'תזכורת מטרה לאמצע הקורס',category:'milestone',is_active:true,shown:160,ctr:22,dismiss:8},
+  ];
+
+  let POPUPS = [];
+  function banner(txt, warn){ const b=document.getElementById('popups-banner'); b.style.display='block'; b.innerHTML = `<div class="card" style="padding:12px 16px;margin-bottom:16px;border-color:${warn?'#B8860B':'var(--t-border)'};color:var(--t-text-secondary);font-size:.86rem"><i class="fa-solid fa-circle-info" style="color:#B8860B"></i> ${txt}</div>`; }
+
+  function renderPopups(list){
+    POPUPS = list;
+    const grid = document.getElementById('popups-grid');
+    grid.innerHTML = list.map(p => {
+      const cat = CAT[p.category] || CAT._default;
+      const on = p.is_active;
+      return `<div class="pop-card" data-title="${(p.title||'').toLowerCase()}" style="--accent:${cat.c};--accent-soft:${soft(cat.c)}">
+        <div class="pc-top">
+          <div class="pc-ico"><i class="fa-solid ${cat.i}"></i></div>
+          <button class="switch ${on?'on':''}" title="${on?'פעיל':'כבוי'}" onclick="togglePopup('${p.id}', this)"></button>
+        </div>
+        <div class="pc-title">${p.title||''}</div>
+        <div class="pc-desc">${p.description_he||''}</div>
+        <div class="pc-foot">
+          <span class="stat"><i class="fa-solid fa-eye"></i> ${p.shown??0}</span>
+          <span class="stat"><i class="fa-solid fa-arrow-pointer"></i> ${p.ctr??0}%</span>
+          <span class="stat"><i class="fa-solid fa-xmark"></i> ${p.dismiss??0}%</span>
+        </div>
+      </div>`;
+    }).join('');
+    // עדכן מיני-סטטים מהפופאפ הראשון
+    const f = list[0]; if(f){ setT('algo-shown', f.shown??'—'); setT('algo-ctr',(f.ctr??'—')+'%'); setT('algo-dismiss',(f.dismiss??'—')+'%'); }
+  }
+  function setT(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
+  function filterPopups(q){ q=(q||'').toLowerCase(); document.querySelectorAll('#popups-grid .pop-card').forEach(c=>{ c.style.display = c.dataset.title.includes(q)?'':'none'; }); }
+
+  async function togglePopup(id, btn){
+    const on = !btn.classList.contains('on');
+    btn.classList.toggle('on', on);
+    if(window.db){
+      try{ await window.db.from('popup_configs').update({is_active:on, status:on?'live':'paused'}).eq('id', id); }
+      catch(e){ btn.classList.toggle('on', !on); alert('שגיאה בעדכון'); }
+    }
+  }
+
+  // ---- אוטומציות (החוקים האמיתיים מהמערכת; חיווט חי למנוע = שלב הבא) ----
+  const AUTORULES = [
+    {name:'מי שסיים מעל 5 שיעורים', when:'כל יום 14:00 · סיים >5 שיעורים + יש טלפון', then:'וואטסאפ: דחיפה לחלק ב׳', enabled:true},
+    {name:'לידים שלא הגיבו 7 ימים', when:'ימי חול 10:00 · בשלב follow_up מעל 7 ימים', then:'וואטסאפ: תזכורת לחזור', enabled:true},
+    {name:'לא מילא שאלון פורטל', when:'כל יום 11:00 · נרשם מעל 3 ימים, לא מילא שאלון', then:'וואטסאפ: לינק לשאלון', enabled:true},
+    {name:'תזכורת 30 דק׳ אחרי הרשמה', when:'כל 5 דקות · 30–120 דק׳ מההרשמה, לא מילא שאלון', then:'וואטסאפ: תזכורת שאלון', enabled:false, dry:true},
+    {name:'תזכורת שבועית מותאמת (AI)', when:'כל שלישי 10:00 · הסכים לתזכורות, מתחת 51 שיעורים', then:'AI: הודעה אישית לפי החזון', enabled:true, ai:true},
+  ];
+  function renderAutomations(){
+    const box = document.getElementById('automations-list'); if(!box) return;
+    box.innerHTML = AUTORULES.map((r,i)=>`
+      <div class="auto-rule">
+        <button class="switch ${r.enabled?'on':''}" onclick="this.classList.toggle('on')"></button>
+        <div class="ar-body">
+          <div class="ar-name">${r.name} ${r.dry?'<span class="badge gray">טיוטה</span>':''} ${r.ai?'<span class="badge">AI</span>':''}</div>
+          <div class="auto-flow">
+            <span class="auto-pill if"><i class="fa-solid fa-bolt"></i> ${r.when}</span>
+            <i class="auto-arrow fa-solid fa-arrow-left"></i>
+            <span class="auto-pill then"><i class="fa-solid fa-paper-plane"></i> ${r.then}</span>
+          </div>
+        </div>
+        <div class="ar-acts"><button title="ערוך"><i class="fa-solid fa-pen"></i></button><button title="מחק"><i class="fa-solid fa-trash"></i></button></div>
+      </div>`).join('');
+  }
+
+  // ---- לומדים (course_progress + profiles) ----
+  const SAMPLE_LEARNERS = [
+    {name:'דנה לוי', contact:'054-7821934', completed:9, secs:15600, last:'לפני יומיים', active:true},
+    {name:'יוסי כהן', contact:'052-3349087', completed:14, secs:24300, last:'היום', active:true},
+    {name:'מירב שרעבי', contact:'053-9012776', completed:3, secs:4200, last:'לפני 9 ימים', active:false},
+    {name:'אבי מזרחי', contact:'052-7790215', completed:21, secs:38800, last:'אתמול', active:true},
+    {name:'שירה פרץ', contact:'054-6673491', completed:1, secs:900, last:'לפני 12 ימים', active:false},
+    {name:'דניאל אזולאי', contact:'050-4458120', completed:6, secs:9100, last:'לפני 3 ימים', active:true},
+    {name:'נועה בן דוד', contact:'054-1102233', completed:11, secs:19800, last:'היום', active:true},
+  ];
+  function fmtDur(s){ const h=Math.floor(s/3600), m=Math.floor((s%3600)/60); return h?`${h}ש' ${m}ד'`:`${m}ד'`; }
+  function renderLearners(list){
+    const tb=document.getElementById('learners-tbody'); if(!tb) return;
+    tb.innerHTML = list.map(u=>`<tr data-name="${(u.name||'').toLowerCase()}">
+      <td><b>${u.name||'—'}</b></td>
+      <td style="color:var(--t-text-secondary)">${u.contact||''}</td>
+      <td><b style="color:${u.completed>0?'var(--t-success)':'var(--t-text-muted)'}">${u.completed}</b> ${u.completed>=10?'<i class="fa-solid fa-fire" style="color:#B8860B"></i>':''}</td>
+      <td style="color:var(--t-text-secondary)">${fmtDur(u.secs||0)}</td>
+      <td style="color:var(--t-text-secondary)">${u.last||'—'}</td>
+      <td>${u.active?'<span class="badge green">פעיל</span>':'<span class="badge gray">נתקע</span>'}</td>
+    </tr>`).join('');
+  }
+  function filterLearners(q){ q=(q||'').toLowerCase(); document.querySelectorAll('#learners-tbody tr').forEach(r=>{ r.style.display=r.dataset.name.includes(q)?'':'none'; }); }
+  function setLrnStats(list){
+    const wk=Date.now()-7*864e5;
+    setT('lrn-total', list.length);
+    setT('lrn-active', list.filter(u=>u.active).length);
+    setT('lrn-completed', list.filter(u=>u.completed>0).length);
+    setT('lrn-hours', Math.round(list.reduce((s,u)=>s+(u.secs||0),0)/3600));
+  }
+  async function loadLearnersLive(){
+    try{
+      const { data: progress } = await window.db.from('course_progress').select('user_id,video_id,completed,watched_seconds,completed_at,updated_at,created_at').order('completed_at',{ascending:false});
+      const { data: profiles } = await window.db.from('profiles').select('id,email,full_name,phone');
+      const pmap={}; (profiles||[]).forEach(p=>pmap[p.id]=p);
+      const u={};
+      (progress||[]).filter(r=>!String(r.video_id||'').startsWith('last_watched_')).forEach(r=>{
+        const x=u[r.user_id]=u[r.user_id]||{completed:0,secs:0,last:null,id:r.user_id};
+        if(r.completed)x.completed++; x.secs+=r.watched_seconds||0;
+        const act=r.completed_at||r.updated_at||r.created_at; if(act&&(!x.last||act>x.last))x.last=act;
+      });
+      const wk=Date.now()-7*864e5;
+      const list=Object.values(u).map(x=>{ const p=pmap[x.id]||{}; return {name:p.full_name||p.email||'—', contact:p.phone||p.email||'', completed:x.completed, secs:x.secs, last:x.last?new Date(x.last).toLocaleDateString('he-IL'):'—', active:x.last&&new Date(x.last).getTime()>wk}; })
+        .sort((a,b)=>(b.completed)-(a.completed));
+      renderLearners(list.length?list:SAMPLE_LEARNERS); setLrnStats(list.length?list:SAMPLE_LEARNERS);
+    }catch(e){ renderLearners(SAMPLE_LEARNERS); setLrnStats(SAMPLE_LEARNERS); }
+  }
+
+  // ---- אתחול: live מול preview ----
+  async function initV2(){
+    renderAutomations();
+    renderLearners(SAMPLE_LEARNERS); setLrnStats(SAMPLE_LEARNERS);
+    const isLocal = location.protocol === 'file:';
+    const preview = new URLSearchParams(location.search).has('preview');
+    if(isLocal || preview){ renderPopups(SAMPLE); banner('מצב תצוגה (preview) — נתוני דמו. בסביבה החיה הנתונים נטענים מ-Supabase האמיתי.', true); return; }
+
+    if(!window.SUPABASE_CONFIG){ banner('חסר supabase-config', true); renderPopups(SAMPLE); return; }
+    const db = supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+    window.db = db;
+    const { data:{ session } } = await db.auth.getSession();
+    if(!session){ location.href = 'login.html'; return; }
+    const { data: profile } = await db.from('profiles').select('role').eq('id', session.user.id).single();
+    if(!profile || !['admin','sales_rep'].includes(profile.role)){ location.href = 'course-library.html'; return; }
+
+    try{
+      const { data: configs } = await db.from('popup_configs').select('*').order('priority');
+      const since = new Date(Date.now()-30*864e5).toISOString();
+      const { data: events } = await db.from('popup_events').select('popup_id,event_type').gte('created_at', since);
+      const agg = {};
+      (events||[]).forEach(e=>{ const a=agg[e.popup_id]=agg[e.popup_id]||{shown:0,clicked:0,dismissed:0}; if(e.event_type==='shown')a.shown++; else if(e.event_type==='clicked')a.clicked++; else if(e.event_type==='dismissed')a.dismissed++; });
+      const list = (configs||[]).map(c=>{ const a=agg[c.popup_id]||{shown:0,clicked:0,dismissed:0}; return {...c, shown:a.shown, ctr:a.shown?Math.round(a.clicked/a.shown*100):0, dismiss:a.shown?Math.round(a.dismissed/a.shown*100):0}; });
+      renderPopups(list.length?list:SAMPLE);
+      if(!list.length) banner('אין עדיין פופאפים ב-Supabase — מוצגים נתוני דמו.', true);
+      loadLearnersLive();
+    }catch(e){ renderPopups(SAMPLE); banner('שגיאת טעינה מ-Supabase: '+e.message, true); }
+  }
+  initV2();
+</script>
+</body>
+</html>

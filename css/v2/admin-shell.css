@@ -1,0 +1,460 @@
+/* ============================================================
+   תבנית-אם · מעטפת אדמין (Admin Shell)
+   הדפוסים שנלקחו מ-Newlege: סיידבר מתויג, באנר ירו צבעוני,
+   שורת פעולה אחידה, empty states פרימיום, תתי-טאבים.
+   תלוי ב-theme.css (טוקנים).
+   ============================================================ */
+
+* { box-sizing: border-box; }
+.hidden { display: none !important; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--t-bg);
+    color: var(--t-text);
+    font-family: var(--t-font-body);
+    direction: rtl;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------- פריסה כללית ---------------- */
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+    padding: 28px 32px 48px;
+    overflow-x: hidden;
+}
+
+/* ============================================================
+   סיידבר (מתויג ומרווח, מתקפל) — RTL בצד ימין
+   ============================================================ */
+.sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: var(--t-bg-card);
+    border-inline-start: 1px solid var(--t-border);
+    display: flex;
+    flex-direction: column;
+    padding: 18px 14px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    transition: width var(--dur-3) var(--ease-standard);
+}
+.sidebar.collapsed { width: var(--sidebar-w-collapsed); }
+
+.sidebar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 8px 16px;
+}
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--t-text);
+    white-space: nowrap;
+    overflow: hidden;
+}
+.sidebar-brand .brand-mark {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: var(--t-primary);
+    color: #fff;
+    display: grid; place-items: center;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+.sidebar-collapse {
+    background: transparent; border: none; cursor: pointer;
+    color: var(--t-text-muted); font-size: 1.1rem; padding: 4px;
+    border-radius: 8px; flex-shrink: 0;
+}
+.sidebar-collapse:hover { background: var(--t-bg-card-hover); color: var(--t-text); }
+.sidebar.collapsed .sidebar-brand span,
+.sidebar.collapsed .nav-item span,
+.sidebar.collapsed .nav-group-label,
+.sidebar.collapsed .sidebar-user .u-meta { display: none; }
+
+.sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+
+.nav-group-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--t-text-muted);
+    text-transform: none;
+    letter-spacing: .02em;
+    padding: 14px 12px 6px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: var(--t-text-secondary);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 500;
+    border-radius: 11px;
+    cursor: pointer;
+    width: 100%;
+    text-align: start;
+    transition: background var(--dur-2), color var(--dur-2);
+    white-space: nowrap;
+}
+.nav-item .nav-ico {
+    width: 22px; text-align: center; font-size: 1rem;
+    color: var(--w, var(--t-text-muted));
+    flex-shrink: 0;
+}
+.nav-item:hover { background: var(--t-bg-card-hover); color: var(--t-text); }
+.nav-item.active {
+    background: var(--t-primary-soft);
+    color: var(--t-primary);
+    font-weight: 700;
+}
+.nav-item.active .nav-ico { color: var(--t-primary); }
+
+/* קיבוץ "אפליקציות" — פריטים מקוננים */
+.nav-sub { margin-inline-start: 10px; padding-inline-start: 8px; border-inline-start: 1px solid var(--t-border); }
+
+.sidebar-foot { border-top: 1px solid var(--t-border); padding-top: 12px; margin-top: 8px; }
+.sidebar-user {
+    display: flex; align-items: center; gap: 10px; padding: 8px;
+    border-radius: 11px;
+}
+.sidebar-user img, .sidebar-user .u-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--t-primary-soft); color: var(--t-primary);
+    display: grid; place-items: center; font-weight: 700; flex-shrink: 0;
+}
+.sidebar-user .u-meta { line-height: 1.2; overflow: hidden; }
+.sidebar-user .u-name { font-weight: 700; font-size: 0.88rem; }
+.sidebar-user .u-role { font-size: 0.72rem; color: var(--t-text-muted); }
+
+/* ============================================================
+   באנר ירו (צבעוני פר-עולם)
+   ============================================================ */
+.hero {
+    --w: var(--w-overview);
+    position: relative;
+    border-radius: var(--radius-card);
+    padding: 30px 32px;
+    margin-bottom: 22px;
+    color: #fff;
+    background: linear-gradient(120deg, var(--w) 0%, color-mix(in srgb, var(--w) 70%, #000 12%) 100%);
+    box-shadow: var(--t-shadow-md);
+    overflow: hidden;
+}
+.hero h1 { margin: 0; font-size: 1.7rem; font-weight: 800; }
+.hero p { margin: 6px 0 0; opacity: .9; font-size: 0.98rem; }
+.hero .hero-art {
+    position: absolute; inset-inline-start: 28px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 3.4rem; opacity: .22;
+}
+.hero .hero-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+.hero .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.28);
+    color: #fff; padding: 7px 14px; border-radius: var(--radius-pill);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; backdrop-filter: blur(4px);
+}
+.hero .chip:hover { background: rgba(255,255,255,.26); }
+
+/* ============================================================
+   שורת פעולה אחידה (ראשי + ייבוא / toggle + פילטרים + חיפוש)
+   ============================================================ */
+.actionbar {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px; flex-wrap: wrap;
+}
+.actionbar .spacer { flex: 1; }
+
+.btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: var(--radius-btn);
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; border: 1px solid transparent; transition: all var(--dur-2);
+    white-space: nowrap;
+}
+.btn-primary { background: var(--t-primary); color: var(--t-on-primary); }
+.btn-primary:hover { background: var(--t-primary-hover); box-shadow: 0 4px 14px var(--t-primary-glow); }
+.btn-ghost { background: var(--t-bg-card); color: var(--t-text-secondary); border-color: var(--t-border); }
+.btn-ghost:hover { background: var(--t-bg-card-hover); color: var(--t-text); }
+.btn .sparkle { color: #FFD66B; }
+
+.view-toggle { display: inline-flex; background: var(--t-bg-card); border: 1px solid var(--t-border); border-radius: var(--radius-btn); overflow: hidden; }
+.view-toggle button { border: none; background: transparent; padding: 8px 12px; cursor: pointer; color: var(--t-text-muted); }
+.view-toggle button.active { background: var(--t-primary-soft); color: var(--t-primary); }
+
+.filter-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--t-bg-card); border: 1px solid var(--t-border);
+    border-radius: var(--radius-pill); padding: 8px 14px;
+    font-size: 0.85rem; color: var(--t-text-secondary); cursor: pointer;
+}
+.filter-pill:hover { border-color: var(--t-border-strong); }
+
+.search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--t-bg-card); border: 1px solid var(--t-border);
+    border-radius: var(--radius-btn); padding: 9px 14px; min-width: 240px;
+}
+.search-box i { color: var(--t-text-muted); }
+.search-box input { border: none; background: transparent; outline: none; font-family: inherit; color: var(--t-text); width: 100%; }
+
+/* ============================================================
+   תתי-טאבים אופקיים (גלולות)
+   ============================================================ */
+.subtabs {
+    display: inline-flex; gap: 6px; padding: 5px;
+    background: var(--t-bg-card); border: 1px solid var(--t-border);
+    border-radius: var(--radius-pill); margin-bottom: 20px; flex-wrap: wrap;
+}
+.subtab {
+    border: none; background: transparent; color: var(--t-text-secondary);
+    padding: 8px 16px; border-radius: var(--radius-pill); cursor: pointer;
+    font-family: inherit; font-size: 0.86rem; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 7px;
+}
+.subtab:hover { background: var(--t-bg-card-hover); color: var(--t-text); }
+.subtab.active { background: var(--t-primary-soft); color: var(--t-primary); }
+
+/* ============================================================
+   כרטיסים + KPI
+   ============================================================ */
+.card {
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--t-shadow-sm);
+}
+.grid { display: grid; gap: 16px; }
+.grid-kpi { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+
+.kpi {
+    display: flex; align-items: center; gap: 14px; padding: 18px 20px;
+}
+.kpi .kpi-ico {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    display: grid; place-items: center; font-size: 1.15rem;
+    background: var(--accent-soft, var(--t-primary-soft));
+    color: var(--accent, var(--t-primary));
+}
+.kpi .kpi-val { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+.kpi .kpi-label { font-size: 0.82rem; color: var(--t-text-muted); margin-top: 4px; }
+
+/* ============================================================
+   Empty state פרימיום (איור + כותרת + CTA)
+   ============================================================ */
+.empty {
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
+    border-radius: var(--radius-card);
+    padding: 56px 24px;
+    text-align: center;
+}
+.empty .empty-art {
+    position: relative; width: 96px; height: 110px; margin: 0 auto 20px;
+}
+.empty .empty-art .sheet {
+    width: 84px; height: 100px; margin: 0 auto;
+    background: var(--t-bg); border: 1px solid var(--t-border);
+    border-radius: 14px; box-shadow: var(--t-shadow-md);
+    display: grid; place-items: center; font-size: 1.8rem;
+    color: var(--w, var(--t-primary));
+}
+.empty .empty-art .badge-dot {
+    position: absolute; top: -6px; inset-inline-start: 4px;
+    width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--w, var(--t-primary)) 16%, #fff);
+    color: var(--w, var(--t-primary)); font-size: 0.85rem;
+}
+.empty .empty-art .sparkle-dot {
+    position: absolute; bottom: 0; inset-inline-end: 6px; color: #F59E0B; font-size: 1rem;
+}
+.empty h3 { margin: 0 0 6px; font-size: 1.18rem; font-weight: 800; }
+.empty p { margin: 0 auto 20px; color: var(--t-text-secondary); max-width: 420px; }
+
+/* ============================================================
+   באדג'ים
+   ============================================================ */
+.badge {
+    display: inline-block; padding: 4px 11px; border-radius: var(--radius-pill);
+    font-size: 0.76rem; font-weight: 700;
+    background: var(--t-primary-soft); color: var(--t-primary);
+}
+.badge.green { background: rgba(22,163,74,.12); color: var(--t-success); }
+.badge.gray  { background: var(--t-bg-card-hover); color: var(--t-text-muted); }
+
+/* ============================================================
+   ראוטר עולמות + כניסה מונפשת
+   ============================================================ */
+.world { display: none; }
+.world.active { display: block; animation: world-in var(--dur-4) var(--ease-decelerate); }
+@keyframes world-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.section-title { font-size: 1.05rem; font-weight: 800; margin: 26px 0 12px; }
+
+/* ---------------- רספונסיבי ---------------- */
+@media (max-width: 860px) {
+    .sidebar { position: fixed; z-index: 60; transform: translateX(100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { padding: 18px; }
+    .hero { padding: 22px; }
+}
+
+/* ============================================================
+   ניהול קורסים — רשימה + בונה קורס (פרקים → שיעורים)
+   זה הלב: ניהול מסודר של התוכן מאחורי הקלעים
+   ============================================================ */
+
+/* ----- רשימת קורסים ----- */
+.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; }
+.course-card {
+    background: var(--t-bg-card); border: 1px solid var(--t-border);
+    border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--t-shadow-sm);
+    transition: transform var(--dur-2), box-shadow var(--dur-2); cursor: pointer;
+}
+.course-card:hover { transform: translateY(-3px); box-shadow: var(--t-shadow-md); }
+.course-card .cc-cover {
+    height: 118px; display: grid; place-items: center; color: #fff; font-size: 2rem;
+    background: linear-gradient(120deg, var(--cc, var(--w-content)) 0%, color-mix(in srgb, var(--cc, var(--w-content)) 70%, #000 14%) 100%);
+    position: relative;
+}
+.course-card .cc-status { position: absolute; top: 10px; inset-inline-end: 10px; }
+.course-card .cc-body { padding: 14px 16px 16px; }
+.course-card .cc-title { font-weight: 800; font-size: 1.02rem; margin-bottom: 4px; }
+.course-card .cc-meta { color: var(--t-text-muted); font-size: 0.82rem; display: flex; gap: 12px; }
+.course-card .cc-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+.course-card.new-card {
+    border: 2px dashed var(--t-border-strong); background: var(--t-bg-secondary);
+    display: grid; place-items: center; min-height: 200px; color: var(--t-text-secondary); gap: 8px;
+}
+.course-card.new-card:hover { border-color: var(--t-primary); color: var(--t-primary); }
+.course-card.new-card .plus-ring { width: 48px; height: 48px; border-radius: 50%; background: var(--t-primary-soft); color: var(--t-primary); display: grid; place-items: center; font-size: 1.3rem; }
+
+/* ----- בונה הקורס ----- */
+.builder-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
+.builder-back { background: transparent; border: none; color: var(--t-text-muted); cursor: pointer; font-family: inherit; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; padding: 6px; border-radius: 8px; }
+.builder-back:hover { color: var(--t-text); background: var(--t-bg-card-hover); }
+.builder-title { font-size: 1.35rem; font-weight: 800; }
+.builder-sub { color: var(--t-text-muted); font-size: 0.85rem; }
+
+.chapter { background: var(--t-bg-card); border: 1px solid var(--t-border); border-radius: var(--radius-card); margin-bottom: 14px; overflow: hidden; }
+.chapter-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--t-bg-secondary); border-bottom: 1px solid var(--t-border); }
+.chapter-grip { color: var(--t-text-muted); cursor: grab; }
+.chapter-head .ch-title { font-weight: 700; flex: 1; }
+.chapter-head .ch-count { color: var(--t-text-muted); font-size: 0.8rem; }
+.chapter-head .ch-act { background: transparent; border: none; color: var(--t-text-muted); cursor: pointer; padding: 6px; border-radius: 7px; }
+.chapter-head .ch-act:hover { background: var(--t-bg-card-hover); color: var(--t-text); }
+
+.lesson-row { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--t-border); transition: background var(--dur-1); }
+.lesson-row:last-child { border-bottom: none; }
+.lesson-row:hover { background: var(--t-bg-card-hover); }
+.lesson-row .l-grip { color: var(--t-text-muted); cursor: grab; opacity: .55; }
+.lesson-row .l-type { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 0.85rem; flex-shrink: 0; }
+.l-type.video { background: rgba(99,102,241,.12); color: #6366F1; }
+.l-type.text  { background: rgba(100,116,139,.14); color: #64748B; }
+.l-type.quiz  { background: rgba(13,148,136,.14); color: #0D9488; }
+.lesson-row .l-title { flex: 1; font-size: 0.92rem; font-weight: 500; }
+.lesson-row .l-dur { color: var(--t-text-muted); font-size: 0.78rem; }
+.lesson-row .l-acts { display: flex; gap: 4px; opacity: 0; transition: opacity var(--dur-1); }
+.lesson-row:hover .l-acts { opacity: 1; }
+.lesson-row .l-acts button { background: transparent; border: none; color: var(--t-text-muted); cursor: pointer; padding: 6px; border-radius: 7px; }
+.lesson-row .l-acts button:hover { background: var(--t-bg); color: var(--t-text); }
+
+.lesson-add { display: flex; align-items: center; gap: 10px; padding: 11px 18px; color: var(--t-primary); cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+.lesson-add:hover { background: var(--t-primary-softer); }
+
+.add-chapter { width: 100%; padding: 14px; border: 1.5px dashed var(--t-border-strong); border-radius: var(--radius-card); background: transparent; color: var(--t-text-secondary); cursor: pointer; font-family: inherit; font-size: 0.92rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.add-chapter:hover { border-color: var(--t-primary); color: var(--t-primary); background: var(--t-primary-softer); }
+
+/* ============================================================
+   דמו בית המטפלים — פופאפים, אוטומציות, טבלאות, טוגלים
+   ============================================================ */
+
+/* ----- טוגל מתג ----- */
+.switch { width: 44px; height: 25px; border-radius: 999px; background: var(--t-border-strong); position: relative; cursor: pointer; flex-shrink: 0; transition: background var(--dur-2); border: none; }
+.switch::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 19px; height: 19px; border-radius: 50%; background: #fff; box-shadow: var(--t-shadow-sm); transition: inset-inline-start var(--dur-2); }
+.switch.on { background: var(--t-success); }
+.switch.on::after { inset-inline-start: 22px; }
+
+/* ----- כרטיס פופאפ (רשת) ----- */
+.pop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.pop-card { background: var(--t-bg-card); border: 1px solid var(--t-border); border-radius: var(--radius-card); padding: 16px; box-shadow: var(--t-shadow-sm); cursor: pointer; transition: transform var(--dur-2), box-shadow var(--dur-2); }
+.pop-card:hover { transform: translateY(-2px); box-shadow: var(--t-shadow-md); border-color: var(--t-border-strong); }
+.pop-card .pc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.pop-card .pc-ico { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 1.1rem; background: var(--accent-soft, var(--t-primary-soft)); color: var(--accent, var(--t-primary)); }
+.pop-card .pc-title { font-weight: 700; font-size: 0.96rem; margin-bottom: 3px; }
+.pop-card .pc-desc { color: var(--t-text-muted); font-size: 0.8rem; line-height: 1.45; min-height: 34px; }
+.pop-card .pc-foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--t-border); font-size: 0.76rem; color: var(--t-text-muted); }
+.pop-card .pc-foot .stat { display: inline-flex; align-items: center; gap: 5px; }
+
+/* ----- פאנל עריכה דו-טורי (פופאפ / אוטומציה) ----- */
+.split { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; align-items: start; }
+@media (max-width: 980px){ .split { grid-template-columns: 1fr; } }
+
+.panel { background: var(--t-bg-card); border: 1px solid var(--t-border); border-radius: var(--radius-card); padding: 20px; box-shadow: var(--t-shadow-sm); }
+.panel h3 { margin: 0 0 4px; font-size: 1.05rem; font-weight: 800; }
+.panel .panel-sub { color: var(--t-text-muted); font-size: 0.82rem; margin-bottom: 16px; }
+
+.field { margin-bottom: 15px; }
+.field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--t-text-secondary); margin-bottom: 6px; }
+.field input, .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border-radius: var(--radius-btn);
+    border: 1px solid var(--t-border); background: var(--t-bg); color: var(--t-text);
+    font-family: inherit; font-size: 0.9rem; outline: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--t-primary); box-shadow: 0 0 0 3px var(--t-primary-softer); }
+.field .hint { color: var(--t-text-muted); font-size: 0.76rem; margin-top: 5px; }
+.field-row { display: flex; gap: 12px; } .field-row .field { flex: 1; }
+
+.toggle-line { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--t-border); }
+.toggle-line:last-child { border-bottom: none; }
+.toggle-line .tl-meta { flex: 1; }
+.toggle-line .tl-meta b { font-size: 0.9rem; }
+.toggle-line .tl-meta div { color: var(--t-text-muted); font-size: 0.78rem; }
+
+/* מיני-סטטים בפאנל */
+.minigrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.minigrid .ms { background: var(--t-bg-secondary); border-radius: 12px; padding: 12px; text-align: center; }
+.minigrid .ms .v { font-size: 1.3rem; font-weight: 800; }
+.minigrid .ms .l { font-size: 0.72rem; color: var(--t-text-muted); margin-top: 2px; }
+
+/* ----- כלל אוטומציה (IF → THEN) ----- */
+.auto-rule { background: var(--t-bg-card); border: 1px solid var(--t-border); border-radius: var(--radius-card); padding: 16px 18px; margin-bottom: 12px; box-shadow: var(--t-shadow-sm); display: flex; align-items: center; gap: 16px; }
+.auto-rule .ar-body { flex: 1; }
+.auto-rule .ar-name { font-weight: 700; font-size: 0.96rem; margin-bottom: 8px; }
+.auto-flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 0.84rem; }
+.auto-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; font-weight: 600; }
+.auto-pill.if { background: rgba(99,102,241,.10); color: #6366F1; }
+.auto-pill.then { background: rgba(22,163,74,.12); color: var(--t-success); }
+.auto-arrow { color: var(--t-text-muted); }
+.auto-rule .ar-acts { display: flex; align-items: center; gap: 6px; }
+.auto-rule .ar-acts button { background: transparent; border: none; color: var(--t-text-muted); cursor: pointer; padding: 7px; border-radius: 8px; }
+.auto-rule .ar-acts button:hover { background: var(--t-bg-card-hover); color: var(--t-text); }
+
+/* ----- טבלה נקייה (תלמידים / נתונים) ----- */
+.dtable { width: 100%; border-collapse: collapse; background: var(--t-bg-card); border: 1px solid var(--t-border); border-radius: var(--radius-card); overflow: hidden; }
+.dtable th { text-align: start; padding: 13px 16px; background: var(--t-bg-secondary); font-size: 0.78rem; color: var(--t-text-secondary); font-weight: 700; border-bottom: 1px solid var(--t-border); }
+.dtable td { padding: 13px 16px; border-bottom: 1px solid var(--t-border); font-size: 0.88rem; }
+.dtable tr:last-child td { border-bottom: none; }
+.dtable tbody tr:hover { background: var(--t-bg-card-hover); }
+.progressbar { height: 7px; border-radius: 999px; background: var(--t-bg-secondary); overflow: hidden; min-width: 90px; }
+.progressbar i { display: block; height: 100%; background: var(--t-primary); border-radius: 999px; }

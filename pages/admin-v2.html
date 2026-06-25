@@ -57,7 +57,7 @@
       </div>
       <div id="popups-banner" style="display:none"></div>
       <div class="actionbar">
-        <button class="btn btn-primary" onclick="alert('יצירת פופאפ — בשלב הבא של המיגרציה')"><i class="fa-solid fa-plus"></i> פופאפ חדש</button>
+        <button class="btn btn-primary" onclick="openPopupEditor(null)"><i class="fa-solid fa-plus"></i> פופאפ חדש</button>
         <span class="spacer"></span>
         <span class="filter-pill"><i class="fa-solid fa-layer-group"></i> קטגוריה</span>
         <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="חיפוש פופאפ..." oninput="filterPopups(this.value)"></div>
@@ -235,7 +235,7 @@
         <th>פעולות</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="crm-tbody">
       <tr>
         <td>נועה בן דוד</td>
         <td>054-7821934</td>
@@ -612,11 +612,11 @@
         <th>מקום</th>
         <th>שם שותף</th>
         <th>הפניות</th>
-        <th>נרשמו</th>
+        <th>הפניה אחרונה</th>
         <th>סטטוס</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="referrals-tbody">
       <tr>
         <td>🥇 1</td>
         <td>נועה ברקוביץ'</td>
@@ -795,13 +795,16 @@
   function renderPopups(list){
     POPUPS = list;
     const grid = document.getElementById('popups-grid');
-    grid.innerHTML = list.map(p => {
+    grid.innerHTML = list.map((p,idx) => {
       const cat = CAT[p.category] || CAT._default;
       const on = p.is_active;
       return `<div class="pop-card" data-title="${(p.title||'').toLowerCase()}" style="--accent:${cat.c};--accent-soft:${soft(cat.c)}">
         <div class="pc-top">
           <div class="pc-ico"><i class="fa-solid ${cat.i}"></i></div>
-          <button class="switch ${on?'on':''}" title="${on?'פעיל':'כבוי'}" onclick="togglePopup('${p.id}', this)"></button>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button title="ערוך" onclick="openPopupEditor(${idx})" style="background:transparent;border:none;color:var(--t-text-muted);cursor:pointer;padding:4px;border-radius:7px"><i class="fa-solid fa-pen"></i></button>
+            <button class="switch ${on?'on':''}" title="${on?'פעיל':'כבוי'}" onclick="togglePopup('${p.id}', this)"></button>
+          </div>
         </div>
         <div class="pc-title">${p.title||''}</div>
         <div class="pc-desc">${p.description_he||''}</div>
@@ -825,6 +828,54 @@
       try{ await window.db.from('popup_configs').update({is_active:on, status:on?'live':'paused'}).eq('id', id); }
       catch(e){ btn.classList.toggle('on', !on); alert('שגיאה בעדכון'); }
     }
+  }
+
+  // ---- מודאל יצירה/עריכה של פופאפ (CRUD מלא) ----
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function openPopupEditor(idx){
+    const p = (idx==null) ? {} : (POPUPS[idx]||{});
+    const isNew = idx==null;
+    const opt=(v,sel,lbl)=>`<option value="${v}" ${v===sel?'selected':''}>${lbl||v}</option>`;
+    const cats=[['engagement','מעורבות'],['achievement','הישגים'],['milestone','אבני דרך'],['celebration','חגיגה'],['encouragement','עידוד']];
+    const auds=[['all','כל הלומדים'],['inactive','לא פעילים'],['new','חדשים'],['active','פעילים']];
+    const trigs=[['none','ללא'],['inactivity','חוסר פעילות'],['lesson_complete','סיום שיעור'],['streak_break','רצף נשבר'],['first_visit','כניסה ראשונה']];
+    const stats=[['live','פעיל'],['draft','טיוטה'],['scheduled','מתוזמן'],['paused','מושהה'],['archived','בארכיון']];
+    const ov=document.createElement('div'); ov.id='popup-modal';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px';
+    ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+    ov.innerHTML=`<div class="panel" style="width:100%;max-width:580px;max-height:90vh;overflow:auto">
+      <h3>${isNew?'פופאפ חדש':'עריכת פופאפ'}</h3><div class="panel-sub">מה הלומד רואה, ומתי</div>
+      <div class="field"><label>כותרת</label><input id="pf-title" value="${esc(p.title)}"></div>
+      <div class="field"><label>תיאור קצר</label><input id="pf-desc" value="${esc(p.description_he)}"></div>
+      <div class="field"><label>תוכן ההודעה</label><textarea id="pf-msg" rows="3">${esc(p.message)}</textarea></div>
+      <div class="field-row"><div class="field"><label>טקסט כפתור</label><input id="pf-cta" value="${esc(p.cta_text)}"></div><div class="field"><label>קישור</label><input id="pf-link" value="${esc(p.cta_link)}"></div></div>
+      <div class="field-row"><div class="field"><label>קטגוריה</label><select id="pf-cat">${cats.map(c=>opt(c[0],p.category,c[1])).join('')}</select></div><div class="field"><label>קהל יעד</label><select id="pf-aud">${auds.map(a=>opt(a[0],p.target_audience,a[1])).join('')}</select></div></div>
+      <div class="field-row"><div class="field"><label>טריגר</label><select id="pf-trig">${trigs.map(t=>opt(t[0],p.trigger_event,t[1])).join('')}</select></div><div class="field"><label>סטטוס</label><select id="pf-status">${stats.map(s=>opt(s[0],p.status,s[1])).join('')}</select></div></div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-primary" onclick="savePopupFromModal('${isNew?'':(p.id||'')}', ${isNew?'null':idx})"><i class="fa-solid fa-check"></i> שמור</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('popup-modal').remove()">ביטול</button>
+      </div></div>`;
+    document.body.appendChild(ov);
+  }
+  async function savePopupFromModal(id, idx){
+    const gv=x=>document.getElementById(x).value;
+    const status=gv('pf-status');
+    const data={ title:gv('pf-title'), description_he:gv('pf-desc')||null, message:gv('pf-msg')||null,
+      cta_text:gv('pf-cta')||null, cta_link:gv('pf-link')||null, category:gv('pf-cat'),
+      target_audience:gv('pf-aud'), trigger_event:gv('pf-trig'), status:status,
+      is_active:(status==='live'||status==='scheduled'), updated_at:new Date().toISOString() };
+    if(!gv('pf-title')){ alert('צריך כותרת'); return; }
+    if(window.db){
+      try{
+        if(id){ await window.db.from('popup_configs').update(data).eq('id', id); }
+        else { data.popup_id='popup_'+Date.now(); const r=await window.db.from('popup_configs').insert([data]).select().single(); if(r.data) data.id=r.data.id; }
+      }catch(e){ alert('שגיאה בשמירה: '+e.message); return; }
+    } else { if(id==='') data.id='tmp_'+Date.now(); }
+    // עדכון אופטימי בתצוגה
+    const view={...data, shown:(idx!=null&&POPUPS[idx]?.shown)||0, ctr:(idx!=null&&POPUPS[idx]?.ctr)||0, dismiss:(idx!=null&&POPUPS[idx]?.dismiss)||0, id:id||data.id};
+    if(idx!=null && POPUPS[idx]) POPUPS[idx]={...POPUPS[idx], ...view}; else POPUPS.unshift(view);
+    renderPopups(POPUPS);
+    document.getElementById('popup-modal')?.remove();
   }
 
   // ---- אוטומציות (החוקים האמיתיים מהמערכת; חיווט חי למנוע = שלב הבא) ----
@@ -900,6 +951,52 @@
     }catch(e){ renderLearners(SAMPLE_LEARNERS); setLrnStats(SAMPLE_LEARNERS); }
   }
 
+  // ---- CRM / Pipeline (profiles + sales_stage) ----
+  const STAGES = {new:{l:'חדש',c:'gray'},contacted:{l:'נוצר קשר',c:''},follow_up:{l:'פולו-אפ',c:''},presentation:{l:'הצגת מוצר',c:''},negotiation:{l:'משא ומתן',c:'green'},won:{l:'נסגר ✓',c:'green'},lost:{l:'אבוד',c:'gray'}};
+  function stageSelect(id, cur){
+    return `<select onchange="changeStage('${id}', this.value)" style="padding:6px 10px;border-radius:8px;border:1px solid var(--t-border);background:var(--t-bg);font-family:inherit;font-size:.82rem">`
+      + Object.entries(STAGES).map(([k,v])=>`<option value="${k}" ${k===cur?'selected':''}>${v.l}</option>`).join('') + `</select>`;
+  }
+  function renderCrm(list){
+    const tb=document.getElementById('crm-tbody'); if(!tb) return;
+    if(!list.length){ tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--t-text-muted);padding:24px">אין לידים פעילים</td></tr>'; return; }
+    tb.innerHTML=list.map(p=>`<tr>
+      <td><b>${esc(p.full_name||p.email||'—')}</b></td>
+      <td style="color:var(--t-text-secondary)">${esc(p.phone||'')}</td>
+      <td>${stageSelect(p.id, p.sales_stage||'new')}</td>
+      <td style="color:var(--t-text-secondary)">${esc(p.source||'—')}</td>
+      <td style="color:var(--t-text-secondary)">${p.created_at?new Date(p.created_at).toLocaleDateString('he-IL'):'—'}</td>
+      <td><span class="btn btn-ghost" style="padding:6px 10px"><i class="fa-solid fa-eye"></i></span></td>
+    </tr>`).join('');
+  }
+  async function changeStage(id, stage){
+    try{ await window.db.from('profiles').update({sales_stage:stage, sales_last_contact:new Date().toISOString()}).eq('id', id); }
+    catch(e){ alert('שגיאה בעדכון שלב'); }
+  }
+  async function loadCrmLive(){
+    try{
+      const { data } = await window.db.from('profiles').select('id, full_name, email, phone, role, created_at, sales_stage').order('created_at',{ascending:false}).limit(200);
+      const list=(data||[]).filter(p=>p.sales_stage || p.role==='student_lead');
+      if(list.length) renderCrm(list);
+    }catch(e){}
+  }
+
+  // ---- שותפים (referral_leaderboard) ----
+  async function loadRefLive(){
+    try{
+      const { data } = await window.db.from('referral_leaderboard').select('*').order('referral_count',{ascending:false}).limit(20);
+      const tb=document.getElementById('referrals-tbody'); if(!tb||!data||!data.length) return;
+      const medals=['🥇 1','🥈 2','🥉 3'];
+      tb.innerHTML=data.map((r,i)=>`<tr>
+        <td>${medals[i]||(i+1)}</td>
+        <td><b>${esc(r.referrer_name||(r.referrer_id||'').slice(0,8))}</b></td>
+        <td style="font-weight:700">${r.referral_count??0}</td>
+        <td style="color:var(--t-text-secondary)">${r.last_referral_at?new Date(r.last_referral_at).toLocaleDateString('he-IL'):'—'}</td>
+        <td><span class="badge green">פעיל</span></td>
+      </tr>`).join('');
+    }catch(e){}
+  }
+
   // ---- אתחול: live מול preview ----
   async function initV2(){
     renderAutomations();
@@ -926,6 +1023,8 @@
       renderPopups(list.length?list:SAMPLE);
       if(!list.length) banner('אין עדיין פופאפים ב-Supabase — מוצגים נתוני דמו.', true);
       loadLearnersLive();
+      loadCrmLive();
+      loadRefLive();
     }catch(e){ renderPopups(SAMPLE); banner('שגיאת טעינה מ-Supabase: '+e.message, true); }
   }
   initV2();

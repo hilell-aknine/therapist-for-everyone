@@ -1161,7 +1161,10 @@
                 const utm = window.getUtmData ? window.getUtmData() : {};
                 await supabaseClient.from('profiles').upsert({
                     id: data.user.id, email, full_name: fullName, phone,
-                    roles: ['student_lead'],
+                    // role is set by the handle_new_user DB trigger ('student_lead').
+                    // Previously sent `roles: [...]` — a column dropped in migration
+                    // 20260315160000, which made this whole upsert fail silently and
+                    // dropped the UTM attribution. (Same fix already applied in free-portal.html.)
                     utm_source: utm.utm_source || null, utm_medium: utm.utm_medium || null,
                     utm_campaign: utm.utm_campaign || null, utm_content: utm.utm_content || null,
                     utm_term: utm.utm_term || null

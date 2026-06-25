@@ -409,6 +409,8 @@
     <meta name="twitter:description" content="שאלון אבחון ראשוני לבית המטפלים">
     <meta name="twitter:image" content="https://www.therapist-home.com/assets/logo.png">
     <!-- === /SEO Tags === -->
+    <!-- Cloudflare Turnstile — required by submit-lead Edge Function -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
 </head>
 <body>
 
@@ -624,6 +626,9 @@
 
         </form>
 
+        <!-- Cloudflare Turnstile (invisible unless challenged) -->
+        <div id="turnstile-container" style="display:flex;justify-content:center;margin:.5rem 0;"></div>
+
         <!-- Navigation Buttons -->
         <div class="q-buttons" id="navButtons">
             <button type="button" class="q-btn q-btn-back" id="btnBack" style="visibility:hidden;" onclick="prevStep()">→ חזרה</button>
@@ -667,6 +672,20 @@
     const progressWrap = document.getElementById('progressWrap');
     const navButtons = document.getElementById('navButtons');
     const successScreen = document.getElementById('successScreen');
+
+    // ========= TURNSTILE =========
+    window.onloadTurnstileCallback = function() {
+        const siteKey = window.SUPABASE_CONFIG?.turnstileSiteKey;
+        const container = document.getElementById('turnstile-container');
+        if (container && siteKey && typeof turnstile !== 'undefined') {
+            turnstile.render(container, { sitekey: siteKey, appearance: 'interaction-only' });
+        }
+    };
+    function getTurnstileToken() {
+        if (typeof turnstile === 'undefined') return null;
+        const c = document.getElementById('turnstile-container');
+        return c ? turnstile.getResponse(c) : null;
+    }
 
     // ========= RADIO VISUAL SELECTION =========
     document.querySelectorAll('.q-radio-option input').forEach(input => {
@@ -822,6 +841,12 @@
     }
 
     async function submitForm() {
+        const turnstileToken = getTurnstileToken();
+        if (!turnstileToken) {
+            alert('נא לאמת שאינך רובוט ולנסות שוב (אם האימות לא הופיע, רענן/י את הדף).');
+            return;
+        }
+
         btnNext.disabled = true;
         btnNext.innerHTML = 'שולח... <span class="q-spinner"></span>';
 
@@ -844,7 +869,8 @@
                 body: JSON.stringify({
                     table: 'questionnaire_submissions',
                     data: payload,
-                    attribution: attribution
+                    attribution: attribution,
+                    turnstileToken: turnstileToken
                 })
             });
 
@@ -876,6 +902,7 @@
         } catch (err) {
             console.error('Submit error:', err.message);
             alert('אירעה שגיאה בשליחת השאלון. אנא נסה/י שוב.');
+            try { if (typeof turnstile !== 'undefined') turnstile.reset(document.getElementById('turnstile-container')); } catch(e) {}
             btnNext.disabled = false;
             btnNext.innerHTML = '<i class="fa-solid fa-paper-plane"></i> שליחה';
         }

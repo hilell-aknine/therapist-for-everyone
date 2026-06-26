@@ -334,7 +334,31 @@
       </div>
       <div id="automations-list"></div>
     </section>
-    <section class="world" id="w-bot"><div class="hero" style="--w:#00606B"><i class="hero-art fa-solid fa-robot"></i><h1>בוט · סוכן</h1><p>עולם זה יעבור מיגרציה בשלב הבא</p></div></section>
+    <section class="world" id="w-bot">
+      <div class="hero" style="--w:#00606B"><i class="hero-art fa-solid fa-robot"></i><h1>בוט CRM · סוכן מומחה</h1><p>הסוכן החכם שמלווה כל לומד בוואטסאפ — מענה, חימום והחזרה, באפס מגע אנושי</p></div>
+      <div class="grid grid-kpi">
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#16A34A;--accent-soft:rgba(22,163,74,.12)"><i class="fa-solid fa-circle-check"></i></div><div><div class="kpi-val">מחובר</div><div class="kpi-label">סטטוס הסוכן</div></div></div>
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#00606B;--accent-soft:rgba(0,96,107,.12)"><i class="fa-solid fa-user-shield"></i></div><div><div class="kpi-val">3</div><div class="kpi-label">משתמשים מורשים</div></div></div>
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#6366F1;--accent-soft:rgba(99,102,241,.12)"><i class="fa-solid fa-code-branch"></i></div><div><div class="kpi-val">4.0.0</div><div class="kpi-label">גרסת בוט</div></div></div>
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#B8860B;--accent-soft:rgba(184,134,11,.12)"><i class="fa-solid fa-heart-pulse"></i></div><div><div class="kpi-val">תקין</div><div class="kpi-label">בריאות המערכת</div></div></div>
+      </div>
+      <div class="split" style="margin-top:18px">
+        <div class="panel">
+          <h3>סוכן מומחה (Expert Clone)</h3><div class="panel-sub">משכפל את המומחה ומלווה את הלומד</div>
+          <div class="toggle-line"><div class="tl-meta"><b>מענה אוטומטי ללומדים</b><div>עונה על שאלות תוכן בזמן אמת</div></div><button class="switch on"></button></div>
+          <div class="toggle-line"><div class="tl-meta"><b>החזרת נתקעים</b><div>פונה יזום למי שלא התקדם</div></div><button class="switch on"></button></div>
+          <div class="toggle-line"><div class="tl-meta"><b>חימום לידים</b><div>מלווה ליד עד להרשמה</div></div><button class="switch on"></button></div>
+          <div class="toggle-line"><div class="tl-meta"><b>הסלמה לאדם (אם נתקע)</b><div>מעביר אליך רק מקרים מורכבים</div></div><button class="switch"></button></div>
+        </div>
+        <div class="panel">
+          <h3>יכולות פעילות</h3><div class="panel-sub">מה הסוכן יודע לעשות</div>
+          <div class="toggle-line"><div class="tl-meta"><b>בינה (Groq + Claude)</b></div><span class="badge green">פעיל</span></div>
+          <div class="toggle-line"><div class="tl-meta"><b>זיהוי קולי + זיכרון</b></div><span class="badge green">פעיל</span></div>
+          <div class="toggle-line"><div class="tl-meta"><b>אוטומציות ופולואפים</b></div><span class="badge green">פעיל</span></div>
+          <div class="toggle-line"><div class="tl-meta"><b>שיבוץ והתראות</b></div><span class="badge green">פעיל</span></div>
+        </div>
+      </div>
+    </section>
     <section class="world" id="w-retention">
   <div class="hero" style="--w:#9A3B3B">
     <div class="hero-art"><i class="fa-solid fa-bell"></i></div>
@@ -1086,6 +1110,19 @@
     }catch(e){}
   }
 
+  // ---- בוט CRM (סטטוס חי מ-crm-bot) ----
+  async function loadBotLive(){
+    try{
+      const res=await fetch('https://crm-bot-hillel.fly.dev/',{signal:AbortSignal.timeout(8000)});
+      const d=await res.json();
+      const online=d.whatsapp==='authorized'||d.whatsapp==='connected';
+      setKpi('w-bot','סטטוס', online?'מחובר':'לא מחובר');
+      setKpi('w-bot','משתמשים מורשים', d.authorizedUsers??'—');
+      setKpi('w-bot','גרסת בוט', d.version||'—');
+      setKpi('w-bot','בריאות', online?'תקין':'לא מגיב');
+    }catch(e){ setKpi('w-bot','סטטוס','לא מגיב'); setKpi('w-bot','בריאות','לא מגיב'); }
+  }
+
   // ---- אתחול: live מול preview ----
   async function initV2(){
     renderAutomations();
@@ -1118,6 +1155,7 @@
       loadRetentionLive();
       loadAutomationsLive();
       loadMarketingLive();
+      loadBotLive();
     }catch(e){ renderPopups(SAMPLE); banner('שגיאת טעינה מ-Supabase: '+e.message, true); }
   }
   initV2();

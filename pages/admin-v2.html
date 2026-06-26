@@ -15,6 +15,7 @@
 </head>
 <body>
 <div class="app">
+  <button class="mobile-nav-btn" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="תפריט"><i class="fa-solid fa-bars"></i></button>
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
@@ -766,6 +767,7 @@
     var el = document.getElementById('w-'+world); if(el) el.classList.add('active');
     document.querySelectorAll('.nav-item[data-world]').forEach(n => n.classList.toggle('active', n.dataset.world === world));
     window.scrollTo(0,0);
+    document.getElementById('sidebar').classList.remove('open');
   }
   function toggleTheme(){ var h=document.documentElement; h.setAttribute('data-theme', h.getAttribute('data-theme')==='dark'?'light':'dark'); }
 
@@ -868,7 +870,7 @@
     if(window.db){
       try{
         if(id){ await window.db.from('popup_configs').update(data).eq('id', id); }
-        else { data.popup_id='popup_'+Date.now(); const r=await window.db.from('popup_configs').insert([data]).select().single(); if(r.data) data.id=r.data.id; }
+        else { Object.assign(data,{popup_id:'popup_'+Date.now(), priority:5, max_per_day:1, cooldown_minutes:0, trigger_min_lessons:0}); const r=await window.db.from('popup_configs').insert([data]).select().single(); if(r.data) data.id=r.data.id; }
       }catch(e){ alert('שגיאה בשמירה: '+e.message); return; }
     } else { if(id==='') data.id='tmp_'+Date.now(); }
     // עדכון אופטימי בתצוגה

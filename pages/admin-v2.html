@@ -492,7 +492,7 @@
       <div class="kpi-ico" style="--accent:#1F6E7A;--accent-soft:rgba(31,110,122,.12)"><i class="fa-solid fa-users"></i></div>
       <div>
         <div class="kpi-val">3,400</div>
-        <div class="kpi-label">מבקרים החודש</div>
+        <div class="kpi-label">נרשמו (לפי מקור)</div>
       </div>
     </div>
     <div class="card kpi">
@@ -523,13 +523,13 @@
     <thead>
       <tr>
         <th>מקור</th>
-        <th>מבקרים</th>
+        <th>נרשמו</th>
         <th>לידים</th>
         <th>אחוז המרה</th>
         <th>מגמה</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="mkt-tbody">
       <tr>
         <td>אינסטגרם</td>
         <td>1,400</td>
@@ -888,11 +888,12 @@
     {name:'תזכורת 30 דק׳ אחרי הרשמה', when:'כל 5 דקות · 30–120 דק׳ מההרשמה, לא מילא שאלון', then:'וואטסאפ: תזכורת שאלון', enabled:false, dry:true},
     {name:'תזכורת שבועית מותאמת (AI)', when:'כל שלישי 10:00 · הסכים לתזכורות, מתחת 51 שיעורים', then:'AI: הודעה אישית לפי החזון', enabled:true, ai:true},
   ];
-  function renderAutomations(){
+  function renderAutomations(rules){
+    const list = rules || AUTORULES;
     const box = document.getElementById('automations-list'); if(!box) return;
-    box.innerHTML = AUTORULES.map((r,i)=>`
+    box.innerHTML = list.map((r)=>`
       <div class="auto-rule">
-        <button class="switch ${r.enabled?'on':''}" onclick="this.classList.toggle('on')"></button>
+        <button class="switch ${r.enabled?'on':''}" onclick="toggleAuto('${r.id||''}', this)"></button>
         <div class="ar-body">
           <div class="ar-name">${r.name} ${r.dry?'<span class="badge gray">טיוטה</span>':''} ${r.ai?'<span class="badge">AI</span>':''}</div>
           <div class="auto-flow">
@@ -903,6 +904,20 @@
         </div>
         <div class="ar-acts"><button title="ערוך"><i class="fa-solid fa-pen"></i></button><button title="מחק"><i class="fa-solid fa-trash"></i></button></div>
       </div>`).join('');
+  }
+  function toggleAuto(id, btn){
+    const on=!btn.classList.contains('on'); btn.classList.toggle('on',on);
+    if(id && window.db){ window.db.rpc('admin_automations_upsert',{rule:{id, is_enabled:on}}).then(({error})=>{ if(error){ btn.classList.toggle('on',!on); alert('שגיאה בעדכון'); } }); }
+  }
+  const AUTO_CRON={'*/5 * * * *':'כל 5 דקות','0 9 * * *':'כל יום 09:00','0 14 * * *':'כל יום 14:00','0 10 * * 1-5':'ימי חול 10:00','0 11 * * *':'כל יום 11:00','0 10 * * 2':'כל שלישי 10:00'};
+  async function loadAutomationsLive(){
+    try{
+      const { data } = await window.db.rpc('admin_automations_list');
+      if(!data || !data.length) return;
+      const mapped=data.map(r=>{ const cron=r.trigger_config&&r.trigger_config.cron||''; const cl=AUTO_CRON[cron]||cron||'מתוזמן'; const n=(r.audience_filter&&r.audience_filter.all||[]).length;
+        return { id:r.id, name:r.name||'אוטומציה', when:`${cl}${n?(' · '+n+' תנאים'):''}`, then:(r.ai_personalized?'AI: הודעה אישית':'וואטסאפ'), enabled:r.is_enabled, dry:r.dry_run, ai:r.ai_personalized }; });
+      renderAutomations(mapped);
+    }catch(e){}
   }
 
   // ---- לומדים (course_progress + profiles) ----
@@ -1047,6 +1062,30 @@
   async function approveRet(id){ try{ await window.db.from('retention_messages').update({status:'approved'}).eq('id',id); loadRetentionLive(); }catch(e){ alert('שגיאה באישור'); } }
   async function rejectRet(id){ try{ await window.db.from('retention_messages').update({status:'rejected'}).eq('id',id); loadRetentionLive(); }catch(e){ alert('שגיאה בדחייה'); } }
 
+  // ---- שיווק / מקורות תנועה (profiles.utm_source = ייחוס נרשמים) ----
+  const SRC_LBL={instagram:'אינסטגרם',ig:'אינסטגרם',facebook:'פייסבוק',fb:'פייסבוק',meta:'מטא',google:'גוגל',whatsapp:'וואטסאפ',wa:'וואטסאפ',direct:'ישיר',organic:'אורגני',referral:'הפניה',email:'מייל'};
+  async function loadMarketingLive(){
+    try{
+      const { data } = await window.db.from('profiles').select('id,role,utm_source').limit(5000);
+      if(!data || !data.length) return;
+      const g={};
+      data.forEach(p=>{ const key=(p.utm_source||'direct').toLowerCase(); const lbl=SRC_LBL[key]||p.utm_source||'ישיר'; const o=g[lbl]=g[lbl]||{reg:0,leads:0}; o.reg++; if(p.role==='student_lead')o.leads++; });
+      const rows=Object.entries(g).map(([src,o])=>({src, reg:o.reg, leads:o.leads, conv:o.reg?Math.round(o.leads/o.reg*100):0})).sort((a,b)=>b.reg-a.reg);
+      const tb=document.getElementById('mkt-tbody');
+      if(tb && rows.length){ tb.innerHTML=rows.map(r=>`<tr>
+        <td><b>${esc(r.src)}</b></td>
+        <td style="color:var(--t-text-secondary)">${r.reg.toLocaleString()}</td>
+        <td style="color:var(--t-text-secondary)">${r.leads}</td>
+        <td><div class="progressbar" style="display:inline-block;vertical-align:middle;min-width:70px"><i style="width:${Math.min(r.conv,100)}%"></i></div> ${r.conv}%</td>
+        <td><span class="badge gray">—</span></td></tr>`).join(''); }
+      const totReg=rows.reduce((a,r)=>a+r.reg,0), totLeads=rows.reduce((a,r)=>a+r.leads,0);
+      setKpi('w-marketing','נרשמו', totReg.toLocaleString());
+      setKpi('w-marketing','לידים', totLeads);
+      setKpi('w-marketing','אחוז המרה', (totReg?Math.round(totLeads/totReg*100):0)+'%');
+      setKpi('w-marketing','מקור מוביל', rows[0]?rows[0].src:'—');
+    }catch(e){}
+  }
+
   // ---- אתחול: live מול preview ----
   async function initV2(){
     renderAutomations();
@@ -1077,6 +1116,8 @@
       loadRefLive();
       loadOverviewLive();
       loadRetentionLive();
+      loadAutomationsLive();
+      loadMarketingLive();
     }catch(e){ renderPopups(SAMPLE); banner('שגיאת טעינה מ-Supabase: '+e.message, true); }
   }
   initV2();

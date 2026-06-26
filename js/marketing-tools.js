@@ -246,6 +246,7 @@ window.getUtmData = function () {
 const MARKETING_CONFIG = {
     GA4_ID: 'G-6YN94QMSH1',
     META_PIXEL_ID: '1039436226809281',
+    CLARITY_ID: 'xd3acpj52h',               // Microsoft Clarity project id (בית המטפלים)
     PRIVACY_POLICY_URL: 'privacy-policy.html',
     CONSENT_KEY: 'cookie_consent_v2',       // v2: stores consent level, not just boolean
     TRACKING_ENABLED: true
@@ -309,10 +310,21 @@ function injectMetaPixel() {
     fbq('track', 'PageView');
 }
 
+function injectSessionRecording() {
+    if (MARKETING_CONFIG.CLARITY_ID === 'XXXXXXXXXX') return;
+    // Microsoft Clarity — set up the command queue stub, then load the tag.
+    window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+    const clarityScript = document.createElement('script');
+    clarityScript.async = true;
+    clarityScript.src = `https://www.clarity.ms/tag/${MARKETING_CONFIG.CLARITY_ID}`;
+    document.head.appendChild(clarityScript);
+}
+
 function initializeTracking() {
     if (!MARKETING_CONFIG.TRACKING_ENABLED || !hasUserConsented()) return;
     injectGoogleAnalytics();
     injectMetaPixel();
+    injectSessionRecording();
 }
 
 // ============================================================================
@@ -408,6 +420,11 @@ function createConsentBanner() {
         // Earlier PageView already fired — that's unavoidable, but no further events will be tracked.
         if (window.fbq) {
             try { fbq('consent', 'revoke'); } catch(e) {}
+        }
+        // Stop Microsoft Clarity session recording immediately on opt-out.
+        // The current session up to this click was captured; no further frames are recorded.
+        if (window.clarity) {
+            try { window.clarity('stop'); } catch(e) {}
         }
     });
 }

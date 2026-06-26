@@ -400,7 +400,7 @@
         <th>פעולות</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="ret-tbody">
       <tr>
         <td>נועה ברקוביץ'</td>
         <td>054-7781234</td>
@@ -949,7 +949,10 @@
       const wk=Date.now()-7*864e5;
       const list=Object.values(u).map(x=>{ const p=pmap[x.id]||{}; return {name:p.full_name||p.email||'—', contact:p.phone||p.email||'', completed:x.completed, secs:x.secs, last:x.last?new Date(x.last).toLocaleDateString('he-IL'):'—', active:x.last&&new Date(x.last).getTime()>wk}; })
         .sort((a,b)=>(b.completed)-(a.completed));
-      renderLearners(list.length?list:SAMPLE_LEARNERS); setLrnStats(list.length?list:SAMPLE_LEARNERS);
+      const L = list.length?list:SAMPLE_LEARNERS;
+      renderLearners(L); setLrnStats(L);
+      setKpi('w-overview','לומדים פעילים', L.filter(u=>u.active).length);
+      setKpi('w-overview','אחוז סיום', (L.length?Math.round(L.filter(u=>u.completed>0).length/L.length*100):0)+'%');
     }catch(e){ renderLearners(SAMPLE_LEARNERS); setLrnStats(SAMPLE_LEARNERS); }
   }
 
@@ -999,6 +1002,51 @@
     }catch(e){}
   }
 
+  // ---- KPI helper + סקירה (subscriptions + profiles) ----
+  function setKpi(scope, prefix, value){
+    document.querySelectorAll(`#${scope} .kpi`).forEach(k=>{
+      const l=k.querySelector('.kpi-label'); if(l && l.textContent.trim().startsWith(prefix)){ const v=k.querySelector('.kpi-val'); if(v) v.textContent=value; }
+    });
+  }
+  async function loadOverviewLive(){
+    try{
+      const { count } = await window.db.from('profiles').select('id',{count:'exact',head:true}).eq('role','student_lead');
+      if(count!=null) setKpi('w-overview','לידים', count);
+      const { data: subs } = await window.db.from('subscriptions').select('status,price');
+      if(subs){ const a=subs.filter(s=>s.status==='active'); setKpi('w-overview','לקוחות משלמים', a.length); setKpi('w-overview','הכנסה', '₪'+a.reduce((x,s)=>x+(parseFloat(s.price)||0),0).toLocaleString()); }
+    }catch(e){}
+  }
+
+  // ---- שימור נוטשים (retention_messages) ----
+  const RET_ST={draft:{l:'טיוטה',c:'gray'},approved:{l:'אושר',c:'green'},sent:{l:'נשלח',c:'green'},rejected:{l:'נדחה',c:'gray'}};
+  async function loadRetentionLive(){
+    try{
+      const { data } = await window.db.from('retention_messages').select('id,status,full_name,phone,message_text,why_category,next_lesson_index,next_lesson_title,days_inactive_at_send,generated_at').order('generated_at',{ascending:false}).limit(200);
+      if(!data) return;
+      setKpi('w-retention','ממתינים', data.filter(r=>r.status==='draft').length);
+      setKpi('w-retention','אושרו', data.filter(r=>r.status==='approved').length);
+      setKpi('w-retention','נשלחו', data.filter(r=>r.status==='sent').length);
+      setKpi('w-retention','נדחו', data.filter(r=>r.status==='rejected').length);
+      const tb=document.getElementById('ret-tbody'); if(!tb) return;
+      if(!data.length){ tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--t-text-muted);padding:24px">אין טיוטות כרגע</td></tr>'; return; }
+      tb.innerHTML=data.map(r=>{ const st=RET_ST[r.status]||{l:r.status,c:'gray'};
+        const acts = r.status==='draft'
+          ? `<button title="אשר" onclick="approveRet('${r.id}')" style="background:transparent;border:none;color:var(--t-success);cursor:pointer;padding:6px"><i class="fa-solid fa-check"></i></button><button title="דחה" onclick="rejectRet('${r.id}')" style="background:transparent;border:none;color:var(--t-text-muted);cursor:pointer;padding:6px"><i class="fa-solid fa-xmark"></i></button>`
+          : '—';
+        return `<tr>
+          <td><b>${esc(r.full_name||'—')}</b></td>
+          <td style="color:var(--t-text-secondary)">${esc(r.phone||'—')}</td>
+          <td style="color:var(--t-text-secondary)">${esc(r.why_category||'—')}</td>
+          <td style="color:var(--t-text-secondary)">${r.next_lesson_index?('שיעור '+r.next_lesson_index+' '+esc(r.next_lesson_title||'')):'—'}</td>
+          <td>${r.days_inactive_at_send!=null?r.days_inactive_at_send:'—'}</td>
+          <td><span class="badge ${st.c}">${st.l}</span></td>
+          <td>${acts}</td>
+        </tr>`;}).join('');
+    }catch(e){}
+  }
+  async function approveRet(id){ try{ await window.db.from('retention_messages').update({status:'approved'}).eq('id',id); loadRetentionLive(); }catch(e){ alert('שגיאה באישור'); } }
+  async function rejectRet(id){ try{ await window.db.from('retention_messages').update({status:'rejected'}).eq('id',id); loadRetentionLive(); }catch(e){ alert('שגיאה בדחייה'); } }
+
   // ---- אתחול: live מול preview ----
   async function initV2(){
     renderAutomations();
@@ -1027,6 +1075,8 @@
       loadLearnersLive();
       loadCrmLive();
       loadRefLive();
+      loadOverviewLive();
+      loadRetentionLive();
     }catch(e){ renderPopups(SAMPLE); banner('שגיאת טעינה מ-Supabase: '+e.message, true); }
   }
   initV2();

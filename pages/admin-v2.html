@@ -722,8 +722,8 @@
 
       <div class="field">
         <label>צבע ראשי</label>
-        <input type="color" value="#5B5BD6">
-        <div class="hint">כל המערכת מתעדכנת אוטומטית מהצבע הזה (token-driven)</div>
+        <input type="color" value="#003B46" oninput="applyPrimary(this.value)">
+        <div class="hint">גרור והמערכת כולה מתעדכנת מיד מהצבע הזה (token-driven · נסה!)</div>
       </div>
 
       <div class="field">
@@ -743,7 +743,7 @@
           <b>וואטסאפ (Green API)</b>
           <div>שליחת הודעות והתראות ללקוחות</div>
         </div>
-        <button class="switch on"></button>
+        <button class="switch on" id="intg-wa"></button>
       </div>
 
       <div class="toggle-line">
@@ -1047,6 +1047,15 @@
       const l=k.querySelector('.kpi-label'); if(l && l.textContent.trim().startsWith(prefix)){ const v=k.querySelector('.kpi-val'); if(v) v.textContent=value; }
     });
   }
+  // החלת צבע ראשי חי (הוכחת token-driven) — לא נשמר בשרת (single-tenant)
+  function applyPrimary(hex){
+    const r=document.documentElement, n=parseInt(hex.slice(1),16), R=(n>>16)&255,G=(n>>8)&255,B=n&255;
+    r.style.setProperty('--t-primary', hex);
+    r.style.setProperty('--t-primary-hover', hex);
+    r.style.setProperty('--t-primary-soft', `rgba(${R},${G},${B},.10)`);
+    r.style.setProperty('--t-primary-softer', `rgba(${R},${G},${B},.05)`);
+    r.style.setProperty('--t-primary-glow', `rgba(${R},${G},${B},.22)`);
+  }
   async function loadOverviewLive(){
     try{
       const { count } = await window.db.from('profiles').select('id',{count:'exact',head:true}).eq('role','student_lead');
@@ -1120,7 +1129,8 @@
       setKpi('w-bot','משתמשים מורשים', d.authorizedUsers??'—');
       setKpi('w-bot','גרסת בוט', d.version||'—');
       setKpi('w-bot','בריאות', online?'תקין':'לא מגיב');
-    }catch(e){ setKpi('w-bot','סטטוס','לא מגיב'); setKpi('w-bot','בריאות','לא מגיב'); }
+      const wa=document.getElementById('intg-wa'); if(wa) wa.classList.toggle('on', online);
+    }catch(e){ setKpi('w-bot','סטטוס','לא מגיב'); setKpi('w-bot','בריאות','לא מגיב'); const wa=document.getElementById('intg-wa'); if(wa) wa.classList.remove('on'); }
   }
 
   // ---- אתחול: live מול preview ----

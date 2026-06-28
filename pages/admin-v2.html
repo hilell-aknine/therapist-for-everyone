@@ -30,6 +30,7 @@
       <div class="nav-sub">
         <button class="nav-item active" data-world="popups" style="--w:#B8860B" onclick="go('popups')"><i class="nav-ico fa-solid fa-window-restore"></i><span>פופאפים</span></button>
         <button class="nav-item" data-world="automations" style="--w:#8B6914" onclick="go('automations')"><i class="nav-ico fa-solid fa-bolt"></i><span>אוטומציות</span></button>
+        <button class="nav-item" data-world="workflow" style="--w:#1F6E7A" onclick="go('workflow')"><i class="nav-ico fa-solid fa-diagram-project"></i><span>וורקפלואו</span></button>
         <button class="nav-item" data-world="bot" style="--w:#00606B" onclick="go('bot')"><i class="nav-ico fa-solid fa-robot"></i><span>בוט · סוכן</span></button>
         <button class="nav-item" data-world="retention" style="--w:#9A3B3B" onclick="go('retention')"><i class="nav-ico fa-solid fa-bell"></i><span>שימור נוטשים</span></button>
       </div>
@@ -333,6 +334,22 @@
         <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="חיפוש אוטומציה..."></div>
       </div>
       <div id="automations-list"></div>
+    </section>
+    <section class="world" id="w-workflow">
+      <div class="hero" style="--w:#1F6E7A"><i class="hero-art fa-solid fa-diagram-project"></i><h1>וורקפלואו · תצפית אוטומציות</h1><p>רואים בתוך הקופסה השחורה: כל אוטומציה מתוזמנת, מתי רצה לאחרונה, והאם הצליחה או נפלה</p></div>
+      <div class="card" style="padding:14px 18px;margin-bottom:18px;color:var(--t-text-secondary);font-size:.88rem"><i class="fa-solid fa-circle-info" style="color:#1F6E7A"></i> כל "תהליך" הוא טריגר מתוזמן שמפעיל פעולה בשרת. כאן רואים את הזרימה, ההיסטוריה, ואיפה בדיוק נתקע — בלי להיכנס לקוד. לחיצה על "יומן ריצות" פותחת את כל מה שקרה מאחורי הקלעים.</div>
+      <div class="grid grid-kpi">
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#1F6E7A;--accent-soft:rgba(31,110,122,.12)"><i class="fa-solid fa-diagram-project"></i></div><div><div class="kpi-val" id="wf-total">—</div><div class="kpi-label">תהליכים מתוזמנים</div></div></div>
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#16A34A;--accent-soft:rgba(22,163,74,.12)"><i class="fa-solid fa-circle-play"></i></div><div><div class="kpi-val" id="wf-active">—</div><div class="kpi-label">פעילים</div></div></div>
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#9A3B3B;--accent-soft:rgba(154,59,59,.12)"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="kpi-val" id="wf-failed">—</div><div class="kpi-label">כשלים (7 ימים)</div></div></div>
+        <div class="card kpi"><div class="kpi-ico" style="--accent:#B8860B;--accent-soft:rgba(184,134,11,.12)"><i class="fa-solid fa-clock-rotate-left"></i></div><div><div class="kpi-val" id="wf-last">—</div><div class="kpi-label">ריצה אחרונה</div></div></div>
+      </div>
+      <div class="actionbar" style="margin-top:18px">
+        <button class="btn btn-ghost" onclick="loadWorkflowLive()"><i class="fa-solid fa-rotate"></i> רענן</button>
+        <span class="spacer"></span>
+        <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="חיפוש תהליך..." oninput="filterWorkflow(this.value)"></div>
+      </div>
+      <div id="workflow-list"></div>
     </section>
     <section class="world" id="w-bot">
       <div class="hero" style="--w:#00606B"><i class="hero-art fa-solid fa-robot"></i><h1>בוט CRM · סוכן מומחה</h1><p>הסוכן החכם שמלווה כל לומד בוואטסאפ — מענה, חימום והחזרה, באפס מגע אנושי</p></div>
@@ -1133,13 +1150,130 @@
     }catch(e){ setKpi('w-bot','סטטוס','לא מגיב'); setKpi('w-bot','בריאות','לא מגיב'); const wa=document.getElementById('intg-wa'); if(wa) wa.classList.remove('on'); }
   }
 
+  // ---- וורקפלואו · תצפית אוטומציות (cron.job + cron.job_run_details דרך RPC) ----
+  let WF_JOBS = [];
+  const WF_CRON = {'* * * * *':'כל דקה','*/2 * * * *':'כל 2 דקות','*/5 * * * *':'כל 5 דקות','*/30 * * * *':'כל 30 דקות','0 * * * *':'כל שעה','0 3 * * *':'כל יום 03:00','0 9 * * *':'כל יום 09:00','0 10 * * *':'כל יום 10:00','0 6 1 * *':'1 בחודש 06:00'};
+  function describeCron(expr){
+    if(!expr) return 'מתוזמן';
+    if(WF_CRON[expr]) return WF_CRON[expr];
+    const p = String(expr).trim().split(/\s+/); if(p.length!==5) return expr;
+    const [mi,h,dom,mon,dow]=p;
+    if(h==='*' && mi.startsWith('*/')) return `כל ${mi.slice(2)} דקות`;
+    if(dom==='*'&&mon==='*'&&dow==='*'&&/^\d+$/.test(h)&&/^\d+$/.test(mi)) return `כל יום ${h.padStart(2,'0')}:${mi.padStart(2,'0')}`;
+    return expr;
+  }
+  const WF_ST = {
+    succeeded:{l:'הצליח', c:'green', i:'fa-circle-check'},
+    failed:   {l:'נכשל',  c:'red',   i:'fa-circle-xmark'},
+    running:  {l:'רץ עכשיו', c:'', i:'fa-spinner'},
+    starting: {l:'מתחיל', c:'', i:'fa-hourglass-start'},
+  };
+  function wfBadge(status){
+    const s = WF_ST[status];
+    if(!s) return `<span class="badge gray">${status||'אין ריצות'}</span>`;
+    if(s.c==='red') return `<span class="badge" style="background:rgba(154,59,59,.12);color:#C0504D"><i class="fa-solid ${s.i}"></i> ${s.l}</span>`;
+    return `<span class="badge ${s.c}"><i class="fa-solid ${s.i}"></i> ${s.l}</span>`;
+  }
+  function relTime(ts){
+    if(!ts) return '—';
+    const d=new Date(ts), diff=(Date.now()-d.getTime())/1000;
+    if(diff<60) return 'לפני רגע';
+    if(diff<3600) return `לפני ${Math.floor(diff/60)} ד׳`;
+    if(diff<86400) return `לפני ${Math.floor(diff/3600)} ש׳`;
+    if(diff<7*86400) return `לפני ${Math.floor(diff/86400)} ימים`;
+    return d.toLocaleDateString('he-IL');
+  }
+  function fmtMs(ms){ if(ms==null) return ''; ms=Number(ms); if(!isFinite(ms)) return ''; return ms<1000 ? Math.round(ms)+' מ״ש' : (ms/1000).toFixed(1)+' שנ׳'; }
+  function renderWorkflow(jobs){
+    const box=document.getElementById('workflow-list'); if(!box) return;
+    if(!jobs.length){ box.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--t-text-muted)">אין תהליכים מתוזמנים</div>'; return; }
+    box.innerHTML = jobs.map(j=>`
+      <div class="auto-rule" data-name="${esc((j.jobname||'').toLowerCase())} ${esc((j.target||'').toLowerCase())}" style="flex-direction:column;align-items:stretch;gap:12px">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="ar-body">
+            <div class="ar-name">${esc(j.jobname||'תהליך')} ${j.active?'':'<span class="badge gray">כבוי</span>'}</div>
+            <div class="auto-flow">
+              <span class="auto-pill if"><i class="fa-solid fa-clock"></i> ${describeCron(j.schedule)}</span>
+              <i class="auto-arrow fa-solid fa-arrow-left"></i>
+              <span class="auto-pill" style="background:var(--t-bg-card-hover);color:var(--t-text-secondary)"><i class="fa-solid fa-bolt"></i> קריאה לשרת</span>
+              <i class="auto-arrow fa-solid fa-arrow-left"></i>
+              <span class="auto-pill then"><i class="fa-solid fa-cloud"></i> ${esc(j.target||'—')}</span>
+            </div>
+          </div>
+          <div style="text-align:left;min-width:150px">
+            ${wfBadge(j.last_status)}
+            <div style="color:var(--t-text-muted);font-size:.78rem;margin-top:6px">ריצה אחרונה: ${relTime(j.last_start)}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:.78rem;color:var(--t-text-secondary);border-top:1px solid var(--t-border);padding-top:10px">
+          <span><i class="fa-solid fa-play" style="color:#1F6E7A"></i> 24ש׳: <b>${j.runs_24h||0}</b></span>
+          <span><i class="fa-solid fa-circle-check" style="color:var(--t-success)"></i> הצליחו (7י): <b>${j.success_7d||0}</b></span>
+          <span><i class="fa-solid fa-circle-xmark" style="color:#C0504D"></i> נכשלו (7י): <b>${j.failed_7d||0}</b></span>
+          ${j.avg_ms!=null?`<span><i class="fa-solid fa-stopwatch" style="color:#B8860B"></i> משך ממוצע: <b>${fmtMs(j.avg_ms)}</b></span>`:''}
+          <span class="spacer" style="flex:1"></span>
+          <button class="btn btn-ghost" style="padding:4px 12px" onclick="toggleCronRuns(${j.jobid}, this)"><i class="fa-solid fa-list-ul"></i> יומן ריצות</button>
+        </div>
+        <div class="wf-runs" id="wf-runs-${j.jobid}" style="display:none"></div>
+      </div>`).join('');
+  }
+  function filterWorkflow(q){ q=(q||'').toLowerCase(); document.querySelectorAll('#workflow-list .auto-rule').forEach(r=>{ r.style.display=(r.dataset.name||'').includes(q)?'':'none'; }); }
+  function wfKpis(jobs){
+    setT('wf-total', jobs.length);
+    setT('wf-active', jobs.filter(j=>j.active).length);
+    setT('wf-failed', jobs.reduce((s,j)=>s+(Number(j.failed_7d)||0),0));
+    const last = jobs.map(j=>j.last_start).filter(Boolean).sort().slice(-1)[0];
+    setT('wf-last', last?relTime(last):'—');
+  }
+  async function toggleCronRuns(jobid, btn){
+    const box=document.getElementById('wf-runs-'+jobid); if(!box) return;
+    if(box.style.display!=='none'){ box.style.display='none'; return; }
+    box.style.display='block'; box.innerHTML='<div style="color:var(--t-text-muted);font-size:.82rem;padding:8px">טוען...</div>';
+    if(!window.db){ box.innerHTML='<div style="color:var(--t-text-muted);font-size:.82rem;padding:8px">יומן הריצות זמין רק בסביבה החיה.</div>'; return; }
+    try{
+      const { data, error } = await window.db.rpc('admin_cron_runs',{p_jobid:jobid, max_rows:25});
+      if(error) throw error;
+      if(!data || !data.length){ box.innerHTML='<div style="color:var(--t-text-muted);font-size:.82rem;padding:8px">אין ריצות מתועדות</div>'; return; }
+      box.innerHTML = '<div style="border-right:2px solid var(--t-border);padding:4px 14px 0">'+data.map(r=>{
+        const st=WF_ST[r.status]||{l:r.status,c:'gray',i:'fa-circle'};
+        const col = st.c==='green'?'var(--t-success)':(st.c==='red'?'#C0504D':'var(--t-text-muted)');
+        return `<div style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:.84rem;flex-wrap:wrap">
+            <i class="fa-solid ${st.i}" style="color:${col}"></i>
+            <b style="color:${col}">${st.l}</b>
+            <span style="color:var(--t-text-secondary)">${r.start_time?new Date(r.start_time).toLocaleString('he-IL'):'—'}</span>
+            ${r.duration_ms!=null?`<span style="color:var(--t-text-muted)">· ${fmtMs(r.duration_ms)}</span>`:''}
+          </div>
+          ${r.return_message?`<div style="color:var(--t-text-muted);font-size:.76rem;margin-top:3px;white-space:pre-wrap;word-break:break-word">${esc(r.return_message)}</div>`:''}
+        </div>`;
+      }).join('')+'</div>';
+    }catch(e){ box.innerHTML='<div style="color:#C0504D;font-size:.82rem;padding:8px">שגיאה בטעינת היומן: '+esc(e.message)+'</div>'; }
+  }
+  async function loadWorkflowLive(){
+    if(!window.db){ return; }
+    try{
+      const { data, error } = await window.db.rpc('admin_cron_jobs');
+      if(error) throw error;
+      WF_JOBS = data||[];
+      renderWorkflow(WF_JOBS);
+      wfKpis(WF_JOBS);
+    }catch(e){
+      const box=document.getElementById('workflow-list');
+      if(box) box.innerHTML='<div class="card" style="padding:20px;color:#C0504D;font-size:.86rem"><i class="fa-solid fa-triangle-exclamation"></i> לא ניתן לטעון את התצפית: '+esc(e.message)+'<br><span style="color:var(--t-text-muted);font-size:.8rem">אם זו פעם ראשונה — ודא שמיגרציה 060 הורצה (admin_cron_jobs), ושאתה מחובר כמנהל.</span></div>';
+    }
+  }
+  const WF_SAMPLE=[
+    {jobid:1,jobname:'capi-queue-process',schedule:'* * * * *',active:true,target:'capi-queue-processor',last_status:'succeeded',last_start:new Date(Date.now()-90000).toISOString(),runs_24h:1440,success_7d:10080,failed_7d:0,avg_ms:320},
+    {jobid:2,jobname:'meta-ads-daily-spend',schedule:'0 3 * * *',active:true,target:'fetch-meta-ads-spend',last_status:'succeeded',last_start:new Date(Date.now()-3600*1000*9).toISOString(),runs_24h:1,success_7d:7,failed_7d:0,avg_ms:1850},
+    {jobid:3,jobname:'smart_automations_tick',schedule:'* * * * *',active:true,target:'משימת SQL פנימית',last_status:'failed',last_start:new Date(Date.now()-120000).toISOString(),runs_24h:1440,success_7d:9900,failed_7d:180,avg_ms:95},
+  ];
+
   // ---- אתחול: live מול preview ----
   async function initV2(){
     renderAutomations();
     renderLearners(SAMPLE_LEARNERS); setLrnStats(SAMPLE_LEARNERS);
     const isLocal = location.protocol === 'file:';
     const preview = new URLSearchParams(location.search).has('preview');
-    if(isLocal || preview){ renderPopups(SAMPLE); banner('מצב תצוגה (preview) — נתוני דמו. בסביבה החיה הנתונים נטענים מ-Supabase האמיתי.', true); return; }
+    if(isLocal || preview){ renderPopups(SAMPLE); renderWorkflow(WF_SAMPLE); wfKpis(WF_SAMPLE); banner('מצב תצוגה (preview) — נתוני דמו. בסביבה החיה הנתונים נטענים מ-Supabase האמיתי.', true); return; }
 
     if(!window.SUPABASE_CONFIG){ banner('חסר supabase-config', true); renderPopups(SAMPLE); return; }
     const db = supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
@@ -1164,6 +1298,7 @@
       loadOverviewLive();
       loadRetentionLive();
       loadAutomationsLive();
+      loadWorkflowLive();
       loadMarketingLive();
       loadBotLive();
     }catch(e){ renderPopups(SAMPLE); banner('שגיאת טעינה מ-Supabase: '+e.message, true); }

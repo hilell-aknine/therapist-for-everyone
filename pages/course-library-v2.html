@@ -2361,9 +2361,12 @@
     const client = window.supabaseClient;
     if (!client) return;
     if (window.PopupManager && _lmsActiveAuthPopup) window.PopupManager.click(_lmsActiveAuthPopup);
+    const btn = document.querySelector('#lmsAuthSocialPanel .lms-modal__google-btn');
+    const prev = btn ? btn.innerHTML : '';
+    if (btn){ btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> מתחבר…'; }
     try {
       await client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
-    } catch(e){ console.error('Google sign-in', e); }
+    } catch(e){ console.error('Google sign-in', e); if (btn){ btn.disabled = false; btn.innerHTML = prev; } }
   }
   async function lmsHandleEmailAuth(event){
     event && event.preventDefault();
@@ -2374,15 +2377,20 @@
     if (!email || !pw) return;
     if (window.PopupManager && _lmsActiveAuthPopup) window.PopupManager.click(_lmsActiveAuthPopup);
     const errEl = document.getElementById('lmsAuthError');
+    const submitBtn = document.querySelector('#lmsAuthEmailPanel .lms-modal__submit');
+    const prevSubmit = submitBtn ? submitBtn.innerHTML : '';
+    const restoreSubmit = () => { if (submitBtn){ submitBtn.disabled = false; submitBtn.innerHTML = prevSubmit; } };
+    if (submitBtn){ submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> מתחבר…'; }
     try {
       const { error } = await client.auth.signInWithPassword({ email, password: pw });
       if (error){
         if (errEl){ errEl.textContent = 'שגיאת התחברות: ' + (error.message || ''); errEl.hidden = false; }
+        restoreSubmit();
         return;
       }
       closeLmsAuthModal();
       location.reload();
-    } catch(e){ if (errEl){ errEl.textContent = 'שגיאת רשת'; errEl.hidden = false; } }
+    } catch(e){ if (errEl){ errEl.textContent = 'שגיאת רשת'; errEl.hidden = false; } restoreSubmit(); }
   }
   async function lmsHandleSignup(event){
     event && event.preventDefault();
@@ -2394,15 +2402,20 @@
     if (!email || !pw) return;
     if (window.PopupManager && _lmsActiveAuthPopup) window.PopupManager.click(_lmsActiveAuthPopup);
     const errEl = document.getElementById('lmsAuthError');
+    const signupBtn = document.querySelector('#lmsAuthEmailPanel .lms-modal__link-btn');
+    const prevSignup = signupBtn ? signupBtn.innerHTML : '';
+    const restoreSignup = () => { if (signupBtn){ signupBtn.disabled = false; signupBtn.innerHTML = prevSignup; } };
+    if (signupBtn){ signupBtn.disabled = true; signupBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> נרשם…'; }
     try {
       const { error } = await client.auth.signUp({ email, password: pw, options: { data: { full_name: name || '' } } });
       if (error){
         if (errEl){ errEl.textContent = 'שגיאת הרשמה: ' + (error.message || ''); errEl.hidden = false; }
+        restoreSignup();
         return;
       }
       closeLmsAuthModal();
       location.reload();
-    } catch(e){ if (errEl){ errEl.textContent = 'שגיאת רשת'; errEl.hidden = false; } }
+    } catch(e){ if (errEl){ errEl.textContent = 'שגיאת רשת'; errEl.hidden = false; } restoreSignup(); }
   }
   function lmsSwitchAuthTab(tab){
     const social = document.getElementById('lmsAuthSocialPanel');
@@ -4362,9 +4375,16 @@
     if (bonusSection) bonusSection.style.display = bonusBlocks.length ? '' : 'none';
   }
 
-  async function openMasterWorkbook(i){
+  async function openMasterWorkbook(i, btn){
     const wb = MASTER_WORKBOOKS[i];
     if (!wb || !supabaseClient) return;
+    const icon = btn && btn.querySelector('i');
+    const label = btn && btn.querySelector('span');
+    const prevIcon = icon ? icon.className : '';
+    const prevLabel = label ? label.textContent : '';
+    if (btn) btn.disabled = true;
+    if (icon) icon.className = 'fa-solid fa-circle-notch fa-spin';
+    if (label) label.textContent = 'טוען חוברת…';
     try {
       const { data, error } = await supabaseClient.storage.from('workbooks').createSignedUrl(wb.name, 600);
       if (error) throw error;
@@ -4377,18 +4397,33 @@
       viewer.classList.add('is-open');
     } catch (err){
       alert('שגיאה בטעינת החוברת: ' + (err.message || err));
+    } finally {
+      if (btn) btn.disabled = false;
+      if (icon) icon.className = prevIcon;
+      if (label) label.textContent = prevLabel;
     }
   }
 
-  async function downloadMasterWorkbook(i){
+  async function downloadMasterWorkbook(i, btn){
     const wb = MASTER_WORKBOOKS[i];
     if (!wb || !supabaseClient) return;
+    const icon = btn && btn.querySelector('i');
+    const label = btn && btn.querySelector('span');
+    const prevIcon = icon ? icon.className : '';
+    const prevLabel = label ? label.textContent : '';
+    if (btn) btn.disabled = true;
+    if (icon) icon.className = 'fa-solid fa-circle-notch fa-spin';
+    if (label) label.textContent = 'מכין…';
     try {
       const { data, error } = await supabaseClient.storage.from('workbooks').createSignedUrl(wb.name, 300);
       if (error) throw error;
       window.open(data.signedUrl, '_blank');
     } catch (err){
       alert('שגיאה: ' + (err.message || err));
+    } finally {
+      if (btn) btn.disabled = false;
+      if (icon) icon.className = prevIcon;
+      if (label) label.textContent = prevLabel;
     }
   }
 
@@ -4422,9 +4457,9 @@
       if (!host) return;
       host.addEventListener('click', e => {
         const viewBtn = e.target.closest('[data-mwb-view]');
-        if (viewBtn){ e.preventDefault(); openMasterWorkbook(parseInt(viewBtn.getAttribute('data-mwb-view'), 10)); return; }
+        if (viewBtn){ e.preventDefault(); openMasterWorkbook(parseInt(viewBtn.getAttribute('data-mwb-view'), 10), viewBtn); return; }
         const dlBtn = e.target.closest('[data-mwb-dl]');
-        if (dlBtn){ e.preventDefault(); downloadMasterWorkbook(parseInt(dlBtn.getAttribute('data-mwb-dl'), 10)); return; }
+        if (dlBtn){ e.preventDefault(); downloadMasterWorkbook(parseInt(dlBtn.getAttribute('data-mwb-dl'), 10), dlBtn); return; }
         const card = e.target.closest('[data-mvid]');
         if (card){ playMasterLesson(card.getAttribute('data-mvid'), parseInt(card.getAttribute('data-midx'), 10)); return; }
       });

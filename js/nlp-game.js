@@ -1633,19 +1633,35 @@ class StoryGame {
     }
 
     async showRamCoaching(stepTitle, userAnswer) {
-        const response = await this.gemini.coachPractice(stepTitle, userAnswer);
-        if (!response) return;
-
-        // Show as a toast notification
+        // Doherty threshold: show a "רם חושב..." toast IMMEDIATELY (before the await),
+        // reusing the same ai-dot typing indicator as getAIFeedback / sendRamChat,
+        // so the screen never sits silent while the AI replies.
         const toast = document.createElement('div');
         toast.className = 'ram-coaching-toast';
-        toast.innerHTML = `<img src="../assets/mentor-ram.webp" class="ram-toast-img" /><div class="ram-toast-text">${response}</div>`;
+        toast.innerHTML = `<img src="../assets/mentor-ram.webp" class="ram-toast-img" /><div class="ram-toast-text"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span> רם חושב...</div>`;
         document.body.appendChild(toast);
         setTimeout(() => toast.classList.add('show'), 50);
-        setTimeout(() => {
+
+        const dismiss = () => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 400);
-        }, 6000);
+        };
+
+        let response;
+        try {
+            response = await this.gemini.coachPractice(stepTitle, userAnswer);
+        } catch (e) {
+            dismiss();
+            return;
+        }
+
+        // No coaching returned — clear the thinking indicator on error/empty.
+        if (!response) { dismiss(); return; }
+
+        // Swap the typing indicator for the actual coaching text, then auto-dismiss.
+        const textEl = toast.querySelector('.ram-toast-text');
+        if (textEl) textEl.textContent = response;
+        setTimeout(dismiss, 6000);
     }
 
     prevStoryStep() {

@@ -790,18 +790,22 @@
         document.getElementById('error-message').classList.remove('show');
         setLoading('login-btn', 'login-spinner', true, 'שולח...', 'שלחו לי קישור');
         try {
-            const { data: profile } = await supabaseClient
-                .from('profiles').select('id').eq('email', email).maybeSingle();
-            if (!profile) {
-                showError('האימייל לא נמצא במערכת — צריך להירשם קודם');
+            // shouldCreateUser:false → Supabase rejects unknown emails itself,
+            // so no anonymous profiles read (which required the public-SELECT RLS hole).
+            const { error } = await supabaseClient.auth.signInWithOtp({
+                email,
+                options: { shouldCreateUser: false, emailRedirectTo: 'https://www.therapist-home.com/pages/login.html' }
+            });
+            if (error) {
+                const msg = (error.message || '').toLowerCase();
+                if (msg.includes('signups not allowed') || msg.includes('not allowed') || msg.includes('user not found') || error.status === 422) {
+                    showError('האימייל לא נמצא במערכת — צריך להירשם קודם');
+                } else {
+                    showError('שגיאה בשליחת הקישור — נסו שוב');
+                }
                 setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
                 return;
             }
-            const { error } = await supabaseClient.auth.signInWithOtp({
-                email,
-                options: { emailRedirectTo: 'https://www.therapist-home.com/pages/login.html' }
-            });
-            if (error) throw error;
             showSuccess('קישור התחברות נשלח למייל! בדקו את תיבת הדואר 📧');
             setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
         } catch (error) {

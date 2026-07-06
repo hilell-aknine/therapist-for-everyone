@@ -670,28 +670,29 @@
             setLoading('login-btn', 'login-spinner', true, 'שולח...', 'שלחו לי קישור');
 
             try {
-                // Check if email exists in profiles first
-                const { data: profile } = await supabaseClient
-                    .from('profiles')
-                    .select('id')
-                    .eq('email', email)
-                    .maybeSingle();
-
-                if (!profile) {
-                    showError('האימייל לא נמצא במערכת — צריך להירשם קודם');
-                    setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
-                    return;
-                }
-
-                // Send magic link
+                // Send magic link only to EXISTING users. shouldCreateUser:false
+                // makes Supabase itself reject unknown emails — no anonymous
+                // profiles read (which would require the public-SELECT RLS hole).
                 const { error } = await supabaseClient.auth.signInWithOtp({
                     email,
                     options: {
+                        shouldCreateUser: false,
                         emailRedirectTo: 'https://www.therapist-home.com/pages/login.html'
                     }
                 });
 
-                if (error) throw error;
+                if (error) {
+                    // Supabase returns a signup-disabled / user-not-found style error
+                    // when the email isn't registered.
+                    const msg = (error.message || '').toLowerCase();
+                    if (msg.includes('signups not allowed') || msg.includes('not allowed') || msg.includes('user not found') || error.status === 422) {
+                        showError('האימייל לא נמצא במערכת — צריך להירשם קודם');
+                    } else {
+                        showError('שגיאה בשליחת הקישור — נסו שוב');
+                    }
+                    setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
+                    return;
+                }
 
                 showSuccess('קישור התחברות נשלח למייל! בדקו את תיבת הדואר 📧');
                 setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');

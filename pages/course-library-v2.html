@@ -3460,8 +3460,9 @@
     if (devBypass) return;
     if (!window.CourseProgress) return;
     try {
-      const ids = await window.CourseProgress.getCompletedVideoIds('nlp-practitioner');
-      if (ids && ids.size){
+      // getCompletedVideoIds returns a plain Array — wrap in a Set so .size/.has work.
+      const ids = new Set(await window.CourseProgress.getCompletedVideoIds('nlp-practitioner') || []);
+      if (ids.size){
         modules.forEach((mod, mIdx) => mod.lessons.forEach((les, lIdx) => {
           if (ids.has(les.id)){
             const key = `${mIdx}-${lIdx}`;

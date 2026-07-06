@@ -550,9 +550,15 @@ def _safe_stdout():
 
 
 # Retry policy for transient network failures (e.g. Wi-Fi not yet up at 07:00 wake —
-# caused repeated "getaddrinfo failed" fatals 2026-06-03..06-10).
-MAX_ATTEMPTS = 3
-RETRY_DELAY_SECONDS = 60
+# caused repeated "getaddrinfo failed" fatals). The 3×60s (~2 min) window was too
+# short: after a Modern-Standby wake the network can take 5-10 min to come up, which
+# caused 7 terminal FAIL days out of 21 (three multi-day backup gaps) through 2026-07.
+# 10×90s gives a ~13.5 min window, still well before the 09:00 health-check watchdog.
+MAX_ATTEMPTS = 10
+RETRY_DELAY_SECONDS = 90
+# Errors that mean "network not ready, try again" — URLError covers DNS (gaierror);
+# TimeoutError/ConnectionError cover a half-up stack that resolves but stalls/resets.
+_TRANSIENT_NET_ERRORS = (urllib.error.URLError, TimeoutError, ConnectionError)
 
 
 if __name__ == "__main__":
@@ -562,8 +568,10 @@ if __name__ == "__main__":
             try:
                 main()
                 break
-            except urllib.error.URLError as e:
-                if attempt >= MAX_ATTEMPTS:
+            except _TRANSIENT_NET_ERRORS as e:
+                # An HTTPError means the host DID respond — that's not a connectivity
+                # problem, so don't burn the retry budget on it; fail fast.
+                if isinstance(e, urllib.error.HTTPError) or attempt >= MAX_ATTEMPTS:
                     raise
                 print(f"\n⚠ Network error (attempt {attempt}/{MAX_ATTEMPTS}): {e} — retrying in {RETRY_DELAY_SECONDS}s...")
                 append_run_log("RETRY", f"attempt {attempt}/{MAX_ATTEMPTS}: {type(e).__name__}: {str(e)[:150]} | retrying in {RETRY_DELAY_SECONDS}s")

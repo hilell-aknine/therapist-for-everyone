@@ -130,6 +130,7 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
 
   <div class="summary" id="summary"></div>
   <button class="save" id="saveBtn"><i class="fa-solid fa-check"></i> שמירה</button>
+  <div class="note" id="skipNote" style="display:none"><a href="course-library-v2.html?completed=1" style="color:var(--text-muted)">דילוג — כניסה לפורטל בלי תזכורות</a></div>
   <div class="note">בכל שלב אפשר להגיב "הסר" בוואטסאפ ונפסיק מיד. נבנה ע״י הלל.</div>
 </div>
 
@@ -151,14 +152,22 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
   // --- auth gate ---
   let user = null;
   try { user = await window.AuthGuard.getCurrentUser(); } catch(_){}
-  if (!user) { location.href = 'login.html?return=' + encodeURIComponent('reminder-settings.html'); return; }
+  if (!user) { location.href = 'login.html?return=' + encodeURIComponent('reminder-settings.html' + location.search); return; }
+
+  // --- onboarding mode (arriving from the registration questionnaire) ---
+  // Toggle starts ON, save continues into the portal, and a skip link is shown.
+  const onboarding = new URLSearchParams(location.search).get('onboarding') === '1';
 
   // --- load existing prefs ---
-  let prefs = { on:false, days:[], hours:[] };
+  let prefs = { on: onboarding, days:[], hours:[] };
   try {
     const { data } = await db.from('profiles').select('reminder_prefs').eq('id', user.id).maybeSingle();
     if (data && data.reminder_prefs) prefs = Object.assign(prefs, data.reminder_prefs);
   } catch(_){}
+  if (onboarding) {
+    document.querySelector('#saveBtn').innerHTML = '<i class="fa-solid fa-check"></i> שמירה וכניסה לפורטל';
+    document.getElementById('skipNote').style.display = '';
+  }
 
   // --- populate UI ---
   $('on').checked = !!prefs.on;
@@ -203,6 +212,7 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
       const { error } = await db.from('profiles').update({ reminder_prefs: p }).eq('id', user.id);
       if (error) throw error;
       toast('נשמר ✓ ' + (p.on ? 'נתחיל לתזכר אותך בזמנים שבחרת' : 'התזכורות כבויות'));
+      if (onboarding) setTimeout(()=>{ location.href='course-library-v2.html?completed=1'; }, 1200);
     } catch(err){ toast('שגיאה בשמירה, נסה/י שוב', true); }
     finally { btn.disabled=false; }
   });

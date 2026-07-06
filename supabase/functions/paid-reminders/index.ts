@@ -2,10 +2,11 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { MASTER_LESSONS } from './master-lessons.ts'
 
-// Personalized learning reminders for paying customers. Runs hourly (secret-gated).
-// For each customer who opted in and chose THIS day+hour (Asia/Jerusalem), sends ONE
-// personal WhatsApp nudge that ties their GOAL to the SPECIFIC next master lesson they
-// should learn (by their progress). Honors whatsapp_opt_out, de-dupes within the hour.
+// Personalized learning reminders — every user who opted in (paid + free portal).
+// Runs hourly (secret-gated). For each user who chose THIS day+hour (Asia/Jerusalem),
+// sends ONE personal WhatsApp nudge. Paid customers get their GOAL tied to the SPECIFIC
+// next master lesson; free-portal learners get a goal-based nudge with the portal link.
+// Honors whatsapp_opt_out, de-dupes within the hour via reminder_prefs.last_sent.
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -39,16 +40,24 @@ function israelNow(): { day: number; hour: number; key: string } {
 }
 
 // Claude Sonnet — write the warm, personal reminder. Falls back to a template on failure.
-async function writeMessage(name: string, goal: string, next: NextLesson | null): Promise<string> {
+const PORTAL_LINK = 'https://www.therapist-home.com/pages/course-library-v2.html'
+
+async function writeMessage(name: string, goal: string, next: NextLesson | null, audience: 'master' | 'free' = 'master'): Promise<string> {
   const optout = '\n\n(להפסקת התזכורות אפשר להשיב "הסר".)'
   // Template fallback (also used when no AI key)
-  const tmpl = next
+  const tmpl = audience === 'free'
+    ? `היי ${name} 🙏\nבחרת שאזכיר לך לחזור ללמוד — אז הנה תזכורת קטנה 😊\nכמה דקות לימוד היום יקרבו אותך${goal ? ' ל' + goal : ' למטרה שלך'}.\nהפורטל מחכה לך: ${PORTAL_LINK}\n— הלל`
+    : next
     ? `היי ${name} 🙏\nבחרת שאזכיר לך עכשיו לחזור ללמוד — אז הנה 😊\nהשלב הבא שמחכה לך במאסטר: "${next.title}" (${next.module}).\nכמה דקות עליו היום יקרבו אותך${goal ? ' ל' + goal : ' למטרה שלך'}. נתראה בפנים 🤍\n— הלל`
     : `היי ${name} 🙏\nכל הכבוד — סיימת את כל שיעורי המאסטר! 🎉\nזה הזמן לחזור ולתרגל את מה שהכי חשוב לך${goal ? ' עבור ' + goal : ''}. אני כאן 🤍\n— הלל`
   if (!ANTHROPIC_API_KEY) return tmpl + optout
   try {
-    const system = `אתה רם, המנחה של קורס NLP מאסטר ב"בית המטפלים". כתוב הודעת וואטסאפ קצרה (3-4 שורות), חמה ואישית, בגוף ראשון, שמזכירה בעדינות לתלמיד לחזור ללמוד. קשר בין המטרה האישית שלו לבין השיעור הספציפי הבא שמחכה לו במאסטר — תהיה ספציפי ומדויק, בלי מכירתיות ובלי הגזמה. בעברית. אל תמציא תוכן שלא נמסר לך. חתום "— הלל".`
-    const payload = { name, goal: goal || '(לא צוין)', next_lesson: next ? `${next.title} (${next.module})` : '(סיים את כל הקורס)' }
+    const system = audience === 'free'
+      ? `אתה רם, המנחה של קורס ה-NLP החינמי ב"בית המטפלים". כתוב הודעת וואטסאפ קצרה (3-4 שורות), חמה ואישית, בגוף ראשון, שמזכירה בעדינות לתלמיד לחזור ללמוד בפורטל. אם נמסרה מטרה אישית — קשר אליה במילים שלו, בלי מכירתיות ובלי הגזמה. בעברית. אל תמציא תוכן שלא נמסר לך. סיים בשורה: ${PORTAL_LINK} ואז חתום "— הלל".`
+      : `אתה רם, המנחה של קורס NLP מאסטר ב"בית המטפלים". כתוב הודעת וואטסאפ קצרה (3-4 שורות), חמה ואישית, בגוף ראשון, שמזכירה בעדינות לתלמיד לחזור ללמוד. קשר בין המטרה האישית שלו לבין השיעור הספציפי הבא שמחכה לו במאסטר — תהיה ספציפי ומדויק, בלי מכירתיות ובלי הגזמה. בעברית. אל תמציא תוכן שלא נמסר לך. חתום "— הלל".`
+    const payload = audience === 'free'
+      ? { name, goal: goal || '(לא צוין)', portal_link: PORTAL_LINK }
+      : { name, goal: goal || '(לא צוין)', next_lesson: next ? `${next.title} (${next.module})` : '(סיים את כל הקורס)' }
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
@@ -108,22 +117,24 @@ serve(async (req) => {
   }
 
   // Status report to Hillel: who activated reminders, their goal + chosen times.
+  // Paid customers are always listed; free-portal users appear once they set prefs.
   if (url.searchParams.get('report') === '1') {
-    const { data } = await db.from('profiles').select('full_name, reminder_prefs, whatsapp_opt_out').eq('role', 'paid_customer')
+    const { data } = await db.from('profiles').select('full_name, role, reminder_prefs, whatsapp_opt_out')
+      .or('role.eq.paid_customer,reminder_prefs.not.is.null')
     const on: string[] = [], off: string[] = []
     for (const r of (data || [])) {
       const p = r.reminder_prefs || {}
-      const name = (r.full_name || 'לקוח').trim()
+      const name = (r.full_name || 'לקוח').trim() + (r.role === 'paid_customer' ? ' 👑' : '')
       if (p.on && Array.isArray(p.days) && p.days.length && Array.isArray(p.hours) && p.hours.length) {
         const days = p.days.map((d: number) => DAY_HE[d] || d).join(',')
         const hours = p.hours.map((h: number) => String(h).padStart(2, '0') + ':00').join(',')
         const goal = (p.goal || '').trim()
         on.push(`• ${name}${goal ? ' — ' + goal : ''}\n   ימים ${days} · שעות ${hours}`)
-      } else { off.push(name) }
+      } else if (r.role === 'paid_customer') { off.push(name) }
     }
-    const msg = `🔔 סטטוס תזכורות — לקוחות משלמים\n\n` +
+    const msg = `🔔 סטטוס תזכורות אישיות (👑 = מאסטר)\n\n` +
       `✅ הפעילו (${on.length}):\n${on.length ? on.join('\n') : '—'}\n\n` +
-      `⏳ טרם הפעילו (${off.length}): ${off.length ? off.join(', ') : '—'}`
+      `⏳ מאסטר שטרם הפעילו (${off.length}): ${off.length ? off.join(', ') : '—'}`
     const sent = await sendWhatsApp(ALERT_PHONE.replace(/\D/g, ''), msg)
     return json({ report: true, active: on.length, pending: off.length, sent })
   }
@@ -133,13 +144,12 @@ serve(async (req) => {
 
   const { data: rows, error } = await db
     .from('profiles')
-    .select('id, full_name, phone, reminder_prefs, whatsapp_opt_out')
-    .eq('role', 'paid_customer')
+    .select('id, full_name, phone, role, reminder_prefs, whatsapp_opt_out')
     .eq('whatsapp_opt_out', false)
     .not('reminder_prefs', 'is', null)
   if (error) return json({ error: error.message }, 500)
 
-  const due: Array<{ id: string; name: string; phone: string; prefs: Record<string, unknown> }> = []
+  const due: Array<{ id: string; name: string; phone: string; role: string; prefs: Record<string, unknown> }> = []
   for (const r of (rows || [])) {
     const p = r.reminder_prefs || {}
     if (!p.on) continue
@@ -148,14 +158,17 @@ serve(async (req) => {
     if (p.last_sent === hourKey) continue
     const phone = normalizePhone(r.phone)
     if (!phone) continue
-    due.push({ id: r.id, name: (r.full_name || '').trim().split(' ')[0], phone, prefs: p })
+    due.push({ id: r.id, name: (r.full_name || '').trim().split(' ')[0], phone, role: r.role || '', prefs: p })
   }
 
   const results: Array<Record<string, unknown>> = []
   for (const c of due) {
-    const next = await nextMasterLesson(db, c.id)
+    // Paid customers (and admin for self-testing) get the master-lesson nudge;
+    // everyone else gets the free-portal nudge with the portal link.
+    const isMaster = c.role === 'paid_customer' || c.role === 'admin'
+    const next = isMaster ? await nextMasterLesson(db, c.id) : null
     const goal = await userGoal(db, c.id, c.prefs.goal as string | undefined)
-    const msg = await writeMessage(c.name, goal, next)
+    const msg = await writeMessage(c.name, goal, next, isMaster ? 'master' : 'free')
     if (dry) { results.push({ name: c.name, next: next?.title || '(finished)', goal, preview: msg }); continue }
     const ok = await sendWhatsApp(c.phone, msg)
     if (ok) await db.from('profiles').update({ reminder_prefs: { ...c.prefs, last_sent: hourKey } }).eq('id', c.id)

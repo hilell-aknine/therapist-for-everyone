@@ -784,8 +784,8 @@
                     <span class="q-consent-stat__label">בלבד מסיימים קורס</span>
                 </div>
                 <p class="q-consent-body">
-                    ראינו שהדבר שעוזר ביותר ללומדים לסיים הוא <strong>תזכורת שבועית אחת</strong> —
-                    מותאמת לסיבה שלך ללמוד. נשלח לך הודעה קצרה פעם בשבוע. ניתן לבטל בכל עת.
+                    ראינו שהדבר שעוזר ביותר ללומדים לסיים הוא <strong>תזכורת קצרה בזמן שנוח לך</strong> —
+                    מותאמת לסיבה שלך ללמוד. בשלב הבא תבחר/י בדיוק באיזה ימים ובאיזו שעה. ניתן לבטל בכל עת.
                 </p>
                 <div class="q-consent-toggle">
                     <button id="consentYes" class="q-consent-btn active" aria-pressed="true">
@@ -1155,7 +1155,11 @@
                         .eq('id', questionnaireId);
                 } catch (e) { /* non-critical — don't block portal entry on save failure */ }
             }
-            window.location.href = 'course-library-v2.html?completed=1';
+            // Said yes → let them pick exactly which days + hours (onboarding mode
+            // continues to the portal after saving). Said no → straight to the portal.
+            window.location.href = _consentChoice
+                ? 'reminder-settings.html?onboarding=1'
+                : 'course-library-v2.html?completed=1';
         });
     }
 

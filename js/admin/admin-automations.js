@@ -38,6 +38,147 @@ const OP_LABELS = {
 
 const TEMPLATE_VARS = ['first_name', 'full_name', 'lessons_completed', 'role'];
 
+// ─── Plain-Hebrew translation layer ─────────────────────────────────────────
+// Turns rule internals (cron, audience_filter, stats) into sentences a
+// 10-year-old can read. Unknown fields fall back to the technical label.
+
+const ROLE_NAMES_HE = {
+    admin: 'מנהל המערכת',
+    therapist: 'מטפל',
+    patient: 'מטופל',
+    student_lead: 'תלמיד בפורטל החינמי',
+    student: 'תלמיד',
+    sales_rep: 'איש מכירות',
+    paid_customer: 'לקוח משלם (קורס מאסטר)',
+};
+
+const STAGE_NAMES_HE = {
+    new: 'ליד חדש שעוד לא דיברנו איתו',
+    contacted: 'דיברנו איתו פעם אחת',
+    follow_up: 'מחכה שנחזור אליו (מעקב)',
+    presentation: 'אחרי שיחת היכרות',
+    negotiation: 'באמצע סגירה',
+    won: 'סגר וקנה',
+    lost: 'החליט שלא',
+};
+
+function numCompare(op, value, phrases) {
+    // phrases: { more, atLeast, less, atMost, exactly }
+    switch (op) {
+        case '>':  return phrases.more;
+        case '>=': return phrases.atLeast;
+        case '<':  return phrases.less;
+        case '<=': return phrases.atMost;
+        case '=':  return phrases.exactly;
+        default:   return phrases.more;
+    }
+}
+
+function humanizeCondition(cond) {
+    const { field, op } = cond || {};
+    const v = cond?.value;
+    switch (field) {
+        case 'has_phone':
+            return op === 'is_true' ? 'יש לנו את מספר הטלפון שלו' : 'אין לנו מספר טלפון שלו';
+        case 'filled_questionnaire':
+            return op === 'is_true' ? 'כבר מילא את שאלון ההיכרות' : 'עדיין לא מילא את שאלון ההיכרות';
+        case 'reminders_consent':
+            return op === 'is_true' ? 'ביקש לקבל תזכורות' : 'לא ביקש לקבל תזכורות';
+        case 'whatsapp_opt_out':
+            return op === 'is_false' ? 'לא ביקש להפסיק לקבל הודעות' : 'ביקש להפסיק לקבל הודעות';
+        case 'is_paying':
+            return op === 'is_true' ? 'לקוח משלם פעיל' : 'לא לקוח משלם';
+        case 'lessons_completed':
+            return numCompare(op, v, {
+                more:    `סיים יותר מ-${v} שיעורים`,
+                atLeast: `סיים ${v} שיעורים או יותר`,
+                less:    `סיים פחות מ-${v} שיעורים`,
+                atMost:  `סיים עד ${v} שיעורים`,
+                exactly: `סיים בדיוק ${v} שיעורים`,
+            });
+        case 'last_lesson_days_ago':
+            return numCompare(op, v, {
+                more:    `לא נכנס לשיעור כבר יותר מ-${v} ימים`,
+                atLeast: `לא נכנס לשיעור כבר ${v} ימים לפחות`,
+                less:    `למד שיעור במהלך ${v} הימים האחרונים`,
+                atMost:  `למד שיעור במהלך ${v} הימים האחרונים`,
+                exactly: `השיעור האחרון שלו היה לפני ${v} ימים`,
+            });
+        case 'days_since_signup':
+            return numCompare(op, v, {
+                more:    `נרשם לפני יותר מ-${v} ימים`,
+                atLeast: `נרשם לפני ${v} ימים או יותר`,
+                less:    `נרשם במהלך ${v} הימים האחרונים`,
+                atMost:  `נרשם במהלך ${v} הימים האחרונים`,
+                exactly: `נרשם לפני ${v} ימים בדיוק`,
+            });
+        case 'minutes_since_signup':
+            return numCompare(op, v, {
+                more:    `עברו יותר מ-${v} דקות מאז שנרשם`,
+                atLeast: `עברו לפחות ${v} דקות מאז שנרשם`,
+                less:    `עברו פחות מ-${v} דקות מאז שנרשם`,
+                atMost:  `עברו עד ${v} דקות מאז שנרשם`,
+                exactly: `עברו בדיוק ${v} דקות מאז שנרשם`,
+            });
+        case 'sales_stage_days':
+            return numCompare(op, v, {
+                more:    `נמצא באותו שלב כבר יותר מ-${v} ימים`,
+                atLeast: `נמצא באותו שלב כבר ${v} ימים לפחות`,
+                less:    `נכנס לשלב הזה במהלך ${v} הימים האחרונים`,
+                atMost:  `נכנס לשלב הזה במהלך ${v} הימים האחרונים`,
+                exactly: `נמצא באותו שלב בדיוק ${v} ימים`,
+            });
+        case 'sales_stage':
+            return op === '!='
+                ? `לא נמצא בשלב "${STAGE_NAMES_HE[v] || v}"`
+                : `נמצא בשלב: ${STAGE_NAMES_HE[v] || v}`;
+        case 'role':
+            return op === '!='
+                ? `הוא לא ${ROLE_NAMES_HE[v] || v}`
+                : `הוא ${ROLE_NAMES_HE[v] || v}`;
+        default: {
+            // Fallback: technical label from the field registry
+            const def = _autoFields.find(f => f.key === field);
+            const label = def?.label || field || '?';
+            if (['is_true','is_false','is_null','is_not_null'].includes(op)) {
+                return `${label} ${OP_LABELS[op] || op}`;
+            }
+            return `${label} ${OP_LABELS[op] || op} ${v ?? ''}`;
+        }
+    }
+}
+
+function humanizeAudience(rule) {
+    const conds = rule?.audience_filter?.all || [];
+    if (!conds.length) return ['כולם (אין סינון!)'];
+    return conds.map(humanizeCondition);
+}
+
+// Sample values for rendering the message preview bubble
+const PREVIEW_SAMPLE = { first_name: 'דנה', full_name: 'דנה לוי', lessons_completed: 7, role: 'תלמידה' };
+
+function renderMessageBubble(template) {
+    const rendered = (template || '').replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, k) => PREVIEW_SAMPLE[k] ?? '');
+    return `<div class="auto-wa-bubble" dir="rtl">${escapeHtml(rendered).replace(/\n/g, '<br>')}</div>`;
+}
+
+// "לפני 5 דקות" / "היום ב-14:00" / "אתמול ב-10:30" / full date
+function relTimeHe(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d)) return null;
+    const now = new Date();
+    const diffMin = Math.round((now - d) / 60000);
+    if (diffMin < 1) return 'ממש עכשיו';
+    if (diffMin < 60) return `לפני ${diffMin} דקות`;
+    const hhmm = d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    const today = now.toDateString() === d.toDateString();
+    if (today) return `היום ב-${hhmm}`;
+    const yesterday = new Date(now.getTime() - 864e5).toDateString() === d.toDateString();
+    if (yesterday) return `אתמול ב-${hhmm}`;
+    return `${d.toLocaleDateString('he-IL')} ב-${hhmm}`;
+}
+
 const RULE_TEMPLATES = [
     {
         name: 'מי שסיים מעל 5 שיעורים',
@@ -207,7 +348,7 @@ function renderAutomations() {
             <button class="btn btn-primary" onclick="openAutomationEditor(null)">
                 <i class="fa-solid fa-plus"></i> כלל חדש
             </button>
-            <span class="auto-count">${_autoRules.length} כללים · ${_autoRules.filter(r => r.is_enabled).length} פעילים</span>
+            <span class="auto-count">יש כאן ${_autoRules.length} תזכורות אוטומטיות · ${_autoRules.filter(r => r.is_enabled).length} מהן פועלות עכשיו</span>
         </div>
         <div class="automations-grid">${cards}</div>
         <div class="auto-templates-section">
@@ -234,28 +375,54 @@ function renderRuleCard(rule) {
     const stats = _autoStats.get(rule.id) || {};
     const cronExpr = rule.trigger_config?.cron || '—';
     const cronLabel = humanizeCron(cronExpr);
-    const conditions = (rule.audience_filter?.all || []).length;
     const enabledClass = rule.is_enabled ? 'enabled' : 'disabled';
     const dryClass = (rule.is_enabled && rule.dry_run) ? ' card-in-dry-run' : '';
     const audienceCount = _autoAudienceCounts.has(rule.id) ? _autoAudienceCounts.get(rule.id) : null;
-    const audienceBadge = audienceCount !== null
-        ? `<span class="auto-audience-badge" title="כמה משתמשים תואמים כרגע לתנאי הכלל"><i class="fa-solid fa-users"></i> ${audienceCount} תואמים</span>`
-        : `<span class="auto-audience-badge loading"><i class="fa-solid fa-circle-notch fa-spin"></i> בודק...</span>`;
-    const dryBadge = rule.dry_run
-        ? '<span class="auto-badge auto-badge-dry">מצב תרגול</span>'
-        : '<span class="auto-badge auto-badge-live">חי</span>';
-    const lastFired = stats.last_fired
-        ? `הרצה אחרונה: ${formatDateTime(stats.last_fired)}`
-        : 'עדיין לא רץ';
+
+    // Status in plain words — the first thing the eye lands on
+    let statusPill;
+    if (!rule.is_enabled) {
+        statusPill = '<span class="auto-status off"><i class="fa-solid fa-pause"></i> כבוי — לא שולח כלום</span>';
+    } else if (rule.dry_run) {
+        statusPill = '<span class="auto-status dry"><i class="fa-solid fa-flask"></i> מצב ניסיון — מתאמן בלבד, אף אחד לא מקבל הודעה</span>';
+    } else {
+        statusPill = '<span class="auto-status live"><i class="fa-solid fa-circle-check"></i> פועל — שולח הודעות וואטסאפ אמיתיות</span>';
+    }
+
+    // WHO — plain-Hebrew condition list + live match count
+    const whoLines = humanizeAudience(rule).map(p => `<li>${escapeHtml(p)}</li>`).join('');
+    const whoCount = audienceCount !== null
+        ? `<span class="auto-who-count"><i class="fa-solid fa-users"></i> כרגע יש <b>${audienceCount}</b> אנשים שמתאימים</span>`
+        : `<span class="auto-who-count loading"><i class="fa-solid fa-circle-notch fa-spin"></i> סופר כמה אנשים מתאימים...</span>`;
+
+    // WHAT — the actual WhatsApp message, shown like it looks on the phone
+    const isAI = !!rule.action_config?.ai_personalized;
+    const template = rule.action_config?.message_template || rule.action_config?.fallback_template || '';
+    const whatBlock = isAI
+        ? `<div class="auto-what-note"><i class="fa-solid fa-wand-magic-sparkles"></i> כל אחד מקבל הודעה אישית שנכתבת במיוחד בשבילו. אם הכתיבה האישית לא מצליחה, נשלחת ההודעה הזאת:</div>${renderMessageBubble(template)}`
+        : renderMessageBubble(template);
+
+    // Safety limits, as one plain sentence
+    const cd = rule.cooldown_days;
+    const repeatText = (cd >= 9999) ? 'כל אחד מקבל את ההודעה פעם אחת בלבד'
+        : (cd > 0) ? `לא שולח שוב לאותו אדם במשך ${cd} ימים`
+        : 'יכול לשלוח לאותו אדם שוב ושוב';
+    const safetyLine = `${repeatText} · מקסימום ${rule.daily_cap || 100} הודעות ביום`;
+
+    // Numbers that mean something
+    const lastFired = relTimeHe(stats.last_fired);
+    const numbersLine = stats.last_fired
+        ? `נשלחו היום: <b>${stats.sent_today || 0}</b> · בשבוע האחרון: <b>${stats.sent_7d || 0}</b> · מאז ההתחלה: <b>${stats.total_sent || 0}</b>${stats.failed_7d ? ` · <span class="auto-num-err">נכשלו השבוע: <b>${stats.failed_7d}</b></span>` : ''} · רץ לאחרונה ${lastFired}`
+        : 'עדיין לא רץ אף פעם';
 
     // Loud warning banner when an enabled rule is still stuck in dry_run —
     // this is the state that made the "pulse check" bug invisible.
     const dryWarning = (rule.is_enabled && rule.dry_run) ? `
                 <div class="auto-dry-warning">
                     <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span>מצב תרגול פעיל — הכלל <b>לא שולח הודעות אמיתיות</b>.</span>
+                    <span>שים לב: זה רק אימון — <b>אף הודעה אמיתית לא נשלחת</b>.</span>
                     <button class="auto-dry-golive" onclick="goLiveAutomation('${rule.id}')">
-                        עבור למצב חי
+                        התחל לשלוח באמת
                     </button>
                 </div>` : '';
 
@@ -263,19 +430,14 @@ function renderRuleCard(rule) {
         <div class="automation-card ${enabledClass}${dryClass}">
             ${dryWarning}
             <div class="auto-card-head">
-                <label class="auto-toggle">
+                <label class="auto-toggle" title="${rule.is_enabled ? 'לחץ כדי לכבות' : 'לחץ כדי להפעיל'}">
                     <input type="checkbox" ${rule.is_enabled ? 'checked' : ''}
                            onchange="toggleAutomationEnabled('${rule.id}', this.checked)">
                     <span class="auto-toggle-slider"></span>
                 </label>
                 <div class="auto-card-title">
                     <h3>${escapeHtml(rule.name || 'ללא שם')}</h3>
-                    <div class="auto-card-meta">
-                        ${dryBadge}
-                        ${audienceBadge}
-                        <span><i class="fa-solid fa-clock"></i> ${escapeHtml(cronLabel)}</span>
-                        <span><i class="fa-solid fa-filter"></i> ${conditions} תנאים</span>
-                    </div>
+                    ${statusPill}
                 </div>
                 <div class="auto-card-actions">
                     <button class="btn-icon" title="ערוך" onclick="openAutomationEditor('${rule.id}')">
@@ -298,25 +460,34 @@ function renderRuleCard(rule) {
                     </button>
                 </div>
             </div>
-            ${rule.description ? `<p class="auto-card-desc">${escapeHtml(rule.description)}</p>` : ''}
-            <div class="auto-card-stats">
-                <div class="auto-stat">
-                    <div class="auto-stat-num">${stats.sent_today || 0}</div>
-                    <div class="auto-stat-label">נשלחו היום</div>
+
+            <div class="auto-story">
+                <div class="auto-story-row">
+                    <div class="auto-story-ico"><i class="fa-solid fa-clock"></i></div>
+                    <div class="auto-story-body">
+                        <div class="auto-story-label">מתי?</div>
+                        <div class="auto-story-text">${escapeHtml(cronLabel)}</div>
+                    </div>
                 </div>
-                <div class="auto-stat">
-                    <div class="auto-stat-num">${stats.sent_7d || 0}</div>
-                    <div class="auto-stat-label">נשלחו 7 ימים</div>
+                <div class="auto-story-row">
+                    <div class="auto-story-ico"><i class="fa-solid fa-users"></i></div>
+                    <div class="auto-story-body">
+                        <div class="auto-story-label">למי?</div>
+                        <ul class="auto-who-list">${whoLines}</ul>
+                        ${whoCount}
+                    </div>
                 </div>
-                <div class="auto-stat">
-                    <div class="auto-stat-num">${stats.total_sent || 0}</div>
-                    <div class="auto-stat-label">סה״כ</div>
+                <div class="auto-story-row">
+                    <div class="auto-story-ico wa"><i class="fa-brands fa-whatsapp"></i></div>
+                    <div class="auto-story-body">
+                        <div class="auto-story-label">מה הוא מקבל בטלפון?</div>
+                        ${whatBlock}
+                    </div>
                 </div>
-                ${rule.dry_run && stats.dry_runs_7d ? `<div class="auto-stat dry"><div class="auto-stat-num">${stats.dry_runs_7d}</div><div class="auto-stat-label">תרגולים 7 ימים</div></div>` : ''}
-                ${stats.invalid_7d ? `<div class="auto-stat error"><div class="auto-stat-num">${stats.invalid_7d}</div><div class="auto-stat-label">מספר לא בוואטסאפ</div></div>` : ''}
-                ${stats.failed_7d ? `<div class="auto-stat error"><div class="auto-stat-num">${stats.failed_7d}</div><div class="auto-stat-label">שגיאות 7d</div></div>` : ''}
             </div>
-            <div class="auto-card-footer">${lastFired}</div>
+
+            <div class="auto-safety-line"><i class="fa-solid fa-shield-halved"></i> ${safetyLine}</div>
+            <div class="auto-card-footer">${numbersLine}</div>
         </div>
     `;
 }
@@ -958,6 +1129,13 @@ function humanizeCron(expr) {
     if (expr === '* * * * *') return 'כל דקה';
     let m;
     if ((m = expr.match(/^\*\/(\d+) \* \* \* \*$/))) return `כל ${m[1]} דקות`;
-    if ((m = expr.match(/^0 (\d+) \* \* \*$/))) return `כל יום ב-${m[1].padStart(2,'0')}:00`;
+    if ((m = expr.match(/^(\d+) (\d+) \* \* \*$/))) return `כל יום ב-${m[2].padStart(2,'0')}:${m[1].padStart(2,'0')}`;
+    const DAYS_HE = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+    if ((m = expr.match(/^(\d+) (\d+) \* \* (\d)$/))) {
+        const day = DAYS_HE[parseInt(m[3], 10) % 7];
+        return `כל יום ${day} ב-${m[2].padStart(2,'0')}:${m[1].padStart(2,'0')}`;
+    }
+    if ((m = expr.match(/^(\d+) (\d+) \* \* 1-5$/))) return `בימי חול ב-${m[2].padStart(2,'0')}:${m[1].padStart(2,'0')}`;
+    if ((m = expr.match(/^(\d+) (\d+) (\d+) \* \*$/))) return `ב-${m[3]} לכל חודש ב-${m[2].padStart(2,'0')}:${m[1].padStart(2,'0')}`;
     return expr;
 }

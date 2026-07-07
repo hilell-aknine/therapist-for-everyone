@@ -10,6 +10,16 @@
 <link rel="stylesheet" href="../css/v2/theme.css">
 <link rel="stylesheet" href="../css/v2/theme-bvm.css">
 <link rel="stylesheet" href="../css/v2/admin-shell.css">
+<style>
+/* תזכורות וואטסאפ — תצוגת "מתי / למי / מה" בשפה פשוטה */
+.auto-simple{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.as-row{font-size:.88rem;color:var(--t-text-secondary);line-height:1.5}
+.as-label{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--t-text);margin-left:4px}
+.as-label.wa{color:#25D366}
+.as-bubble{background:rgba(37,211,102,.09);border:1px solid rgba(37,211,102,.28);border-radius:12px 12px 12px 3px;padding:9px 12px;color:var(--t-text);max-width:430px;margin-top:4px;white-space:normal;word-break:break-word}
+.as-ai-note{font-size:.78rem;color:#B8860B;margin-bottom:4px}
+.badge.gold{background:rgba(212,175,55,.14);color:#B8860B;border:1px solid rgba(212,175,55,.35)}
+</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase-config.js"></script>
 </head>
@@ -326,7 +336,7 @@
       </table>
     </section>
     <section class="world" id="w-automations">
-      <div class="hero" style="--w:#8B6914"><i class="hero-art fa-solid fa-bolt"></i><h1>אוטומציות</h1><p>בנה תהליכים אוטומטיים בלי קוד: בחר מתי, בחר מה קורה, שמור</p></div>
+      <div class="hero" style="--w:#8B6914"><i class="hero-art fa-solid fa-bolt"></i><h1>תזכורות וואטסאפ</h1><p>כל כרטיס הוא תזכורת שנשלחת לבד. רואים בדיוק: מתי היא רצה, למי היא נשלחת, ומה כתוב בהודעה</p></div>
       <div class="card" style="padding:14px 18px;margin-bottom:18px;color:var(--t-text-secondary);font-size:.88rem"><i class="fa-solid fa-circle-info" style="color:#8B6914"></i> כל אוטומציה היא חוק פשוט: אם מתקיים תנאי, אז יוצאת פעולה. הפעל/כבה בלחיצה, בלי לגעת בקוד. מצב "טיוטה" (dry-run) רץ בלי לשלוח באמת.</div>
       <div class="actionbar">
         <button class="btn btn-primary" onclick="alert('בונה אוטומציה — בשלב הבא')"><i class="fa-solid fa-plus"></i> אוטומציה חדשה</button>
@@ -921,26 +931,33 @@
     document.getElementById('popup-modal')?.remove();
   }
 
-  // ---- אוטומציות (החוקים האמיתיים מהמערכת; חיווט חי למנוע = שלב הבא) ----
+  // ---- תזכורות וואטסאפ (מוצג בשפה פשוטה: מתי / למי / מה ההודעה) ----
   const AUTORULES = [
-    {name:'מי שסיים מעל 5 שיעורים', when:'כל יום 14:00 · סיים >5 שיעורים + יש טלפון', then:'וואטסאפ: דחיפה לחלק ב׳', enabled:true},
-    {name:'לידים שלא הגיבו 7 ימים', when:'ימי חול 10:00 · בשלב follow_up מעל 7 ימים', then:'וואטסאפ: תזכורת לחזור', enabled:true},
-    {name:'לא מילא שאלון פורטל', when:'כל יום 11:00 · נרשם מעל 3 ימים, לא מילא שאלון', then:'וואטסאפ: לינק לשאלון', enabled:true},
-    {name:'תזכורת 30 דק׳ אחרי הרשמה', when:'כל 5 דקות · 30–120 דק׳ מההרשמה, לא מילא שאלון', then:'וואטסאפ: תזכורת שאלון', enabled:false, dry:true},
-    {name:'תזכורת שבועית מותאמת (AI)', when:'כל שלישי 10:00 · הסכים לתזכורות, מתחת 51 שיעורים', then:'AI: הודעה אישית לפי החזון', enabled:true, ai:true},
+    {name:'מי שסיים מעל 5 שיעורים', when:'כל יום ב-14:00', who:['סיים יותר מ-5 שיעורים','יש לנו את הטלפון שלו'], msg:'היי דנה 👋\nראית שסיימת 7 שיעורים — כל הכבוד!\nהחלק השני של הקורס מחכה לך.', enabled:true},
+    {name:'לידים שלא הגיבו 7 ימים', when:'בימי חול ב-10:00', who:['מחכה שנחזור אליו (מעקב)','כבר יותר מ-7 ימים באותו מצב'], msg:'שלום דנה, רציתי לחזור אלייך לגבי השיחה שלנו 🙂\nמתי נוח לך השבוע?', enabled:true},
+    {name:'לא מילא שאלון פורטל', when:'כל יום ב-11:00', who:['נרשם לפני 3 ימים או יותר','עדיין לא מילא את שאלון ההיכרות'], msg:'היי דנה, ראיתי שעדיין לא השלמת את שאלון ההיכרות 💛\nזה לוקח 2 דקות.', enabled:true},
+    {name:'תזכורת 30 דק׳ אחרי הרשמה', when:'כל 5 דקות', who:['נרשם לפני חצי שעה עד שעתיים','עדיין לא מילא את השאלון'], msg:'היי דנה 👋\nנרשמת לפורטל אבל עוד לא מילאת את השאלון הקצר — זה לוקח שתי דקות.', enabled:false, dry:true},
+    {name:'תזכורת שבועית מותאמת (AI)', when:'כל יום שלישי ב-10:00', who:['ביקש לקבל תזכורות','עדיין לא סיים את כל הקורס'], msg:'היי דנה 👋\nהמשיכי ללמוד — 7 שיעורים כבר מאחורייך!', enabled:true, ai:true},
   ];
+  function autoStatusPill(r){
+    if(!r.enabled) return '<span class="badge gray">⏸️ כבוי — לא שולח כלום</span>';
+    if(r.dry) return '<span class="badge gold">🧪 מצב ניסיון — לא שולח באמת</span>';
+    return '<span class="badge green">✅ פועל — שולח הודעות אמיתיות</span>';
+  }
   function renderAutomations(rules){
     const list = rules || AUTORULES;
     const box = document.getElementById('automations-list'); if(!box) return;
     box.innerHTML = list.map((r)=>`
-      <div class="auto-rule">
-        <button class="switch ${r.enabled?'on':''}" onclick="toggleAuto('${r.id||''}', this)"></button>
+      <div class="auto-rule" style="align-items:flex-start">
+        <button class="switch ${r.enabled?'on':''}" onclick="toggleAuto('${r.id||''}', this)" title="${r.enabled?'לחץ כדי לכבות':'לחץ כדי להפעיל'}"></button>
         <div class="ar-body">
-          <div class="ar-name">${r.name} ${r.dry?'<span class="badge gray">טיוטה</span>':''} ${r.ai?'<span class="badge">AI</span>':''}</div>
-          <div class="auto-flow">
-            <span class="auto-pill if"><i class="fa-solid fa-bolt"></i> ${r.when}</span>
-            <i class="auto-arrow fa-solid fa-arrow-left"></i>
-            <span class="auto-pill then"><i class="fa-solid fa-paper-plane"></i> ${r.then}</span>
+          <div class="ar-name">${r.name} ${autoStatusPill(r)}</div>
+          <div class="auto-simple">
+            <div class="as-row"><span class="as-label"><i class="fa-solid fa-clock"></i> מתי?</span> ${r.when}</div>
+            <div class="as-row"><span class="as-label"><i class="fa-solid fa-users"></i> למי?</span> כל מי ש: ${(r.who||[]).join(' · ')}</div>
+            <div class="as-row"><span class="as-label wa"><i class="fa-brands fa-whatsapp"></i> ההודעה:</span>
+              <div class="as-bubble">${(r.ai?'<div class="as-ai-note">🤖 כל אחד מקבל הודעה אישית משלו. דוגמה:</div>':'')}${String(r.msg||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+            </div>
           </div>
         </div>
         <div class="ar-acts"><button title="ערוך"><i class="fa-solid fa-pen"></i></button><button title="מחק"><i class="fa-solid fa-trash"></i></button></div>
@@ -950,13 +967,37 @@
     const on=!btn.classList.contains('on'); btn.classList.toggle('on',on);
     if(id && window.db){ window.db.rpc('admin_automations_upsert',{rule:{id, is_enabled:on}}).then(({error})=>{ if(error){ btn.classList.toggle('on',!on); alert('שגיאה בעדכון'); } }); }
   }
-  const AUTO_CRON={'*/5 * * * *':'כל 5 דקות','0 9 * * *':'כל יום 09:00','0 14 * * *':'כל יום 14:00','0 10 * * 1-5':'ימי חול 10:00','0 11 * * *':'כל יום 11:00','0 10 * * 2':'כל שלישי 10:00'};
+  const AUTO_CRON={'* * * * *':'כל דקה','*/5 * * * *':'כל 5 דקות','0 9 * * *':'כל יום ב-09:00','0 14 * * *':'כל יום ב-14:00','0 10 * * 1-5':'בימי חול ב-10:00','0 11 * * *':'כל יום ב-11:00','0 10 * * 2':'כל יום שלישי ב-10:00'};
+  // תרגום תנאי סינון לעברית פשוטה (אותן מילים כמו בדשבורד הראשי)
+  function autoCondHe(c){
+    const v=c.value, op=c.op;
+    const cmp=(more,atLeast,less)=> op==='>'?more : op==='>='?atLeast : less;
+    switch(c.field){
+      case 'has_phone': return op==='is_true'?'יש לנו את הטלפון שלו':'אין לנו טלפון שלו';
+      case 'filled_questionnaire': return op==='is_true'?'כבר מילא את השאלון':'עדיין לא מילא את השאלון';
+      case 'reminders_consent': return op==='is_true'?'ביקש לקבל תזכורות':'לא ביקש תזכורות';
+      case 'whatsapp_opt_out': return op==='is_false'?'לא ביקש להפסיק לקבל הודעות':'ביקש להפסיק לקבל הודעות';
+      case 'is_paying': return op==='is_true'?'לקוח משלם פעיל':'לא לקוח משלם';
+      case 'lessons_completed': return cmp(`סיים יותר מ-${v} שיעורים`,`סיים ${v} שיעורים או יותר`,`סיים פחות מ-${v} שיעורים`);
+      case 'days_since_signup': return cmp(`נרשם לפני יותר מ-${v} ימים`,`נרשם לפני ${v} ימים או יותר`,`נרשם במהלך ${v} הימים האחרונים`);
+      case 'minutes_since_signup': return cmp(`עברו יותר מ-${v} דקות מאז שנרשם`,`עברו לפחות ${v} דקות מאז שנרשם`,`עברו פחות מ-${v} דקות מאז שנרשם`);
+      case 'sales_stage_days': return cmp(`נמצא באותו שלב יותר מ-${v} ימים`,`נמצא באותו שלב ${v} ימים לפחות`,`נכנס לשלב הזה לאחרונה`);
+      case 'sales_stage': return ({new:'ליד חדש',contacted:'דיברנו איתו פעם אחת',follow_up:'מחכה שנחזור אליו (מעקב)',presentation:'אחרי שיחת היכרות',negotiation:'באמצע סגירה',won:'סגר וקנה',lost:'החליט שלא'})[v]||`בשלב ${v}`;
+      case 'role': return ({student_lead:'תלמיד בפורטל החינמי',paid_customer:'לקוח משלם (מאסטר)',student:'תלמיד',therapist:'מטפל'})[v]||v;
+      case 'last_lesson_days_ago': return cmp(`לא למד כבר יותר מ-${v} ימים`,`לא למד כבר ${v} ימים לפחות`,`למד לאחרונה`);
+      default: return `${c.field} ${op} ${v??''}`;
+    }
+  }
   async function loadAutomationsLive(){
     try{
       const { data } = await window.db.rpc('admin_automations_list');
       if(!data || !data.length) return;
-      const mapped=data.map(r=>{ const cron=r.trigger_config&&r.trigger_config.cron||''; const cl=AUTO_CRON[cron]||cron||'מתוזמן'; const n=(r.audience_filter&&r.audience_filter.all||[]).length;
-        return { id:r.id, name:r.name||'אוטומציה', when:`${cl}${n?(' · '+n+' תנאים'):''}`, then:(r.ai_personalized?'AI: הודעה אישית':'וואטסאפ'), enabled:r.is_enabled, dry:r.dry_run, ai:r.ai_personalized }; });
+      const mapped=data.map(r=>{ const cron=r.trigger_config&&r.trigger_config.cron||''; const cl=AUTO_CRON[cron]||cron||'מתוזמן';
+        const ai=!!(r.action_config&&r.action_config.ai_personalized);
+        const tpl=(r.action_config&&(r.action_config.message_template||r.action_config.fallback_template))||'';
+        const sample={first_name:'דנה',full_name:'דנה לוי',lessons_completed:7,role:'תלמידה'};
+        const msg=tpl.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g,(_,k)=>sample[k]??'');
+        return { id:r.id, name:r.name||'תזכורת', when:cl, who:(r.audience_filter&&r.audience_filter.all||[]).map(autoCondHe), msg, enabled:r.is_enabled, dry:r.dry_run, ai }; });
       renderAutomations(mapped);
     }catch(e){}
   }

@@ -26,15 +26,34 @@ Independent of any one form — add a page to PAGES and it's covered.
 """
 
 import json
+import os
 import sys
 import urllib.request
 import urllib.error
+from pathlib import Path
+
+
+def _load_env_local():
+    env_file = Path(__file__).resolve().parent.parent / ".env.local"
+    if not env_file.exists():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        os.environ.setdefault(k.strip(), v.strip())
+
+
+_load_env_local()
 
 # ---- WhatsApp alert (same Green API instance as the backup watchdog) --------
-GREEN_API_URL = "https://7103.api.greenapi.com"
-GREEN_API_INSTANCE = "7103533485"
-GREEN_API_TOKEN = "83960338d380459ca79eb37e2b08c4639479d22c643144779f"
-ALERT_PHONE = "972549116092"
+# Secrets come from .env.local (gitignored). This file is committed to a PUBLIC
+# repo — never inline the token here again. No fallback: fail loudly instead.
+GREEN_API_URL = os.environ.get("GREEN_API_URL", "https://7103.api.greenapi.com")
+GREEN_API_INSTANCE = os.environ["GREEN_API_INSTANCE"]
+GREEN_API_TOKEN = os.environ["GREEN_API_TOKEN"]
+ALERT_PHONE = os.environ.get("ALERT_PHONE", "972549116092")
 
 SITE = "https://www.therapist-home.com"
 FUNCTIONS_URL = "https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1"

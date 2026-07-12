@@ -67,22 +67,28 @@ serve(async (req: Request) => {
 
     const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-    // Dedup: skip the insert if a pending row for the same id already exists.
+    // Dedup: a welcome is sent once per person, ever — so any existing row (pending,
+    // sent or failed) means we are done. The old check looked at 'pending' only, so a
+    // second sign-up call after the first was already sent queued a second welcome.
     const dedupCol = profile_id ? 'profile_id' : 'questionnaire_id'
     const dedupVal = profile_id || questionnaire_id
     const { data: existing } = await db
       .from('welcome_queue')
       .select('id')
-      .eq('status', 'pending')
       .eq(dedupCol, dedupVal)
       .limit(1)
       .maybeSingle()
-    if (existing) return jsonResponse({ queued: false, reason: 'already_pending' }, 200, cors)
+    if (existing) return jsonResponse({ queued: false, reason: 'already_queued' }, 200, cors)
 
     const { error: insErr } = await db
       .from('welcome_queue')
       .insert({ profile_id, questionnaire_id })
     if (insErr) {
+      // 23505 = unique violation on welcome_queue_{profile,questionnaire}_uniq. Two
+      // calls raced past the SELECT above; the index is the real guard. Not an error.
+      if (insErr.code === '23505') {
+        return jsonResponse({ queued: false, reason: 'already_queued' }, 200, cors)
+      }
       console.error('enqueue-welcome insert error:', insErr.message)
       return jsonResponse({ queued: false, error: 'insert_failed' }, 500, cors)
     }

@@ -16,6 +16,7 @@ const VIEW_GROUPS = {
     'segments': { views: ['segments'], header: null, default: 'segments' },
     'automations':{ views: ['automations'], header: null, default: 'automations' },
     'retention': { views: ['retention'], header: null, default: 'retention' },
+    'health':   { views: ['health'], header: null, default: 'health' },
     'traffic':  { views: ['sources', 'traffic', 'analytics', 'instagram'], header: 'traffic-header', default: 'sources' },
     'settings': { views: ['settings'], header: null, default: 'settings' },
     // Legacy routes — hidden from sidebar but still accessible
@@ -72,6 +73,7 @@ function switchView(view) {
     if (view === 'segments' || group.default === 'segments') loadSegments();
     if (view === 'automations' || group.default === 'automations') loadAutomations();
     if (view === 'retention' || group.default === 'retention') { if (typeof loadRetention === 'function') loadRetention(); }
+    if (view === 'health') { if (typeof loadHealth === 'function') loadHealth(); }
     if (view === 'traffic') { if (typeof loadSources === 'function') loadSources(); }
     if (view === 'settings' || group.default === 'settings') { loadSettingsView(); loadUtmConfigs(); loadAutomationConfigs(); loadPermissionsManager(); loadSalesRepManager(); }
 

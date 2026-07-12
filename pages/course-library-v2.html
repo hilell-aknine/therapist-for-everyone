@@ -15,13 +15,9 @@
 <link rel="preconnect" href="https://www.youtube.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link rel="dns-prefetch" href="https://googlevideo.com">
-<!-- The Google Fonts stylesheet is render-blocking: the browser draws nothing until
-     it lands, which is why the sales headline kept showing up as a slow LCP element.
-     Load it the same way Font Awesome is already loaded here — as a preload that
-     promotes itself to a stylesheet — so the text paints immediately in the fallback
-     font and swaps when the webfont arrives (display=swap already handles that). -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;600;700;800&display=swap"></noscript>
+<!-- No Google Fonts stylesheet here on purpose: the @font-face rules are inline (see
+     the <style> below) and the files are preloaded. Loading the stylesheet as well
+     re-declared the same families late and made the page repaint and shift. -->
 <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 <!-- The sales-page video poster is the LCP element there; start it with the HTML. -->
@@ -40,22 +36,32 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
 <style>
-  /* Hebrew @font-face declared inline, not waited for.
-     Preloading the woff2 alone did not stop the reflow: the browser still could not
-     USE the font until Google's stylesheet arrived and declared it, so the headline
-     was drawn in a fallback and redrawn ~2s later (CLS 0.17). Both families are
-     variable fonts — one Hebrew subset file each covers every weight — so the rules
-     fit here and the real font is available at first paint. Google's stylesheet still
-     loads async and supplies the Latin subsets. */
-  @font-face{
-    font-family:'Heebo'; font-style:normal; font-weight:100 900; font-display:swap;
-    src:url(https://fonts.gstatic.com/s/heebo/v28/NGS6v5_NC0k9P9H0TbFzsQ.woff2) format('woff2');
-    unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
-  }
-  @font-face{
+  /* Fonts declared here in full, instead of loading Google's stylesheet at all.
+     The headline was changing height THREE times (1.4s, 1.9s, 2.3s) and dragging the
+     whole page with it — CLS 0.16 against a 0.10 budget. Preloading the woff2 did not
+     fix it: Google's stylesheet still arrived late and re-declared the SAME families,
+     so the browser resolved the faces again and repainted.
+     Both families are variable fonts, so one file per subset covers every weight the
+     site uses. With no external font stylesheet, nothing is left to arrive late. */
+  @font-face{ /* Frank Ruhl Libre · hebrew */
     font-family:'Frank Ruhl Libre'; font-style:normal; font-weight:100 900; font-display:swap;
     src:url(https://fonts.gstatic.com/s/frankruhllibre/v23/j8_w6_fAw7jrcalD7oKYNX0QfAnPW7Ll4ajn.woff2) format('woff2');
-    unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+    unicode-range:U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+  }
+  @font-face{ /* Frank Ruhl Libre · latin */
+    font-family:'Frank Ruhl Libre'; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url(https://fonts.gstatic.com/s/frankruhllibre/v23/j8_w6_fAw7jrcalD7oKYNX0QfAnPW7Dl4Q.woff2) format('woff2');
+    unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  @font-face{ /* Heebo · hebrew */
+    font-family:'Heebo'; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url(https://fonts.gstatic.com/s/heebo/v28/NGS6v5_NC0k9P9H0TbFzsQ.woff2) format('woff2');
+    unicode-range:U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+  }
+  @font-face{ /* Heebo · latin */
+    font-family:'Heebo'; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url(https://fonts.gstatic.com/s/heebo/v28/NGS6v5_NC0k9P9H2TbE.woff2) format('woff2');
+    unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
 
   *{box-sizing:border-box;}

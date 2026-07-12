@@ -26,6 +26,15 @@
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 <!-- The sales-page video poster is the LCP element there; start it with the HTML. -->
 <link rel="preload" as="image" href="../assets/master-sales/intro-poster.webp" fetchpriority="high">
+<!-- The Hebrew webfonts arrived ~2s in, and the headline reflowed when they did —
+     everything below it jumped ~60px (CLS 0.17). Both families are variable fonts,
+     so ONE Hebrew subset file each covers every weight we use. Fetching them with
+     the HTML means the text is drawn in the real font the first time, not redrawn.
+     If Google ever rotates these URLs the preload is simply ignored — nothing breaks. -->
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://fonts.gstatic.com/s/frankruhllibre/v23/j8_w6_fAw7jrcalD7oKYNX0QfAnPW7Ll4ajn.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://fonts.gstatic.com/s/heebo/v28/NGS6v5_NC0k9P9H0TbFzsQ.woff2">
 
 <!-- ⚡ Supabase הועבר לסוף ה-<body> כדי שהמסך יופיע מיד (היה חוסם render ~1.3 שניות כאן) -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>

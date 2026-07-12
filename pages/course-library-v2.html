@@ -2112,6 +2112,32 @@
   </div>
 </div>
 
+<!-- engaged_master_offer: the personal pitch, for learners who are DEEP in the course.
+     These are the 38 people who finished 5+ lessons and are still coming back — the
+     ones most likely to buy. They get their own offer, named and specific to what they
+     have actually done, instead of the same generic upsell everyone else sees. -->
+<div id="lmsEngagedOfferModal" class="lms-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lmsEngagedTitle" hidden>
+  <div class="lms-modal">
+    <button type="button" class="lms-modal__close" aria-label="סגור" onclick="closeEngagedOffer()">×</button>
+    <div class="lmsmp-kicker"><i class="fa-solid fa-fire"></i> <span id="lmsEngagedKicker">אישית אליך</span></div>
+    <!-- The headline is rendered here, NOT from popup_configs: it carries the learner's
+         live lesson count, and a stale number from the DB would be worse than no popup.
+         The body copy and CTA text ARE admin-editable (data-pc-*). -->
+    <h2 id="lmsEngagedTitle" class="lmsmp-h">סיימת <span id="lmsEngagedCount">5</span> שיעורים. אתה כבר לא רק מתעניין.</h2>
+    <p class="lmsmp-text" data-pc-message>
+      רוב מי שנרשם לפורטל עוצר אחרי שיעור אחד. אתה לא. הגעת רחוק מספיק כדי לדעת
+      שהשיטה הזו עובדת עליך — והמאסטר הוא בדיוק המקום שבו זה הופך מ״הבנתי״ ל״אני יודע לעשות״.
+    </p>
+    <div class="lmsmp-offer">
+      <div class="lmsmp-offer-top">במקום <s>6,200 ש״ח</s> · הנחה 70%</div>
+      <div class="lmsmp-price">1,900 <small>ש״ח</small></div>
+      <div class="lmsmp-bonus"><i class="fa-solid fa-credit-card"></i> או ב-5 תשלומים של 380 ש״ח</div>
+    </div>
+    <button type="button" class="lmsmp-cta" onclick="engagedOfferCta()"><i class="fa-solid fa-crown"></i> <span data-pc-cta>קחו אותי למאסטר</span></button>
+    <button type="button" class="lmsmp-link" onclick="closeEngagedOffer()">לא עכשיו, אני ממשיך ללמוד</button>
+  </div>
+</div>
+
 <!-- ai_questionnaire modal -->
 <div id="lmsQuestionnaireModal" class="lms-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lmsQTitle" hidden>
   <div class="lms-modal">
@@ -2288,6 +2314,11 @@
     const el = document.getElementById(elId);
     if (el) el.hidden = true;
   }
+  // Must match ENGAGED_MIN_LESSONS in js/popup-manager.js. Derived from the data on
+  // 2026-07-12 (scripts/hot_learners.py): of 284 people who opened the course, 112
+  // stopped after one lesson; the 38 who passed five keep coming back.
+  const ENGAGED_MIN_LESSONS_UI = 5;
+
   function registerEngagementPopups(){
     if (!window.PopupManager) return;
     window.PopupManager.register('top_percentile_v2', {
@@ -2321,8 +2352,32 @@
       condition: () => {
         try {
           const u = window.PopupManager.getUser ? window.PopupManager.getUser() : {};
-          return u.role !== 'paid_customer' && u.role !== 'admin';
+          if (u.role === 'paid_customer' || u.role === 'admin') return false;
+          // Deep learners get engaged_master_offer instead — the personal one. Nobody
+          // should receive both pitches; that reads as spam and burns the better offer.
+          return (u.lessonCount || 0) < ENGAGED_MIN_LESSONS_UI;
         } catch(_) { return true; }
+      }
+    });
+    // engaged_master_offer: the SAME product, pitched personally to the people who are
+    // deep in the course. Of 284 who opened it, 112 stopped after one lesson; the 38
+    // who passed five keep coming back. They have already proven the method works on
+    // them, so they get a named, specific offer and a shorter cooldown, while everyone
+    // else keeps the generic training_cta above.
+    window.PopupManager.register('engaged_master_offer', {
+      priority: 2,                    // outranks training_cta — the better-qualified pitch wins
+      category: 'engagement',
+      targetAudience: 'engaged_learner',
+      show: () => showEngagedOffer(),
+      hide: () => hideEngagedOffer(),
+      maxPerDay: 1,
+      cooldownMs: 3*24*60*60*1000,    // every 3 days, vs 1 day for the generic one
+      condition: () => {
+        try {
+          const u = window.PopupManager.getUser ? window.PopupManager.getUser() : {};
+          if (u.role === 'paid_customer' || u.role === 'admin') return false;
+          return (u.lessonCount || 0) >= ENGAGED_MIN_LESSONS_UI;
+        } catch(_) { return false; }   // fails CLOSED: no data, no pitch
       }
     });
     // master_welcome_pitch: first-registration Master offer. Requested explicitly
@@ -2376,6 +2431,49 @@
     else location.hash = '#master-sales';
   }
 
+  // ===== engaged_master_offer (the personal pitch for deep learners) helpers =====
+  // The whole point of this popup is that it is NOT generic: it says the learner's
+  // name and the number of lessons he actually finished. A wrong number here would be
+  // worse than no popup at all, so it reads the live count from PopupManager (which
+  // checkPaidRole fed from the real progress) and refuses to show without one.
+  function showEngagedOffer(){
+    const m = document.getElementById('lmsEngagedOfferModal');
+    if (!m) return;
+    let count = 0, name = '';
+    try {
+      const u = window.PopupManager.getUser ? window.PopupManager.getUser() : {};
+      count = u.lessonCount || 0;
+    } catch(_){}
+    try { name = (window._portalFirstName || '').trim(); } catch(_){}
+
+    if (count < ENGAGED_MIN_LESSONS_UI) return;   // never lie about the number
+
+    const cEl = document.getElementById('lmsEngagedCount');
+    if (cEl) cEl.textContent = count;
+    const kEl = document.getElementById('lmsEngagedKicker');
+    if (kEl) kEl.textContent = name ? `${name}, אישית אליך` : 'אישית אליך';
+
+    applyPopupContent(m, 'engaged_master_offer');   // admin can still override copy from the dashboard
+    m.hidden = false;
+  }
+  function hideEngagedOffer(){
+    const m = document.getElementById('lmsEngagedOfferModal');
+    if (m) m.hidden = true;
+  }
+  function closeEngagedOffer(){
+    hideEngagedOffer();
+    if (window.PopupManager) window.PopupManager.dismiss('engaged_master_offer');
+  }
+  function engagedOfferCta(){
+    if (window.PopupManager){
+      window.PopupManager.click('engaged_master_offer');
+      window.PopupManager.close('engaged_master_offer');
+    }
+    hideEngagedOffer();
+    if (typeof window.showMasterSalesView === 'function') window.showMasterSalesView();
+    else location.hash = '#master-sales';
+  }
+
   // ===== master_welcome_pitch (first-registration Master offer) helpers =====
   function showMasterPitch(){
     const m = document.getElementById('lmsMasterPitchModal');
@@ -2413,7 +2511,8 @@
     closeLmsQuestionnaire, skipLmsQuestionnaire, submitLmsQuestionnaire,
     hideLmsToast, lmsShareCopy, lmsShareWhatsApp,
     closeTrainingCta, trainingCtaCheckout,
-    showMasterPitch, closeMasterPitch, masterPitchCta
+    showMasterPitch, closeMasterPitch, masterPitchCta,
+    closeEngagedOffer, engagedOfferCta
   });
 
   // ===== Auth modal helpers (auth_modal + auth_wall share one DOM element) =====
@@ -4238,7 +4337,13 @@
     try {
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (!user) return;
-      const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single();
+      const { data: profile } = await supabaseClient.from('profiles').select('role, full_name').eq('id', user.id).single();
+      // First name only — engaged_master_offer addresses the learner directly, and
+      // "שלום דוד" reads human where a full legal name reads like a mail merge.
+      try {
+        const fn = (profile && profile.full_name ? String(profile.full_name).trim().split(/\s+/)[0] : '');
+        window._portalFirstName = fn && fn.length <= 20 ? fn : '';
+      } catch(_){ window._portalFirstName = ''; }
       // Feed the REAL role into PopupManager so audience targeting is accurate.
       // authGate() optimistically set role='student_lead' before the profile loaded;
       // now that we know the true role, refresh it. This is what makes the

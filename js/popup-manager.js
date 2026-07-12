@@ -65,6 +65,12 @@
         }
     }
 
+    // A learner who has finished this many lessons has stopped browsing and started
+    // studying. Taken from the data, not guessed: of 284 people who opened the course,
+    // 112 stopped after a single lesson, and the ones who pass 5 keep going (2026-07-12,
+    // scripts/hot_learners.py). 38 people are above the line today.
+    const ENGAGED_MIN_LESSONS = 5;
+
     // --- Audience matching ---
     function matchesAudience(targetAudience) {
         if (!targetAudience || targetAudience === 'all') return true;
@@ -73,6 +79,15 @@
         if (targetAudience === 'free_user') return userContext.isAuthenticated && userContext.role !== 'paid_customer' && userContext.role !== 'admin';
         if (targetAudience === 'paid_customer') return userContext.role === 'paid_customer';
         if (targetAudience === 'admin') return userContext.role === 'admin';
+        // The people most likely to buy: free users who are deep into the course.
+        // Deliberately a subset of free_user — pair it with a stricter, personal offer
+        // and keep the generic one for everyone else, so nobody gets both.
+        if (targetAudience === 'engaged_learner') {
+            return userContext.isAuthenticated
+                && userContext.role !== 'paid_customer'
+                && userContext.role !== 'admin'
+                && (userContext.lessonCount || 0) >= ENGAGED_MIN_LESSONS;
+        }
         return true;
     }
 

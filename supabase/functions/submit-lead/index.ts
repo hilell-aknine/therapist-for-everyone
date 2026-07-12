@@ -1,7 +1,14 @@
 // ============================================================================
-// Edge Function: submit-lead
+// Edge Function: submit-lead (v2 — lead_intake unified table)
 // Cloudflare Turnstile-protected lead capture endpoint.
-// Replaces direct anonymous INSERTs from the frontend.
+//
+// Accepts BOTH request shapes:
+//   New:    { intake_type, core, payload, pipeline? }
+//   Legacy: { table: 'contact_requests'|'patients'|..., data: {...} }
+// Legacy shape is auto-translated → writes to public.lead_intake.
+//
+// Replaces the v1 submit-lead which routed to 5 separate tables (3 of which
+// are now _archive_*). See docs/specs/lead-intake-v1/00-overview.md.
 // ============================================================================
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -14,12 +21,70 @@ if (!TURNSTILE_SECRET_KEY) {
   console.error('CRITICAL: TURNSTILE_SECRET_KEY not configured — form CAPTCHA protection is DISABLED')
 }
 const TURNSTILE_ENABLED = TURNSTILE_SECRET_KEY.length > 0
-
-const ALLOWED_TABLES = ['patients', 'therapists', 'contact_requests', 'questionnaire_submissions', 'sales_leads']
-
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 
-// Whitelisted origins (production + Vercel preview)
+// ===== intake_type vocabulary (matches lead_intake CHECK constraint) =========
+const ALLOWED_INTAKE_TYPES = [
+  'portal_signup',
+  'contact_form',
+  'patient_application',
+  'therapist_application',
+  'sales_inquiry',
+] as const
+type IntakeType = typeof ALLOWED_INTAKE_TYPES[number]
+
+// ===== Legacy table → intake_type translation (BC layer) ====================
+// Lets old frontend code keep submitting `{ table: 'contact_requests', ... }`
+// while we migrate it. Remove after 04-frontend-diffs.md checklist is 100% done.
+const LEGACY_TABLE_TO_INTAKE: Record<string, IntakeType> = {
+  contact_requests:          'contact_form',
+  portal_questionnaires:     'portal_signup',
+  patients:                  'patient_application',
+  therapists:                'therapist_application',
+  sales_leads:               'sales_inquiry',
+  questionnaire_submissions: 'sales_inquiry',
+}
+
+// ===== Per-type field allow-lists ============================================
+const CORE_FIELDS = ['full_name', 'phone', 'email', 'city'] as const
+type CoreField = typeof CORE_FIELDS[number]
+const CORE_FIELD_SET = new Set<string>(CORE_FIELDS as readonly string[])
+
+const PAYLOAD_SCHEMA: Record<IntakeType, string[]> = {
+  portal_signup: [
+    'gender', 'birth_date', 'occupation',
+    'why_nlp', 'study_time', 'digital_challenge', 'knew_ram',
+    'motivation_tip', 'main_challenge', 'vision_one_year', 'how_found',
+  ],
+  contact_form: [
+    'message', 'request_type', 'data',
+  ],
+  patient_application: [
+    'birth_date', 'gender', 'marital_status', 'occupation',
+    'therapy_type', 'therapist_gender_preference',
+    'main_concern', 'health_declaration', 'military_role',
+    'military_service', 'referral_source', 'session_style',
+    'is_minor', 'parent_consent',
+    'photo_url', 'photo_base64', 'social_link',
+    'questionnaire',
+    'signature_data', 'legal_consent_date',
+    'age_confirmed', 'health_declaration_confirmed', 'terms_confirmed',
+    'truth_confirmed', 'commitment_confirmed', 'id_verified',
+  ],
+  therapist_application: [
+    'birth_date', 'gender', 'specialization', 'specializations',
+    'experience_years', 'license_number', 'education_details',
+    'academic_degrees', 'therapy_methods', 'target_populations',
+    'works_online', 'works_in_person', 'available_hours_per_week',
+    'questionnaire', 'signature_data', 'agreement_signature', 'social_link',
+    'age_confirmed', 'terms_confirmed', 'documents_verified',
+  ],
+  sales_inquiry: [
+    'occupation', 'questionnaire_id',
+  ],
+}
+
+// ===== CORS ==================================================================
 const ALLOWED_ORIGINS = [
   'https://www.therapist-home.com',
   'https://therapist-home.com',
@@ -38,9 +103,7 @@ function getCorsHeaders(req: Request): Record<string, string> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Turnstile token verification
-// ---------------------------------------------------------------------------
+// ===== Turnstile =============================================================
 async function verifyTurnstileToken(
   token: string,
   ip: string | null
@@ -71,14 +134,11 @@ async function verifyTurnstileToken(
   }
 }
 
-// ---------------------------------------------------------------------------
-// IP → geo lookup (ipapi.co, free tier, no key required)
-// Returns null on any failure — we never fail a lead submit because of geo.
-// ---------------------------------------------------------------------------
+// ===== IP → geo (best-effort, never blocks the lead) =========================
 async function fetchGeo(ip: string): Promise<{
   country_code?: string; country_name?: string; region?: string; city?: string;
 } | null> {
-  if (!ip || ip === 'unknown' || ip.startsWith('127.') || ip === '::1') return null;
+  if (!ip || ip === 'unknown' || ip.startsWith('127.') || ip === '::1') return null
   try {
     const ctrl = new AbortController()
     const timer = setTimeout(() => ctrl.abort(), 2000)
@@ -100,7 +160,7 @@ async function fetchGeo(ip: string): Promise<{
   }
 }
 
-// Flatten the client-side attribution payload into DB row shape
+// ===== Attribution row builder ==============================================
 function buildAttributionRow(
   attribution: Record<string, any>,
   linkedTable: string,
@@ -157,30 +217,14 @@ function buildAttributionRow(
     city:         geo?.city         || null,
 
     raw_ua:       attribution?.raw_ua || null,
-    // NOTE: raw IP is NEVER stored. Only the resolved country/city above.
   }
 }
 
-// Backfill utm_* fields onto a row from attribution.last when the row didn't carry them.
-// Without this, primary tables (contact_requests / patients / therapists) get NULL UTM
-// even though attribution carries the values — only lead_attribution would receive them.
-function backfillUtmFromAttribution(row: Record<string, unknown>, attribution: any): void {
-  if (!attribution || typeof attribution !== 'object') return
-  const last = (attribution.last && typeof attribution.last === 'object') ? attribution.last : {}
-  const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const
-  for (const k of utmKeys) {
-    if (!row[k] && last[k]) row[k] = last[k]
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Basic input sanitization — strip HTML tags from string values
-// ---------------------------------------------------------------------------
+// ===== Input sanitization ===================================================
 function sanitizeData(data: Record<string, unknown>): Record<string, unknown> {
   const sanitized: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(data)) {
     if (typeof value === 'string') {
-      // Strip HTML tags to prevent stored XSS
       sanitized[key] = value.replace(/<[^>]*>/g, '').trim()
     } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       sanitized[key] = sanitizeData(value as Record<string, unknown>)
@@ -191,189 +235,190 @@ function sanitizeData(data: Record<string, unknown>): Record<string, unknown> {
   return sanitized
 }
 
-// ---------------------------------------------------------------------------
+// ===== Request normalization (legacy → new shape) ===========================
+type NormalizedRequest = {
+  intake_type: IntakeType
+  core: Record<string, unknown>
+  payload: Record<string, unknown>
+  pipeline?: { status?: string; pipeline_stage?: string }
+}
+
+function normalizeRequest(body: any): NormalizedRequest {
+  // New shape
+  if (body.intake_type) {
+    return {
+      intake_type: body.intake_type,
+      core:        body.core || {},
+      payload:     body.payload || {},
+      pipeline:    body.pipeline,
+    }
+  }
+
+  // Legacy shape: { table: 'contact_requests', data: {...} }
+  if (body.table && LEGACY_TABLE_TO_INTAKE[body.table]) {
+    const intakeType = LEGACY_TABLE_TO_INTAKE[body.table]
+    const data = body.data || {}
+    const core: Record<string, unknown> = {}
+    const payload: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(data)) {
+      if (CORE_FIELD_SET.has(k)) core[k] = v
+      else payload[k] = v
+    }
+    // contact_requests sometimes sends `name` instead of `full_name`
+    if (!core.full_name && (data as any).name) core.full_name = (data as any).name
+    return { intake_type: intakeType, core, payload }
+  }
+
+  throw new Error('Request missing intake_type (or legacy table) field')
+}
+
+// ===== Whitelist payload to schema-allowed keys =============================
+function whitelistPayload(intakeType: IntakeType, payload: Record<string, unknown>): Record<string, unknown> {
+  const allowed = new Set(PAYLOAD_SCHEMA[intakeType])
+  const result: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(payload)) {
+    if (allowed.has(k)) result[k] = v
+    // silently drop unknown keys
+  }
+  return result
+}
+
+// ============================================================================
 // Handler
-// ---------------------------------------------------------------------------
+// ============================================================================
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req)
 
-  // Preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
-
-  // Only POST
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ error: 'Method not allowed' }),
+      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
   try {
     const body = await req.json()
-    const { table, data, turnstileToken, attribution, mirror_table, mirror_data } = body
+    const { turnstileToken, attribution } = body
 
-    // ---- Validate required fields ----
-    if (!table || !data) {
-      return new Response(
-        JSON.stringify({ error: 'חסרים שדות חובה: table, data' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    // ---- Normalize request shape ----
+    let norm: NormalizedRequest
+    try {
+      norm = normalizeRequest(body)
+    } catch (e: any) {
+      return new Response(JSON.stringify({ error: e.message }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // ---- Validate table name (whitelist) ----
-    if (!ALLOWED_TABLES.includes(table)) {
-      return new Response(
-        JSON.stringify({ error: `טבלה לא מורשית: ${table}` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    // ---- Validate intake_type ----
+    if (!ALLOWED_INTAKE_TYPES.includes(norm.intake_type as IntakeType)) {
+      return new Response(JSON.stringify({ error: `intake_type לא מורשה: ${norm.intake_type}` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // ---- Validate mirror_table if provided ----
-    if (mirror_table && !ALLOWED_TABLES.includes(mirror_table)) {
-      return new Response(
-        JSON.stringify({ error: `טבלת mirror לא מורשית: ${mirror_table}` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // ---- Turnstile verification (when enabled) ----
+    // ---- Turnstile ----
     if (TURNSTILE_ENABLED) {
       if (!turnstileToken || typeof turnstileToken !== 'string' || turnstileToken.trim().length === 0) {
-        return new Response(
-          JSON.stringify({ error: 'טוקן Turnstile לא תקין.' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return new Response(JSON.stringify({ error: 'טוקן Turnstile לא תקין.' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
-
       const clientIp = req.headers.get('cf-connecting-ip') ||
-                       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                       null
-
+                       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null
       const verification = await verifyTurnstileToken(turnstileToken, clientIp)
       if (!verification.success) {
-        return new Response(
-          JSON.stringify({
-            error: 'אימות Turnstile נכשל. רענן את הדף ונסה שוב.',
-            codes: verification.errorCodes,
-          }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return new Response(JSON.stringify({
+          error: 'אימות Turnstile נכשל. רענן את הדף ונסה שוב.',
+          codes: verification.errorCodes,
+        }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
     }
 
-    // ---- Sanitize input data ----
-    const cleanData = sanitizeData(data as Record<string, unknown>)
+    // ---- Sanitize ----
+    const cleanCore    = sanitizeData(norm.core)    as Record<string, unknown>
+    const cleanPayload = sanitizeData(whitelistPayload(norm.intake_type, norm.payload)) as Record<string, unknown>
 
-    // Backfill UTM fields from attribution so primary tables (not just lead_attribution)
-    // receive utm_source/medium/campaign/content/term. Client-provided values win.
-    backfillUtmFromAttribution(cleanData, attribution)
-
-    // ---- Validate phone (Israeli or international) ----
-    if (cleanData.phone && typeof cleanData.phone === 'string') {
-      const stripped = (cleanData.phone as string).replace(/[\s\-()]/g, '')
+    // ---- Phone normalization (Israeli or international, 9-15 digits) ----
+    if (cleanCore.phone && typeof cleanCore.phone === 'string') {
+      const stripped = (cleanCore.phone as string).replace(/[\s\-()]/g, '')
       if (!/^\+?\d{9,15}$/.test(stripped)) {
-        return new Response(
-          JSON.stringify({ error: 'מספר טלפון לא תקין. יש להזין 9-15 ספרות.' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return new Response(JSON.stringify({ error: 'מספר טלפון לא תקין. יש להזין 9-15 ספרות.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
-      // Normalize: store cleaned digits (with optional + prefix)
-      cleanData.phone = stripped
+      cleanCore.phone = stripped
     }
 
-    // ---- Insert via service role (bypasses RLS) ----
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false },
-    })
+    // ---- UTM from attribution.last (consolidated into top-level cols) ----
+    const last = (attribution?.last && typeof attribution.last === 'object') ? attribution.last : {}
+    const utmCols = {
+      utm_source:      last.utm_source      || null,
+      utm_medium:      last.utm_medium      || null,
+      utm_campaign:    last.utm_campaign    || null,
+      utm_term:        last.utm_term        || null,
+      utm_content:     last.utm_content     || null,
+      referrer_domain: last.referrer_domain || null,
+      landing_url:     last.landing_url     || null,
+    }
 
-    // ---- Same-table dedup check (prevent accidental double-submit) ----
-    // Cross-table "duplicates" are legitimate (same person as patient + learner + lead).
-    // Only block same phone in the SAME table within the last 24 hours.
-    if (cleanData.phone && typeof cleanData.phone === 'string') {
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-      const { data: existing } = await supabase
-        .from(table)
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+      { auth: { persistSession: false } })
+
+    // ---- Dedup: same intake_type + phone in last 24h returns existing row ----
+    if (cleanCore.phone) {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      const { data: dup } = await supabase
+        .from('lead_intake')
         .select('id')
-        .eq('phone', cleanData.phone)
-        .gte('created_at', twentyFourHoursAgo)
+        .eq('intake_type', norm.intake_type)
+        .eq('phone', cleanCore.phone as string)
+        .gte('created_at', since)
         .limit(1)
-
-      if (existing && existing.length > 0) {
-        console.log(`Dedup: phone ${cleanData.phone} already exists in ${table} within 24h, id=${existing[0].id}`)
-        return new Response(
-          JSON.stringify({ success: true, id: existing[0].id, duplicate: true }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+      if (dup && dup.length > 0) {
+        return new Response(JSON.stringify({ success: true, id: dup[0].id, duplicate: true }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
     }
 
-    // Return the new row's id so we can link the attribution row to it
-    const { data: insertedRows, error: insertError } = await supabase
-      .from(table)
-      .insert(cleanData)
+    // ---- Insert into lead_intake ----
+    const row: Record<string, unknown> = {
+      intake_type:   norm.intake_type,
+      intake_source: 'website',
+      ...cleanCore,
+      payload: cleanPayload,
+      payload_version: 1,
+      status: norm.pipeline?.status || 'new',
+      pipeline_stage: norm.pipeline?.pipeline_stage || null,
+      ...utmCols,
+    }
+
+    const { data: inserted, error } = await supabase
+      .from('lead_intake')
+      .insert(row)
       .select('id')
 
-    if (insertError) {
-      console.error(`Insert error [${table}]:`, insertError.message, insertError.details, insertError.hint)
-      return new Response(
-        JSON.stringify({ error: `שגיאה בשמירת הנתונים: ${insertError.message}` }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    if (error) {
+      console.error('lead_intake insert error:', error.message, error.details)
+      return new Response(JSON.stringify({ error: `שגיאה בשמירה: ${error.message}` }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    const newId = (insertedRows && insertedRows[0] && (insertedRows[0] as { id?: string }).id) || null
+    const newId = inserted?.[0]?.id || null
 
-    // ---- Mirror insert (atomic secondary table, e.g. contact_requests for CRM bot) ----
-    if (mirror_table && mirror_data && typeof mirror_data === 'object') {
-      try {
-        const cleanMirror = sanitizeData(mirror_data as Record<string, unknown>)
-        // Phone validation on mirror data too
-        if (cleanMirror.phone && typeof cleanMirror.phone === 'string') {
-          cleanMirror.phone = (cleanMirror.phone as string).replace(/[\s\-()]/g, '')
-        }
-        // Same UTM backfill on the mirror row (e.g. contact_requests when primary is patients)
-        backfillUtmFromAttribution(cleanMirror, attribution)
-        const { error: mirrorErr } = await supabase.from(mirror_table).insert(cleanMirror)
-        if (mirrorErr) {
-          console.error(`Mirror insert error [${mirror_table}]:`, mirrorErr.message)
-          // Don't fail — primary insert already succeeded
-        }
-      } catch (mirrorErr) {
-        console.warn(`Mirror insert exception [${mirror_table}]:`, mirrorErr)
-      }
-    }
-
-    // ---- Write lead_attribution row (best effort — never fails the lead) ----
-    // Done in parallel with building the response so latency is minimal.
+    // ---- lead_attribution (best-effort, never fails the lead) ----
     if (attribution && typeof attribution === 'object') {
       try {
-        const clientIp = req.headers.get('cf-connecting-ip') ||
-                         req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                         req.headers.get('x-real-ip') ||
-                         null
+        const clientIp = req.headers.get('cf-connecting-ip') || null
         const geo = clientIp ? await fetchGeo(clientIp) : null
-        const row = buildAttributionRow(attribution, table, newId, cleanData, geo)
-        const { error: attrErr } = await supabase.from('lead_attribution').insert(row)
-        if (attrErr) {
-          console.warn(`lead_attribution insert warning [${table}/${newId}]:`, attrErr.message)
-        }
-      } catch (attrErr) {
-        console.warn('attribution pipeline error:', attrErr)
+        const attrRow = buildAttributionRow(attribution, 'lead_intake', newId, cleanCore, geo)
+        await supabase.from('lead_attribution').insert(attrRow)
+      } catch (e) {
+        console.warn('attribution write skipped:', e)
       }
     }
 
-    return new Response(
-      JSON.stringify({ success: true, id: newId }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ success: true, id: newId }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
-  } catch (err) {
-    console.error('submit-lead error:', err)
-    return new Response(
-      JSON.stringify({ error: 'שגיאה פנימית בשרת.' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+  } catch (e: any) {
+    console.error('submit-lead unhandled error:', e?.message || e)
+    return new Response(JSON.stringify({ error: 'שגיאה כללית בשרת.' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 })

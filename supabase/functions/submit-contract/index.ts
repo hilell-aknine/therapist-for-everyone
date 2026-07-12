@@ -93,7 +93,18 @@ serve(async (req) => {
       )
     }
 
-    // ---- Turnstile verification ----
+    // ---- Turnstile verification (fail CLOSED) ----
+    // If the secret isn't configured, REFUSE rather than silently accept —
+    // signed_contracts holds a government ID number + signature; never insert
+    // one without CAPTCHA protection. (Previously this block was simply skipped
+    // when the secret was missing, leaving an open anon service-role INSERT.)
+    if (!TURNSTILE_ENABLED) {
+      console.error('SECURITY: refusing contract submission — TURNSTILE_SECRET_KEY not configured')
+      return new Response(
+        JSON.stringify({ error: 'שירות החתימה אינו זמין כעת. נסה שוב מאוחר יותר.' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
     if (TURNSTILE_ENABLED) {
       if (!turnstileToken || typeof turnstileToken !== 'string' || turnstileToken.trim().length === 0) {
         return new Response(

@@ -2432,10 +2432,20 @@
   }
 
   // ===== engaged_master_offer (the personal pitch for deep learners) helpers =====
-  // The whole point of this popup is that it is NOT generic: it says the learner's
-  // name and the number of lessons he actually finished. A wrong number here would be
-  // worse than no popup at all, so it reads the live count from PopupManager (which
-  // checkPaidRole fed from the real progress) and refuses to show without one.
+  // Every word here is editable from the admin dashboard — including the headline.
+  // The dashboard copy may use two placeholders, filled in at show time from the
+  // learner's real data:
+  //     {{lessons}}  -> the number of lessons he actually finished
+  //     {{name}}     -> his first name
+  // The count is read live from PopupManager (fed by checkPaidRole from real progress).
+  // If it is below the threshold we do not show at all, because a wrong number here
+  // would be worse than no popup.
+  function fillPersonalTokens(text, vars){
+    return String(text || '')
+      .replace(/\{\{\s*lessons\s*\}\}/g, vars.lessons)
+      .replace(/\{\{\s*name\s*\}\}/g, vars.name || '');
+  }
+
   function showEngagedOffer(){
     const m = document.getElementById('lmsEngagedOfferModal');
     if (!m) return;
@@ -2448,13 +2458,50 @@
 
     if (count < ENGAGED_MIN_LESSONS_UI) return;   // never lie about the number
 
-    const cEl = document.getElementById('lmsEngagedCount');
-    if (cEl) cEl.textContent = count;
+    const vars = { lessons: count, name: name };
+    let content = {};
+    try { content = (window.PopupManager.getContent && window.PopupManager.getContent('engaged_master_offer')) || {}; } catch(_){}
+
+    // Headline: dashboard copy wins; the markup is only the fallback if the row is empty.
+    const h = m.querySelector('.lmsmp-h');
+    if (h && content.title) h.textContent = fillPersonalTokens(content.title, vars);
+    else {
+      const cEl = document.getElementById('lmsEngagedCount');
+      if (cEl) cEl.textContent = count;
+    }
+
     const kEl = document.getElementById('lmsEngagedKicker');
     if (kEl) kEl.textContent = name ? `${name}, אישית אליך` : 'אישית אליך';
 
-    applyPopupContent(m, 'engaged_master_offer');   // admin can still override copy from the dashboard
+    // Body + CTA from the dashboard (data-pc-*), with the same placeholders available.
+    applyPopupContent(m, 'engaged_master_offer');
+    const body = m.querySelector('[data-pc-message]');
+    if (body) body.textContent = fillPersonalTokens(body.textContent, vars);
+    const cta = m.querySelector('[data-pc-cta]');
+    if (cta) cta.textContent = fillPersonalTokens(cta.textContent, vars);
+
     m.hidden = false;
+  }
+
+  // Admin-only live preview: open the portal with
+  //   ?preview_popup=engaged_master_offer&lessons=14&name=דוד
+  // and see the REAL popup, with any lesson count, without being that learner.
+  // Gated on the admin role — checkPaidRole calls this once the role is known.
+  function maybePreviewPopup(role){
+    if (role !== 'admin') return;
+    const q = new URLSearchParams(location.search);
+    const id = q.get('preview_popup');
+    if (!id) return;
+    const lessons = parseInt(q.get('lessons') || '14', 10);
+    const name = q.get('name') || '';
+    try {
+      window.PopupManager.setUser({ isAuthenticated: true, role: 'student_lead', lessonCount: lessons });
+      window._portalFirstName = name;
+      localStorage.removeItem('popup_history');
+      if (window.PopupManager.reset) window.PopupManager.reset();
+      if (window.PopupManager.setActive) window.PopupManager.setActive(null);
+      setTimeout(() => window.PopupManager.request(id), 400);
+    } catch(_){}
   }
   function hideEngagedOffer(){
     const m = document.getElementById('lmsEngagedOfferModal');
@@ -2512,7 +2559,7 @@
     hideLmsToast, lmsShareCopy, lmsShareWhatsApp,
     closeTrainingCta, trainingCtaCheckout,
     showMasterPitch, closeMasterPitch, masterPitchCta,
-    closeEngagedOffer, engagedOfferCta
+    closeEngagedOffer, engagedOfferCta, maybePreviewPopup
   });
 
   // ===== Auth modal helpers (auth_modal + auth_wall share one DOM element) =====
@@ -4357,6 +4404,9 @@
             lessonCount: (typeof completedLessons !== 'undefined' && Array.isArray(completedLessons)) ? completedLessons.length : 0
           });
         } catch(_){}
+        // Admin live-preview hook (?preview_popup=...&lessons=..&name=..). Runs only
+        // for admins, and only when the param is present.
+        try { window.maybePreviewPopup && window.maybePreviewPopup(profile.role); } catch(_){}
       }
       // Master SALES preview — ADMIN ONLY for now (hidden from everyone else, incl. paid_customer)
       if (profile && profile.role === 'admin'){

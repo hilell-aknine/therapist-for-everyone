@@ -89,9 +89,20 @@
             } catch (e) { stage.innerHTML = '<div class="pv-error">שגיאה בטעינה</div>'; return; }
 
             const isToast = TOASTS.includes(popupId);
-            const title = config.title || '';
-            const message = config.message || '';
-            const cta = config.cta_text || '';
+
+            // Personal popups (engaged_master_offer) may use {{lessons}} / {{name}},
+            // filled from the real learner at show time. Showing the raw braces here
+            // would make the copy look broken to whoever is editing it, so preview with
+            // a sample learner. Override from the URL: &lessons=20&name=מאיה
+            const q = new URLSearchParams(location.search);
+            const sample = { lessons: q.get('lessons') || '14', name: q.get('name') || 'דוד' };
+            const fill = t => String(t || '')
+                .replace(/\{\{\s*lessons\s*\}\}/g, sample.lessons)
+                .replace(/\{\{\s*name\s*\}\}/g, sample.name);
+
+            const title = fill(config.title);
+            const message = fill(config.message);
+            const cta = fill(config.cta_text);
 
             if (isToast) {
                 const icon = TOAST_ICONS[popupId] || '🔔';

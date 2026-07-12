@@ -918,6 +918,23 @@
   .lms-ms-video__s{ font-size:.82rem; color:rgba(255,255,255,.55); }
   .lms-ms-video--live{ padding:0 !important; border:none !important; background:#000; overflow:hidden; display:block; }
   .lms-ms-video--live iframe{ width:100%; height:100%; border:0; display:block; border-radius:16px; }
+
+  /* Click-to-play facade — looks like the player, costs a thumbnail. */
+  .yt-facade{ position:relative; width:100%; height:100%; padding:0; border:0; border-radius:16px;
+    overflow:hidden; cursor:pointer; display:block; background:#000; }
+  .yt-facade__thumb{ width:100%; height:100%; object-fit:cover; display:block;
+    transition:transform .35s ease, filter .35s ease; }
+  /* Only the 4:3 fallback needs cropping — it carries black bars. */
+  .yt-facade__thumb--crop{ transform:scale(1.35); }
+  .yt-facade:hover .yt-facade__thumb{ transform:scale(1.03); filter:brightness(1.06); }
+  .yt-facade:hover .yt-facade__thumb--crop{ transform:scale(1.4); }
+  .yt-facade__play{ position:absolute; inset:50% auto auto 50%; translate:-50% -50%;
+    width:68px; height:48px; border-radius:12px; background:rgba(212,175,55,.94);
+    box-shadow:0 8px 26px rgba(0,0,0,.45); transition:transform .2s ease, background .2s ease; }
+  .yt-facade__play::after{ content:''; position:absolute; inset:50% auto auto 50%; translate:-40% -50%;
+    border-style:solid; border-width:11px 0 11px 18px; border-color:transparent transparent transparent #1a1208; }
+  .yt-facade:hover .yt-facade__play{ transform:scale(1.08); background:#D4AF37; }
+  .yt-facade:focus-visible{ outline:3px solid #fff; outline-offset:3px; }
   @container (max-width:560px){
     .lms-master-section{ padding:1.15rem 1.1rem; border-radius:16px; }
     .lms-master-section h2.lms-ms-hero__h{ font-size:1.5rem; line-height:1.4; max-width:18ch; }
@@ -1732,8 +1749,20 @@
             שיודע ליצור פריצות דרך
           </h2>
           <p class="lms-ms-hero__sub"><span class="lms-ms-u">בחיים שלך ושל הסובבים אותך</span></p>
+          <!-- Facade, not an iframe. A YouTube embed pulls ~800KB of player code
+               before the visitor has seen anything, and on mobile that alone put
+               this page's LCP at 4s. We show the thumbnail (~15KB) and load the
+               real player only when someone actually wants to watch. -->
           <div class="lms-ms-video lms-ms-video--live">
-            <iframe src="https://www.youtube.com/embed/Kktx3L-3uqs" title="סרטון מבוא · קורס NLP MASTER — רם אלוס" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            <button type="button" class="yt-facade" data-yt="Kktx3L-3uqs"
+                    aria-label="נגן: סרטון מבוא · קורס NLP MASTER — רם אלוס">
+              <!-- maxresdefault is natively 16:9, so it fills the frame with no crop.
+                   Not every video has one; fall back to the 4:3 thumb if it 404s. -->
+              <img class="yt-facade__thumb" src="https://i.ytimg.com/vi/Kktx3L-3uqs/maxresdefault.jpg"
+                   onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Kktx3L-3uqs/hqdefault.jpg';this.classList.add('yt-facade__thumb--crop');"
+                   alt="סרטון מבוא · קורס NLP MASTER — רם אלוס" width="1280" height="720" fetchpriority="high">
+              <span class="yt-facade__play" aria-hidden="true"></span>
+            </button>
           </div>
         </section>
 
@@ -4239,6 +4268,23 @@
     if (!skipPush && location.hash !== '#master-sales') history.pushState(null, '', '#master-sales');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  // ===== YouTube facades — swap the thumbnail for the real player on click =====
+  // Any element with [data-yt] renders as a poster until the visitor asks to watch.
+  // autoplay=1 is safe here: it is a direct response to a click, so the play is
+  // not interrupted and the visitor does not have to press play twice.
+  document.addEventListener('click', e => {
+    const facade = e.target.closest('.yt-facade[data-yt]');
+    if (!facade) return;
+    const id = facade.getAttribute('data-yt');
+    const frame = document.createElement('iframe');
+    frame.src = `https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0`;
+    frame.title = facade.getAttribute('aria-label') || 'YouTube';
+    frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    frame.allowFullscreen = true;
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    facade.replaceWith(frame);
+  });
 
   // ===== Master CHECKOUT (Cardcom) — נקודת החיבור היחידה לקראדקום =====
   // ⬇️⬇️ הדבק כאן את כתובת עמוד התשלום של Cardcom (מרם) ושמור. זה מחבר אוטומטית את שני כפתורי "קניתם אותי".

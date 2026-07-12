@@ -40,6 +40,24 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
 <style>
+  /* Hebrew @font-face declared inline, not waited for.
+     Preloading the woff2 alone did not stop the reflow: the browser still could not
+     USE the font until Google's stylesheet arrived and declared it, so the headline
+     was drawn in a fallback and redrawn ~2s later (CLS 0.17). Both families are
+     variable fonts — one Hebrew subset file each covers every weight — so the rules
+     fit here and the real font is available at first paint. Google's stylesheet still
+     loads async and supplies the Latin subsets. */
+  @font-face{
+    font-family:'Heebo'; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url(https://fonts.gstatic.com/s/heebo/v28/NGS6v5_NC0k9P9H0TbFzsQ.woff2) format('woff2');
+    unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+  }
+  @font-face{
+    font-family:'Frank Ruhl Libre'; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url(https://fonts.gstatic.com/s/frankruhllibre/v23/j8_w6_fAw7jrcalD7oKYNX0QfAnPW7Ll4ajn.woff2) format('woff2');
+    unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+  }
+
   *{box-sizing:border-box;}
   html{direction:rtl;}
   html,body{margin:0;padding:0;background:var(--bg-primary);color:#fff;font-family:'Heebo',sans-serif;min-height:100vh;}

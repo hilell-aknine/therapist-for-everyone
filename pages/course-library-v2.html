@@ -3965,24 +3965,21 @@
   // ===== AI Mentor =====
   let aiHistory = [];
   let aiBusy = false;
-  let aiRemaining = 200;
+  // Daily message allowance — must mirror ai-chat/index.ts (DAILY_LIMIT / DAILY_LIMIT_FREE).
+  // Display only; the server is the authority and returns the true `remaining`.
+  const AI_LIMIT_PAID = 200;
+  const AI_LIMIT_FREE = 30;
+  let aiRemaining = AI_LIMIT_FREE;
   function resetAiChat(){
     aiHistory = [];
     const msgs = document.getElementById('aiMsgs');
     const input = document.getElementById('aiInput');
     const sendBtn = document.getElementById('aiSendBtn');
-    // Cost-bearing feature → Master members (paid) / admin only.
-    if (!_isPaidCustomer && !devBypass){
-      msgs.innerHTML = `
-        <div class="lms-ai-empty" id="aiEmpty">
-          <div class="lms-ai-empty__icon"><i class="fa-solid fa-lock" style="color:var(--accent-gold-hover);"></i></div>
-          <h3>העוזר האישי — בלעדי לחברי המאסטר 👑</h3>
-          <p>מורה AI שמכיר את כל תכני הקורס וזמין לכל שאלה הוא חלק מתוכנית המאסטר. שדרגו כדי לפתוח אותו.</p>
-        </div>`;
-      if (input){ input.disabled = true; input.placeholder = 'זמין לחברי המאסטר 👑'; }
-      if (sendBtn) sendBtn.disabled = true;
-      return;
-    }
+    // Open to every logged-in learner. Free learners get a smaller daily allowance
+    // (enforced server-side) — the throttle is the cost control, not a lock.
+    aiRemaining = _isPaidCustomer ? AI_LIMIT_PAID : AI_LIMIT_FREE;
+    const remEl = document.getElementById('aiRemaining');
+    if (remEl) remEl.textContent = `${aiRemaining}/${aiRemaining}`;
     if (input){ input.disabled = false; input.placeholder = 'שאלו על השיעור...'; }
     if (sendBtn) sendBtn.disabled = false;
     msgs.innerHTML = `
@@ -3991,13 +3988,13 @@
         <h3>שאלו אותי על השיעור הזה</h3>
         <p>אני מכיר את כל התכנים בקורס ויכול לעזור עם הסברים, דוגמאות מעשיות ותרגול. כתבו שאלה ונענה תוך כמה שניות.</p>
       </div>`;
-    // Per-lesson memory: load prior conversation for this lesson (paid only).
+    // Per-lesson memory: load prior conversation for this lesson.
     loadAiHistoryForCurrent();
   }
   function courseTypeShort(){ return courseType==='nlp-master'?'master':courseType==='nlp-techniques'?'techniques':'practitioner'; }
   async function loadAiHistoryForCurrent(){
     try {
-      if (currentModuleIndex < 0 || !supabaseClient || devBypass || !_isPaidCustomer) return;
+      if (currentModuleIndex < 0 || !supabaseClient || devBypass) return;
       if (!window.AiChatHistory) return;
       const lessonId = modules[currentModuleIndex].lessons[currentLessonIndex].id;
       const msgs = await window.AiChatHistory.load(lessonId).catch(()=>[]);
@@ -4051,8 +4048,6 @@
   }
   async function sendAi(message){
     if (aiBusy || !message.trim()) return;
-    // Paid-only (cost-bearing). UI is already locked for non-paid; this guards programmatic calls too.
-    if (!_isPaidCustomer && !devBypass){ appendAiMsg('bot', 'העוזר האישי זמין לחברי קורס המאסטר 👑'); return; }
     if (devBypass){ appendAiMsg('user', message); appendAiMsg('bot', '(מצב פיתוח — ה-AI לא פעיל. ההודעה שלך התקבלה אבל לא נשלחת לשרת.)'); return; }
     aiBusy = true;
     const persistLessonId = modules[currentModuleIndex]?.lessons[currentLessonIndex]?.id;
@@ -4091,7 +4086,7 @@
       hideTyping();
       if (!r.ok && r.status !== 429){ appendAiMsg('bot', 'שגיאה בתקשורת עם המורה AI. נסו שוב.'); return; }
       const data = await r.json();
-      if (data.rateLimited){ appendAiMsg('bot', 'הגעתם לכמות ההודעות היומית. ננסה שוב מחר!'); return; }
+      if (data.rateLimited){ appendAiMsg('bot', data.error || 'הגעתם לכמות ההודעות היומית. ננסה שוב מחר!'); return; }
       if (data.error){ appendAiMsg('bot', data.error); return; }
       const reply = data.reply || 'לא הצלחתי לענות. נסו שוב.';
       appendAiMsg('bot', reply);
@@ -4099,7 +4094,8 @@
       try { if (window.AiChatHistory && persistLessonId) window.AiChatHistory.append(persistLessonId, 'model', reply, { courseType: courseTypeShort() }); } catch(_){}
       if (data.remaining !== undefined){
         aiRemaining = data.remaining;
-        document.getElementById('aiRemaining').textContent = `${data.remaining}/200`;
+        const cap = data.dailyLimit || (_isPaidCustomer ? AI_LIMIT_PAID : AI_LIMIT_FREE);
+        document.getElementById('aiRemaining').textContent = `${data.remaining}/${cap}`;
       }
     } catch(err){
       hideTyping();

@@ -8,7 +8,12 @@ const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || ''
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-const DAILY_LIMIT = 200
+// Daily message caps, per user, by role.
+// The mentor used to be paid-only (hard 403 for everyone else), which is why almost
+// nobody ever touched it. It is now open to every logged-in learner — the throttle,
+// not a lock, is what protects the spend. Master members keep the generous cap.
+const DAILY_LIMIT = 200        // paid_customer / admin
+const DAILY_LIMIT_FREE = 30    // any other logged-in learner
 const MODEL = 'stepfun/step-3.5-flash:free'
 const OPENROUTER_FALLBACK = 'nvidia/nemotron-3-nano-30b-a3b:free'
 const GEMINI_MODEL = 'gemini-2.0-flash'
@@ -289,22 +294,18 @@ serve(async (req) => {
       )
     }
 
-    // --- Paid-only gate (cost control) ---
-    // The AI mentor is a paid Master benefit. The client UI is locked for non-paid
-    // users; this is the authoritative server-side enforcement so the costly API
-    // can't be reached by bypassing the browser. Only paid_customer / admin pass.
+    // --- Role → daily cap (cost control) ---
+    // Open to every authenticated learner. Cost is bounded by the per-role daily cap
+    // below plus the monthly ₪ ceiling (AI_MONTHLY_CAP_ILS), which degrades to the free
+    // models rather than blocking anyone. Login is still required — no anonymous access.
     const { data: roleRow } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .maybeSingle()
     const role = roleRow?.role
-    if (role !== 'paid_customer' && role !== 'admin') {
-      return new Response(
-        JSON.stringify({ error: 'העוזר האישי זמין לחברי קורס המאסטר 👑', paidOnly: true }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    const isPaid = role === 'paid_customer' || role === 'admin'
+    const dailyLimit = isPaid ? DAILY_LIMIT : DAILY_LIMIT_FREE
 
     // --- Parse request ---
     // courseType: 'master' activates the master KB and master system prompt.
@@ -337,10 +338,12 @@ serve(async (req) => {
     let currentCount = 0
     for (const r of (usageRows || [])) { rowBySource[r.source] = r; currentCount += Number(r.message_count) || 0 }
 
-    if (currentCount >= DAILY_LIMIT) {
+    if (currentCount >= dailyLimit) {
       return new Response(
         JSON.stringify({
-          error: `הגעת למגבלה היומית של ${DAILY_LIMIT} הודעות. אפשר להמשיך עם העוזר החינמי, או לחזור מחר!`,
+          error: isPaid
+            ? `הגעת למגבלה היומית של ${dailyLimit} הודעות. נתראה מחר!`
+            : `הגעת למגבלה היומית של ${dailyLimit} הודעות. אפשר להמשיך לתרגל במשחק, לחזור מחר, או לשדרג לקורס המאסטר לשיחה בלי הגבלה כמעט 👑`,
           rateLimited: true,
           remaining: 0
         }),
@@ -465,7 +468,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         reply,
-        remaining: DAILY_LIMIT - (currentCount + 1),
+        remaining: dailyLimit - (currentCount + 1),
+        dailyLimit,
         provider: result.provider,
         personalized: studentProfile !== '',
         knowledgeScope: knowledge.scope,

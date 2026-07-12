@@ -1359,6 +1359,14 @@
 </style>
 </head>
 <body>
+<script>
+  /* The Master sales view is a public page (guest pass in authGate), but its
+     content only became visible once the auth check finished and JS added
+     .view-master-sales — so the headline was painting seconds late and became
+     the LCP element. The hash already tells us where we are, so paint it now
+     and let the auth check catch up. Anything private stays gated as before. */
+  if (location.hash === '#master-sales') document.body.classList.add('view-master-sales');
+</script>
 
 <div class="frame">
   <div class="atmos">

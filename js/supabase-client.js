@@ -435,6 +435,43 @@
                 }, { onConflict: 'user_id,video_id', ignoreDuplicates: false });
         },
 
+        // ===== Resume position (exact second inside a lesson) =====
+        // Keyed by video_id alone — YouTube IDs are globally unique, so this stays correct
+        // no matter which course the lesson belongs to.
+
+        async savePosition(videoId, courseType, seconds) {
+            const user = await Auth.getCurrentUser();
+            if (!user || !videoId) return;
+            const pos = Math.max(0, Math.floor(Number(seconds) || 0));
+
+            // Partial upsert: only these columns are written, so `completed` / `completed_at`
+            // on an existing row are left exactly as they were.
+            await supabaseClient
+                .from('course_progress')
+                .upsert({
+                    user_id: user.id,
+                    video_id: videoId,
+                    course_type: courseType || 'nlp-practitioner',
+                    position_seconds: pos
+                }, { onConflict: 'user_id,video_id', ignoreDuplicates: false });
+        },
+
+        async getPositions() {
+            const user = await Auth.getCurrentUser();
+            if (!user) return {};
+
+            const { data, error } = await supabaseClient
+                .from('course_progress')
+                .select('video_id, position_seconds')
+                .eq('user_id', user.id)
+                .gt('position_seconds', 0);
+
+            if (error || !data) return {};
+            const map = {};
+            data.forEach(r => { map[r.video_id] = r.position_seconds; });
+            return map;
+        },
+
         async getCourseCompletion(courseType, totalVideos) {
             const progress = await this.getAll(courseType);
             const completed = progress.filter(p => p.completed).length;

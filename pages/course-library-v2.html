@@ -1594,8 +1594,19 @@
 
         <div class="lms-pl-video">
           <div class="lms-pl-video__loading" id="plLoading"><i class="fa-solid fa-circle-notch"></i> טוען שיעור…</div>
-          <iframe id="plIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          <iframe id="plIframe" title="נגן וידאו — שיעור" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
         </div>
+        <!-- רשת ביטחון: קישור צפייה ישיר ביוטיוב, גלוי תמיד — מציל את המשתמש אם הנגן המוטמע נכשל (נפוץ בדפדפן-בתוך-אפליקציה במובייל). ה-href מתעדכן לכל שיעור ב-loadLessonVideo. -->
+        <style>
+          .lms-pl-yt{display:inline-flex;align-items:center;gap:.4rem;margin:.55rem .1rem .2rem;font-size:.85rem;color:var(--text-secondary,#9fb4b8);text-decoration:none;opacity:.85;transition:color .15s ease,opacity .15s ease;}
+          .lms-pl-yt:hover{color:var(--gold,#D4AF37);opacity:1;text-decoration:underline;}
+          .lms-pl-err{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.85rem;text-align:center;padding:1.4rem;background:linear-gradient(180deg,rgba(0,30,36,.96),rgba(0,20,24,.98));border-radius:inherit;}
+          .lms-pl-err i{font-size:2rem;color:var(--gold,#D4AF37);}
+          .lms-pl-err p{margin:0;max-width:26rem;color:var(--frost-white,#E8F1F2);line-height:1.5;}
+          .lms-pl-err__btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:99px;background:var(--gold,#D4AF37);color:#1a1200;font-weight:700;text-decoration:none;}
+          .lms-pl-err__btn:hover{filter:brightness(1.08);}
+        </style>
+        <a class="lms-pl-yt" id="plYtLink" href="https://www.youtube.com/" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i> בעיה בנגן? צפה בשיעור ישירות ביוטיוב ↗</a>
         <div class="lms-pl-tip" id="plTip">השיעור יסומן אוטומטית אחרי 45 שניות צפייה — אפשר גם לסמן ידנית</div>
 
         <!-- Practice clips for the CURRENT master lesson — surfaced directly under the
@@ -1708,7 +1719,7 @@
             <button type="button" class="lms-clip-modal__x" data-close aria-label="סגור"><i class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="lms-clip-modal__video">
-            <iframe id="clipModalIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            <iframe id="clipModalIframe" title="נגן וידאו — קליפ תרגול" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
           </div>
         </div>
       </div>
@@ -1926,7 +1937,7 @@
           <h3 id="masterViewerTitle"></h3>
           <a id="masterViewerDownload" target="_blank" rel="noopener" style="display:none;"><i class="fa-solid fa-download"></i><span>הורדה</span></a>
         </div>
-        <iframe id="masterViewerFrame" class="lms-master-viewer-frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <iframe id="masterViewerFrame" class="lms-master-viewer-frame" title="נגן וידאו — שיעור מאסטר" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>
 
     </main>
@@ -3331,7 +3342,9 @@
                 // Pausing is the single most common way a learner leaves a lesson — persist there.
                 if (e.data === YT.PlayerState.PAUSED) flushPos();
                 if (e.data === YT.PlayerState.ENDED){ if (_curLessonId) clearPos(_curLessonId); markLessonCompleted(m, l); }
-              }
+              },
+              // Embed refused (owner disabled embedding / private / player error) → surface an escape hatch.
+              onError: () => { try { showVideoError(_curLessonId); } catch(_){} }
             }
           });
         } catch(_){ /* leave auto-complete disabled; manual button still works */ }
@@ -3369,17 +3382,37 @@
   }
   function _fallbackIframe(lesson, startSec){
     const hostEl = document.querySelector('.lms-pl-video');
+    // Clear any error card from a previous (failed) lesson so the fresh iframe isn't hidden behind it.
+    if (hostEl){ const prevErr = hostEl.querySelector('.lms-pl-err'); if (prevErr) prevErr.remove(); }
     // Always rebuild a FRESH iframe. Reusing an iframe left on about:blank is exactly what black-screened
     // the old facade flow; a fresh element avoids that AND lets us attach a YT state-reader (enablejsapi)
     // for real watch-gating. autoplay removed → entering a lesson no longer blasts sound on load.
     const old = document.getElementById('plIframe'); if (old) old.remove();
     const iframe = document.createElement('iframe'); iframe.id = 'plIframe';
+    iframe.title = 'שיעור: ' + (lesson.title || '');
     iframe.allow = 'accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
     iframe.setAttribute('allowfullscreen',''); iframe.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
     if (hostEl) hostEl.appendChild(iframe);
     const startParam = startSec>0 ? `&start=${startSec}` : '';
     iframe.src = `https://www.youtube-nocookie.com/embed/${lesson.id}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}${startParam}`;
     iframe.onload = _hideLoading;
+  }
+  // When the embedded player reports an error (code 101/150 = embedding disabled by the video owner,
+  // 100 = private/removed, 2/5 = player error) YouTube paints its OWN error inside the iframe and the app
+  // never knew. This surfaces an app-level Hebrew card with a real "watch on YouTube" escape hatch.
+  function showVideoError(videoId){
+    const host = document.querySelector('.lms-pl-video');
+    if (!host || !videoId) return;
+    _hideLoading();
+    if (host.querySelector('.lms-pl-err')) return; // already shown for this lesson
+    const ifr = document.getElementById('plIframe'); if (ifr) ifr.style.visibility = 'hidden';
+    const card = document.createElement('div');
+    card.className = 'lms-pl-err';
+    card.setAttribute('role', 'alert');
+    card.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>'
+      + '<p>לא הצלחנו לנגן את הסרטון כאן. אפשר לצפות בו ישירות ביוטיוב, ולחזור לסמן את השיעור כהושלם.</p>'
+      + '<a class="lms-pl-err__btn" href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i> צפה בשיעור ביוטיוב ↗</a>';
+    host.appendChild(card);
   }
   function loadLessonVideo(lesson, m, l){
     const loading = document.getElementById('plLoading'); if (loading) loading.classList.remove('is-hidden');
@@ -3388,6 +3421,8 @@
     // Switching lessons: bank the position of the one we're leaving before _curLessonId moves on.
     flushPos();
     _curLessonId = lesson.id; _curML = { m, l };
+    // Keep the always-visible "watch on YouTube" escape hatch pointed at the current lesson.
+    const ytLink = document.getElementById('plYtLink'); if (ytLink) ytLink.href = 'https://www.youtube.com/watch?v=' + lesson.id;
     const saved = getSavedPos(lesson.id);
     // Workshop chapters carry a fixed `start`; otherwise resume from the saved position.
     const startSec = Number.isFinite(lesson.start) ? lesson.start : (saved > 10 ? saved : 0);

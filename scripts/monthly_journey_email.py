@@ -103,7 +103,7 @@ def fetch_all(path_base):
 # ── Data assembly ────────────────────────────────────────────────────────────
 
 def build_learners(report_year, report_month):
-    """Return list of learner dicts with personal numbers for the report month."""
+    """Return (learners, facts) — personal numbers per learner + true population facts."""
     progress = fetch_all("/rest/v1/course_progress?select=user_id,lesson_number,course_type,completed_at")
 
     by_user = defaultdict(set)      # all-time distinct lessons
@@ -135,8 +135,31 @@ def build_learners(report_year, report_month):
             cur["longest_streak"] = max(cur["longest_streak"], g.get("longest_streak") or 0)
             cur["xp"] += g.get("xp") or 0
 
+    # the learner's own words from the signup questionnaire (595/595 filled — verified live)
+    quests = {}
+    q_total = 0
+    for q in fetch_all("/rest/v1/portal_questionnaires"
+                       "?select=user_id,vision_one_year,main_challenge,why_nlp"):
+        q_total += 1
+        if q.get("user_id"):
+            quests[q["user_id"]] = q
+
     # rank by all-time lessons for the percentile line
     totals_sorted = sorted((len(v) for v in by_user.values()), reverse=True)
+
+    def clean_quote(text):
+        """Their own words, safe for inline quoting: single line, sane length.
+        Capped at 80 chars — Hebrew inflates ~9x when percent-encoded and the whole
+        email travels in a GET URL (~8K hard limit at Apps Script)."""
+        t = " ".join((text or "").split())
+        # junk filter: one-word / very short answers are usually keyboard mash
+        # ("צגלל", "כק׳כק׳כק׳") — quoting those back looks broken, skip them
+        if len(t) < 8 or len(t.split()) < 2:
+            return ""
+        if len(t) > 80:
+            cut = t[:80]
+            t = cut[:cut.rfind(" ")] + "..." if " " in cut else cut + "..."
+        return t
 
     learners = []
     for uid in uids:
@@ -147,6 +170,7 @@ def build_learners(report_year, report_month):
         total = len(by_user[uid])
         rank = totals_sorted.index(total) + 1  # best rank for that total
         top_pct = max(5, math.ceil(rank / len(totals_sorted) * 100 / 5) * 5)
+        q = quests.get(uid) or {}
         learners.append({
             "user_id": uid,
             "email": email,
@@ -155,11 +179,24 @@ def build_learners(report_year, report_month):
             "month_lessons": len(month_by_user.get(uid, set())),
             "longest_streak": game[uid]["longest_streak"],
             "top_pct": top_pct,
+            "vision": clean_quote(q.get("vision_one_year")),
+            "challenge": clean_quote(q.get("main_challenge")),
         })
-    return learners
+
+    facts = {
+        "registered": q_total,           # everyone who filled the signup questionnaire
+        "learners": len(learners),       # actually started learning (>=1 lesson)
+        "month_active": sum(1 for l in learners if l["month_lessons"] > 0),
+    }
+    return learners, facts
 
 
 # ── Email building ───────────────────────────────────────────────────────────
+
+def escapeq(text):
+    """HTML-escape a learner-written quote for safe inline embedding."""
+    return (text or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
 
 def stat_row(value, label):
     return (f'<td align="center" style="padding:10px 6px;">'
@@ -167,10 +204,17 @@ def stat_row(value, label):
             f'<div style="font-size:13px;color:#5b7177;margin-top:6px;">{label}</div></td>')
 
 
-def build_email(learner, month_name, test_marker=""):
-    """Return (subject, plain_text, html). Kept compact — HTML travels in a GET URL."""
+def build_email(learner, month_name, facts, test_marker=""):
+    """Return (subject, plain_text, html). Kept compact — HTML travels in a GET URL.
+
+    Copy rules (Hillel, 2026-07-19): no em-dashes in learner-facing text; quote the
+    learner's OWN questionnaire words back to them; every comparison number must be
+    a real computed fact, never invented.
+    """
     name = learner["first_name"] or "לומד יקר"
     active = learner["month_lessons"] > 0
+    vision = escapeq(learner["vision"])
+    challenge = escapeq(learner["challenge"])
 
     stats = []
     if active:
@@ -179,19 +223,37 @@ def build_email(learner, month_name, test_marker=""):
     if learner["longest_streak"] >= 2:
         stats.append(stat_row(learner["longest_streak"], "ימי הרצף הכי ארוך"))
     if learner["top_pct"] <= 50:
-        stats.append(stat_row(f"{learner['top_pct']}%", "אתה בין המתמידים המובילים"))
+        stats.append(stat_row(f"{100 - learner['top_pct']}%", "מהלומדים השלימו פחות ממך"))
+
+    # their own words, quoted back (the most personal line in the email)
+    if vision:
+        vision_line = (f'כשהצטרפת כתבת לנו מה אתה רוצה שיקרה בעוד שנה: '
+                       f'<span style="color:#00606B;font-weight:700;">"{vision}"</span>. '
+                       f'זה לא נשכח. הנה כמה התקדמת לשם:')
+    else:
+        vision_line = f"ככה נראה המסע שלך בפורטל עד עכשיו:"
 
     # NOTE: no emojis in subjects — the Gmail Apps Script GET channel mangles
     # astral-plane chars (arrive as ������). Hebrew itself is fine.
     if active:
-        subject = f"{name}, החודש שלך בבית המטפלים"
-        intro = f"איזה חודש היה לך! ככה נראה {month_name} שלך במסע ה-NLP:"
-        cta_line = "ההתמדה שלך מרשימה — בוא נמשיך מאיפה שעצרת."
+        subject = f"{name}, אתה בין {learner['top_pct']}% המתמידים של בית המטפלים" \
+            if learner["top_pct"] <= 50 else f"{name}, החודש שלך בבית המטפלים"
+        proud_line = (f"ורק שתדע מה זה אומר: ב{month_name} נכנסו ללמוד "
+                      f"{facts['month_active']} אנשים בלבד מתוך {facts['learners']} "
+                      f"לומדים בפורטל. אתה אחד מהם. זו לא סטטיסטיקה, זו זהות: "
+                      f"אתה מהאנשים שמתחילים וגם ממשיכים.")
+        cta_line = "בוא נמשיך מאיפה שעצרת." if not challenge else \
+            (f'כתבת שהאתגר שלך הוא "{challenge}". '
+             f"כל שיעור שאתה מסיים הוא עוד צעד בדיוק לשם.")
     else:
         subject = f"{name}, {learner['total_lessons']} השיעורים שלך מחכים לך"
-        intro = (f"שמנו לב שלא היית איתנו ב{month_name}. "
-                 f"תראה כמה כבר בנית — ההשקעה הזאת שלך, ואף אחד לא לוקח אותה:")
-        cta_line = "מספיק שיעור אחד קטן כדי לחזור לתנועה. הכל שמור בדיוק איפה שעזבת."
+        proud_line = (f"ועובדה אחת ששווה שתדע: {facts['registered']} אנשים נרשמו לפורטל, "
+                      f"אבל רק {facts['learners']} באמת התחילו ללמוד. אתה כבר בפנים, "
+                      f"עם {learner['total_lessons']} שיעורים מאחוריך. את זה אף אחד לא לוקח ממך.")
+        cta_line = "מספיק שיעור אחד קטן כדי לחזור לתנועה. הכל שמור בדיוק איפה שעזבת." \
+            if not challenge else \
+            (f'כשנרשמת כתבת שהאתגר שלך הוא "{challenge}". '
+             f"הוא לא נפתר מעצמו. שיעור אחד היום מחזיר אותך לדרך.")
 
     if test_marker:
         subject = f"{test_marker} {subject}"
@@ -203,9 +265,10 @@ def build_email(learner, month_name, test_marker=""):
 </div>
 <div style="padding:24px;color:#1f2d30;font-size:16px;line-height:1.7;">
 <p style="margin:0 0 6px;font-size:20px;font-weight:700;color:#003B46;">שלום {name},</p>
-<p style="margin:0 0 18px;">{intro}</p>
+<p style="margin:0 0 18px;">{vision_line}</p>
 <table role="presentation" width="100%" style="border-collapse:collapse;background:#f4f8f9;border-radius:10px;"><tr>{''.join(stats)}</tr></table>
-<p style="margin:18px 0 22px;">{cta_line}</p>
+<p style="margin:18px 0 0;">{proud_line}</p>
+<p style="margin:14px 0 22px;">{cta_line}</p>
 <div style="text-align:center;">
 <a href="{PORTAL_URL}" style="display:inline-block;background:#D4AF37;color:#003B46;font-weight:700;font-size:16px;padding:13px 34px;border-radius:8px;text-decoration:none;">חזרה למסע שלי ←</a>
 </div>
@@ -217,15 +280,31 @@ def build_email(learner, month_name, test_marker=""):
 </div>
 </div>"""
 
-    plain_lines = [f"שלום {name},", "", intro, ""]
-    if active:
-        plain_lines.append(f"- שיעורים ב{month_name}: {learner['month_lessons']}")
-    plain_lines.append(f"- שיעורים בסך הכל: {learner['total_lessons']}")
-    if learner["longest_streak"] >= 2:
-        plain_lines.append(f"- הרצף הכי ארוך: {learner['longest_streak']} ימים")
-    plain_lines += ["", cta_line, f"חזרה למסע שלך: {PORTAL_URL}", "",
-                    'להסרה: השב למייל זה עם המילה "הסר".']
+    # plain body kept MINIMAL on purpose — it rides in the same GET URL as the HTML
+    # and only shows in text-only clients (rare). The HTML is the real email.
+    plain_lines = [f"שלום {name},",
+                   f"סיימת {learner['total_lessons']} שיעורים במסע שלך בבית המטפלים.",
+                   f"חזרה למסע שלך: {PORTAL_URL}",
+                   'להסרה: השב למייל זה עם המילה "הסר".']
     return subject, "\n".join(plain_lines), html
+
+
+URL_BUDGET = 7800  # Apps Script GET URLs 400 above ~8K; keep headroom
+
+
+def encoded_len(to, subject, plain, html):
+    return len(urllib.parse.urlencode({
+        "token": "X" * 60, "action": "send", "to": to, "subject": subject,
+        "body": plain, "html": html, "name": "בית המטפלים"}))
+
+
+def build_email_safe(learner, month_name, facts, test_marker=""):
+    """Build the email; if the encoded GET URL would overflow, retry without quotes."""
+    subject, plain, html = build_email(learner, month_name, facts, test_marker)
+    if encoded_len(learner["email"], subject, plain, html) > URL_BUDGET:
+        stripped = dict(learner, vision="", challenge="")
+        subject, plain, html = build_email(stripped, month_name, facts, test_marker)
+    return subject, plain, html
 
 
 def send_gmail(to, subject, plain, html):
@@ -268,7 +347,7 @@ def main():
     state_file = STATE_DIR / f"{prev.year:04d}-{prev.month:02d}.json"
 
     try:
-        learners = build_learners(prev.year, prev.month)
+        learners, facts = build_learners(prev.year, prev.month)
         optout = set(json.loads(OPTOUT_FILE.read_text(encoding="utf-8"))) if OPTOUT_FILE.exists() else set()
         learners = [l for l in learners if l["email"].lower() not in optout]
         active_n = sum(1 for l in learners if l["month_lessons"] > 0)
@@ -283,13 +362,15 @@ def main():
 
         if test_mode:
             notify = os.environ.get("NOTIFY_EMAIL", "htjewelry.a474@gmail.com")
-            sample = max(learners, key=lambda x: x["month_lessons"])       # active variant
-            dormant = next((l for l in sorted(learners, key=lambda x: -x["total_lessons"])
+            quoted = [l for l in learners if l["vision"] and l["challenge"]] or learners
+            sample = max(quoted, key=lambda x: x["month_lessons"])         # active variant
+            dormant = next((l for l in sorted(quoted, key=lambda x: -x["total_lessons"])
                             if l["month_lessons"] == 0), None)             # dormant variant
             for variant, l in [("פעיל", sample), ("רדום", dormant)]:
                 if not l:
                     continue
-                subject, plain, html = build_email(l, month_name, test_marker=f"[בדיקה — גרסת {variant}]")
+                subject, plain, html = build_email_safe(l, month_name, facts,
+                                                        test_marker=f"[בדיקה, גרסת {variant}]")
                 send_gmail(notify, subject, plain, html)
                 log(f"TEST sent to {notify} (variant={variant}, sample={l['email']})")
                 time.sleep(SEND_INTERVAL_SEC)
@@ -306,7 +387,7 @@ def main():
         failures = 0
         for l in batch:
             try:
-                subject, plain, html = build_email(l, month_name)
+                subject, plain, html = build_email_safe(l, month_name, facts)
                 send_gmail(l["email"], subject, plain, html)
                 sent.add(l["email"].lower())
                 state_file.write_text(json.dumps(sorted(sent), ensure_ascii=False), encoding="utf-8")

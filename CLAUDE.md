@@ -184,6 +184,24 @@ course-library.html  → masterView (hidden by default)
 - Sends email report to `htjewelry.a474@gmail.com` via Gmail Apps Script API on success
 - Keeps last 30 backups, creates ZIP archive per run
 
+## Monthly Journey Email ("החודש שלך")
+
+Spotify-Wrapped-style personal monthly summary emailed to every learner with >=1
+completed lesson (340 as of 2026-07), with a UTM-tagged CTA back to the portal.
+
+- **Script:** `scripts/monthly_journey_email.py` — reads `course_progress` (source of truth,
+  distinct lessons) + `profiles` (name/email) + `nlp_game_players` (longest_streak).
+  Two variants: active (celebrate month) / dormant (protect-your-investment). Modes:
+  `--test` (2 🧪 samples to NOTIFY_EMAIL), `--dry-run`, `--force` (ignore day gate).
+- **Delivery:** Gmail Apps Script GET (`action=send` + `html` param) — same contract as
+  the `send-email` Edge Function fallback. Quota ~100/day shared with backup reports →
+  85/run, 7s between sends. When Resend DNS is verified, switching = route through Resend.
+- **Scheduling:** schtasks `BeitVmetaplim-MonthlyJourneyEmail` runs DAILY 09:30 (8.3 path),
+  but the script acts only on days 1-6, draining ~85/day with a per-month state file
+  (`scripts/journey_state/YYYY-MM.json`, gitignored — contains learner emails). Undrained
+  by day 6 → WhatsApp alert. Failure → WhatsApp alert (Green API, same as backup).
+- **Opt-out:** learner replies "הסר" → add their email to `scripts/journey_state/optout.json`.
+
 ## PopupManager System
 
 Central orchestrator (`js/popup-manager.js`) manages all popups, modals, toasts, and banners.
@@ -239,6 +257,12 @@ Central orchestrator (`js/popup-manager.js`) manages all popups, modals, toasts,
 **Flow**: Video plays 45s → `markLessonCompleted()` → saves to localStorage + Supabase UPSERT. On login, `mergeProgress()` does bi-directional sync (union of localStorage + Supabase). Failed syncs go to `pendingSync` localStorage queue.
 
 **Admin view**: `js/admin/admin-learners.js` shows per-user progress (completed lessons, watch time, last activity).
+
+## Practice-Game Data in Admin
+
+**Tab**: "משחק תרגול" — a sub-tab in the Learning group (`js/admin/admin-game.js`). Shows per-player NLP-game data in plain Hebrew: level, XP, day-streak, lessons finished, correct/wrong + accuracy %, course, and relative "last played". Summary cards + CSV export.
+
+**Source**: reads `nlp_game_players` (full save-state, keyed on `user_id`+`course_id`) joined to `profiles` (name/phone/email). The `admin_full_player` RLS policy lets the admin client read all rows. `nlp_game_leaderboard` holds the summary/ranking (only `total_xp` from it was surfaced before this tab, via `admin-portal-questionnaires.js`). Both tables key `user_id` = `profiles.id`.
 
 ## User Roles
 | Role | Access |

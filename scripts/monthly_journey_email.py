@@ -181,8 +181,10 @@ def build_email(learner, month_name, test_marker=""):
     if learner["top_pct"] <= 50:
         stats.append(stat_row(f"{learner['top_pct']}%", "אתה בין המתמידים המובילים"))
 
+    # NOTE: no emojis in subjects — the Gmail Apps Script GET channel mangles
+    # astral-plane chars (arrive as ������). Hebrew itself is fine.
     if active:
-        subject = f"{name}, החודש שלך בבית המטפלים 🌟"
+        subject = f"{name}, החודש שלך בבית המטפלים"
         intro = f"איזה חודש היה לך! ככה נראה {month_name} שלך במסע ה-NLP:"
         cta_line = "ההתמדה שלך מרשימה — בוא נמשיך מאיפה שעצרת."
     else:
@@ -287,7 +289,7 @@ def main():
             for variant, l in [("פעיל", sample), ("רדום", dormant)]:
                 if not l:
                     continue
-                subject, plain, html = build_email(l, month_name, test_marker=f"🧪 [בדיקה — גרסת {variant}]")
+                subject, plain, html = build_email(l, month_name, test_marker=f"[בדיקה — גרסת {variant}]")
                 send_gmail(notify, subject, plain, html)
                 log(f"TEST sent to {notify} (variant={variant}, sample={l['email']})")
                 time.sleep(SEND_INTERVAL_SEC)

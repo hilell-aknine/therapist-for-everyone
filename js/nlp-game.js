@@ -1,4 +1,4 @@
-// nlp-game.js — NLP Game Engine for Beit HaMetaplim Portal
+// nlp-game.js, NLP Game Engine for Beit HaMetaplim Portal
 // Uses Auth module + supabaseClient from supabase-client.js
 
 const HEART_RECOVERY_MINUTES = 20;
@@ -80,7 +80,7 @@ class SoundManager {
     }
 }
 
-// AuthManager removed — uses window.Auth from supabase-client.js
+// AuthManager removed, uses window.Auth from supabase-client.js
 
 // ═══════════════════════════════════════
 // Gemini AI Mentor (Ram)
@@ -100,7 +100,7 @@ class GeminiMentor {
     }
 
     async ask(userMessage, context = '') {
-        // Cancel any prior request — only one mentor reply is ever relevant at a time.
+        // Cancel any prior request, only one mentor reply is ever relevant at a time.
         this.abortInFlight();
         const controller = new AbortController();
         this.inFlight = controller;
@@ -158,7 +158,7 @@ class GeminiMentor {
     }
 
     async coachPractice(stepTitle, userAnswer) {
-        const prompt = `תרגול חופשי (${stepTitle}): "${userAnswer}". תן משוב קצר — מה טוב, מה אפשר לחדד.`;
+        const prompt = `תרגול חופשי (${stepTitle}): "${userAnswer}". תן משוב קצר, מה טוב, מה אפשר לחדד.`;
         return this.ask(prompt);
     }
 }
@@ -168,7 +168,7 @@ class GeminiMentor {
 // ═══════════════════════════════════════
 class StoryGame {
     constructor() {
-        // Course identity — lets a Master variant reuse this engine without
+        // Course identity, lets a Master variant reuse this engine without
         // colliding with the free practitioner game's saves/leaderboard.
         // Default MUST stay 'practitioner' so the existing free game is unaffected.
         const courseId = (typeof window !== 'undefined' && window.GAME_COURSE) ? window.GAME_COURSE : 'practitioner';
@@ -235,17 +235,17 @@ class StoryGame {
                 id: 'anchor',
                 title: 'שלב 4: יצירת עוגן',
                 question: 'תארו רגע בחייכם שהרגשתם ביטחון מלא ועוצמה. מה קרה? מה הרגשתם?',
-                hint: 'זה יכול להיות: הצלחה בעבודה, רגע משפחתי, הישג ספורטיבי — כל רגע של עוצמה.',
+                hint: 'זה יכול להיות: הצלחה בעבודה, רגע משפחתי, הישג ספורטיבי, כל רגע של עוצמה.',
                 example: 'כשסיימתי את המרתון הראשון שלי. הרגשתי חזק, מסוגל, גאה. הגוף היה עייף אבל הנשמה הייתה בשמיים.',
-                mentorMessage: 'מצוין! עכשיו כשהזיכרון חי ומרגש — דמיינו שאתם לוחצים על נקודה ביד. זה העוגן שלכם. תוכלו להשתמש בו בכל פעם שתצטרכו ביטחון.'
+                mentorMessage: 'מצוין! עכשיו כשהזיכרון חי ומרגש, דמיינו שאתם לוחצים על נקודה ביד. זה העוגן שלכם. תוכלו להשתמש בו בכל פעם שתצטרכו ביטחון.'
             },
             {
                 id: 'action',
                 title: 'שלב 5: צעד ראשון',
                 question: 'מה הצעד הראשון הקטן שתעשו השבוע כדי להתחיל את השינוי?',
                 hint: 'הצעד צריך להיות קטן, ספציפי, ומדיד. לא "אהיה יותר בטוח" אלא פעולה קונקרטית.',
-                example: 'השבוע אעשה תרגיל ויזואליזציה של 5 דקות כל בוקר — אדמיין את עצמי עומד בביטחון מול הקהל ומדבר בבהירות.',
-                mentorMessage: 'מושלם! זוכרים — חזרה היא אם כל המיומנויות. צעד קטן כל יום יוצר שינוי אדיר. בהצלחה!'
+                example: 'השבוע אעשה תרגיל ויזואליזציה של 5 דקות כל בוקר, אדמיין את עצמי עומד בביטחון מול הקהל ומדבר בבהירות.',
+                mentorMessage: 'מושלם! זוכרים, חזרה היא אם כל המיומנויות. צעד קטן כל יום יוצר שינוי אדיר. בהצלחה!'
             }
         ];
 
@@ -258,17 +258,17 @@ class StoryGame {
             ],
             moduleIntro: {
                 1: "הבסיס של הכל! בואו נבין מהו NLP ואיך המוח שלנו באמת עובד.",
-                2: "עכשיו נלמד לראות את העולם מזוויות שונות — רמות לוגיות ועמדות תפיסה!",
+                2: "עכשיו נלמד לראות את העולם מזוויות שונות, רמות לוגיות ועמדות תפיסה!",
                 3: "המסננים של המוח קובעים מה אנחנו רואים. בואו נלמד לזהות אותם ולהגדיר מטרות חכמות!",
-                4: "השפה של המוח — ויזואלי, אודיטורי, קינסתטי. מוכנים לגלות את שפת המוח שלכם?",
+                4: "השפה של המוח, ויזואלי, אודיטורי, קינסתטי. מוכנים לגלות את שפת המוח שלכם?",
                 5: "מה מניע אותנו? ששת הצרכים האנושיים וכוח המחשבה!",
-                6: "מסגור, מצבים רגשיים ועוגנים — הכלים המתקדמים ביותר של NLP!",
+                6: "מסגור, מצבים רגשיים ועוגנים, הכלים המתקדמים ביותר של NLP!",
                 7: "אין כשלונות, רק משוב! בואו נלמד לזהות ולשנות אמונות מגבילות."
             },
             lessonStart: [
                 "מעולה! בואו נתחיל. קחו את הזמן, אין לחץ.",
                 "אני לצידך בכל שלב. בהצלחה!",
-                "זוכרים — כל תשובה נכונה מחזקת את המסלולים העצביים החדשים שלכם!"
+                "זוכרים, כל תשובה נכונה מחזקת את המסלולים העצביים החדשים שלכם!"
             ],
             correctAnswer: [
                 "מדהים! בדיוק ככה!",
@@ -278,10 +278,10 @@ class StoryGame {
                 "מצוין! את/ה בדרך להיות פרקטישנר מעולה!"
             ],
             wrongAnswer: [
-                "לא נורא! טעויות הן חלק מהלמידה — זה בדיוק מה ש-NLP מלמד.",
+                "לא נורא! טעויות הן חלק מהלמידה, זה בדיוק מה ש-NLP מלמד.",
                 "קרוב! בפעם הבאה נסו להיזכר בעקרון הבסיסי.",
                 "לא בדיוק, אבל זו הזדמנות ללמוד משהו חדש!",
-                "אל דאגה, אין כשלונות — רק משוב ולמידה!"
+                "אל דאגה, אין כשלונות, רק משוב ולמידה!"
             ],
             encouragement: [
                 "את/ה עושה עבודה נהדרת!",
@@ -334,7 +334,7 @@ class StoryGame {
         window.addEventListener('beforeunload', () => {
             // localStorage is already up-to-date (savePlayerData writes synchronously).
             // Cancel the 1s debounce and fire the Supabase save immediately so we
-            // do not lose progress on quick tab close. Fire-and-forget — the browser
+            // do not lose progress on quick tab close. Fire-and-forget, the browser
             // may not deliver the request, but at least we attempted it.
             if (this.saveDebounceTimer) {
                 clearTimeout(this.saveDebounceTimer);
@@ -435,17 +435,17 @@ class StoryGame {
         try {
             const session = await window.Auth.getSession();
             if (session?.user) {
-                // Logged in — always show welcome gate
+                // Logged in, always show welcome gate
                 await this.showWelcomeGateAndWait();
                 this.onAuthSuccess(session.user);
             } else {
-                // Guest mode — show welcome gate, wait for click, then proceed
+                // Guest mode, show welcome gate, wait for click, then proceed
                 await this.showWelcomeGateAndWait();
                 this.isGuest = true;
                 this.onAuthSuccess(null);
             }
         } catch (e) {
-            // Guest mode fallback — show welcome gate
+            // Guest mode fallback, show welcome gate
             await this.showWelcomeGateAndWait();
             this.isGuest = true;
             this.onAuthSuccess(null);
@@ -466,23 +466,34 @@ class StoryGame {
         return new Promise((resolve) => {
             const gate = document.getElementById('welcome-gate');
             if (!gate) { resolve(); return; }
+
+            // Returning visitor: they've already seen the intro splash once, so
+            // skip straight to their map instead of replaying it every visit.
+            const seenKey = 'nlpWelcomeGateSeen_' + this.courseId;
+            try {
+                if (localStorage.getItem(seenKey)) { resolve(); return; }
+            } catch (e) { /* localStorage unavailable, just show the gate */ }
+
             gate.style.display = 'flex';
 
             // Animate elements in sequence
             setTimeout(() => gate.classList.add('active'), 50);
 
+            const dismiss = () => {
+                try { localStorage.setItem(seenKey, '1'); } catch (e) { /* ignore */ }
+                gate.classList.remove('active');
+                setTimeout(() => {
+                    gate.style.display = 'none';
+                    resolve();
+                }, 400);
+            };
+
             // Wait for button click, then dismiss and resolve
             const btn = document.getElementById('welcome-gate-btn');
             if (btn) {
-                btn.addEventListener('click', () => {
-                    gate.classList.remove('active');
-                    setTimeout(() => {
-                        gate.style.display = 'none';
-                        resolve();
-                    }, 400);
-                });
+                btn.addEventListener('click', dismiss);
             } else {
-                resolve();
+                dismiss();
             }
         });
     }
@@ -493,7 +504,7 @@ class StoryGame {
         // Show loading screen
         document.getElementById('loading-screen').style.display = 'flex';
 
-        // Paid-content gate — Master game only (window.GAME_REQUIRE_PAID set in nlp-game-master.html).
+        // Paid-content gate, Master game only (window.GAME_REQUIRE_PAID set in nlp-game-master.html).
         // The free practitioner game never sets the flag, so this block is a no-op there.
         if (window.GAME_REQUIRE_PAID) {
             const allowed = await this.verifyPaidAccess(user);
@@ -504,7 +515,7 @@ class StoryGame {
         await this.loadPlayerData(user);
 
         // Fail-safe: if the course data files failed to load (e.g. a syntax error
-        // in a data file — a documented failure mode), show a clear message instead
+        // in a data file, a documented failure mode), show a clear message instead
         // of letting every render call crash on an undefined MODULES.
         if (!this.validateModules()) {
             const loading = document.getElementById('loading-screen');
@@ -512,7 +523,7 @@ class StoryGame {
                 loading.style.display = 'flex';
                 loading.innerHTML = '<div style="text-align:center;padding:2rem;color:#E8F1F2;">'
                     + '<p style="font-size:1.1rem;font-weight:700;">אופס, התוכן לא נטען כמו שצריך.</p>'
-                    + '<p style="opacity:.8;margin-top:.5rem;">נסו לרענן את הדף. אם זה חוזר — כתבו לנו.</p></div>';
+                    + '<p style="opacity:.8;margin-top:.5rem;">נסו לרענן את הדף. אם זה חוזר, כתבו לנו.</p></div>';
             }
             return;
         }
@@ -525,7 +536,7 @@ class StoryGame {
 
         // Show bottom navigation. The element ships with an inline style="display:none"
         // so it stays hidden before auth. An inline style beats a class rule, so adding
-        // .nav-visible alone could never win — the whole bar (incl. the leaderboard tab)
+        // .nav-visible alone could never win, the whole bar (incl. the leaderboard tab)
         // stayed invisible in production. Remove the inline display first, then add the
         // class. game-fullscreen still hides it during exercises via `display:none !important`.
         const navEl = document.getElementById('bottom-nav');
@@ -549,7 +560,7 @@ class StoryGame {
             this.startHeartTimer();
         } catch (e) { console.warn('Game init warning:', e); }
 
-        // Render home screen — unless the portal deep-linked to a specific lesson's practice.
+        // Render home screen, unless the portal deep-linked to a specific lesson's practice.
         if (!this.playerData.onboardingComplete) {
             this.showOnboarding();
         } else if (!this.tryDeepLink()) {
@@ -558,7 +569,7 @@ class StoryGame {
     }
 
     // Deep-link from the portal's practice button: nlp-game.html?m=<moduleId>&l=<lessonPosition>.
-    // Routes straight to that module — and the specific lesson — even if the journey has not
+    // Routes straight to that module, and the specific lesson, even if the journey has not
     // unlocked it yet, because the user arrived directly from watching that lesson's video.
     // Returns true if it navigated (so the caller skips the home screen); false → render home.
     tryDeepLink() {
@@ -583,7 +594,7 @@ class StoryGame {
     // Paid-content access gate (Master game)
     // ═══════════════════════════════════════
     // Returns true only for paying customers / admins. Fails CLOSED: a guest,
-    // a missing profile, or any error all deny access — paid content is never
+    // a missing profile, or any error all deny access, paid content is never
     // exposed on an unverified check. Mirrors checkPaidRole() in course-library.html.
     async verifyPaidAccess(user) {
         if (!user || !window.supabaseClient) return false;
@@ -605,12 +616,12 @@ class StoryGame {
     // Course-data integrity check (runs once at startup)
     // ═══════════════════════════════════════
     // Returns false if MODULES is missing/empty (a data file failed to parse).
-    // Also logs — but does NOT throw on — individual lessons/exercises that are
+    // Also logs, but does NOT throw on, individual lessons/exercises that are
     // missing required fields, so one bad row degrades gracefully instead of
     // silently breaking mid-lesson.
     validateModules() {
         if (typeof MODULES === 'undefined' || !Array.isArray(MODULES) || MODULES.length === 0) {
-            console.error('[NLP Game] MODULES is missing or empty — a course data file likely failed to load.');
+            console.error('[NLP Game] MODULES is missing or empty, a course data file likely failed to load.');
             return false;
         }
         try {
@@ -683,7 +694,7 @@ class StoryGame {
         // Migration from 21-lesson version to 51-lesson version.
         // Skip if already migrated, OR if user has any progress (safety guard:
         // never wipe existing completedLessons even if migration_version is missing
-        // — see hindsight 2026-05-03 for the cross-device reset incident).
+        //, see hindsight 2026-05-03 for the cross-device reset incident).
         if (this.playerData.migrationVersion >= 2) return;
         if (this.playerData.completedLessons && Object.keys(this.playerData.completedLessons).length > 0) {
             this.playerData.migrationVersion = 2;
@@ -692,7 +703,7 @@ class StoryGame {
         }
 
         // Preserve XP, level, hearts, streak, achievements
-        // Reset completed lessons — content changed completely
+        // Reset completed lessons, content changed completely
         this.playerData.completedLessons = {};
         this.playerData.moduleProgress = {};
         this.playerData.migrationVersion = 2;
@@ -728,7 +739,7 @@ class StoryGame {
 
                 if (data && !error) {
                     // Map DB fields to local playerData. Every field from
-                    // getDefaultPlayerData() must appear here — missing fields
+                    // getDefaultPlayerData() must appear here, missing fields
                     // become undefined and silently break features (and trigger
                     // migrateProgress() to wipe completedLessons; see hindsight 2026-05-03).
                     this.playerData = {
@@ -761,7 +772,7 @@ class StoryGame {
                     return;
                 }
 
-                // No DB row yet — check localStorage for migration
+                // No DB row yet, check localStorage for migration
                 const local = this.loadFromLocalStorage();
                 if (local && Object.keys(local.completedLessons).length > 0) {
                     // Migrate local data to Supabase
@@ -779,7 +790,7 @@ class StoryGame {
             }
         }
 
-        // Guest mode or Supabase failed — use localStorage
+        // Guest mode or Supabase failed, use localStorage
         this.playerData = this.loadFromLocalStorage() || this.getDefaultPlayerData();
     }
 
@@ -870,7 +881,7 @@ class StoryGame {
         try {
             await attempt();
         } catch (e1) {
-            // Single retry after 2s — covers transient network blips. localStorage
+            // Single retry after 2s, covers transient network blips. localStorage
             // already holds the latest state, so failing both attempts only delays
             // cross-device sync until the next save.
             await new Promise(r => setTimeout(r, 2000));
@@ -984,7 +995,7 @@ class StoryGame {
             <p>${step.text}</p>
         `;
 
-        // Dots — reverse order for RTL (progress right→left)
+        // Dots, reverse order for RTL (progress right→left)
         const dotsEl = document.getElementById('onboarding-dots');
         dotsEl.innerHTML = steps.map((_, i) => {
             let cls = 'onboarding-dot';
@@ -1111,9 +1122,15 @@ class StoryGame {
                     <button class="profile-action-btn" onclick="window.installApp()" style="${window.matchMedia('(display-mode: standalone)').matches ? 'display:none' : ''}">
                         📲 <span>התקנה כאפליקציה</span>
                     </button>
+                    ${this.isGuest ? `
+                    <button class="profile-action-btn" onclick="window.location.href='login.html'">
+                        ✨ <span>הרשמה / התחברות</span>
+                    </button>
+                    ` : `
                     <button class="profile-action-btn danger" onclick="game.logout()">
                         🚪 <span>התנתקות</span>
                     </button>
+                    `}
                 </div>
             </div>
         `;
@@ -1389,7 +1406,7 @@ class StoryGame {
         // Build journey path nodes
         let pathNodesHtml = '';
 
-        // START node — daily challenge
+        // START node, daily challenge
         pathNodesHtml += `
             <div class="home-path-node special" onclick="game.startDailyChallenge()">
                 <div class="home-path-icon">${dailyChallengeCompleted ? '✅' : '🎯'}</div>
@@ -1422,7 +1439,7 @@ class StoryGame {
             if (!this.isModuleLocked(i) && prog < 100) { nextModuleId = MODULES[i].id; break; }
         }
 
-        // Module nodes — track unlock transitions
+        // Module nodes, track unlock transitions
         const previousLocked = this._previousLockedModules || [];
         const currentLocked = [];
 
@@ -1654,7 +1671,7 @@ class StoryGame {
             return;
         }
 
-        // No coaching returned — clear the thinking indicator on error/empty.
+        // No coaching returned, clear the thinking indicator on error/empty.
         if (!response) { dismiss(); return; }
 
         // Swap the typing indicator for the actual coaching text, then auto-dismiss.
@@ -1799,7 +1816,7 @@ ${answers.action || ''}`;
         //   1. It is the first module, OR
         //   2. The previous module is 100% complete, OR
         //   3. The user already has at least one completed lesson in this module
-        //      (grandfathering — old criterion was 50% of previous; some users
+        //      (grandfathering, old criterion was 50% of previous; some users
         //      passed that threshold and started this module).
         if (index <= 0) return false;
         const mod = MODULES[index];
@@ -1941,7 +1958,7 @@ ${answers.action || ''}`;
         const reading = lesson.reading;
         const container = document.getElementById('game-container');
 
-        // Highlight key terms in paragraphs — tappable to ask Ram for definition
+        // Highlight key terms in paragraphs, tappable to ask Ram for definition
         const renderParagraph = (text) => {
             if (!reading.keyTerms || reading.keyTerms.length === 0) return text;
             let result = text;
@@ -2095,10 +2112,10 @@ ${answers.action || ''}`;
             localStorage.setItem(key, '1');
             const toast = document.getElementById('toast');
             if (!toast) return;
-            toast.textContent = 'טיפ: בחרו תשובה ואז לחצו "בדיקה". כל לב הוא ניסיון — אל דאגה, אפשר לטעות וללמוד.';
+            toast.textContent = 'טיפ: בחרו תשובה ואז לחצו "בדיקה". כל לב הוא ניסיון, אל דאגה, אפשר לטעות וללמוד.';
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 6000);
-        } catch (e) { /* localStorage unavailable — skip the tip */ }
+        } catch (e) { /* localStorage unavailable, skip the tip */ }
     }
 
     getExerciseTypeIcon(exerciseType) {
@@ -2107,14 +2124,14 @@ ${answers.action || ''}`;
 
     createExerciseTip(exerciseType) {
         const tips = {
-            'multiple-choice': "💡 חשבו על מה שמרגיש הכי נכון מהחוויה שלכם — סמכו על האינטואיציה!",
+            'multiple-choice': "💡 חשבו על מה שמרגיש הכי נכון מהחוויה שלכם, סמכו על האינטואיציה!",
             'fill-blank': "💡 המילה הנכונה היא זו שמשלימה את המשפט בצורה הטבעית ביותר.",
-            'order': "💡 חשבו על הסדר ההגיוני — מה קורה קודם ומה אחר כך?",
+            'order': "💡 חשבו על הסדר ההגיוני, מה קורה קודם ומה אחר כך?",
             'identify': "💡 חפשו את החלק שגורם לכם להרגיש משהו.",
-            'compare': "💡 דמיינו את עצמכם בסיטואציה — איזו גישה הייתה עוזרת לכם יותר?",
+            'compare': "💡 דמיינו את עצמכם בסיטואציה, איזו גישה הייתה עוזרת לכם יותר?",
             'improve': "💡 חפשו את האפשרות שהכי מחוברת לרגש, לספציפיות ולחוויה אישית.",
-            'match': "💡 חפשו את הקשר הלוגי בין העמודות — מה מתחבר למה?",
-            'scenario': "💡 דמיינו את עצמכם במצב הזה — מה הייתם עושים?"
+            'match': "💡 חפשו את הקשר הלוגי בין העמודות, מה מתחבר למה?",
+            'scenario': "💡 דמיינו את עצמכם במצב הזה, מה הייתם עושים?"
         };
         return tips[exerciseType] || "";
     }
@@ -2337,7 +2354,7 @@ ${answers.action || ''}`;
         document.querySelectorAll('.order-item').forEach((item, index) => {
             item.querySelector('.order-number').textContent = index + 1;
         });
-        // The player has interacted with the order — now they can check.
+        // The player has interacted with the order, now they can check.
         this.enableCheckButton();
     }
 
@@ -2847,7 +2864,7 @@ ${answers.action || ''}`;
             }
         });
         // Show correct word in blank if wrong.
-        // Store the timeout id so continueToNext() can cancel it — otherwise the
+        // Store the timeout id so continueToNext() can cancel it, otherwise the
         // delayed write fires after the next exercise has already mounted, and
         // overwrites the new exercise's blank-slot with the previous correct word.
         if (!isCorrect && blankSlot) {
@@ -2927,7 +2944,7 @@ ${answers.action || ''}`;
         document.getElementById('feedback-btn').textContent = 'המשך';
 
         // Get AI feedback from Ram (async, non-blocking).
-        // Only on WRONG answers — that's where the explanation adds value.
+        // Only on WRONG answers, that's where the explanation adds value.
         // Skipping it on correct answers keeps the win-loop instant and avoids
         // a paid AI call on every single right answer.
         if (!isCorrect) this.getAIFeedback(exercise, isCorrect);
@@ -3378,7 +3395,7 @@ ${answers.action || ''}`;
                 return les ? `<div class="perfect-lesson-item">⭐ ${les.title}</div>` : '';
             }).join('');
         } else {
-            perfectHtml = '<div class="perfect-lesson-empty">עדיין אין שיעורים מושלמים — סיימו שיעור בלי טעויות!</div>';
+            perfectHtml = '<div class="perfect-lesson-empty">עדיין אין שיעורים מושלמים, סיימו שיעור בלי טעויות!</div>';
         }
 
         // Accuracy percentage
@@ -3389,7 +3406,7 @@ ${answers.action || ''}`;
         const levelInfo = this.getLevelProgressInfo();
         const xpHint = levelInfo.xpToNext > 0 ? `עוד ${levelInfo.xpToNext} XP לרמה ${(pd.level || 1) + 1}` : 'רמה מקסימלית!';
         const streakHint = pd.streak === 0 ? 'השלם שיעור כדי להתחיל' :
-            pd.streak < 7 ? 'שמור על הסטריק — היכנס מחר!' : 'כל הכבוד! המשך ככה';
+            pd.streak < 7 ? 'שמור על הסטריק, היכנס מחר!' : 'כל הכבוד! המשך ככה';
         const longestHint = longestStreak < 7 ? 'המטרה הבאה: 7 ימים רצופים' :
             longestStreak < 30 ? 'המטרה הבאה: 30 ימים רצופים!' : 'התמדה אגדית!';
         const lessonsHint = totalLessons === 0 ? 'השלם שיעור ראשון כדי להתחיל' :

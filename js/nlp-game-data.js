@@ -1,4 +1,4 @@
-/* nlp-game-data.js — Assembles all module files into the MODULES array */
+/* nlp-game-data.js, Assembles all module files into the MODULES array */
 /* Module files (MODULE_1 through MODULE_7) are loaded via separate <script> tags */
 
 const MODULES = [

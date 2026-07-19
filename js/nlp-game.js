@@ -961,13 +961,13 @@ class StoryGame {
         const steps = [
             {
                 icon: '🧠',
-                title: 'ברוכים הבאים ל-NLP Master!',
-                text: 'כאן תלמדו את עקרונות ה-NLP — ניתוב לשוני פיזיולוגי — בדרך כיפית ואינטראקטיבית, צעד אחרי צעד.'
+                title: this.courseId === 'master' ? 'ברוכים הבאים ל-NLP Master!' : 'ברוכים הבאים למשחק ה-NLP!',
+                text: 'כאן תלמדו איך המוח עובד ואיך "לתכנת" אותו מחדש (תכנות נוירו-לשוני), בדרך כיפית ואינטראקטיבית, צעד אחרי צעד.'
             },
             {
                 icon: '👨‍🏫',
                 title: 'הכירו את רם, המנטור שלכם',
-                text: 'רם ילווה אתכם בכל שלב — ייתן טיפים, עידוד, ויעזור לכם להבין איך המוח עובד ואיך לתכנת אותו מחדש.'
+                text: 'רם ילווה אתכם בכל שלב: ייתן טיפים, עידוד, ויעזור לכם להבין איך המוח עובד ואיך לתכנת אותו מחדש.'
             },
             {
                 icon: '🚀',
@@ -1354,7 +1354,6 @@ class StoryGame {
 
         const randomModule = availableModules[Math.floor(Math.random() * availableModules.length)];
         this.isDailyChallenge = true;
-        this.dailyChallengeExercisesLeft = 3;
         this.transitionTo(() => this.openModule(randomModule.id));
     }
 
@@ -1396,7 +1395,7 @@ class StoryGame {
                 <div class="home-path-icon">${dailyChallengeCompleted ? '✅' : '🎯'}</div>
                 <div class="home-path-info">
                     <div class="home-path-label">אתגר יומי</div>
-                    <div class="home-path-title">${dailyChallengeCompleted ? 'הושלם היום!' : 'השלימו 3 תרגילים'}</div>
+                    <div class="home-path-title">${dailyChallengeCompleted ? 'הושלם היום!' : 'השלימו שיעור אחד'}</div>
                     <div class="home-path-desc">${dailyChallengeCompleted ? 'כל הכבוד! חזרו מחר' : 'קבלו בונוס XP!'}</div>
                 </div>
                 <div class="home-path-arrow">${dailyChallengeCompleted ? '' : '←'}</div>
@@ -2076,11 +2075,9 @@ ${answers.action || ''}`;
 
         this.showFooter();
 
-        // Order exercises: check button must be enabled immediately
-        // (showFooter disables it, but order has no "selection" step)
-        if (exercise.type === 'order') {
-            this.enableCheckButton();
-        }
+        // Order exercises: the check button stays DISABLED until the player
+        // actually moves an item (enabled inside updateOrderNumbers). This stops
+        // a mis-tap on the initial shuffle from losing a heart with zero interaction.
 
         // One-time mechanics tip for a brand-new player's very first exercise.
         this.maybeShowFirstExerciseTip();
@@ -2250,8 +2247,7 @@ ${answers.action || ''}`;
                 </div>
             </div>
         `;
-
-        this.enableCheckButton();
+        // Check button stays disabled until the player reorders (see updateOrderNumbers).
     }
 
     // Drag & Drop
@@ -2341,6 +2337,8 @@ ${answers.action || ''}`;
         document.querySelectorAll('.order-item').forEach((item, index) => {
             item.querySelector('.order-number').textContent = index + 1;
         });
+        // The player has interacted with the order — now they can check.
+        this.enableCheckButton();
     }
 
     renderIdentify(container, exercise) {
@@ -2928,8 +2926,11 @@ ${answers.action || ''}`;
         document.getElementById('feedback-explanation').innerHTML = feedbackHtml;
         document.getElementById('feedback-btn').textContent = 'המשך';
 
-        // Get AI feedback from Ram (async, non-blocking)
-        this.getAIFeedback(exercise, isCorrect);
+        // Get AI feedback from Ram (async, non-blocking).
+        // Only on WRONG answers — that's where the explanation adds value.
+        // Skipping it on correct answers keeps the win-loop instant and avoids
+        // a paid AI call on every single right answer.
+        if (!isCorrect) this.getAIFeedback(exercise, isCorrect);
 
         // Streak fire pulse on correct
         if (isCorrect) {
@@ -3225,16 +3226,13 @@ ${answers.action || ''}`;
     // ═══════════════════════════════════════
     showNoHeartsModal() {
         const modal = document.getElementById('modal-overlay');
-        document.getElementById('modal-icon').textContent = '💔';
-        document.getElementById('modal-title').textContent = 'נגמרו הלבבות!';
-
-        const hasTimer = this.playerData.lastHeartLost;
-        const timerMsg = hasTimer ? `לב חדש יתחדש בעוד ${HEART_RECOVERY_MINUTES} דקות.` : '';
-        document.getElementById('modal-text').textContent = `${timerMsg} חזרו מאוחר יותר או מלאו את הלבבות.`;
+        document.getElementById('modal-icon').textContent = '💙';
+        document.getElementById('modal-title').textContent = 'רוצים להמשיך?';
+        document.getElementById('modal-text').textContent = 'טעויות הן חלק מהלמידה. אפשר לקחת אוויר ולחזור, או פשוט להמשיך לתרגל.';
 
         document.getElementById('modal-buttons').innerHTML = `
             <button class="btn btn-secondary" onclick="game.closeModal()">חזרה לתפריט</button>
-            <button class="btn btn-primary" onclick="game.refillHearts()">מילוי לבבות</button>
+            <button class="btn btn-primary" onclick="game.refillHearts()">להמשיך לתרגל</button>
         `;
         modal.classList.add('show');
     }

@@ -709,6 +709,31 @@ main,
     100% { transform: translateX(0); }
 }
 
+/* Shape cue (not color alone) so correct/incorrect is clear for color-blind users.
+   Positioned like the .selected checkmark; source order after it so these win. */
+.option-btn.correct::after {
+    content: '✓';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent-green);
+    z-index: 2;
+}
+.option-btn.incorrect::after {
+    content: '✗';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent-red);
+    z-index: 2;
+}
+
 .option-letter {
     width: 32px;
     height: 32px;
@@ -2121,7 +2146,7 @@ main,
 
 .copy-btn {
     background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-dark));
-    color: white;
+    color: #001A20; /* dark text on gold — white failed WCAG (~2.1:1) */
     box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
 }
 
@@ -2483,8 +2508,8 @@ main,
 
 .review-btn-icon { font-size: 26px; }
 .review-btn-info { text-align: right; flex: 1; }
-.review-btn-title { font-size: 15px; font-weight: 700; color: white; }
-.review-btn-desc { font-size: 12px; color: rgba(255, 255, 255, 0.75); }
+.review-btn-title { font-size: 15px; font-weight: 700; color: #001A20; }
+.review-btn-desc { font-size: 12px; color: rgba(0, 26, 32, 0.75); }
 
 .review-badge {
     background: rgba(255, 255, 255, 0.2);
@@ -2977,9 +3002,16 @@ body.game-fullscreen .ram-chat-fab {
     display: none !important;
 }
 
-/* Ensure exercise content isn't hidden behind the fixed footer */
+/* Ensure exercise content isn't hidden behind the fixed footer.
+   On phones (≤480px) the footer stacks two full-width buttons (~130px tall),
+   so reserve enough room that the LAST answer option is never trapped under it. */
 body.game-fullscreen #game-container {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 480px) {
+    body.game-fullscreen #game-container {
+        padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
+    }
 }
 
 /* Profile Screen */

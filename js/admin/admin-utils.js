@@ -6,7 +6,7 @@ const VIEW_GROUPS = {
     'mizum':    { views: ['patients', 'therapists', 'matches'], header: 'mizum-header', default: 'patients' },
     'funnel':   { views: ['pipeline'], header: null, default: 'pipeline' },
     'outreach': { views: ['outreach'], header: null, default: 'outreach' },
-    'learning': { views: ['leads', 'learners', 'portal-q'], header: 'learning-header', default: 'portal-q' },
+    'learning': { views: ['leads', 'learners', 'portal-q', 'game'], header: 'learning-header', default: 'portal-q' },
     'bot':      { views: ['bot'], header: null, default: 'bot' },
     'paid':     { views: ['paid'], header: null, default: 'paid' },
     'ai-cost':  { views: ['ai-cost'], header: null, default: 'ai-cost' },
@@ -101,6 +101,7 @@ function switchSubView(groupName, subView) {
 
     // Lazy-load hooks for sub-views
     if (subView === 'learners') loadLearnersView();
+    if (subView === 'game') loadGameView();
     if (subView === 'portal-q' && !portalQLoaded) loadPortalQuestionnaires();
     if (subView === 'traffic' && typeof loadTrafficSources === 'function') loadTrafficSources();
     if (subView === 'sources' && typeof loadSources === 'function') loadSources();

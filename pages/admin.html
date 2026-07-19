@@ -393,6 +393,9 @@
                         <button class="sub-tab" onclick="switchSubView('learning', 'portal-q')">
                             <i class="fa-solid fa-clipboard-list"></i> שאלוני היכרות <span class="badge" id="portal-q-count">0</span>
                         </button>
+                        <button class="sub-tab" onclick="switchSubView('learning', 'game')">
+                            <i class="fa-solid fa-gamepad"></i> משחק תרגול <span class="badge" id="game-count">0</span>
+                        </button>
                     </div>
                 </div>
 
@@ -500,6 +503,62 @@
                             </thead>
                             <tbody id="learners-table">
                                 <tr><td colspan="7" class="empty-state"><i class="fa-solid fa-graduation-cap"></i><br>טוען נתוני למידה...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Practice Game View -->
+                <div id="game-view" class="hidden">
+                    <h1 class="page-title"><i class="fa-solid fa-gamepad" style="color:var(--gold);margin-left:0.5rem;"></i> משחק התרגול</h1>
+                    <p style="color:var(--text-secondary);margin:-0.5rem 0 1.25rem;font-size:0.95rem;max-width:720px;">
+                        כאן רואים מי משחק במשחק התרגול, כמה הוא התקדם, וכמה זמן עבר מאז ששיחק. הניקוד עולה על כל תשובה נכונה, הרצף סופר כמה ימים ברצף שיחקו, והדיוק הוא כמה אחוז מהתשובות היו נכונות.
+                    </p>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon gold"><i class="fa-solid fa-gamepad"></i></div>
+                            <div><div class="stat-value" id="stat-game-total">0</div><div class="stat-label">סה"כ שחקנים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fa-solid fa-clock"></i></div>
+                            <div><div class="stat-value" id="stat-game-active7d">0</div><div class="stat-label">שיחקו ב-7 ימים</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-list-check"></i></div>
+                            <div><div class="stat-value" id="stat-game-answered">0</div><div class="stat-label">תרגילים שנענו</div></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red"><i class="fa-solid fa-bullseye"></i></div>
+                            <div><div class="stat-value" id="stat-game-accuracy">0%</div><div class="stat-label">דיוק ממוצע</div></div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div style="display:flex;align-items:center;gap:1rem;">
+                                <h3>רשימת שחקנים</h3>
+                                <button class="btn btn-export" onclick="exportGameCSV()">
+                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
+                                </button>
+                            </div>
+                            <div class="search-box">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" placeholder="חיפוש לפי שם או אימייל..." id="game-search" oninput="renderGame()">
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>שחקן</th>
+                                    <th>רמה</th>
+                                    <th>ניקוד</th>
+                                    <th>רצף ימים</th>
+                                    <th>שיעורים שסיים</th>
+                                    <th>תשובות (נכון/שגוי · דיוק)</th>
+                                    <th>קורס</th>
+                                    <th>שיחק לאחרונה</th>
+                                </tr>
+                            </thead>
+                            <tbody id="game-table">
+                                <tr><td colspan="8" class="empty-state"><i class="fa-solid fa-gamepad"></i><br>טוען נתוני משחק...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -2833,6 +2892,7 @@
     <script src="../js/admin/admin-therapists.js"></script>
     <script src="../js/admin/admin-leads.js"></script>
     <script src="../js/admin/admin-learners.js"></script>
+    <script src="../js/admin/admin-game.js"></script>
     <script src="../js/admin/admin-portal-questionnaires.js?v=8"></script>
     <script src="../js/admin/admin-pipeline.js"></script>
     <script src="../js/admin/admin-bot.js"></script>

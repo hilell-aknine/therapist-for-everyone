@@ -1610,7 +1610,8 @@
         <div class="lms-pl-tip" id="plTip">השיעור יסומן אוטומטית אחרי 45 שניות צפייה — אפשר גם לסמן ידנית</div>
 
         <!-- Practice clips for the CURRENT master lesson — surfaced directly under the
-             video so paying users actually discover them (was buried in master-practice.html). -->
+             video so paying users actually discover them (the old standalone
+             master-practice.html page was removed 2026-07-19). -->
         <style>
           .lms-practice{margin:1.4rem 0 .4rem;}
           .lms-practice__head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.25rem;}
@@ -4201,8 +4202,9 @@
     return modules.slice(0, currentModuleIndex + 1).filter(m => !m.isBonus).length;
   }
 
-  // MIRRORS the real-YouTube clips in master-practice.html (the source of truth).
-  // PLACEHOLDER_* clips are intentionally omitted here. Keep in sync if clips change.
+  // SINGLE SOURCE OF TRUTH for master practice clips (the standalone
+  // master-practice.html page was removed/redirected 2026-07-19 — practice now
+  // lives only per-lesson here). Add real-YouTube clips only; no PLACEHOLDERs.
   const MASTER_PRACTICE_TYPES = { demo:'הדגמה חיה', guided:'תרגול מודרך', pairs:'תרגול זוגות', instructions:'הנחיות טכניקה', visualization:'דמיון מודרך' };
   const MASTER_PRACTICE_CLIPS = [
     { id:'Aims2i2UA2E', t:'הדגמת שיבוש - דיבור עצמי שלילי', k:'demo', lesson:9 },

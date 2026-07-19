@@ -45,6 +45,7 @@ SEND_INTERVAL_SEC = 7       # ~8-9/min, under the ~10/min Apps Script send limit
 ACTIVE_THROUGH_DAY = 6      # drain window: days 1-6 of each month
 PORTAL_URL = ("https://www.therapist-home.com/pages/course-library.html"
               "?utm_source=email&utm_medium=email&utm_campaign=monthly_journey")
+COURSE_TOTAL_LESSONS = 51   # free practitioner course size (course-library)
 
 HEB_MONTHS = {1: "ינואר", 2: "פברואר", 3: "מרץ", 4: "אפריל", 5: "מאי", 6: "יוני",
               7: "יולי", 8: "אוגוסט", 9: "ספטמבר", 10: "אוקטובר", 11: "נובמבר", 12: "דצמבר"}
@@ -139,7 +140,7 @@ def build_learners(report_year, report_month):
     quests = {}
     q_total = 0
     for q in fetch_all("/rest/v1/portal_questionnaires"
-                       "?select=user_id,vision_one_year,main_challenge,why_nlp"):
+                       "?select=user_id,vision_one_year,main_challenge,why_nlp,gender,created_at"):
         q_total += 1
         if q.get("user_id"):
             quests[q["user_id"]] = q
@@ -156,8 +157,8 @@ def build_learners(report_year, report_month):
         # ("צגלל", "כק׳כק׳כק׳") — quoting those back looks broken, skip them
         if len(t) < 8 or len(t.split()) < 2:
             return ""
-        if len(t) > 80:
-            cut = t[:80]
+        if len(t) > 60:
+            cut = t[:60]
             t = cut[:cut.rfind(" ")] + "..." if " " in cut else cut + "..."
         return t
 
@@ -181,6 +182,9 @@ def build_learners(report_year, report_month):
             "top_pct": top_pct,
             "vision": clean_quote(q.get("vision_one_year")),
             "challenge": clean_quote(q.get("main_challenge")),
+            "is_f": (q.get("gender") or "") == "אישה",   # 595/595 filled, values גבר/אישה
+            "join_month": HEB_MONTHS.get(
+                int((q.get("created_at") or "0000-00")[5:7]) if (q.get("created_at") or "")[5:7].isdigit() else 0, ""),
         })
 
     facts = {
@@ -199,9 +203,9 @@ def escapeq(text):
 
 
 def stat_row(value, label):
-    return (f'<td align="center" style="padding:10px 6px;">'
-            f'<div style="font-size:34px;font-weight:700;color:#003B46;line-height:1;">{value}</div>'
-            f'<div style="font-size:13px;color:#5b7177;margin-top:6px;">{label}</div></td>')
+    return (f'<td align="center" style="padding:10px 5px">'
+            f'<div style="font-size:32px;font-weight:700;color:#003B46">{value}</div>'
+            f'<div style="font-size:13px;color:#5b7177;margin-top:5px">{label}</div></td>')
 
 
 def build_email(learner, month_name, facts, test_marker=""):
@@ -211,74 +215,90 @@ def build_email(learner, month_name, facts, test_marker=""):
     learner's OWN questionnaire words back to them; every comparison number must be
     a real computed fact, never invented.
     """
-    name = learner["first_name"] or "לומד יקר"
+    name = learner["first_name"] or ("לומדת יקרה" if learner.get("is_f") else "לומד יקר")
     active = learner["month_lessons"] > 0
     vision = escapeq(learner["vision"])
     challenge = escapeq(learner["challenge"])
+    f = learner.get("is_f", False)
+
+    # gendered fragments (everything else is spelled identically for both)
+    ata = "את" if f else "אתה"
+    shteda = "שתדעי" if f else "שתדע"
+    echad_mehem = "אחת מהם" if f else "אחד מהם"
+    bo = "בואי" if f else "בוא"
+    mesayem = "שאת מסיימת" if f else "שאתה מסיים"
+    identity = "את מאלו שמתחילות וגם ממשיכות" if f else "אתה מהאנשים שמתחילים וגם ממשיכים"
+    holem = "חולמת" if f else "חולם"
+    bona = "בונה" if f else "בונה"
+
+    total = learner["total_lessons"]
+    course_pct = min(100, round(total / COURSE_TOTAL_LESSONS * 100))
 
     stats = []
     if active:
         stats.append(stat_row(learner["month_lessons"], f"שיעורים ב{month_name}"))
-    stats.append(stat_row(learner["total_lessons"], "שיעורים בסך הכל במסע"))
+    stats.append(stat_row(total, f"שיעורים, {course_pct}% מהקורס"))
     if learner["longest_streak"] >= 2:
         stats.append(stat_row(learner["longest_streak"], "ימי הרצף הכי ארוך"))
     if learner["top_pct"] <= 50:
         stats.append(stat_row(f"{100 - learner['top_pct']}%", "מהלומדים השלימו פחות ממך"))
 
-    # their own words, quoted back (the most personal line in the email)
-    if vision:
-        vision_line = (f'כשהצטרפת כתבת לנו מה אתה רוצה שיקרה בעוד שנה: '
+    # opener: their join month + their own vision quoted back (the most personal line)
+    joined = f"ב{learner['join_month']} הצטרפת למסע" if learner["join_month"] else "הצטרפת למסע"
+    if vision and active:
+        vision_line = (f'{joined}, וכתבת לנו מה {ata} רוצה שיקרה בעוד שנה: '
                        f'<span style="color:#00606B;font-weight:700;">"{vision}"</span>. '
-                       f'זה לא נשכח. הנה כמה התקדמת לשם:')
+                       f'מאז {ata} לא רק {holem} על זה. {ata} {bona} את זה, שיעור אחרי שיעור:')
+    elif vision:
+        vision_line = (f'{joined}, וכתבת לנו מה {ata} רוצה שיקרה בעוד שנה: '
+                       f'<span style="color:#00606B;font-weight:700;">"{vision}"</span>. '
+                       f'החלום הזה לא הלך לשום מקום. וגם מה שכבר בנית בדרך אליו, לא:')
     else:
-        vision_line = f"ככה נראה המסע שלך בפורטל עד עכשיו:"
+        vision_line = f"{joined}, ומאז הצטברו דברים ששווה לעצור ולראות:"
 
     # NOTE: no emojis in subjects — the Gmail Apps Script GET channel mangles
     # astral-plane chars (arrive as ������). Hebrew itself is fine.
     if active:
-        subject = f"{name}, אתה בין {learner['top_pct']}% המתמידים של בית המטפלים" \
+        subject = f"{name}, {ata} בין {learner['top_pct']}% המתמידים של בית המטפלים" \
             if learner["top_pct"] <= 50 else f"{name}, החודש שלך בבית המטפלים"
-        proud_line = (f"ורק שתדע מה זה אומר: ב{month_name} נכנסו ללמוד "
-                      f"{facts['month_active']} אנשים בלבד מתוך {facts['learners']} "
-                      f"לומדים בפורטל. אתה אחד מהם. זו לא סטטיסטיקה, זו זהות: "
-                      f"אתה מהאנשים שמתחילים וגם ממשיכים.")
-        cta_line = "בוא נמשיך מאיפה שעצרת." if not challenge else \
-            (f'כתבת שהאתגר שלך הוא "{challenge}". '
-             f"כל שיעור שאתה מסיים הוא עוד צעד בדיוק לשם.")
+        proud_line = (f"ורק כדי לחדד כמה זה לא מובן מאליו: {facts['registered']} אנשים נרשמו "
+                      f"לפורטל, {facts['learners']} התחילו ללמוד בפועל, וב{month_name} רק "
+                      f"{facts['month_active']} מהם נכנסו ולמדו באמת. {ata} {echad_mehem}. "
+                      f"זו לא סטטיסטיקה, זו זהות: {identity}.")
+        cta_line = f"{bo} נמשיך מאיפה שעצרת. השיעור הבא כבר מחכה." if not challenge else \
+            (f'ואם נחזור לאתגר שכתבת אז, "{challenge}", '
+             f"כל שיעור {mesayem} הוא צעד אמיתי בדיוק לשם. השיעור הבא כבר מחכה.")
     else:
-        subject = f"{name}, {learner['total_lessons']} השיעורים שלך מחכים לך"
-        proud_line = (f"ועובדה אחת ששווה שתדע: {facts['registered']} אנשים נרשמו לפורטל, "
-                      f"אבל רק {facts['learners']} באמת התחילו ללמוד. אתה כבר בפנים, "
-                      f"עם {learner['total_lessons']} שיעורים מאחוריך. את זה אף אחד לא לוקח ממך.")
-        cta_line = "מספיק שיעור אחד קטן כדי לחזור לתנועה. הכל שמור בדיוק איפה שעזבת." \
-            if not challenge else \
-            (f'כשנרשמת כתבת שהאתגר שלך הוא "{challenge}". '
-             f"הוא לא נפתר מעצמו. שיעור אחד היום מחזיר אותך לדרך.")
+        subject = f"{name}, {total} השיעורים שלך מחכים לך"
+        proud_line = (f"ועובדה אחת ששווה {shteda}: {facts['registered']} אנשים נרשמו לפורטל, "
+                      f"אבל רק {facts['learners']} התחילו ללמוד בפועל. {ata} כבר בפנים, "
+                      f"עם {total} שיעורים ו-{course_pct}% מהקורס מאחוריך. "
+                      f"את זה אף אחד לא לוקח ממך.")
+        cta_line = ("מספיק שיעור אחד קטן כדי לחזור לתנועה. הכל שמור בדיוק איפה שעזבת."
+                    if not challenge else
+                    (f'האתגר שכתבת כשנרשמת, "{challenge}", לא נפתר מעצמו. '
+                     f"שיעור אחד היום מחזיר אותך לתנועה, והכל שמור בדיוק איפה שעזבת."))
 
     if test_marker:
         subject = f"{test_marker} {subject}"
 
-    html = f"""<div dir="rtl" style="background:#E8F1F2;padding:24px 12px;font-family:'Heebo',Arial,sans-serif;">
-<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #d7e3e5;">
-<div style="background:#003B46;padding:18px 24px;border-bottom:3px solid #D4AF37;">
-<span style="color:#E8F1F2;font-size:20px;font-weight:700;">בית המטפלים</span>
-</div>
-<div style="padding:24px;color:#1f2d30;font-size:16px;line-height:1.7;">
-<p style="margin:0 0 6px;font-size:20px;font-weight:700;color:#003B46;">שלום {name},</p>
-<p style="margin:0 0 18px;">{vision_line}</p>
-<table role="presentation" width="100%" style="border-collapse:collapse;background:#f4f8f9;border-radius:10px;"><tr>{''.join(stats)}</tr></table>
-<p style="margin:18px 0 0;">{proud_line}</p>
-<p style="margin:14px 0 22px;">{cta_line}</p>
-<div style="text-align:center;">
-<a href="{PORTAL_URL}" style="display:inline-block;background:#D4AF37;color:#003B46;font-weight:700;font-size:16px;padding:13px 34px;border-radius:8px;text-decoration:none;">חזרה למסע שלי ←</a>
-</div>
-</div>
-<div style="padding:14px 24px;background:#f4f8f9;color:#5b7177;font-size:12px;border-top:1px solid #e2ecee;">
-נשלח מצוות בית המטפלים · <a href="https://www.therapist-home.com" style="color:#00606B;">www.therapist-home.com</a><br>
-לא רוצה לקבל את הסיכום החודשי? פשוט השב למייל הזה עם המילה "הסר".
-</div>
-</div>
-</div>"""
+    html = f"""<div dir="rtl" style="background:#E8F1F2;padding:20px 10px;font-family:Arial,sans-serif">
+<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+<div style="background:#003B46;padding:16px 22px;border-bottom:3px solid #D4AF37">
+<span style="color:#E8F1F2;font-size:20px;font-weight:700">בית המטפלים</span></div>
+<div style="padding:22px;color:#1f2d30;font-size:16px;line-height:1.7">
+<p style="margin:0 0 6px;font-size:20px;font-weight:700;color:#003B46">שלום {name},</p>
+<p style="margin:0 0 16px">{vision_line}</p>
+<table width="100%" style="background:#f4f8f9;border-radius:10px"><tr>{''.join(stats)}</tr></table>
+<p style="margin:16px 0 0">{proud_line}</p>
+<p style="margin:12px 0 20px">{cta_line}</p>
+<div style="text-align:center">
+<a href="{PORTAL_URL}" style="display:inline-block;background:#D4AF37;color:#003B46;font-weight:700;font-size:16px;padding:12px 32px;border-radius:8px;text-decoration:none">חזרה למסע שלי ←</a>
+</div></div>
+<div style="padding:12px 22px;background:#f4f8f9;color:#5b7177;font-size:12px">
+נשלח מצוות בית המטפלים · <a href="https://www.therapist-home.com" style="color:#00606B">therapist-home.com</a><br>
+לא רוצה לקבל את הסיכום החודשי? השב למייל זה עם המילה "הסר".
+</div></div></div>"""
 
     # plain body kept MINIMAL on purpose — it rides in the same GET URL as the HTML
     # and only shows in text-only clients (rare). The HTML is the real email.
@@ -289,13 +309,15 @@ def build_email(learner, month_name, facts, test_marker=""):
     return subject, "\n".join(plain_lines), html
 
 
-URL_BUDGET = 7800  # Apps Script GET URLs 400 above ~8K; keep headroom
+URL_BUDGET = 7300  # empirically: 7,622-char URLs got HTTP 400 from Apps Script; headroom under that
 
 
 def encoded_len(to, subject, plain, html):
-    return len(urllib.parse.urlencode({
-        "token": "X" * 60, "action": "send", "to": to, "subject": subject,
-        "body": plain, "html": html, "name": "בית המטפלים"}))
+    """Full final URL length, with the real base URL and token."""
+    params = urllib.parse.urlencode({
+        "token": os.environ.get("GMAIL_API_TOKEN", "X" * 32), "action": "send",
+        "to": to, "subject": subject, "body": plain, "html": html, "name": "בית המטפלים"})
+    return len(os.environ.get("GMAIL_API_URL", "")) + 1 + len(params)
 
 
 def build_email_safe(learner, month_name, facts, test_marker=""):
@@ -318,8 +340,22 @@ def send_gmail(to, subject, plain, html):
         "name": "בית המטפלים",
     })
     url = f"{os.environ['GMAIL_API_URL']}?{params}"
-    with urllib.request.urlopen(url, timeout=45) as resp:
-        raw = resp.read().decode()
+    # Google's front-end 400s long URLs SPORADICALLY (probed live 2026-07-19: the
+    # same 7K URL fails then passes) — so transient HTTP errors get retried.
+    last_err = None
+    for attempt in range(4):
+        if attempt:
+            time.sleep(4)
+        try:
+            with urllib.request.urlopen(url, timeout=45) as resp:
+                raw = resp.read().decode()
+            break
+        except urllib.error.HTTPError as e:
+            last_err = f"HTTP {e.code}"
+        except (urllib.error.URLError, TimeoutError) as e:
+            last_err = str(e)
+    else:
+        raise RuntimeError(f"Apps Script unreachable after 4 attempts: {last_err}")
     try:
         result = json.loads(raw)
     except Exception:
@@ -363,10 +399,12 @@ def main():
         if test_mode:
             notify = os.environ.get("NOTIFY_EMAIL", "htjewelry.a474@gmail.com")
             quoted = [l for l in learners if l["vision"] and l["challenge"]] or learners
-            sample = max(quoted, key=lambda x: x["month_lessons"])         # active variant
-            dormant = next((l for l in sorted(quoted, key=lambda x: -x["total_lessons"])
-                            if l["month_lessons"] == 0), None)             # dormant variant
-            for variant, l in [("פעיל", sample), ("רדום", dormant)]:
+            males = [l for l in quoted if not l["is_f"]] or quoted
+            females = [l for l in quoted if l["is_f"]] or quoted
+            sample = max(males, key=lambda x: x["month_lessons"])          # active, male copy
+            dormant = next((l for l in sorted(females, key=lambda x: -x["total_lessons"])
+                            if l["month_lessons"] == 0), None)             # dormant, female copy
+            for variant, l in [("פעיל-זכר", sample), ("רדומה-נקבה", dormant)]:
                 if not l:
                     continue
                 subject, plain, html = build_email_safe(l, month_name, facts,

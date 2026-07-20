@@ -103,12 +103,26 @@ def fetch_all(path_base):
 
 # ── Data assembly ────────────────────────────────────────────────────────────
 
+def load_course_order():
+    """Ordered [(video_id, title)] for the free practitioner course, parsed live from
+    the portal page itself (course-library-v2.html) so lesson names never drift."""
+    import re
+    src = (PROJECT_ROOT / "pages" / "course-library-v2.html").read_text(encoding="utf-8")
+    start = src.index("PRACTITIONER_MODULES = [")
+    end = src.index("\n  ];", start)
+    block = src[start:end]
+    return re.findall(r"id:\s*'([^']+)',\s*title:\s*'((?:[^'\\]|\\.)*)'", block)
+
+
 def build_learners(report_year, report_month):
     """Return (learners, facts) — personal numbers per learner + true population facts."""
-    progress = fetch_all("/rest/v1/course_progress?select=user_id,lesson_number,course_type,completed_at")
+    progress = fetch_all("/rest/v1/course_progress"
+                         "?select=user_id,lesson_number,course_type,completed_at,video_id,completed"
+                         "&completed=is.true")
 
     by_user = defaultdict(set)      # all-time distinct lessons
     month_by_user = defaultdict(set)  # distinct lessons completed in report month
+    vids_by_user = defaultdict(set)   # completed video ids (for "next lesson" lookup)
     prefix = f"{report_year:04d}-{report_month:02d}"
     for r in progress:
         uid = r.get("user_id")
@@ -116,8 +130,12 @@ def build_learners(report_year, report_month):
             continue
         key = (r.get("course_type"), r.get("lesson_number"))
         by_user[uid].add(key)
+        if r.get("video_id"):
+            vids_by_user[uid].add(r["video_id"])
         if (r.get("completed_at") or "").startswith(prefix):
             month_by_user[uid].add(key)
+
+    course_order = load_course_order()
 
     uids = list(by_user.keys())
 
@@ -172,7 +190,9 @@ def build_learners(report_year, report_month):
         rank = totals_sorted.index(total) + 1  # best rank for that total
         top_pct = max(5, math.ceil(rank / len(totals_sorted) * 100 / 5) * 5)
         q = quests.get(uid) or {}
+        next_lesson = next((t for vid, t in course_order if vid not in vids_by_user[uid]), "")
         learners.append({
+            "next_lesson": next_lesson.replace("\\'", "'"),
             "user_id": uid,
             "email": email,
             "first_name": (p.get("full_name") or "").split()[0] if p.get("full_name") else "",
@@ -256,6 +276,22 @@ def build_email(learner, month_name, facts, test_marker=""):
     else:
         vision_line = f"{joined}, ומאז הצטברו דברים ששווה לעצור ולראות:"
 
+    # Wrapped-style personal title — rule-based from REAL data only, gendered
+    badge = ""
+    if active:
+        if learner["month_lessons"] >= 8:
+            badge = "ספרינטרית החודש" if f else "ספרינטר החודש"
+        elif learner["longest_streak"] >= 5:
+            badge = "מתמידת הברזל" if f else "מתמיד הברזל"
+        elif learner["top_pct"] <= 10:
+            badge = "חלוצת המסע" if f else "חלוץ המסע"
+        else:
+            badge = "בונה בהתמדה"
+
+    # the next lesson, by name — the most concrete comeback trigger there is
+    nt = escapeq(learner["next_lesson"])
+    next_line = f'השיעור הבא שמחכה לך: "{nt}".' if nt else "השיעור הבא כבר מחכה."
+
     # NOTE: no emojis in subjects — the Gmail Apps Script GET channel mangles
     # astral-plane chars (arrive as ������). Hebrew itself is fine.
     if active:
@@ -265,19 +301,19 @@ def build_email(learner, month_name, facts, test_marker=""):
                       f"לפורטל, {facts['learners']} התחילו ללמוד בפועל, וב{month_name} רק "
                       f"{facts['month_active']} מהם נכנסו ולמדו באמת. {ata} {echad_mehem}. "
                       f"זו לא סטטיסטיקה, זו זהות: {identity}.")
-        cta_line = f"{bo} נמשיך מאיפה שעצרת. השיעור הבא כבר מחכה." if not challenge else \
+        cta_line = f"{bo} נמשיך מאיפה שעצרת. {next_line}" if not challenge else \
             (f'ואם נחזור לאתגר שכתבת אז, "{challenge}", '
-             f"כל שיעור {mesayem} הוא צעד אמיתי בדיוק לשם. השיעור הבא כבר מחכה.")
+             f"כל שיעור {mesayem} הוא צעד אמיתי בדיוק לשם. {next_line}")
     else:
         subject = f"{name}, {total} השיעורים שלך מחכים לך"
         proud_line = (f"ועובדה אחת ששווה {shteda}: {facts['registered']} אנשים נרשמו לפורטל, "
                       f"אבל רק {facts['learners']} התחילו ללמוד בפועל. {ata} כבר בפנים, "
                       f"עם {total} שיעורים ו-{course_pct}% מהקורס מאחוריך. "
                       f"את זה אף אחד לא לוקח ממך.")
-        cta_line = ("מספיק שיעור אחד קטן כדי לחזור לתנועה. הכל שמור בדיוק איפה שעזבת."
+        cta_line = (f"מספיק שיעור אחד קטן כדי לחזור לתנועה. {next_line}"
                     if not challenge else
                     (f'האתגר שכתבת כשנרשמת, "{challenge}", לא נפתר מעצמו. '
-                     f"שיעור אחד היום מחזיר אותך לתנועה, והכל שמור בדיוק איפה שעזבת."))
+                     f"אפשר לחזור בקטן, עוד היום: {next_line}"))
 
     if test_marker:
         subject = f"{test_marker} {subject}"
@@ -289,6 +325,7 @@ def build_email(learner, month_name, facts, test_marker=""):
 <div style="padding:22px;color:#1f2d30;font-size:16px;line-height:1.7">
 <p style="margin:0 0 6px;font-size:20px;font-weight:700;color:#003B46">שלום {name},</p>
 <p style="margin:0 0 16px">{vision_line}</p>
+{f'<div style="text-align:center;margin:0 0 12px"><span style="display:inline-block;background:#fdf6e3;border:1px solid #D4AF37;color:#8a6d1a;font-weight:700;font-size:14px;padding:6px 16px;border-radius:20px">התואר שלך החודש: {badge}</span></div>' if badge else ''}
 <table width="100%" style="background:#f4f8f9;border-radius:10px"><tr>{''.join(stats)}</tr></table>
 <p style="margin:16px 0 0">{proud_line}</p>
 <p style="margin:12px 0 20px">{cta_line}</p>
@@ -321,11 +358,15 @@ def encoded_len(to, subject, plain, html):
 
 
 def build_email_safe(learner, month_name, facts, test_marker=""):
-    """Build the email; if the encoded GET URL would overflow, retry without quotes."""
-    subject, plain, html = build_email(learner, month_name, facts, test_marker)
-    if encoded_len(learner["email"], subject, plain, html) > URL_BUDGET:
-        stripped = dict(learner, vision="", challenge="")
-        subject, plain, html = build_email(stripped, month_name, facts, test_marker)
+    """Build the email; if the encoded GET URL would overflow, degrade gracefully:
+    first drop the challenge quote, then the vision quote too."""
+    for strip in ({}, {"challenge": ""}, {"challenge": "", "vision": ""}):
+        candidate = dict(learner, **strip)
+        subject, plain, html = build_email(candidate, month_name, facts, test_marker)
+        if encoded_len(learner["email"], subject, plain, html) <= URL_BUDGET:
+            if strip:
+                log(f"size fallback for {learner['email']}: stripped {list(strip)}")
+            break
     return subject, plain, html
 
 

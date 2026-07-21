@@ -154,7 +154,7 @@ function renderGA4Data(data) {
         '/thank-you.html': 'דף תודה',
         '/privacy-policy.html': 'מדיניות פרטיות',
         '/catalog.html': 'קטלוג',
-        '/pages/admin.html': 'פאנל ניהול',
+        '/pages/admin-4fa6eb0937.html': 'פאנל ניהול',
         '/pages/login.html': 'התחברות',
         '/pages/course-library.html': 'ספריית הקורסים',
         '/pages/free-portal.html': 'פורטל חינמי',

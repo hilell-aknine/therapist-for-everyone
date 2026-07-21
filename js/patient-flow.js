@@ -8,7 +8,7 @@
     // Email notification configuration — reads from centralized supabase-config.js
     const SUPABASE_FUNCTIONS_URL = window.SUPABASE_CONFIG?.functionsUrl || 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
     const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG?.anonKey || '';
-    const ADMIN_DASHBOARD_URL = 'https://www.therapist-home.com/pages/admin.html';
+    const ADMIN_DASHBOARD_URL = 'https://www.therapist-home.com/pages/admin-4fa6eb0937.html';
 
     // Send admin notification for new patient registration
     async function sendAdminNotification(formData, userEmail = null) {

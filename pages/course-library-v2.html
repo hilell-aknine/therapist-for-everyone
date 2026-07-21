@@ -3597,10 +3597,6 @@
     document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales');
     try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
     renderAll();
-    // Re-hydrate the new course's completed lessons + last-watched position from the DB,
-    // so "המשך צפייה" continues from where the learner stopped in THIS course (master/practitioner),
-    // not from the previous course. hydrateProgress() reads `courseType` (just set above) and re-renders.
-    hydrateProgress();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -3764,11 +3760,8 @@
     if (devBypass) return;
     if (!window.CourseProgress) return;
     try {
-      // Hydrate for whatever course is currently active — this is what makes "המשך צפייה"
-      // work in the Master and Practitioner-techniques courses too, not just the free course.
-      const ct = courseType;
       // getCompletedVideoIds returns a plain Array — wrap in a Set so .size/.has work.
-      const ids = new Set(await window.CourseProgress.getCompletedVideoIds(ct) || []);
+      const ids = new Set(await window.CourseProgress.getCompletedVideoIds('nlp-practitioner') || []);
       if (ids.size){
         modules.forEach((mod, mIdx) => mod.lessons.forEach((les, lIdx) => {
           if (ids.has(les.id)){
@@ -3778,8 +3771,8 @@
         }));
         localStorage.setItem(completedKey(), JSON.stringify(completedLessons));
       }
-      const last = await window.CourseProgress.getLastWatched(ct);
-      lastWatched = last || null;
+      const last = await window.CourseProgress.getLastWatched('nlp-practitioner');
+      if (last) lastWatched = last;
       // Exact playback positions — this is what lets "המשך צפייה" land on the right second
       // even on a device this learner has never opened the portal on.
       try { _dbPositions = await window.CourseProgress.getPositions() || {}; } catch(_){ _dbPositions = {}; }

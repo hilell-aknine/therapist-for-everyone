@@ -525,8 +525,11 @@ async function handleRead(name: string, input: any, ctx: { admin: any; userClien
         const { data } = await admin.from('profiles').select('*').ilike('email', `%${q}%`).limit(1)
         prof = data?.[0]
       } else if (/\d{6,}/.test(cleaned)) {
-        const { data } = await admin.from('profiles').select('*').ilike('phone', `%${cleaned}%`).limit(1)
-        prof = data?.[0]
+        // Exact phone match (format-agnostic) — see open_access note. Broad-fetch by core, exact-equal filter.
+        const core = cleaned.replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '')
+        const { data } = await admin.from('profiles').select('*').ilike('phone', `%${core}%`).limit(10)
+        const target = intlPhone(cleaned)
+        prof = (data || []).find((u: any) => intlPhone(u.phone) === target) || null
       } else {
         const { data } = await admin.from('profiles').select('*').ilike('full_name', `%${q}%`).limit(1)
         prof = data?.[0]
@@ -655,9 +658,14 @@ async function prepareWrite(name: string, input: any, admin: any): Promise<{ pen
   switch (name) {
     case 'open_access': {
       if (!isValidPhone(input.phone)) return { error: 'מספר טלפון לא תקין.' }
-      const cleaned = String(input.phone).replace(/[-\s]/g, '')
-      const { data } = await admin.from('profiles').select('id, full_name, role, phone').ilike('phone', `%${cleaned}%`).limit(1)
-      const user = data?.[0]
+      // Exact phone match (format-agnostic): broad-fetch by the 9-digit subscriber core,
+      // then keep only the row whose normalized phone equals the input EXACTLY — never a
+      // substring. The old ILIKE `%...%` + limit(1) matched a real user by a test number
+      // and granted/updated the wrong account (incident 2026-07-12).
+      const core = String(input.phone).replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '')
+      const { data } = await admin.from('profiles').select('id, full_name, role, phone').ilike('phone', `%${core}%`).limit(10)
+      const target = intlPhone(input.phone)
+      const user = (data || []).find((u: any) => intlPhone(u.phone) === target)
       if (!user) return { error: 'משתמש לא נמצא — צריך שיירשם לאתר קודם.' }
       if (user.role === 'paid_customer') return { error: `${user.full_name} כבר לקוח משלם פעיל.` }
       const lifetime = input.months === null || input.months === undefined

@@ -140,21 +140,27 @@ async function activateNewCustomer() {
     resultEl.style.color = 'var(--text-secondary)';
 
     try {
-        // Find user by phone
+        // Find user by phone — EXACT match (format-agnostic). Broad-fetch by the 9-digit
+        // subscriber core, then keep only rows whose normalized phone equals the input
+        // exactly. The old ILIKE `%...%` + limit(1) matched a real user by a test number
+        // and activated the wrong account (incident 2026-07-12).
         const cleaned = phone.replace(/[-\s]/g, '');
+        const normPhone = (p) => String(p || '').replace(/\D/g, '').replace(/^972/, '').replace(/^0/, '');
+        const core = normPhone(cleaned);
         const { data: profiles, error: pErr } = await db.from('profiles')
             .select('id, full_name, phone, role')
-            .ilike('phone', `%${cleaned}%`)
-            .limit(1);
+            .ilike('phone', `%${core}%`)
+            .limit(10);
 
         if (pErr) throw pErr;
-        if (!profiles || !profiles.length) {
+        const matches = (profiles || []).filter(u => normPhone(u.phone) === core);
+        if (!matches.length) {
             resultEl.textContent = 'משתמש לא נמצא — צריך להירשם לאתר קודם';
             resultEl.style.color = '#f85149';
             return;
         }
 
-        const user = profiles[0];
+        const user = matches[0];
         if (user.role === 'paid_customer') {
             resultEl.textContent = `${user.full_name} כבר לקוח משלם פעיל`;
             resultEl.style.color = '#f59e0b';

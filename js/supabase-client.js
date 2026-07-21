@@ -422,6 +422,90 @@
             return true;
         },
 
+        // ── Weekly learning stats ────────────────────────────────────────────
+        // "כמה למדת השבוע מול שבוע שעבר". Counts distinct completed lessons across
+        // ALL courses (no course_type filter) from course_progress.completed_at.
+        // Source note: we read course_progress (not lesson_completion_events, which
+        // is empty in prod — its insert path silently fails). completed_at is set
+        // once, on first completion (markVideoWatched only fires when !alreadyDone),
+        // so it's a reliable first-completion timeline.
+        // Week starts SUNDAY 00:00 Asia/Jerusalem. Returns
+        // { thisWeek, lastWeek, delta, deltaPct, totalAllTime } or null
+        // (not logged in / DB error) so the caller can silently hide the card.
+        async getWeeklyStats() {
+            try {
+                const user = await Auth.getCurrentUser();
+                if (!user) return null;
+
+                // Convert an Israel WALL-CLOCK midnight (y, mon0, day) to the exact
+                // UTC instant — DST-safe (Israel is UTC+2 winter / UTC+3 summer).
+                // Trick: treat the wall time as if it were UTC, ask Intl what that
+                // instant reads as in Jerusalem, and correct by the difference
+                // (= the live offset at that date).
+                const ilWallToUTC = (y, mon0, day) => {
+                    const asIfUTC = Date.UTC(y, mon0, day, 0, 0, 0);
+                    const dtf = new Intl.DateTimeFormat('en-US', {
+                        timeZone: 'Asia/Jerusalem', hour12: false,
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    });
+                    const p = {};
+                    for (const part of dtf.formatToParts(new Date(asIfUTC))) p[part.type] = part.value;
+                    const hour = p.hour === '24' ? 0 : +p.hour; // Intl may render midnight as '24'
+                    const shown = Date.UTC(+p.year, +p.month - 1, +p.day, hour, +p.minute, +p.second);
+                    return new Date(asIfUTC - (shown - asIfUTC));
+                };
+
+                // 1) Today's Israel calendar date + weekday (0=Sun … 6=Sat).
+                const now = new Date();
+                const parts = new Intl.DateTimeFormat('en-US', {
+                    timeZone: 'Asia/Jerusalem', weekday: 'short',
+                    year: 'numeric', month: '2-digit', day: '2-digit'
+                }).formatToParts(now);
+                const g = {};
+                for (const part of parts) g[part.type] = part.value;
+                const dowMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+                const dow = dowMap[g.weekday];
+
+                // 2) This/last week's Sunday as Israel calendar dates (pure calendar
+                //    arithmetic — do NOT subtract 168h, a DST week is 167/169h).
+                const todayCal = new Date(+g.year, +g.month - 1, +g.day);
+                const thisSun = new Date(todayCal); thisSun.setDate(todayCal.getDate() - dow);
+                const lastSun = new Date(thisSun);  lastSun.setDate(thisSun.getDate() - 7);
+
+                // 3) Real UTC instants for the two Sunday-00:00 Israel boundaries.
+                const thisISO = ilWallToUTC(thisSun.getFullYear(), thisSun.getMonth(), thisSun.getDate()).toISOString();
+                const lastISO = ilWallToUTC(lastSun.getFullYear(), lastSun.getMonth(), lastSun.getDate()).toISOString();
+
+                // 4) Three head-only COUNT queries. completed=true excludes the
+                //    last_watched_* bookkeeping rows (those carry completed=false).
+                const base = () => supabaseClient
+                    .from('course_progress')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', user.id)
+                    .eq('completed', true);
+
+                const [thisRes, lastRes, allRes] = await Promise.all([
+                    base().gte('completed_at', thisISO),
+                    base().gte('completed_at', lastISO).lt('completed_at', thisISO),
+                    base()
+                ]);
+                if (thisRes.error || lastRes.error || allRes.error) return null;
+
+                const thisWeek = thisRes.count || 0;
+                const lastWeek = lastRes.count || 0;
+                const totalAllTime = allRes.count || 0;
+                const delta = thisWeek - lastWeek;
+                // Guard divide-by-zero: no baseline → deltaPct null (caller treats as "new").
+                const deltaPct = lastWeek > 0 ? Math.round((delta / lastWeek) * 100) : null;
+
+                return { thisWeek, lastWeek, delta, deltaPct, totalAllTime };
+            } catch (err) {
+                console.error('getWeeklyStats error:', err);
+                return null; // fail silent → card hides
+            }
+        },
+
         async updateWatchTime(videoId, seconds) {
             const user = await Auth.getCurrentUser();
             if (!user) return;

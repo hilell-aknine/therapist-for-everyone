@@ -910,6 +910,38 @@
 
   /* ==================== #2/#3 JOURNEY PANEL (progress + XP + levels + badges) ==================== */
   /* Compact "המסע שלך" — ~40% shorter than the original (smaller padding, cards, ring, badges). */
+  /* ── Weekly learning card (השבוע מול שבוע שעבר) ── sits inside .lms-welcome,
+     so it inherits the parent's hide-on-subview behavior automatically. */
+  .lms-weekly{ position:relative; overflow:hidden; display:flex; align-items:center; gap:1rem;
+    background:linear-gradient(180deg, rgba(233,185,73,.07), rgba(255,255,255,.02));
+    border:1px solid rgba(242,199,102,.24); border-radius:14px; padding:1rem 1.1rem; }
+  .lms-weekly__glow{ position:absolute; inset:auto -80px -90px auto; width:260px; height:260px;
+    border-radius:50%; background:radial-gradient(circle, rgba(212,175,55,.20), transparent 65%);
+    filter:blur(50px); pointer-events:none; z-index:0; }
+  .lms-weekly__icon{ position:relative; z-index:1; flex:none; width:48px; height:48px; border-radius:50%;
+    display:grid; place-items:center; font-size:1.15rem; color:var(--text-on-gold);
+    background:linear-gradient(135deg, var(--accent-gold-hover), var(--accent-gold));
+    box-shadow:0 4px 12px rgba(212,164,55,.35), inset 0 1px 0 rgba(255,255,255,.4); }
+  .lms-weekly__body{ position:relative; z-index:1; flex:1 1 auto; min-width:0; text-align:start; }
+  .lms-weekly__eyebrow{ font-size:.72rem; color:var(--accent-gold-hover); font-weight:600; letter-spacing:.02em; }
+  .lms-weekly__title{ margin:.15rem 0 .1rem; font-family:var(--font-display); font-size:1.15rem; font-weight:800; color:#fff; line-height:1.25; }
+  .lms-weekly__sub{ margin:0; font-size:.85rem; color:var(--text-muted); font-weight:500; line-height:1.4; }
+  .lms-weekly__figures{ position:relative; z-index:1; flex:none; display:flex; align-items:center; gap:.55rem; padding-inline-start:.5rem; }
+  .lms-weekly__num{ display:flex; flex-direction:column; align-items:center; line-height:1; }
+  .lms-weekly__num b{ font-family:var(--font-display); font-size:1.7rem; font-weight:800; color:var(--accent-gold-hover); }
+  .lms-weekly__num span{ font-size:.66rem; color:var(--text-muted); margin-top:.2rem; white-space:nowrap; }
+  .lms-weekly__num--muted b{ color:var(--text-muted); }
+  .lms-weekly__vs{ font-size:.7rem; color:var(--text-muted); opacity:.7; }
+  .lms-weekly__delta{ margin-inline-start:.35rem; padding:.25rem .55rem; border-radius:999px; font-size:.78rem; font-weight:800; white-space:nowrap; }
+  .lms-weekly__delta--up{ color:#0d2b13; background:var(--success); }
+  .lms-weekly__delta--flat{ color:var(--text-on-gold); background:rgba(242,199,102,.85); }
+  .lms-weekly.is-up{ border-color:rgba(74,222,128,.45); }
+  .lms-weekly.is-up .lms-weekly__icon{ background:linear-gradient(135deg,#5ee88f,var(--success)); color:#0d2b13; }
+  .lms-weekly.is-new .lms-weekly__figures{ display:none; }
+  @media (max-width:560px){
+    .lms-weekly{ flex-wrap:wrap; }
+    .lms-weekly__figures{ width:100%; justify-content:flex-start; padding-inline-start:0; margin-top:.4rem; }
+  }
   .lms-journey{ background:linear-gradient(180deg, rgba(233,185,73,.06), rgba(255,255,255,.02)); border:1px solid rgba(242,199,102,.22); border-radius:14px; padding:.5rem .7rem; margin-bottom:0; }
   .lms-journey__head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.4rem; }
   .lms-journey__head h2{ margin:0; font-size:.9rem; color:#fff; display:flex; align-items:center; gap:.4rem; }
@@ -1530,6 +1562,22 @@
           <div class="lms-hero__video-scrim"></div>
           <span class="lms-hero__video-caption" id="heroCaption">השיעור הבא</span>
         </button>
+      </section>
+
+      <section class="lms-weekly" id="weeklyStatsCard" aria-label="הלמידה שלך השבוע" hidden>
+        <div class="lms-weekly__glow" aria-hidden="true"></div>
+        <div class="lms-weekly__icon" id="weeklyIcon"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="lms-weekly__body">
+          <div class="lms-weekly__eyebrow">הלמידה שלך השבוע</div>
+          <h2 class="lms-weekly__title" id="weeklyTitle">טוען…</h2>
+          <p class="lms-weekly__sub" id="weeklySub">&nbsp;</p>
+        </div>
+        <div class="lms-weekly__figures" id="weeklyFigures">
+          <div class="lms-weekly__num"><b id="weeklyThis">0</b><span>השבוע</span></div>
+          <div class="lms-weekly__vs">מול</div>
+          <div class="lms-weekly__num lms-weekly__num--muted"><b id="weeklyLast">0</b><span>שבוע שעבר</span></div>
+          <div class="lms-weekly__delta" id="weeklyDelta" hidden></div>
+        </div>
       </section>
 
       <section class="lms-journey" id="journeyPanel" aria-label="המסע שלך"></section>
@@ -3578,9 +3626,72 @@
       });
     });
   }
+  // Weekly "כמה למדת השבוע מול שבוע שעבר" card. Async + self-contained: starts
+  // hidden, reveals only on success, so a slow/failed fetch never blocks the
+  // synchronous home render. Decision 3: when the student learned less, warm
+  // nudge only — never render the negative delta / percentage.
+  async function renderWeeklyStats(){
+    const host = document.getElementById('weeklyStatsCard');
+    if (!host) return;
+    let s = null;
+    try { s = window.CourseProgress && await window.CourseProgress.getWeeklyStats(); } catch(_){ s = null; }
+    if (!s){ host.hidden = true; return; }   // not logged in / DB error → silent hide
+
+    const titleEl = document.getElementById('weeklyTitle');
+    const subEl   = document.getElementById('weeklySub');
+    const iconEl  = document.getElementById('weeklyIcon');
+    const figs    = document.getElementById('weeklyFigures');
+    const deltaEl = document.getElementById('weeklyDelta');
+    const nf = n => Number(n).toLocaleString('he-IL');
+    document.getElementById('weeklyThis').textContent = nf(s.thisWeek);
+    document.getElementById('weeklyLast').textContent = nf(s.lastWeek);
+    host.classList.remove('is-up','is-new'); deltaEl.hidden = true; figs.style.display = '';
+
+    // State C — brand-new / no last-week baseline (deltaPct === null)
+    if (s.deltaPct === null){
+      iconEl.innerHTML = '<i class="fa-solid fa-seedling"></i>';
+      if (s.totalAllTime === 0){
+        host.classList.add('is-new');
+        titleEl.textContent = 'ברוך הבא למסע שלך 🌟';
+        subEl.textContent   = 'כל שיעור שתשלים השבוע יופיע כאן. בוא נתחיל בשיעור הראשון.';
+      } else if (s.thisWeek > 0){
+        titleEl.textContent = 'התחלה מצוינת לשבוע! 🚀';
+        subEl.textContent   = `כבר ${nf(s.thisWeek)} שיעורים השבוע — זו ההתחלה של משהו גדול.`;
+      } else {
+        host.classList.add('is-new');
+        titleEl.textContent = 'שבוע חדש, הזדמנות חדשה 🔥';
+        subEl.textContent   = 'שיעור אחד היום מחזיר אותך למסלול. אני איתך.';
+      }
+    }
+    // State A — improved vs last week
+    else if (s.delta > 0){
+      host.classList.add('is-up');
+      iconEl.innerHTML = '<i class="fa-solid fa-arrow-trend-up"></i>';
+      titleEl.textContent = 'כל הכבוד! שבוע חזק 💪';
+      subEl.textContent   = `השלמת ${nf(s.thisWeek)} שיעורים השבוע — ${nf(s.delta)} יותר מהשבוע שעבר. אתה בתנופה, תמשיך ככה.`;
+      deltaEl.hidden = false; deltaEl.className = 'lms-weekly__delta lms-weekly__delta--up';
+      deltaEl.textContent = `+${nf(s.delta)}`;
+    }
+    // State B — same or less (warm nudge, never shaming; negative delta hidden)
+    else {
+      iconEl.innerHTML = '<i class="fa-solid fa-heart"></i>';
+      if (s.delta === 0){
+        titleEl.textContent = 'שמרת על הקצב 👏';
+        subEl.textContent   = `${nf(s.thisWeek)} שיעורים השבוע — בדיוק כמו שבוע שעבר. יציבות זה כוח.`;
+        deltaEl.hidden = false; deltaEl.className = 'lms-weekly__delta lms-weekly__delta--flat';
+        deltaEl.textContent = '=';
+      } else {
+        titleEl.textContent = 'כל התחלה נחשבת 🌱';
+        subEl.textContent   = `השלמת ${nf(s.thisWeek)} השבוע. שיעור אחד קטן היום מחזיר אותך לקצב שלך.`;
+      }
+    }
+    host.hidden = false;
+  }
+
   function renderAll(){
     renderProgress();
     renderHero();
+    renderWeeklyStats();   // async, fire-and-forget; manages its own show/hide
     renderStats();
     renderJourney();
     renderAnnouncements();

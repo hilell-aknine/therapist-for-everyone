@@ -1596,7 +1596,7 @@
           <div class="lms-pl-video__loading" id="plLoading"><i class="fa-solid fa-circle-notch"></i> טוען שיעור…</div>
           <iframe id="plIframe" title="נגן וידאו — שיעור" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
         </div>
-        <!-- רשת ביטחון: קישור צפייה ישיר ביוטיוב, גלוי תמיד — מציל את המשתמש אם הנגן המוטמע נכשל (נפוץ בדפדפן-בתוך-אפליקציה במובייל). ה-href מתעדכן לכל שיעור ב-loadLessonVideo. -->
+        <!-- הערה: קישור fallback ליוטיוב מוצג רק כאשר הנגן המוטמע נכשל בפועל (createErrorCard). ההערה הקבועה שהייתה כאן הוסרה לבקשת הלל. -->
         <style>
           .lms-pl-yt{display:inline-flex;align-items:center;gap:.4rem;margin:.55rem .1rem .2rem;font-size:.85rem;color:var(--text-secondary,#9fb4b8);text-decoration:none;opacity:.85;transition:color .15s ease,opacity .15s ease;}
           .lms-pl-yt:hover{color:var(--gold,#D4AF37);opacity:1;text-decoration:underline;}
@@ -1606,8 +1606,6 @@
           .lms-pl-err__btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:99px;background:var(--gold,#D4AF37);color:#1a1200;font-weight:700;text-decoration:none;}
           .lms-pl-err__btn:hover{filter:brightness(1.08);}
         </style>
-        <a class="lms-pl-yt" id="plYtLink" href="https://www.youtube.com/" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i> בעיה בנגן? צפה בשיעור ישירות ביוטיוב ↗</a>
-        <div class="lms-pl-tip" id="plTip">השיעור יסומן אוטומטית אחרי 45 שניות צפייה — אפשר גם לסמן ידנית</div>
 
         <!-- Practice clips for the CURRENT master lesson — surfaced directly under the
              video so paying users actually discover them (the old standalone
@@ -3599,6 +3597,10 @@
     document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales');
     try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
     renderAll();
+    // Re-hydrate the new course's completed lessons + last-watched position from the DB,
+    // so "המשך צפייה" continues from where the learner stopped in THIS course (master/practitioner),
+    // not from the previous course. hydrateProgress() reads `courseType` (just set above) and re-renders.
+    hydrateProgress();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -3762,8 +3764,11 @@
     if (devBypass) return;
     if (!window.CourseProgress) return;
     try {
+      // Hydrate for whatever course is currently active — this is what makes "המשך צפייה"
+      // work in the Master and Practitioner-techniques courses too, not just the free course.
+      const ct = courseType;
       // getCompletedVideoIds returns a plain Array — wrap in a Set so .size/.has work.
-      const ids = new Set(await window.CourseProgress.getCompletedVideoIds('nlp-practitioner') || []);
+      const ids = new Set(await window.CourseProgress.getCompletedVideoIds(ct) || []);
       if (ids.size){
         modules.forEach((mod, mIdx) => mod.lessons.forEach((les, lIdx) => {
           if (ids.has(les.id)){
@@ -3773,8 +3778,8 @@
         }));
         localStorage.setItem(completedKey(), JSON.stringify(completedLessons));
       }
-      const last = await window.CourseProgress.getLastWatched('nlp-practitioner');
-      if (last) lastWatched = last;
+      const last = await window.CourseProgress.getLastWatched(ct);
+      lastWatched = last || null;
       // Exact playback positions — this is what lets "המשך צפייה" land on the right second
       // even on a device this learner has never opened the portal on.
       try { _dbPositions = await window.CourseProgress.getPositions() || {}; } catch(_){ _dbPositions = {}; }

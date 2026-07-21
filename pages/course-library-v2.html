@@ -1600,6 +1600,10 @@
         <style>
           .lms-pl-yt{display:inline-flex;align-items:center;gap:.4rem;margin:.55rem .1rem .2rem;font-size:.85rem;color:var(--text-secondary,#9fb4b8);text-decoration:none;opacity:.85;transition:color .15s ease,opacity .15s ease;}
           .lms-pl-yt:hover{color:var(--gold,#D4AF37);opacity:1;text-decoration:underline;}
+          /* Shown ONLY on a genuine embed failure (101/150/100), beneath a still-visible player. */
+          .lms-pl-ythint{display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap;margin:.55rem .1rem .2rem;font-size:.85rem;color:var(--text-secondary,#9fb4b8);}
+          .lms-pl-ythint i{color:#ff0000;}
+          .lms-pl-ythint a{color:var(--gold,#D4AF37);text-decoration:underline;}
           .lms-pl-err{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.85rem;text-align:center;padding:1.4rem;background:linear-gradient(180deg,rgba(0,30,36,.96),rgba(0,20,24,.98));border-radius:inherit;}
           .lms-pl-err i{font-size:2rem;color:var(--gold,#D4AF37);}
           .lms-pl-err p{margin:0;max-width:26rem;color:var(--frost-white,#E8F1F2);line-height:1.5;}
@@ -3350,8 +3354,11 @@
                 if (e.data === YT.PlayerState.PAUSED) flushPos();
                 if (e.data === YT.PlayerState.ENDED){ if (_curLessonId) clearPos(_curLessonId); markLessonCompleted(m, l); }
               },
-              // Embed refused (owner disabled embedding / private / player error) → surface an escape hatch.
-              onError: () => { try { showVideoError(_curLessonId); } catch(_){} }
+              // Only a genuine "embedding disabled by owner" (101/150) or missing/private video (100)
+              // should surface the YouTube hand-off. Generic player errors (2/5) false-fire inside
+              // mobile in-app / PWA webviews (flaky IFrame-API handshake) over a video that actually
+              // plays — those must NOT touch the embed. (Root cause of the master "המשך" red card.)
+              onError: (e) => { const c = e && e.data; if (c === 101 || c === 150 || c === 100){ try { showVideoError(_curLessonId); } catch(_){} } }
             }
           });
         } catch(_){ /* leave auto-complete disabled; manual button still works */ }
@@ -3389,8 +3396,11 @@
   }
   function _fallbackIframe(lesson, startSec){
     const hostEl = document.querySelector('.lms-pl-video');
-    // Clear any error card from a previous (failed) lesson so the fresh iframe isn't hidden behind it.
-    if (hostEl){ const prevErr = hostEl.querySelector('.lms-pl-err'); if (prevErr) prevErr.remove(); }
+    // Clear any error card / youtube hand-off hint from a previous lesson before the fresh embed.
+    if (hostEl){
+      const prevErr = hostEl.querySelector('.lms-pl-err'); if (prevErr) prevErr.remove();
+      const prevHint = hostEl.parentNode && hostEl.parentNode.querySelector('.lms-pl-ythint'); if (prevHint) prevHint.remove();
+    }
     // Always rebuild a FRESH iframe. Reusing an iframe left on about:blank is exactly what black-screened
     // the old facade flow; a fresh element avoids that AND lets us attach a YT state-reader (enablejsapi)
     // for real watch-gating. autoplay removed → entering a lesson no longer blasts sound on load.
@@ -3411,15 +3421,17 @@
     const host = document.querySelector('.lms-pl-video');
     if (!host || !videoId) return;
     _hideLoading();
-    if (host.querySelector('.lms-pl-err')) return; // already shown for this lesson
-    const ifr = document.getElementById('plIframe'); if (ifr) ifr.style.visibility = 'hidden';
-    const card = document.createElement('div');
-    card.className = 'lms-pl-err';
-    card.setAttribute('role', 'alert');
-    card.innerHTML = '<i class="fa-brands fa-youtube"></i>'
-      + '<p>השיעור הזה נפתח לצפייה ישירות ביוטיוב. אחרי הצפייה אפשר לחזור לכאן ולסמן אותו כהושלם.</p>'
-      + '<a class="lms-pl-err__btn" href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i> לצפייה בשיעור ביוטיוב ↗</a>';
-    host.appendChild(card);
+    // NON-DESTRUCTIVE: never hide the embed. In mobile in-app / PWA webviews the IFrame API can
+    // report an error even though the video actually plays — the old full-screen card HID a working
+    // video. Keep the player visible and add only a small hand-off link beneath it, for the rare
+    // case the embed genuinely can't run.
+    const parent = host.parentNode; if (!parent) return;
+    if (parent.querySelector('.lms-pl-ythint')) return; // already shown for this lesson
+    const hint = document.createElement('div');
+    hint.className = 'lms-pl-ythint';
+    hint.innerHTML = '<i class="fa-brands fa-youtube"></i> הנגן לא נטען? '
+      + '<a href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener">לצפייה בשיעור ישירות ביוטיוב ↗</a>';
+    host.insertAdjacentElement('afterend', hint);
   }
   function loadLessonVideo(lesson, m, l){
     const loading = document.getElementById('plLoading'); if (loading) loading.classList.remove('is-hidden');

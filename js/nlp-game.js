@@ -361,6 +361,24 @@ class StoryGame {
         }
     }
 
+    showLockedHint(type, id) {
+        // A locked node used to have an empty onclick — clicking it did nothing,
+        // so users couldn't tell "locked" from "broken" and reported the game as
+        // unresponsive. Now a locked node explains what to finish first.
+        let message;
+        if (type === 'module') {
+            const idx = MODULES.findIndex(m => m.id === id);
+            const mod = idx >= 0 ? MODULES[idx] : null;
+            const prev = idx > 0 ? MODULES[idx - 1] : null;
+            message = prev
+                ? `כדי לפתוח את "${mod ? mod.title : 'המפגש הזה'}" צריך קודם לסיים את המפגש הקודם: "${prev.title}".`
+                : 'המפגש הזה עדיין נעול.';
+        } else {
+            message = 'כדי לפתוח את השיעור הזה, צריך קודם לסיים את השיעור הקודם.';
+        }
+        this.showError(message);
+    }
+
     // ═══════════════════════════════════════
     // Ripple Effect
     // ═══════════════════════════════════════
@@ -1474,7 +1492,7 @@ class StoryGame {
 
             pathNodesHtml += `
                 <div class="home-path-node ${stateClass}"
-                     onclick="${isLocked ? '' : `game.transitionTo(function() { game.openModule(${module.id}) })`}">
+                     onclick="${isLocked ? `game.showLockedHint('module', ${module.id})` : `game.transitionTo(function() { game.openModule(${module.id}) })`}">
                     <div class="home-path-icon">${stateIcon}</div>
                     <div class="home-path-info">
                         <div class="home-path-label">מודול ${index + 1}</div>
@@ -1872,6 +1890,9 @@ ${answers.action || ''}`;
                 stateClass = 'available';
                 icon = '▶️';
                 onclick = `onclick="game.startLesson(${lesson.id})"`;
+            } else {
+                // locked: don't leave a dead click — explain what to finish first
+                onclick = `onclick="game.showLockedHint('lesson')"`;
             }
 
             return `
@@ -1939,14 +1960,23 @@ ${answers.action || ''}`;
         this.maxCombo = 0;
         this.showProgressBar();
 
-        // Show reading section first if available
-        if (this.currentLesson.reading) {
-            this.currentScreen = 'reading';
-            this.updateProgressBar();
-            this.renderReading();
-        } else {
-            this.currentScreen = 'exercise';
-            this.renderExercise();
+        // Show reading section first if available.
+        // Safety net: a malformed lesson (e.g. bad reading data) used to throw here
+        // BEFORE any screen was drawn — a silent dead click. Never let that happen:
+        // show a visible error and fall back to the module screen instead.
+        try {
+            if (this.currentLesson.reading) {
+                this.currentScreen = 'reading';
+                this.updateProgressBar();
+                this.renderReading();
+            } else {
+                this.currentScreen = 'exercise';
+                this.renderExercise();
+            }
+        } catch (e) {
+            console.error('[game] startLesson render failed', e, this.currentLesson);
+            this.showError('שגיאה בטעינת השיעור. חוזר לתפריט המפגש.');
+            this.transitionTo(() => this.openModule(this.currentModule.id));
         }
     }
 

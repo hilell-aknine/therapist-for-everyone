@@ -2944,16 +2944,24 @@
     if (mins >= 1) return `${mins} דק׳`;
     return '0';
   }
+  // A lesson is "playable" only if it carries a real 11-char YouTube id. Staged/placeholder
+  // chapters (e.g. a master session not yet uploaded) have an empty/invalid id and would paint
+  // the "cannot play — watch on YouTube" error card if "המשך" ever landed on them. Resume must
+  // skip those and continue to the next real video.
+  function isPlayableLesson(les){
+    return !!(les && typeof les.id === 'string' && /^[A-Za-z0-9_-]{11}$/.test(les.id));
+  }
   function getNextLesson(){
     if (lastWatched){
       const m = lastWatched.moduleIndex, l = lastWatched.lessonIndex;
-      if (modules[m] && modules[m].lessons[l] && !completedLessons.includes(`${m}-${l}`)){
-        return { m, l, lesson: modules[m].lessons[l], isFirstStart: completedLessons.length === 0 };
+      const les = modules[m] && modules[m].lessons[l];
+      if (les && isPlayableLesson(les) && !completedLessons.includes(`${m}-${l}`)){
+        return { m, l, lesson: les, isFirstStart: completedLessons.length === 0 };
       }
     }
     for (let i = 0; i < modules.length; i++){
       for (let j = 0; j < modules[i].lessons.length; j++){
-        if (!completedLessons.includes(`${i}-${j}`)){
+        if (!completedLessons.includes(`${i}-${j}`) && isPlayableLesson(modules[i].lessons[j])){
           return { m: i, l: j, lesson: modules[i].lessons[j], isFirstStart: completedLessons.length === 0 };
         }
       }
@@ -3408,9 +3416,9 @@
     const card = document.createElement('div');
     card.className = 'lms-pl-err';
     card.setAttribute('role', 'alert');
-    card.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>'
-      + '<p>לא הצלחנו לנגן את הסרטון כאן. אפשר לצפות בו ישירות ביוטיוב, ולחזור לסמן את השיעור כהושלם.</p>'
-      + '<a class="lms-pl-err__btn" href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i> צפה בשיעור ביוטיוב ↗</a>';
+    card.innerHTML = '<i class="fa-brands fa-youtube"></i>'
+      + '<p>השיעור הזה נפתח לצפייה ישירות ביוטיוב. אחרי הצפייה אפשר לחזור לכאן ולסמן אותו כהושלם.</p>'
+      + '<a class="lms-pl-err__btn" href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i> לצפייה בשיעור ביוטיוב ↗</a>';
     host.appendChild(card);
   }
   function loadLessonVideo(lesson, m, l){
@@ -3597,6 +3605,11 @@
     document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales');
     try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
     renderAll();
+    // Re-hydrate the new course's completed lessons + last-watched position from the DB,
+    // so "המשך צפייה" continues from where the learner stopped in THIS course (master/practitioner).
+    // getNextLesson() skips any placeholder lesson without a real video id, so continue can never
+    // land on an un-uploaded chapter. hydrateProgress() reads `courseType` (just set) and re-renders.
+    hydrateProgress();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -3760,8 +3773,11 @@
     if (devBypass) return;
     if (!window.CourseProgress) return;
     try {
+      // Hydrate for whatever course is currently active — this is what makes "המשך צפייה"
+      // work in the Master and Practitioner-techniques courses too, not just the free course.
+      const ct = courseType;
       // getCompletedVideoIds returns a plain Array — wrap in a Set so .size/.has work.
-      const ids = new Set(await window.CourseProgress.getCompletedVideoIds('nlp-practitioner') || []);
+      const ids = new Set(await window.CourseProgress.getCompletedVideoIds(ct) || []);
       if (ids.size){
         modules.forEach((mod, mIdx) => mod.lessons.forEach((les, lIdx) => {
           if (ids.has(les.id)){
@@ -3771,8 +3787,8 @@
         }));
         localStorage.setItem(completedKey(), JSON.stringify(completedLessons));
       }
-      const last = await window.CourseProgress.getLastWatched('nlp-practitioner');
-      if (last) lastWatched = last;
+      const last = await window.CourseProgress.getLastWatched(ct);
+      lastWatched = last || null;
       // Exact playback positions — this is what lets "המשך צפייה" land on the right second
       // even on a device this learner has never opened the portal on.
       try { _dbPositions = await window.CourseProgress.getPositions() || {}; } catch(_){ _dbPositions = {}; }

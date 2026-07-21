@@ -1424,31 +1424,9 @@ class StoryGame {
         // Build journey path nodes
         let pathNodesHtml = '';
 
-        // START node, daily challenge
-        pathNodesHtml += `
-            <div class="home-path-node special" onclick="game.startDailyChallenge()">
-                <div class="home-path-icon">${dailyChallengeCompleted ? '✅' : '🎯'}</div>
-                <div class="home-path-info">
-                    <div class="home-path-label">אתגר יומי</div>
-                    <div class="home-path-title">${dailyChallengeCompleted ? 'הושלם היום!' : 'השלימו שיעור אחד'}</div>
-                    <div class="home-path-desc">${dailyChallengeCompleted ? 'כל הכבוד! חזרו מחר' : 'קבלו בונוס XP!'}</div>
-                </div>
-                <div class="home-path-arrow">${dailyChallengeCompleted ? '' : '←'}</div>
-            </div>
-        `;
-
-        // Story Builder node
-        pathNodesHtml += `
-            <div class="home-path-node special" onclick="game.transitionTo(function() { game.startStoryBuilder() })">
-                <div class="home-path-icon">✍️</div>
-                <div class="home-path-info">
-                    <div class="home-path-label">תרגול חופשי</div>
-                    <div class="home-path-title">תרגול חופשי</div>
-                    <div class="home-path-desc">תרגלו טכניקות NLP עם ליווי של רם</div>
-                </div>
-                <div class="home-path-arrow">←</div>
-            </div>
-        `;
+        // FIX-ENGINE F-001+F-006 (2026-07-21): כרטיסי "אתגר יומי" ו"תרגול חופשי" הוסרו לבקשת הלל.
+        // המשחק בנוי בשלבים, אז ההנעה לפעולה הראשית היא "המשך מאיפה שעצרת" (ראה resumeCtaHtml למטה),
+        // ומתחתיה מסלול המודולים כשרשרת שלבים אחת. להחזרה: שחזר את בלוקי ה-home-path-node של startDailyChallenge/startStoryBuilder.
 
         // Find the next recommended module (first incomplete + unlocked)
         let nextModuleId = null;
@@ -1530,8 +1508,34 @@ class StoryGame {
             </div>
         `;
 
+        // FIX-ENGINE F-006 (2026-07-21): ההנעה-לפעולה הראשית — "המשך מאיפה שעצרת".
+        const resume = this.getResumeTarget();
+        let resumeCtaHtml = '';
+        if (resume.allDone) {
+            resumeCtaHtml = `
+                <div class="resume-cta resume-cta--done">
+                    <div class="resume-cta-icon">🏆</div>
+                    <div class="resume-cta-body">
+                        <div class="resume-cta-label">כל הכבוד!</div>
+                        <div class="resume-cta-title">סיימת את כל המודולים</div>
+                    </div>
+                </div>`;
+        } else {
+            resumeCtaHtml = `
+                <button class="resume-cta" onclick="game.resumeLearning()">
+                    <div class="resume-cta-icon">▶️</div>
+                    <div class="resume-cta-body">
+                        <div class="resume-cta-label">${resume.started ? 'המשך מאיפה שעצרת' : 'התחל ללמוד'}</div>
+                        <div class="resume-cta-title">${resume.module.title} · ${resume.lesson.title}</div>
+                    </div>
+                    <div class="resume-cta-arrow">←</div>
+                </button>`;
+        }
+
         container.innerHTML = `
             ${this.createMentorHTML(welcomeMessage, true, 'wave')}
+
+            ${resumeCtaHtml}
 
             <!-- התקדמות רמה -->
             <div class="level-progress-container">
@@ -1846,6 +1850,38 @@ ${answers.action || ''}`;
         return !hasOwnProgress;
     }
 
+    // FIX-ENGINE F-006 (2026-07-21): "המשך מאיפה שעצרת" — מאתר את השיעור הבא ללמידה.
+    // מחזיר { module, lesson, moduleIndex, lessonIndex, started, allDone }.
+    getResumeTarget() {
+        for (let i = 0; i < MODULES.length; i++) {
+            if (this.isModuleLocked(i)) continue;
+            const module = MODULES[i];
+            if (this.getModuleProgress(module.id) >= 100) continue;
+            // First incomplete lesson in this unlocked, not-yet-finished module
+            for (let j = 0; j < module.lessons.length; j++) {
+                const lesson = module.lessons[j];
+                if (!this.playerData.completedLessons[`${module.id}-${lesson.id}`]) {
+                    const started = Object.keys(this.playerData.completedLessons || {}).length > 0;
+                    return { module, lesson, moduleIndex: i, lessonIndex: j, started, allDone: false };
+                }
+            }
+        }
+        return { module: null, lesson: null, allDone: true, started: true };
+    }
+
+    // FIX-ENGINE F-006: מפעיל את "המשך מאיפה שעצרת" — פותח ישר את השיעור הבא.
+    resumeLearning() {
+        const t = this.getResumeTarget();
+        if (t.allDone || !t.module || !t.lesson) {
+            this.transitionTo(() => this.renderHomeScreen());
+            return;
+        }
+        this.transitionTo(() => {
+            this.openModule(t.module.id);
+            this.startLesson(t.lesson.id);
+        });
+    }
+
     // ═══════════════════════════════════════
     // Module Screen
     // ═══════════════════════════════════════
@@ -2013,9 +2049,7 @@ ${answers.action || ''}`;
 
         container.innerHTML = `
             <div class="reading-section">
-                <div class="reading-hero">
-                    <img src="${lessonImg}" alt="" class="reading-hero-img" onerror="this.parentElement.style.display='none'">
-                </div>
+                <!-- FIX-ENGINE F-004 (2026-07-21): תמונת ההירו הוסרה מקטעי הקריאה לבקשת הלל ("להסיר כרגע"). להחזרה: שחזר את בלוק reading-hero. -->
                 <div class="reading-header">
                     <span class="reading-icon">📖</span>
                     <h2 class="reading-title">${lesson.title}</h2>
@@ -3043,7 +3077,73 @@ ${answers.action || ''}`;
         }
 
         this.currentExerciseIndex++;
-        setTimeout(() => this.renderExercise(), 300);
+
+        // FIX-ENGINE F-007 (2026-07-21): כל 4 תרגילים — פופאפ חיזוק חיובי מגוון, מנתונים אמיתיים בלבד.
+        this._reinforceCount = (this._reinforceCount || 0) + 1;
+        const moreExercises = this.currentLesson && this.currentExerciseIndex < this.currentLesson.exercises.length;
+        if (moreExercises && this._reinforceCount % 4 === 0) {
+            this.showReinforcementPopup(() => setTimeout(() => this.renderExercise(), 100));
+        } else {
+            setTimeout(() => this.renderExercise(), 300);
+        }
+    }
+
+    // FIX-ENGINE F-007 (2026-07-21): בונה מאגר הודעות חיזוק — כל הודעה נגזרת מנתון אמיתי של השחקן.
+    // אין המצאה: הודעה מוצגת רק אם המספר שמאחוריה אמיתי ומשמעותי. (הודעות השוואתיות מסוג
+    // "רק X% מהמשתמשים סיימו" לא נכללות — הן דורשות נתוני aggregate אמיתיים מלוח המובילים, ראה דיווח.)
+    buildReinforcementMessages() {
+        const pd = this.playerData;
+        const totalAns = (pd.totalCorrectAnswers || 0) + (pd.totalWrongAnswers || 0);
+        const acc = totalAns > 0 ? Math.round((pd.totalCorrectAnswers / totalAns) * 100) : null;
+        const lessonsDone = Object.keys(pd.completedLessons || {}).length;
+        const msgs = [];
+        if (acc !== null && totalAns >= 5) {
+            msgs.push({ icon: '🎯', title: 'דיוק מרשים', text: `אתה כבר מדייק ב-${acc}% מהתשובות שלך. ככה ממשיכים!` });
+        }
+        if ((pd.xp || 0) > 0) {
+            msgs.push({ icon: '⭐', title: 'צוברים נקודות', text: `כבר ${pd.xp} נקודות XP בכיס. כל תרגיל מקרב אותך לרמה הבאה.` });
+        }
+        if ((pd.streak || 0) >= 2) {
+            msgs.push({ icon: '🔥', title: 'רצף חם', text: `${pd.streak} ימים ברצף! אל תיתן לזה להישבר.` });
+        }
+        if (lessonsDone >= 1) {
+            msgs.push({ icon: '📚', title: 'מתקדמים יפה', text: `כבר השלמת ${lessonsDone} שיעורים. הידע מצטבר.` });
+        }
+        if ((pd.perfectLessons || 0) >= 1) {
+            msgs.push({ icon: '💎', title: 'שיעורים מושלמים', text: `${pd.perfectLessons} שיעורים סיימת בלי אף טעות. חדות אמיתית.` });
+        }
+        if ((pd.longestStreak || 0) > (pd.streak || 0) && (pd.longestStreak || 0) >= 3) {
+            msgs.push({ icon: '🏆', title: 'שיא אישי', text: `השיא שלך הוא ${pd.longestStreak} ימים ברצף. בוא נשבור אותו.` });
+        }
+        if ((pd.level || 1) >= 2) {
+            msgs.push({ icon: '🚀', title: 'הרמה עולה', text: `אתה כבר ברמה ${pd.level}. ההתמדה משתלמת.` });
+        }
+        if (msgs.length === 0) {
+            msgs.push({ icon: '💪', title: 'ממשיכים', text: 'עוד תרגיל הושלם. כל צעד קטן בונה שליטה.' });
+        }
+        return msgs;
+    }
+
+    showReinforcementPopup(onContinue) {
+        const msgs = this.buildReinforcementMessages();
+        let idx = Math.floor(Math.random() * msgs.length);
+        if (msgs.length > 1 && idx === this._lastReinforceIdx) idx = (idx + 1) % msgs.length;
+        this._lastReinforceIdx = idx;
+        const m = msgs[idx];
+        document.getElementById('modal-icon').textContent = m.icon;
+        document.getElementById('modal-title').textContent = m.title;
+        document.getElementById('modal-text').textContent = m.text;
+        document.getElementById('modal-buttons').innerHTML =
+            `<button class="btn btn-primary btn-full" onclick="game.dismissReinforcement()">המשך ←</button>`;
+        this._reinforceContinue = (typeof onContinue === 'function') ? onContinue : null;
+        document.getElementById('modal-overlay').classList.add('show');
+    }
+
+    dismissReinforcement() {
+        document.getElementById('modal-overlay').classList.remove('show');
+        const cb = this._reinforceContinue;
+        this._reinforceContinue = null;
+        if (typeof cb === 'function') cb();
     }
 
     // ═══════════════════════════════════════

@@ -373,6 +373,21 @@ class StoryGame {
         }
     }
 
+    // Fire a consent-gated analytics event (GA4 + Meta) for the game funnel.
+    // window.trackEvent is defined in marketing-tools.js and no-ops without consent,
+    // so this is safe to call unconditionally. Every event carries course + guest
+    // so we can read practitioner-vs-master and guest-vs-registered drop-off.
+    track(eventName, params) {
+        try {
+            if (typeof window.trackEvent === 'function') {
+                window.trackEvent(eventName, Object.assign({
+                    course: this.courseId,
+                    is_guest: !!this.isGuest
+                }, params || {}));
+            }
+        } catch (e) { /* never let tracking break gameplay */ }
+    }
+
     showLockedHint(type, id) {
         // A locked node used to have an empty onclick — clicking it did nothing,
         // so users couldn't tell "locked" from "broken" and reported the game as
@@ -702,6 +717,9 @@ class StoryGame {
 
     // Deny path: hide the game, show a Hebrew toast, then redirect to the portal.
     lockOutPaidContent() {
+        // High-intent demand signal: a non-paying user tried to open the Master
+        // game. This is the closest thing the game has to a "wants to buy" event.
+        this.track('game_master_gate_hit', {});
         const loading = document.getElementById('loading-screen');
         if (loading) loading.style.display = 'none';
         const toast = document.getElementById('toast');
@@ -1096,6 +1114,7 @@ class StoryGame {
             document.getElementById('onboarding-overlay').style.display = 'none';
             this.playerData.onboardingComplete = true;
             this.savePlayerData();
+            this.track('game_onboarding_complete', { skipped: false });
             this.renderHomeScreen();
         } else {
             this.renderOnboardingStep();
@@ -1106,6 +1125,7 @@ class StoryGame {
         document.getElementById('onboarding-overlay').style.display = 'none';
         this.playerData.onboardingComplete = true;
         this.savePlayerData();
+        this.track('game_onboarding_complete', { skipped: true });
         this.renderHomeScreen();
     }
 
@@ -2063,6 +2083,11 @@ ${answers.action || ''}`;
         this.lessonMistakes = 0;
         this.comboCount = 0;
         this.maxCombo = 0;
+        this.track('game_lesson_start', {
+            module_id: this.currentModule.id,
+            lesson_id: this.currentLesson.id,
+            daily_challenge: !!this.isDailyChallenge
+        });
         this.showProgressBar();
 
         // Show reading section first if available.
@@ -3236,6 +3261,14 @@ ${answers.action || ''}`;
             }
 
             this.savePlayerData();
+            // Fire only on the FIRST completion of this lesson (inside the !completed
+            // guard) so replays don't inflate the funnel.
+            this.track('game_lesson_complete', {
+                module_id: this.currentModule.id,
+                lesson_id: this.currentLesson.id,
+                perfect: this.lessonMistakes === 0,
+                lessons_completed_total: Object.keys(this.playerData.completedLessons).length
+            });
         }
 
         // Sync to leaderboard
@@ -3718,6 +3751,7 @@ ${answers.action || ''}`;
     // Level Up Celebration
     // ═══════════════════════════════════════
     showLevelUpCelebration(level) {
+        this.track('game_level_up', { level: level });
         const overlay = document.getElementById('level-up-overlay');
         const text = document.getElementById('level-up-text');
         text.innerHTML = `

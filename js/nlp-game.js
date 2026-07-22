@@ -439,7 +439,17 @@ class StoryGame {
             if (ram && ram.style.display !== 'none' && ram.style.display !== '') {
                 this.toggleRamChat();
             } else if (modal && modal.classList.contains('show')) {
-                this.closeModal();
+                // Route by which modal is actually open. A blanket closeModal() here
+                // navigated HOME, so ESC on the reinforcement popup ejected the learner
+                // mid-lesson (losing the lesson's progress) and ESC on a confirm dialog
+                // acted as a silent "yes, quit".
+                if (this._reinforceContinue) {
+                    this.dismissReinforcement(); // same as the המשך button
+                } else if (this._modalKind === 'exit-confirm' || this._modalKind === 'story-exit' || this._modalKind === 'no-hearts') {
+                    this.closeModalAndStay(); // ESC = dismiss, never a destructive confirm
+                } else {
+                    this.closeModal();
+                }
             } else if (feedback && feedback.classList.contains('show')) {
                 this.continueToNext();
             }
@@ -775,7 +785,9 @@ class StoryGame {
                     this.playerData = {
                         xp: data.xp || 0,
                         level: data.level || 1,
-                        hearts: data.hearts || 5,
+                        // Number.isFinite so a legitimate 0 stays 0 — `|| 5` refilled
+                        // hearts to full on every reload for logged-in players.
+                        hearts: Number.isFinite(data.hearts) ? data.hearts : 5,
                         maxHearts: data.max_hearts || 5,
                         streak: data.streak || 0,
                         lastPlayDate: data.last_play_date || null,
@@ -798,7 +810,7 @@ class StoryGame {
                         longestStreak: data.longest_streak || 0
                     };
                     // Also cache to localStorage
-                    localStorage.setItem('nlpGameData', JSON.stringify(this.playerData));
+                    localStorage.setItem(this.localSaveKey(), JSON.stringify(this.playerData));
                     return;
                 }
 
@@ -824,10 +836,32 @@ class StoryGame {
         this.playerData = this.loadFromLocalStorage() || this.getDefaultPlayerData();
     }
 
+    // Local save key is namespaced PER COURSE. Both games used the bare
+    // 'nlpGameData' key while module/lesson ids collide across courses
+    // (both start at 1-1), so playing Master then opening the free game
+    // (or vice versa) cross-contaminated saves — the mechanism behind the
+    // "סיימתי אבל זה נעול" complaints.
+    localSaveKey() {
+        return 'nlpGameData_' + this.courseId;
+    }
+
     loadFromLocalStorage() {
         try {
-            const saved = localStorage.getItem('nlpGameData');
+            const saved = localStorage.getItem(this.localSaveKey());
             if (saved) return JSON.parse(saved);
+
+            // One-time migration of the legacy shared key. Adopted for the
+            // practitioner course only (the key predates the master game, so
+            // that is what it almost always holds); master starts fresh and
+            // restores from its own Supabase row.
+            if (this.courseId === 'practitioner') {
+                const legacy = localStorage.getItem('nlpGameData');
+                if (legacy) {
+                    localStorage.setItem(this.localSaveKey(), legacy);
+                    localStorage.removeItem('nlpGameData');
+                    return JSON.parse(legacy);
+                }
+            }
         } catch (e) { /* ignore */ }
         return null;
     }
@@ -865,7 +899,7 @@ class StoryGame {
 
     savePlayerData() {
         // Always save to localStorage immediately
-        localStorage.setItem('nlpGameData', JSON.stringify(this.playerData));
+        localStorage.setItem(this.localSaveKey(), JSON.stringify(this.playerData));
 
         // Debounced save to Supabase
         if (this.user) {
@@ -899,12 +933,15 @@ class StoryGame {
             updated_at: new Date().toISOString()
         };
 
+        // UPSERT, not UPDATE: an UPDATE matching 0 rows "succeeds" silently, so a
+        // player whose row creation failed once (network blip on first session)
+        // would report successful saves forever while persisting nothing to the
+        // cloud. Same proven shape as createSupabaseRow.
         const attempt = async () => {
             const { error } = await window.supabaseClient
                 .from('nlp_game_players')
-                .update(payload)
-                .eq('user_id', this.user.id)
-                .eq('course_id', this.courseId);
+                .upsert({ user_id: this.user.id, course_id: this.courseId, ...payload },
+                    { onConflict: 'user_id,course_id' });
             if (error) throw error;
         };
 
@@ -1411,6 +1448,7 @@ class StoryGame {
         this.isDailyChallenge = false;
 
         const modal = document.getElementById('modal-overlay');
+        this._modalKind = 'daily-complete';
         document.getElementById('modal-icon').textContent = '🎯';
         document.getElementById('modal-title').textContent = 'אתגר יומי הושלם!';
         document.getElementById('modal-text').textContent = 'קיבלת +50 XP בונוס! חזרו מחר לאתגר חדש.';
@@ -1815,6 +1853,7 @@ ${answers.action || ''}`;
 
     exitStoryBuilder() {
         const modal = document.getElementById('modal-overlay');
+        this._modalKind = 'story-exit';
         document.getElementById('modal-icon').textContent = '✍️';
         document.getElementById('modal-title').textContent = 'לצאת מבניית הסיפור?';
         document.getElementById('modal-text').textContent = 'הסיפור שלך יישמר ותוכל להמשיך אותו אחר כך.';
@@ -1997,6 +2036,11 @@ ${answers.action || ''}`;
             return;
         }
         document.body.classList.add('game-fullscreen');
+
+        // Reinforcement popup counts per LESSON ("every 4 exercises in the lesson"),
+        // not per page session — without this reset the 4th popup could land on a
+        // new lesson's first exercise.
+        this._reinforceCount = 0;
 
         if (this.playerData.hearts <= 0) {
             this.showNoHeartsModal();
@@ -3149,6 +3193,7 @@ ${answers.action || ''}`;
         document.getElementById('modal-text').textContent = m.text;
         document.getElementById('modal-buttons').innerHTML =
             `<button class="btn btn-primary btn-full" onclick="game.dismissReinforcement()">המשך ←</button>`;
+        this._modalKind = 'reinforce';
         this._reinforceContinue = (typeof onContinue === 'function') ? onContinue : null;
         document.getElementById('modal-overlay').classList.add('show');
     }
@@ -3387,6 +3432,7 @@ ${answers.action || ''}`;
     // ═══════════════════════════════════════
     showNoHeartsModal() {
         const modal = document.getElementById('modal-overlay');
+        this._modalKind = 'no-hearts';
         document.getElementById('modal-icon').textContent = '💙';
         document.getElementById('modal-title').textContent = 'רוצים להמשיך?';
         document.getElementById('modal-text').textContent = 'טעויות הן חלק מהלמידה. אפשר לקחת אוויר ולחזור, או פשוט להמשיך לתרגל.';
@@ -3413,6 +3459,7 @@ ${answers.action || ''}`;
 
     exitLesson() {
         const modal = document.getElementById('modal-overlay');
+        this._modalKind = 'exit-confirm';
         document.getElementById('modal-icon').textContent = '🚪';
         document.getElementById('modal-title').textContent = 'לצאת מהשיעור?';
         document.getElementById('modal-text').textContent = 'ההתקדמות בשיעור הזה לא תישמר.';

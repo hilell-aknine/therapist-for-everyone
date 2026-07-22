@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { PRACTITIONER_KB, MASTER_KB } from './knowledge.ts'
 
 // Keys from Supabase secrets — never hardcoded
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || ''
@@ -24,14 +25,15 @@ const SONNET_OUT_USD = Number(Deno.env.get('SONNET_OUT_USD')) || 15
 const USD_ILS = Number(Deno.env.get('USD_ILS')) || 3.8
 const AI_MONTHLY_CAP_ILS = Number(Deno.env.get('AI_MONTHLY_CAP_ILS')) || 100
 
-// Extra rules appended to the client-supplied system prompt: stay on course
+// Extra rules appended to the server-side system prompt: stay on course
 // content, and (when it helps) offer a movie/series check to anchor the concept
 // in the student's daily life. Everyday examples only — no business language.
 const MENTOR_EXTRA_RULES = `
 
 ## כללים נוספים:
 - הישאר אך ורק בנושאי הקורס וה-NLP. שאלה שאינה קשורה לחומר — החזר בעדינות לנושא במשפט אחד.
-- כשזה תורם, אתה רשאי להציע *כשאלה* קצרה לבדוק הבנה דרך דמות או סצנה מסדרה/סרט שהתלמיד מכיר, כדי לחבר את המושג לחיי היומיום. לא בכל הודעה, ותמיד מתוך תוכן הקורס. דוגמאות מהיומיום בלבד.`
+- כשזה תורם, אתה רשאי להציע *כשאלה* קצרה לבדוק הבנה דרך דמות או סצנה מסדרה/סרט שהתלמיד מכיר, כדי לחבר את המושג לחיי היומיום. לא בכל הודעה, ותמיד מתוך תוכן הקורס. דוגמאות מהיומיום בלבד.
+- אל תשתמש במקף ארוך (—) בתשובות. השתמש בפסיק או נקודה במקום.`
 
 const ALLOWED_ORIGINS = [
   'https://www.therapist-home.com',
@@ -218,6 +220,16 @@ serve(async (req) => {
       )
     }
 
+    // ── Role check: the paid Sonnet model serves paying customers only ──
+    // (Hillel's standing rule: cost-bearing per-use features are Master-only.
+    // Free-course learners still get the mentor, on the free Gemini/OpenRouter tier.)
+    const { data: prof } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    const isPaid = ['paid_customer', 'admin'].includes(prof?.role || '')
+
     // ── Rate limiting (100/day per user) — count both model rows ─────
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date())
 
@@ -240,7 +252,10 @@ serve(async (req) => {
     }
 
     // ── Parse request ───────────────────────────────
-    const { messages, systemPrompt } = await req.json()
+    // The system prompt is chosen SERVER-SIDE by course. A client-supplied
+    // systemPrompt is deliberately ignored — trusting it turned this function
+    // into a general-purpose AI proxy for any signed-in user.
+    const { messages, course } = await req.json()
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(
@@ -249,11 +264,12 @@ serve(async (req) => {
       )
     }
 
-    const sysFull = (systemPrompt || '') + MENTOR_EXTRA_RULES
+    const kb = course === 'master' ? MASTER_KB : PRACTITIONER_KB
+    const sysFull = kb + MENTOR_EXTRA_RULES
     const convo = toConvo(messages)
 
-    // ── Call AI: Sonnet (primary, smart) within budget → Gemini → OpenRouter x2 ──
-    const overBudget = (await monthlyCostShekel(supabaseAdmin)) >= AI_MONTHLY_CAP_ILS
+    // ── Call AI: Sonnet (paid users, within budget) → Gemini → OpenRouter x2 ──
+    const overBudget = isPaid ? (await monthlyCostShekel(supabaseAdmin)) >= AI_MONTHLY_CAP_ILS : true
 
     let text: string | null = null
     let provider = 'gemini'

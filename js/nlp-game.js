@@ -88,7 +88,9 @@ class SoundManager {
 class GeminiMentor {
     constructor() {
         this.endpoint = `${window.SUPABASE_CONFIG?.url || 'https://eimcudmlfjlyxjyrdcgc.supabase.co'}/functions/v1/gemini-mentor`;
-        this.systemPrompt = window.NLP_COURSE_KNOWLEDGE || 'אתה רם, מנטור NLP חם ומעודד. דבר בעברית בלבד.';
+        // The system prompt is now chosen server-side by course (the Edge Function
+        // ignores a client-supplied prompt), so we only tell it which course this is.
+        this.course = (typeof window !== 'undefined' && window.GAME_COURSE) ? window.GAME_COURSE : 'practitioner';
         this.inFlight = null;
     }
 
@@ -116,17 +118,27 @@ class GeminiMentor {
             }
             messages.push({ role: 'user', parts: [{ text: userMessage }] });
 
+            // The Edge Function requires a real user JWT (auth.getUser). Sending the
+            // anon key here returned 401 on every call and silently killed the mentor
+            // for everyone, including paying Master customers.
+            let accessToken = '';
+            try {
+                const session = await window.Auth.getSession();
+                accessToken = session?.access_token || '';
+            } catch (e) { /* no session */ }
+            if (!accessToken) return null; // guest — callers show a register invite instead
+
             const anonKey = window.SUPABASE_CONFIG?.anonKey || '';
             const res = await fetch(this.endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey': anonKey,
-                    'Authorization': `Bearer ${anonKey}`
+                    'Authorization': `Bearer ${accessToken}`
                 },
                 body: JSON.stringify({
                     messages,
-                    systemPrompt: this.systemPrompt
+                    course: this.course
                 }),
                 signal: controller.signal
             });
@@ -1671,6 +1683,7 @@ class StoryGame {
     }
 
     async showRamCoaching(stepTitle, userAnswer) {
+        if (this.isGuest) return; // mentor requires a signed-in user (EF checks the JWT)
         // Doherty threshold: show a "רם חושב..." toast IMMEDIATELY (before the await),
         // reusing the same ai-dot typing indicator as getAIFeedback / sendRamChat,
         // so the screen never sits silent while the AI replies.
@@ -3026,6 +3039,7 @@ ${answers.action || ''}`;
     }
 
     async getAIFeedback(exercise, isCorrect) {
+        if (this.isGuest) return; // mentor requires a signed-in user (EF checks the JWT)
         const explanationEl = document.getElementById('feedback-explanation');
         if (!explanationEl) return;
 
@@ -3790,6 +3804,16 @@ ${answers.action || ''}`;
         document.querySelectorAll('.term-tooltip').forEach(t => t.remove());
         const tooltip = document.createElement('div');
         tooltip.className = 'term-tooltip';
+
+        // Guests can't reach the mentor (the Edge Function requires a signed-in user).
+        if (this.isGuest) {
+            tooltip.innerHTML = `<strong>${term}</strong><br><span>ההסבר החכם של רם זמין למשתמשים רשומים. ההרשמה חינם: <a href="login.html">להתחברות</a></span>`;
+            document.body.appendChild(tooltip);
+            setTimeout(() => tooltip.classList.add('show'), 10);
+            setTimeout(() => { tooltip.classList.remove('show'); setTimeout(() => tooltip.remove(), 300); }, 8000);
+            return;
+        }
+
         tooltip.innerHTML = `<strong>${term}</strong><br><span class="term-loading">מחפש הסבר...</span>`;
         document.body.appendChild(tooltip);
         setTimeout(() => tooltip.classList.add('show'), 10);
@@ -3813,6 +3837,17 @@ ${answers.action || ''}`;
         const input = document.getElementById('ram-chat-input');
         const message = input.value.trim();
         if (!message) return;
+
+        // Guests can't reach the mentor (the Edge Function requires a signed-in user)
+        // — invite them to register instead of firing a call that would fail silently.
+        if (this.isGuest) {
+            input.value = '';
+            const messagesEl = document.getElementById('ram-chat-messages');
+            messagesEl.innerHTML += `<div class="ram-msg ram-msg-user">${message}</div>`;
+            messagesEl.innerHTML += `<div class="ram-msg ram-msg-ai">כדי לשוחח איתי צריך להתחבר, וזה בחינם לגמרי. <a href="login.html">להתחברות</a> ואני כאן!</div>`;
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            return;
+        }
 
         // Hide suggestions once user sends any message
         const suggestions = document.getElementById('ram-chat-suggestions');

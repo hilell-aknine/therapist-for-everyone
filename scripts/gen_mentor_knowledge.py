@@ -17,7 +17,8 @@ def extract(path):
     return body
 
 prac = extract(ROOT + r"\js\nlp-game-knowledge.js")
-mast = extract(ROOT + r"\js\nlp-game-knowledge-master.js")
+# master KB source moved out of the public repo with the rest of the paid content (2026-07-22)
+mast = extract(ROOT + r"\content-private\master-game\src\nlp-game-knowledge-master.js")
 
 out = (
     "// AUTO-EXTRACTED from js/nlp-game-knowledge.js + js/nlp-game-knowledge-master.js\n"

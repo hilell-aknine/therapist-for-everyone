@@ -551,6 +551,18 @@ class StoryGame {
             if (!allowed) { this.lockOutPaidContent(); return; }
         }
 
+        // Paid course data arrives from the server AFTER the gate passes (the master
+        // page defines GAME_DATA_LOADER; it is undefined on the free game, where the
+        // data files are plain public <script> tags). On failure MODULES stays unset
+        // and validateModules() below shows the friendly reload message.
+        if (typeof window.GAME_DATA_LOADER === 'function') {
+            try {
+                await window.GAME_DATA_LOADER();
+            } catch (e) {
+                console.error('[NLP Game] course data load failed', e);
+            }
+        }
+
         // Load player data
         await this.loadPlayerData(user);
 

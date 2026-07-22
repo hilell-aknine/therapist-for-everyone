@@ -144,6 +144,12 @@ function validateCourse(name, modules) {
 }
 
 // ── Run ──
+// MASTER moved out of the public repo (paid-content leak): its data now lives in
+// content-private/master-game/master-modules.json (built by build_master_game_json.mjs,
+// served to paying users via the get-game-data Edge Function). Validate the JSON —
+// that is exactly what production serves.
+const MASTER_JSON = path.join(__dirname, '..', 'content-private', 'master-game', 'master-modules.json');
+
 const courses = [
   {
     name: 'PRACTITIONER',
@@ -152,15 +158,21 @@ const courses = [
   },
   {
     name: 'MASTER',
-    files: ['nlp-game-data-master-m1.js','nlp-game-data-master-m2.js','nlp-game-data-master-m3.js','nlp-game-data-master-m4.js','nlp-game-data-master-m5.js','nlp-game-data-master-m6.js','nlp-game-data-master-m7.js','nlp-game-data-master-m8.js','nlp-game-data-master-m9.js','nlp-game-data-master-m10.js'],
-    asm: 'nlp-game-data-master.js'
+    json: MASTER_JSON
   }
 ];
 
 for (const c of courses) {
   problems.length = 0;
   let modules;
-  try { modules = loadCourse(c.files, c.asm); }
+  try {
+    if (c.json) {
+      if (!fs.existsSync(c.json)) { console.log(`\n⚠ ${c.name}: ${c.json} not found on this machine — skipped (built+validated on the machine that uploads it)`); continue; }
+      modules = JSON.parse(fs.readFileSync(c.json, 'utf8')).modules;
+    } else {
+      modules = loadCourse(c.files, c.asm);
+    }
+  }
   catch (e) { console.log(`\n❌ ${c.name}: failed to load — ${e.message}`); continue; }
   const stats = validateCourse(c.name, modules);
   const errors = problems.filter(p => p.level === 'ERROR');

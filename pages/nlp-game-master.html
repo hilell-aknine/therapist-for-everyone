@@ -411,18 +411,29 @@
     <!-- MASTER course mode — separates saves/leaderboard from the free practitioner game -->
     <!-- GAME_REQUIRE_PAID gates this page to paid_customer/admin only (enforced in nlp-game.js onAuthSuccess). -->
     <script>window.GAME_COURSE = 'master'; window.GAME_REQUIRE_PAID = true;</script>
-    <script src="../js/nlp-game-data-master-m1.js"></script>
-    <script src="../js/nlp-game-data-master-m2.js"></script>
-    <script src="../js/nlp-game-data-master-m3.js"></script>
-    <script src="../js/nlp-game-data-master-m4.js"></script>
-    <script src="../js/nlp-game-data-master-m5.js"></script>
-    <script src="../js/nlp-game-data-master-m6.js"></script>
-    <script src="../js/nlp-game-data-master-m7.js"></script>
-    <script src="../js/nlp-game-data-master-m8.js"></script>
-    <script src="../js/nlp-game-data-master-m9.js"></script>
-    <script src="../js/nlp-game-data-master-m10.js"></script>
-    <script src="../js/nlp-game-data-master.js"></script>
-    <script src="../js/nlp-game-knowledge-master.js"></script>
+    <!-- Master course data is PAID content. It is no longer shipped as public static JS
+         (anyone could download the whole course with one URL) — the engine fetches it
+         from the get-game-data Edge Function AFTER the paid gate passes, via this hook. -->
+    <script>
+        window.GAME_DATA_LOADER = async function () {
+            const session = await window.Auth.getSession();
+            const token = session && session.access_token;
+            if (!token) throw new Error('no session');
+            const res = await fetch(`${window.SUPABASE_CONFIG.functionsUrl}/get-game-data`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': window.SUPABASE_CONFIG.anonKey,
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ course: 'master' })
+            });
+            if (!res.ok) throw new Error('get-game-data ' + res.status);
+            const data = await res.json();
+            if (!Array.isArray(data.modules) || !data.modules.length) throw new Error('empty modules');
+            window.MODULES = data.modules;
+        };
+    </script>
     <script src="../js/nlp-game.js?v=20260722-1"></script>
     <script src="../js/nlp-game-leaderboard.js"></script>
     <script>

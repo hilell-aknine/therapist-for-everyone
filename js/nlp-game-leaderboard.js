@@ -433,30 +433,19 @@
         },
 
         // ─── Fetch Leaderboard ───
+        // Reads via the get_game_leaderboard RPC (SECURITY DEFINER). Direct table
+        // reads exposed every player's full name + auth user_id to any signed-in
+        // user; the RPC returns first-name-plus-initial, rank, score and is_me
+        // only, plus the caller's own rank (also cached for the FAB badge).
         async fetchLeaderboard(period) {
             if (!window.supabaseClient) return [];
             const course = window.GAME_COURSE || 'practitioner';
             try {
-                let query = window.supabaseClient
-                    .from('nlp_game_leaderboard')
-                    .select('*')
-                    .eq('course_id', course)
-                    .order('total_xp', { ascending: false })
-                    .limit(20);
-
-                if (period === 'weekly') {
-                    const weekAgo = new Date();
-                    weekAgo.setDate(weekAgo.getDate() - 7);
-                    query = query.gte('updated_at', weekAgo.toISOString());
-                }
-
-                const { data, error } = await query;
+                const { data, error } = await window.supabaseClient
+                    .rpc('get_game_leaderboard', { p_course: course, p_period: period || 'all' });
                 if (error) throw error;
-
-                return (data || []).map((row, i) => ({
-                    ...row,
-                    rank: i + 1
-                }));
+                this._myRank = (data && data.my_rank) || null;
+                return (data && data.rows) || [];
             } catch (err) {
                 console.warn('[Leaderboard] fetch error:', err);
                 return [];
@@ -464,28 +453,15 @@
         },
 
         // ─── Get Player Rank ───
-        async getPlayerRank(userId) {
-            if (!window.supabaseClient || !userId) return null;
+        async getPlayerRank() {
+            if (!window.supabaseClient || !this._currentUserId) return null;
             const course = window.GAME_COURSE || 'practitioner';
             try {
-                // Get user's XP
-                const { data: me } = await window.supabaseClient
-                    .from('nlp_game_leaderboard')
-                    .select('total_xp')
-                    .eq('user_id', userId)
-                    .eq('course_id', course)
-                    .single();
-
-                if (!me) return null;
-
-                // Count how many have higher XP
-                const { count } = await window.supabaseClient
-                    .from('nlp_game_leaderboard')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('course_id', course)
-                    .gt('total_xp', me.total_xp);
-
-                return (count || 0) + 1;
+                const { data, error } = await window.supabaseClient
+                    .rpc('get_game_leaderboard', { p_course: course, p_period: 'all' });
+                if (error) throw error;
+                this._myRank = (data && data.my_rank) || null;
+                return this._myRank;
             } catch (_) {
                 return null;
             }
@@ -514,10 +490,12 @@
                 return r;
             };
 
-            const userInTop = data.some(row => row.user_id === currentUserId);
+            // Rows come from the RPC pre-masked and carry is_me — user_id never
+            // reaches the browser anymore.
+            const userInTop = data.some(row => row.is_me);
 
             let rows = data.map(row => {
-                const isMe = row.user_id === currentUserId;
+                const isMe = !!row.is_me;
                 let rowClass = '';
                 if (row.rank <= 3) rowClass = `lb-row-${row.rank}`;
                 if (isMe) rowClass += ' lb-row-me';
@@ -549,22 +527,29 @@
                 </table>
             `;
 
-            // Show user's rank at bottom if not in top 20
-            if (currentUserId && !userInTop) {
-                this.getPlayerRank(currentUserId).then(rank => {
-                    footer.style.display = 'flex';
-                    if (rank) {
-                        footer.innerHTML = `
-                            <span>👤 המיקום שלך:</span>
-                            <span class="lb-my-rank-num">#${rank}</span>
-                        `;
-                    } else {
-                        footer.innerHTML = `
-                            <span>👤 עדיין לא דורגת</span>
-                            <span class="lb-my-rank-num">השלם שיעור כדי להיכנס לטבלה</span>
-                        `;
-                    }
-                });
+            // Guests: completing lessons never enters the board (sync requires a
+            // user) — the old "השלם שיעור כדי להיכנס" text was a false promise.
+            if (!currentUserId) {
+                footer.style.display = 'flex';
+                footer.innerHTML = `
+                    <span>👤 רוצים להופיע בטבלה?</span>
+                    <span class="lb-my-rank-num"><a href="login.html" style="color:inherit;">הירשמו בחינם</a></span>
+                `;
+            } else if (!userInTop) {
+                // fetchLeaderboard already brought my_rank — no second query needed
+                const rank = this._myRank;
+                footer.style.display = 'flex';
+                if (rank) {
+                    footer.innerHTML = `
+                        <span>👤 המיקום שלך:</span>
+                        <span class="lb-my-rank-num">#${rank}</span>
+                    `;
+                } else {
+                    footer.innerHTML = `
+                        <span>👤 עדיין לא דורגת</span>
+                        <span class="lb-my-rank-num">השלימו שיעור כדי להיכנס לטבלה</span>
+                    `;
+                }
             } else {
                 footer.style.display = 'none';
                 // Scroll to user's row if in table

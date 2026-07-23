@@ -24,9 +24,9 @@
     <link rel="stylesheet" href="../css/theme.css">
     <script src="../js/theme-toggle.js" defer></script>
     <link rel="stylesheet" href="../css/admin-styles.css">
-    <link rel="stylesheet" href="../js/admin/admin-automations.css">
+    <link rel="stylesheet" href="../js/admin/admin-automations.css?v=2">
     <link rel="stylesheet" href="../js/admin/admin-traffic.css">
-    <link rel="stylesheet" href="../js/admin/admin-sources.css">
+    <link rel="stylesheet" href="../js/admin/admin-sources.css?v=2">
 
     <!-- === SEO Tags (auto-generated) === -->
     <link rel="canonical" href="https://www.therapist-home.com/pages/admin-4fa6eb0937.html">
@@ -37,6 +37,7 @@
     <!-- === /SEO Tags === -->
 </head>
 <body>
+<!-- FIX-ENGINE F-001,F-002,F-004 (2026-07-23): הוסרו משפך לידים, לשונית לומדים, ו-Pipeline לבקשת הלל. -->
     <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
     <!-- Dashboard -->
     <div id="dashboard">
@@ -72,11 +73,6 @@
                     <i class="fa-solid fa-clipboard-list" style="color:#D4AF37;"></i>
                     <span>ניהול לידים</span>
                     <span class="badge" id="learning-count">…</span>
-                </div>
-                <div class="nav-item" onclick="switchView('funnel')">
-                    <i class="fa-solid fa-filter-circle-dollar"></i>
-                    <span>Pipeline</span>
-                    <span class="badge" id="funnel-count">…</span>
                 </div>
                 <div class="nav-item" onclick="switchView('paid')">
                     <i class="fa-solid fa-crown" style="color:#D4AF37;"></i>
@@ -146,7 +142,7 @@
 
             <main class="content" id="main-content">
                 <!-- Overview View -->
-                <div id="overview-view">
+                <div id="overview-view" data-area="overview" data-src="js/admin/admin-state.js (overview cards)">
                     <h1 class="page-title"><i class="fa-solid fa-house" style="color:var(--gold);margin-left:0.5rem;"></i> סקירה כללית</h1>
                     <div class="overview-grid">
                         <div class="overview-card" onclick="enterAllLeadsView()">
@@ -157,7 +153,6 @@
                                 <div class="overview-card-title">ניהול לידים</div>
                                 <div class="overview-card-stats">
                                     <span><strong id="ov-leads">0</strong> נרשמים</span>
-                                    <span><strong id="ov-learners">0</strong> לומדים</span>
                                     <span><strong id="ov-questionnaires">0</strong> שאלונים</span>
                                     <span><strong id="ov-leads-silent" style="color:#f85149;">0</strong> 🔇 שקטים</span>
                                 </div>
@@ -191,32 +186,7 @@
                             <i class="fa-solid fa-chevron-left overview-card-arrow"></i>
                         </div>
                     </div>
-                    <!-- Leads Funnel -->
-                    <div class="overview-recent" style="margin-bottom:1.5rem;">
-                        <h2 style="font-size:1.1rem;margin-bottom:1rem;"><i class="fa-solid fa-filter" style="color:var(--gold);margin-left:0.4rem;"></i> משפך לידים</h2>
-                        <div class="pq-funnel">
-                            <div class="pq-funnel-step">
-                                <div class="pq-funnel-num" id="funnel-registered">…</div>
-                                <div class="pq-funnel-label">נרשמו</div>
-                            </div>
-                            <div class="pq-funnel-arrow">→</div>
-                            <div class="pq-funnel-step">
-                                <div class="pq-funnel-num" id="funnel-active">…</div>
-                                <div class="pq-funnel-label">לומדים</div>
-                            </div>
-                            <div class="pq-funnel-arrow">→</div>
-                            <div class="pq-funnel-step">
-                                <div class="pq-funnel-num" id="funnel-hot" style="color:#f85149;">…</div>
-                                <div class="pq-funnel-label">חמים</div>
-                            </div>
-                            <div class="pq-funnel-arrow">→</div>
-                            <div class="pq-funnel-step">
-                                <div class="pq-funnel-num" id="funnel-pipeline" style="color:#D4AF37;">…</div>
-                                <div class="pq-funnel-label">פוטנציאליים</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="overview-recent">
+                                        <div class="overview-recent">
                         <h2 style="font-size:1.1rem;margin-bottom:1rem;"><i class="fa-solid fa-clock" style="color:var(--gold);margin-left:0.4rem;"></i> פעילות אחרונה</h2>
                         <div id="overview-recent-list" style="color:var(--text-secondary);font-size:0.9rem;">טוען...</div>
                     </div>
@@ -238,7 +208,7 @@
                 </div>
 
                 <!-- Patients View -->
-                <div id="patients-view" class="hidden">
+                <div id="patients-view" data-area="patients" data-src="js/admin/admin-patients.js" class="hidden">
                     <h1 class="page-title">מטופלים</h1>
                     <div class="stats">
                         <div class="stat-card">
@@ -302,7 +272,7 @@
                 </div>
 
                 <!-- Therapists View -->
-                <div id="therapists-view" class="hidden">
+                <div id="therapists-view" data-area="therapists" data-src="js/admin/admin-therapists.js" class="hidden">
                     <h1 class="page-title">מטפלים</h1>
                     <div class="tabs">
                         <button class="tab active" onclick="filterTherapists('all')">הכל</button>
@@ -353,7 +323,7 @@
                 </div>
 
                 <!-- Matches View -->
-                <div id="matches-view" class="hidden">
+                <div id="matches-view" data-area="matches" data-src="js/admin/admin-crud.js (matches)" class="hidden">
                     <h1 class="page-title">שידוכים</h1>
                     <div class="table-container">
                         <div class="table-header">
@@ -388,9 +358,6 @@
                         <button class="sub-tab active" onclick="switchSubView('learning', 'leads')">
                             <i class="fa-solid fa-user-plus"></i> נרשמים <span class="badge" id="leads-count">0</span>
                         </button>
-                        <button class="sub-tab" onclick="switchSubView('learning', 'learners')">
-                            <i class="fa-solid fa-book-open-reader"></i> לומדים <span class="badge" id="learners-count">0</span>
-                        </button>
                         <button class="sub-tab" onclick="switchSubView('learning', 'portal-q')">
                             <i class="fa-solid fa-clipboard-list"></i> שאלוני היכרות <span class="badge" id="portal-q-count">0</span>
                         </button>
@@ -401,7 +368,7 @@
                 </div>
 
                 <!-- Leads (Registered Users) View -->
-                <div id="leads-view" class="hidden">
+                <div id="leads-view" data-area="leads" data-src="js/admin/admin-leads.js?v=2" class="hidden">
                     <h1 class="page-title">נרשמים לאתר</h1>
                     <div class="stats">
                         <div class="stat-card">
@@ -457,7 +424,7 @@
                     </div>
                 </div>
                 <!-- Learners View -->
-                <div id="learners-view" class="hidden">
+                <div id="learners-view" data-area="learners" data-src="js/admin/admin-learners.js" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-graduation-cap" style="color:var(--gold);margin-left:0.5rem;"></i> לומדים בפורטל</h1>
                     <div class="stats">
                         <div class="stat-card">
@@ -509,7 +476,7 @@
                     </div>
                 </div>
                 <!-- Practice Game View -->
-                <div id="game-view" class="hidden">
+                <div id="game-view" data-area="game" data-src="js/admin/admin-game.js" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-gamepad" style="color:var(--gold);margin-left:0.5rem;"></i> משחק התרגול</h1>
                     <p style="color:var(--text-secondary);margin:-0.5rem 0 1.25rem;font-size:0.95rem;max-width:720px;">
                         כאן רואים מי משחק במשחק התרגול, כמה הוא התקדם, וכמה זמן עבר מאז ששיחק. הניקוד עולה על כל תשובה נכונה, הרצף סופר כמה ימים ברצף שיחקו, והדיוק הוא כמה אחוז מהתשובות היו נכונות.
@@ -566,7 +533,7 @@
                 </div>
 
                 <!-- Portal Questionnaires View -->
-                <div id="portal-q-view" class="hidden">
+                <div id="portal-q-view" data-area="portal-q" data-src="js/admin/admin-portal-questionnaires.js?v=2" class="hidden">
                     <h1 class="page-title" id="portal-q-page-title"><i class="fa-solid fa-clipboard-list" style="color:var(--gold);margin-left:0.5rem;"></i> ניהול לידים</h1>
                     <!-- Stats -->
                     <div class="stats">
@@ -580,7 +547,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon gold"><i class="fa-solid fa-star"></i></div>
-                            <div><div class="stat-value" id="stat-portal-q-avg-score">0</div><div class="stat-label">פעילות ממוצעת</div></div>
+                            <div><div class="stat-value" id="stat-portal-q-avg-score">0</div><div class="stat-label">כמה פעילים הנרשמים (ציון 0-100)</div></div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon" style="background:rgba(248,81,73,0.12);color:#f85149;"><i class="fa-solid fa-fire"></i></div>
@@ -827,7 +794,7 @@
 
                 <!-- Sales Sub-Tabs Header -->
                 <!-- Sales Funnel — All potential customers in one view -->
-                <div id="funnel-view" class="hidden">
+                <div id="funnel-view" data-area="funnel" data-src="js/admin/admin-funnel.js" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-fire" style="color:#f59e0b;margin-left:0.5rem;"></i> פאנל מכירות — כל הלקוחות הפוטנציאליים</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">כל מי שנרשם למערכת (חוץ ממטופלים ומטפלים) — ממוין לפי חמימות</p>
 
@@ -908,7 +875,7 @@
                 </div>
 
                 <!-- Outreach board (פנייה מחדש) — rendered by admin-outreach.js -->
-                <div id="outreach-view" class="hidden"></div>
+                <div id="outreach-view" data-area="outreach" data-src="js/admin/admin-outreach.js" class="hidden"></div>
 
                 <div id="sales-header" class="view-group-header hidden">
                     <div class="sub-tabs">
@@ -918,14 +885,11 @@
                         <button class="sub-tab" onclick="switchSubView('sales', 'questionnaires')">
                             <i class="fa-solid fa-clipboard-question"></i> שאלונים <span class="badge" id="questionnaires-count">0</span>
                         </button>
-                        <button class="sub-tab" onclick="switchSubView('sales', 'pipeline')">
-                            <i class="fa-solid fa-filter-circle-dollar"></i> Pipeline <span class="badge" id="pipeline-count">0</span>
-                        </button>
                     </div>
                 </div>
 
                 <!-- Contact Leads (Form Submissions) View -->
-                <div id="contact-leads-view" class="hidden">
+                <div id="contact-leads-view" data-area="contact-leads" data-src="js/admin/admin-leads.js (contact leads)" class="hidden">
                     <h1 class="page-title">לידים מטפסי האתר</h1>
                     <div class="stats">
                         <div class="stat-card">
@@ -997,7 +961,7 @@
                 </div>
 
                 <!-- Questionnaires View -->
-                <div id="questionnaires-view" class="hidden">
+                <div id="questionnaires-view" data-area="questionnaires" data-src="js/admin/admin-portal-questionnaires.js?v=2" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-clipboard-question"></i> שאלוני התאמה להכשרה</h1>
                     <div class="stats">
                         <div class="stat-card">
@@ -1075,126 +1039,14 @@
                             <button class="btn btn-success" id="q-btn-approve" onclick="updateQStatus('approved')"><i class="fa-solid fa-check"></i> אשר מועמד</button>
                             <button class="btn btn-warning" id="q-btn-review" onclick="updateQStatus('reviewed')"><i class="fa-solid fa-eye"></i> סמן כנקרא</button>
                             <button class="btn btn-danger" id="q-btn-reject" onclick="updateQStatus('rejected')"><i class="fa-solid fa-xmark"></i> דחה</button>
-                            <button class="btn" id="q-btn-pipeline" onclick="moveQToPipeline()" style="background:linear-gradient(135deg,var(--gold),#c9a227);color:white;"><i class="fa-solid fa-filter-circle-dollar"></i> העבר ל-Pipeline</button>
                             <a id="q-btn-whatsapp" href="#" target="_blank" class="btn" style="background:#25D366;color:white;margin-right:auto;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Pipeline View -->
-                <div id="pipeline-view" class="hidden">
-                    <h1 class="page-title"><i class="fa-solid fa-filter-circle-dollar"></i> Pipeline מכירות — הכשרת NLP</h1>
-
-                    <!-- Stat Cards -->
-                    <div class="stats">
-                        <div class="stat-card">
-                            <div class="stat-icon gold"><i class="fa-solid fa-users"></i></div>
-                            <div><div class="stat-value" id="stat-p-total">0</div><div class="stat-label">סה"כ לידים</div></div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon blue"><i class="fa-solid fa-phone-volume"></i></div>
-                            <div><div class="stat-value" id="stat-p-calling">0</div><div class="stat-label">בחיוגים</div></div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background:rgba(136,87,229,0.12);color:#8857e5;"><i class="fa-solid fa-presentation-screen"></i></div>
-                            <div><div class="stat-value" id="stat-p-presentation">0</div><div class="stat-label">הצגת מוצר</div></div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon green"><i class="fa-solid fa-trophy"></i></div>
-                            <div><div class="stat-value" id="stat-p-won">0</div><div class="stat-label">קנו</div></div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon red"><i class="fa-solid fa-xmark"></i></div>
-                            <div><div class="stat-value" id="stat-p-lost">0</div><div class="stat-label">לא קנו</div></div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon gold"><i class="fa-solid fa-shekel-sign"></i></div>
-                            <div><div class="stat-value" id="stat-p-revenue">0</div><div class="stat-label">הכנסות ₪</div></div>
-                        </div>
-                    </div>
-
-                    <!-- Conversion Rate Bar -->
-                    <div class="conversion-bar">
-                        <span class="conversion-bar-label">יחס המרה:</span>
-                        <div class="conversion-bar-track"><div class="conversion-bar-fill" id="conversion-bar-fill" style="width:0%"></div></div>
-                        <span class="conversion-bar-value" id="conversion-rate-value">0%</span>
-                    </div>
-
-                    <!-- Stage Filter Tabs -->
-                    <div class="tabs">
-                        <button class="tab active" onclick="filterPipeline('all')">הכל</button>
-                        <button class="tab" onclick="filterPipeline('new_lead')">🆕 חדשים</button>
-                        <button class="tab" onclick="filterPipeline('calling')">📞 בחיוגים</button>
-                        <button class="tab" onclick="filterPipeline('answered')">✅ ענו</button>
-                        <button class="tab" onclick="filterPipeline('presentation')">🎯 הצגה</button>
-                        <button class="tab" onclick="filterPipeline('closed_won')">🏆 קנו</button>
-                        <button class="tab" onclick="filterPipeline('closed_lost')">❌ לא קנו</button>
-                    </div>
-
-                    <!-- Table -->
-                    <div class="table-container">
-                        <div class="table-header">
-                            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-                                <h3>לידים מכירות</h3>
-                                <button class="btn btn-export" onclick="exportPipelineCSV()" id="btn-export-pipeline" data-admin-only>
-                                    <i class="fa-solid fa-file-excel"></i> ייצא לאקסל
-                                </button>
-                            </div>
-                            <div class="search-box">
-                                <i class="fa-solid fa-search"></i>
-                                <input type="text" placeholder="חיפוש לפי שם, טלפון, אימייל..." id="pipeline-search" oninput="renderPipeline()">
-                            </div>
-                            <select id="pipeline-source-filter" class="source-filter" onchange="setSourceFilter('pipeline', this.value)" title="סינון לפי מקור">
-                                <option value="all">כל המקורות</option>
-                            </select>
-                        </div>
-                        <div class="bulk-bar" id="bulk-bar-pipeline">
-                            <span id="bulk-count-pipeline">0 נבחרו</span>
-                            <button class="btn btn-danger" onclick="bulkDeleteEntity('pipeline')">
-                                <i class="fa-solid fa-trash"></i> מחק נבחרים
-                            </button>
-                            <select id="bulk-assign-select" style="padding:0.4rem 0.6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:0.82rem;">
-                                <option value="">הקצה ל...</option>
-                            </select>
-                            <button class="btn" style="background:var(--muted-teal);color:white;font-size:0.82rem;" onclick="bulkAssignLeads()">
-                                <i class="fa-solid fa-user-tag"></i> הקצה נבחרים
-                            </button>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th class="lead-checkbox"><input type="checkbox" id="select-all-pipeline" onchange="toggleSelectAllFor('pipeline')" title="בחר הכל"></th>
-                                    <th>שם</th>
-                                    <th>טלפון</th>
-                                    <th>שלב</th>
-                                    <th>מקור</th>
-                                    <th>חיוגים</th>
-                                    <th class="admin-only-col">מוקצה ל</th>
-                                    <th>חזרה</th>
-                                    <th>סכום ₪</th>
-                                    <th>תאריך</th>
-                                    <th>פעולות</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pipeline-table"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Pipeline Detail Modal -->
-                <div class="modal-overlay" id="pipeline-modal" onclick="if(event.target===this)closeModal('pipeline-modal')">
-                    <div class="modal-content" style="max-width:550px;max-height:90vh;overflow-y:auto;">
-                        <div class="modal-header">
-                            <h2 id="pipeline-modal-title">ליד מכירות</h2>
-                            <button onclick="closeModal('pipeline-modal')" class="modal-close">&times;</button>
-                        </div>
-                        <div id="pipeline-modal-body"></div>
-                        <div id="pipeline-modal-footer" style="display:flex;gap:0.5rem;padding:1.5rem;border-top:1px solid var(--border);flex-wrap:wrap;"></div>
-                    </div>
-                </div>
-
                 <!-- Bot CRM View -->
-                <div id="bot-view" class="hidden">
+                <div id="bot-view" data-area="bot" data-src="js/admin/admin-bot.js" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-robot"></i> בוט CRM</h1>
 
                     <!-- Bot Status Card -->
@@ -1345,7 +1197,7 @@
                 <!-- GA4 Analytics View -->
                 <!-- Instagram Tracking View -->
                 <!-- Paid Customers View -->
-                <div id="paid-view" class="hidden">
+                <div id="paid-view" data-area="paid" data-src="js/admin/admin-paid.js" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-crown" style="color:var(--gold);margin-left:0.5rem;"></i> לקוחות משלמים</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">ניהול מנויים — לקוחות שרכשו קורס מאסטר NLP</p>
 
@@ -1454,11 +1306,11 @@
                 </div>
 
                 <!-- AI mentor cost panel (rendered by admin-ai-cost.js) -->
-                <div id="ai-cost-view" class="hidden"></div>
+                <div id="ai-cost-view" data-area="ai-cost" data-src="js/admin/admin-ai-cost.js?v=2" class="hidden"></div>
                 <!-- AI mentor recurring-questions insights (rendered by admin-insights.js) -->
-                <div id="mentor-insights-view" class="hidden"></div>
+                <div id="mentor-insights-view" data-area="mentor-insights" data-src="js/admin/admin-insights.js" class="hidden"></div>
 
-                <div id="instagram-view" class="hidden">
+                <div id="instagram-view" data-area="instagram" data-src="js/admin/admin-instagram.js?v=2" class="hidden">
                     <h1 class="page-title"><i class="fa-brands fa-instagram" style="color:#E4405F;margin-left:0.5rem;"></i> מעקב אינסטגרם</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">כמה אנשים הגיעו מהקישור המוצמד באינסטגרם — <span style="direction:ltr;display:inline;">therapist-home.com/ig</span></p>
 
@@ -1554,7 +1406,7 @@
                 </div>
 
                 <!-- ===== Campaigns View ===== -->
-                <div id="campaigns-view" class="hidden">
+                <div id="campaigns-view" data-area="campaigns" data-src="js/admin/admin-campaigns.js" class="hidden">
                     <h1 class="page-title"><i class="fa-brands fa-meta" style="color:#1877F2;margin-left:0.5rem;"></i> קמפיינים ממומנים</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1rem;font-size:0.9rem;">מעקב ביצועים, לידים, עלויות ו-ROI לכל קמפיין ממומן</p>
 
@@ -1721,7 +1573,7 @@
                 </div>
 
                 <!-- ===== Referrals View ===== -->
-                <div id="referrals-view" class="hidden">
+                <div id="referrals-view" data-area="referrals" data-src="js/admin/admin-referrals.js?v=2" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-rocket" style="color:var(--gold);margin-left:0.5rem;"></i> תוכנית השותפים</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">מעקב הפניות — כמה משתמשים הביאו חברים דרך הלינק האישי שלהם</p>
 
@@ -1764,7 +1616,7 @@
                 </div>
 
                 <!-- ===== Popups View ===== -->
-                <div id="popups-view" class="hidden">
+                <div id="popups-view" data-area="popups" data-src="js/admin/admin-popups.js" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-window-restore" style="color:#2F8592;margin-left:0.5rem;"></i> ניהול פופאפים</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">יצירה, עריכה ומעקב אחר כל הפופאפים באתר</p>
 
@@ -1857,7 +1709,7 @@
                     </div>
                 </div>
 
-                <div id="analytics-view" class="hidden">
+                <div id="analytics-view" data-area="analytics" data-src="js/admin/admin-analytics.js?v=2" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-chart-line" style="color:var(--gold);margin-left:0.5rem;"></i> סטטיסטיקות האתר</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">נתונים מ-Google Analytics — כמה אנשים נכנסים לאתר, מאיפה הם מגיעים, ומה הם צופים.</p>
 
@@ -2059,45 +1911,28 @@
                 </div>
 
                 <!-- Segments & Filters View -->
-                <div id="segments-view" class="hidden"></div>
+                <div id="segments-view" data-area="segments" data-src="js/admin/admin-segments.js" class="hidden"></div>
 
                 <!-- Engine Health View — rendered by admin-health.js -->
-                <div id="health-view" class="hidden"></div>
+                <div id="health-view" data-area="health" data-src="js/admin/admin-health.js" class="hidden"></div>
 
                 <!-- Traffic Sources — Phase 3 ROI: unified "מקור הלקוחות" + 3 legacy sub-tabs -->
-                <div id="traffic-header" class="view-group-header hidden" style="margin-bottom:0.5rem;">
-                    <h1 class="page-title" style="margin-bottom:0.5rem;"><i class="fa-solid fa-compass" style="color:var(--gold);margin-left:0.5rem;"></i> מקורות תנועה</h1>
-                    <div class="sub-tabs">
-                        <button class="sub-tab active" onclick="switchSubView('traffic', 'sources')">
-                            <i class="fa-solid fa-chart-line"></i> מקור הלקוחות
-                        </button>
-                        <button class="sub-tab" onclick="switchSubView('traffic', 'traffic')" title="הדשבורד הישן של lead_attribution. ייסגר עוד שבועיים.">
-                            <i class="fa-solid fa-route"></i> טראפיק <span class="badge" style="background:rgba(0,0,0,0.1);color:var(--text-secondary);font-size:0.7rem;">ישן</span>
-                        </button>
-                        <button class="sub-tab" onclick="switchSubView('traffic', 'analytics')" title="GA4 הגולמי. ייסגר עוד שבועיים.">
-                            <i class="fa-solid fa-chart-pie"></i> GA4 <span class="badge" style="background:rgba(0,0,0,0.1);color:var(--text-secondary);font-size:0.7rem;">ישן</span>
-                        </button>
-                        <button class="sub-tab" onclick="switchSubView('traffic', 'instagram')" title="טאב אינסטגרם הישן. ייסגר עוד שבועיים.">
-                            <i class="fa-brands fa-instagram"></i> אינסטגרם <span class="badge" style="background:rgba(0,0,0,0.1);color:var(--text-secondary);font-size:0.7rem;">ישן</span>
-                        </button>
-                    </div>
-                </div>
-                <div id="sources-view" class="hidden">
+                <div id="sources-view" data-area="sources" data-src="js/admin/admin-sources.js?v=2" class="hidden">
                     <div id="sources-body"></div>
                 </div>
-                <div id="traffic-view" class="hidden">
+                <div id="traffic-view" data-area="traffic" data-src="js/admin/admin-analytics.js (traffic)" class="hidden">
                     <div id="traffic-body"></div>
                 </div>
 
                 <!-- Smart Automations View -->
-                <div id="automations-view" class="hidden">
+                <div id="automations-view" data-area="automations" data-src="js/admin/admin-automations.js?v=2" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-bolt" style="color:#D4AF37;margin-left:0.5rem;"></i> תזכורות וואטסאפ אוטומטיות</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">כל כרטיס כאן הוא תזכורת שנשלחת לבד. בכל כרטיס רואים בדיוק: <b>מתי</b> היא רצה, <b>למי</b> היא נשלחת, ו<b>מה כתוב בהודעה</b> — בדיוק כמו שהיא נראית בטלפון. תזכורת חדשה תמיד מתחילה במצב ניסיון (לא שולחת באמת) עד שאתה מאשר.</p>
                     <div id="automations-list"></div>
                 </div>
 
                 <!-- Retention (Course Abandoners) View -->
-                <div id="retention-view" class="hidden">
+                <div id="retention-view" data-area="retention" data-src="js/admin/admin-retention.js" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-bell" style="color:#D4AF37;margin-left:0.5rem;"></i> שימור — נוטשי קורס</h1>
 
                     <details id="retention-info-box" style="margin:-0.5rem 0 1.2rem;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.3);border-radius:10px;padding:0.8rem 1rem;">
@@ -2182,7 +2017,7 @@
                 </div>
 
                 <!-- Settings View -->
-                <div id="settings-view" class="hidden">
+                <div id="settings-view" data-area="settings" data-src="js/admin/admin-settings.js?v=2" class="hidden">
                     <h1 class="page-title"><i class="fa-solid fa-gear" style="color:var(--gold);margin-left:0.5rem;"></i> הגדרות דאשבורד</h1>
                     <p style="color:var(--text-secondary);margin:-1rem 0 1.5rem;font-size:0.9rem;">התאמה אישית של התצוגה, האנליטיקס, והטבלאות. ההגדרות נשמרות בדפדפן שלך.</p>
 
@@ -2886,34 +2721,34 @@
     <!-- Admin modules (dependency order) -->
     <script src="../js/admin/admin-auth.js"></script>
     <script src="../js/admin/admin-state.js"></script>
-    <script src="../js/admin/admin-utils.js"></script>
+    <script src="../js/admin/admin-utils.js?v=2"></script>
     <script src="../js/admin/admin-crud.js"></script>
     <script src="../js/admin/admin-email.js"></script>
     <script src="../js/admin/admin-patients.js"></script>
     <script src="../js/admin/admin-therapists.js"></script>
-    <script src="../js/admin/admin-leads.js"></script>
+    <script src="../js/admin/admin-leads.js?v=2"></script>
     <script src="../js/admin/admin-learners.js"></script>
     <script src="../js/admin/admin-game.js"></script>
-    <script src="../js/admin/admin-portal-questionnaires.js?v=8"></script>
-    <script src="../js/admin/admin-pipeline.js"></script>
+    <script src="../js/admin/admin-portal-questionnaires.js?v=9"></script>
     <script src="../js/admin/admin-bot.js"></script>
     <script src="../js/admin/admin-funnel.js"></script>
     <script src="../js/admin/admin-outreach.js"></script>
     <script src="../js/admin/admin-paid.js?v=2"></script>
-    <script src="../js/admin/admin-ai-cost.js"></script>
+    <script src="../js/admin/admin-ai-cost.js?v=2"></script>
     <script src="../js/admin/admin-insights.js"></script>
-    <script src="../js/admin/admin-instagram.js"></script>
-    <script src="../js/admin/admin-referrals.js"></script>
+    <script src="../js/admin/admin-instagram.js?v=2"></script>
+    <script src="../js/admin/admin-referrals.js?v=2"></script>
     <script src="../js/admin/admin-campaigns.js"></script>
     <script src="../js/admin/admin-popups.js"></script>
-    <script src="../js/admin/admin-automations.js"></script>
+    <script src="../js/admin/admin-automations.js?v=2"></script>
     <script src="../js/admin/admin-segments.js"></script>
     <script src="../js/admin/admin-retention.js"></script>
     <script src="../js/admin/admin-health.js"></script>
-    <script src="../js/admin/admin-analytics.js"></script>
-    <script src="../js/admin/admin-traffic.js"></script>
-    <script src="../js/admin/admin-sources.js?v=11"></script>
-    <script src="../js/admin/admin-settings.js"></script>
+    <script src="../js/admin/admin-analytics.js?v=2"></script>
+    <script src="../js/admin/admin-traffic.js?v=2"></script>
+    <script src="../js/admin/admin-sources.js?v=12"></script>
+    <script src="../js/admin/admin-privacy.js?v=2"></script>
+    <script src="../js/admin/admin-settings.js?v=2"></script>
     <script src="../js/admin/admin-export.js"></script>
 
     <!-- Marketing & Analytics -->

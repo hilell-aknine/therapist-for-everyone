@@ -10,13 +10,21 @@ let _trafficCache = null;
 let _trafficCacheTime = 0;
 const _TRAFFIC_CACHE_TTL = 5 * 60 * 1000;
 let _trafficDays = 30;
+// FIX-ENGINE F-005 (2026-07-23): הדשבורד הזה מרונדר עכשיו גם בתוך "פירוט מלא
+// (למתקדמים)" בעמוד הפשוט — host דינמי במקום #traffic-body קבוע. לבקשת הלל.
+let _trafficHost = null;
 
-async function loadTrafficSources() {
+function _getTrafficHost() {
+    return _trafficHost || document.getElementById('traffic-body');
+}
+
+async function loadTrafficSources(hostEl) {
+    if (hostEl) _trafficHost = hostEl;
     if (_trafficCache && (Date.now() - _trafficCacheTime) < _TRAFFIC_CACHE_TTL) {
         renderTraffic(_trafficCache);
         return;
     }
-    const host = document.getElementById('traffic-body');
+    const host = _getTrafficHost();
     if (host) host.innerHTML = '<div class="traffic-loading"><i class="fa-solid fa-circle-notch fa-spin"></i> טוען...</div>';
 
     try {
@@ -48,7 +56,7 @@ function changeTrafficRange(days) {
 }
 
 function renderTraffic({ overview, funnel, recent }) {
-    const host = document.getElementById('traffic-body');
+    const host = _getTrafficHost();
     if (!host) return;
 
     const ov = overview || {};
@@ -174,7 +182,7 @@ function renderTraffic({ overview, funnel, recent }) {
         </div>
 
         <div class="traffic-footnote">
-            💡 שים לב: הדשבורד הזה מבוסס על טבלת <code>lead_attribution</code> שמלאה רק מלידים חדשים שנשלחים דרך ה-Edge Function המעודכן. לידים ישנים (לפני ${new Date().toLocaleDateString('he-IL')}) לא יופיעו כאן אלא רק בלשוניות הישנות (Instagram + קמפיינים).
+            💡 שים לב: הפירוט הזה כולל רק אנשים חדשים שנקלטו מאז שהמערכת החדשה הותקנה (19/4/2026). אנשים ותיקים יותר מופיעים בחלקים האחרים של הפירוט המלא.
         </div>
     `;
 }
@@ -293,4 +301,183 @@ function renderRecent(rows) {
             </table>
         </div>
     `;
+}
+
+// ============================================================================
+// FIX-ENGINE F-005 (2026-07-23): העמוד הפשוט של "מקורות תנועה" — דף אחד,
+// במילים פשוטות. כרטיסי מספרים למעלה + רשימת "מאיפה הם הגיעו" אחת + מתג
+// זמן יחיד (30 ימים / הכל). כל התוכן הצפוף הישן עבר ל"פירוט מלא (למתקדמים)".
+// לבקשת הלל.
+// ============================================================================
+
+// קיבוץ המקורות הטכניים לשמות פשוטים שכל אחד מבין.
+// keys = הדליים הקנוניים של admin_unified_source_funnel (ראה FUNNEL_SOURCE_LABELS).
+const SIMPLE_SOURCE_GROUPS = [
+    { he: 'פייסבוק ואינסטגרם', keys: ['facebook', 'instagram', 'ad'],   icon: 'fa-brands fa-instagram', color: '#E4405F' },
+    { he: 'גוגל',               keys: ['google'],                        icon: 'fa-brands fa-google',    color: '#4285F4' },
+    { he: 'יוטיוב',             keys: ['youtube'],                       icon: 'fa-brands fa-youtube',   color: '#FF0000' },
+    { he: 'וואטסאפ',            keys: ['whatsapp'],                      icon: 'fa-brands fa-whatsapp',  color: '#25D366' },
+    { he: 'חבר או המלצה',       keys: ['referral', 'podcast', 'event'],  icon: 'fa-solid fa-user-group', color: '#9b59b6' },
+    { he: 'הגיעו ישירות',       keys: ['unknown'],                       icon: 'fa-solid fa-link',       color: '#9CA3AF' },
+    { he: 'אחר',                keys: ['other', 'tiktok'],               icon: 'fa-solid fa-globe',      color: '#6B7280' },
+];
+
+// data = מה ש-loadSources (admin-sources.js) כבר טען: funnel אמיתי מ-Supabase
+// + מבקרים מ-GA4 (best-effort). אפס המצאות: מה שלא נטען — מוצג "אין נתונים טריים".
+function renderSimpleSources(data) {
+    const host = document.getElementById('sources-body');
+    if (!host) return;
+
+    const t  = data.totals_per_stage || {};
+    const at = data.all_time_totals  || { leads_total: 0, registrations_total: 0, paid_total: 0 };
+    const isAllTime = _sourcesDays >= 3650;
+
+    // כרטיס מבקרים: GA4 מודד תמיד רק 30 יום אחורה — אומרים את זה ביושר
+    const visitorsValue = data.ga4_error
+        ? '<span class="simple-card-nodata">אין נתונים טריים</span>'
+        : (t.visitors || 0).toLocaleString();
+    const visitorsSub = data.ga4_error
+        ? 'גוגל לא ענה כרגע — נסה לרענן'
+        : 'לפי גוגל · תמיד 30 הימים האחרונים';
+
+    const leadsSub = isAllTime
+        ? 'מאז שהמערכת קיימת'
+        : 'סך הכל אי-פעם: ' + (at.leads_total || 0).toLocaleString();
+
+    host.innerHTML = `
+        <h1 class="page-title" style="margin-bottom:0.25rem;"><i class="fa-solid fa-compass" style="color:var(--gold,#D4AF37);margin-left:0.5rem;"></i> מקורות תנועה</h1>
+        <p class="simple-intro">כמה אנשים הגיעו, ומאיפה — במילים פשוטות.</p>
+
+        <div class="simple-toolbar">
+            <div class="simple-toggle">
+                <button class="simple-toggle-btn ${!isAllTime ? 'active' : ''}" onclick="changeSourcesRange(30)">30 ימים</button>
+                <button class="simple-toggle-btn ${isAllTime ? 'active' : ''}" onclick="changeSourcesRange(3650)">הכל</button>
+            </div>
+            <button class="btn btn-secondary" onclick="loadSources(true)"><i class="fa-solid fa-rotate"></i> רענן</button>
+        </div>
+
+        <!-- כרטיסי מספרים -->
+        <div class="simple-cards">
+            <div class="simple-card">
+                <div class="simple-card-num">${visitorsValue}</div>
+                <div class="simple-card-label">נכנסו לאתר</div>
+                <div class="simple-card-sub">${visitorsSub}</div>
+            </div>
+            <div class="simple-card">
+                <div class="simple-card-num">${(t.leads || 0).toLocaleString()}</div>
+                <div class="simple-card-label">השאירו פרטים</div>
+                <div class="simple-card-sub">${leadsSub}</div>
+            </div>
+            <div class="simple-card">
+                <div class="simple-card-num">${(t.registrations || 0).toLocaleString()}</div>
+                <div class="simple-card-label">נרשמו לפורטל</div>
+                <div class="simple-card-sub">${isAllTime ? 'מאז שהמערכת קיימת' : 'סך הכל אי-פעם: ' + (at.registrations_total || 0).toLocaleString()}</div>
+            </div>
+            <div class="simple-card simple-card-gold">
+                <div class="simple-card-num">${(at.paid_total || 0).toLocaleString()}</div>
+                <div class="simple-card-label">משלמים עכשיו</div>
+                <div class="simple-card-sub">מנוי פעיל כרגע</div>
+            </div>
+        </div>
+
+        <!-- מאיפה הם הגיעו -->
+        <div class="simple-panel">
+            <h3>מאיפה הם הגיעו?</h3>
+            <p class="simple-panel-sub">לפי אנשים שהשאירו פרטים ${isAllTime ? 'מאז ומעולם' : 'ב-30 הימים האחרונים'}</p>
+            ${_renderSimpleBreakdown(data.per_source || [])}
+        </div>
+
+        <!-- פירוט מלא — מקופל, למתקדמים בלבד -->
+        <details class="simple-adv">
+            <summary><i class="fa-solid fa-magnifying-glass-chart"></i> פירוט מלא (למתקדמים)</summary>
+            <div class="simple-adv-body">
+                <details class="simple-adv-block" ontoggle="_advShowUnified(this)">
+                    <summary>הטבלה המלאה לפי מקור (המרות, קמפיינים)</summary>
+                    <div class="simple-adv-host"></div>
+                </details>
+                <details class="simple-adv-block" ontoggle="_advShowGA4(this)">
+                    <summary>נתוני גלישה גולמיים מגוגל</summary>
+                    <div class="simple-adv-host"></div>
+                </details>
+                <details class="simple-adv-block" ontoggle="_advShowInstagram(this)">
+                    <summary>אינסטגרם — פירוט היסטורי</summary>
+                    <div class="simple-adv-host"></div>
+                </details>
+                <details class="simple-adv-block" ontoggle="_advShowJourney(this)">
+                    <summary>מסע הלקוח — לידים אחרונים ומכשירים</summary>
+                    <div class="simple-adv-host"></div>
+                </details>
+            </div>
+        </details>
+    `;
+}
+
+function _renderSimpleBreakdown(perSource) {
+    // סכימת הלידים של כל מקור טכני לתוך הקבוצות הפשוטות
+    const counts = new Map();
+    let total = 0;
+    perSource.forEach(row => {
+        const n = row.leads || 0;
+        if (!n) return;
+        const group = SIMPLE_SOURCE_GROUPS.find(g => g.keys.includes(row.source)) ||
+                      SIMPLE_SOURCE_GROUPS[SIMPLE_SOURCE_GROUPS.length - 1]; // 'אחר'
+        counts.set(group, (counts.get(group) || 0) + n);
+        total += n;
+    });
+
+    if (!total) {
+        return '<div class="simple-empty">עדיין אין נתונים לתקופה הזו. ברגע שמישהו ישאיר פרטים — הוא יופיע כאן.</div>';
+    }
+
+    const rows = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    return '<div class="simple-break">' + rows.map(([group, n]) => {
+        const pct = Math.round((n / total) * 100);
+        return `
+            <div class="simple-break-row">
+                <div class="simple-break-name">
+                    <i class="${group.icon}" style="color:${group.color};"></i>
+                    ${escapeHtml(group.he)}
+                </div>
+                <div class="simple-break-track">
+                    <div class="simple-break-fill" style="width:${Math.max(pct, 2)}%;"></div>
+                </div>
+                <div class="simple-break-val"><strong>${n.toLocaleString()}</strong> · ${pct}%</div>
+            </div>
+        `;
+    }).join('') + '</div>';
+}
+
+// ─── טעינה עצלה של בלוקי "פירוט מלא" — כל בלוק נטען רק בפתיחה ראשונה ────
+function _advHost(el) { return el.querySelector('.simple-adv-host'); }
+
+function _advShowUnified(el) {
+    if (!el.open || el.dataset.loaded) return;
+    el.dataset.loaded = '1';
+    const host = _advHost(el);
+    if (_sourcesCache && typeof renderSourcesAdvanced === 'function') {
+        renderSourcesAdvanced(_sourcesCache, host);
+    } else if (host) {
+        host.innerHTML = '<div class="simple-empty">אין נתונים טריים כרגע.</div>';
+    }
+}
+
+function _advShowGA4(el) {
+    if (!el.open || el.dataset.loaded) return;
+    el.dataset.loaded = '1';
+    const host = _advHost(el);
+    if (typeof loadGA4RawInto === 'function' && host) loadGA4RawInto(host);
+}
+
+function _advShowInstagram(el) {
+    if (!el.open || el.dataset.loaded) return;
+    el.dataset.loaded = '1';
+    const host = _advHost(el);
+    if (typeof loadInstagramInto === 'function' && host) loadInstagramInto(host);
+}
+
+function _advShowJourney(el) {
+    if (!el.open || el.dataset.loaded) return;
+    el.dataset.loaded = '1';
+    const host = _advHost(el);
+    if (host) loadTrafficSources(host);
 }

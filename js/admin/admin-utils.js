@@ -4,9 +4,9 @@
 const VIEW_GROUPS = {
     'overview': { views: ['overview'], header: null, default: 'overview' },
     'mizum':    { views: ['patients', 'therapists', 'matches'], header: 'mizum-header', default: 'patients' },
-    'funnel':   { views: ['pipeline'], header: null, default: 'pipeline' },
+    // FIX-ENGINE F-004 (2026-07-23): קבוצת funnel/Pipeline הוסרה לבקשת הלל.
     'outreach': { views: ['outreach'], header: null, default: 'outreach' },
-    'learning': { views: ['leads', 'learners', 'portal-q', 'game'], header: 'learning-header', default: 'portal-q' },
+    'learning': { views: ['leads', 'portal-q', 'game'], header: 'learning-header', default: 'portal-q' }, // FIX-ENGINE F-002 (2026-07-23): לשונית לומדים הוסרה לבקשת הלל.
     'bot':      { views: ['bot'], header: null, default: 'bot' },
     'paid':     { views: ['paid'], header: null, default: 'paid' },
     'ai-cost':  { views: ['ai-cost'], header: null, default: 'ai-cost' },
@@ -17,10 +17,10 @@ const VIEW_GROUPS = {
     'automations':{ views: ['automations'], header: null, default: 'automations' },
     'retention': { views: ['retention'], header: null, default: 'retention' },
     'health':   { views: ['health'], header: null, default: 'health' },
-    'traffic':  { views: ['sources', 'traffic', 'analytics', 'instagram'], header: 'traffic-header', default: 'sources' },
+    'traffic':  { views: ['sources'], header: null, default: 'sources' }, // FIX-ENGINE F-005 (2026-07-23): טאב אחד פשוט לבקשת הלל.
     'settings': { views: ['settings'], header: null, default: 'settings' },
     // Legacy routes — hidden from sidebar but still accessible
-    'sales':    { views: ['contact-leads', 'questionnaires', 'pipeline'], header: 'sales-header', default: 'contact-leads' },
+    'sales':    { views: ['contact-leads', 'questionnaires'], header: 'sales-header', default: 'contact-leads' }, // FIX-ENGINE F-004
 };
 
 // All individual view IDs (flat list)

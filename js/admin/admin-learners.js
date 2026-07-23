@@ -1,4 +1,7 @@
 // admin-learners.js — Learners progress view (course_progress + profiles)
+// FIX-ENGINE F-002 (2026-07-23): הטאב "לומדים" הוסר מקבוצת ניהול לידים ("לומדים זה לא רלוונטי"), לבקשת הלל.
+// הקובץ נשאר לתאימות (loadLearnersView עדיין מוזכר ב-admin-utils.js) אך אינו נטען יותר מה-UI.
+// נתוני הלמידה מוצגים ממילא בתוך "נרשמים"/"שאלוני היכרות" (עמודת שיעורים + ציון פעילות).
 
 let learnersData = [];
 let learnersLoaded = false;

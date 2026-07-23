@@ -47,7 +47,26 @@ async function loadAiCost(month) {
         aiCostCache[ym] = { data, t: Date.now() };
         renderAiCost(data);
     } catch (err) {
-        if (view) view.innerHTML = `<div style="padding:2rem;text-align:center;color:#f85149;"><i class="fa-solid fa-circle-exclamation"></i> ${escapeHtml(err.message)}</div>`;
+        // FIX-ENGINE F-011 (2026-07-23): human Hebrew error + retry button instead of the raw
+        // "Failed to fetch" (which was a CORS block on localhost — data itself is unaffected). לבקשת הלל.
+        if (!view) return;
+        const isNetwork = err.name === 'TypeError' || err.name === 'TimeoutError' || /fetch|network/i.test(err.message || '');
+        const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        let msg;
+        if (isNetwork) {
+            msg = 'לא הצלחנו למשוך את נתוני העלות מהשרת. הנתונים עצמם שמורים ולא נפגעו — זו רק בעיה בטעינה.';
+            if (isLocalhost) msg += '<br><span style="font-size:0.85rem;">שים לב: אתה עובד מסביבת פיתוח מקומית (localhost) — ייתכן שהשרת עדיין לא מאשר את הכתובת הזו (CORS). באתר החי זה עובד כרגיל.</span>';
+        } else {
+            msg = `הטעינה נכשלה: ${escapeHtml(err.message)}.<br><span style="font-size:0.85rem;">הנתונים עצמם שמורים ולא נפגעו.</span>`;
+        }
+        view.innerHTML = `
+        <div style="padding:2.5rem 2rem;text-align:center;">
+            <div style="color:#f85149;font-size:1.6rem;margin-bottom:0.8rem;"><i class="fa-solid fa-circle-exclamation"></i></div>
+            <p style="color:var(--text,#e8f1f2);margin:0 0 1.2rem;line-height:1.7;">${msg}</p>
+            <button onclick="loadAiCost('${aiCostMonth || ''}')" style="background:var(--gold,#D4AF37);color:#003B46;border:none;border-radius:8px;padding:10px 22px;font-family:inherit;font-weight:700;cursor:pointer;">
+                <i class="fa-solid fa-rotate-right" style="margin-left:0.4rem;"></i> נסה שוב
+            </button>
+        </div>`;
     }
 }
 

@@ -1,5 +1,20 @@
 // admin-referrals.js — Referral/Ambassador program analytics
 
+// FIX-ENGINE F-006 (2026-07-23): הסתרת רם אלוס מתצוגות שותפים לבקשת הלל.
+// סינון בצד תצוגה בלבד — שום דבר לא נמחק/משתנה בדאטהבייס.
+// ids: user_id-ים חסומים (לא אותר דרך anon בגלל RLS — להוסיף כאן כשיאותר).
+// names: התאמת שם (case-insensitive, כולל התאמה חלקית) כגיבוי.
+const EXCLUDED_REFERRERS = {
+    ids: [],
+    names: ['ram alus', 'רם אלוס']
+};
+
+function isExcludedReferrer(userId, name) {
+    if (userId && EXCLUDED_REFERRERS.ids.includes(userId)) return true;
+    const n = (name || '').trim().toLowerCase();
+    return !!n && EXCLUDED_REFERRERS.names.some(ex => n === ex || n.includes(ex));
+}
+
 let refCache = null;
 let refCacheTime = 0;
 const REF_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -33,9 +48,18 @@ async function loadReferralAnalytics() {
             });
         }
 
+        // FIX-ENGINE F-006 (2026-07-23): הסתרת רם אלוס מתצוגות שותפים לבקשת הלל.
+        // מסננים לפני שמירה ב-cache, כך שכל התצוגות והמונים (סה"כ, 30/7 ימים,
+        // היום, ממליצים ייחודיים, badge, טבלת מובילים, רשימת אחרונים)
+        // מחושבים מחדש אחרי הסינון ונשארים עקביים.
+        const filteredReferrals = (allReferrals.data || []).filter(r =>
+            !isExcludedReferrer(r.referrer_id, nameMap[r.referrer_id]));
+        const filteredLeaderboard = (leaderboard.data || []).filter(row =>
+            !isExcludedReferrer(row.referrer_id, row.referrer_name || nameMap[row.referrer_id]));
+
         refCache = {
-            referrals: allReferrals.data || [],
-            leaderboard: leaderboard.data || [],
+            referrals: filteredReferrals,
+            leaderboard: filteredLeaderboard,
             nameMap
         };
         refCacheTime = Date.now();

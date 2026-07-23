@@ -10,6 +10,30 @@ async function loadLeads() {
     renderLeads();
 }
 
+// FIX-ENGINE F-002 (2026-07-23): סנכרון נרשמים↔שאלוני היכרות — כל נרשם שמילא שאלון לחיץ ופותח את פרטי השאלון, לבקשת הלל.
+// portalQuestionnaires (admin-portal-questionnaires.js) is keyed by user_id = profiles.id.
+function _leadQuestionnaire(profileId) {
+    if (typeof portalQuestionnaires === 'undefined' || typeof portalQLoaded === 'undefined' || !portalQLoaded) return null;
+    return portalQuestionnaires.find(q => q.user_id === profileId && q.has_questionnaire) || null;
+}
+
+// Opens the existing questionnaire/prospect modal (viewPortalQ) for a registrant row.
+// If questionnaire data isn't loaded yet (parallel startup), loads it first.
+async function openLeadQuestionnaire(profileId) {
+    const open = () => {
+        const q = portalQuestionnaires.find(x => x.user_id === profileId && x.has_questionnaire)
+               || portalQuestionnaires.find(x => x.user_id === profileId);
+        if (q && typeof viewPortalQ === 'function') viewPortalQ(q.id);
+        else showToast('לא נמצא שאלון לנרשם זה', 'warning');
+    };
+    if (typeof portalQLoaded !== 'undefined' && portalQLoaded) { open(); return; }
+    if (typeof loadPortalQuestionnaires === 'function') {
+        showToast('טוען נתוני שאלונים...', 'info');
+        await loadPortalQuestionnaires();
+        open();
+    }
+}
+
 function renderLeads() {
     const search = document.getElementById('leads-search')?.value?.toLowerCase() || '';
     let filtered = leads;
@@ -35,26 +59,35 @@ function renderLeads() {
     for (const [group, items] of Object.entries(groups)) {
         if (items.length === 0) continue;
         html += `<tr class="date-group-row"><td colspan="8"><i class="fa-solid ${dateGroupIcons[group]}"></i> ${group} (${items.length})</td></tr>`;
-        html += items.map(l => `
-            <tr>
-                <td class="lead-checkbox"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('leads')"></td>
-                <td><strong>${escapeHtml(l.full_name || '-')}</strong></td>
-                <td>${l.phone ? `<a href="tel:${escAttr(l.phone)}">${escapeHtml(l.phone)}</a>` : '-'}</td>
+        html += items.map(l => {
+            // FIX-ENGINE F-002 (2026-07-23): נרשם שמילא שאלון היכרות — השורה לחיצה ופותחת את השאלון, לבקשת הלל.
+            const pq = _leadQuestionnaire(l.id);
+            const qLoaded = (typeof portalQLoaded !== 'undefined' && portalQLoaded);
+            const qBadge = pq
+                ? ' <span style="font-size:0.65rem;background:rgba(212,175,55,0.15);color:var(--gold,#D4AF37);padding:0.1rem 0.35rem;border-radius:4px;white-space:nowrap;"><i class="fa-solid fa-clipboard-check"></i> שאלון</span>'
+                : (qLoaded ? ' <span style="font-size:0.65rem;background:rgba(128,128,128,0.12);color:var(--text-secondary);padding:0.1rem 0.35rem;border-radius:4px;white-space:nowrap;">ללא שאלון</span>' : '');
+            return `
+            <tr${pq ? ` onclick="openLeadQuestionnaire('${l.id}')" style="cursor:pointer;" title="לחיצה פותחת את שאלון ההיכרות"` : ''}>
+                <td class="lead-checkbox" onclick="event.stopPropagation()"><input type="checkbox" value="${l.id}" onchange="updateBulkBarFor('leads')"></td>
+                <td><strong>${escapeHtml(l.full_name || '-')}</strong>${qBadge}</td>
+                <td onclick="event.stopPropagation()">${l.phone ? `<a href="tel:${escAttr(l.phone)}">${escapeHtml(l.phone)}</a>` : '-'}</td>
                 <td>${escapeHtml(l.email || '-')}</td>
                 <td>${l.role ? `<span class="role-badge role-${l.role}">${roleLabel(l.role)}</span>` : ''}</td>
                 <td>${renderSourceChip(l, attributionMap.get('profiles:' + l.id))}</td>
                 <td>${formatDate(l.created_at)}</td>
-                <td class="action-btns">
+                <td class="action-btns" onclick="event.stopPropagation()">
                     <div class="row-menu" id="menu-l-${l.id}">
                         <button class="row-menu-btn" onclick="toggleRowMenu('menu-l-${l.id}')">⋮</button>
                         <div class="row-menu-dropdown">
+                            ${pq ? `<button class="row-menu-item" onclick="openLeadQuestionnaire('${l.id}');closeAllMenus()"><i class="fa-solid fa-clipboard-check" style="color:var(--gold,#D4AF37);"></i> צפייה בשאלון</button>` : ''}
                             <button class="row-menu-item" onclick="openEditModal('profiles','${l.id}');closeAllMenus()"><i class="fa-solid fa-pen"></i> עריכה</button>
                             <button class="row-menu-item danger" onclick="deleteEntity('profiles','${l.id}','${escJsStr(l.full_name || '')}');closeAllMenus()"><i class="fa-solid fa-trash"></i> מחיקה</button>
                         </div>
                     </div>
                 </td>
             </tr>
-        `).join('');
+        `;
+        }).join('');
     }
     tbody.innerHTML = html;
 }

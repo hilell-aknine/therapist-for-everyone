@@ -103,6 +103,12 @@ async function loadPortalQuestionnaires() {
         populatePqFilterOptions();
         renderPortalQuestionnaires();
         updateFunnelStats();
+
+        // FIX-ENGINE F-002 (2026-07-23): רענון טבלת הנרשמים אחרי שנתוני השאלונים נטענו,
+        // כדי שתגיות "שאלון"/"ללא שאלון" והלחיצות יופיעו גם אם הנרשמים רונדרו קודם (טעינה מקבילית), לבקשת הלל.
+        if (typeof renderLeads === 'function' && typeof leads !== 'undefined' && Array.isArray(leads) && leads.length) {
+            renderLeads();
+        }
     } catch (err) { console.error('Error loading portal questionnaires:', err); }
 }
 
@@ -157,6 +163,17 @@ function updatePqStats() {
     setText('learning-count', t);
     setText('stat-portal-q-today', today);
     setText('stat-portal-q-avg-score', avg);
+
+    // FIX-ENGINE F-003 (2026-07-23): "פעילות ממוצעת" לא הובן — שם ברור + טולטיפ הסבר, לבקשת הלל.
+    // The metric = average of fitScore (0-100) across ALL registrants: completed lessons + how recently
+    // active + practice-game play (see calculateFitScore). Renamed in plain Hebrew + title tooltip.
+    const avgValueEl = document.getElementById('stat-portal-q-avg-score');
+    if (avgValueEl) {
+        const avgLabelEl = avgValueEl.parentElement?.querySelector('.stat-label');
+        if (avgLabelEl) avgLabelEl.textContent = 'כמה פעילים הנרשמים (ציון 0-100)';
+        const avgCard = avgValueEl.closest('.stat-card');
+        if (avgCard) avgCard.title = 'ממוצע ציון הפעילות של כל הנרשמים: כמה שיעורים סיימו, מתי נכנסו ללמוד לאחרונה וכמה שיחקו במשחק התרגול. 0 = רדומים לגמרי, 100 = פעילים מאוד.';
+    }
     setText('stat-portal-q-hot', hot + warm);
     setText('stat-portal-q-not-called', notCalled);
 

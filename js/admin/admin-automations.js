@@ -334,8 +334,9 @@ function renderAutomations() {
         list.innerHTML = `
             <div class="empty-state" style="text-align:center;padding:3rem 1rem;">
                 <i class="fa-solid fa-bolt" style="font-size:3rem;color:var(--gold);opacity:0.4;"></i>
-                <h3 style="margin:1rem 0 0.5rem;color:var(--frost-white);">עדיין אין כללים</h3>
-                <p style="color:#999;margin-bottom:1.5rem;">צור כלל אוטומציה ראשון או בחר תבנית מוכנה למטה</p>
+                <!-- FIX-ENGINE F-007-010 (2026-07-23): contrast fix לבקשת הלל — theme tokens instead of hardcoded light colors -->
+                <h3 style="margin:1rem 0 0.5rem;color:var(--text);">עדיין אין כללים</h3>
+                <p style="color:var(--text-secondary);margin-bottom:1.5rem;">צור כלל אוטומציה ראשון או בחר תבנית מוכנה למטה</p>
                 ${renderTemplates()}
             </div>
         `;
@@ -443,7 +444,7 @@ function renderRuleCard(rule) {
                     <button class="btn-icon" title="ערוך" onclick="openAutomationEditor('${rule.id}')">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <button class="btn-icon" title="בדיקת תקינות" onclick="diagnoseAutomation('${rule.id}')" style="color:#2F8592;">
+                    <button class="btn-icon" title="בדיקת תקינות" onclick="diagnoseAutomation('${rule.id}')" style="color:var(--t-muted-teal, #2F8592);">
                         <i class="fa-solid fa-stethoscope"></i>
                     </button>
                     <button class="btn-icon" title="הפעל עכשיו" onclick="runAutomationNow('${rule.id}')">
@@ -619,7 +620,7 @@ function renderConditionRow(cond, idx) {
 
     let valueInput = '';
     if (['is_true','is_false','is_null','is_not_null'].includes(cond.op)) {
-        valueInput = '<span style="color:#777;align-self:center;">(אין צורך בערך)</span>';
+        valueInput = '<span style="color:var(--text-secondary, #777);align-self:center;">(אין צורך בערך)</span>'; // FIX-ENGINE F-007-010 (2026-07-23): contrast fix לבקשת הלל
     } else if (fieldDef?.type === 'enum') {
         valueInput = `<select class="auto-input small" onchange="updateConditionField(${idx},'value',this.value)">
             ${(fieldDef.options || []).map(opt => `<option value="${opt}" ${cond.value === opt ? 'selected' : ''}>${opt}</option>`).join('')}

@@ -1,42 +1,124 @@
 // admin-analytics.js — GA4 Analytics: load, render, cache
 
-async function loadGA4Analytics() {
-    // Use cache if fresh
-    if (ga4Cache && (Date.now() - ga4CacheTime) < GA4_CACHE_TTL) {
-        renderGA4Data(ga4Cache);
-        return;
+// FIX-ENGINE F-005 (2026-07-23): שליפת הנתונים הופרדה לפונקציה משותפת כדי
+// שגם הבלוק "נתוני גלישה גולמיים מגוגל" בעמוד הפשוט ישתמש באותו cache. לבקשת הלל.
+async function _fetchGA4Data() {
+    if (ga4Cache && (Date.now() - ga4CacheTime) < GA4_CACHE_TTL) return ga4Cache;
+
+    const { data: { session } } = await db.auth.getSession();
+    const token = session?.access_token;
+    if (!token) throw new Error('לא מחובר — יש להתחבר מחדש');
+
+    const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl || 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
+    const res = await fetch(`${functionsUrl}/ga4-analytics`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        signal: AbortSignal.timeout(15000)
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
     }
 
+    const data = await res.json();
+    ga4Cache = data;
+    ga4CacheTime = Date.now();
+    return data;
+}
+
+async function loadGA4Analytics() {
     try {
-        const { data: { session } } = await db.auth.getSession();
-        const token = session?.access_token;
-        if (!token) {
-            showGA4Error('לא מחובר — יש להתחבר מחדש');
-            return;
-        }
-
-        const functionsUrl = window.SUPABASE_CONFIG?.functionsUrl || 'https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1';
-        const res = await fetch(`${functionsUrl}/ga4-analytics`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            signal: AbortSignal.timeout(15000)
-        });
-
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || `HTTP ${res.status}`);
-        }
-
-        const data = await res.json();
-        ga4Cache = data;
-        ga4CacheTime = Date.now();
-        renderGA4Data(data);
+        renderGA4Data(await _fetchGA4Data());
     } catch (err) {
         /* GA4 load error handled by UI */
         showGA4Error(err.message);
     }
+}
+
+// FIX-ENGINE F-005 (2026-07-23): רינדור קומפקטי של נתוני GA4 הגולמיים לתוך
+// container נתון — משמש את "פירוט מלא (למתקדמים)" בעמוד הפשוט. אם גוגל לא
+// עונה — "אין נתונים טריים" בעברית פשוטה, בלי להמציא מספרים. לבקשת הלל.
+async function loadGA4RawInto(host) {
+    if (!host) return;
+    host.innerHTML = '<div class="sources-loading"><i class="fa-solid fa-circle-notch fa-spin"></i> טוען נתונים מגוגל...</div>';
+
+    let data;
+    try {
+        data = await _fetchGA4Data();
+    } catch (err) {
+        host.innerHTML = '<div class="sources-empty">אין נתונים טריים מגוגל כרגע. נסה שוב מאוחר יותר.</div>';
+        console.error('[GA4 raw] load error:', err);
+        return;
+    }
+
+    const channelHe = {
+        'Organic Search': 'חיפוש בגוגל',
+        'Direct': 'ישיר (הקלידו כתובת)',
+        'Organic Social': 'רשתות חברתיות',
+        'Referral': 'קישור מאתר אחר',
+        'Paid Search': 'פרסום בגוגל (ממומן)',
+        'Paid Social': 'פרסום ברשתות (ממומן)',
+        'Email': 'אימייל',
+        'Unassigned': 'לא ידוע',
+    };
+
+    const ts = data.traffic_sources || { channels: [], totalSessions: 0 };
+    const ds = (data.detailed_sources && data.detailed_sources.sources) || [];
+    const daily = ((data.users && data.users.daily) || []).slice(0, 7);
+
+    const channelRows = ts.channels.map(ch => `
+        <tr>
+            <td>${escapeHtml(channelHe[ch.channel] || ch.channel)}</td>
+            <td><strong>${(ch.sessions || 0).toLocaleString()}</strong></td>
+            <td>${ch.percentage || 0}%</td>
+            <td>${ch.newUsers || 0}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="4" class="sources-empty">אין נתונים</td></tr>';
+
+    const sourceRows = ds.slice(0, 15).map(s => `
+        <tr>
+            <td style="direction:ltr;text-align:right;">${escapeHtml(s.source || '—')}</td>
+            <td>${escapeHtml(s.medium || '—')}</td>
+            <td><strong>${(s.sessions || 0).toLocaleString()}</strong></td>
+            <td>${(s.users || 0).toLocaleString()}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="4" class="sources-empty">אין נתונים</td></tr>';
+
+    const dailyRows = daily.map(d => `
+        <tr>
+            <td>${new Date(d.date).toLocaleDateString('he-IL', { weekday: 'short', day: 'numeric', month: 'short' })}</td>
+            <td><strong>${d.activeUsers}</strong></td>
+            <td>${d.newUsers}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="3" class="sources-empty">אין נתונים</td></tr>';
+
+    host.innerHTML = `
+        <p class="simple-adv-note">הנתונים כאן מגיעים ישירות מגוגל אנליטיקס ומכסים את 30 הימים האחרונים בלבד.</p>
+        <div class="sources-panel">
+            <h3>איך אנשים הגיעו (לפי גוגל)</h3>
+            <table class="sources-table">
+                <thead><tr><th>ערוץ</th><th>ביקורים</th><th>אחוז</th><th>חדשים</th></tr></thead>
+                <tbody>${channelRows}</tbody>
+            </table>
+        </div>
+        <div class="sources-panel">
+            <h3>מקורות מפורטים</h3>
+            <table class="sources-table">
+                <thead><tr><th>מקור</th><th>סוג</th><th>ביקורים</th><th>גולשים</th></tr></thead>
+                <tbody>${sourceRows}</tbody>
+            </table>
+        </div>
+        <div class="sources-panel">
+            <h3>השבוע האחרון — יום אחרי יום</h3>
+            <table class="sources-table">
+                <thead><tr><th>יום</th><th>גולשים</th><th>חדשים</th></tr></thead>
+                <tbody>${dailyRows}</tbody>
+            </table>
+        </div>
+    `;
 }
 
 function renderGA4Data(data) {

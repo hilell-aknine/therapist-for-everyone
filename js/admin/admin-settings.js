@@ -30,6 +30,7 @@ function loadSettingsView() {
         });
         return;
     }
+    renderDemoModeCard(); // FIX-ENGINE F-012 (2026-07-23): מצב דמו לבקשת הלל
     const s = getDashboardSettings();
     document.getElementById('setting-date-range').value = s.dateRange;
     document.getElementById('setting-max-pages').value = s.maxPages;
@@ -44,6 +45,48 @@ function loadSettingsView() {
     // Sync theme select with actual theme
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     document.getElementById('setting-theme').value = currentTheme;
+}
+
+// FIX-ENGINE F-012 (2026-07-23): מצב דמו לבקשת הלל
+// Injects the "demo mode" toggle card into the settings view (HTML is static,
+// so the card is built here). State lives in localStorage via AdminPrivacy.
+function renderDemoModeCard() {
+    const existingCb = document.getElementById('setting-demo-mode');
+    if (existingCb) {
+        if (window.AdminPrivacy) existingCb.checked = AdminPrivacy.isActive();
+        return;
+    }
+    const view = document.getElementById('settings-view');
+    if (!view) return;
+
+    const section = document.createElement('div');
+    section.className = 'settings-section';
+    section.id = 'demo-mode-section';
+    section.innerHTML = `
+        <div class="settings-section-header">
+            <i class="fa-solid fa-user-secret"></i> מצב דמו — הסתרת שמות וטלפונים
+        </div>
+        <div class="settings-section-body">
+            <div class="settings-row">
+                <div class="settings-label">
+                    <strong>טשטוש פרטים אישיים בכל הדאשבורד</strong>
+                    <span>מטשטש שמות מלאים, מספרי טלפון ואימיילים — מתאים להדגמה או שיתוף מסך על נתונים חיים. הנתונים עצמם לא משתנים, רק התצוגה. כיבוי: כאן או בלחיצה על החיווי הצף.</span>
+                </div>
+                <label class="utm-config-toggle" title="הפעלה/כיבוי של מצב דמו">
+                    <input type="checkbox" id="setting-demo-mode"
+                        onchange="window.AdminPrivacy && AdminPrivacy.setActive(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>`;
+
+    // Insert as the first settings card
+    const firstSection = view.querySelector('.settings-section');
+    view.insertBefore(section, firstSection || null);
+
+    if (window.AdminPrivacy) {
+        document.getElementById('setting-demo-mode').checked = AdminPrivacy.isActive();
+    }
 }
 
 function saveDashboardSettings() {

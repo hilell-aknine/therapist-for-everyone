@@ -56,10 +56,21 @@ function _normalizeGA4Source(rawSource) {
     return 'other';
 }
 
+// FIX-ENGINE F-005 (2026-07-23): הדף הראשי הוחלף בעמוד פשוט (renderSimpleSources
+// ב-admin-traffic.js). הטבלה הצפופה כאן הפכה ל"פירוט מלא (למתקדמים)" —
+// renderSourcesAdvanced(data, host). לבקשת הלל.
+function _renderSourcesPage(data) {
+    if (typeof renderSimpleSources === 'function') {
+        renderSimpleSources(data);
+    } else {
+        renderSourcesAdvanced(data, document.getElementById('sources-body'));
+    }
+}
+
 async function loadSources(forceRefresh) {
     if (forceRefresh) { _sourcesCache = null; _sourcesCacheTime = 0; }
     if (_sourcesCache && (Date.now() - _sourcesCacheTime) < _SOURCES_CACHE_TTL) {
-        renderSources(_sourcesCache);
+        _renderSourcesPage(_sourcesCache);
         return;
     }
     const host = document.getElementById('sources-body');
@@ -82,10 +93,15 @@ async function loadSources(forceRefresh) {
 
         _sourcesCache = _mergeFunnelWithVisitors(funnel, ga4, ga4Error);
         _sourcesCacheTime = Date.now();
-        renderSources(_sourcesCache);
+        _renderSourcesPage(_sourcesCache);
     } catch (err) {
         console.error('[Sources] load error:', err);
-        if (host) host.innerHTML = `<div class="sources-error"><i class="fa-solid fa-circle-exclamation"></i> שגיאה בטעינת הדשבורד: ${escapeHtml(err.message || String(err))}</div>`;
+        // FIX-ENGINE F-005 (2026-07-23): הודעת כשל בעברית פשוטה, בלי ז'רגון. לבקשת הלל.
+        if (host) host.innerHTML = `
+            <div class="sources-error">
+                <i class="fa-solid fa-circle-exclamation"></i> אין נתונים טריים כרגע.
+                <button class="btn btn-secondary" style="margin-right:0.75rem;" onclick="loadSources(true)"><i class="fa-solid fa-rotate"></i> נסה שוב</button>
+            </div>`;
     }
 }
 
@@ -187,8 +203,11 @@ function _mergeFunnelWithVisitors(funnel, ga4, ga4Error) {
     };
 }
 
-function renderSources(data) {
-    const host = document.getElementById('sources-body');
+// FIX-ENGINE F-005 (2026-07-23): לשעבר renderSources — עכשיו מרונדר בתוך
+// "פירוט מלא (למתקדמים)" בעמוד הפשוט. בלי פסי טווח משלו (עוקב אחרי המתג
+// הראשי 30 ימים / הכל). לבקשת הלל.
+function renderSourcesAdvanced(data, host) {
+    host = host || document.getElementById('sources-body');
     if (!host) return;
 
     const t = data.totals_per_stage;
@@ -198,21 +217,12 @@ function renderSources(data) {
     const totalL2R = t.leads > 0 ? Math.min(100, (t.lead_and_reg / t.leads) * 100).toFixed(0) : '—';
 
     host.innerHTML = `
-        <!-- Toolbar -->
+        <!-- Toolbar (advanced) -->
         <div class="sources-toolbar">
-            <div class="sources-range">
-                <button class="sources-range-btn ${_sourcesDays===7?'active':''}"   onclick="changeSourcesRange(7)">7 ימים</button>
-                <button class="sources-range-btn ${_sourcesDays===30?'active':''}"  onclick="changeSourcesRange(30)">30 ימים</button>
-                <button class="sources-range-btn ${_sourcesDays===90?'active':''}"  onclick="changeSourcesRange(90)">90 ימים</button>
-                <button class="sources-range-btn ${_sourcesDays===365?'active':''}" onclick="changeSourcesRange(365)">שנה</button>
-                <button class="sources-range-btn ${_sourcesDays>=3650?'active':''}" onclick="changeSourcesRange(3650)" title="כל הזמן (10 שנים אחורה — מספיק לכל פעילות הפרויקט)">כל הזמן</button>
-            </div>
+            <div style="font-size:0.85rem;color:var(--text-secondary,#4B5563);">מציג נתונים לתקופה: <strong>${_sourcesDays >= 3650 ? 'כל הזמן' : _sourcesDays + ' ימים'}</strong></div>
             <div class="sources-actions">
                 <button class="btn btn-secondary" onclick="showWeeklyReconciliation()">
                     <i class="fa-solid fa-chart-simple"></i> דוח התאמה שבועי
-                </button>
-                <button class="btn btn-secondary" onclick="loadSources(true)">
-                    <i class="fa-solid fa-rotate"></i> רענן
                 </button>
             </div>
         </div>

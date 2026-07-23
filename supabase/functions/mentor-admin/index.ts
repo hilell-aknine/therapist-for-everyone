@@ -34,6 +34,11 @@ const ALLOWED_ORIGINS = [
   'https://www.therapist-home.com',
   'https://therapist-home.com',
   'https://therapist-for-everyone.vercel.app',
+  // FIX-ENGINE F-011 (2026-07-23): local dev origins were missing — preflight failed on
+  // localhost and the "עלויות AI" tab showed "Failed to fetch". Added to match the other
+  // Edge Functions (submit-lead, get-lessons, etc.). לבקשת הלל.
+  'http://localhost:8770',
+  'http://localhost:3000',
 ]
 
 function getCorsHeaders(req: Request) {

@@ -278,3 +278,220 @@
     .sources-table th, .sources-table td { padding: 0.5rem 0.4rem; }
     .campaign-subtable th, .campaign-subtable td { padding: 0.4rem 0.75rem; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FIX-ENGINE F-005 (2026-07-23): העמוד הפשוט של "מקורות תנועה" — כרטיסי
+   מספרים, רשימת "מאיפה הגיעו" עם פס אחוזים, מתג 30 ימים/הכל, ופירוט מלא
+   מקופל. משתמש במשתני התמה — עובד גם בכהה וגם בבהיר. לבקשת הלל.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.simple-intro {
+    color: var(--text-secondary, #4B5563);
+    font-size: 0.95rem;
+    margin: 0 0 1.25rem;
+}
+
+/* Toolbar: one time toggle + refresh */
+.simple-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+.simple-toggle {
+    display: inline-flex;
+    background: var(--card, #fff);
+    border: 1px solid var(--border, rgba(0,0,0,0.1));
+    border-radius: 10px;
+    overflow: hidden;
+}
+.simple-toggle-btn {
+    background: transparent;
+    color: var(--text-secondary, #4B5563);
+    border: 0;
+    padding: 0.55rem 1.4rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.simple-toggle-btn:hover { color: var(--text, #1A2D33); }
+.simple-toggle-btn.active {
+    background: var(--gold, #D4AF37);
+    color: #003B46;
+    font-weight: 700;
+}
+
+/* Headline number cards */
+.simple-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.simple-card {
+    background: var(--card, #fff);
+    border: 1px solid var(--border, rgba(0,0,0,0.1));
+    border-radius: 14px;
+    padding: 1.25rem 1.4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.simple-card-gold::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; left: 0;
+    height: 3px;
+    background: var(--gold, #D4AF37);
+}
+.simple-card-num {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--gold, #D4AF37);
+    line-height: 1.1;
+    font-family: 'Frank Ruhl Libre', serif;
+}
+.simple-card-nodata {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary, #4B5563);
+}
+.simple-card-label {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text, #1A2D33);
+}
+.simple-card-sub {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary, #4B5563);
+}
+
+/* "מאיפה הם הגיעו" panel */
+.simple-panel {
+    background: var(--card, #fff);
+    border: 1px solid var(--border, rgba(0,0,0,0.1));
+    border-radius: 14px;
+    padding: 1.4rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.simple-panel h3 {
+    margin: 0;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 1.2rem;
+    color: var(--text, #1A2D33);
+}
+.simple-panel-sub {
+    margin: 0.25rem 0 1rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary, #4B5563);
+}
+.simple-break { display: flex; flex-direction: column; gap: 0.65rem; }
+.simple-break-row {
+    display: grid;
+    grid-template-columns: 170px 1fr 90px;
+    align-items: center;
+    gap: 0.75rem;
+}
+.simple-break-name {
+    font-size: 0.95rem;
+    color: var(--text, #1A2D33);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.simple-break-track {
+    background: var(--bg, #E8F1F2);
+    border-radius: 99px;
+    height: 12px;
+    overflow: hidden;
+}
+.simple-break-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--gold, #D4AF37), #e8cd6e);
+    transition: width 0.4s ease;
+}
+.simple-break-val {
+    font-size: 0.9rem;
+    color: var(--text, #1A2D33);
+    white-space: nowrap;
+    text-align: left;
+}
+.simple-empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-secondary, #4B5563);
+    font-size: 0.95rem;
+}
+
+/* Collapsed advanced details */
+.simple-adv {
+    border: 1px dashed var(--border, rgba(0,0,0,0.15));
+    border-radius: 14px;
+    background: transparent;
+    margin-bottom: 2rem;
+}
+.simple-adv > summary {
+    cursor: pointer;
+    padding: 0.9rem 1.25rem;
+    color: var(--text-secondary, #4B5563);
+    font-size: 0.9rem;
+    font-weight: 600;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    user-select: none;
+}
+.simple-adv > summary::-webkit-details-marker { display: none; }
+.simple-adv > summary::before {
+    content: '◂';
+    font-size: 0.75rem;
+    transition: transform 0.15s;
+}
+.simple-adv[open] > summary::before { transform: rotate(-90deg); }
+.simple-adv[open] > summary { color: var(--gold, #D4AF37); }
+.simple-adv-body {
+    padding: 0 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.simple-adv-block {
+    border: 1px solid var(--border, rgba(0,0,0,0.1));
+    border-radius: 10px;
+    background: var(--card, #fff);
+}
+.simple-adv-block > summary {
+    cursor: pointer;
+    padding: 0.7rem 1rem;
+    font-size: 0.88rem;
+    color: var(--text, #1A2D33);
+    list-style: none;
+    user-select: none;
+}
+.simple-adv-block > summary::-webkit-details-marker { display: none; }
+.simple-adv-block[open] > summary {
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.08));
+    font-weight: 600;
+}
+.simple-adv-host { padding: 1rem; }
+.simple-adv-host .sources-panel { margin-bottom: 1rem; padding: 1rem; }
+.simple-adv-note {
+    font-size: 0.82rem;
+    color: var(--text-secondary, #4B5563);
+    margin: 0 0 0.75rem;
+}
+
+@media (max-width: 640px) {
+    .simple-break-row { grid-template-columns: 120px 1fr 80px; }
+    .simple-card-num { font-size: 1.9rem; }
+}

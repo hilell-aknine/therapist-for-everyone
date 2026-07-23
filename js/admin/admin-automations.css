@@ -1,4 +1,17 @@
 /* admin-automations.css — Smart Automations Rule Builder */
+/* ------------------------------------------------------------------------
+   FIX-ENGINE F-007-010 (2026-07-23): contrast fix לבקשת הלל.
+   The cards section hardcoded dark-mode colors (var(--frost-white) — an
+   UNDEFINED variable whose #E8F1F2 fallback always rendered near-white text —
+   plus #aaa/#999/#888 grays, white-alpha borders, black-alpha backgrounds).
+   Light mode is the site DEFAULT (css/theme.css), so titles/desc/meta showed
+   light-on-light. All text colors now use the same theme tokens the rest of
+   the dashboard uses (--text / --text-secondary / --card / --card-hover /
+   --border via css/admin-styles.css bridge → css/theme.css), with gold text
+   on light backgrounds routed through --t-gold-text (#8B6914, AA on white).
+   Greens that were too pale for white get an explicit [data-theme="dark"]
+   override. Old dark values kept as var() fallbacks.
+   ------------------------------------------------------------------------ */
 
 #automations-view { padding: 0; }
 
@@ -12,7 +25,7 @@
     margin-bottom: 1.5rem;
 }
 .automations-toolbar .auto-count {
-    color: #999;
+    color: var(--text-secondary, #999); /* FIX-ENGINE F-007-010 */
     font-size: 0.9rem;
 }
 
@@ -45,7 +58,7 @@
 .auto-card-title h3 {
     margin: 0 0 0.25rem;
     font-size: 1.05rem;
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #E8F1F2); /* FIX-ENGINE F-007-010: was var(--frost-white) */
     font-family: 'Frank Ruhl Libre', serif;
 }
 .auto-card-meta {
@@ -53,7 +66,7 @@
     flex-wrap: wrap;
     gap: 0.75rem;
     font-size: 0.78rem;
-    color: #aaa;
+    color: var(--text-secondary, #aaa); /* FIX-ENGINE F-007-010 */
 }
 .auto-card-meta i { margin-left: 0.25rem; opacity: 0.7; }
 
@@ -65,17 +78,17 @@
     width: 32px; height: 32px;
     border-radius: 6px;
     background: transparent;
-    color: #aaa;
+    color: var(--text-secondary, #aaa); /* FIX-ENGINE F-007-010 */
     border: 1px solid transparent;
     cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
     transition: all 0.15s;
 }
-.btn-icon:hover { background: rgba(212, 175, 55, 0.1); color: var(--gold, #D4AF37); border-color: rgba(212, 175, 55, 0.3); }
-.btn-icon.danger:hover { background: rgba(214, 69, 69, 0.12); color: #E57373; border-color: rgba(214, 69, 69, 0.35); }
+.btn-icon:hover { background: rgba(212, 175, 55, 0.1); color: var(--t-gold-text, var(--gold, #D4AF37)); border-color: rgba(212, 175, 55, 0.3); }
+.btn-icon.danger:hover { background: rgba(214, 69, 69, 0.12); color: var(--danger, #E57373); border-color: rgba(214, 69, 69, 0.35); }
 
 .auto-card-desc {
-    color: #aaa;
+    color: var(--text-secondary, #aaa); /* FIX-ENGINE F-007-010 */
     font-size: 0.85rem;
     margin: 0.75rem 0;
     line-height: 1.5;
@@ -86,7 +99,7 @@
     gap: 1rem;
     padding: 0.75rem 0;
     margin-top: 0.5rem;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    border-top: 1px solid var(--border, rgba(255,255,255,0.05)); /* FIX-ENGINE F-007-010 */
 }
 .auto-stat {
     text-align: center;
@@ -94,17 +107,17 @@
 }
 .auto-stat-num {
     font-size: 1.4rem;
-    color: var(--gold, #D4AF37);
+    color: var(--t-gold-text, var(--gold, #D4AF37)); /* FIX-ENGINE F-007-010: readable gold in light mode */
     font-weight: 600;
     line-height: 1;
 }
-.auto-stat-label { font-size: 0.7rem; color: #888; margin-top: 0.25rem; }
-.auto-stat.error .auto-stat-num { color: #E57373; }
+.auto-stat-label { font-size: 0.7rem; color: var(--text-secondary, #888); margin-top: 0.25rem; } /* FIX-ENGINE F-007-010 */
+.auto-stat.error .auto-stat-num { color: var(--danger, #E57373); }
 
 .auto-card-footer {
     margin-top: 0.5rem;
     font-size: 0.75rem;
-    color: #777;
+    color: var(--text-secondary, #777); /* FIX-ENGINE F-007-010 */
     text-align: left;
     direction: ltr;
 }
@@ -145,8 +158,8 @@
     font-size: 0.7rem;
     font-weight: 600;
 }
-.auto-badge-dry { background: rgba(212,175,55,0.15); color: var(--gold, #D4AF37); }
-.auto-badge-live { background: rgba(47,133,146,0.22); color: var(--dusty-aqua, #2F8592); }
+.auto-badge-dry { background: rgba(212,175,55,0.15); color: var(--t-gold-text, var(--gold, #D4AF37)); } /* FIX-ENGINE F-007-010 */
+.auto-badge-live { background: rgba(47,133,146,0.22); color: var(--t-muted-teal, var(--dusty-aqua, #2F8592)); } /* FIX-ENGINE F-007-010 */
 
 /* ------------------------------------------------------------------------
    DRY-RUN WARNING — loud card state for "enabled + dry_run" rules.
@@ -170,17 +183,17 @@
     border-radius: 12px 12px 0 0;
     background: rgba(212,175,55,0.14);
     border-bottom: 1px solid rgba(212,175,55,0.35);
-    color: #f0e1a8;
+    color: var(--text, #f0e1a8); /* FIX-ENGINE F-007-010: pale gold text was invisible on light bg */
     font-size: 0.85rem;
     line-height: 1.35;
 }
 .auto-dry-warning i.fa-triangle-exclamation {
-    color: var(--gold, #D4AF37);
+    color: var(--t-gold-text, var(--gold, #D4AF37));
     font-size: 1rem;
     flex-shrink: 0;
 }
 .auto-dry-warning span { flex: 1; }
-.auto-dry-warning b { color: #fff; font-weight: 700; }
+.auto-dry-warning b { color: var(--text, #fff); font-weight: 700; } /* FIX-ENGINE F-007-010 */
 .auto-dry-golive {
     flex-shrink: 0;
     background: var(--gold, #D4AF37);
@@ -204,8 +217,8 @@
     background: rgba(212,175,55,0.12);
     border-color: rgba(212,175,55,0.35);
 }
-.auto-stat.dry .auto-stat-num { color: var(--gold, #D4AF37); }
-.auto-stat.dry .auto-stat-label { color: #f0e1a8; }
+.auto-stat.dry .auto-stat-num { color: var(--t-gold-text, var(--gold, #D4AF37)); } /* FIX-ENGINE F-007-010 */
+.auto-stat.dry .auto-stat-label { color: var(--text-secondary, #f0e1a8); } /* FIX-ENGINE F-007-010 */
 
 /* Audience count badge on rule cards */
 .auto-audience-badge {
@@ -213,14 +226,14 @@
     align-items: center;
     gap: 0.35rem;
     background: rgba(47,133,146,0.18);
-    color: var(--dusty-aqua, #2F8592);
+    color: var(--t-muted-teal, var(--dusty-aqua, #2F8592)); /* FIX-ENGINE F-007-010 */
     padding: 0.15rem 0.6rem;
     border-radius: 12px;
     font-size: 0.72rem;
     font-weight: 600;
     border: 1px solid rgba(47,133,146,0.3);
 }
-.auto-audience-badge.loading { color: #8fa3a6; border-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); }
+.auto-audience-badge.loading { color: var(--text-secondary, #8fa3a6); border-color: var(--border, rgba(255,255,255,0.08)); background: var(--card-hover, rgba(255,255,255,0.04)); } /* FIX-ENGINE F-007-010 */
 
 /* Live count pill inside editor */
 .auto-live-count-badge {
@@ -237,20 +250,20 @@
     border: 1px solid transparent;
 }
 .auto-count-pill strong { font-size: 1.15rem; font-weight: 700; }
-.auto-count-pill.ok { background: rgba(47,133,146,0.18); color: var(--frost-white, #E8F1F2); border-color: rgba(47,133,146,0.45); }
-.auto-count-pill.ok strong { color: var(--gold, #D4AF37); }
-.auto-count-pill.zero { background: rgba(90,107,110,0.2); color: #c5d4d6; border-color: rgba(255,255,255,0.12); }
-.auto-count-pill.zero strong { color: #E8F1F2; }
-.auto-count-pill.err { background: rgba(214,69,69,0.15); color: #E57373; border-color: rgba(214,69,69,0.4); }
-.auto-count-loading { color: #8fa3a6; font-size: 0.85rem; font-style: italic; }
-.auto-error-text { color: #E57373; }
+.auto-count-pill.ok { background: rgba(47,133,146,0.18); color: var(--text, #E8F1F2); border-color: rgba(47,133,146,0.45); } /* FIX-ENGINE F-007-010 */
+.auto-count-pill.ok strong { color: var(--t-gold-text, var(--gold, #D4AF37)); } /* FIX-ENGINE F-007-010 */
+.auto-count-pill.zero { background: rgba(90,107,110,0.2); color: var(--text-secondary, #c5d4d6); border-color: var(--border, rgba(255,255,255,0.12)); } /* FIX-ENGINE F-007-010 */
+.auto-count-pill.zero strong { color: var(--text, #E8F1F2); } /* FIX-ENGINE F-007-010 */
+.auto-count-pill.err { background: rgba(214,69,69,0.15); color: var(--danger, #E57373); border-color: rgba(214,69,69,0.4); }
+.auto-count-loading { color: var(--text-secondary, #8fa3a6); font-size: 0.85rem; font-style: italic; } /* FIX-ENGINE F-007-010 */
+.auto-error-text { color: var(--danger, #E57373); }
 
 /* ============================================================
    TEMPLATES section
    ============================================================ */
 .auto-templates-section h3 {
     margin: 2rem 0 1rem;
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #E8F1F2); /* FIX-ENGINE F-007-010 */
     font-family: 'Frank Ruhl Libre', serif;
 }
 .auto-templates-grid {
@@ -259,7 +272,7 @@
     gap: 0.75rem;
 }
 .auto-template-card {
-    background: rgba(0,59,70,0.6);
+    background: var(--card, rgba(0,59,70,0.6)); /* FIX-ENGINE F-007-010: semi-petrol bg made white text unreadable on light page */
     border: 1px dashed rgba(212,175,55,0.3);
     border-radius: 10px;
     padding: 1rem;
@@ -268,27 +281,27 @@
 }
 .auto-template-card:hover {
     border-color: var(--gold, #D4AF37);
-    background: rgba(0,59,70,0.9);
+    background: var(--card-hover, rgba(0,59,70,0.9)); /* FIX-ENGINE F-007-010 */
     transform: translateY(-2px);
 }
 .auto-template-icon {
-    color: var(--gold, #D4AF37);
+    color: var(--t-gold-text, var(--gold, #D4AF37)); /* FIX-ENGINE F-007-010 */
     font-size: 1.4rem;
     margin-bottom: 0.5rem;
 }
 .auto-template-name {
     font-weight: 600;
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #E8F1F2); /* FIX-ENGINE F-007-010 */
     margin-bottom: 0.25rem;
 }
 .auto-template-desc {
-    color: #999;
+    color: var(--text-secondary, #999); /* FIX-ENGINE F-007-010 */
     font-size: 0.8rem;
     margin-bottom: 0.5rem;
     line-height: 1.4;
 }
 .auto-template-cron {
-    color: var(--gold, #D4AF37);
+    color: var(--t-gold-text, var(--gold, #D4AF37)); /* FIX-ENGINE F-007-010 */
     font-size: 0.75rem;
 }
 
@@ -301,25 +314,25 @@
 .auto-edit-section {
     margin-bottom: 1.75rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border, rgba(255,255,255,0.05)); /* FIX-ENGINE F-007-010 */
 }
 .auto-edit-section:last-child { border-bottom: 0; }
 .auto-edit-section h4 {
     margin: 0 0 0.75rem;
-    color: var(--dusty-aqua, #2F8592);
+    color: var(--t-muted-teal, var(--dusty-aqua, #2F8592)); /* FIX-ENGINE F-007-010 */
     font-size: 1rem;
     font-family: 'Frank Ruhl Libre', serif;
     letter-spacing: 0.01em;
 }
-.auto-help-inline { font-size: 0.8rem; color: #888; font-weight: normal; }
+.auto-help-inline { font-size: 0.8rem; color: var(--text-secondary, #888); font-weight: normal; } /* FIX-ENGINE F-007-010 */
 
 .auto-input {
     width: 100%;
-    background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--bg, rgba(0,0,0,0.25)); /* FIX-ENGINE F-007-010: black-alpha bg + white text broke in light mode */
+    border: 1px solid var(--border, rgba(255,255,255,0.1));
     border-radius: 6px;
     padding: 0.6rem 0.75rem;
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #E8F1F2);
     font-family: inherit;
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
@@ -337,11 +350,11 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 }
 .auto-help {
     font-size: 0.78rem;
-    color: #888;
+    color: var(--text-secondary, #888); /* FIX-ENGINE F-007-010 */
     margin-top: 0.25rem;
     line-height: 1.5;
 }
-.auto-help code { background: rgba(0,0,0,0.4); padding: 0.1rem 0.4rem; border-radius: 4px; color: var(--gold, #D4AF37); }
+.auto-help code { background: var(--card-hover, rgba(0,0,0,0.4)); padding: 0.1rem 0.4rem; border-radius: 4px; color: var(--t-gold-text, var(--gold, #D4AF37)); } /* FIX-ENGINE F-007-010 */
 
 .auto-condition-row {
     display: grid;
@@ -359,10 +372,10 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
     margin-top: 1rem;
 }
 .auto-preview-result {
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #E8F1F2); /* FIX-ENGINE F-007-010 */
     font-size: 1rem;
 }
-.auto-preview-result strong { color: var(--gold, #D4AF37); font-size: 1.4rem; margin-left: 0.25rem; }
+.auto-preview-result strong { color: var(--t-gold-text, var(--gold, #D4AF37)); font-size: 1.4rem; margin-left: 0.25rem; } /* FIX-ENGINE F-007-010 */
 
 .auto-sample-list {
     margin-top: 1rem;
@@ -371,17 +384,17 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
     border-radius: 8px;
     border: 1px solid rgba(47,133,146,0.25);
 }
-.auto-sample-phone { color: #9ab3b6; direction: ltr; }
-.auto-sample-lessons { color: #9ab3b6; font-size: 0.82em; }
-.auto-sample-title { color: #888; font-size: 0.8rem; margin-bottom: 0.5rem; }
+.auto-sample-phone { color: var(--text-secondary, #9ab3b6); direction: ltr; } /* FIX-ENGINE F-007-010 */
+.auto-sample-lessons { color: var(--text-secondary, #9ab3b6); font-size: 0.82em; } /* FIX-ENGINE F-007-010 */
+.auto-sample-title { color: var(--text-secondary, #888); font-size: 0.8rem; margin-bottom: 0.5rem; } /* FIX-ENGINE F-007-010 */
 .auto-sample-row {
     display: grid;
     grid-template-columns: 1.5fr 1fr auto;
     gap: 0.75rem;
     padding: 0.35rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border, rgba(255,255,255,0.04)); /* FIX-ENGINE F-007-010 */
     font-size: 0.85rem;
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #E8F1F2); /* FIX-ENGINE F-007-010 */
 }
 .auto-sample-row:last-child { border-bottom: 0; }
 
@@ -393,7 +406,7 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 }
 .auto-var-chip {
     background: rgba(212,175,55,0.12);
-    color: var(--gold, #D4AF37);
+    color: var(--t-gold-text, var(--gold, #D4AF37)); /* FIX-ENGINE F-007-010 */
     padding: 0.25rem 0.65rem;
     border-radius: 12px;
     font-size: 0.78rem;
@@ -407,10 +420,10 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 .auto-live-preview {
     margin-top: 1rem;
 }
-.auto-preview-label { color: #888; font-size: 0.78rem; margin-bottom: 0.4rem; }
+.auto-preview-label { color: var(--text-secondary, #888); font-size: 0.78rem; margin-bottom: 0.4rem; } /* FIX-ENGINE F-007-010 */
 .auto-preview-bubble {
     background: linear-gradient(135deg, rgba(47,133,146,0.28), rgba(0,96,107,0.35));
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #E8F1F2); /* FIX-ENGINE F-007-010 */
     padding: 0.85rem 1.1rem;
     border-radius: 14px 14px 14px 4px;
     max-width: 90%;
@@ -426,13 +439,13 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
     align-items: flex-start;
     gap: 0.75rem;
     padding: 0.75rem;
-    background: rgba(0,0,0,0.2);
+    background: var(--card-hover, rgba(0,0,0,0.2)); /* FIX-ENGINE F-007-010 */
     border-radius: 8px;
     cursor: pointer;
     margin-bottom: 1rem;
 }
 .auto-checkbox-row input { margin-top: 0.3rem; }
-.auto-checkbox-row strong { color: var(--frost-white, #E8F1F2); }
+.auto-checkbox-row strong { color: var(--text, #E8F1F2); } /* FIX-ENGINE F-007-010 */
 
 .auto-input-row {
     display: flex;
@@ -443,7 +456,7 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 }
 .auto-input-row label {
     min-width: 240px;
-    color: #ccc;
+    color: var(--text, #ccc); /* FIX-ENGINE F-007-010 */
     font-size: 0.9rem;
 }
 .auto-input-row .auto-help { width: 100%; margin-right: 240px; margin-top: 0; }
@@ -458,10 +471,10 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 .auto-editor-footer {
     position: sticky;
     bottom: 0;
-    background: var(--deep-petrol, #003B46);
+    background: var(--card, var(--deep-petrol, #003B46)); /* FIX-ENGINE F-007-010: petrol bg clashed with light modal */
     padding: 1rem 0 0;
     margin-top: 1rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid var(--border, rgba(255,255,255,0.1)); /* FIX-ENGINE F-007-010 */
     display: flex;
     gap: 0.5rem;
     justify-content: flex-end;
@@ -479,11 +492,11 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 .auto-runs-table th, .auto-runs-table td {
     text-align: right;
     padding: 0.6rem 0.75rem;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border, rgba(255,255,255,0.05)); /* FIX-ENGINE F-007-010 */
 }
 .auto-runs-table th {
-    background: rgba(0,0,0,0.2);
-    color: #aaa;
+    background: var(--card-hover, rgba(0,0,0,0.2)); /* FIX-ENGINE F-007-010 */
+    color: var(--text-secondary, #aaa); /* FIX-ENGINE F-007-010 */
     font-weight: 600;
 }
 .auto-run-status {
@@ -494,11 +507,11 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
     font-weight: 600;
     text-transform: uppercase;
 }
-.auto-run-sent     { background: rgba(47,133,146,0.2); color: var(--dusty-aqua, #2F8592); }
-.auto-run-dry_run  { background: rgba(212,175,55,0.15); color: var(--gold, #D4AF37); }
-.auto-run-failed   { background: rgba(214,69,69,0.15); color: #E57373; }
-.auto-run-skipped  { background: rgba(150,150,150,0.15); color: #999; }
-.auto-run-err-cell { color: #E57373; font-size: 0.85em; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.auto-run-sent     { background: rgba(47,133,146,0.2); color: var(--t-muted-teal, var(--dusty-aqua, #2F8592)); } /* FIX-ENGINE F-007-010 */
+.auto-run-dry_run  { background: rgba(212,175,55,0.15); color: var(--t-gold-text, var(--gold, #D4AF37)); } /* FIX-ENGINE F-007-010 */
+.auto-run-failed   { background: rgba(214,69,69,0.15); color: var(--danger, #E57373); }
+.auto-run-skipped  { background: rgba(150,150,150,0.15); color: var(--text-secondary, #999); } /* FIX-ENGINE F-007-010 */
+.auto-run-err-cell { color: var(--danger, #E57373); font-size: 0.85em; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 768px) {
     .auto-condition-row { grid-template-columns: 1fr; }
@@ -521,7 +534,7 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
     margin-bottom: 0.75rem;
 }
 
-.seg-error { color: #E57373; }
+.seg-error { color: var(--danger, #E57373); } /* FIX-ENGINE F-007-010 */
 
 /* --- KPI strip --- */
 .seg-kpi-grid {
@@ -566,7 +579,7 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 .seg-reengage-btn:hover {
     background: var(--card-hover);
     border-color: var(--gold, #D4AF37);
-    color: var(--gold, #D4AF37);
+    color: var(--t-gold-text, var(--gold, #D4AF37)); /* FIX-ENGINE F-007-010 */
 }
 
 .seg-kpi-icon {
@@ -766,9 +779,11 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
     border-radius: 999px;
     margin-top: 0.25rem;
 }
-.auto-status.live { background: rgba(46, 160, 67, 0.15); color: #4CC38A; border: 1px solid rgba(76, 195, 138, 0.35); }
-.auto-status.dry  { background: rgba(212, 175, 55, 0.12); color: var(--gold, #D4AF37); border: 1px solid rgba(212, 175, 55, 0.35); }
-.auto-status.off  { background: rgba(150, 150, 150, 0.12); color: #999; border: 1px solid rgba(150, 150, 150, 0.3); }
+/* FIX-ENGINE F-007-010: pale green #4CC38A unreadable on white — dark green in light, original in dark */
+.auto-status.live { background: rgba(46, 160, 67, 0.15); color: #1B7F4B; border: 1px solid rgba(76, 195, 138, 0.35); }
+[data-theme="dark"] .auto-status.live { color: #4CC38A; }
+.auto-status.dry  { background: rgba(212, 175, 55, 0.12); color: var(--t-gold-text, var(--gold, #D4AF37)); border: 1px solid rgba(212, 175, 55, 0.35); } /* FIX-ENGINE F-007-010 */
+.auto-status.off  { background: rgba(150, 150, 150, 0.12); color: var(--text-secondary, #999); border: 1px solid rgba(150, 150, 150, 0.3); } /* FIX-ENGINE F-007-010 */
 
 .auto-story {
     display: flex;
@@ -789,21 +804,22 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
     justify-content: center;
     border-radius: 10px;
     background: rgba(47, 133, 146, 0.18);
-    color: var(--dusty-aqua, #2F8592);
+    color: var(--t-muted-teal, var(--dusty-aqua, #2F8592)); /* FIX-ENGINE F-007-010 */
     font-size: 0.95rem;
     margin-top: 2px;
 }
-.auto-story-ico.wa { background: rgba(37, 211, 102, 0.14); color: #25D366; }
+.auto-story-ico.wa { background: rgba(37, 211, 102, 0.14); color: #1B8C4A; } /* FIX-ENGINE F-007-010: was #25D366 (pale on white) */
+[data-theme="dark"] .auto-story-ico.wa { color: #25D366; }
 .auto-story-body { flex: 1; min-width: 0; }
 .auto-story-label {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #8fb3ba;
+    color: var(--text-secondary, #8fb3ba); /* FIX-ENGINE F-007-010 */
     letter-spacing: 0.02em;
     margin-bottom: 0.15rem;
 }
 .auto-story-text {
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #E8F1F2); /* FIX-ENGINE F-007-010 */
     font-size: 0.95rem;
     font-weight: 600;
 }
@@ -811,24 +827,27 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 .auto-who-list {
     margin: 0;
     padding: 0 1.1rem 0 0;
-    color: var(--frost-white, #E8F1F2);
+    color: var(--text, #E8F1F2); /* FIX-ENGINE F-007-010 */
     font-size: 0.9rem;
     line-height: 1.55;
 }
-.auto-who-list li::marker { color: var(--dusty-aqua, #2F8592); }
+.auto-who-list li::marker { color: var(--t-muted-teal, var(--dusty-aqua, #2F8592)); } /* FIX-ENGINE F-007-010 */
 .auto-who-count {
     display: inline-block;
     margin-top: 0.35rem;
     font-size: 0.8rem;
-    color: #4CC38A;
+    color: #1B7F4B; /* FIX-ENGINE F-007-010: was #4CC38A (pale on white) */
     background: rgba(46, 160, 67, 0.1);
     border-radius: 999px;
     padding: 0.15rem 0.6rem;
 }
-.auto-who-count.loading { color: #999; background: rgba(150,150,150,0.1); }
+[data-theme="dark"] .auto-who-count { color: #4CC38A; }
+.auto-who-count.loading { color: var(--text-secondary, #999); background: rgba(150,150,150,0.1); } /* FIX-ENGINE F-007-010 */
 .auto-who-count b { font-size: 0.95rem; }
 
-/* WhatsApp-style message bubble — looks like the real thing on the phone */
+/* WhatsApp-style message bubble — looks like the real thing on the phone.
+   Deliberately keeps its own dark-green palette in BOTH themes (self-contained,
+   light text on dark bubble is readable everywhere). */
 .auto-wa-bubble {
     background: #1f3d2b;
     border: 1px solid rgba(37, 211, 102, 0.25);
@@ -845,20 +864,20 @@ textarea.auto-input { resize: vertical; line-height: 1.6; }
 }
 .auto-what-note {
     font-size: 0.8rem;
-    color: var(--gold, #D4AF37);
+    color: var(--t-gold-text, var(--gold, #D4AF37)); /* FIX-ENGINE F-007-010 */
     margin-bottom: 0.35rem;
     line-height: 1.4;
 }
 
 .auto-safety-line {
     font-size: 0.78rem;
-    color: #8fb3ba;
+    color: var(--text-secondary, #8fb3ba); /* FIX-ENGINE F-007-010 */
     padding-top: 0.6rem;
     border-top: 1px dashed var(--border, #1a3a42);
 }
 .auto-safety-line i { margin-left: 0.3rem; opacity: 0.8; }
 
-.auto-num-err { color: #ff8a8a; }
+.auto-num-err { color: var(--danger, #ff8a8a); } /* FIX-ENGINE F-007-010 */
 
 /* Head layout fix: give the title room — action buttons drop to their own row */
 .automation-card .auto-card-head { flex-wrap: wrap; align-items: center; }

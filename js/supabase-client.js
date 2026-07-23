@@ -1322,9 +1322,14 @@
             const { data, error } = await supabaseClient
                 .from('referral_leaderboard')
                 .select('*')
-                .limit(limit);
+                .limit(limit + 3);
             if (error) { console.error('Leaderboard error:', error); return []; }
-            return data || [];
+            // FIX-ENGINE F-006 (2026-07-23): הסתרת רם אלוס (המדריך) מלוח המובילים לבקשת הלל.
+            const EXCLUDED = ['ram alus', 'רם אלוס'];
+            return (data || []).filter(r => {
+                const n = String(r.full_name || r.name || '').trim().toLowerCase();
+                return !EXCLUDED.some(x => n.includes(x));
+            }).slice(0, limit);
         },
 
         /** Get all referrals made by a user (last 30 days) */

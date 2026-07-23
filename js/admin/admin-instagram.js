@@ -18,14 +18,12 @@ const IG_CAMPAIGN_NAMES = {
     'free-course-march-2026': 'קורס חינמי מרץ 2026',
 };
 
-async function loadInstagramAnalytics() {
-    if (igCache && (Date.now() - igCacheTime) < IG_CACHE_TTL) {
-        renderInstagramData(igCache);
-        return;
-    }
+// FIX-ENGINE F-005 (2026-07-23): שליפת הלידים הופרדה לפונקציה משותפת כדי שגם
+// הבלוק "אינסטגרם — פירוט היסטורי" בעמוד הפשוט ישתמש באותו cache. לבקשת הלל.
+async function _fetchInstagramLeads() {
+    if (igCache && (Date.now() - igCacheTime) < IG_CACHE_TTL) return igCache;
 
-    try {
-        // Query UTM-based sources + how_found questionnaire answers
+    // Query UTM-based sources + how_found questionnaire answers
         const [patientsRes, therapistsRes, contactsRes, profilesRes, qUtmRes, qHowFoundRes] = await Promise.all([
             db.from('patients').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
             db.from('therapists').select('id, full_name, utm_source, utm_medium, utm_campaign, created_at').eq('utm_source', 'instagram'),
@@ -77,12 +75,75 @@ async function loadInstagramAnalytics() {
 
         igCache = allLeads;
         igCacheTime = Date.now();
-        renderInstagramData(allLeads);
+        return allLeads;
+}
+
+async function loadInstagramAnalytics() {
+    try {
+        renderInstagramData(await _fetchInstagramLeads());
     } catch (err) {
         console.error('[Instagram] Load error:', err);
-        document.getElementById('ig-recent-table').innerHTML =
+        const tbody = document.getElementById('ig-recent-table');
+        if (tbody) tbody.innerHTML =
             `<tr><td colspan="4" style="text-align:center;color:var(--danger);padding:2rem;"><i class="fa-solid fa-circle-exclamation"></i> ${err.message}</td></tr>`;
     }
+}
+
+// FIX-ENGINE F-005 (2026-07-23): רינדור קומפקטי של נתוני האינסטגרם ההיסטוריים
+// לתוך container נתון — משמש את "פירוט מלא (למתקדמים)" בעמוד הפשוט. לבקשת הלל.
+async function loadInstagramInto(host) {
+    if (!host) return;
+    host.innerHTML = '<div class="sources-loading"><i class="fa-solid fa-circle-notch fa-spin"></i> טוען...</div>';
+
+    let allLeads;
+    try {
+        allLeads = await _fetchInstagramLeads();
+    } catch (err) {
+        console.error('[Instagram into] load error:', err);
+        host.innerHTML = '<div class="sources-empty">אין נתונים טריים מאינסטגרם כרגע.</div>';
+        return;
+    }
+
+    if (!allLeads || !allLeads.length) {
+        host.innerHTML = '<div class="sources-empty">עדיין אין אנשים שהגיעו מאינסטגרם.</div>';
+        return;
+    }
+
+    const now = new Date();
+    const d30 = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    const last30 = allLeads.filter(l => new Date(l.created_at) >= d30).length;
+
+    // פילוח לפי סוג
+    const typeCounts = {};
+    allLeads.forEach(l => { typeCounts[l.type] = (typeCounts[l.type] || 0) + 1; });
+    const typeRows = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]).map(([type, count]) => `
+        <tr><td>${escapeHtml(type)}</td><td><strong>${count}</strong></td><td>${Math.round((count / allLeads.length) * 100)}%</td></tr>
+    `).join('');
+
+    // 10 אחרונים
+    const recentRows = allLeads.slice(0, 10).map(l => {
+        const date = new Date(l.created_at).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jerusalem' });
+        const camp = IG_CAMPAIGN_NAMES[l.utm_campaign] || l.utm_campaign || '—';
+        return `<tr><td><strong>${escapeHtml(l.full_name || 'ללא שם')}</strong></td><td>${escapeHtml(l.type)}</td><td>${escapeHtml(camp)}</td><td>${date}</td></tr>`;
+    }).join('');
+
+    host.innerHTML = `
+        <p class="simple-adv-note">כל מי שאי-פעם הגיע מאינסטגרם (כולל לפני המערכת החדשה): <strong>${allLeads.length}</strong> · מתוכם ב-30 הימים האחרונים: <strong>${last30}</strong></p>
+        <div class="sources-panel">
+            <h3>פילוח לפי סוג</h3>
+            <table class="sources-table">
+                <thead><tr><th>סוג</th><th>כמות</th><th>אחוז</th></tr></thead>
+                <tbody>${typeRows}</tbody>
+            </table>
+        </div>
+        <div class="sources-panel">
+            <h3>10 אחרונים מאינסטגרם</h3>
+            <table class="sources-table">
+                <thead><tr><th>שם</th><th>סוג</th><th>קמפיין</th><th>תאריך</th></tr></thead>
+                <tbody>${recentRows}</tbody>
+            </table>
+        </div>
+    `;
 }
 
 function renderInstagramData(allLeads) {

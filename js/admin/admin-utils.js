@@ -6,7 +6,7 @@ const VIEW_GROUPS = {
     'mizum':    { views: ['patients', 'therapists', 'matches'], header: 'mizum-header', default: 'patients' },
     // FIX-ENGINE F-004 (2026-07-23): קבוצת funnel/Pipeline הוסרה לבקשת הלל.
     'outreach': { views: ['outreach'], header: null, default: 'outreach' },
-    'learning': { views: ['leads', 'portal-q', 'game'], header: 'learning-header', default: 'portal-q' }, // FIX-ENGINE F-002 (2026-07-23): לשונית לומדים הוסרה לבקשת הלל.
+    'learning': { views: ['leads', 'portal-q', 'game', 'learners'], header: 'learning-header', default: 'portal-q' }, // 2026-07-28: לשונית "לומדים" הוחזרה — ההסרה ב-23.7 נבעה מבאג טעינה (תקרת 1000 שורות + NULLS FIRST), לא מחוסר נתונים.
     'bot':      { views: ['bot'], header: null, default: 'bot' },
     'paid':     { views: ['paid'], header: null, default: 'paid' },
     'ai-cost':  { views: ['ai-cost'], header: null, default: 'ai-cost' },

@@ -2122,7 +2122,13 @@ ${answers.action || ''}`;
         const renderParagraph = (text) => {
             if (!reading.keyTerms || reading.keyTerms.length === 0) return text;
             let result = text;
-            reading.keyTerms.forEach(term => {
+            // keyTerms comes in two shapes across the data files: a plain string
+            // ("מסננים") in modules 1/2/5/6/7, and a card ({ term, definition }) in
+            // modules 3/4. Treating a card as a string threw TypeError here and killed
+            // all 14 lessons of modules 3+4 before anything was drawn. Accept both.
+            reading.keyTerms.forEach(entry => {
+                const term = typeof entry === 'string' ? entry : entry && entry.term;
+                if (!term) return;
                 const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const safeTermAttr = term.replace(/'/g, "\\'");
                 result = result.replace(new RegExp(escaped, 'g'),

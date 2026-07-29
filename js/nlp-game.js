@@ -1534,18 +1534,26 @@ class StoryGame {
             const justUnlocked = previousLocked.includes(module.id) && !isLocked;
 
             let stateClass = 'available';
-            const moduleImg = module.image ? `<img src="${module.image}" alt="" class="home-path-img">` : module.icon;
-            let stateIcon = moduleImg;
+            // The module cover used to be REPLACED by a state emoji, so a learner
+            // saw exactly one artwork on the whole path (the current module) and
+            // emoji everywhere else. Keep the cover always and put the state on it
+            // as a small corner badge instead - the path gains depth without
+            // losing any of the lock / done / perfect signal.
+            let stateBadge = '';
             if (isLocked) {
                 stateClass = 'locked';
-                stateIcon = '🔒';
+                stateBadge = '🔒';
             } else if (isPerfect) {
                 stateClass = 'completed';
-                stateIcon = '⭐';
+                stateBadge = '⭐';
             } else if (isCompleted) {
                 stateClass = 'completed';
-                stateIcon = '✅';
+                stateBadge = '✅';
             }
+            const stateIcon = module.image
+                ? `<img src="${module.image}" alt="" class="home-path-img">` +
+                  (stateBadge ? `<span class="home-path-state">${stateBadge}</span>` : '')
+                : (stateBadge || module.icon);
 
             if (justUnlocked) stateClass += ' just-unlocked';
             if (module.id === nextModuleId) stateClass += ' next-action';
@@ -3317,12 +3325,22 @@ ${answers.action || ''}`;
                 </button>`;
         }
 
+        // Finishing the last lesson of a module is a bigger moment than finishing
+        // a lesson - give it its own artwork and its own headline.
+        const moduleDone = !nextLesson;
+        const completionIcon = moduleDone
+            ? `<img src="../assets/game/completions/module-complete.jpg" alt="" class="completion-icon-img">`
+            : `<div class="completion-icon">🏆</div>`;
+        const completionSubtitle = moduleDone
+            ? `סיימת את המודול "${this.currentModule.title}"`
+            : `סיימת את השיעור "${this.currentLesson.title}"`;
+
         const container = document.getElementById('game-container');
         container.innerHTML = `
             <div class="completion-screen">
-                <div class="completion-icon">🏆</div>
+                ${completionIcon}
                 <div class="completion-title">כל הכבוד!</div>
-                <div class="completion-subtitle">סיימת את השיעור "${this.currentLesson.title}"</div>
+                <div class="completion-subtitle">${completionSubtitle}</div>
                 ${this.createMentorHTML(completionMessage, true, 'happy')}
                 <div class="completion-stats">
                     <div class="completion-stat">
@@ -3761,7 +3779,7 @@ ${answers.action || ''}`;
         const overlay = document.getElementById('level-up-overlay');
         const text = document.getElementById('level-up-text');
         text.innerHTML = `
-            <div class="level-up-icon">🎉</div>
+            <img src="../assets/game/levels/level-up.jpg" alt="" class="level-up-img">
             <div class="level-up-heading">!עלית לרמה ${level}</div>
             <div class="level-up-name">${this.getLevelName(level)}</div>
         `;

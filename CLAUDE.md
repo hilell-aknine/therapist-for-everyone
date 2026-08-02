@@ -256,10 +256,39 @@ in both directions but keeps already-accepted connections.
 !important}` rule — without it the section classes out-rank the UA `[hidden]` rule and
 "hidden" sections render anyway.
 
-**Open gap:** no outbound notification. A request that arrives while the learner is away
-only shows as a sidebar badge next visit. With ~34 monthly-active learners this is the
-thing that decides whether the feature lives — next step is a WhatsApp ping on new
-request + on acceptance (portal Green API, must respect `profiles.whatsapp_opt_out`).
+### Study-buddy notifications (built 2026-08-02, SHIPPED OFF)
+
+Exactly two WhatsApp messages exist: `request` (someone asked to study with you) and
+`accepted` (they said yes — sent to both sides). No digests, no re-engagement nudges.
+Migration `20260802130000_study_buddy_notifications.sql` + Edge Function `buddy-notify`.
+
+- **Two independent switches, both required to go live:**
+  1. `study_buddy_settings.notifications_enabled` (starts `false`)
+  2. `20260802140000_study_buddy_notify_cron.sql` — **not applied**; applying it starts
+     the 5-minute drainer.
+- Queue `study_buddy_notifications` is filled by triggers on `study_buddy_requests`, so
+  any path that creates a request notifies (nothing to remember to call). Unique on
+  `(request_id, user_id, kind)` — a retry can never double-send. Answering a request
+  before its ping goes out marks the ping `skipped/answered_before_send`.
+- Guards in `buddy-notify`: service_role token only (checks the JWT **role claim**, not a
+  string compare against `SUPABASE_SERVICE_ROLE_KEY` — those legitimately differ),
+  kill switch, 09:00–20:00 Asia/Jerusalem window, 1 message per recipient per 24h
+  (enforced in `buddy_notify_batch`), `whatsapp_opt_out`, ~1.2s spacing.
+- **Messages never carry contact details** — both templates link into the portal, so a
+  forwarded WhatsApp cannot leak a phone number.
+- **This repo is public**: the cron migration reads the service key from Supabase Vault
+  (`buddy_notify_service_key`), unlike the older cron migrations here which inline the
+  anon key. Never inline a service key in `supabase/migrations/`.
+- **Channel blocker (2026-08-02):** the function's `GREEN_API_INSTANCE` secret points at
+  the *portal* instance `7103515939`, which is **expired** (known parked state, waiting
+  on Ram). The crm-bot instance `7103533485` is authorized and working. Going live needs
+  either the portal line renewed or the secret repointed — a decision, not a code change.
+
+**Seeding:** `scripts/study_buddy_seed_invite.py` — one-time WhatsApp opening the pool to
+the ~98 currently-matchable learners. `--dry-run` is the default; `--send` is required,
+refuses outside 09:00–20:00, and records every send in
+`scripts/journey_state/buddy_seed_sent.json` so a re-run cannot message anyone twice.
+Not yet run. Without it the matching screen is empty on day one.
 
 ## Referral / Ambassador Program
 

@@ -44,7 +44,11 @@ STATE_PATH = os.path.join(STATE_DIR, 'buddy_seed_sent.json')
 PORTAL_LINK = 'https://www.therapist-home.com/pages/course-library-v2.html#buddy'
 MIN_LESSONS = 3
 ACTIVE_DAYS = 90
-SEND_DELAY_SEC = 1.5
+# 4s rather than the ~1.2s the queue drainer uses. This is a bulk send to people who
+# have not messaged this number recently, which is the pattern most likely to trip a
+# WhatsApp spam flag — and the line being used also runs Hillel's CRM bot, so a ban here
+# would take that down too. Slower is cheap: 98 messages still finish in ~7 minutes.
+SEND_DELAY_SEC = 4.0
 SEND_HOUR_START, SEND_HOUR_END = 9, 20
 
 
@@ -235,6 +239,7 @@ def main():
         return
 
     sent = failed = 0
+    consecutive_failures = 0
     for a in audience:
         ok, info = send_whatsapp(a['phone'], message_for(a['name'], a['lessons']))
         if ok:
@@ -242,9 +247,28 @@ def main():
                 datetime.timezone.utc).isoformat()}
             save_state(state)          # persist per message, so a crash cannot re-send
             sent += 1
+            consecutive_failures = 0
         else:
             failed += 1
+            consecutive_failures += 1
             print(f"  FAILED {a['name']} {a['phone']}: {info}")
+
+            # 466 = monthly send quota exhausted on the Green API plan (it does NOT mean
+            # the number is invalid — that misreading once blacklisted 69 good numbers).
+            # Once the quota is gone every further send fails, so stop immediately rather
+            # than burning through the list and marking the rest as failures.
+            if '466' in str(info):
+                print('\n⛔ Green API 466 — monthly quota exhausted. Stopping.')
+                print(f'   {sent} sent, {len(audience) - sent} not attempted.')
+                print('   Re-run after the quota resets; already-sent people are skipped.')
+                break
+
+            # Any other run of failures means something systemic (auth, instance state,
+            # network). Better to stop and look than to spray the whole list.
+            if consecutive_failures >= 3:
+                print('\n⛔ 3 failures in a row — stopping to avoid burning the list.')
+                print(f'   {sent} sent, {len(audience) - sent} not attempted.')
+                break
         time.sleep(SEND_DELAY_SEC)
     print(f'\ndone. sent={sent} failed={failed}')
 

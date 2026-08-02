@@ -29,9 +29,16 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const GREEN_API_URL = Deno.env.get('GREEN_API_URL') || 'https://api.green-api.com'
-const GREEN_API_INSTANCE = Deno.env.get('GREEN_API_INSTANCE') || ''
-const GREEN_API_TOKEN = Deno.env.get('GREEN_API_TOKEN') || ''
+// Dedicated line for study-buddy messages, falling back to the shared project secrets.
+// Deliberately NOT reusing GREEN_API_INSTANCE directly: those secrets are shared with
+// send-welcome-whatsapp and paid-reminders, so repointing them would silently move every
+// other outbound message in the project onto a different WhatsApp number too.
+const GREEN_API_URL = Deno.env.get('BUDDY_GREEN_API_URL')
+  || Deno.env.get('GREEN_API_URL') || 'https://api.green-api.com'
+const GREEN_API_INSTANCE = Deno.env.get('BUDDY_GREEN_API_INSTANCE')
+  || Deno.env.get('GREEN_API_INSTANCE') || ''
+const GREEN_API_TOKEN = Deno.env.get('BUDDY_GREEN_API_TOKEN')
+  || Deno.env.get('GREEN_API_TOKEN') || ''
 
 const PORTAL_LINK = 'https://www.therapist-home.com/pages/course-library-v2.html#buddy'
 const BATCH_SIZE = 20

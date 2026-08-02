@@ -845,6 +845,99 @@
   .lms-amb-lb__count{ flex:none; font-size:.85rem; font-weight:700; color:var(--accent-gold-hover); }
   .lms-amb-empty{ font-size:.85rem; color:var(--text-muted); text-align:center; padding:1rem 0; margin:0; }
 
+  /* ==================== STUDY BUDDY ("ללמוד עם חבר") ==================== */
+  .lms-buddy{ display:none; flex-direction:column; gap:1rem; container-type: inline-size; }
+  body.view-buddy .lms-buddy{ display:flex; }
+  body.view-buddy .lms-welcome,
+  body.view-buddy .lms-player,
+  body.view-buddy .lms-amb,
+  body.view-buddy .lms-master,
+  body.view-buddy .lms-master-sales{ display:none; }
+
+  /* The UA rule for [hidden] is display:none at element specificity, so every class
+     below (.lms-bd-sec, .lms-bd-panel, .lms-bd-empty) would out-rank it and the
+     "hidden" sections would render anyway — caught in a real mobile render, not by
+     reading the markup. This restores hidden to meaning hidden inside this view. */
+  .lms-buddy [hidden]{ display:none !important; }
+
+  .lms-bd-sec{ display:flex; flex-direction:column; gap:.75rem; }
+  .lms-bd-sec__h{
+    margin:0; display:flex; align-items:center; gap:.5rem;
+    font-family:'Frank Ruhl Libre','Heebo',serif; font-size:1.02rem; color:#fff;
+  }
+  .lms-bd-sec__h .lms-bd-count{
+    font-size:.72rem; font-weight:700; padding:.12rem .5rem; border-radius:999px;
+    background:rgba(212,164,55,.2); color:var(--accent-gold-hover);
+  }
+
+  /* Card grid. auto-fit + minmax rather than a bare 1fr: a single-column RTL grid
+     with a fixed 1fr track has rendered blank on some mobile webviews here before. */
+  .lms-bd-grid{ display:grid; gap:.8rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+
+  .lms-bd-card{
+    display:flex; flex-direction:column; gap:.65rem;
+    background: linear-gradient(180deg, rgba(8,32,38,.68), rgba(6,22,28,.56));
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:1rem 1.1rem;
+    box-shadow: 0 10px 24px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .lms-bd-card__top{ display:flex; align-items:center; gap:.7rem; }
+  .lms-bd-avatar{
+    flex:none; width:44px; height:44px; border-radius:50%;
+    display:grid; place-items:center;
+    background: linear-gradient(135deg, rgba(212,175,55,.9), rgba(212,164,55,.6));
+    color:#1a1207; font-family:'Frank Ruhl Libre','Heebo',serif; font-weight:900; font-size:1.15rem;
+  }
+  .lms-bd-id{ flex:1; min-width:0; display:flex; flex-direction:column; gap:.15rem; }
+  .lms-bd-name{ font-size:.98rem; font-weight:700; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lms-bd-meta{ font-size:.76rem; color:var(--text-muted); }
+  .lms-bd-fresh{
+    flex:none; font-size:.68rem; font-weight:700; padding:.16rem .5rem; border-radius:999px;
+    background:rgba(37,211,102,.16); color:#7ee2a8; border:1px solid rgba(37,211,102,.25);
+  }
+  .lms-bd-reason{
+    margin:0; font-size:.83rem; line-height:1.55; color:var(--text-muted);
+    background:rgba(255,255,255,.04); border-inline-start:2px solid rgba(212,164,55,.5);
+    border-radius:0 8px 8px 0; padding:.5rem .7rem;
+  }
+  .lms-bd-actions{ display:flex; gap:.5rem; flex-wrap:wrap; }
+  .lms-bd-btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
+    padding:.58rem 1rem; border-radius:10px; border:0; cursor:pointer;
+    font-family:inherit; font-size:.83rem; font-weight:600;
+    background:rgba(255,255,255,.08); color:#fff;
+    transition: background .2s, transform .15s, opacity .2s;
+  }
+  .lms-bd-btn:hover{ background:rgba(255,255,255,.14); transform:translateY(-1px); }
+  .lms-bd-btn:disabled{ opacity:.5; cursor:default; transform:none; }
+  .lms-bd-btn--gold{
+    background: linear-gradient(135deg, var(--accent-gold-hover) 0%, var(--accent-gold) 100%);
+    color:var(--text-on-gold); box-shadow:0 6px 16px rgba(212,164,55,.3); flex:1;
+  }
+  .lms-bd-btn--wa{ background:#25D366; color:#fff; flex:1; }
+  .lms-bd-btn--wa:hover{ background:#1ebd5a; }
+  .lms-bd-btn--ghost{ background:transparent; border:1px solid rgba(255,255,255,.16); }
+  .lms-bd-btn--sent{ background:rgba(37,211,102,.14); color:#7ee2a8; cursor:default; }
+
+  /* Consent / gate panel */
+  .lms-bd-panel{
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8F6F0 100%);
+    border:1px solid rgba(15,61,62,.08); border-radius:18px; padding:1.3rem 1.4rem;
+    box-shadow: 0 10px 24px rgba(0,0,0,.16), 0 1px 0 rgba(255,255,255,.55) inset;
+  }
+  .lms-bd-panel h3{ margin:0 0 .4rem 0; font-family:'Frank Ruhl Libre','Heebo',serif; font-size:1.12rem; color:var(--text-on-light-strong); }
+  .lms-bd-panel p{ margin:0 0 1rem 0; font-size:.87rem; line-height:1.6; color:var(--text-on-light-body); }
+  .lms-bd-panel .lms-bd-actions .lms-bd-btn{ background:rgba(15,61,62,.08); color:var(--text-on-light-strong); }
+  .lms-bd-panel .lms-bd-actions .lms-bd-btn--gold{ background: linear-gradient(135deg, var(--accent-gold-hover) 0%, var(--accent-gold) 100%); color:var(--text-on-gold); }
+  .lms-bd-note{ font-size:.76rem; color:var(--text-muted); margin:0; line-height:1.55; }
+  .lms-bd-empty{
+    font-size:.86rem; color:var(--text-muted); text-align:center; margin:0;
+    padding:1.4rem 1rem; border:1px dashed rgba(255,255,255,.14); border-radius:14px;
+    line-height:1.6;
+  }
+  .lms-bd-phone{ direction:ltr; text-align:right; unicode-bidi:isolate; font-weight:700; color:#fff; }
+
   /* ==================== MASTER VIEW ==================== */
   .lms-master{ display:none; flex-direction:column; gap:1rem; container-type: inline-size; }
   body.view-master .lms-master{ display:flex; }
@@ -1814,6 +1907,53 @@
         </div>
       </div><!-- /.lms-amb -->
 
+      <!-- ===== Study buddy — "ללמוד עם חבר" ===== -->
+      <div class="lms-buddy">
+        <header class="lms-amb-bar">
+          <button class="lms-pl-bar__back" type="button" id="buddyBack" aria-label="חזרה לסקירה" title="חזרה"><i class="fa-solid fa-arrow-right"></i></button>
+          <div class="lms-amb-bar__title">
+            <h1 class="lms-amb-bar__h"><i class="fa-solid fa-user-group" style="color:var(--accent-gold-hover);margin-inline-end:.4rem;"></i>ללמוד עם חבר</h1>
+            <div class="lms-amb-bar__sub" id="buddySub">מי מהלומדים נמצא בערך באותו מקום כמוך</div>
+          </div>
+        </header>
+
+        <!-- Gate: not enough lessons / no consent yet / opted out -->
+        <div id="buddyGate" class="lms-bd-panel" hidden></div>
+
+        <!-- Requests waiting for MY answer — first, because someone is waiting on me -->
+        <section class="lms-bd-sec" id="buddyIncomingSec" hidden>
+          <h2 class="lms-bd-sec__h">
+            <i class="fa-solid fa-envelope-open-text" style="color:var(--accent-gold-hover);"></i>
+            מחכים לתשובה שלך
+            <span class="lms-bd-count" id="buddyIncomingCount">0</span>
+          </h2>
+          <div class="lms-bd-grid" id="buddyIncomingGrid"></div>
+        </section>
+
+        <!-- Accepted connections — the only place a phone number appears -->
+        <section class="lms-bd-sec" id="buddyConnSec" hidden>
+          <h2 class="lms-bd-sec__h">
+            <i class="fa-solid fa-handshake-angle" style="color:var(--accent-gold-hover);"></i>
+            שותפי הלמידה שלך
+          </h2>
+          <div class="lms-bd-grid" id="buddyConnGrid"></div>
+        </section>
+
+        <!-- Suggestions -->
+        <section class="lms-bd-sec" id="buddyMatchSec" hidden>
+          <h2 class="lms-bd-sec__h">
+            <i class="fa-solid fa-magnifying-glass" style="color:var(--accent-gold-hover);"></i>
+            לומדים באזור שלך בקורס
+          </h2>
+          <div class="lms-bd-grid" id="buddyMatchGrid"></div>
+          <p class="lms-bd-note" id="buddyMatchNote">
+            רואים רק שם פרטי ואיפה הם בקורס. הפרטים שלהם נחשפים רק אחרי שהם מאשרים, ואותו דבר לגביך.
+          </p>
+        </section>
+
+        <div id="buddyToast" class="lms-bd-empty" hidden></div>
+      </div><!-- /.lms-buddy -->
+
       <div class="lms-master">
         <header class="lms-amb-bar">
           <button class="lms-pl-bar__back" type="button" id="masterBack" aria-label="חזרה לסקירה" title="חזרה"><i class="fa-solid fa-arrow-right"></i></button>
@@ -2068,6 +2208,32 @@
   <div class="lms-toast__body">
     <strong data-pc-title>יש לכם הפניה חדשה!</strong>
     <p data-pc-message>מישהו שהפניתם הצטרף לפורטל. כל הכבוד!</p>
+  </div>
+</div>
+
+<!-- study_buddy_consent: permission to appear in the study-buddy pool. Asked once,
+     after a completed lesson, at 3+ lessons. Either answer is recorded server-side
+     (study_buddy_prefs), so it never asks twice. -->
+<div id="lmsBuddyConsentModal" class="lms-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lmsBuddyConsentTitle" hidden>
+  <div class="lms-modal">
+    <button type="button" class="lms-modal__close" aria-label="סגור" onclick="closeBuddyConsent()">×</button>
+    <div class="lms-modal__head">
+      <h2 id="lmsBuddyConsentTitle" data-pc-title>ללמוד עם עוד מישהו מהפורטל?</h2>
+      <p data-pc-message>רוב מי שמגיע לסוף הקורס לא עשה את זה לבד. נוכל להראות לך מי מהלומדים נמצא בערך באותו מקום כמוך.</p>
+    </div>
+    <div class="lms-modal__body">
+      <ul class="lms-modal__benefits">
+        <li>הפרטים שלך לא נחשפים לאף אחד</li>
+        <li>מישהו יוכל לבקש ללמוד איתך</li>
+        <li>רק אם תאשר, תקבלו אחד את הפרטים של השני</li>
+        <li>אפשר לצאת מזה בכל רגע</li>
+      </ul>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem;">
+        <button type="button" class="lms-modal__action-btn lms-modal__action-btn--gold"
+                onclick="buddyConsentAnswer(true)" data-pc-cta>מעניין אותי</button>
+        <button type="button" class="lms-modal__action-btn" onclick="buddyConsentAnswer(false)">לא, תודה</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2461,8 +2627,59 @@
         } catch(_) { return false; }
       }
     });
+    // study_buddy_consent — permission to join the matching pool. Asked once, ever.
+    // The "asked" flag lives in the DB (study_buddy_prefs), not localStorage, so
+    // clearing the browser or switching device cannot re-ask someone who said no.
+    // Eligibility (3+ lessons) is enforced again server-side in buddy_set_opt_in.
+    window.PopupManager.register('study_buddy_consent', {
+      priority: 3, category: 'engagement', targetAudience: 'authenticated',
+      show: () => showBuddyConsent(),
+      hide: () => closeBuddyConsent(),
+      maxPerDay: 1,
+      cooldownMs: 24*60*60*1000,
+      condition: () => {
+        try {
+          const u = window.PopupManager.getUser ? window.PopupManager.getUser() : {};
+          if ((u.lessonCount || 0) < 3) return false;
+          // window._buddyAsked is set from buddy_status() once it resolves. Undefined
+          // means "we do not know yet" → fails CLOSED rather than asking twice.
+          return window._buddyAsked === false;
+        } catch(_) { return false; }
+      }
+    });
   }
   registerEngagementPopups();
+
+  // ===== study_buddy_consent helpers =====
+  function showBuddyConsent(){
+    const m = document.getElementById('lmsBuddyConsentModal');
+    if (!m) return;
+    applyPopupContent(m, 'study_buddy_consent');
+    m.hidden = false;
+  }
+  function closeBuddyConsent(){
+    const m = document.getElementById('lmsBuddyConsentModal');
+    if (m) m.hidden = true;
+    if (window.PopupManager) window.PopupManager.dismiss('study_buddy_consent');
+  }
+  // Both answers are recorded. "No" is an answer: it writes a row so the popup is
+  // never shown again, which is the whole point of asking politely once.
+  window.buddyConsentAnswer = async function(yes){
+    const m = document.getElementById('lmsBuddyConsentModal');
+    if (m) m.hidden = true;
+    window._buddyAsked = true;
+    if (window.PopupManager){
+      if (yes) window.PopupManager.click('study_buddy_consent');
+      window.PopupManager.close('study_buddy_consent');
+    }
+    try {
+      await supabaseClient.rpc('buddy_set_opt_in', { p_opt_in: !!yes });
+    } catch(_){ window._buddyAsked = false; return; }  // let it ask again next time
+    if (yes){
+      try { location.hash = '#buddy'; } catch(_){}
+    }
+  };
+  window.closeBuddyConsent = closeBuddyConsent;
 
   // ===== training_cta (Master upsell) helpers =====
   function showTrainingCta(){
@@ -3540,6 +3757,11 @@
         <span class="lms-sb-item__icon"><i class="fa-solid fa-house"></i></span>
         <span class="lms-sb-item__label">ברוך הבא לפורטל</span>
       </a>
+      <a class="lms-sb-item" href="#buddy" data-nav="buddy" id="sbBuddyItem">
+        <span class="lms-sb-item__icon"><i class="fa-solid fa-user-group"></i></span>
+        <span class="lms-sb-item__label">ללמוד עם חבר</span>
+        <span class="lms-sb-item__badge" id="sbBuddyBadge" style="${(_buddyStatus && _buddyStatus.pending_incoming > 0) ? '' : 'display:none;'}background:rgba(212,175,55,.2);color:var(--accent-gold-hover);">${(_buddyStatus && _buddyStatus.pending_incoming > 0) ? _buddyStatus.pending_incoming : ''}</span>
+      </a>
       <a class="lms-sb-item" href="#ambassador" data-nav="ambassador">
         <span class="lms-sb-item__icon"><i class="fa-solid fa-handshake"></i></span>
         <span class="lms-sb-item__label">תוכנית השותפים</span>
@@ -3710,7 +3932,7 @@
   function setCourse(c){
     if (c !== 'nlp-master' && c !== 'nlp-practitioner' && c !== 'nlp-techniques') return;
     if ((c === 'nlp-master' || c === 'nlp-techniques') && !_isPaidCustomer) return;
-    if (c === courseType){ document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales'); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+    if (c === courseType){ document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales','view-buddy'); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); return; }
     courseType = c;
     modules = (c === 'nlp-master') ? getMasterAsModules() : (c === 'nlp-techniques') ? getTechniquesAsModules() : PRACTITIONER_MODULES;
     totalLessons = modules.reduce((s, m) => s + m.lessons.length, 0);
@@ -3725,7 +3947,7 @@
     if (mtl) mtl.textContent = (c === 'nlp-master') ? 'חזרה לפרקטישנר' : 'קורס המאסטר';
     const ttl2 = document.getElementById('techTabLabel');
     if (ttl2) ttl2.textContent = (c === 'nlp-techniques') ? 'חזרה לפרקטישנר' : 'טכניקות פרקטישנר';
-    document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales');
+    document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales','view-buddy');
     try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
     renderAll();
     // Re-hydrate the new course's completed lessons + last-watched position from the DB,
@@ -3927,7 +4149,7 @@
     if (iframe) iframe.src = 'about:blank';
   }
   function showWelcome(skipPush){
-    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales');
+    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales', 'view-buddy');
     clearVideoState();
     if (!skipPush && location.hash) history.pushState(null, '', location.pathname + location.search);
     renderAll();
@@ -3941,7 +4163,7 @@
     const mod = modules[m];
     const lesson = mod.lessons[l];
 
-    document.body.classList.remove('view-master-sales');
+    document.body.classList.remove('view-master-sales', 'view-buddy');
     document.body.classList.add('view-player');
     document.getElementById('plTitle').textContent = lesson.title;
     document.getElementById('plSub').innerHTML = `מודול ${mod.id}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> <bdi>${lesson.duration}</bdi> דק׳`;
@@ -4437,7 +4659,7 @@
 
   // ===== Ambassador view =====
   async function showAmbassadorView(skipPush){
-    document.body.classList.remove('view-player', 'view-master', 'view-master-sales');
+    document.body.classList.remove('view-player', 'view-master', 'view-master-sales', 'view-buddy');
     document.body.classList.add('view-ambassador');
     clearVideoState();
     if (!skipPush && location.hash !== '#ambassador') history.pushState(null, '', '#ambassador');
@@ -4528,6 +4750,348 @@
         setTimeout(() => { msgBtn.innerHTML = orig; }, 2000);
       }).catch(() => {});
     });
+  }
+
+  // ===== Study buddy ("ללמוד עם חבר") =====
+  // Every call here is an RPC. The study_buddy_* tables have RLS on with NO policy for
+  // authenticated users, so there is deliberately no direct .from() path — the server
+  // decides which fields exist in the response. See
+  // supabase/migrations/20260802120000_study_buddy_matching.sql.
+  let _buddyStatus = null;
+  let _buddyBusy = false;
+
+  async function buddyRpc(fn, args){
+    const { data, error } = await supabaseClient.rpc(fn, args || {});
+    if (error) throw error;
+    return data;
+  }
+
+  function buddyToast(msg, isError){
+    const el = document.getElementById('buddyToast');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.color = isError ? '#ffb4a2' : '';
+    el.hidden = false;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.hidden = true; }, 6000);
+  }
+
+  // 050-1234567 / +972-50-1234567 / 972501234567 → 972501234567 for wa.me.
+  // Returns '' when it cannot be made sense of, and the caller then hides the button
+  // rather than opening a broken WhatsApp link.
+  function buddyWaNumber(raw){
+    let d = String(raw || '').replace(/\D/g, '');
+    if (!d) return '';
+    if (d.startsWith('972')) { /* already international */ }
+    else if (d.startsWith('0')) d = '972' + d.slice(1);
+    else if (d.length === 9 && d.startsWith('5')) d = '972' + d;
+    else return '';
+    return (d.length >= 11 && d.length <= 13) ? d : '';
+  }
+
+  function buddyInitial(name){
+    const s = String(name || '').trim();
+    return s ? s[0] : '?';
+  }
+
+  async function showBuddyView(skipPush){
+    document.body.classList.remove('view-player', 'view-master', 'view-master-sales', 'view-ambassador');
+    document.body.classList.add('view-buddy');
+    clearVideoState();
+    if (!skipPush && location.hash !== '#buddy') history.pushState(null, '', '#buddy');
+    await loadBuddyView();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function loadBuddyView(){
+    const gate = document.getElementById('buddyGate');
+    const matchSec = document.getElementById('buddyMatchSec');
+    const incSec = document.getElementById('buddyIncomingSec');
+    const connSec = document.getElementById('buddyConnSec');
+    [matchSec, incSec, connSec].forEach(s => { if (s) s.hidden = true; });
+
+    let st;
+    try {
+      st = await buddyRpc('buddy_status');
+    } catch(_){
+      gate.hidden = false;
+      gate.innerHTML = '<h3>לא הצלחנו לטעון</h3><p>נסו לרענן את העמוד.</p>';
+      return;
+    }
+    _buddyStatus = st;
+
+    if (!st || !st.signed_in){
+      gate.hidden = false;
+      gate.innerHTML = '<h3>צריך להתחבר</h3><p>התחברו לפורטל כדי למצוא שותפים ללמידה.</p>';
+      return;
+    }
+
+    // Connections and incoming requests are shown even after opting out: those are
+    // people who already agreed, and hiding a real connection would read as a bug.
+    await Promise.all([loadBuddyConnections(), loadBuddyIncoming()]);
+
+    if (!st.eligible){
+      gate.hidden = false;
+      const left = Math.max(0, (st.min_lessons || 3) - (st.lessons_done || 0));
+      gate.innerHTML = `
+        <h3>עוד ${left} ${left === 1 ? 'שיעור' : 'שיעורים'} וזה נפתח</h3>
+        <p>אנחנו מחברים בין לומדים שכבר בתוך החומר, כדי שתהיה לכם באמת שיחה משותפת.
+           סיימת ${st.lessons_done} ${st.lessons_done === 1 ? 'שיעור' : 'שיעורים'} עד עכשיו.</p>
+        <div class="lms-bd-actions"><a class="lms-bd-btn lms-bd-btn--gold" href="#" data-nav="welcome">להמשיך ללמוד</a></div>`;
+      return;
+    }
+
+    if (!st.opted_in){
+      gate.hidden = false;
+      gate.innerHTML = `
+        <h3>רוצה ללמוד עם עוד מישהו מהפורטל?</h3>
+        <p>נראה לך מי מהלומדים נמצא בערך באותו מקום כמוך בקורס. אף אחד לא מקבל את הפרטים שלך:
+           אפשר יהיה לבקש ללמוד איתך, ורק אם תאשר, תקבלו אחד את הפרטים של השני.</p>
+        <div class="lms-bd-actions">
+          <button type="button" class="lms-bd-btn lms-bd-btn--gold" id="buddyOptInBtn">אני בעניין</button>
+        </div>
+        <p class="lms-bd-note" style="margin-top:.8rem;">אפשר לצאת מזה בכל רגע, וברגע שיוצאים מפסיקים להופיע לאחרים.</p>`;
+      const b = document.getElementById('buddyOptInBtn');
+      if (b) b.addEventListener('click', () => buddySetOptIn(true, b));
+      return;
+    }
+
+    if (!st.has_phone){
+      gate.hidden = false;
+      gate.innerHTML = `
+        <h3>חסר מספר טלפון בפרופיל</h3>
+        <p>בלי מספר, אי אפשר לחבר בינך לבין שותף גם אחרי ששניכם מאשרים. אפשר להוסיף אותו בעמוד הפרופיל.</p>
+        <div class="lms-bd-actions"><a class="lms-bd-btn lms-bd-btn--gold" href="profile.html">לעמוד הפרופיל</a></div>`;
+      return;
+    }
+
+    // Opted in and eligible: show the working screen.
+    gate.hidden = false;
+    gate.innerHTML = `
+      <h3>אתה במאגר</h3>
+      <p>סיימת ${st.lessons_done} שיעורים, ${st.stage}. לומדים אחרים באזור הזה יכולים לבקש ללמוד איתך.</p>
+      <div class="lms-bd-actions">
+        <button type="button" class="lms-bd-btn" id="buddyOptOutBtn">להפסיק להופיע לאחרים</button>
+      </div>`;
+    const ob = document.getElementById('buddyOptOutBtn');
+    if (ob) ob.addEventListener('click', () => buddySetOptIn(false, ob));
+
+    await loadBuddyMatches();
+  }
+
+  async function buddySetOptIn(optIn, btn){
+    if (_buddyBusy) return;
+    _buddyBusy = true;
+    if (btn){ btn.disabled = true; }
+    try {
+      await buddyRpc('buddy_set_opt_in', { p_opt_in: optIn });
+      buddyToast(optIn ? 'מעולה. מחפשים לך שותפים.' : 'יצאת מהמאגר. כבר לא תופיע לאחרים.');
+      await loadBuddyView();
+      refreshBuddyBadge();
+    } catch(e){
+      buddyToast('משהו השתבש. נסו שוב.', true);
+      if (btn) btn.disabled = false;
+    } finally { _buddyBusy = false; }
+  }
+
+  async function loadBuddyMatches(){
+    const sec = document.getElementById('buddyMatchSec');
+    const grid = document.getElementById('buddyMatchGrid');
+    const note = document.getElementById('buddyMatchNote');
+    if (!sec || !grid) return;
+    sec.hidden = false;
+    grid.innerHTML = '<p class="lms-bd-empty">טוען…</p>';
+
+    let res;
+    try { res = await buddyRpc('buddy_matches'); }
+    catch(_){ grid.innerHTML = '<p class="lms-bd-empty">שגיאה בטעינה.</p>'; return; }
+
+    const rows = (res && res.rows) || [];
+    if (!rows.length){
+      if (note) note.hidden = true;
+      grid.innerHTML = `<p class="lms-bd-empty">
+        אין כרגע התאמה פנויה באזור שלך בקורס.<br>
+        המאגר קטן ועדיין נבנה, אז שווה לחזור לכאן בעוד כמה ימים.</p>`;
+      return;
+    }
+    if (note) note.hidden = false;
+
+    grid.innerHTML = rows.map(r => `
+      <div class="lms-bd-card" data-token="${escapeHtml(r.token)}">
+        <div class="lms-bd-card__top">
+          <div class="lms-bd-avatar">${escapeHtml(buddyInitial(r.first_name))}</div>
+          <div class="lms-bd-id">
+            <span class="lms-bd-name">${escapeHtml(r.first_name || 'לומד/ת')}</span>
+            <span class="lms-bd-meta">${escapeHtml(r.stage)} · ${r.lessons} שיעורים</span>
+          </div>
+          ${r.fresh ? '<span class="lms-bd-fresh">פעיל/ה עכשיו</span>' : ''}
+        </div>
+        <p class="lms-bd-reason">${escapeHtml(r.reason)}</p>
+        <div class="lms-bd-actions">
+          <button type="button" class="lms-bd-btn lms-bd-btn--gold" data-buddy-request="${escapeHtml(r.token)}">
+            <i class="fa-solid fa-paper-plane"></i> בא לי ללמוד איתו
+          </button>
+        </div>
+      </div>`).join('');
+
+    grid.querySelectorAll('[data-buddy-request]').forEach(btn => {
+      btn.addEventListener('click', () => buddyRequest(btn.getAttribute('data-buddy-request'), btn));
+    });
+  }
+
+  async function buddyRequest(token, btn){
+    if (_buddyBusy || !token) return;
+    _buddyBusy = true;
+    btn.disabled = true;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> שולח…';
+    try {
+      const res = await buddyRpc('buddy_request', { p_token: token });
+      if (res && res.ok){
+        btn.classList.add('lms-bd-btn--sent');
+        btn.classList.remove('lms-bd-btn--gold');
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> הבקשה נשלחה';
+        buddyToast('שלחנו את הבקשה. ברגע שהוא יאשר, תקבלו אחד את הפרטים של השני.');
+      } else {
+        btn.innerHTML = orig; btn.disabled = false;
+        buddyToast('כבר פנית ללומד/ת הזה בעבר.', true);
+      }
+    } catch(e){
+      btn.innerHTML = orig; btn.disabled = false;
+      const msg = String((e && (e.message || e.hint)) || '');
+      if (msg.indexOf('daily limit') !== -1) buddyToast('הגעת ל-3 בקשות היום. אפשר להמשיך מחר.', true);
+      else if (msg.indexOf('no longer available') !== -1) buddyToast('ההתאמה כבר לא זמינה.', true);
+      else buddyToast('משהו השתבש. נסו שוב.', true);
+    } finally { _buddyBusy = false; }
+  }
+
+  async function loadBuddyIncoming(){
+    const sec = document.getElementById('buddyIncomingSec');
+    const grid = document.getElementById('buddyIncomingGrid');
+    const cnt = document.getElementById('buddyIncomingCount');
+    if (!sec || !grid) return;
+
+    let rows = [];
+    try { rows = (await buddyRpc('buddy_incoming')) || []; } catch(_){ }
+
+    if (!rows.length){ sec.hidden = true; return; }
+    sec.hidden = false;
+    if (cnt) cnt.textContent = rows.length;
+
+    grid.innerHTML = rows.map(r => `
+      <div class="lms-bd-card">
+        <div class="lms-bd-card__top">
+          <div class="lms-bd-avatar">${escapeHtml(buddyInitial(r.first_name))}</div>
+          <div class="lms-bd-id">
+            <span class="lms-bd-name">${escapeHtml(r.first_name || 'לומד/ת')}</span>
+            <span class="lms-bd-meta">${escapeHtml(r.stage)} · ${r.lessons} שיעורים</span>
+          </div>
+        </div>
+        <p class="lms-bd-reason">${escapeHtml(r.reason)}. רוצה ללמוד איתך.</p>
+        <div class="lms-bd-actions">
+          <button type="button" class="lms-bd-btn lms-bd-btn--gold" data-buddy-accept="${escapeHtml(r.id)}">
+            <i class="fa-solid fa-check"></i> מאשר
+          </button>
+          <button type="button" class="lms-bd-btn lms-bd-btn--ghost" data-buddy-decline="${escapeHtml(r.id)}">לא עכשיו</button>
+        </div>
+        <p class="lms-bd-note">אם תאשר, שניכם תקבלו את הפרטים אחד של השני.</p>
+      </div>`).join('');
+
+    grid.querySelectorAll('[data-buddy-accept]').forEach(b =>
+      b.addEventListener('click', () => buddyRespond(b.getAttribute('data-buddy-accept'), true, b)));
+    grid.querySelectorAll('[data-buddy-decline]').forEach(b =>
+      b.addEventListener('click', () => buddyRespond(b.getAttribute('data-buddy-decline'), false, b)));
+  }
+
+  async function buddyRespond(id, accept, btn){
+    if (_buddyBusy) return;
+    _buddyBusy = true;
+    if (btn) btn.disabled = true;
+    try {
+      const res = await buddyRpc('buddy_respond', { p_id: id, p_accept: accept });
+      if (res && res.ok){
+        buddyToast(accept ? 'מעולה. הפרטים מופיעים עכשיו תחת שותפי הלמידה שלך.' : 'סירבת לבקשה. הוא לא יוכל לפנות אליך שוב.');
+      } else {
+        buddyToast('הבקשה כבר לא רלוונטית.', true);
+      }
+      await Promise.all([loadBuddyIncoming(), loadBuddyConnections()]);
+      refreshBuddyBadge();
+    } catch(_){
+      buddyToast('משהו השתבש. נסו שוב.', true);
+      if (btn) btn.disabled = false;
+    } finally { _buddyBusy = false; }
+  }
+
+  async function loadBuddyConnections(){
+    const sec = document.getElementById('buddyConnSec');
+    const grid = document.getElementById('buddyConnGrid');
+    if (!sec || !grid) return;
+
+    let rows = [];
+    try { rows = (await buddyRpc('buddy_connections')) || []; } catch(_){ }
+
+    if (!rows.length){ sec.hidden = true; return; }
+    sec.hidden = false;
+
+    grid.innerHTML = rows.map(r => {
+      const wa = buddyWaNumber(r.phone);
+      const msg = 'היי ' + (String(r.name || '').trim().split(/\s+/)[0] || '') +
+                  '! אנחנו לומדים את אותו קורס NLP בפורטל בית המטפלים, ויצא לנו חיבור שם. חשבתי שאולי שווה לנו לעבור על החומר ביחד 🙂';
+      return `
+      <div class="lms-bd-card">
+        <div class="lms-bd-card__top">
+          <div class="lms-bd-avatar">${escapeHtml(buddyInitial(r.name))}</div>
+          <div class="lms-bd-id">
+            <span class="lms-bd-name">${escapeHtml(r.name || 'שותף/ה')}</span>
+            <span class="lms-bd-meta">${escapeHtml(r.stage)} · ${r.lessons} שיעורים</span>
+          </div>
+        </div>
+        <p class="lms-bd-reason">הטלפון: <span class="lms-bd-phone">${escapeHtml(r.phone || '')}</span></p>
+        <div class="lms-bd-actions">
+          ${wa ? `<a class="lms-bd-btn lms-bd-btn--wa" target="_blank" rel="noopener"
+                     href="https://wa.me/${wa}?text=${encodeURIComponent(msg)}">
+                    <i class="fa-brands fa-whatsapp"></i> לפתוח שיחה
+                  </a>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Sidebar badge — the only nudge for a request that arrived while you were away.
+  async function refreshBuddyBadge(){
+    try {
+      const st = await buddyRpc('buddy_status');
+      _buddyStatus = st;
+      const badge = document.getElementById('sbBuddyBadge');
+      if (!badge) return;
+      const n = (st && st.pending_incoming) || 0;
+      if (n > 0){ badge.textContent = n; badge.style.display = ''; }
+      else { badge.style.display = 'none'; }
+    } catch(_){}
+  }
+
+  function setupBuddy(){
+    const back = document.getElementById('buddyBack');
+    if (back) back.addEventListener('click', () => showWelcome());
+  }
+
+  // Runs once at boot for signed-in learners. Sets window._buddyAsked (the flag the
+  // consent popup's condition reads — it stays undefined, and the popup stays closed,
+  // if this call fails) and paints the pending-request badge in the sidebar.
+  async function initBuddyState(){
+    try {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) return;
+      const st = await buddyRpc('buddy_status');
+      if (!st || !st.signed_in) return;
+      _buddyStatus = st;
+      window._buddyAsked = !!st.asked;
+      const badge = document.getElementById('sbBuddyBadge');
+      if (badge && st.pending_incoming > 0){
+        badge.textContent = st.pending_incoming;
+        badge.style.display = '';
+      }
+    } catch(_){}
   }
 
   // ===== Master view (paid customers / admin) =====
@@ -4667,7 +5231,7 @@
       console.info('Master access requires paid membership.');
       return;
     }
-    document.body.classList.remove('view-player', 'view-ambassador', 'view-master-sales');
+    document.body.classList.remove('view-player', 'view-ambassador', 'view-master-sales', 'view-buddy');
     document.body.classList.add('view-master');
     clearVideoState();
     if (!skipPush && location.hash !== '#master') history.pushState(null, '', '#master');
@@ -4677,7 +5241,7 @@
 
   // ===== Master SALES view (upsell landing page — open to all portal members) =====
   function showMasterSalesView(skipPush){
-    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales');
+    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales', 'view-buddy');
     document.body.classList.add('view-master-sales');
     if (typeof clearVideoState === 'function') clearVideoState();
     if (!skipPush && location.hash !== '#master-sales') history.pushState(null, '', '#master-sales');
@@ -4948,6 +5512,7 @@
         return true;
       }
     }
+    if (location.hash === '#buddy'){ showBuddyView(true); return true; }
     if (location.hash === '#ambassador'){ showAmbassadorView(true); return true; }
     if (location.hash === '#master-sales'){ showMasterSalesView(true); return true; }
     if (location.hash === '#master'){ setCourse('nlp-master'); return true; }
@@ -5000,9 +5565,10 @@
         }
       }
       // In-page nav (sidebar items + partners CTA + resource cards)
-      const navAnchor = e.target.closest('a[data-nav], a[href="#ambassador"], a[href="#master"]');
+      const navAnchor = e.target.closest('a[data-nav], a[href="#ambassador"], a[href="#master"], a[href="#buddy"]');
       if (navAnchor){
         const target = navAnchor.getAttribute('data-nav') || navAnchor.getAttribute('href').replace('#','');
+        if (target === 'buddy'){ e.preventDefault(); showBuddyView(); return; }
         if (target === 'ambassador'){ e.preventDefault(); showAmbassadorView(); return; }
         if (target === 'master-sales'){ e.preventDefault(); showMasterSalesView(); return; }
         if (target === 'master'){ e.preventDefault(); setCourse('nlp-master'); return; }
@@ -5029,9 +5595,14 @@
     setupPracticeClips();
     setupLessonNav();
     setupAmbassador();
+    setupBuddy();
     setupMaster();
     hydrateProgress();
     await checkPaidRole();
+    // Study buddy: learn whether this person was already asked for consent (the flag
+    // the popup's condition reads) and surface a badge if someone is waiting on them.
+    // Deliberately not awaited — a slow RPC must never delay the portal rendering.
+    initBuddyState();
     // Paid/admin only: pull the gated Master modules from the server BEFORE any
     // render/route can consume them. Non-paid users never fetch (fails closed,
     // zero console errors). On fetch failure MASTER_MODULES stays empty → master

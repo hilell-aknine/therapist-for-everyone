@@ -220,6 +220,47 @@ Central orchestrator (`js/popup-manager.js`) manages all popups, modals, toasts,
 
 **Admin panel** (`js/admin/admin-popups.js`): CRUD for popup configs, toggle active/inactive, live preview mockup, per-popup stats (impressions, CTR, dismiss rate), scheduling with start/end dates.
 
+## Study Buddy ("ללמוד עם חבר")
+
+Connects learners who are at roughly the same point in the practitioner course.
+Migration: `20260802120000_study_buddy_matching.sql` (+ consent popup row in `...121000`).
+
+**Privacy model — do not weaken any of these three:**
+1. **Double opt-in.** A phone number is only ever returned by `buddy_connections()`, which
+   requires an `accepted` row, which only the TARGET can create. Asking alone gets nothing.
+2. **First name only** before a match. `buddy_matches()` / `buddy_incoming()` return no
+   user_id, phone, email or surname — matches carry an opaque `buddy_pair_token(me, them)`.
+3. **Consent required to appear at all**, asked only at 3+ completed lessons.
+
+**Access pattern:** `study_buddy_prefs` and `study_buddy_requests` have RLS enabled with
+**no policy for `authenticated`** (admin SELECT only). There is deliberately no `.from()`
+path from the browser — everything goes through 8 SECURITY DEFINER RPCs:
+`buddy_status`, `buddy_set_opt_in`, `buddy_matches`, `buddy_request`, `buddy_incoming`,
+`buddy_respond`, `buddy_cancel`, `buddy_connections`. The helpers
+(`buddy_lessons_done`, `buddy_last_active`, `buddy_pair_token`) are revoked from
+`authenticated` — never grant them.
+
+**Matching rule:** position = DISTINCT completed `course_progress` rows for
+`course_type='nlp-practitioner'`, excluding `last_watched%` bookkeeping rows.
+`lesson_number` is per-module and is NOT a global position — do not use it.
+Candidates are ranked by |lesson gap| then recency, capped at 3. The window is the whole
+pool rather than a tight band **on purpose**: the live matchable pool is ~98 people
+(2026-08-02), so a strict band leaves most learners with an empty screen.
+
+**Guardrails:** 3 requests/day per user; one row per ordered pair forever, so a declined
+request blocks re-asking (anti-harassment, not a bug); opting out cancels pending requests
+in both directions but keeps already-accepted connections.
+
+**UI:** `#buddy` view in `course-library-v2.html` (`body.view-buddy`), sidebar item
+`sbBuddyItem` with a pending-request badge. Note the `.lms-buddy [hidden]{display:none
+!important}` rule — without it the section classes out-rank the UA `[hidden]` rule and
+"hidden" sections render anyway.
+
+**Open gap:** no outbound notification. A request that arrives while the learner is away
+only shows as a sidebar badge next visit. With ~34 monthly-active learners this is the
+thing that decides whether the feature lives — next step is a WhatsApp ping on new
+request + on acceptance (portal Green API, must respect `profiles.whatsapp_opt_out`).
+
 ## Referral / Ambassador Program
 
 **Flow:** User shares `course-library.html?ref=UUID` → `marketing-tools.js` captures to `localStorage('referrer_data')` → on signup/login, `ensureProfile()` in `supabase-client.js` calls `saveReferral()` → INSERT to `referrals` table → leaderboard updates.

@@ -845,6 +845,39 @@
   .lms-amb-lb__count{ flex:none; font-size:.85rem; font-weight:700; color:var(--accent-gold-hover); }
   .lms-amb-empty{ font-size:.85rem; color:var(--text-muted); text-align:center; padding:1rem 0; margin:0; }
 
+  /* Study-buddy announcement banner on the welcome screen */
+  .lms-bd-banner{
+    position:relative; display:flex; align-items:center; gap:.9rem; flex-wrap:wrap;
+    margin-bottom:1rem; padding:1rem 1.15rem; border-radius:18px;
+    background: linear-gradient(135deg, rgba(212,175,55,.16), rgba(8,32,38,.6));
+    border:1px solid rgba(212,175,55,.34);
+    box-shadow: 0 10px 26px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.07);
+  }
+  .lms-bd-banner[hidden]{ display:none !important; }
+  .lms-bd-banner__x{
+    position:absolute; inset-inline-end:.5rem; inset-block-start:.35rem;
+    background:none; border:0; color:var(--text-muted); font-size:1.25rem;
+    line-height:1; cursor:pointer; padding:.2rem .4rem;
+  }
+  .lms-bd-banner__x:hover{ color:#fff; }
+  .lms-bd-banner__icon{
+    flex:none; width:42px; height:42px; border-radius:12px; display:grid; place-items:center;
+    background:rgba(212,175,55,.2); color:var(--accent-gold-hover); font-size:1.1rem;
+  }
+  .lms-bd-banner__body{ flex:1 1 220px; min-width:0; }
+  .lms-bd-banner__body strong{ display:block; color:#fff; font-size:1rem; margin-bottom:.2rem; }
+  .lms-bd-banner__body p{ margin:0; font-size:.84rem; line-height:1.55; color:var(--text-muted); }
+  .lms-bd-banner__cta{
+    flex:none; display:inline-flex; align-items:center; gap:.4rem;
+    padding:.6rem 1.1rem; border-radius:10px; text-decoration:none; font-weight:700; font-size:.86rem;
+    background: linear-gradient(135deg, var(--accent-gold-hover) 0%, var(--accent-gold) 100%);
+    color:var(--text-on-gold); box-shadow:0 6px 16px rgba(212,164,55,.3);
+  }
+  @media (max-width: 560px){
+    .lms-bd-banner{ padding:.9rem 1rem; }
+    .lms-bd-banner__cta{ width:100%; justify-content:center; }
+  }
+
   /* ==================== STUDY BUDDY ("ללמוד עם חבר") ==================== */
   .lms-buddy{ display:none; flex-direction:column; gap:1rem; container-type: inline-size; }
   body.view-buddy .lms-buddy{ display:flex; }
@@ -1635,6 +1668,20 @@
 
     <main class="lms-main">
       <div class="lms-welcome">
+      <!-- Announcement that "ללמוד עם חבר" exists. The consent popup only fires after a
+           completed lesson, and the sidebar item is easy to miss, so a learner already
+           sitting in the portal would never find out on their own. Shown once per person
+           until they act on it or dismiss it. -->
+      <section class="lms-bd-banner" id="buddyBanner" hidden>
+        <button type="button" class="lms-bd-banner__x" id="buddyBannerX" aria-label="סגור">×</button>
+        <div class="lms-bd-banner__icon"><i class="fa-solid fa-user-group"></i></div>
+        <div class="lms-bd-banner__body">
+          <strong id="buddyBannerTitle">חדש בפורטל: ללמוד עם חבר</strong>
+          <p id="buddyBannerText">אפשר למצוא לומד שנמצא בערך באותו מקום כמוך בקורס, וללמוד יחד. הפרטים שלך לא נחשפים לאף אחד לפני שאישרת.</p>
+        </div>
+        <a class="lms-bd-banner__cta" href="#buddy" data-nav="buddy" id="buddyBannerCta">לראות מי שם</a>
+      </section>
+
       <section class="lms-hero" aria-label="השיעור הבא">
         <div class="lms-hero__glow"></div>
         <div class="lms-hero__copy">
@@ -5091,7 +5138,43 @@
         badge.textContent = st.pending_incoming;
         badge.style.display = '';
       }
+      showBuddyBanner(st, user.id);
     } catch(_){}
+  }
+
+  // Welcome-screen announcement. Three states, in priority order:
+  //   someone is waiting on you  → always shown, cannot be dismissed away permanently
+  //   eligible but never asked   → the "this exists" announcement, dismissible
+  //   anything else              → nothing
+  // Dismissal is per user (a shared browser must not hide it for the next person).
+  function showBuddyBanner(st, userId){
+    const el = document.getElementById('buddyBanner');
+    if (!el) return;
+    const dismissKey = 'lms_buddy_banner_dismissed_' + userId;
+
+    if (st.pending_incoming > 0){
+      const n = st.pending_incoming;
+      document.getElementById('buddyBannerTitle').textContent =
+        n === 1 ? 'מישהו מחכה לתשובה שלך' : `${n} לומדים מחכים לתשובה שלך`;
+      document.getElementById('buddyBannerText').textContent =
+        'ביקשו ללמוד איתך. אף פרט שלך לא נמסר עדיין — זה קורה רק אם תאשר.';
+      document.getElementById('buddyBannerCta').textContent = 'לראות ולהחליט';
+      el.hidden = false;
+      return;
+    }
+
+    if (!st.eligible || st.asked) return;
+    if (localStorage.getItem(dismissKey)) return;
+    el.hidden = false;
+
+    const x = document.getElementById('buddyBannerX');
+    if (x && !x._wired){
+      x._wired = true;
+      x.addEventListener('click', () => {
+        el.hidden = true;
+        try { localStorage.setItem(dismissKey, '1'); } catch(_){}
+      });
+    }
   }
 
   // ===== Master view (paid customers / admin) =====

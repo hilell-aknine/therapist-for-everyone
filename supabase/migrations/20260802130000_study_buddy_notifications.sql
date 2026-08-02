@@ -144,14 +144,17 @@ CREATE TRIGGER trg_study_buddy_enqueue_accepted
 -- the connection exists. Phone numbers are NOT returned here; the message links into
 -- the portal instead of carrying contact details through WhatsApp.
 CREATE OR REPLACE FUNCTION public.buddy_notify_batch(p_limit int DEFAULT 20)
+-- Returns the recipient's EMAIL, not their phone: study-buddy notifications go out by
+-- email (2026-08-02 — both Green API lines are unusable for learners). The phone is
+-- deliberately absent so this payload cannot leak a number into a log or an error body.
 RETURNS TABLE (
     id uuid, kind text, recipient_id uuid, recipient_name text,
-    recipient_phone text, opted_out boolean, other_first_name text, attempts int
+    recipient_email text, opted_out boolean, other_first_name text, attempts int
 )
 LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
     SELECT n.id, n.kind, n.user_id,
            split_part(trim(coalesce(pr.full_name,'')), ' ', 1),
-           nullif(trim(coalesce(pr.phone,'')), ''),
+           nullif(trim(coalesce(pr.email,'')), ''),
            coalesce(pr.whatsapp_opt_out, false),
            split_part(trim(coalesce(op.full_name,'')), ' ', 1),
            n.attempts

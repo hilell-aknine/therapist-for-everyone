@@ -29,20 +29,25 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-// Dedicated line for study-buddy messages, falling back to the shared project secrets.
-// Deliberately NOT reusing GREEN_API_INSTANCE directly: those secrets are shared with
-// send-welcome-whatsapp and paid-reminders, so repointing them would silently move every
-// other outbound message in the project onto a different WhatsApp number too.
-const GREEN_API_URL = Deno.env.get('BUDDY_GREEN_API_URL')
-  || Deno.env.get('GREEN_API_URL') || 'https://api.green-api.com'
-const GREEN_API_INSTANCE = Deno.env.get('BUDDY_GREEN_API_INSTANCE')
-  || Deno.env.get('GREEN_API_INSTANCE') || ''
-const GREEN_API_TOKEN = Deno.env.get('BUDDY_GREEN_API_TOKEN')
-  || Deno.env.get('GREEN_API_TOKEN') || ''
+// EMAIL, not WhatsApp (decided 2026-08-02). Both Green API lines are unusable for
+// learners: the portal instance is expired, and the crm-bot instance is on a free tariff
+// that can only exchange messages with three specific numbers — a canary run failed on
+// its first learner. Every one of the 98 matchable learners has an email address on
+// file, and the Resend → Gmail Apps Script chain below is already delivering in this
+// project. A study invitation is not urgent enough to justify waiting for a paid line.
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
+const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'בית המטפלים <no-reply@therapist-home.com>'
+const REPLY_TO = Deno.env.get('EMAIL_REPLY_TO') || 'htjewelry.a474@gmail.com'
+const GMAIL_API_URL = Deno.env.get('GMAIL_API_URL') || ''
+const GMAIL_API_TOKEN = Deno.env.get('GMAIL_API_TOKEN') || ''
 
 const PORTAL_LINK = 'https://www.therapist-home.com/pages/course-library-v2.html#buddy'
-const BATCH_SIZE = 20
-const SEND_DELAY_MS = 1200
+// Paced for the Gmail Apps Script fallback, which tolerates roughly 10 sends/minute
+// (Resend is far faster, but the drainer cannot know which provider will answer).
+// 8 × 6.5s ≈ 52s per run, comfortably inside the 150s Edge Function timeout, and the
+// 5-minute cron still clears ~96/hour — far more than this feature will ever produce.
+const BATCH_SIZE = 8
+const SEND_DELAY_MS = 6500
 const MAX_ATTEMPTS = 4
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -55,17 +60,12 @@ function israelHour(): number {
   return parseInt(s, 10)
 }
 
-// Israeli 05X / +972 / bare digits → 972XXXXXXXXX (Green API chatId format).
-// Same normalisation as send-welcome-whatsapp.
-function normalizePhone(raw: string): string {
-  let d = (raw || '').replace(/\D/g, '')
-  if (!d) return ''
-  if (d.startsWith('0')) d = '972' + d.slice(1)
-  else if (d.startsWith('5') && d.length === 9) d = '972' + d
-  return d
+function validEmail(raw: string): string {
+  const e = String(raw || '').trim()
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : ''
 }
 
-const OPT_OUT_LINE = '\n\nלא רוצה לקבל הודעות כאלה? השב/י "הסר" ונפסיק.'
+const OPT_OUT_LINE = '\n\nלא רוצה לקבל הודעות כאלה? השב/י למייל הזה במילה "הסר" ונפסיק.'
 
 function buildMessage(kind: string, me: string, other: string, isTest = false): string {
   const name = me || 'חבר/ה'
@@ -94,17 +94,64 @@ ${buddy} אישר/ה, ואתם מחוברים.
 ${PORTAL_LINK}` + OPT_OUT_LINE
 }
 
-async function sendWhatsApp(phone972: string, message: string) {
-  const url = `${GREEN_API_URL}/waInstance${GREEN_API_INSTANCE}/sendMessage/${GREEN_API_TOKEN}`
-  // linkPreview:false — Green API's preview prefetch has burned one-time links here
-  // before (2026-06-11). Keep it off.
-  const payload = JSON.stringify({ chatId: `${phone972}@c.us`, message, linkPreview: false })
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: new TextEncoder().encode(payload),   // UTF-8 safe for Hebrew
+function subjectFor(kind: string, other: string): string {
+  return kind === 'request'
+    ? `${other || 'לומד/ת בפורטל'} מבקש/ת ללמוד איתך`
+    : `${other || 'לומד/ת בפורטל'} אישר/ה — אתם מחוברים`
+}
+
+// RTL email body. Kept to inline styles only: Gmail and most Hebrew mail clients strip
+// <style> blocks, and an unstyled RTL mail renders left-aligned and looks broken.
+function buildHtml(message: string, ctaLabel: string): string {
+  const body = message
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(new RegExp(PORTAL_LINK.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), '')
+    .trim().replace(/\n/g, '<br>')
+  return `<div dir="rtl" style="text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#123;max-width:560px;margin:0 auto;padding:18px;">
+<div style="border-top:3px solid #D4AF37;padding-top:16px;">${body}</div>
+<p style="margin:26px 0;"><a href="${PORTAL_LINK}" style="background:#003B46;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;display:inline-block;font-weight:bold;">${ctaLabel}</a></p>
+<p style="font-size:12px;color:#667;margin-top:24px;">בית המטפלים · פורטל הלמידה</p>
+</div>`
+}
+
+// Same provider chain as the send-email function: Resend first (verified domain), then
+// the Gmail Apps Script web app. Not a call INTO send-email — that one is admin-JWT
+// gated by design, and this runs as a service with no user behind it.
+async function sendEmail(to: string, subject: string, message: string, html: string):
+    Promise<{ ok: boolean; provider: string; error?: string }> {
+  if (RESEND_API_KEY) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: RESEND_FROM, to: [to], reply_to: REPLY_TO, subject, text: message, html }),
+        signal: AbortSignal.timeout(20000),
+      })
+      if (res.ok) return { ok: true, provider: 'resend' }
+      console.error('Resend failed:', res.status, (await res.text()).slice(0, 200))
+    } catch (e) { console.error('Resend threw:', e) }
+  }
+
+  // Fallback. GET, not POST — POSTing to Apps Script breaks on Google's redirect.
+  if (!GMAIL_API_URL || !GMAIL_API_TOKEN) {
+    return { ok: false, provider: 'none', error: 'no_email_provider_configured' }
+  }
+  const params = new URLSearchParams({
+    token: GMAIL_API_TOKEN, action: 'send', to, subject,
+    body: message, html, name: 'בית המטפלים',
   })
-  return { ok: res.ok, status: res.status, body: await res.text() }
+  try {
+    const res = await fetch(`${GMAIL_API_URL}?${params.toString()}`, {
+      method: 'GET', redirect: 'follow', signal: AbortSignal.timeout(25000),
+    })
+    const text = await res.text()
+    let result: { success?: boolean; error?: string } = {}
+    try { result = JSON.parse(text) } catch { /* non-JSON = Apps Script error page */ }
+    if (res.ok && result.success) return { ok: true, provider: 'gmail' }
+    return { ok: false, provider: 'gmail', error: (result.error || text.slice(0, 120)) }
+  } catch (e) {
+    return { ok: false, provider: 'gmail', error: 'gmail_unreachable' }
+  }
 }
 
 serve(async (req) => {
@@ -144,17 +191,17 @@ serve(async (req) => {
   let body: Record<string, unknown> = {}
   if (req.method === 'POST') { try { body = await req.json() } catch (_) { /* empty body ok */ } }
 
-  // Test path: send one clearly-marked sample to a given number. Touches no queue rows
-  // and no learner data, so it is safe to run while the feature is still switched off.
-  if (body.test_phone) {
-    if (!GREEN_API_INSTANCE || !GREEN_API_TOKEN) {
-      return new Response(JSON.stringify({ error: 'green api not configured' }), { status: 503 })
-    }
-    const phone = normalizePhone(String(body.test_phone))
+  // Test path: send one clearly-marked sample to a given address. Touches no queue rows
+  // and no learner data, so it is safe to run while the feature is switched off.
+  if (body.test_email) {
+    const to = validEmail(String(body.test_email))
+    if (!to) return new Response(JSON.stringify({ error: 'invalid email' }), { status: 400 })
     const kind = body.test_kind === 'accepted' ? 'accepted' : 'request'
-    const msg = buildMessage(kind, String(body.test_name || 'הילל'), String(body.test_other || 'דנה'), true)
-    const r = await sendWhatsApp(phone, msg)
-    return new Response(JSON.stringify({ test: true, kind, phone, ok: r.ok, status: r.status, body: r.body }),
+    const other = String(body.test_other || 'דנה')
+    const msg = buildMessage(kind, String(body.test_name || 'הילל'), other, true)
+    const r = await sendEmail(to, '🧪 ' + subjectFor(kind, other), msg,
+                              buildHtml(msg, kind === 'request' ? 'לראות ולהחליט' : 'לפתיחת הפרטים'))
+    return new Response(JSON.stringify({ test: true, kind, to, ...r }),
       { headers: { 'Content-Type': 'application/json' } })
   }
 
@@ -177,8 +224,8 @@ serve(async (req) => {
       { headers: { 'Content-Type': 'application/json' } })
   }
 
-  if (!GREEN_API_INSTANCE || !GREEN_API_TOKEN) {
-    return new Response(JSON.stringify({ error: 'green api not configured' }), { status: 503 })
+  if (!RESEND_API_KEY && (!GMAIL_API_URL || !GMAIL_API_TOKEN)) {
+    return new Response(JSON.stringify({ error: 'no email provider configured' }), { status: 503 })
   }
 
   // Guard 4 lives inside buddy_notify_batch (per-recipient 24h cap).
@@ -196,11 +243,13 @@ serve(async (req) => {
 
   for (const row of rows as Array<Record<string, string | boolean>>) {
     const id = String(row.id)
-    const phone = normalizePhone(String(row.recipient_phone || ''))
+    const to = validEmail(String(row.recipient_email || ''))
 
-    // Guard 5: opted out, or no usable number → terminal skip, never retried.
-    if (row.opted_out === true || !phone) {
-      const reason = row.opted_out === true ? 'whatsapp_opt_out' : 'no_phone'
+    // Guard 5: opted out, or no usable address → terminal skip, never retried.
+    // whatsapp_opt_out is reused as the single "leave me alone" flag for this learner
+    // rather than inventing a second one they would have to find and set separately.
+    if (row.opted_out === true || !to) {
+      const reason = row.opted_out === true ? 'opted_out' : 'no_email'
       if (!dryRun) {
         await db.from('study_buddy_notifications')
           .update({ status: 'skipped', skip_reason: reason }).eq('id', id)
@@ -209,24 +258,27 @@ serve(async (req) => {
       continue
     }
 
-    const msg = buildMessage(String(row.kind), String(row.recipient_name || ''), String(row.other_first_name || ''))
-    if (dryRun) { log.push({ id, would_send_to: phone, kind: row.kind, preview: msg.slice(0, 80) }); continue }
+    const kind = String(row.kind)
+    const other = String(row.other_first_name || '')
+    const msg = buildMessage(kind, String(row.recipient_name || ''), other)
+    if (dryRun) { log.push({ id, would_send_to: to, kind, preview: msg.slice(0, 80) }); continue }
 
-    const r = await sendWhatsApp(phone, msg)
+    const r = await sendEmail(to, subjectFor(kind, other), msg,
+                              buildHtml(msg, kind === 'request' ? 'לראות ולהחליט' : 'לפתיחת הפרטים'))
     if (r.ok) {
       await db.from('study_buddy_notifications')
         .update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', id)
-      sent++; log.push({ id, sent: true })
+      sent++; log.push({ id, sent: r.provider })
     } else {
       // Retry a few times, then give up. Left 'pending' in between so the next cron
       // run picks it up; only a persistent failure becomes terminal.
       const attempts = Number(row.attempts ?? 0) + 1
       await db.from('study_buddy_notifications').update({
         attempts,
-        last_error: `${r.status}: ${r.body}`.slice(0, 500),
+        last_error: `${r.provider}: ${r.error}`.slice(0, 500),
         status: attempts >= MAX_ATTEMPTS ? 'failed' : 'pending',
       }).eq('id', id)
-      failed++; log.push({ id, error: r.status })
+      failed++; log.push({ id, error: `${r.provider}: ${r.error}` })
     }
     await sleep(SEND_DELAY_MS)
   }

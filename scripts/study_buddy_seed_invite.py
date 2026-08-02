@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-study_buddy_seed_invite.py — the one-time WhatsApp that opens the study-buddy pool.
+study_buddy_seed_invite.py — the one-time EMAIL that opens the study-buddy pool.
 
 WHY THIS EXISTS
     The matching screen is empty on day one. Nobody can be matched with anyone until
@@ -11,14 +11,14 @@ WHY THIS EXISTS
 
 WHO IT WRITES TO
     Learners who are genuinely matchable today: >= 3 distinct completed practitioner
-    lessons, a phone on file, active within the last 90 days, not opted out of WhatsApp,
+    lessons, an email on file, active within the last 90 days, not opted out,
     and not already in study_buddy_prefs (never invite someone who already answered).
     At the time of writing that is ~98 people.
 
 SAFETY
     --dry-run is the DEFAULT. It prints the audience and one sample message and sends
     nothing. Sending requires --send, and even then it refuses to run outside 09:00-20:00
-    Israel time, spaces messages 1.5s apart, and writes every send to
+    Israel time, paces sends for the Apps Script rate limit, and writes every send to
     scripts/journey_state/buddy_seed_sent.json so a re-run never messages anyone twice.
 
 USAGE
@@ -44,11 +44,8 @@ STATE_PATH = os.path.join(STATE_DIR, 'buddy_seed_sent.json')
 PORTAL_LINK = 'https://www.therapist-home.com/pages/course-library-v2.html#buddy'
 MIN_LESSONS = 3
 ACTIVE_DAYS = 90
-# 4s rather than the ~1.2s the queue drainer uses. This is a bulk send to people who
-# have not messaged this number recently, which is the pattern most likely to trip a
-# WhatsApp spam flag — and the line being used also runs Hillel's CRM bot, so a ban here
-# would take that down too. Slower is cheap: 98 messages still finish in ~7 minutes.
-SEND_DELAY_SEC = 4.0
+# Apps Script tolerates roughly 10 sends/minute. 98 messages finish in ~11 minutes.
+SEND_DELAY_SEC = 9.0
 SEND_HOUR_START, SEND_HOUR_END = 9, 20
 
 
@@ -94,19 +91,13 @@ def normalize_phone(raw):
 
 
 def message_for(first_name, lessons):
+    """Plain-text part. Kept SHORT on purpose — see build_html for why length is a
+    functional constraint here, not a style preference."""
     name = first_name or 'חבר/ה'
-    return f"""היי {name},
-
-סיימת כבר {lessons} שיעורים בקורס, וזה יותר ממה שרוב האנשים שנרשמים מגיעים אליו.
-
-פתחנו בפורטל משהו חדש: אפשר למצוא לומד אחר שנמצא בערך באותו מקום כמוך בקורס, וללמוד איתו. מי שלומד עם עוד מישהו פשוט מגיע רחוק יותר.
-
-איך זה עובד: נראה לך שם פרטי ואיפה הוא בקורס, בלי שום פרט אישי. אם תרצה ללמוד עם מישהו, הוא יקבל בקשה, ורק אם הוא מאשר תקבלו אחד את הפרטים של השני. הפרטים שלך לא נחשפים לאף אחד לפני שאישרת.
-
-זה נמצא כאן, תחת "ללמוד עם חבר":
-{PORTAL_LINK}
-
-לא רוצה לקבל הודעות כאלה? השב/י "הסר" ונפסיק."""
+    return (f'היי {name}, סיימת כבר {lessons} שיעורים בקורס. '
+            'פתחנו בפורטל אזור חדש: למצוא לומד שנמצא בערך באותו מקום כמוך, וללמוד יחד. '
+            'רואים שם פרטי ואיפה הוא בקורס בלבד, והפרטים שלך עוברים רק אחרי שאישרת. '
+            f'{PORTAL_LINK}')
 
 
 def load_state():
@@ -176,7 +167,7 @@ def build_audience():
     for i in range(0, len(ids), 100):
         chunk = ids[i:i + 100]
         profiles = {p['id']: p for p in rest('profiles', {
-            'select': 'id,full_name,phone,whatsapp_opt_out',
+            'select': 'id,full_name,phone,email,whatsapp_opt_out',
             'id': 'in.(' + ','.join(chunk) + ')'})}
         for uid, n in eligible:
             if uid not in profiles or uid in already:
@@ -184,25 +175,63 @@ def build_audience():
             p = profiles[uid]
             if p.get('whatsapp_opt_out') is True:
                 continue
-            phone = normalize_phone(p.get('phone'))
+            email = (p.get('email') or '').strip()
             name = (p.get('full_name') or '').strip().split(' ')[0]
-            if not phone or not name:
+            if not name or '@' not in email:
                 continue
-            audience.append({'user_id': uid, 'name': name, 'phone': phone, 'lessons': n})
+            audience.append({'user_id': uid, 'name': name, 'email': email, 'lessons': n})
     audience.sort(key=lambda a: -a['lessons'])
     return audience
 
 
-def send_whatsapp(phone, text):
-    url = f"{CFG['GREEN_API_URL']}/waInstance{CFG['GREEN_API_INSTANCE']}/sendMessage/{CFG['GREEN_API_TOKEN']}"
-    payload = json.dumps({'chatId': phone + '@c.us', 'message': text, 'linkPreview': False})
-    req = urllib.request.Request(url, data=payload.encode('utf-8'), method='POST',
-                                 headers={'Content-Type': 'application/json'})
+MAX_URL_CHARS = 5000
+
+
+def build_html(name, lessons):
+    """Small, inline-styled RTL body.
+
+    Length is a hard functional limit, not taste. The Apps Script mailer takes the whole
+    message as a GET query string, and Hebrew costs ~6 URL-encoded characters per letter.
+    Measured against the live endpoint on 2026-08-02: a 5,667-character URL returns 200,
+    a 7,467-character one returns 400. MAX_URL_CHARS keeps a margin under that.
+
+    This is also why the monthly journey email has been failing for every learner since
+    at least 2026-08-01 — its HTML builds a ~52,000-character URL.
+    """
+    return (
+        '<div dir="rtl" style="text-align:right;font-family:Arial,sans-serif;'
+        'font-size:16px;line-height:1.7;color:#123;max-width:540px;margin:0 auto;padding:16px">'
+        f'<div style="border-top:3px solid #D4AF37;padding-top:14px">היי {name},<br><br>'
+        f'סיימת כבר {lessons} שיעורים בקורס, יותר מרוב הנרשמים.<br><br>'
+        'פתחנו בפורטל אזור חדש: אפשר למצוא לומד שנמצא בערך באותו מקום כמוך, וללמוד יחד.<br><br>'
+        'רואים שם פרטי ואיפה הוא בקורס בלבד. הפרטים שלך עוברים רק אחרי שאישרת.</div>'
+        f'<p style="margin:24px 0"><a href="{PORTAL_LINK}" style="background:#003B46;color:#fff;'
+        'text-decoration:none;padding:12px 22px;border-radius:8px;display:inline-block;'
+        'font-weight:bold">לפתוח את האזור</a></p>'
+        '<p style="font-size:12px;color:#667">בית המטפלים · פורטל הלמידה<br>'
+        'לא רוצה הודעות כאלה? השב/י "הסר".</p></div>')
+
+
+def send_email(to, name, lessons, text):
+    """Apps Script mailer. GET, not POST — POSTing breaks on Google's redirect."""
+    params = urllib.parse.urlencode({
+        'token': CFG['GMAIL_API_TOKEN'], 'action': 'send', 'to': to,
+        'subject': 'מצאנו לך עם מי ללמוד בפורטל',
+        'body': text, 'html': build_html(name, lessons), 'name': 'בית המטפלים'})
+    url = CFG['GMAIL_API_URL'] + '?' + params
+    if len(url) > MAX_URL_CHARS:
+        return False, f'payload too large ({len(url)} chars) — Apps Script would 400'
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            return True, r.read().decode('utf-8')
+        with urllib.request.urlopen(url, timeout=60) as r:
+            txt = r.read().decode('utf-8')
+            try:
+                return bool(json.loads(txt).get('success')), txt[:160]
+            except Exception:
+                return False, 'non-JSON response: ' + txt[:160]
     except urllib.error.HTTPError as e:
-        return False, f'{e.code}: {e.read().decode("utf-8")}'
+        return False, f'{e.code}: {e.read().decode("utf-8")[:160]}'
+    except Exception as e:
+        return False, str(e)[:160]
 
 
 def main():
@@ -218,7 +247,7 @@ def main():
         audience = audience[:args.limit]
 
     print(f'audience: {len(audience)} learners (>= {MIN_LESSONS} lessons, active {ACTIVE_DAYS}d, '
-          f'phone on file, not yet asked, not opted out)')
+          f'email on file, not yet asked, not opted out)')
     if not audience:
         print('nothing to do.')
         return
@@ -228,7 +257,7 @@ def main():
         print(message_for(audience[0]['name'], audience[0]['lessons']))
         print('\n--- first 10 recipients ---')
         for a in audience[:10]:
-            print(f"  {a['name']:12s} {a['phone']}  {a['lessons']} lessons")
+            print(f"  {a['name']:12s} {a['email']:34s} {a['lessons']} lessons")
         print('\nRe-run with --send to actually send.')
         return
 
@@ -241,26 +270,42 @@ def main():
     sent = failed = 0
     consecutive_failures = 0
     for a in audience:
-        ok, info = send_whatsapp(a['phone'], message_for(a['name'], a['lessons']))
+        ok, info = send_email(a['email'], a['name'], a['lessons'],
+                              message_for(a['name'], a['lessons']))
         if ok:
-            state[a['user_id']] = {'phone': a['phone'], 'at': datetime.datetime.now(
+            state[a['user_id']] = {'email': a['email'], 'at': datetime.datetime.now(
                 datetime.timezone.utc).isoformat()}
             save_state(state)          # persist per message, so a crash cannot re-send
             sent += 1
             consecutive_failures = 0
         else:
+            # "Rate limit exceeded" is PER MINUTE and transient — a pause, not a failure.
+            # Lumping it in with the daily cap (both contain the word "limit") would abort
+            # a healthy run, which is exactly what happened on the first canary batch.
+            if 'rate limit' in str(info).lower():
+                print(f"  rate limited on {a['name']} — waiting 70s, retrying once")
+                time.sleep(70)
+                ok, info = send_email(a['email'], a['name'], a['lessons'],
+                                      message_for(a['name'], a['lessons']))
+                if ok:
+                    state[a['user_id']] = {'email': a['email'], 'at': datetime.datetime.now(
+                        datetime.timezone.utc).isoformat()}
+                    save_state(state)
+                    sent += 1
+                    consecutive_failures = 0
+                    time.sleep(SEND_DELAY_SEC)
+                    continue
+
             failed += 1
             consecutive_failures += 1
-            print(f"  FAILED {a['name']} {a['phone']}: {info}")
+            print(f"  FAILED {a['name']} {a['email']}: {info}")
 
-            # 466 = monthly send quota exhausted on the Green API plan (it does NOT mean
-            # the number is invalid — that misreading once blacklisted 69 good numbers).
-            # Once the quota is gone every further send fails, so stop immediately rather
-            # than burning through the list and marking the rest as failures.
-            if '466' in str(info):
-                print('\n⛔ Green API 466 — monthly quota exhausted. Stopping.')
+            # The daily cap (~100 recipients) is the hard ceiling. Once it is hit every
+            # further send fails, so stop rather than marking the rest failed.
+            if 'quota' in str(info).lower() or 'daily' in str(info).lower():
+                print('\n⛔ Gmail daily quota reached. Stopping.')
                 print(f'   {sent} sent, {len(audience) - sent} not attempted.')
-                print('   Re-run after the quota resets; already-sent people are skipped.')
+                print('   Re-run tomorrow; already-sent people are skipped automatically.')
                 break
 
             # Any other run of failures means something systemic (auth, instance state,

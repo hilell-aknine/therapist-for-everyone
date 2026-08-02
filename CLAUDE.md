@@ -256,39 +256,54 @@ in both directions but keeps already-accepted connections.
 !important}` rule — without it the section classes out-rank the UA `[hidden]` rule and
 "hidden" sections render anyway.
 
-### Study-buddy notifications (built 2026-08-02, SHIPPED OFF)
+### Study-buddy notifications (built 2026-08-02) — EMAIL
 
-Exactly two WhatsApp messages exist: `request` (someone asked to study with you) and
-`accepted` (they said yes — sent to both sides). No digests, no re-engagement nudges.
-Migration `20260802130000_study_buddy_notifications.sql` + Edge Function `buddy-notify`.
+Exactly two messages exist: `request` (someone asked to study with you) and `accepted`
+(they said yes — sent to both sides). No digests, no re-engagement nudges.
+Migration `20260802130000_study_buddy_notifications.sql` + Edge Function `buddy-notify`
++ cron `20260802140000_study_buddy_notify_cron.sql`.
 
-- **Two independent switches, both required to go live:**
-  1. `study_buddy_settings.notifications_enabled` (starts `false`)
-  2. `20260802140000_study_buddy_notify_cron.sql` — **not applied**; applying it starts
-     the 5-minute drainer.
-- Queue `study_buddy_notifications` is filled by triggers on `study_buddy_requests`, so
-  any path that creates a request notifies (nothing to remember to call). Unique on
-  `(request_id, user_id, kind)` — a retry can never double-send. Answering a request
-  before its ping goes out marks the ping `skipped/answered_before_send`.
+**Channel is EMAIL, not WhatsApp — both Green API lines are unusable for learners:**
+- portal instance `7103515939` — **expired** (known parked state).
+- crm-bot instance `7103533485` — **free tariff, 3 correspondents only**. It can message
+  Hillel and two other numbers; every learner fails with 466. A test send to Hillel
+  succeeds and proves nothing. Verified 2026-08-02 by a canary run that failed on its
+  first learner.
+All 98 matchable learners have an email on file. Delivery reuses the `send-email`
+provider chain (Resend → Gmail Apps Script) inline; it does not call `send-email`, which
+is admin-JWT gated by design.
+
+**⚠️ Apps Script mailer has a hard payload limit.** The whole message goes as a GET query
+string and Hebrew costs ~6 URL-encoded chars per letter. Measured live 2026-08-02:
+**5,667-char URL → 200, 7,467-char URL → 400.** Keep any Apps Script mail body small
+(`MAX_URL_CHARS = 5000` in the seed script). It also enforces a **per-minute** rate limit
+— "Rate limit exceeded" is transient, NOT the daily cap; pause and retry rather than
+aborting the run.
+
+**🔴 Consequence found while building this:** `scripts/monthly_journey_email.py` builds a
+~52,000-character URL and has therefore been failing with HTTP 400 for **every** learner
+(see `scripts/journey_state/log.txt`, failing at least 2026-08-01 and 2026-08-02). The
+monthly "החודש שלך" email to 340 learners is not going out. Fix = shrink the HTML or
+switch that script to Resend.
+
+- Queue `study_buddy_notifications`, filled by triggers on `study_buddy_requests`, so any
+  path that creates a request notifies. Unique on `(request_id, user_id, kind)` — a retry
+  can never double-send. Answering before the ping goes out marks it
+  `skipped/answered_before_send`.
 - Guards in `buddy-notify`: service_role token only (checks the JWT **role claim**, not a
   string compare against `SUPABASE_SERVICE_ROLE_KEY` — those legitimately differ),
-  kill switch, 09:00–20:00 Asia/Jerusalem window, 1 message per recipient per 24h
-  (enforced in `buddy_notify_batch`), `whatsapp_opt_out`, ~1.2s spacing.
+  `study_buddy_settings.notifications_enabled` kill switch, 09:00–20:00 Asia/Jerusalem,
+  1 message per recipient per 24h, `profiles.whatsapp_opt_out` (reused as the single
+  "leave me alone" flag), 8 per run at 6.5s spacing.
 - **Messages never carry contact details** — both templates link into the portal, so a
-  forwarded WhatsApp cannot leak a phone number.
+  forwarded email cannot leak a phone number.
 - **This repo is public**: the cron migration reads the service key from Supabase Vault
-  (`buddy_notify_service_key`), unlike the older cron migrations here which inline the
-  anon key. Never inline a service key in `supabase/migrations/`.
-- **Channel blocker (2026-08-02):** the function's `GREEN_API_INSTANCE` secret points at
-  the *portal* instance `7103515939`, which is **expired** (known parked state, waiting
-  on Ram). The crm-bot instance `7103533485` is authorized and working. Going live needs
-  either the portal line renewed or the secret repointed — a decision, not a code change.
+  (`buddy_notify_service_key`). Never inline a service key in `supabase/migrations/`.
 
-**Seeding:** `scripts/study_buddy_seed_invite.py` — one-time WhatsApp opening the pool to
-the ~98 currently-matchable learners. `--dry-run` is the default; `--send` is required,
-refuses outside 09:00–20:00, and records every send in
-`scripts/journey_state/buddy_seed_sent.json` so a re-run cannot message anyone twice.
-Not yet run. Without it the matching screen is empty on day one.
+**Seeding:** `scripts/study_buddy_seed_invite.py` — the one-time email that opens the
+pool. Dry run by default; `--send` required, refuses outside 09:00–20:00, records every
+send in `scripts/journey_state/buddy_seed_sent.json` so a re-run cannot mail anyone twice,
+and stops on the daily quota. Sent 2026-08-02.
 
 ## Referral / Ambassador Program
 

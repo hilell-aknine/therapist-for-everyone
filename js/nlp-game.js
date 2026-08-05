@@ -436,10 +436,18 @@ class StoryGame {
             const el = document.querySelector(sel);
             if (!el) continue;
             let startY = 0;
-            el.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
+            let startedAtTop = true;
+            el.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                // A wrong answer fills this sheet past its 55vh cap, so it scrolls.
+                // Only treat a downward swipe as "dismiss" when there is nothing left
+                // to scroll up to, otherwise reading back up closed the panel and
+                // jumped the learner to the next exercise mid-sentence.
+                startedAtTop = el.scrollTop <= 0;
+            }, { passive: true });
             el.addEventListener('touchend', (e) => {
                 const dy = e.changedTouches[0].clientY - startY;
-                if (dy > 80) dismiss();
+                if (dy > 80 && startedAtTop) dismiss();
             }, { passive: true });
         }
     }
@@ -2221,6 +2229,8 @@ ${answers.action || ''}`;
         this.selectedAnswer = null;
         this.exerciseAnswered = false;
         this.secondChanceUsed = false;
+        this._advancing = false; // the previous exercise finished advancing
+        this.selectedIdentifyIndex = -1;
         this.exerciseStartTime = Date.now();
         this.updateProgressBar();
 
@@ -2299,10 +2309,10 @@ ${answers.action || ''}`;
             'multiple-choice': "💡 חשבו על מה שמרגיש הכי נכון מהחוויה שלכם, סמכו על האינטואיציה!",
             'fill-blank': "💡 המילה הנכונה היא זו שמשלימה את המשפט בצורה הטבעית ביותר.",
             'order': "💡 חשבו על הסדר ההגיוני, מה קורה קודם ומה אחר כך?",
-            'identify': "💡 חפשו את החלק שגורם לכם להרגיש משהו.",
+            'identify': "💡 קראו כל חלק בנפרד ובחרו את זה שעונה על השאלה.",
             'compare': "💡 דמיינו את עצמכם בסיטואציה, איזו גישה הייתה עוזרת לכם יותר?",
             'improve': "💡 חפשו את האפשרות שהכי מחוברת לרגש, לספציפיות ולחוויה אישית.",
-            'match': "💡 חפשו את הקשר הלוגי בין העמודות, מה מתחבר למה?",
+            'match': "💡 חפשו את הקשר הלוגי בין שתי הקבוצות, מה מתחבר למה?",
             'scenario': "💡 דמיינו את עצמכם במצב הזה, מה הייתם עושים?"
         };
         return tips[exerciseType] || "";
@@ -2407,18 +2417,28 @@ ${answers.action || ''}`;
         this.enableCheckButton();
     }
 
+    // Reordering used to be drag-only. Dragging is fine with a mouse but hostile
+    // with a thumb: the touch handler had to swallow the gesture, so a learner who
+    // swiped anywhere on the list could not scroll the page and instead scrambled
+    // the answer by accident. The list is now moved with explicit ▲/▼ buttons,
+    // which work identically on both, and HTML5 drag is kept for mouse users.
     renderOrder(container, exercise) {
         const shuffled = this.shuffleArray([...exercise.items].map((item, i) => ({ item, originalIndex: i })));
         const tip = this.createExerciseTip('order');
+        const lastIndex = shuffled.length - 1;
 
         const itemsHtml = shuffled.map((obj, index) => `
             <div class="order-item" draggable="true" data-index="${index}" data-original="${obj.originalIndex}"
                  ondragstart="game.dragStart(event)" ondragover="game.dragOver(event)"
-                 ondrop="game.drop(event)" ondragend="game.dragEnd(event)"
-                 ontouchstart="game.touchStart(event)" ontouchmove="game.touchMove(event)" ontouchend="game.touchEnd(event)">
+                 ondrop="game.drop(event)" ondragend="game.dragEnd(event)">
                 <span class="order-number">${index + 1}</span>
-                <span>${obj.item}</span>
-                <span class="drag-handle">⋮⋮</span>
+                <span class="order-text">${obj.item}</span>
+                <div class="order-controls">
+                    <button type="button" class="order-move-btn" aria-label="העבירו שלב אחד למעלה"
+                            onclick="game.moveOrderItem(this, -1)"${index === 0 ? ' disabled' : ''}>▲</button>
+                    <button type="button" class="order-move-btn" aria-label="העבירו שלב אחד למטה"
+                            onclick="game.moveOrderItem(this, 1)"${index === lastIndex ? ' disabled' : ''}>▼</button>
+                </div>
             </div>
         `).join('');
 
@@ -2439,8 +2459,43 @@ ${answers.action || ''}`;
         // Check button stays disabled until the player reorders (see updateOrderNumbers).
     }
 
-    // Drag & Drop
+    // Moves one row up (-1) or down (+1). This is the primary input for the
+    // order exercise; drag is a mouse-only convenience on top of it.
+    moveOrderItem(button, direction) {
+        if (this.exerciseAnswered) return;
+        const item = button.closest('.order-item');
+        const container = document.getElementById('order-container');
+        if (!item || !container) return;
+
+        const neighbour = direction < 0 ? item.previousElementSibling : item.nextElementSibling;
+        if (!neighbour) return;
+
+        if (direction < 0) {
+            container.insertBefore(item, neighbour);
+        } else {
+            container.insertBefore(neighbour, item);
+        }
+
+        this.sound.play('click');
+        this.updateOrderNumbers();
+
+        // Keep the thumb on a live control: if the pressed button just hit the end
+        // of the list it is now disabled, so hand focus to the opposite direction.
+        if (button.disabled) {
+            const buttons = item.querySelectorAll('.order-move-btn');
+            const fallback = [...buttons].find(b => !b.disabled);
+            if (fallback) fallback.focus();
+        } else {
+            button.focus();
+        }
+    }
+
+    // Drag & Drop (mouse only — see renderOrder)
     dragStart(e) {
+        if (this.exerciseAnswered) {
+            e.preventDefault();
+            return;
+        }
         e.target.classList.add('dragging');
         e.dataTransfer.setData('text/plain', e.target.dataset.index);
     }
@@ -2484,106 +2539,107 @@ ${answers.action || ''}`;
         });
     }
 
-    // Touch reorder for mobile
-    touchStart(e) {
-        const item = e.target.closest('.order-item');
-        if (!item) return;
-        this.touchDragItem = item;
-        this.touchStartY = e.touches[0].clientY;
-        item.classList.add('dragging');
-    }
-
-    touchMove(e) {
-        if (!this.touchDragItem) return;
-        e.preventDefault();
-        const touchY = e.touches[0].clientY;
-        const container = document.getElementById('order-container');
-        const items = [...container.querySelectorAll('.order-item:not(.dragging)')];
-
-        for (const item of items) {
-            const rect = item.getBoundingClientRect();
-            const midY = rect.top + rect.height / 2;
-            if (touchY < midY) {
-                container.insertBefore(this.touchDragItem, item);
-                this.updateOrderNumbers();
-                break;
-            }
-            if (item === items[items.length - 1] && touchY >= midY) {
-                container.appendChild(this.touchDragItem);
-                this.updateOrderNumbers();
-            }
-        }
-    }
-
-    touchEnd(e) {
-        if (this.touchDragItem) {
-            this.touchDragItem.classList.remove('dragging');
-            this.touchDragItem = null;
-        }
-    }
+    // (The old touchStart/touchMove/touchEnd reorder handlers were removed with the
+    // move to ▲/▼ buttons — they had to preventDefault every touchmove, which made
+    // the whole list a scroll dead zone on a phone.)
 
     updateOrderNumbers() {
-        document.querySelectorAll('.order-item').forEach((item, index) => {
+        const items = [...document.querySelectorAll('.order-item')];
+        items.forEach((item, index) => {
             item.querySelector('.order-number').textContent = index + 1;
+            // The top row cannot go up and the bottom row cannot go down.
+            const [up, down] = item.querySelectorAll('.order-move-btn');
+            if (up) up.disabled = index === 0;
+            if (down) down.disabled = index === items.length - 1;
         });
         // The player has interacted with the order, now they can check.
         this.enableCheckButton();
     }
 
+    // Identify exercises used to ask the learner to drag a selection across the
+    // passage. On a phone that hands control to the OS text-selection UI (blue
+    // handles + copy/paste toolbar) and the exercise becomes unplayable, so the
+    // type was retired from the content in favour of plain choice questions.
+    // This renderer stays as a safety net for any stale data still sitting in
+    // the game-data bucket or in a cached build: it splits the same passage into
+    // tappable parts, so it plays like a choice question and never opens a text
+    // selection. Nothing here depends on the exercise still existing.
+    splitIdentifySegments(text) {
+        const segments = [];
+        const sentence = /[^.!?]+[.!?]*/g;
+        let match;
+        while ((match = sentence.exec(text)) !== null) {
+            const raw = match[0];
+            if (!raw.trim()) continue;
+            const leading = raw.length - raw.trimStart().length;
+            const start = match.index + leading;
+            const body = raw.trim();
+            segments.push({ start, end: start + body.length, text: body });
+        }
+        return segments.length ? segments : [{ start: 0, end: text.length, text }];
+    }
+
+    // The part that overlaps correctRange the most is the intended answer.
+    findIdentifyCorrectIndex(segments, correctRange) {
+        if (!Array.isArray(correctRange) || correctRange.length < 2) return -1;
+        const [correctStart, correctEnd] = correctRange;
+        let bestIndex = -1;
+        let bestOverlap = 0;
+        segments.forEach((seg, index) => {
+            const overlap = Math.min(seg.end, correctEnd) - Math.max(seg.start, correctStart);
+            if (overlap > bestOverlap) {
+                bestOverlap = overlap;
+                bestIndex = index;
+            }
+        });
+        return bestIndex;
+    }
+
     renderIdentify(container, exercise) {
+        const letters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
         const tip = this.createExerciseTip('identify');
+        const text = typeof exercise.text === 'string' ? exercise.text : '';
+
+        this.identifySegments = this.splitIdentifySegments(text);
+        this.identifyCorrectIndex = this.findIdentifyCorrectIndex(this.identifySegments, exercise.correctRange);
+        this.selectedIdentifyIndex = -1;
+
+        const optionsHtml = this.identifySegments.map((segment, index) => `
+            <button class="option-btn" onclick="game.selectIdentifySegment(${index})">
+                <span class="option-letter">${letters[index] || index + 1}</span>
+                <span>${segment.text}</span>
+            </button>
+        `).join('');
 
         container.innerHTML = `
             <button class="back-btn" onclick="game.exitLesson()">✕</button>
             <div class="exercise-container">
                 <div class="exercise-type">${this.getExerciseTypeIcon('identify')} זיהוי בטקסט</div>
                 <div class="exercise-question">${exercise.question}</div>
-                <div class="identify-instructions">סמנו את החלק הרלוונטי בטקסט</div>
-                <div class="identify-text" id="identify-text" onmouseup="game.handleTextSelection()" ontouchend="setTimeout(function(){game.handleTextSelection()}, 100)">${exercise.text}</div>
+                <div class="identify-instructions">בחרו את החלק הנכון</div>
+                <div class="options-list" role="group" aria-label="חלקי הטקסט">
+                    ${optionsHtml}
+                </div>
                 <div class="mentor-tip">
                     <span class="mentor-tip-icon">🧑‍🏫</span>
                     <span class="mentor-tip-text">${tip}</span>
                 </div>
             </div>
         `;
-
-        this.enableCheckButton();
     }
 
-    handleTextSelection() {
+    selectIdentifySegment(index) {
         if (this.exerciseAnswered) return;
+        const segment = this.identifySegments && this.identifySegments[index];
+        if (!segment) return;
 
-        const selection = window.getSelection();
-        const text = selection.toString().trim();
-
-        if (text.length > 0) {
-            const container = document.getElementById('identify-text');
-            const range = selection.getRangeAt(0);
-            const start = this.getTextOffset(container, range.startContainer, range.startOffset);
-            const end = start + text.length;
-
-            this.selectedAnswer = { start, end, text };
-
-            const fullText = container.textContent;
-            const before = fullText.substring(0, start);
-            const selected = fullText.substring(start, end);
-            const after = fullText.substring(end);
-
-            container.innerHTML = `${before}<span class="highlight">${selected}</span>${after}`;
-            this.enableCheckButton();
-        }
-    }
-
-    getTextOffset(container, node, offset) {
-        let totalOffset = 0;
-        const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
-        while (walker.nextNode()) {
-            if (walker.currentNode === node) {
-                return totalOffset + offset;
-            }
-            totalOffset += walker.currentNode.textContent.length;
-        }
-        return totalOffset + offset;
+        this.sound.play('click');
+        this.selectedIdentifyIndex = index;
+        this.selectedAnswer = { start: segment.start, end: segment.end, text: segment.text };
+        document.querySelectorAll('.option-btn').forEach((btn, i) => {
+            btn.classList.toggle('selected', i === index);
+        });
+        this.enableCheckButton();
     }
 
     // ═══════════════════════════════════════
@@ -2696,7 +2752,7 @@ ${answers.action || ''}`;
             <div class="exercise-container">
                 <div class="exercise-type">${this.getExerciseTypeIcon('match')} התאמה</div>
                 <div class="exercise-question">${exercise.question}</div>
-                <div class="match-instructions">לחצו על פריט מצד אחד ואז על הפריט המתאים לו מהצד השני</div>
+                <div class="match-instructions">לחצו על פריט מהקבוצה הראשונה ואז על הפריט שמתאים לו מהקבוצה השנייה</div>
                 <div class="match-container">
                     <div class="match-column">${leftHtml}</div>
                     <div class="match-column">${rightHtml}</div>
@@ -2919,6 +2975,13 @@ ${answers.action || ''}`;
         if (!isCorrect && !this.secondChanceUsed && secondChanceTypes.includes(exercise.type)) {
             this.secondChanceUsed = true;
             this.comboCount = 0; // combo breaks on any mistake
+            // A second chance forgives the heart, not the record. Without this the
+            // first wrong answer vanished from the books: a learner could miss every
+            // question on the first try and still be handed a "perfect lesson" badge
+            // with +50 XP, and the accuracy shown back to them was inflated.
+            this.playerData.totalWrongAnswers = (this.playerData.totalWrongAnswers || 0) + 1;
+            this.lessonMistakes++;
+            this.updateExerciseStats(false, this.currentModule.id);
             this.showSecondChanceUI(exercise);
             return;
         }
@@ -2996,20 +3059,13 @@ ${answers.action || ''}`;
     }
 
     checkIdentifyAnswer(exercise) {
-        if (!this.selectedAnswer) return false;
+        if (this.selectedIdentifyIndex == null || this.selectedIdentifyIndex < 0) return false;
         // Guard: malformed/missing correctRange must not crash the whole lesson.
-        if (!Array.isArray(exercise.correctRange) || exercise.correctRange.length < 2) {
+        if (this.identifyCorrectIndex < 0) {
             console.warn('identify exercise has invalid correctRange:', exercise);
             return false;
         }
-        const [correctStart, correctEnd] = exercise.correctRange;
-        const { start, end } = this.selectedAnswer;
-        const overlapStart = Math.max(start, correctStart);
-        const overlapEnd = Math.min(end, correctEnd);
-        const overlap = Math.max(0, overlapEnd - overlapStart);
-        const selectedLength = end - start;
-        const correctLength = correctEnd - correctStart;
-        return overlap / selectedLength >= 0.6 && overlap / correctLength >= 0.4;
+        return this.selectedIdentifyIndex === this.identifyCorrectIndex;
     }
 
     showMultipleChoiceFeedback(isCorrect, exercise) {
@@ -3057,20 +3113,13 @@ ${answers.action || ''}`;
     }
 
     showIdentifyFeedback(isCorrect, exercise) {
-        const container = document.getElementById('identify-text');
-        const [correctStart, correctEnd] = exercise.correctRange;
-
-        if (isCorrect) {
-            container.querySelector('.highlight')?.classList.add('correct-highlight');
-        } else {
-            container.querySelector('.highlight')?.classList.add('incorrect-highlight');
-            setTimeout(() => {
-                const before = exercise.text.substring(0, correctStart);
-                const correct = exercise.text.substring(correctStart, correctEnd);
-                const after = exercise.text.substring(correctEnd);
-                container.innerHTML = `${before}<span class="highlight correct-highlight">${correct}</span>${after}`;
-            }, 500);
-        }
+        document.querySelectorAll('.option-btn').forEach((btn, index) => {
+            if (index === this.identifyCorrectIndex) {
+                btn.classList.add('correct');
+            } else if (index === this.selectedIdentifyIndex && !isCorrect) {
+                btn.classList.add('incorrect');
+            }
+        });
     }
 
     showFeedback(isCorrect, explanation) {
@@ -3169,6 +3218,13 @@ ${answers.action || ''}`;
     }
 
     continueToNext() {
+        // The feedback panel keeps taking taps for the 0.35s it spends sliding away,
+        // and the same "continue" action is reachable from the button, a swipe down
+        // and ESC. Two hits inside that window advanced the index twice and skipped
+        // an exercise, so only the first one through counts.
+        if (this._advancing) return;
+        this._advancing = true;
+
         document.getElementById('feedback-panel').classList.remove('show');
 
         // Cancel anything that might still write to the closing exercise's DOM
@@ -3181,6 +3237,7 @@ ${answers.action || ''}`;
         this.gemini.abortInFlight();
 
         if (this.playerData.hearts <= 0) {
+            this._advancing = false;
             this.showNoHeartsModal();
             return;
         }

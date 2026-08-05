@@ -883,7 +883,6 @@ main,
     background: var(--bg-overlay);
     border: 1px solid var(--border-light);
     border-radius: var(--r-md);
-    touch-action: none;
     padding: 14px 18px;
     cursor: grab;
     transition: all 0.2s var(--ease-out);
@@ -893,10 +892,6 @@ main,
     font-size: 15px;
     position: relative;
     overflow: hidden;
-}
-
-.order-item * {
-    touch-action: none;
 }
 
 .order-item:hover {
@@ -935,31 +930,83 @@ main,
     opacity: 0.5;
 }
 
-/* ── Identify Exercise ── */
-.identify-text {
-    font-size: 17px;
-    line-height: 2;
-    background: var(--bg-overlay);
-    padding: var(--space-5);
+/* ── Reorder controls (explicit up/down buttons — replaces touch-drag) ── */
+/* Sits at the inline-end of .order-item (left edge in RTL), after the text.
+   .order-number stays at the inline-start; the text takes the middle. */
+.order-controls {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    margin-inline-start: auto;
+    flex-shrink: 0;
+}
+
+.order-move-btn {
+    /* Accessibility floor: 44x44 CSS px tap target */
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: var(--bg-active);
+    border: 1px solid var(--border-light);
     border-radius: var(--r-md);
-    user-select: text;
-    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: background var(--transition-fast), border-color var(--transition-fast),
+                color var(--transition-fast), transform var(--transition-fast);
 }
 
-.identify-text .highlight {
-    background: rgba(47, 133, 146, 0.25);
-    padding: 2px 0;
-    border-radius: 4px;
+.order-move-btn:hover:not(:disabled) {
+    background: var(--bg-hover);
+    border-color: var(--primary);
+    color: var(--text-primary);
 }
 
-.identify-text .correct-highlight {
-    background: rgba(52, 211, 153, 0.25);
+.order-move-btn:focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
 }
 
-.identify-text .incorrect-highlight {
-    background: rgba(251, 113, 133, 0.25);
+/* Pressed state — instant tactile feedback on tap */
+.order-move-btn:active:not(:disabled) {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--text-on-primary);
+    transform: scale(0.9);
 }
 
+/* First row's ▲ / last row's ▼ — clearly greyed and non-interactive */
+.order-move-btn:disabled,
+.order-move-btn[aria-disabled="true"] {
+    opacity: 0.28;
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    transform: none;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .order-move-btn { transition: none; }
+    .order-move-btn:active:not(:disabled) { transform: none; }
+}
+
+/* ── Identify Exercise ── */
+/* NOTE: the `identify` exercise now renders ordinary tappable option buttons.
+   The old `.identify-text` block (and its .highlight variants) was removed —
+   the #identify-text node no longer exists anywhere in the codebase. */
 .identify-instructions {
     font-size: 13px;
     color: var(--text-secondary);
@@ -5074,6 +5121,56 @@ video.welcome-gate-hero {
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         background: rgba(0, 42, 50, 0.85);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Match exercise — group differentiation on phones
+   Below 480px .match-container collapses to a single column, so terms
+   (.match-left) and definitions (.match-right) would render as 8 identical
+   cards. One coherent approach: colour-code the two groups — gold accent for
+   the terms group, teal accent for the definitions group — plus a divider
+   between the two stacked columns. Declared AFTER the perf block above so the
+   flat rgba(0,42,50,.85) background does not out-cascade the group tints.
+   Uses brand tokens/mid-tone brand colours, so it reads correctly on the game
+   surface in both the dark and the light theme.
+   Note: a completed pair gets inline styles from the JS (pair colour) and
+   therefore always wins over these rules — intentional.
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+    /* Visual break between the terms group and the definitions group */
+    .match-container .match-column + .match-column {
+        margin-top: var(--space-2);
+        padding-top: var(--space-3);
+        border-top: 1px dashed var(--border-light);
+    }
+
+    /* Group A — terms (gold) */
+    .match-item.match-left {
+        background: rgba(212, 175, 55, 0.12);
+        border-color: rgba(212, 175, 55, 0.45);
+        border-inline-start: 4px solid var(--color-gold-500);
+        justify-content: flex-start;
+        text-align: start;
+        font-weight: 600;
+    }
+
+    /* Group B — definitions (teal) */
+    .match-item.match-right {
+        background: rgba(47, 133, 146, 0.16);
+        border-color: rgba(91, 184, 196, 0.45);
+        border-inline-start: 4px solid var(--color-primary-400);
+        justify-content: flex-start;
+        text-align: start;
+        font-weight: 400;
+    }
+
+    /* Selection must still read louder than the group tint */
+    .match-item.match-left.selected,
+    .match-item.match-right.selected {
+        background: rgba(47, 133, 146, 0.28);
+        border-color: var(--primary);
+        border-inline-start-color: var(--primary);
     }
 }
 

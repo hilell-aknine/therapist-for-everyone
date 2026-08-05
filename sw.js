@@ -1,5 +1,7 @@
 // Service Worker for NLP Game PWA
-const CACHE_NAME = 'nlp-game-v2';
+// Bump on every game code/content change: the activate handler deletes every
+// cache whose name differs, so this is what evicts the previous build.
+const CACHE_NAME = 'nlp-game-v3';
 const ASSETS_TO_CACHE = [
     '/pages/nlp-game.html',
     '/css/nlp-game.css',

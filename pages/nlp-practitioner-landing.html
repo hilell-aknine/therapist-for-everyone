@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>NLP Practitioner — הכשרה מלאה | בית המטפלים</title>
+<meta property="og:title" content="NLP Practitioner — הכשרה מלאה עם רם אלוס">
+<meta property="og:description" content="7 יחידות לימוד, עשרות פרקים, חוברות ואפשרות הסמכה. 197 ₪ חד פעמי.">
+<meta property="og:image" content="../assets/master-sales/ram-stage-solo.jpg">
+<link rel="icon" href="../assets/logo-square.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   NLP Practitioner — דף נחיתה
+   שפת העיצוב: Apple Glass של בית המטפלים, נשאבה מ-login-v2 / free-portal-v2 /
+   course-library-v2. כהה בלבד: הזכוכית מניחה רקע פטרול, משטח בהיר שובר אותה.
+   ============================================================================ */
+:root{
+  --petrol-deep:#04161b; --petrol-bg:#062831; --petrol-mid:#0a3d48; --petrol-hi:#15525d;
+  --teal:#2F8592; --teal-bright:#3FAABB;
+  --gold:#D4AF37; --gold-light:#E6C65A; --frost:#E8F1F2;
+
+  --text:#ffffff;
+  --text-soft:rgba(255,255,255,.72);
+  --text-muted:rgba(255,255,255,.58);
+
+  --lg-sat:180%;
+  --lg-edge:rgba(255,255,255,.15);
+  --lg-shadow-md:0 12px 32px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.24);
+  --lg-shadow-lg:0 28px 60px rgba(0,0,0,.4), 0 6px 14px rgba(0,0,0,.3);
+  --lg-r-outer:24px; --lg-r-inner:16px;
+
+  --font-display:'Frank Ruhl Libre','Noto Serif Hebrew',Georgia,serif;
+  --font-body:'Heebo',-apple-system,'Segoe UI',Arial,sans-serif;
+  --tracking-eyebrow:.15em;
+
+  --ease-standard:cubic-bezier(.2,0,0,1);
+  --dur-2:.2s; --dur-3:.32s;
+  --maxw:1040px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip}          /* clip ולא hidden: hidden שובר sticky */
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+body{
+  margin:0; background:var(--petrol-deep); color:var(--text);
+  font-family:var(--font-body); font-size:17px; line-height:1.75;
+  padding-bottom:calc(78px + env(safe-area-inset-bottom,0px));
+}
+img{max-width:100%; height:auto; display:block}
+
+/* ---------- רקע אטמוספרי (בלעדיו הזכוכית ריקה) ---------- */
+.atmos{position:fixed; inset:0; z-index:0; pointer-events:none}
+.atmos__base{position:absolute; inset:0; background:
+  radial-gradient(ellipse at 12% 8%,  rgba(230,198,90,.15), transparent 50%),
+  radial-gradient(ellipse at 88% 92%, rgba(47,133,146,.32), transparent 55%),
+  radial-gradient(ellipse at 78% 18%, rgba(63,170,187,.16), transparent 45%),
+  radial-gradient(ellipse at 22% 78%, rgba(139,75,12,.20),  transparent 50%),
+  linear-gradient(160deg,#041d22 0%,#062831 38%,#0a3d48 78%,#0d4a56 100%);}
+.atmos__blob{position:absolute; border-radius:50%; filter:blur(120px); mix-blend-mode:screen; will-change:transform}
+.atmos__blob--a{width:540px;height:540px;background:#E6C65A;opacity:.28;top:-160px;inset-inline-end:-160px;animation:floatA 26s ease-in-out infinite}
+.atmos__blob--b{width:480px;height:480px;background:#2F8592;opacity:.4;bottom:-180px;inset-inline-start:-150px;animation:floatB 32s ease-in-out infinite}
+.atmos__blob--c{width:360px;height:360px;background:#3FAABB;opacity:.2;top:38%;inset-inline-start:42%;animation:floatC 38s ease-in-out infinite}
+.atmos__grid{position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;
+  background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);}
+@keyframes floatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,40px) scale(1.08)}}
+@keyframes floatB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-40px) scale(1.06)}}
+@keyframes floatC{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-70px,-50px) scale(1.12)}}
+.frame{position:relative; z-index:1}
+
+/* ---------- מבנה ---------- */
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 20px}
+section.sec{padding:64px 0; position:relative}
+.sec.alt::before{content:''; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
+  border-block:1px solid rgba(255,255,255,.07)}
+
+/* ---------- טיפוגרפיה ---------- */
+h1,h2,h3{font-family:var(--font-display); color:#fff; margin:0 0 .5em; overflow-wrap:anywhere}
+h1{font-size:clamp(2rem,5.5vw,3.3rem); font-weight:900; line-height:1.18; letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,4vw,2.5rem); font-weight:700; line-height:1.25; text-align:center}
+h3{font-size:clamp(1.05rem,2.6vw,1.3rem); font-weight:700; line-height:1.35}
+p{margin:0 0 1rem}
+p.lede{text-align:center; color:var(--text-soft); max-width:720px; margin:0 auto 1.6rem; font-size:1rem}
+p.lead{color:var(--text-soft); line-height:1.85}
+.hl{color:var(--gold-light)}
+.eyebrow,.fp-eyebrow{font-size:.74rem; font-weight:700; letter-spacing:var(--tracking-eyebrow);
+  text-transform:uppercase; color:rgba(47,133,146,.95); text-align:center; margin-bottom:.6rem}
+
+/* ---------- זכוכית ---------- */
+.card,.offerbox,.unit,.letter,.qa,.stat,.mock,.callout,.shot{
+  position:relative; isolation:isolate;
+  background:rgba(255,255,255,.055);
+  backdrop-filter:blur(32px) saturate(var(--lg-sat));
+  -webkit-backdrop-filter:blur(32px) saturate(var(--lg-sat));
+  border:1px solid rgba(255,255,255,.14);
+  border-top:1px solid rgba(212,175,55,.22);
+  border-radius:20px;
+  box-shadow:0 4px 24px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.card::before,.offerbox::before,.unit::before,.letter::before,.mock::before,.shot::before{
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:linear-gradient(160deg, rgba(255,255,255,.1) 0%, transparent 45%)}
+.card,.unit{padding:1.7rem 1.5rem; min-width:0; transition:transform var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard), border-top-color var(--dur-2)}
+.card:hover,.unit:hover{transform:translateY(-3px); border-top-color:rgba(212,175,55,.55);
+  box-shadow:0 16px 44px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.1)}
+.card > *,.unit > *{position:relative}
+.card h3,.unit h3{color:#fff}
+.card p{color:var(--text-soft); font-size:.95rem; margin-bottom:0}
+
+/* ---------- גריד ---------- */
+.grid{display:grid; gap:1.1rem; margin-top:1.8rem;
+  grid-template-columns:repeat(auto-fit, minmax(min(100%,280px),1fr))}   /* לא 1fr חשוף: RTL נופל */
+.grid > *{min-width:0}
+.grid.g2{grid-template-columns:repeat(auto-fit, minmax(min(100%,320px),1fr))}
+.grid.g3{grid-template-columns:repeat(auto-fit, minmax(min(100%,260px),1fr))}
+
+/* ---------- רשימות ---------- */
+ul.checks,ul.plain{list-style:none; margin:0; padding:0}
+ul.checks > li{position:relative; padding-inline-start:1.8rem; margin-bottom:.6rem;
+  color:var(--text-soft); font-size:.95rem; line-height:1.7}
+ul.checks > li::before{content:'✓'; position:absolute; inset-inline-start:0; top:0;
+  color:var(--gold-light); font-weight:800}
+ul.plain > li{margin-bottom:.5rem; color:var(--text-soft)}
+
+/* ---------- יחידת לימוד ---------- */
+.unit{padding:0; overflow:hidden}
+.unit .unit-banner{width:100%; aspect-ratio:16/6; object-fit:cover; border-radius:20px 20px 0 0}
+.unit .unit-body{padding:1.5rem}
+.unit .tag{display:inline-flex; align-items:center; gap:.45rem; padding:.3rem .75rem;
+  border-radius:999px; background:rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.38);
+  color:var(--gold-light); font-size:.72rem; font-weight:800; letter-spacing:.02em;
+  margin-bottom:.7rem; font-family:var(--font-body)}
+
+/* ---------- כפתורים ---------- */
+a.cta{display:inline-flex; align-items:center; justify-content:center; gap:.55rem;
+  padding:1rem 2.4rem; border:none; border-radius:14px; min-height:52px;
+  background:linear-gradient(180deg,#E6C65A 0%,#D4A437 100%); color:#1a1205;
+  font-family:var(--font-body); font-size:1.02rem; font-weight:800; letter-spacing:-.01em;
+  text-decoration:none; position:relative; isolation:isolate; overflow:hidden;
+  box-shadow:0 10px 26px rgba(212,164,55,.38), inset 0 1px 0 rgba(255,255,255,.46), inset 0 -2px 0 rgba(0,0,0,.06);
+  transition:transform var(--dur-2) var(--ease-standard), box-shadow var(--dur-2) var(--ease-standard)}
+a.cta::before{content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.45), transparent 50%)}
+a.cta:hover{transform:translateY(-2px); box-shadow:0 14px 32px rgba(212,164,55,.48), inset 0 1px 0 rgba(255,255,255,.52)}
+a.cta:active{transform:translateY(0) scale(.97)}
+.cta-wrap{text-align:center; padding:2rem 0 .5rem}
+.microcopy{text-align:center; font-size:.82rem; color:var(--text-muted); margin-top:.9rem}
+
+/* ---------- הצעה ומחיר ---------- */
+.offerbox{max-width:560px; margin:2rem auto 0; padding:2.2rem 1.8rem; text-align:center;
+  background:rgba(212,175,55,.055); border-top-color:rgba(212,175,55,.45);
+  border-radius:28px; box-shadow:var(--lg-shadow-lg), inset 0 1px 0 rgba(255,255,255,.14)}
+.offerbox > *{position:relative}
+.offerbox::after{content:''; position:absolute; top:0; inset-inline:0; height:1px; border-radius:28px 28px 0 0;
+  background:linear-gradient(90deg, transparent 0%, rgba(212,175,55,.55) 35%, rgba(230,198,90,.8) 50%, rgba(212,175,55,.55) 65%, transparent 100%)}
+.price-old{color:var(--text-muted); text-decoration:line-through; font-size:1.05rem}
+.price-now{font-family:var(--font-display); font-size:clamp(2.6rem,9vw,4rem); font-weight:900;
+  color:var(--gold-light); line-height:1.05; font-variant-numeric:tabular-nums}
+.badges{display:flex; flex-wrap:wrap; justify-content:center; gap:.5rem; margin-top:1.2rem}
+.badge{display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .8rem; border-radius:999px;
+  background:rgba(10,40,46,.55); border:1px solid rgba(212,175,55,.28);
+  backdrop-filter:blur(10px) saturate(180%); -webkit-backdrop-filter:blur(10px) saturate(180%);
+  font-size:.76rem; color:var(--text-soft); font-weight:500}
+
+/* ---------- סטטיסטיקות ---------- */
+.stats{display:grid; gap:.8rem; margin:2rem 0 0;
+  grid-template-columns:repeat(auto-fit, minmax(min(100%,150px),1fr))}
+.stats > *{min-width:0}
+.stat{padding:1.1rem .8rem; text-align:center; border-radius:16px}
+.stat > *{position:relative}
+.stat b{display:block; font-family:var(--font-body); font-size:1.6rem; font-weight:800;
+  color:var(--gold-light); font-variant-numeric:tabular-nums; line-height:1.2}
+.stat small{display:block; font-size:.78rem; color:var(--text-soft); margin-top:.2rem}
+
+/* ---------- שאלות ותשובות ---------- */
+.qa{margin-bottom:.7rem; padding:0; border-radius:var(--lg-r-inner)}
+.qa summary{list-style:none; cursor:pointer; padding:1.05rem 1.3rem; font-weight:700;
+  font-size:1rem; color:#fff; display:flex; justify-content:space-between; gap:1rem;
+  align-items:center; min-height:52px}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::after{content:'+'; color:var(--gold-light); font-weight:800; font-size:1.25rem; flex:none}
+.qa[open] summary::after{content:'−'}
+.qa p{padding:0 1.3rem 1.15rem; color:var(--text-soft); font-size:.95rem; margin:0}
+.faq{max-width:800px; margin:2rem auto 0}
+
+/* ---------- מכתב ---------- */
+.letter{padding:2rem 1.7rem; margin-top:1.8rem}
+.letter > *{position:relative}
+.letter p{color:var(--text-soft); line-height:1.9}
+.signature{font-family:var(--font-display); font-size:1.2rem; color:var(--gold-light);
+  font-weight:700; margin-top:1.2rem}
+
+/* ---------- תמונות ---------- */
+.shot{overflow:hidden; padding:0; margin:1.8rem auto 0; max-width:760px}
+.shot img{width:100%; display:block}
+.shot figcaption{position:relative; padding:.75rem 1.1rem; font-size:.82rem;
+  color:var(--text-muted); text-align:center; border-top:1px solid rgba(255,255,255,.08)}
+.shot--portrait{max-width:300px}
+.hero-figure{margin:2rem auto 0; max-width:640px}
+
+/* ---------- הדגשות ---------- */
+.callout{padding:1.15rem 1.3rem; margin:1.5rem 0; border-radius:14px;
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1);
+  border-inline-start:3px solid rgba(212,164,55,.6)}
+.callout > *{position:relative}
+.callout p{margin-bottom:0; color:var(--text-soft)}
+.callout.warn{background:rgba(212,175,55,.1); border-inline-start-color:var(--gold);
+  border-color:rgba(212,175,55,.38)}
+.callout.warn p{color:#F4E2B0}
+
+/* ---------- מציין מיקום ---------- */
+.mock{display:grid; place-items:center; min-height:170px; padding:1.5rem;
+  border:1px dashed rgba(212,175,55,.45); background:rgba(212,175,55,.05); margin:1.5rem 0}
+.mock span{position:relative; color:var(--gold-light); font-size:.88rem; text-align:center}
+
+/* ---------- סרגל דביק ---------- */
+.sticky{position:fixed; inset-inline:0; inset-block-end:0; z-index:90;
+  display:flex; align-items:center; justify-content:center; gap:1rem; flex-wrap:wrap;
+  padding:.7rem 1rem calc(.7rem + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(180deg, rgba(8,32,38,.94), rgba(4,22,27,.96));
+  backdrop-filter:blur(28px) saturate(180%); -webkit-backdrop-filter:blur(28px) saturate(180%);
+  border-top:1px solid rgba(212,175,55,.28)}
+.sticky b{font-size:1rem; color:var(--gold-light); font-variant-numeric:tabular-nums}
+.sticky a{display:inline-flex; align-items:center; min-height:44px; padding:.6rem 1.5rem;
+  border-radius:12px; background:linear-gradient(180deg,#E6C65A 0%,#D4A437 100%);
+  color:#1a1205; font-weight:800; font-size:.92rem; text-decoration:none;
+  box-shadow:0 6px 18px rgba(212,164,55,.34)}
+
+/* ---------- כותרת עליונה ---------- */
+.topbar{position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; padding:.7rem 1.1rem; margin:0 auto; max-width:var(--maxw);
+  background:rgba(4,22,27,.6); backdrop-filter:blur(28px) saturate(180%);
+  -webkit-backdrop-filter:blur(28px) saturate(180%); border-bottom:1px solid rgba(255,255,255,.09)}
+.topbar img{height:38px; width:auto}
+.topbar .who{font-size:.82rem; color:var(--text-muted)}
+
+footer{position:relative; z-index:1; padding:2.4rem 0 3rem; text-align:center;
+  color:var(--text-muted); font-size:.82rem; border-top:1px solid rgba(255,255,255,.08); margin-top:2rem}
+
+/* ---------- מובייל: מעלים אטימות, הזכוכית בולעת טקסט קטן ---------- */
+@media (max-width:900px){
+  :root{--text-muted:#D8E0DF; --text-soft:rgba(255,255,255,.82)}
+  .card,.unit,.qa,.stat,.letter,.callout,.shot{background:linear-gradient(180deg, rgba(8,32,38,.92), rgba(6,22,28,.86))}
+  .offerbox{background:linear-gradient(180deg, rgba(24,36,30,.94), rgba(10,30,32,.9))}
+  section.sec{padding:46px 0}
+  .atmos__blob{filter:blur(90px)}
+}
+@media (prefers-reduced-transparency: reduce){
+  .card,.unit,.qa,.stat,.letter,.callout,.shot,.offerbox,.sticky,.topbar,.badge{
+    backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+    background:rgba(10,40,46,.95) !important}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; transition-duration:.01ms !important;
+    animation-iteration-count:1 !important}
+}
+*:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:8px}
+[hidden]{display:none !important}
+
+/* ===== FIX-ENGINE 11.8.2026 ===== */
+/* F-002 */
+.uline-red{ text-decoration:underline; text-decoration-color:#E5484D;
+  text-decoration-thickness:2px; text-underline-offset:5px; }
+/* F-003 — סטטיסטיקות בלי ריבוע, עם כניסה מונפשת */
+.stats--bare .stat{ background:none !important; backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important; border:0 !important; box-shadow:none !important;
+  padding:.6rem .4rem; opacity:0; transform:translateY(14px);
+  transition:opacity .6s var(--ease-standard), transform .6s var(--ease-standard); }
+.stats--bare .stat::before{ display:none }
+.stats--bare .stat.is-in{ opacity:1; transform:none }
+.stats--bare .stat:nth-child(2){ transition-delay:.08s }
+.stats--bare .stat:nth-child(3){ transition-delay:.16s }
+.stats--bare .stat:nth-child(4){ transition-delay:.24s }
+.stats--bare .stat h3{ font-family:var(--font-body); font-size:clamp(1.7rem,5vw,2.4rem);
+  font-weight:800; color:var(--gold-light); font-variant-numeric:tabular-nums; margin:0 0 .15rem }
+.stats--bare .stat p{ font-size:.82rem; color:var(--text-soft); margin:0 }
+/* F-005 — קרוסלה אופקית */
+.swipe-hint{ text-align:center; font-size:.8rem; color:var(--text-muted); margin:-.6rem 0 1.2rem }
+.carousel{ display:grid; grid-auto-flow:column; grid-auto-columns:min(86%,360px);
+  gap:1.1rem; overflow-x:auto; overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory; scroll-padding-inline:20px;
+  padding:.4rem 20px 1.4rem; margin-inline:-20px;
+  scrollbar-width:thin; scrollbar-color:rgba(212,175,55,.5) transparent }
+.carousel > *{ scroll-snap-align:center; min-width:0 }
+.carousel::-webkit-scrollbar{ height:6px }
+.carousel::-webkit-scrollbar-thumb{ background:rgba(212,175,55,.5); border-radius:99px }
+.carousel .unit:hover{ transform:none }
+@media(min-width:900px){ .carousel{ grid-auto-columns:340px } }
+/* F-006 — טכניקות כבולטים */
+.tech-title{ text-align:center; margin:2rem 0 1.2rem }
+.tech-grid{ display:grid; gap:.7rem;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr)) }
+.tech-grid > *{ min-width:0 }
+.tech{ display:flex; align-items:center; gap:.65rem; padding:.75rem .9rem; border-radius:12px;
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
+  border-inline-start:3px solid rgba(212,164,55,.6);
+  font-size:.92rem; color:var(--text-soft) }
+.tech__n{ font-family:var(--font-body); font-weight:800; font-size:.78rem;
+  color:var(--gold-light); font-variant-numeric:tabular-nums; flex:none }
+@media(max-width:900px){ .tech{ background:linear-gradient(180deg,rgba(8,32,38,.92),rgba(6,22,28,.86)) } }
+</style>
+</head>
+<body>
+
+<div class="atmos" aria-hidden="true">
+  <div class="atmos__base"></div>
+  <div class="atmos__blob atmos__blob--a"></div>
+  <div class="atmos__blob atmos__blob--b"></div>
+  <div class="atmos__blob atmos__blob--c"></div>
+  <div class="atmos__grid"></div>
+</div>
+
+<div class="frame">
+
+<header class="topbar">
+  <img src="../assets/logo-light.png" alt="בית המטפלים">
+  <!-- FIX-ENGINE F-001 (11.8.2026): הוסרה שורת "הכשרת NLP Practitioner · רם אלוס" לבקשת הלל. -->
+</header>
+
+<main>
+<section class="sec">
+  <div class="wrap">
+    <!-- FIX-ENGINE F-002 (11.8.2026): קו אדום מתחת ל"הסמכה בינלאומית" לבקשת הלל. -->
+    <p class="lede">מעל 30,000 צפיות בקורס ומאות תלמידים עם <span class="uline-red">הסמכה בינלאומית</span></p>
+
+    <!-- FIX-ENGINE F-003 (11.8.2026): הוסרו הריבועים מהסטטיסטיקות, נוספה אנימציית ספירה וכניסה. -->
+    <div class="stats stats--bare">
+      <div class="stat">
+        <h3>30,000</h3>
+        <p>צפיות בקורס</p>
+      </div>
+      <div class="stat">
+        <h3>מאות</h3>
+        <p>תלמידים עם הסמכה בינלאומית</p>
+      </div>
+      <div class="stat">
+        <h3>20+</h3>
+        <p>שעות תוכן</p>
+      </div>
+      <div class="stat">
+        <h3>7</h3>
+        <p>יחידות לימוד</p>
+      </div>
+    </div>
+
+    <h1>היית משלם 197 ש״ח כדי לקבל גישה לקורס NLP Practitioner (מעל 20 שעות תוכן) עם תעודת הסמכה בינלאומית ולקבל עשרות כלים ליצירת פריצות דרך אצלך ואצל אחרים?</h1>
+
+    <p class="lead">הקורס הזה נמכר בעבר ב-4,170 ש״ח, ברכישה אתם מקבלים 2 חוברות PDF של כל הקורס + כל הטכניקות + עוד בונוסים שווים.</p>
+
+    <figure class="shot hero-figure "><img loading="lazy" src="../assets/master-sales/ram-stage-solo.jpg" alt="רם אלוס מרצה על הבמה מול קהל"><figcaption>רם אלוס בהרצאה</figcaption></figure>
+<div class="offerbox" id="join">
+      <h2>מחיר ההכשרה כרגע: 197 ₪ חד־פעמי</h2>
+      <p class="price-old">4,170 ₪</p>
+      <p class="price-now">197 ₪</p>
+
+      <div class="cta-wrap">
+        <a class="cta" href="#join">אני רוצה להתחיל את הקורס</a>
+        <p class="microcopy">תשלום חד־פעמי, גישה לקורס המלא ולחוברות הלימוד.</p>
+      </div>
+
+      <div class="badges">
+        <span class="badge">30 יום אחריות</span>
+        <span class="badge">גישה לקורס</span>
+        <span class="badge">חוברות לימוד</span>
+        <span class="badge">אפשרות להסמכה</span>
+      </div>
+    </div>
+    <!-- FIX-ENGINE F-004 (11.8.2026): תמונת עץ הידע הוסרה לבקשת הלל, ייבנה ויזואל אחר בהמשך. -->
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <h2>למי הקורס הזה נבנה</h2>
+
+    <p class="lead">אם תמיד עניין אתכם להבין איך אנשים עובדים, למה אנחנו מגיבים כמו שאנחנו מגיבים, איך נוצרים דפוסים ואמונות, ואיך אפשר לעבוד איתם בצורה הרבה יותר מודעת, הקורס הזה נבנה בדיוק בשביל זה.</p>
+
+    <ul class="checks">
+      <li>לא צריך רקע קודם.</li>
+      <li>לא צריך להיות מטפל.</li>
+      <li>לא צריך להגיע עם שום ידע ב־NLP.</li>
+    </ul>
+
+    <div class="callout">
+      <p>רק סקרנות אמיתית ורצון להבין יותר לעומק את מה שאני אוהב לקרוא לו: <span class="hl">״מערכת ההפעלה האנושית״</span></p>
+    </div>
+
+    <h3>מה מחכה לכם בפנים</h3>
+
+    <p>בתוך הקורס מחכות לכם 7 יחידות לימוד, עשרות פרקים, כלים פרקטיים, טכניקות, חוברת קורס מלאה ו״ספר מתכונים״ שמרכז את תהליכי ה־NLP שלב אחרי שלב. התכנים עצמם נעים ממודע ולא־מודע, שפת גוף וראפור, דרך מטרות, עמדות תפיסה, מערכות ייצוג וסמ״דים, ועד עוגנים, מסגור, אמונות וציר זמן.</p>
+
+    <p>ומי שרוצה לקחת את זה צעד נוסף קדימה יוכל גם לעבור את מסלול ההסמכה ולקבל תעודת NLP Practitioner בכפוף לעמידה בדרישות ההסמכה.</p><figure class="shot "><img loading="lazy" src="../assets/master-sales/ram-group-cert.jpg" alt="בוגרי קורס של רם אלוס עם תעודות"><figcaption>בוגרי מחזורים קודמים</figcaption></figure>
+
+    <div class="cta-wrap">
+      <a class="cta" href="#join">אני רוצה להתחיל את הקורס</a>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    <h2>למה בכלל ללמוד NLP?</h2>
+    <p class="lede">כי רובנו חיים עם מוח שאנחנו משתמשים בו כל היום, אבל אף אחד לא באמת לימד אותנו איך הוא עובד.</p>
+
+    <ul class="plain">
+      <li>למה לפעמים אנחנו יודעים בדיוק מה נכון לנו לעשות ועדיין לא עושים אותו.</li>
+      <li>למה אדם אחד יכול להלחיץ אותנו במשפט אחד, ואדם אחר לא.</li>
+      <li>למה יש פחדים שאנחנו מבינים לוגית שאין בהם היגיון, אבל הגוף עדיין מגיב.</li>
+      <li>למה אנחנו חוזרים לאותם הרגלים.</li>
+      <li>למה יש מחשבות שאנחנו לא מצליחים לשחרר.</li>
+      <li>למה שני אנשים יכולים לעבור את אותו אירוע ולחוות אותו בצורה שונה לגמרי.</li>
+    </ul>
+
+    <p class="lead"><span class="hl">NLP הוא ניסיון להבין את הקשר שבין הדרך שבה אנחנו חושבים, השפה שבה אנחנו משתמשים, התחושות שאנחנו חווים וההתנהגות שנוצרת בעקבותיהן.</span></p>
+    <p>ובקורס אנחנו לא רק מדברים על זה. אנחנו מפרקים את זה. לומדים את המודלים. ומתרגלים את הכלים.</p>
+    <p class="microcopy">בחוברת הקורס עצמה הדגש הוא לא על צפייה פסיבית, אלא על למידה, בדיקה, תרגול והתנסות.</p>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <h2>אולי אחד הדברים האלה מוכר לכם</h2>
+
+    <ul class="checks">
+      <li>אתם יודעים שאתם רוצים לעשות שינוי, אבל מרגישים שמשהו בפנים מושך אתכם אחורה.</li>
+      <li>אתם מנסים להבין למה אנשים מסוימים מפעילים אתכם רגשית כל כך מהר.</li>
+      <li>אתם מוצאים את עצמכם שוב ושוב באותם דפוסים בזוגיות, בעבודה או מול עצמכם.</li>
+      <li>אתם רוצים ללמוד לשאול שאלות יותר טובות ולהבין אנשים מעבר למה שהם רק אומרים במילים.</li>
+      <li>אתם מסתקרנים מפסיכולוגיה, תת־מודע, הרגלים, אמונות והתנהגות אנושית.</li>
+      <li>או שפשוט תמיד עניין אתכם ללמוד NLP, אבל אף פעם לא באמת נכנסתם לזה.</li>
+    </ul>
+
+    <p class="lead">אם כן, אתם כנראה בדיוק הקהל שבשבילו בניתי את הקורס הזה.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <h2>למי הקורס מתאים?</h2>
+
+    <ul class="checks">
+      <li>אם אתם מתחילים לגמרי ורוצים להכיר NLP בצורה מסודרת. כן.</li>
+      <li>אם אתם מתעניינים בהתפתחות אישית ורוצים להבין את עצמכם יותר. כן.</li>
+      <li>אם אתם רוצים לשפר תקשורת ולהבין אנשים. כן.</li>
+      <li>אם אתם שוקלים בעתיד להיכנס לעולם האימון, הליווי או ה־NLP, הוא יכול להיות נקודת התחלה מצוינת.</li>
+    </ul>
+
+    <div class="callout">
+      <p>אם אתם רוצים פשוט תעודה בלי ללמוד ולתרגל, זה פחות המקום.</p>
+    </div>
+
+    <div class="cta-wrap">
+      <a class="cta" href="#join">אני רוצה להתחיל את הקורס</a>
+    </div>
+  </div>
+</section>
+<section class="sec alt">
+  <div class="wrap">
+    <h2>אז מה באמת לומדים שם?</h2>
+    <p class="lede">לא רציתי ליצור קורס שזורק עליכם רשימה של מושגים. הקורס בנוי כמו מסע. בכל חלק אנחנו מוסיפים עוד שכבה להבנה של עצמנו ושל האדם שמולנו.</p>
+    <p class="swipe-hint">גוררים הצידה כדי לעבור בין החלקים ←</p>
+
+    <!-- FIX-ENGINE F-005 (11.8.2026): שבע היחידות הפכו לקרוסלה אופקית עם scroll-snap לבקשת הלל. -->
+    <div class="carousel">
+
+      <div class="unit">
+<img class="unit-banner" loading="lazy" src="../assets/game/banners/module-1.jpg" alt="יחידת לימוד 1">
+<div class="unit-body">
+        <span class="tag">חלק 1</span>
+        <h3>להכיר את מערכת ההפעלה</h3>
+        <p class="lead">כאן מתחילים מהבסיס. מבינים מה זה בכלל NLP, איך המודע והלא־מודע משתלבים בדרך שבה אנחנו פועלים, ואיך חלק גדול מהתקשורת בין אנשים בכלל לא מתרחש דרך המילים.</p>
+        <ul class="checks">
+          <li>מבוא ל־NLP, היסטוריה והנחות יסוד</li>
+          <li>עקרונות היסוד של NLP</li>
+          <li>המודע והלא־מודע</li>
+          <li>הדרך שבה אנחנו מפרשים את העולם</li>
+          <li>שפת גוף ותקשורת לא מילולית</li>
+          <li>חדות חושים וקליברציה</li>
+          <li>Rapport, יצירת חיבור וכימיה בתקשורת</li>
+        </ul>
+      </div>
+</div><div class="unit">
+<img class="unit-banner" loading="lazy" src="../assets/game/banners/module-2.jpg" alt="יחידת לימוד 2">
+<div class="unit-body">
+        <span class="tag">חלק 2</span>
+        <h3>להבין אנשים וקונפליקטים</h3>
+        <p class="lead">לפעמים אנחנו תקועים בתוך סיטואציה פשוט כי אנחנו מסוגלים לראות אותה רק מזווית אחת. כאן נלמד לצאת לרגע מהראש שלנו ולראות דברים אחרת.</p>
+        <ul class="checks">
+          <li>רמות לוגיות</li>
+          <li>עמדות תפיסה</li>
+          <li>איך להיכנס לנקודת המבט של האדם שמולכם</li>
+          <li>איך להסתכל על קונפליקט גם מנקודת מבט ניטרלית</li>
+          <li>מסע בין עמדות</li>
+          <li>מסע בין יועצים</li>
+        </ul>
+      </div>
+</div><div class="unit">
+<img class="unit-banner" loading="lazy" src="../assets/game/banners/module-3.jpg" alt="יחידת לימוד 3">
+<div class="unit-body">
+        <span class="tag">חלק 3</span>
+        <h3>ללמוד לשאול שאלות שבאמת פותחות משהו</h3>
+        <p class="lead">יש משפט שאני מאוד אוהב: איכות התשובות שאנחנו מקבלים תלויה הרבה פעמים באיכות השאלות שאנחנו יודעים לשאול.</p>
+        <ul class="checks">
+          <li>הכללות</li>
+          <li>השמטות</li>
+          <li>עיוותים</li>
+          <li>ניסוחים מעורפלים</li>
+          <li>הנחות שמסתתרות בתוך השפה</li>
+          <li>Outcome</li>
+          <li>מודל SMART</li>
+          <li>מודל וולט דיסני</li>
+        </ul>
+        <p>המטרה היא לא רק להוסיף שאלות. המטרה היא לדעת לשאול את השאלה שעוזרת לאדם, או לעצמכם, לראות משהו שלא ראיתם קודם.</p>
+      </div>
+</div><div class="unit">
+<img class="unit-banner" loading="lazy" src="../assets/game/banners/module-4.jpg" alt="יחידת לימוד 4">
+<div class="unit-body">
+        <span class="tag">חלק 4</span>
+        <h3>השפה של המוח</h3>
+        <p class="lead">זה אחד החלקים שהכי פתחו לי את הראש כשאני למדתי NLP. כי אנחנו לא חווים את המציאות ישירות. אנחנו יוצרים בתוכנו ייצוגים של המציאות. תמונות. קולות. תחושות. זיכרונות.</p>
+        <ul class="checks">
+          <li>מערכות ייצוג</li>
+          <li>סמ״דים / Submodalities</li>
+          <li>איך אנחנו מקודדים חוויות בראש</li>
+          <li>Map Across</li>
+          <li>Swish</li>
+          <li>שינוי הרגלים והתניות</li>
+          <li>פרוטוקולים מסורתיים לעבודה עם פחדים ותגובות אוטומטיות</li>
+        </ul>
+      </div>
+</div><div class="unit">
+<img class="unit-banner" loading="lazy" src="../assets/game/banners/module-5.jpg" alt="יחידת לימוד 5">
+<div class="unit-body">
+        <span class="tag">חלק 5</span>
+        <h3>למה אנחנו עושים דברים שאנחנו בכלל לא רוצים לעשות?</h3>
+        <p class="lead">לפעמים אדם אומר: אני יודע שזה לא טוב לי. ועדיין עושה את זה. ופה מתחיל חלק מאוד מעניין.</p>
+        <ul class="checks">
+          <li>צרכים אנושיים</li>
+          <li>פרשנות ומשמעות</li>
+          <li>Framing</li>
+          <li>Preframing</li>
+          <li>מודל ה״חלקים״</li>
+          <li>כוונה חיובית מאחורי התנהגות</li>
+          <li>מסגור מחדש ב־6 שלבים</li>
+        </ul>
+      </div>
+</div><div class="unit">
+<img class="unit-banner" loading="lazy" src="../assets/game/banners/module-6.jpg" alt="יחידת לימוד 6">
+<div class="unit-body">
+        <span class="tag">חלק 6</span>
+        <h3>להבין רגשות ולעבוד עם State</h3>
+        <p class="lead">הרגש שלנו לא נוצר משום מקום. יש תהליכים שמשפיעים עליו. וכשמכירים אותם, אפשר להתחיל לעבוד איתם בצורה הרבה יותר מודעת.</p>
+        <ul class="checks">
+          <li>איך State נוצר</li>
+          <li>איך זיכרון וייצוג פנימי משפיעים על תחושה</li>
+          <li>איך שפת גוף משפיעה על מצב פנימי</li>
+          <li>איך דיבור פנימי משפיע על הרגש</li>
+          <li>יצירת עוגנים</li>
+          <li>הערמת עוגנים</li>
+          <li>מיטוט עוגנים</li>
+          <li>כלים לשינוי מצב רגשי</li>
+        </ul>
+      </div>
+</div><div class="unit">
+<img class="unit-banner" loading="lazy" src="../assets/game/banners/module-7.jpg" alt="יחידת לימוד 7">
+<div class="unit-body">
+        <span class="tag">חלק 7</span>
+        <h3>אמונות וציר הזמן</h3>
+        <p class="lead">החלק האחרון נכנס עמוק יותר. כי הרבה פעמים ההתנהגות שאנחנו רואים מבחוץ היא רק הקצה. מתחתיה יש אמונות.</p>
+        <ul class="checks">
+          <li>מהי אמונה</li>
+          <li>סוגי אמונות</li>
+          <li>איך אמונות נוצרות</li>
+          <li>איך לזהות אמונות מגבילות דרך שפה ושאלות</li>
+          <li>איך לעבוד עם אמונות בעזרת הכלים שלמדנו לאורך הקורס</li>
+          <li>ציר זמן</li>
+          <li>שינוי היסטוריה אישית</li>
+        </ul>
+      </div>
+
+    </div>
+
+    </div>
+    <div class="callout">
+      <p>שבעת החלקים בנויים כתהליך מסודר, אחד על גבי השני, עד לחלק האחרון שסוגר את המסע.</p>
+    </div><div class="cta-wrap">
+      <a class="cta" href="#join">אני רוצה להתחיל את הקורס</a>
+    </div>
+    
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    <h2>וזה לא נגמר רק בסרטונים</h2>
+    <p class="lede">אחד הדברים שחשובים לי בקורס הזה הוא שלא תצטרכו לראות טכניקה ואז לנסות לזכור: רגע, מה היה השלב הבא?</p>
+    <p class="lead">לכן כחלק מהקורס אתם מקבלים גם את <span class="hl">״ספר המתכונים״</span> של NLP Practitioner, חוברת נפרדת שמרכזת את הטכניקות בצורה מסודרת ושלבית.</p>
+
+    <!-- FIX-ENGINE F-006 (11.8.2026): רשימת הטכניקות הפכה לבולטים בגריד לבקשת הלל. -->
+    <h3 class="tech-title">הטכניקות שבתוך ספר המתכונים</h3>
+    <div class="tech-grid"><div class="tech"><span class="tech__n">01</span><span>מסע בין עמדות</span></div><div class="tech"><span class="tech__n">02</span><span>מסע בין יועצים</span></div><div class="tech"><span class="tech__n">03</span><span>מודל וולט דיסני</span></div><div class="tech"><span class="tech__n">04</span><span>Map Across</span></div><div class="tech"><span class="tech__n">05</span><span>Swish</span></div><div class="tech"><span class="tech__n">06</span><span>מסגור מחדש ב־6 שלבים</span></div><div class="tech"><span class="tech__n">07</span><span>שליטה ב־State</span></div><div class="tech"><span class="tech__n">08</span><span>יצירת עוגן</span></div><div class="tech"><span class="tech__n">09</span><span>הערמת עוגנים</span></div><div class="tech"><span class="tech__n">10</span><span>מיטוט עוגנים</span></div><div class="tech"><span class="tech__n">11</span><span>מחולל התנהגות</span></div><div class="tech"><span class="tech__n">12</span><span>ציר זמן</span></div><div class="tech"><span class="tech__n">13</span><span>צריבת מטרה</span></div></div>
+
+    <p class="lede" style="margin-top:2rem">מתוך חומרי הקורס</p>
+    <div class="grid g2"><figure class="shot "><img loading="lazy" src="../assets/nlp-landing/anchoring.webp" alt="עוגנים"><figcaption>עוגנים · מתוך חומרי הקורס</figcaption></figure><figure class="shot "><img loading="lazy" src="../assets/nlp-landing/perceptual-positions.webp" alt="עמדות תפיסה"><figcaption>עמדות תפיסה</figcaption></figure><figure class="shot "><img loading="lazy" src="../assets/nlp-landing/vakog.webp" alt="מערכות ייצוג"><figcaption>מערכות ייצוג · VAKOG</figcaption></figure><figure class="shot "><img loading="lazy" src="../assets/nlp-landing/logical-levels.webp" alt="רמות לוגיות"><figcaption>רמות לוגיות</figcaption></figure></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <h2>ויש גם חוברת קורס מלאה</h2>
+    <p class="lead">לא סיכום של שני עמודים. החוברת הראשית בנויה על פני עשרות פרקים ומלווה את 7 יחידות הלימוד. אפשר ללמוד איתה תוך כדי הקורס, לסמן, לחזור לנושאים ולהשתמש בה גם אחר כך.</p>
+
+    <figure class="shot "><img loading="lazy" src="../assets/nlp-landing/booklet-cover.webp" alt="חוברת הקורס"><figcaption>חוברת הקורס המלאה</figcaption></figure>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <h2>מה מקבלים ב־197 ₪?</h2>
+
+    <div class="grid g3">
+      <div class="card">
+        <h3>קורס NLP Practitioner מלא</h3>
+        <p>7 יחידות לימוד עם עשרות פרקים.</p>
+      </div>
+      <div class="card">
+        <h3>חוברת NLP Practitioner</h3>
+        <p>חוברת שמלווה את כל הקורס.</p>
+      </div>
+      <div class="card">
+        <h3>ספר המתכונים</h3>
+        <p>הטכניקות מסודרות בצורה פרקטית, שלב אחרי שלב.</p>
+      </div>
+      <div class="card">
+        <h3>אפשרות למסלול הסמכה</h3>
+        <p>למי שרוצה לסיים עם תעודת NLP Practitioner ועומד בדרישות.</p>
+      </div>
+      <div class="card">
+        <h3>30 יום אחריות</h3>
+        <p>כדי שתוכלו לבדוק בעצמכם אם אתם מתחברים.</p>
+      </div>
+    </div>
+
+    <div class="cta-wrap">
+      <a class="cta" href="#join">אני רוצה להיכנס לקורס</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <h2>30 יום עליי</h2>
+    <p class="lede">אני לא רוצה שתצטרכו לנחש אם הקורס מתאים לכם. אז הנה הדרך הכי פשוטה לפתור את זה.</p>
+    <p class="lead">תירשמו. תיכנסו. תראו את השיעורים. תפתחו את החוברות. ותתחילו ללמוד.</p>
+
+    <div class="callout">
+      <p>יש לכם <span class="hl">30 יום</span> לבדוק את הקורס בעצמכם. אם לא התחברתם לתוכן או שפשוט הבנתם שזה לא בשבילכם, תכתבו לנו במסגרת 30 ימי האחריות ותקבלו את כספכם בחזרה בהתאם לתנאי האחריות.</p>
+    </div>
+
+    <p class="lead">אין לי עניין שמישהו יישאר בקורס שהוא לא רוצה להיות בו. אתם בודקים את הקורס. הסיכון עליי.</p>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    <h2>ועכשיו לשאלה המתבקשת: למה 197 ₪?</h2>
+    <p class="lede">זו כנראה השאלה שהייתי שואל בעצמי אם הייתי מגיע לדף הזה מבחוץ. אז הנה הסיפור.</p>
+    <p>פעם מכרתי את הקורס הזה ב־<span class="hl">4,170 ₪</span>. אחר כך, בשלב מסוים, החלטתי לעשות משהו קצת אחר. העליתי אותו ליוטיוב בחינם.</p>
+    <p>המטרה שלי הייתה פשוטה: רציתי שכמה שיותר אנשים בישראל ייחשפו ל־NLP ויכירו את התוכן הזה. ומאז הקורס והתכנים צברו יחד <span class="hl">מעל 30,000 צפיות</span>.</p>
+    <p>קיבלתי הודעות מאנשים. תגובות. אנשים שסיפרו לי מה הם הבינו על עצמם. ומה השתנה להם בעקבות התוכן.</p>
+    <p>אבל לצד כל הדברים הטובים, שמתי לב למשהו. כשאנחנו לא משקיעים כלום, הרבה יותר קל לנו גם לא להשקיע בעצמנו.</p>
+    <p>אנשים היו שומרים את הסרטונים לאחר כך. מתחילים שיעור. מדלגים. נעלמים. חוזרים אחרי חודש. ואני מבין את זה. גם אני מתייחס אחרת לדבר ששילמתי עליו מאשר לסרטון שקפץ לי ביוטיוב.</p>
+    <p>אז החלטתי לעשות משהו באמצע. לא לחזור ל־4,170 ₪. אבל גם לא לתת את כל ההכשרה בחינם.</p>
+    <p class="lead"><span class="hl">197 ₪.</span> סכום שאני מאמין שכמעט כל מי שבאמת רוצה ללמוד את התחום יכול לעמוד בו, אבל מספיק כדי להגיד: אוקיי. נרשמתי. עכשיו אני באמת עושה את זה.</p>
+
+    <div class="cta-wrap">
+      <a class="cta" href="#join">להצטרפות לקורס</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <h2>ואם כבר עושים את זה, אפשר גם לצאת עם תעודה</h2>
+    <p>מי שרוצה רק ללמוד בשביל עצמו, מעולה. אין שום חובה להפוך את זה למקצוע.</p>
+    <p>אבל אם חשוב לכם גם לסיים עם תעודת NLP Practitioner, יש אפשרות לעבור את מסלול ההסמכה.</p>
+
+    <div class="callout">
+      <p>חשוב לי מאוד להיות ברור כאן: לא קונים ממני תעודה ב־197 ₪. מקבלים גישה להכשרה. לומדים. עומדים בדרישות ההסמכה. ורק מי שמשלים אותן מקבל את התעודה.</p>
+    </div>
+
+    <div class="callout warn">
+      <h3>חוסם פרסום</h3>
+      <div class="mock"><span>כאן יש להכניס את תנאי ההסמכה המדויקים ואת הגוף המנפיק לפני פרסום הדף</span></div>
+    </div>
+
+    <div class="mock"><span>מוקאפ תעודת NLP Practitioner</span></div>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <h2>מי אני ולמה בכלל יצרתי את הקורס הזה?</h2>
+
+    <div class="letter">
+      <p>היי חברים,</p>
+      <p>אם הגעתם עד לפה, כנראה שגם אצלכם יש איזושהי סקרנות להבין יותר לעומק איך אנשים עובדים.</p>
+      <p>אצלי זה התחיל בערך בגיל 21. תמיד עניינו אותי פסיכולוגיה, המוח, התנהגות אנושית, ולמה אנשים עושים את מה שהם עושים.</p>
+      <p>בסוף השירות הצבאי נחשפתי לטוני רובינס. ראיתי איך הוא עובד עם אנשים בסמינרים שלו, והתחלתי להבין שחלק גדול מהכלים שהוא משתמש בהם מגיע מעולמות ה־NLP. וזה תפס אותי.</p><figure class="shot "><img loading="lazy" src="../assets/master-sales/ram-tony-robbins.jpg" alt="רם אלוס יחד עם טוני רובינס"><figcaption>רם יחד עם טוני רובינס</figcaption></figure>
+      <p>אז הלכתי ללמוד. התחלתי מ־NLP Practitioner. משם המשכתי ל־NLP Master. בהמשך פתחתי קליניקה, התחלתי ללמד, הקמתי בית ספר והמשכתי להגיע לסמינרים של טוני רובינס ברחבי העולם.</p>
+      <p>אבל מעבר לכל התעודות והלימודים, <span class="hl">NLP שינה קודם כל אותי</span>.</p>
+      <p>הוא עזר לי להבין הרבה יותר טוב את עצמי. לראות איפה אני מגיב מתוך פחד. איפה אני מייצר לעצמי סיפורים. איפה אני תקוע בדפוס. איך אני מתקשר עם אנשים. ואיך אפשר להסתכל אחרת על דברים שפעם נראו לי מאוד מוחלטים.</p>
+      <p>בשנים שאחרי מצאתי את עצמי מגשים לא מעט מטרות שהיו חשובות לי, בזוגיות, בכסף, בקשרים עם אנשים, בביטחון שלי ובדרך שבה אני חי את החיים שלי.</p>
+      <p>אני לא חושב ש־NLP הוא קסם. ואני גם לא רוצה שתאמינו באופן עיוור לכל דבר שאני אומר לכם. אפילו בחוברת הקורס אני מבקש מהתלמידים לבדוק, להתנסות ולחקור את הכלים בעצמם.</p>
+      <p>אבל אני כן חושב שהשיטה הזאת נתנה לי שפה וכלים שלא היו לי קודם. וזו בדיוק הסיבה שבסוף החלטתי ללמד אותה.</p>
+      <p class="signature">רם אלוס</p>
+    </div>
+
+    <figure class="shot shot--portrait"><img loading="lazy" src="../assets/ram-photo.webp" alt="רם אלוס"><figcaption>רם אלוס</figcaption></figure>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <h2>אבל חשוב לי להגיד גם מה הקורס הזה לא</h2>
+    <p class="lede">הוא לא קסם. הוא לא טיפול פסיכולוגי. הוא לא מחליף טיפול רפואי או נפשי כשצריך אותו. והוא גם לא הופך אתכם ביום אחד למומחים להתנהגות אנושית.</p>
+
+    <div class="card">
+      <h3>מה הוא כן עושה?</h3>
+      <ul class="checks">
+        <li>נותן לכם בסיס מאוד רחב בעולם ה־NLP</li>
+        <li>מלמד את המודלים המרכזיים</li>
+        <li>נותן לכם טכניקות</li>
+        <li>נותן לכם שפה להבין בעזרתה מחשבות, רגשות, תקשורת ודפוסים</li>
+      </ul>
+    </div>
+
+    <p>ומשם, מה שתעשו עם זה תלוי מאוד בכמה באמת תתרגלו ותיישמו.</p>
+
+    <div class="cta-wrap">
+      <a class="cta" href="#join">להצטרפות לקורס</a>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    <h2>אבל רגע... זה באמת רק 197 ₪?</h2>
+    <p class="lede">כן. לא 197 ₪ לחודש. לא תשלום ראשון מתוך סדרה. לא 197 ואז לפתוח כל פרק בנפרד.</p>
+    <p class="lead"><span class="hl">197 ₪. תשלום חד־פעמי.</span></p>
+    <div class="cta-wrap">
+      <a class="cta" href="#join">אני רוצה להיכנס לקורס</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <h2>כמה שאלות שסביר להניח שעוברות לכם בראש</h2>
+
+    <details class="qa" open>
+      <summary>צריך ידע קודם?</summary>
+      <p>לא. הקורס מתחיל מהבסיס ונבנה בהדרגה.</p>
+    </details>
+
+    <details class="qa">
+      <summary>אני חייב לרצות להיות מטפל?</summary>
+      <p>ממש לא. הרבה מהתוכן רלוונטי קודם כל לחיים האישיים, לתקשורת ולהיכרות עמוקה יותר עם עצמנו.</p>
+    </details>
+
+    <details class="qa">
+      <summary>מקבלים תעודה?</summary>
+      <p>מי שבוחר במסלול ההסמכה ומשלים את דרישותיו יכול לקבל תעודת NLP Practitioner.</p>
+    </details>
+
+    <div class="callout warn">
+      <p>לפני פרסום הדף יש להוסיף כאן את הגוף המנפיק ואת דרישות ההסמכה המדויקות.</p>
+    </div>
+
+    <details class="qa">
+      <summary>הקורס הוא טיפול?</summary>
+      <p>לא. זהו קורס לימודי ב־NLP ואינו מחליף טיפול פסיכולוגי, פסיכיאטרי או רפואי.</p>
+    </details>
+
+    <details class="qa">
+      <summary>יש החזר כספי?</summary>
+      <p>כן. יש 30 ימי אחריות בהתאם לתנאי האחריות.</p>
+    </details>
+
+    <details class="qa">
+      <summary>זה באמת אותו קורס שנמכר בעבר ב־4,170 ₪?</summary>
+      <p>כן. זה הסיפור שמאחורי ההחלטה להנגיש אותו היום במחיר של 197 ₪.</p>
+    </details>
+
+    <details class="qa">
+      <summary>למה לא פשוט לראות את התוכן החינמי?</summary>
+      <p>אפשר. ואם זה מה שמתאים לכם, באמת שאין בעיה. הסיבה שיצרתי מחדש מסגרת בתשלום היא כדי לתת ללמידה מקום מסודר, רציני ומחייב יותר, יחד עם החוברות ואפשרות ההסמכה.</p>
+    </details>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <h2>לפני שאתם ממשיכים הלאה...</h2>
+    <p class="lede">אני רוצה להגיד משהו קטן. לא חסר היום תוכן. יש יוטיוב. יש פודקאסטים. יש טיקטוק. יש ספרים. יש אינסוף סרטונים על פסיכולוגיה והתפתחות אישית.</p>
+    <p>הבעיה היא בדרך כלל לא שאין לנו עוד מידע. הבעיה היא ש<span class="hl">המידע נשאר מידע</span>. רואים. מתלהבים. שומרים. וממשיכים לחיים.</p>
+    <p>הקורס הזה הוא הזמנה לעצור רגע ולעשות משהו קצת אחרת. לקחת נושא אחד. ללמוד אותו בצורה מסודרת. לתרגל. להתבונן בעצמכם. ולראות מה מתוך זה באמת עובד עבורכם.</p>
+    <p class="lead">אם אתם מרגישים שכבר הרבה זמן בא לכם להבין את העולם הזה, אולי פשוט הגיע הזמן להתחיל.</p>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <div class="offerbox">
+      <h3>NLP PRACTITIONER</h3>
+      <ul class="checks">
+        <li>7 יחידות לימוד</li>
+        <li>עשרות פרקים</li>
+        <li>חוברת קורס מלאה</li>
+        <li>ספר טכניקות</li>
+        <li>אפשרות להסמכה</li>
+        <li>30 יום אחריות</li>
+      </ul>
+      <p class="price-old">בעבר: 4,170 ₪</p>
+      <p class="price-now">197 ₪</p>
+      <div class="cta-wrap">
+        <a class="cta" href="#join">אני רוצה להתחיל ללמוד NLP</a>
+      </div>
+      <p class="microcopy">תשלום חד־פעמי · 30 יום אחריות</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    בית המטפלים · הכשרת NLP Practitioner עם רם אלוס<br>
+    <span style="opacity:.7">גרסת טיוטה לאישור. התכנים והמחירים טרם אושרו לפרסום.</span>
+  </div>
+</footer>
+
+</div>
+
+<div class="sticky">
+  <b>197 ₪</b>
+  <a href="#join">להרשמה לקורס</a>
+</div>
+
+
+
+<script>
+/* FIX-ENGINE F-003 (11.8.2026): כניסה מונפשת + ספירה למספרים, מכבד prefers-reduced-motion. */
+(function(){
+  var stats=[].slice.call(document.querySelectorAll('.stats--bare .stat'));
+  if(!stats.length) return;
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function countUp(el){
+    var raw=el.textContent.trim(), m=raw.match(/^([\d,]+)(.*)$/);
+    if(!m) return;
+    var target=parseInt(m[1].replace(/,/g,''),10), suffix=m[2]||'', t0=null, dur=900;
+    if(isNaN(target)) return;
+    function step(ts){ if(!t0) t0=ts;
+      var k=Math.min(1,(ts-t0)/dur), v=Math.round(target*(1-Math.pow(1-k,3)));
+      el.textContent=v.toLocaleString('en-US')+suffix;
+      if(k<1) requestAnimationFrame(step); }
+    el.textContent='0'+suffix; requestAnimationFrame(step);
+  }
+  if(reduce || !('IntersectionObserver' in window)){ stats.forEach(function(s){s.classList.add('is-in')}); return; }
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add('is-in');
+      var num=e.target.querySelector('h3'); if(num) countUp(num);
+      io.unobserve(e.target);
+    });
+  },{threshold:.4});
+  stats.forEach(function(s){ io.observe(s); });
+})();
+</script>
+</body>
+</html>

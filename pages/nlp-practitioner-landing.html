@@ -9,6 +9,25 @@
 <meta property="og:description" content="7 יחידות לימוד, עשרות פרקים, חוברות ואפשרות הסמכה. 197 ₪ חד פעמי.">
 <meta property="og:image" content="../assets/nlp-landing/product-mockup.webp">
 <link rel="icon" href="../assets/logo-square.png">
+
+<!-- Meta Pixel — נטען מוקדם כדי לא לפספס PageView של מי שנוחת ויוצא מיד.
+     מכבד opt-out קיים: מי שכבר בחר "ביטול מעקב" באתר לא נטען בכלל.
+     שאר הכלים (GA4, Clarity) נטענים ע"י marketing-tools.js בתחתית הדף. -->
+<script>
+    (function(){
+        try { if (localStorage.getItem('cookie_consent_v2') === 'essential') return; } catch(e) {}
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+        document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init','1039436226809281');
+        fbq('track','PageView');
+        window.__pixelInitedEarly = true;
+    })();
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1039436226809281&ev=PageView&noscript=1" alt="" /></noscript>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Gveret+Levin+AlefAlefAlef&family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -977,7 +996,10 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
         זה מחבר אוטומטית את שני כפתורי הקנייה. אותה תבנית בדיוק כמו
         MASTER_CHECKOUT_URL ב-course-library-v2.html.
         כל עוד ריק — הכפתורים מציגים הודעת "בקרוב" במקום קליק מת.
-   ⚠️ זו חייבת להיות כתובת חדשה ונפרדת. הכתובת של המאסטר גובה 1,900 ₪. */
+   ⚠️ זו חייבת להיות כתובת חדשה ונפרדת. הכתובת של המאסטר גובה 1,900 ₪.
+
+   (13.8.2026) marketing-tools.js נטען בתחתית הדף, ולכן window.fbq ו-window.gtag
+   קיימים כאן והאירוע InitiateCheckout למטה באמת נשלח. עד היום הוא היה קוד מת. */
 const PRACTITIONER_CHECKOUT_URL = '';
 const PRACTITIONER_PRICE_ILS = 197;
 
@@ -1078,5 +1100,12 @@ const PRACTITIONER_PRICE_ILS = 197;
   var io=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){x.target.classList.add('is-in');io.unobserve(x.target);}})},{threshold:.35});
   io.observe(h);})();
 </script>
+
+<!-- (13.8.2026) מדידה. עד היום לא הייתה בדף שום מדידה, כלומר קמפיין בתשלום
+     היה עולה בלי דרך לדעת כמה אנשים הגיעו לתשלום ואיפה הם נשרו.
+     marketing-tools.js מביא GA4 + Meta Pixel + Microsoft Clarity + לכידת UTM,
+     והכל מותנה בהסכמת עוגיות (הבאנר נוצר על ידו; "ביטול מעקב" מפסיק גם את
+     Clarity). זהה לשאר דפי הפורטל. -->
+<script src="../js/marketing-tools.js" defer></script>
 </body>
 </html>

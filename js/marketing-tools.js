@@ -247,7 +247,10 @@ const MARKETING_CONFIG = {
     GA4_ID: 'G-6YN94QMSH1',
     META_PIXEL_ID: '1039436226809281',
     CLARITY_ID: 'xd3acpj52h',               // Microsoft Clarity project id (בית המטפלים)
-    PRIVACY_POLICY_URL: 'privacy-policy.html',
+    // (13.8.2026) היה נתיב יחסי, ולכן בכל דף תחת pages/ הקישור בבאנר העוגיות
+    // הצביע ל-/pages/privacy-policy.html שמחזיר 404 (אומת חי). נתיב מהשורש
+    // עובד משתי הרמות.
+    PRIVACY_POLICY_URL: '/privacy-policy.html',
     CONSENT_KEY: 'cookie_consent_v2',       // v2: stores consent level, not just boolean
     TRACKING_ENABLED: true
 };

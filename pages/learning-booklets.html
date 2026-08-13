@@ -214,10 +214,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-config.js"></script>
     <script>
+        const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+
         // Auth gate — redirect to login if no session
         (async function() {
             try {
-                const sb = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
                 const { data: { session } } = await sb.auth.getSession();
                 if (!session) {
                     sessionStorage.setItem('returnUrl', window.location.href);
@@ -229,13 +230,34 @@
             }
         })();
 
+        // (13.8.2026) החוברות עברו לדלי פרטי ומוגשות בקישור חתום קצר-מועד.
+        // קודם הן ישבו ב-docs/booklets/ בכתובת ציבורית קבועה — כלומר כל מי ששמר
+        // את הכתובת היה ממשיך להוריד אותן גם אחרי שהקורס יהפוך לתשלום, וזה לא
+        // הפיך. מי מקבל קישור נקבע ע"י has_practitioner_access() בדאטהבייס:
+        // כל עוד המתג practitioner_paywall כבוי — כולם, בדיוק כמו קודם.
         const booklet = {
             title: 'חוברת NLP Practitioner – ממותגת',
             description: 'חוברת הקורס המלאה — 7 שיעורים, 50 פרקים עם כל הטכניקות, התרגולים והעקרונות של NLP. מעוצבת בצבעי בית המטפלים.',
-            htmlPath: '../docs/booklets/nlp-booklet-branded.html',
-            pdfPath: '../docs/booklets/nlp-booklet-clean.pdf',
+            htmlObject: 'nlp-booklet-branded.html',
+            pdfObject: 'nlp-booklet-clean.pdf',
             pdfFileName: 'NLP-Practitioner-חוברת-בית-המטפלים.pdf'
         };
+
+        // מחזיר כתובת חתומה, או null כשאין זכאות. 600 שניות — מספיק לקריאה
+        // ולהורדה, קצר מספיק כדי שכתובת שהודלפה תמות מהר.
+        async function signedBookletUrl(objectName) {
+            try {
+                const { data, error } = await sb.storage.from('booklets').createSignedUrl(objectName, 600);
+                if (error || !data) return null;
+                return data.signedUrl;
+            } catch (e) { return null; }
+        }
+
+        // מה שרואים כשאין זכאות. כרגע בלתי ניתן להגעה (המתג כבוי), אבל הוא חייב
+        // להתקיים לפני ההדלקה — אחרת ביום הלחיצה נקבל מסך שבור במקום הזמנה לרכוש.
+        function bookletLocked() {
+            alert('החוברת זמינה למי שרכש את הקורס. לפרטים ולרכישה אפשר לפנות אלינו.');
+        }
 
         (function initPage() {
             const grid = document.getElementById('cardsGrid');
@@ -249,7 +271,7 @@
                     <div class="card-description">${esc(booklet.description)}</div>
                     <div class="card-actions" onclick="event.stopPropagation()">
                         <button class="btn-view" onclick="openBooklet()"><i class="fa-solid fa-eye"></i> צפייה</button>
-                        <a class="btn-download" href="${booklet.pdfPath}" download="${booklet.pdfFileName}"><i class="fa-solid fa-download"></i> הורד PDF</a>
+                        <a class="btn-download" href="#" onclick="downloadBooklet(event)"><i class="fa-solid fa-download"></i> הורד PDF</a>
                     </div>
                 </div>
             `;
@@ -258,18 +280,62 @@
 
         function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
-        function openBooklet() {
+        // כתובת ה-blob הפעילה של החוברת, כדי לשחרר אותה בסגירה.
+        let bookletBlobUrl = null;
+
+        async function openBooklet() {
+            const htmlUrl = await signedBookletUrl(booklet.htmlObject);
+            if (!htmlUrl) return bookletLocked();
+
+            // ⚠️ אי אפשר להצביע את ה-iframe ישירות לכתובת החתומה. Supabase Storage
+            // מגישה כל HTML כ-text/plain בכוונה (הגנה מפני קוד זדוני שהועלה),
+            // ואז הדפדפן מציג את קוד המקור במקום את החוברת. אומת חי 13.8.2026:
+            // הקובץ נשלח עם text/html והוחזר כ-text/plain גם אחרי העלאה מחדש.
+            // לכן מושכים את התוכן ומרכיבים אותו מקומית עם סוג התוכן הנכון.
+            // תמונת השער והגופנים בתוך החוברת הם כתובות מוחלטות, כך שהם נטענים.
+            let src;
+            try {
+                const res = await fetch(htmlUrl);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const html = await res.text();
+                if (bookletBlobUrl) URL.revokeObjectURL(bookletBlobUrl);
+                bookletBlobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+                src = bookletBlobUrl;
+            } catch (e) {
+                return bookletLocked();
+            }
+
             document.getElementById('pdfModalTitle').textContent = booklet.title;
-            document.getElementById('pdfIframe').src = booklet.htmlPath;
-            document.getElementById('pdfDownloadLink').href = booklet.pdfPath;
-            document.getElementById('pdfDownloadLink').setAttribute('download', booklet.pdfFileName);
+            document.getElementById('pdfIframe').src = src;
             document.getElementById('pdfModal').classList.add('active');
             document.body.style.overflow = 'hidden';
+
+            // כפתור ההורדה שבתוך המודאל — חתימה נפרדת, כי זה קובץ אחר (ה-PDF).
+            const dl = document.getElementById('pdfDownloadLink');
+            dl.onclick = downloadBooklet;
+            dl.removeAttribute('download'); // ההורדה נעשית בקוד, לא ע"י הדפדפן
+            dl.href = '#';
+        }
+
+        // הורדה: חותמים ברגע הלחיצה. אי אפשר לשים כתובת חתומה מראש ב-href כי
+        // היא פגה, ומשתמש שמשאיר את הדף פתוח היה מקבל קישור מת.
+        async function downloadBooklet(ev) {
+            if (ev) ev.preventDefault();
+            const url = await signedBookletUrl(booklet.pdfObject);
+            if (!url) return bookletLocked();
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = booklet.pdfFileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
         }
 
         function closeModal() {
             document.getElementById('pdfModal').classList.remove('active');
             document.getElementById('pdfIframe').src = '';
+            // משחררים את ה-blob, אחרת החוברת (360KB) נשארת בזיכרון עד רענון הדף
+            if (bookletBlobUrl) { URL.revokeObjectURL(bookletBlobUrl); bookletBlobUrl = null; }
             document.body.style.overflow = '';
         }
 

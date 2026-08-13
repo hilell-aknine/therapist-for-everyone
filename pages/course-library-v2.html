@@ -1734,9 +1734,9 @@
           <div class="lms-stat__label">זמן שנותר</div>
         </article>
         <article class="lms-stat">
-          <div class="lms-stat__icon lms-stat__icon--streak"><i class="fa-solid fa-fire"></i></div>
+          <div class="lms-stat__icon lms-stat__icon--streak"><i class="fa-solid fa-calendar-check"></i></div>
           <div class="lms-stat__value"><span id="statStreak">0</span></div>
-          <div class="lms-stat__label">ימי רצף</div>
+          <div class="lms-stat__label">ימי למידה</div>
         </article>
       </section>
 
@@ -3294,21 +3294,49 @@
     const done = modules[m].lessons.filter((_, l) => completedLessons.includes(`${m}-${l}`)).length;
     return { idx: m + 1, done, total: modules[m].lessons.length };
   }
-  function getStudyStreak(){
+  // ===== Learning days + streak =====
+  // Both numbers come from the DB (CourseProgress.getStudyStreak) and count only
+  // Israel-calendar days on which a lesson was actually COMPLETED — opening the
+  // portal earns nothing. They follow the learner across devices.
+  //   learningDays = every day they ever advanced. Only grows → this is the number
+  //                  the UI leads with.
+  //   streakDays   = consecutive days right now. Honest, and usually small.
+  // localStorage is a DISPLAY CACHE only, keyed by user id so a shared device never
+  // shows someone else's numbers. It is never the source of truth.
+  const STREAK_CACHE_KEY = 'study_streak_v2';
+  let studyStreakDays = 0;
+  let studyLearningDays = 0;
+  function readStreakCache(uid){
     try {
-      const raw = localStorage.getItem('study_streak');
-      const today = new Date().toISOString().slice(0,10);
-      let state = raw ? JSON.parse(raw) : { lastDate: null, days: 0 };
-      if (state.lastDate === today) return state.days || 1;
-      if (state.lastDate){
-        const last = new Date(state.lastDate);
-        const diffDays = Math.round((new Date(today) - last) / 86400000);
-        state.days = (diffDays === 1) ? (state.days || 0) + 1 : 1;
-      } else state.days = 1;
-      state.lastDate = today;
-      localStorage.setItem('study_streak', JSON.stringify(state));
-      return state.days;
-    } catch(_){ return 0; }
+      const c = JSON.parse(localStorage.getItem(STREAK_CACHE_KEY) || '{}');
+      if (!uid || c.uid !== uid) return null;
+      return { days: c.days || 0, totalDays: c.totalDays || 0 };
+    } catch(_){ return null; }
+  }
+  function writeStreakCache(uid, days, totalDays){
+    try { if (uid) localStorage.setItem(STREAK_CACHE_KEY, JSON.stringify({ uid, days, totalDays, at: Date.now() })); } catch(_){}
+  }
+  function paintStreak(){
+    try { renderStats(); } catch(_){}
+    try { renderJourney(); } catch(_){}
+  }
+  // Async + fire-and-forget: paints the cached numbers instantly so nothing flashes
+  // 0, then corrects them from the DB. On a failed fetch the screen keeps whatever
+  // it already shows rather than lying with a 0.
+  async function refreshStudyStreak(){
+    let uid = null;
+    try { const u = window.Auth && await window.Auth.getCurrentUser(); uid = u && u.id; } catch(_){}
+    const cached = readStreakCache(uid);
+    if (cached && (cached.days !== studyStreakDays || cached.totalDays !== studyLearningDays)){
+      studyStreakDays = cached.days; studyLearningDays = cached.totalDays; paintStreak();
+    }
+    let s = null;
+    try { s = window.CourseProgress && await window.CourseProgress.getStudyStreak(); } catch(_){ s = null; }
+    if (!s) return;
+    writeStreakCache(uid, s.days, s.totalDays);
+    if (s.days !== studyStreakDays || s.totalDays !== studyLearningDays){
+      studyStreakDays = s.days; studyLearningDays = s.totalDays; paintStreak();
+    }
   }
   function lessonHash(m, l){ return `course-library.html#m${m+1}l${l+1}`; }
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -3386,7 +3414,7 @@
     document.getElementById('statModule').textContent = String(mp.done);
     document.getElementById('statModuleOf').textContent = `/${mp.total}`;
     document.getElementById('statTime').textContent = getRemainingTime();
-    document.getElementById('statStreak').textContent = String(getStudyStreak());
+    document.getElementById('statStreak').textContent = String(getLearningDays());
   }
   function renderAnnouncements(){
     const body = document.getElementById('annBody');
@@ -3428,7 +3456,8 @@
     const pct = Math.round((intoLevel / XP_PER_LEVEL) * 100);
     return { level, xp, intoLevel, per: XP_PER_LEVEL, pct, toNext: XP_PER_LEVEL - intoLevel };
   }
-  function getStreakDays(){ try { return JSON.parse(localStorage.getItem('study_streak')||'{}').days || 0; } catch(_){ return 0; } }
+  function getStreakDays(){ return studyStreakDays; }
+  function getLearningDays(){ return studyLearningDays; }
   function getInvestedLabel(){
     let secs = 0;
     modules.forEach((mod, mi) => mod.lessons.forEach((les, li) => { if (completedLessons.includes(`${mi}-${li}`)) secs += parseDuration(les.duration); }));
@@ -3445,7 +3474,7 @@
       { icon:'fa-star',            label:'רבע הדרך',    earned: pct>=0.25 },
       { icon:'fa-star-half-stroke',label:'חצי הדרך',    earned: pct>=0.5 },
       { icon:'fa-layer-group',     label:'מודול שלם',   earned: fullModules>=1 },
-      { icon:'fa-fire',            label:'רצף 7 ימים',  earned: getStreakDays()>=7 },
+      { icon:'fa-fire',            label:'רצף 3 ימים',  earned: getStreakDays()>=3 },
       { icon:'fa-trophy',          label:'סיום הקורס',  earned: pct>=1 },
     ];
   }
@@ -3473,8 +3502,9 @@
           <div class="lms-jcard__hint">${lvl.toNext} XP לרמה ${lvl.level+1}</div>
         </div>
         <div class="lms-jcard">
-          <div class="lms-jcard__big">🔥 ${getStreakDays()}</div>
-          <div class="lms-jcard__label">ימי רצף</div>
+          <div class="lms-jcard__big">📅 ${getLearningDays()}</div>
+          <div class="lms-jcard__label">ימי למידה</div>
+          <div class="lms-jcard__hint">${getStreakDays() > 0 ? `🔥 ${getStreakDays()} ${getStreakDays() === 1 ? 'יום' : 'ימים'} ברצף` : 'שיעור אחד היום פותח רצף'}</div>
         </div>
         <div class="lms-jcard">
           <div class="lms-jcard__big">${getInvestedLabel()}</div>
@@ -3563,7 +3593,7 @@
     try {
       const done = completedLessons.length, total = totalLessons || 0, pct = total ? Math.round(done/total*100) : 0;
       const lesson = modules[currentModuleIndex] && modules[currentModuleIndex].lessons[currentLessonIndex];
-      const parts = [`השלים ${done} מתוך ${total} שיעורים (${pct}%)`, `רצף למידה ${getStreakDays()} ימים`];
+      const parts = [`השלים ${done} מתוך ${total} שיעורים (${pct}%)`, `${getLearningDays()} ימי למידה, רצף נוכחי ${getStreakDays()} ימים`];
       if (lesson){
         const k = `notes_${courseType==='nlp-master'?'master':'nlp'}_${lesson.id}`;
         const notes = (localStorage.getItem(k) || '').trim().slice(0,500);
@@ -3961,6 +3991,7 @@
     renderProgress();
     renderHero();
     renderWeeklyStats();   // async, fire-and-forget; manages its own show/hide
+    refreshStudyStreak();  // async, fire-and-forget; repaints the flame when it lands
     renderStats();
     renderJourney();
     renderAnnouncements();
@@ -4363,6 +4394,9 @@
     try { if (modules[m] && modules[m].lessons[l]) clearPos(modules[m].lessons[l].id); } catch(_){}
     renderProgress();
     try { renderJourney(); } catch(_){}
+    // The DB write above is awaited, so re-reading the streak here sees today's row
+    // and the flame goes up the moment the lesson is finished.
+    refreshStudyStreak();
     if (!alreadyDone){ try { celebrateCompletion(m, l); } catch(_){} }
     renderSidebarNav(document.getElementById('sbSearch').value);
   }
@@ -4562,7 +4596,7 @@
         body: JSON.stringify({
           message: serverMessage,
           history: aiHistory.slice(-10),
-          lessonContext: { moduleIndex: currentModuleIndex, moduleTitle: mod?.title || '', lessonTitle: lesson?.title || '', courseType: (courseType === 'nlp-master' ? 'master' : 'practitioner'), progress: { done: completedLessons.length, total: totalLessons, streak: getStreakDays() } }
+          lessonContext: { moduleIndex: currentModuleIndex, moduleTitle: mod?.title || '', lessonTitle: lesson?.title || '', courseType: (courseType === 'nlp-master' ? 'master' : 'practitioner'), progress: { done: completedLessons.length, total: totalLessons, streak: getStreakDays(), learningDays: getLearningDays() } }
         }),
         signal: controller.signal
       });
@@ -4681,12 +4715,13 @@
     ] : [
       { icon:'fa-solid fa-file-lines', t:'כל סיכומי המאסטר', s:'רשימת סיכומי כל המפגשים', href:'summaries-master/index.html', gold:true, blank:true }
     ]) : [
-      { icon:'fa-solid fa-book-open', t:'חוברת הקורס (PDF)',     s:'7 מודולים, 50 פרקים — להורדה',           href:'../docs/booklets/nlp-booklet-branded.pdf', gold:true,  blank:true },
+      // (13.8.2026) החוברת עברה לדלי פרטי — ראה openCourseBooklet למטה.
+      { icon:'fa-solid fa-book-open', t:'חוברת הקורס (PDF)',     s:'7 מודולים, 50 פרקים — להורדה',           href:'#', gold:true,  blank:false, booklet:true },
       { icon:'fa-solid fa-file-lines', t:'סיכום השיעור הזה',     s:`נקודות המפתח ממודול ${mod.id}`,           href:`summaries/lesson-${mod.id}.html`,            gold:false, blank:true },
       { icon:'fa-solid fa-list-check', t:'כל סיכומי השיעורים',   s:'רשימת כל 7 הסיכומים',                     href:'summaries/index.html',                        gold:false, blank:true }
     ];
     grid.innerHTML = items.map(i => `
-      <a class="lms-res-card${i.gold ? ' lms-res-card--gold' : ''}" href="${escapeHtml(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ''}>
+      <a class="lms-res-card${i.gold ? ' lms-res-card--gold' : ''}" href="${escapeHtml(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ''}${i.booklet ? ' onclick="openCourseBooklet(event)"' : ''}>
         <span class="lms-res-card__icon"><i class="${i.icon}"></i></span>
         <div class="lms-res-card__body">
           <div class="lms-res-card__t">${escapeHtml(i.t)}</div>
@@ -4694,6 +4729,28 @@
         </div>
       </a>`).join('');
   }
+
+  // (13.8.2026) חוברת הקורס עברה מ-docs/booklets/ (כתובת ציבורית קבועה, נגישה
+  // לכל מי ששמר אותה — כולל אחרי שהקורס יהפוך לתשלום) לדלי פרטי עם קישור חתום.
+  // מי מקבל קישור נקבע ע"י has_practitioner_access() בדאטהבייס. כל עוד המתג
+  // practitioner_paywall כבוי, כולם מקבלים — בדיוק כמו קודם.
+  // החתימה נעשית בלחיצה ולא מראש, כי כתובת חתומה פגה אחרי 10 דקות ולומד שמשאיר
+  // את הדף פתוח היה מקבל קישור מת.
+  window.openCourseBooklet = async function(ev){
+    if (ev) ev.preventDefault();
+    try {
+      const client = window.supabaseClient;
+      if (!client) throw new Error('supabase client not ready');
+      const { data, error } = await client.storage
+        .from('booklets').createSignedUrl('nlp-booklet-branded.pdf', 600);
+      if (error || !data) throw error || new Error('no url');
+      window.open(data.signedUrl, '_blank', 'noopener');
+    } catch (e) {
+      // המסלול הזה נפתח רק אחרי הדלקת המתג, למי שלא רכש. חייב להתקיים מראש
+      // כדי שביום הלחיצה תהיה הודעה ולא כפתור מת.
+      alert('חוברת הקורס זמינה למי שרכש את הקורס.');
+    }
+  };
   function setupGameBtn(){
     window.gameBtnUpdater = () => {
       const btn = document.getElementById('gameBtn');

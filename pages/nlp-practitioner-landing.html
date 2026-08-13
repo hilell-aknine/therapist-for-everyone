@@ -130,6 +130,37 @@ ul.checks > li::before{content:'✓'; position:absolute; inset-inline-start:0; t
   color:var(--gold-light); font-weight:800}
 ul.plain > li{margin-bottom:.5rem; color:var(--text-soft)}
 
+/* (12.8.2026) שש שורות זהות נסרקות כקיר אחד. אייקון ייחודי לכל שורה נותן לעין
+   נקודת עצירה. האייקונים חתוכים מגיליון אחד, ולכן משקל הקו שלהם זהה. */
+ul.checks--pain > li{padding-inline-start:3.6rem; min-height:2.9rem;
+  display:flex; align-items:center; margin-bottom:1rem}
+ul.checks--pain > li::before{content:''; width:2.7rem; height:2.7rem;
+  top:50%; transform:translateY(-50%);
+  background-repeat:no-repeat; background-position:center; background-size:contain}
+ul.checks--pain > li:nth-child(1)::before{background-image:url('../assets/nlp-landing/pain-1.webp')}
+ul.checks--pain > li:nth-child(2)::before{background-image:url('../assets/nlp-landing/pain-2.webp')}
+ul.checks--pain > li:nth-child(3)::before{background-image:url('../assets/nlp-landing/pain-3.webp')}
+ul.checks--pain > li:nth-child(4)::before{background-image:url('../assets/nlp-landing/pain-4.webp')}
+ul.checks--pain > li:nth-child(5)::before{background-image:url('../assets/nlp-landing/pain-5.webp')}
+ul.checks--pain > li:nth-child(6)::before{background-image:url('../assets/nlp-landing/pain-6.webp')}
+
+/* עוגן ויזואלי לסקשן "מה מקבלים" — פירוק ערך לחמישה פריטים נבדלים */
+.shelf{margin:0 0 1.6rem; text-align:center}
+.shelf img{width:100%; max-width:420px; height:auto; display:inline-block}
+
+/* תג ההסמכה. מרכז התג נוצר ריק בכוונה, והכיתוב העברי נכנס כאן בשכבת HTML
+   ולא בתוך התמונה, כי מודלי תמונה לא מייצרים עברית אמינה. */
+.certbadge{position:relative; max-width:330px; margin:1.6rem auto 0}
+.certbadge img{width:100%; height:auto; display:block}
+.certbadge figcaption{position:absolute; inset:0; display:grid; place-content:center;
+  text-align:center; transform:translateY(-7%); pointer-events:none}
+.certbadge b{display:block; font-family:var(--font-display,'Frank Ruhl Libre',serif);
+  font-size:clamp(1.5rem,6vw,2rem); font-weight:900; color:#003B46; letter-spacing:.04em; line-height:1}
+.certbadge span{display:block; font-size:clamp(.62rem,2.4vw,.78rem); font-weight:700;
+  color:#00606B; letter-spacing:.22em; margin-top:.3rem}
+.certbadge em{display:block; font-style:normal; font-size:clamp(.72rem,2.8vw,.9rem);
+  font-weight:600; color:#2F8592; margin-top:.55rem}
+
 /* ---------- יחידת לימוד ---------- */
 .unit{padding:0; overflow:hidden}
 .unit .unit-banner{width:100%; aspect-ratio:16/6; object-fit:cover; border-radius:20px 20px 0 0}
@@ -313,6 +344,15 @@ footer{position:relative; z-index:1; padding:2.4rem 0 3rem; text-align:center;
 .hand.is-in .hand__line:nth-child(2){ transition-delay:.18s }
 .hand.is-in .hand__line:nth-child(3){ transition-delay:.36s }
 .hand.is-in .hand__line:nth-child(4){ transition-delay:.54s }
+
+/* (12.8.2026) חשיפה בגלילה לשורות מסקנה. אותה שפת תנועה של .hand, אבל כמחלקה
+   כללית שאפשר לתלות על כל אלמנט. עולה מלמטה ונכנס לפוקוס. */
+.reveal{ opacity:0; transform:translateY(16px);
+  transition:opacity .75s cubic-bezier(.2,.7,.3,1), transform .75s cubic-bezier(.2,.7,.3,1) }
+.reveal.is-in{ opacity:1; transform:none }
+@media (prefers-reduced-motion: reduce){
+  .reveal{ opacity:1; transform:none; transition:none }
+}
 .shot--bleed{ background:none; border:0; box-shadow:none; backdrop-filter:none;
   -webkit-backdrop-filter:none; max-width:900px; margin-inline:auto }
 .shot--bleed::before{ display:none }
@@ -359,6 +399,8 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
   .stats--bare{ gap:.8rem }
   .stats--bare .stat p{ font-size:.82rem }
 }
+
+/* (13.8.2026): הסגנונות של .journey הוסרו יחד עם מפת המסע. */
 </style>
 </head>
 <body>
@@ -415,7 +457,7 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
       <p class="price-now">197 ₪</p>
 
       <div class="cta-wrap">
-        <a class="cta" href="#join">אני רוצה להתחיל את הקורס</a>
+        <a class="cta" href="#join" data-buy>אני רוצה להתחיל את הקורס</a>
         <p class="microcopy">תשלום חד־פעמי, גישה לקורס המלא ולחוברות הלימוד.</p>
       </div>
 
@@ -457,6 +499,7 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
     </div>
   </div>
 </section>
+
 <section class="sec">
   <div class="wrap">
     <h2>למה בכלל ללמוד NLP?</h2>
@@ -481,7 +524,7 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
   <div class="wrap">
     <h2>אולי אחד הדברים האלה מוכר לכם</h2>
 
-    <ul class="checks">
+    <ul class="checks checks--pain">
       <li>אתם יודעים שאתם רוצים לעשות שינוי, אבל מרגישים שמשהו בפנים מושך אתכם אחורה.</li>
       <li>אתם מנסים להבין למה אנשים מסוימים מפעילים אתכם רגשית כל כך מהר.</li>
       <li>אתם מוצאים את עצמכם שוב ושוב באותם דפוסים בזוגיות, בעבודה או מול עצמכם.</li>
@@ -490,34 +533,17 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
       <li>או שפשוט תמיד עניין אתכם ללמוד NLP, אבל אף פעם לא באמת נכנסתם לזה.</li>
     </ul>
 
-    <p class="lead">אם כן, אתם כנראה בדיוק הקהל שבשבילו בניתי את הקורס הזה.</p>
+    <p class="lead reveal">אם כן, אתם כנראה בדיוק הקהל שבשבילו בניתי את הקורס הזה.</p>
   </div>
 </section>
 
 <section class="sec">
   <div class="wrap">
-    <h2>למי הקורס מתאים?</h2>
-
-    <ul class="checks">
-      <li>אם אתם מתחילים לגמרי ורוצים להכיר NLP בצורה מסודרת. כן.</li>
-      <li>אם אתם מתעניינים בהתפתחות אישית ורוצים להבין את עצמכם יותר. כן.</li>
-      <li>אם אתם רוצים לשפר תקשורת ולהבין אנשים. כן.</li>
-      <li>אם אתם שוקלים בעתיד להיכנס לעולם האימון, הליווי או ה־NLP, הוא יכול להיות נקודת התחלה מצוינת.</li>
-    </ul>
-
-    <div class="callout">
-      <p>אם אתם רוצים פשוט תעודה בלי ללמוד ולתרגל, זה פחות המקום.</p>
-    </div>
-
-    <div class="cta-wrap">
-      <a class="cta" href="#join">אני רוצה להתחיל את הקורס</a>
-    </div>
-  </div>
-</section>
-<section class="sec alt">
-  <div class="wrap">
     <h2>אז מה באמת לומדים שם?</h2>
     <p class="lede">לא רציתי ליצור קורס שזורק עליכם רשימה של מושגים. הקורס בנוי כמו מסע. בכל חלק אנחנו מוסיפים עוד שכבה להבנה של עצמנו ושל האדם שמולנו.</p>
+    <!-- (13.8.2026): מפת מסע 7 היחידות (figure.journey) הוסרה לבקשת הלל — לא הוסיפה מידע
+         מעבר לקרוסלה שמתחתיה, והקריאה שלה לא הייתה ברורה. הקרוסלה היא הוויזואל של הסקשן. -->
+
     <p class="swipe-hint">גוררים הצידה כדי לעבור בין החלקים ←</p>
 
     <!-- FIX-ENGINE F-005 (11.8.2026): שבע היחידות הפכו לקרוסלה אופקית עם scroll-snap לבקשת הלל. -->
@@ -649,7 +675,8 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
     
   </div>
 </section>
-<section class="sec">
+
+<section class="sec alt">
   <div class="wrap">
     <h2>וזה לא נגמר רק בסרטונים</h2>
     <p class="lede">אחד הדברים שחשובים לי בקורס הזה הוא שלא תצטרכו לראות טכניקה ואז לנסות לזכור: רגע, מה היה השלב הבא?</p>
@@ -674,52 +701,6 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
 </section>
 
 <section class="sec alt">
-  <div class="wrap">
-    <h2>מה מקבלים ב־197 ₪?</h2>
-
-    <div class="grid g3">
-      <div class="card">
-        <h3>קורס NLP Practitioner מלא</h3>
-        <p>7 יחידות לימוד עם עשרות פרקים.</p>
-      </div>
-      <div class="card">
-        <h3>חוברת NLP Practitioner</h3>
-        <p>חוברת שמלווה את כל הקורס.</p>
-      </div>
-      <div class="card">
-        <h3>ספר המתכונים</h3>
-        <p>הטכניקות מסודרות בצורה פרקטית, שלב אחרי שלב.</p>
-      </div>
-      <div class="card">
-        <h3>אפשרות למסלול הסמכה</h3>
-        <p>למי שרוצה לסיים עם תעודת NLP Practitioner ועומד בדרישות.</p>
-      </div>
-      <div class="card">
-        <h3>30 יום אחריות</h3>
-        <p>כדי שתוכלו לבדוק בעצמכם אם אתם מתחברים.</p>
-      </div>
-    </div>
-
-    <div class="cta-wrap">
-      <a class="cta" href="#join">אני רוצה להיכנס לקורס</a>
-    </div>
-  </div>
-</section>
-
-<section class="sec">
-  <div class="wrap">
-    <h2>30 יום עליי</h2>
-    <p class="lede">אני לא רוצה שתצטרכו לנחש אם הקורס מתאים לכם. אז הנה הדרך הכי פשוטה לפתור את זה.</p>
-    <p class="lead">תירשמו. תיכנסו. תראו את השיעורים. תפתחו את החוברות. ותתחילו ללמוד.</p>
-
-    <div class="callout">
-      <p>יש לכם <span class="hl">30 יום</span> לבדוק את הקורס בעצמכם. אם לא התחברתם לתוכן או שפשוט הבנתם שזה לא בשבילכם, תכתבו לנו במסגרת 30 ימי האחריות ותקבלו את כספכם בחזרה בהתאם לתנאי האחריות.</p>
-    </div>
-
-    <p class="lead">אין לי עניין שמישהו יישאר בקורס שהוא לא רוצה להיות בו. אתם בודקים את הקורס. הסיכון עליי.</p>
-  </div>
-</section>
-<section class="sec">
   <div class="wrap">
     <h2>ועכשיו לשאלה המתבקשת: למה 197 ₪?</h2>
     <p class="lede">זו כנראה השאלה שהייתי שואל בעצמי אם הייתי מגיע לדף הזה מבחוץ. אז הנה הסיפור.</p>
@@ -752,7 +733,14 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
       <div class="mock"><span>כאן יש להכניס את תנאי ההסמכה המדויקים ואת הגוף המנפיק לפני פרסום הדף</span></div>
     </div>
 
-    <div class="mock"><span>מוקאפ תעודת NLP Practitioner</span></div>
+    <figure class="certbadge">
+      <img loading="lazy" src="../assets/nlp-landing/cert-badge.webp" alt="תג תעודת NLP Practitioner">
+      <figcaption>
+        <b>NLP</b>
+        <span>PRACTITIONER</span>
+        <em>תעודת סיום הכשרה</em>
+      </figcaption>
+    </figure>
   </div>
 </section>
 
@@ -801,13 +789,86 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
     </div>
   </div>
 </section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <h2>מה מקבלים ב־197 ₪?</h2>
+
+    <figure class="shelf">
+      <img loading="lazy" src="../assets/nlp-landing/what-you-get.webp" alt="מה נכלל בקורס: השיעורים, חוברת הקורס, ספר הטכניקות, מסלול ההסמכה ואחריות">
+    </figure>
+
+    <div class="grid g3">
+      <div class="card">
+        <h3>קורס NLP Practitioner מלא</h3>
+        <p>7 יחידות לימוד עם עשרות פרקים.</p>
+      </div>
+      <div class="card">
+        <h3>חוברת NLP Practitioner</h3>
+        <p>חוברת שמלווה את כל הקורס.</p>
+      </div>
+      <div class="card">
+        <h3>ספר המתכונים</h3>
+        <p>הטכניקות מסודרות בצורה פרקטית, שלב אחרי שלב.</p>
+      </div>
+      <div class="card">
+        <h3>אפשרות למסלול הסמכה</h3>
+        <p>למי שרוצה לסיים עם תעודת NLP Practitioner ועומד בדרישות.</p>
+      </div>
+      <div class="card">
+        <h3>30 יום אחריות</h3>
+        <p>כדי שתוכלו לבדוק בעצמכם אם אתם מתחברים.</p>
+      </div>
+    </div>
+
+    <div class="cta-wrap">
+      <a class="cta" href="#join">אני רוצה להיכנס לקורס</a>
+    </div>
+  </div>
+</section>
+
 <section class="sec">
+  <div class="wrap">
+    <h2>30 יום עליי</h2>
+    <p class="lede">אני לא רוצה שתצטרכו לנחש אם הקורס מתאים לכם. אז הנה הדרך הכי פשוטה לפתור את זה.</p>
+    <p class="lead">תירשמו. תיכנסו. תראו את השיעורים. תפתחו את החוברות. ותתחילו ללמוד.</p>
+
+    <div class="callout">
+      <p>יש לכם <span class="hl">30 יום</span> לבדוק את הקורס בעצמכם. אם לא התחברתם לתוכן או שפשוט הבנתם שזה לא בשבילכם, תכתבו לנו במסגרת 30 ימי האחריות ותקבלו את כספכם בחזרה בהתאם לתנאי האחריות.</p>
+    </div>
+
+    <p class="lead">אין לי עניין שמישהו יישאר בקורס שהוא לא רוצה להיות בו. אתם בודקים את הקורס. הסיכון עליי.</p>
+  </div>
+</section>
+
+<section class="sec alt">
   <div class="wrap">
     <h2>אבל רגע... זה באמת רק 197 ₪?</h2>
     <p class="lede">כן. לא 197 ₪ לחודש. לא תשלום ראשון מתוך סדרה. לא 197 ואז לפתוח כל פרק בנפרד.</p>
     <p class="lead"><span class="hl">197 ₪. תשלום חד־פעמי.</span></p>
     <div class="cta-wrap">
       <a class="cta" href="#join">אני רוצה להיכנס לקורס</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <h2>למי הקורס מתאים?</h2>
+
+    <ul class="checks">
+      <li>אם אתם מתחילים לגמרי ורוצים להכיר NLP בצורה מסודרת. כן.</li>
+      <li>אם אתם מתעניינים בהתפתחות אישית ורוצים להבין את עצמכם יותר. כן.</li>
+      <li>אם אתם רוצים לשפר תקשורת ולהבין אנשים. כן.</li>
+      <li>אם אתם שוקלים בעתיד להיכנס לעולם האימון, הליווי או ה־NLP, הוא יכול להיות נקודת התחלה מצוינת.</li>
+    </ul>
+
+    <div class="callout">
+      <p>אם אתם רוצים פשוט תעודה בלי ללמוד ולתרגל, זה פחות המקום.</p>
+    </div>
+
+    <div class="cta-wrap">
+      <a class="cta" href="#join">אני רוצה להתחיל את הקורס</a>
     </div>
   </div>
 </section>
@@ -882,7 +943,7 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
       <p class="price-old">בעבר: 4,170 ₪</p>
       <p class="price-now">197 ₪</p>
       <div class="cta-wrap">
-        <a class="cta" href="#join">אני רוצה להתחיל ללמוד NLP</a>
+        <a class="cta" href="#join" data-buy>אני רוצה להתחיל ללמוד NLP</a>
       </div>
       <p class="microcopy">תשלום חד־פעמי · 30 יום אחריות</p>
     </div>
@@ -905,6 +966,62 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
 </div>
 
 
+
+<script>
+/* ===== CHECKOUT (Cardcom) — נקודת החיבור היחידה לתשלום =====================
+   (12.8.2026) לפני זה כל 10 הכפתורים בדף הצביעו על "#join", כלומר על קופסת
+   המחיר עצמה: מי שלחץ "אני רוצה להתחיל" פשוט נגלל לאותה קופסה. לא היה שום
+   מסלול רכישה בדף.
+
+   ⬇️⬇️ הדבק כאן את כתובת עמוד התשלום של Cardcom לפרקטישנר (197 ₪) ושמור.
+        זה מחבר אוטומטית את שני כפתורי הקנייה. אותה תבנית בדיוק כמו
+        MASTER_CHECKOUT_URL ב-course-library-v2.html.
+        כל עוד ריק — הכפתורים מציגים הודעת "בקרוב" במקום קליק מת.
+   ⚠️ זו חייבת להיות כתובת חדשה ונפרדת. הכתובת של המאסטר גובה 1,900 ₪. */
+const PRACTITIONER_CHECKOUT_URL = '';
+const PRACTITIONER_PRICE_ILS = 197;
+
+(function(){
+  var buys = [].slice.call(document.querySelectorAll('a[data-buy]'));
+  if (!buys.length) return;
+
+  function toast(msg){
+    var t = document.createElement('div');
+    t.setAttribute('role','status');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:5.5rem;transform:translateX(-50%);z-index:9999;'
+      + 'background:#003B46;color:#E8F1F2;border:1px solid rgba(212,175,55,.55);border-radius:14px;'
+      + 'padding:.85rem 1.15rem;font:600 .95rem/1.4 Heebo,sans-serif;max-width:min(92vw,420px);'
+      + 'text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 4200);
+  }
+
+  // Cardcom is a third-party host, so the click out of this page is the last
+  // thing we can measure. Without it we cannot tell how many people reached
+  // payment, and a paid campaign cannot be optimised. Same event on pixel +
+  // GA4; no CAPI on this page (marketing-tools.js is not loaded here).
+  function track(){
+    var props = { value: PRACTITIONER_PRICE_ILS, currency: 'ILS',
+      content_name: 'NLP Practitioner', content_type: 'product', content_ids: ['practitioner-197'] };
+    try { if (window.fbq) fbq('track', 'InitiateCheckout', props); } catch(e){}
+    try { if (window.gtag) gtag('event', 'begin_checkout', props); } catch(e){}
+  }
+
+  buys.forEach(function(a){
+    if (PRACTITIONER_CHECKOUT_URL){
+      a.setAttribute('href', PRACTITIONER_CHECKOUT_URL);
+      a.setAttribute('rel', 'noopener');
+      a.addEventListener('click', track);
+    } else {
+      a.addEventListener('click', function(ev){
+        ev.preventDefault();
+        toast('עמוד התשלום נפתח בקרוב. אם בא לך להיכנס ראשון, כתוב לנו בוואטסאפ.');
+      });
+    }
+  });
+})();
+</script>
 
 <script>
 /* FIX-ENGINE F-003 (11.8.2026): כניסה מונפשת + ספירה למספרים, מכבד prefers-reduced-motion. */
@@ -939,6 +1056,23 @@ h1{ font-size:clamp(1.5rem,4.6vw,3rem) }
 
 <script>
 /* (11.8.2026): חשיפת הפסקה בכתב יד בגלילה. */
+/* (12.8.2026): חשיפה בגלילה לכל אלמנט עם .reveal. נצפה פעם אחת ומשחרר. */
+(function(){
+  var els=[].slice.call(document.querySelectorAll('.reveal'));
+  if(!els.length) return;
+  if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    els.forEach(function(e){e.classList.add('is-in')}); return;
+  }
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(x){
+      if(!x.isIntersecting) return;
+      x.target.classList.add('is-in');
+      io.unobserve(x.target);
+    });
+  },{threshold:.3});
+  els.forEach(function(e){io.observe(e)});
+})();
+
 (function(){var h=document.querySelector('.hand'); if(!h) return;
   if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion: reduce)').matches){h.classList.add('is-in');return;}
   var io=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){x.target.classList.add('is-in');io.unobserve(x.target);}})},{threshold:.35});

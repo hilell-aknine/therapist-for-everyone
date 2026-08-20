@@ -3843,7 +3843,7 @@
         <span class="lms-sb-item__icon"><i class="fa-solid fa-handshake"></i></span>
         <span class="lms-sb-item__label">תוכנית השותפים</span>
       </a>
-      <a class="lms-sb-item" href="#master-sales" data-nav="master-sales" id="sbMasterSalesItem">
+      <a class="lms-sb-item" href="#master-sales" data-nav="master-sales" id="sbMasterSalesItem" style="${(_isPaidCustomer && !_isAdmin) ? 'display:none;' : ''}">
         <span class="lms-sb-item__icon"><i class="fa-solid fa-crown" style="color:var(--accent-gold-hover);"></i></span>
         <span class="lms-sb-item__label">תוכנית המאסטרים שלנו</span>
         <span class="lms-sb-item__badge" style="background:rgba(212,175,55,.2);color:var(--accent-gold-hover);">מבצע</span>
@@ -5336,6 +5336,12 @@
         _isPaidCustomer = true;
         const sb = document.getElementById('sbMasterItem');
         if (sb) sb.style.display = '';
+        // A paying master customer must not be pitched the master course he already owns.
+        // Admins keep the preview. Covers the case where the sidebar rendered before the profile resolved.
+        if (!_isAdmin){
+          const ms = document.getElementById('sbMasterSalesItem');
+          if (ms) ms.style.display = 'none';
+        }
         const mt = document.getElementById('masterTab');
         if (mt) mt.style.display = 'inline-flex';
         const tt = document.getElementById('techniquesTab');

@@ -4710,18 +4710,26 @@
     // closing the tab returns to the course instead of dumping the learner on the
     // standalone summaries-list page. Labels kept distinct so the workbook/this-lesson/
     // all-lessons items can't be confused with each other.
-    const items = (courseType === 'nlp-master') ? (masterHasSummary ? [
-      { icon:'fa-solid fa-file-lines', t:'סיכום השיעור הזה', s:`נקודות המפתח מ${mod.title}`, href:`summaries-master/master-lesson-${masterRegularOrdinal}.html`, gold:true, blank:true }
+    // Master lessons also list the 6 workbooks here (not just on the overview screen) —
+    // learners were missing them entirely inside a lesson's "חומרי עזר" tab.
+    const masterWorkbookItems = MASTER_WORKBOOKS.map((wb, i) => ({
+      icon: wb.icon, t: wb.title, s: 'חוברת עבודה — PDF', href:'#', gold:false, blank:false, wb:i
+    }));
+    const items = (courseType === 'nlp-master') ? [
+      ...(masterHasSummary ? [
+        { icon:'fa-solid fa-file-lines', t:'סיכום השיעור הזה', s:`נקודות המפתח מ${mod.title}`, href:`summaries-master/master-lesson-${masterRegularOrdinal}.html`, gold:true, blank:true }
+      ] : [
+        { icon:'fa-solid fa-file-lines', t:'כל סיכומי המאסטר', s:'רשימת סיכומי כל המפגשים', href:'summaries-master/index.html', gold:true, blank:true }
+      ]),
+      ...masterWorkbookItems
     ] : [
-      { icon:'fa-solid fa-file-lines', t:'כל סיכומי המאסטר', s:'רשימת סיכומי כל המפגשים', href:'summaries-master/index.html', gold:true, blank:true }
-    ]) : [
       // (13.8.2026) החוברת עברה לדלי פרטי — ראה openCourseBooklet למטה.
       { icon:'fa-solid fa-book-open', t:'חוברת הקורס (PDF)',     s:'7 מודולים, 50 פרקים — להורדה',           href:'#', gold:true,  blank:false, booklet:true },
       { icon:'fa-solid fa-file-lines', t:'סיכום השיעור הזה',     s:`נקודות המפתח ממודול ${mod.id}`,           href:`summaries/lesson-${mod.id}.html`,            gold:false, blank:true },
       { icon:'fa-solid fa-list-check', t:'כל סיכומי השיעורים',   s:'רשימת כל 7 הסיכומים',                     href:'summaries/index.html',                        gold:false, blank:true }
     ];
     grid.innerHTML = items.map(i => `
-      <a class="lms-res-card${i.gold ? ' lms-res-card--gold' : ''}" href="${escapeHtml(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ''}${i.booklet ? ' onclick="openCourseBooklet(event)"' : ''}>
+      <a class="lms-res-card${i.gold ? ' lms-res-card--gold' : ''}" href="${escapeHtml(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ''}${i.booklet ? ' onclick="openCourseBooklet(event)"' : ''}${i.wb != null ? ` onclick="openResourceWorkbook(event, ${i.wb})"` : ''}>
         <span class="lms-res-card__icon"><i class="${i.icon}"></i></span>
         <div class="lms-res-card__body">
           <div class="lms-res-card__t">${escapeHtml(i.t)}</div>
@@ -5547,6 +5555,33 @@
     if (bonusHost) bonusHost.innerHTML = bonusBlocks.join('');
     if (bonusSection) bonusSection.style.display = bonusBlocks.length ? '' : 'none';
   }
+
+  // Same signed-URL viewer as openMasterWorkbook, but triggered from a resource-tab
+  // card (icon+text layout differs, so it manages its own loading state).
+  window.openResourceWorkbook = async function(ev, i){
+    if (ev) ev.preventDefault();
+    const wb = MASTER_WORKBOOKS[i];
+    if (!wb || !supabaseClient) return;
+    const card = ev && ev.currentTarget;
+    const iconEl = card && card.querySelector('.lms-res-card__icon i');
+    const prevIcon = iconEl ? iconEl.className : '';
+    if (iconEl) iconEl.className = 'fa-solid fa-circle-notch fa-spin';
+    try {
+      const { data, error } = await supabaseClient.storage.from('workbooks').createSignedUrl(wb.name, 600);
+      if (error) throw error;
+      const viewer = document.getElementById('masterViewer');
+      document.getElementById('masterViewerTitle').textContent = wb.title;
+      document.getElementById('masterViewerFrame').src = data.signedUrl;
+      const dl = document.getElementById('masterViewerDownload');
+      dl.href = data.signedUrl;
+      dl.style.display = '';
+      viewer.classList.add('is-open');
+    } catch (err){
+      alert('שגיאה בטעינת החוברת: ' + (err.message || err));
+    } finally {
+      if (iconEl) iconEl.className = prevIcon;
+    }
+  };
 
   async function openMasterWorkbook(i, btn){
     const wb = MASTER_WORKBOOKS[i];

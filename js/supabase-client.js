@@ -506,6 +506,68 @@
             }
         },
 
+        // ===== Study streak (רצף ימי למידה) — SINGLE SOURCE =====
+        // A streak day is a day the learner actually COMPLETED a lesson. Opening the
+        // portal is deliberately NOT a streak day: the flame has to mean learning.
+        // Lives in the DB (course_progress), so it follows the user across devices;
+        // any caller may cache the number for display, never as the truth.
+        // Days are ISRAEL calendar days — a lesson finished at 01:00 Israel time
+        // belongs to that Israel date, not to the UTC one.
+        // Returns { days, activeToday, lastDay } or null (logged out / DB error).
+        async getStudyStreak() {
+            try {
+                const user = await Auth.getCurrentUser();
+                if (!user) return null;
+
+                // completed=true also excludes the last_watched_* bookkeeping rows.
+                const { data, error } = await supabaseClient
+                    .from('course_progress')
+                    .select('completed_at')
+                    .eq('user_id', user.id)
+                    .eq('completed', true)
+                    .not('completed_at', 'is', null)
+                    .order('completed_at', { ascending: false })
+                    .limit(500);
+                if (error) return null;
+
+                const ilFmt = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit'
+                });
+                const days = new Set();
+                for (const row of (data || [])) {
+                    const t = new Date(row.completed_at);
+                    if (!isNaN(t)) days.add(ilFmt.format(t)); // 'YYYY-MM-DD'
+                }
+                const today = ilFmt.format(new Date());
+                // totalDays = every day the learner ever advanced. It only grows, so it
+                // is what the UI leads with; the streak is the fragile number beside it.
+                const totalDays = days.size;
+                if (!days.size) return { days: 0, totalDays: 0, activeToday: false, lastDay: null };
+
+                // Pure calendar arithmetic on 'YYYY-MM-DD'. Built at 12:00 local so a
+                // DST jump in the VIEWER's timezone can never skip or repeat a day.
+                const shift = (ymd, delta) => {
+                    const [y, m, d] = ymd.split('-').map(Number);
+                    const t = new Date(y, m - 1, d + delta, 12);
+                    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+                };
+
+                // Start at today; if nothing was completed yet today the streak is still
+                // alive until midnight, so fall back to yesterday before declaring 0.
+                const activeToday = days.has(today);
+                let cursor = activeToday ? today : shift(today, -1);
+                if (!days.has(cursor)) return { days: 0, totalDays, activeToday: false, lastDay: null };
+
+                let count = 0;
+                const lastDay = cursor;
+                while (days.has(cursor)) { count++; cursor = shift(cursor, -1); }
+                return { days: count, totalDays, activeToday, lastDay };
+            } catch (err) {
+                console.error('getStudyStreak error:', err);
+                return null;
+            }
+        },
+
         async updateWatchTime(videoId, seconds) {
             const user = await Auth.getCurrentUser();
             if (!user) return;
@@ -1347,11 +1409,75 @@
     };
 
     // ============================================================================
+    // ENTITLEMENTS - per-course access grants (table: course_access)
+    // ============================================================================
+    // Why this exists (2026-08-13): until now the only paid gate in the portal was
+    // the `paid_customer` role, and it unlocked BOTH the master course (8,880 ILS)
+    // and the techniques course. The NLP Practitioner full course sells for 197 ILS,
+    // so reusing that role would have handed every 197-buyer the 8,880 product.
+    //
+    // `course_access` is a pre-existing, empty table (user_id, course_slug,
+    // granted_at). Its RLS was verified live before building on it: a learner can
+    // SELECT only their own rows, and the manage policy really checks
+    // profiles.role = 'admin' (not `true`), so nobody can grant themselves a course.
+    //
+    // Entitlements are ADDITIVE and independent of `role` — one person can hold the
+    // practitioner grant, the master role, both, or neither.
+
+    const Entitlements = {
+        /** Slug for the paid, full-length NLP Practitioner lectures (197 ILS). */
+        PRACTITIONER_FULL: 'nlp-practitioner-full',
+
+        _cache: null,
+
+        /** All course slugs granted to the signed-in user.
+         *  Fails CLOSED: any error returns [] so a failed lookup never unlocks
+         *  paid content. Result is cached per page load; call clearCache() after
+         *  a purchase or an admin grant. */
+        async list({ force = false } = {}) {
+            if (this._cache && !force) return this._cache;
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { this._cache = []; return this._cache; }
+
+            // RLS already restricts this to the caller's own rows; the explicit
+            // eq() keeps the intent readable and survives any future policy change.
+            const { data, error } = await supabaseClient
+                .from('course_access')
+                .select('course_slug, granted_at')
+                .eq('user_id', user.id);
+
+            if (error) {
+                console.error('Entitlements lookup error:', error);
+                return [];   // deliberately NOT cached — a transient failure should retry
+            }
+
+            this._cache = (data || []).map(r => r.course_slug).filter(Boolean);
+            return this._cache;
+        },
+
+        /** True if the signed-in user holds `slug`. Fails closed. */
+        async has(slug) {
+            if (!slug) return false;
+            const slugs = await this.list();
+            return slugs.includes(slug);
+        },
+
+        /** Convenience: does this user own the paid full practitioner course? */
+        async hasPractitionerFull() {
+            return this.has(this.PRACTITIONER_FULL);
+        },
+
+        clearCache() { this._cache = null; }
+    };
+
+    // ============================================================================
     // EXPORT TO WINDOW - Make all helpers globally accessible
     // ============================================================================
 
     // Attach all helpers directly to window for easy access
     window.Auth = Auth;
+    window.Entitlements = Entitlements;
     window.Profiles = Profiles;
     window.Therapists = Therapists;
     window.Patients = Patients;

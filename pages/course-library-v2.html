@@ -3857,6 +3857,25 @@
   // often the LAST event we get. Persisting here is what saves the second on a phone.
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushPos(); });
 
+  // The Master offer appears in the sidebar only once a learner has finished module 3
+  // ("שפה, שאלות והצבת מטרות"). Hillel's call, 10.09.2026, off the month's behaviour data:
+  // the item used to sit there from the learner's first minute and drew 3 visits and 29
+  // seconds of attention across 28 days. Module 3 holds 27% of all learning time on the
+  // site and is reached only by someone who already worked through two modules, so that
+  // is where the offer is earned rather than ignored.
+  // Paid customers never see it — they own the thing it sells. Admins always do, to review it.
+  const MASTER_SALES_UNLOCK_MODULE = 2;   // array index; the module labelled 3 in the UI
+  function masterSalesUnlocked(){
+    if (_isAdmin) return true;
+    if (_isPaidCustomer) return false;
+    if (courseType !== 'nlp-practitioner') return false;   // the gate only means anything on the free course
+    try {
+      const mod = modules[MASTER_SALES_UNLOCK_MODULE];
+      return !!mod && mod.lessons.length > 0 &&
+        mod.lessons.every((_, li) => completedLessons.includes(`${MASTER_SALES_UNLOCK_MODULE}-${li}`));
+    } catch(_) { return false; }
+  }
+
   function renderSidebarNav(filter){
     const q = (filter || '').trim().toLowerCase();
     const next = getNextLesson();
@@ -3877,7 +3896,7 @@
         <span class="lms-sb-item__icon"><i class="fa-solid fa-handshake"></i></span>
         <span class="lms-sb-item__label">תוכנית השותפים</span>
       </a>
-      <a class="lms-sb-item" href="#master-sales" data-nav="master-sales" id="sbMasterSalesItem" style="${(_isPaidCustomer && !_isAdmin) ? 'display:none;' : ''}">
+      <a class="lms-sb-item" href="#master-sales" data-nav="master-sales" id="sbMasterSalesItem" style="${masterSalesUnlocked() ? '' : 'display:none;'}">
         <span class="lms-sb-item__icon"><i class="fa-solid fa-crown" style="color:var(--accent-gold-hover);"></i></span>
         <span class="lms-sb-item__label">תוכנית המאסטרים שלנו</span>
         <span class="lms-sb-item__badge" style="background:rgba(212,175,55,.2);color:var(--accent-gold-hover);">מבצע</span>

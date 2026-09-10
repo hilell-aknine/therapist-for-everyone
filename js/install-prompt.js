@@ -109,7 +109,12 @@
 
         watchLink: 'לא מסתדרים? רואים כאן',
         videoTitle: 'ככה שומרים את זה על המסך',
-        videoRegionLabel: 'סרטון הסבר'
+        videoRegionLabel: 'סרטון הסבר',
+
+        // המסלול השלישי (לא אנדרואיד-עם-אירוע, לא ספארי-באייפון). מוצג רק
+        // אם יש סרטון להראות — ראה showFallback().
+        fallbackLead: 'בדפדפן הזה אי אפשר להוסיף אוטומטית.\nזה קורה בעיקר בגלישה בסתר.\nאפשר לנסות שוב בגלישה רגילה, ובינתיים ככה זה עובד.',
+        fallbackPrimary: 'הבנתי, תודה'
     };
 
     // ========================================================================
@@ -676,6 +681,120 @@
     }
 
     // ========================================================================
+    // רינדור — המסלול השלישי (לא אנדרואיד-עם-אירוע, לא ספארי-באייפון)
+    //
+    // אין לנו הוראות מדויקות להציע כאן — לא ידוע לנו למה בדיוק הדפדפן לא
+    // נתן אירוע התקנה (הדוגמה השכיחה: גלישה בסתר באנדרואיד, שם כרום חוסם
+    // את beforeinstallprompt בכוונה). לכן זה **לא** מעמיד תפריט-הוראות
+    // מזויף. זה רק מסביר בכנות שההוספה האוטומטית לא זמינה, ומציע את מה
+    // שכן יש: הסרטון. לכן זה קיים רק אם videoSrc() מחזיר משהו — בלי סרטון
+    // אין כאן ערך שמצדיק דיאלוג, ועדיף השקט הישן.
+    // ========================================================================
+    var openFallback = null;
+
+    function showFallback() {
+        var src = videoSrc();
+        if (!src || openFallback) return;
+        ensureStyles();
+
+        var lastFocused = document.activeElement;
+        var titleId = 'ip-ftitle-' + now();
+        var leadId = 'ip-flead-' + now();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'ip-overlay';
+
+        var sheet = document.createElement('div');
+        sheet.className = 'ip-sheet';
+        sheet.setAttribute('role', 'dialog');
+        sheet.setAttribute('aria-modal', 'true');
+        sheet.setAttribute('aria-labelledby', titleId);
+        sheet.setAttribute('aria-describedby', leadId);
+        sheet.setAttribute('dir', 'rtl');
+        sheet.setAttribute('lang', 'he');
+        sheet.tabIndex = -1;
+
+        sheet.innerHTML =
+            '<button type="button" class="ip-close"></button>' +
+            '<div class="ip-grip" aria-hidden="true"></div>' +
+            '<h2 class="ip-title" id="' + titleId + '"></h2>' +
+            '<p class="ip-lead" id="' + leadId + '"></p>' +
+            '<div class="ip-sheet-watch"></div>' +
+            '<div class="ip-sheet-actions">' +
+                '<button type="button" class="ip-btn ip-btn-primary"></button>' +
+            '</div>';
+
+        var closeBtn = sheet.querySelector('.ip-close');
+        closeBtn.setAttribute('aria-label', TEXT.closeLabel);
+        closeBtn.appendChild(document.createTextNode('×'));
+
+        sheet.querySelector('.ip-title').textContent = TEXT.bannerTitle;
+        setMultiline(sheet.querySelector('.ip-lead'), TEXT.fallbackLead);
+        renderWatchLink(sheet.querySelector('.ip-sheet-watch'));
+
+        var okBtn = sheet.querySelector('.ip-btn-primary');
+        okBtn.textContent = TEXT.fallbackPrimary;
+
+        overlay.appendChild(sheet);
+        document.body.appendChild(overlay);
+        try {
+            document.documentElement.classList.add('ip-locked');
+            document.body.classList.add('ip-locked');
+        } catch (e) {}
+
+        requestAnimationFrame(function () { overlay.classList.add('is-open'); });
+
+        function close(kind) {
+            if (!openFallback) return;
+            openFallback = null;
+            document.removeEventListener('keydown', onKey, true);
+            overlay.classList.remove('is-open');
+            try {
+                document.documentElement.classList.remove('ip-locked');
+                document.body.classList.remove('ip-locked');
+            } catch (e) {}
+            setTimeout(function () {
+                if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            }, 220);
+            try { if (lastFocused && lastFocused.focus) lastFocused.focus(); } catch (e) {}
+            remember('dismissed');
+            log('ה-fallback נסגר:', kind);
+        }
+
+        function onKey(ev) {
+            if (openVideo) return;   // הנגן פתוח מעליו — הוא הבעלים היחיד
+            if (ev.key === 'Escape' || ev.key === 'Esc') {
+                ev.preventDefault();
+                close('dismissed');
+                return;
+            }
+            if (ev.key !== 'Tab') return;
+            var items = focusables(sheet);
+            if (!items.length) { ev.preventDefault(); return; }
+            var first = items[0], last = items[items.length - 1];
+            if (ev.shiftKey && document.activeElement === first) {
+                ev.preventDefault(); last.focus();
+            } else if (!ev.shiftKey && document.activeElement === last) {
+                ev.preventDefault(); first.focus();
+            } else if (!sheet.contains(document.activeElement)) {
+                ev.preventDefault(); first.focus();
+            }
+        }
+
+        closeBtn.addEventListener('click', function () { close('dismissed'); });
+        okBtn.addEventListener('click', function () { close('accepted'); });
+        overlay.addEventListener('click', function (ev) {
+            if (ev.target === overlay) close('dismissed');
+        });
+        document.addEventListener('keydown', onKey, true);
+
+        setTimeout(function () { try { sheet.focus(); } catch (e) {} }, 30);
+
+        openFallback = { close: close };
+        log('ה-fallback הוצג');
+    }
+
+    // ========================================================================
     // התזמורת — מי מוצג, מתי, ורק פעם אחת בסשן
     // ========================================================================
     var deferred = null;          // אירוע ה-beforeinstallprompt השמור
@@ -716,8 +835,15 @@
                 shownThisSession = true;
                 clearTimers();
                 showSheet();
+            } else if (videoSrc()) {
+                // לא אנדרואיד-עם-אירוע ולא ספארי-באייפון (למשל גלישה בסתר
+                // באנדרואיד, שם כרום חוסם את האירוע בכוונה). אין הוראות
+                // מדויקות להציע, אבל יש סרטון — עדיף הסבר כן מהשתיקה הישנה.
+                shownThisSession = true;
+                clearTimers();
+                showFallback();
             }
-            // דפדפן שלא נותן אירוע וגם אינו ספארי באייפון: אין מה להציע. שקט.
+            // שום דבר להציע בכלל (אין סרטון, ואין מסלול זמין): שקט.
         } catch (e) {
             log('שגיאה בבדיקת ההצגה', e);   // הפורטל ממשיך כרגיל
         }
@@ -762,6 +888,7 @@
                 remember('installed');
                 if (openBanner) openBanner.hide('installed');
                 if (openSheet) openSheet.close('installed');
+                if (openFallback) openFallback.close('installed');
                 clearTimers();
                 log('נוסף למסך הבית');
             });
@@ -773,6 +900,7 @@
                     if (!ev.matches) return;
                     if (openBanner) openBanner.hide('installed');
                     if (openSheet) openSheet.close('installed');
+                    if (openFallback) openFallback.close('installed');
                 };
                 if (mq.addEventListener) mq.addEventListener('change', onModeChange);
                 else if (mq.addListener) mq.addListener(onModeChange);

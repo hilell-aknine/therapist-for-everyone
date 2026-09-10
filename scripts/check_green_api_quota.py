@@ -81,8 +81,37 @@ def save_state(state):
     STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
+def probe_instance_state():
+    """Returns (is_ok, reason). Catches `blocked`, which checkWhatsapp cannot see.
+
+    Added 2026-08-22 after a live measurement: instance 7103515939 was
+    `blocked` by WhatsApp and holding a stuck message in its queue, yet
+    checkWhatsapp still answered {"existsWhatsapp": true, "fromCache": true}
+    with no invokeStatus — so this canary stayed silent through a real outage.
+    checkWhatsapp answers from Green API's cache and therefore does not
+    require a live WhatsApp session. getStateInstance does.
+    """
+    url = f"{PORTAL_URL}/waInstance{PORTAL_INSTANCE}/getStateInstance/{PORTAL_TOKEN}"
+    try:
+        with urllib.request.urlopen(url, timeout=20) as resp:
+            state = (json.loads(resp.read().decode("utf-8")) or {}).get("stateInstance")
+    except urllib.error.HTTPError as e:
+        return False, f"getStateInstance HTTP {e.code} — {e.reason}"
+    except Exception as e:
+        return False, f"getStateInstance שגיאת רשת: {type(e).__name__}: {str(e)[:120]}"
+
+    if state != "authorized":
+        return False, f"stateInstance: {state} (הקו אינו מחובר לוואטסאפ)"
+    return True, "ok"
+
+
 def probe_green_api():
     """Returns (is_ok: bool, reason: str). reason is human-readable Hebrew."""
+    # State first — a blocked instance answers checkWhatsapp normally from cache.
+    state_ok, state_reason = probe_instance_state()
+    if not state_ok:
+        return False, state_reason
+
     url = f"{PORTAL_URL}/waInstance{PORTAL_INSTANCE}/checkWhatsapp/{PORTAL_TOKEN}"
     body = json.dumps({"phoneNumber": int(PROBE_PHONE)}).encode("utf-8")
     req = urllib.request.Request(url, data=body, method="POST", headers={"Content-Type": "application/json"})

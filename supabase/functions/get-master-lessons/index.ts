@@ -10,70 +10,81 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 // authenticated paid_customer / admin users. Copied VERBATIM from the page.
 const MASTER_MODULES = [
             {
+                // Re-cut 2026-09-03 from the source recording. The previous nine
+                // chapters were split on a stopwatch: they opened and closed
+                // mid-sentence, repeated material, and 41 of the 88 durations
+                // across the course did not match the video that actually played.
+                // These eight are cut only where a subject ends and another
+                // begins, never inside an exercise or a live demonstration, and
+                // 15:14 of breaks and logistics are gone. Durations below are
+                // measured from YouTube, not hand-written.
                 lessonNumber: 1,
-                lessonTitle: 'מפגש 1 — רמות לוגיות וזהות',
+                lessonTitle: 'מפגש 1 — רמות לוגיות, חזון ואמונות',
                 color: 'var(--muted-teal)',
                 chapters: [
-                    { id: 'I3qjx4Xi62s', title: 'רמות לוגיות — מבוא ושינוי זהות', duration: '29:42' },
-                    { id: 'VTLoSz-e_e8', title: 'חזרת פרקטישנר ואמונות הקורס', duration: '29:33' },
-                    { id: 'fad_UafRAp8', title: 'רמות לוגיות בפירוט והרחבת זהות', duration: '19:41' },
-                    { id: '2jamFOJnaho', title: 'חזון ואפקט הפרפר', duration: '29:20' },
-                    { id: 'geV3tqupFWs', title: 'דמיון מודרך וצריבת מטרה חלק 1', duration: '17:31' },
-                    { id: 'dy7xtarGHpw', title: 'דמיון מודרך וצריבת מטרה חלק 2', duration: '17:31' },
-                    { id: 'BEPEtGFGp00', title: 'מבנה אמונות וגורמי יצירה', duration: '26:56' },
-                    { id: 'sBY96X1jtg0', title: 'תשאול סיבובי וסיכום חלק 1', duration: '19:04' },
-                    { id: 'ZhPFsGgiZlk', title: 'תשאול סיבובי וסיכום חלק 2', duration: '19:09' },
+                    { id: '_W3r2-8dUu8', title: 'ציפיות מהקורס ומודל הרמות הלוגיות', duration: '34:58' },
+                    { id: '2Bu_VjQQQos', title: 'חזרה על נושאי קורס הפרקטישנר', duration: '21:46' },
+                    { id: 'Z3HsQ2otyXo', title: 'תרגיל כתיבה — למה אני כאן ומה המטרות שלי', duration: '32:29' },
+                    { id: '4ujh3kzwzFc', title: 'רמת החזון', duration: '35:37' },
+                    { id: 'LzZ3yIgse5w', title: 'תרגיל צריבת מטרה בנוירונים', duration: '28:36' },
+                    { id: 'ff5blwndxJM', title: 'שיתופים לאחר התרגיל ומבוא לאמונות', duration: '29:45' },
+                    { id: 'LiNhHpu5PWU', title: 'שלושת הגורמים ליצירת אמונות', duration: '18:39' },
+                    { id: 'u5JOMbtCtiU', title: 'תשאול סיבובי וסיכום המפגש', duration: '32:55' },
                 ]
             },
             {
+                // Re-cut 2026-09-03, same method as session 1. Twelve ruler-cut
+                // chapters (with a measured 14:49 of material published beyond the
+                // length of the recording itself) become ten cut on subject
+                // boundaries, with 8:18 of breaks and logistics removed.
                 lessonNumber: 2,
-                lessonTitle: 'מפגש 2 — חילוץ ערכים',
+                lessonTitle: 'מפגש 2 — ערכים, חילוץ ומדרג',
                 color: 'var(--dusty-aqua)',
                 chapters: [
-                    { id: 'wyiQqdxGgkI', title: 'חזרה ותשאול סיבובי', duration: '20:46' },
-                    { id: '_y1oBOmjtTo', title: 'עבודה עם מטפל וכלים לשינוי', duration: '28:59' },
-                    { id: 'OFhJloYsiLk', title: 'מהם ערכים הגדרה ומבנה', duration: '19:42' },
-                    { id: 'xofxgtdZr3I', title: 'כוח הערכים בחיים ובעסק', duration: '21:26' },
-                    { id: '7Nq2NOHSkCc', title: 'ערכים בזוגיות ושינוי ערכים חלק 1', duration: '15:56' },
-                    { id: '1VSnknLzd-0', title: 'ערכים בזוגיות ושינוי ערכים חלק 2', duration: '18:20' },
-                    { id: 'u44u2zoS-g8', title: 'איך מחלצים ערכים', duration: '25:33' },
-                    { id: 'J0EdFm6vYLM', title: 'הדגמה חילוץ ערכים איגל', duration: '24:12' },
-                    { id: 'wP6w2FFgBms', title: 'יישום עסקי והדגמה עם עודיה חלק 1', duration: '14:48' },
-                    { id: '-AT4h12avP0', title: 'יישום עסקי והדגמה עם עודיה חלק 2', duration: '26:20' },
-                    { id: 'bmyL-061Vp4', title: 'הדגמה אדיר וקריטריונים חלק 1', duration: '22:34' },
-                    { id: 'uE4SRretEPk', title: 'הדגמה אדיר וקריטריונים חלק 2', duration: '21:20' },
+                    { id: 'z4zt9Mua3yM', title: 'מבוא לערכים', duration: '25:13' },
+                    { id: 'Gfyp9YsJUOI', title: 'סקאלת העבודה עם אנשים', duration: '29:20' },
+                    { id: 'truEMARTZDQ', title: 'דיון כיתתי — פגיעות כערך', duration: '33:48' },
+                    { id: '7VebmuQTXSA', title: 'ערכי אמצעי, ערכי מטרה ומבנה העומק', duration: '19:46' },
+                    { id: 'vVqZusk9LH4', title: 'שינוי ערכים וקונפליקטים', duration: '25:01' },
+                    { id: 'VF6ymX-mhB4', title: 'איך מפיקים ערכים מאירועי עבר', duration: '25:29' },
+                    { id: '12qWAgQ3qrk', title: 'הדגמה — חילוץ ערכים מסיפור', duration: '25:25' },
+                    { id: '9C4gRD_pNiQ', title: 'הדגמה — תרגול הפקת ערכים', duration: '20:53' },
+                    { id: 'I1My6xLf9c0', title: 'הדגמה — חילוץ ודירוג ערכים', duration: '29:25' },
+                    { id: '_MPc73J3TD4', title: 'קריטריונים להגשמת ערכים', duration: '29:57' },
                 ]
             },
             {
+                // Re-cut 2026-09-03, same method as sessions 1-2. Ten ruler-cut
+                // chapters become nine cut on subject boundaries, with 19:48 of
+                // breaks and logistics removed — the largest removal so far.
                 lessonNumber: 3,
-                lessonTitle: 'מפגש 3 — טראנס וטראומה',
+                lessonTitle: 'מפגש 3 — טראומה, טראנס וריפוי',
                 color: 'var(--gold)',
                 chapters: [
-                    { id: 'HFl8YJAMbMc', title: 'ערכים רגשות וסטייט', duration: '30:23' },
-                    { id: 'ES3NkLUdOy0', title: 'טראומה ותיבת פנדורה', duration: '25:43' },
-                    { id: 'JYlyAOdONBs', title: 'מודל המוח והגורם הביקורתי', duration: '26:42' },
-                    { id: 'BY8nU5LOX-Y', title: 'תיאוריית טראנס', duration: '30:20' },
-                    { id: 'BDUkeI780cg', title: 'תרגול טראנס ומשולש הטראנס חלק 1', duration: '19:45' },
-                    { id: 'V5r6pOa8fIA', title: 'תרגול טראנס ומשולש הטראנס חלק 2', duration: '18:24' },
-                    { id: 'MPO4I-J07BA', title: 'הדגמת טראנס חיה חלק 1', duration: '21:30' },
-                    { id: '4dWvnGHJuGo', title: 'הדגמת טראנס חיה חלק 2', duration: '21:17' },
-                    { id: 'a1iqnqeR-Qs', title: 'רגרסיה וציר זמן', duration: '27:42' },
-                    { id: '6mRDwxy8_-A', title: 'ריפוי ילד פנימי וסיכום', duration: '24:56' },
+                    { id: 'bSG4Wrgu-M0', title: 'חזרה על שיעורי הבית — ערכים', duration: '35:08' },
+                    { id: 'Y62xPVOKqy8', title: 'מהי טראומה ואיך היא נוצרת', duration: '25:21' },
+                    { id: 'uTizzNnmrqc', title: 'הגורם הביקורתי', duration: '31:13' },
+                    { id: 'HpN1Cn8A104', title: 'מצב טראנס', duration: '31:33' },
+                    { id: 'cYtpks8IcOE', title: 'תיאוריית הטראנס — סיכום', duration: '29:36' },
+                    { id: 's1aLUtp_GrY', title: 'משולש הטראנס', duration: '25:10' },
+                    { id: '96qWw9yk-co', title: 'הדגמה — אינדוקציית דייב אלמן', duration: '25:44' },
+                    { id: 'Oe4LSX9khaQ', title: 'רגרסיה וציר זמן — שאלות ותשובות', duration: '24:09' },
+                    { id: '0TPbpP85_aw', title: 'ריפוי הילד הפנימי וסיכום', duration: '18:42' },
                 ]
             },
             {
+                // Re-cut 2026-09-04, same method as sessions 1-3.
                 lessonNumber: 4,
-                lessonTitle: 'מפגש 4 — ציר זמן וקליניקה',
+                lessonTitle: 'מפגש 4 — קליניקה, דיקנס וציר זמן',
                 color: 'var(--muted-teal)',
                 chapters: [
-                    { id: 'mECBLK6Jaj0', title: 'חזרה רמות לוגיות ומדלינג', duration: '34:31' },
-                    { id: 'c-IqZczIJ5g', title: 'בריף טראומה טראנס ומשולש', duration: '21:35' },
-                    { id: 'gt__JCnt9pI', title: 'הדגמת אינדוקציה מלאה', duration: '26:59' },
-                    { id: 'OpUy6q5g7DU', title: 'עבודה בקליניקה מצוי לרצוי', duration: '28:25' },
-                    { id: 'ZC3sAzRMPJw', title: 'אמנות השאלה ודיקנס', duration: '22:19' },
-                    { id: 'E3GayzRh0Ug', title: 'ציר זמן מציאת הרגש', duration: '26:02' },
-                    { id: '5ZXmV4NWRVE', title: 'ציר זמן מציאת האירוע ורגרסיה', duration: '20:29' },
-                    { id: 'vXDxDkW7JCQ', title: 'ציר זמן כיתתי תהליך מלא', duration: '34:12' },
+                    { id: 'JuUqTI0muSM', title: 'מטרת השיעור — פרקטיקה ותרגול', duration: '30:30' },
+                    { id: 'l0EFf1UD6R4', title: 'חזרה — טראומה, מודל המוח וטראנס', duration: '30:22' },
+                    { id: 'vc8qXkT4AfI', title: 'אינדוקציית דייב אלמן', duration: '32:15' },
+                    { id: 'ZMheHLVOn5c', title: 'המבנה הטכני של תהליך NLP', duration: '34:12' },
+                    { id: 'E9XzS6I6yrE', title: 'טכניקת דיקנס — כאב ועונג', duration: '31:23' },
+                    { id: 'avE-xKh7BYA', title: 'תרגיל מודרך — איתור רגש לפני פעולה', duration: '34:07' },
+                    { id: 'w1Q0WvUywXw', title: 'תרגיל מודרך — ציר זמן', duration: '33:49' },
                 ]
             },
             {

@@ -12,6 +12,10 @@ window._authReady = new Promise((resolve) => { window._resolveAuth = resolve; })
 (async function() {
     try {
         const tempClient = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+        // חשיפה כ-window.supabaseClient: אפס יכולת חדשה (אותו anon key שכבר גלוי
+        // בדף), רק alias שמאפשר ל-session-guard.js (ניתוק אוטומטי 15 דק') למצוא
+        // קליינט מוכן בלי לשכפל את לוגיקת האימות. ראה primer.md 2026-08-24.
+        window.supabaseClient = tempClient;
         const { data: { session } } = await tempClient.auth.getSession();
         if (!session) {
             window.location.href = 'login.html';

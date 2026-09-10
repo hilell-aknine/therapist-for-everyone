@@ -1319,6 +1319,7 @@
     if(!window.SUPABASE_CONFIG){ banner('חסר supabase-config', true); renderPopups(SAMPLE); return; }
     const db = supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
     window.db = db;
+    window.supabaseClient = db; // alias ל-session-guard.js (ניתוק אוטומטי 15 דק') — ראה primer.md 2026-08-24
     const { data:{ session } } = await db.auth.getSession();
     if(!session){ location.href = 'login.html'; return; }
     const { data: profile } = await db.from('profiles').select('role').eq('id', session.user.id).single();
@@ -1346,5 +1347,6 @@
   }
   initV2();
 </script>
+<script src="../js/session-guard.js"></script>
 </body>
 </html>

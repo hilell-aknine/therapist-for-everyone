@@ -542,7 +542,10 @@ class StoryGame {
             // Animate elements in sequence
             setTimeout(() => gate.classList.add('active'), 50);
 
+            let dismissed = false;
             const dismiss = () => {
+                if (dismissed) return;   // the gate click and the button click both land here
+                dismissed = true;
                 try { localStorage.setItem(seenKey, '1'); } catch (e) { /* ignore */ }
                 gate.classList.remove('active');
                 setTimeout(() => {
@@ -558,6 +561,18 @@ class StoryGame {
             } else {
                 dismiss();
             }
+
+            // The splash is one full-screen call to action, so the whole thing starts
+            // the course. Measured 10.09.2026 (Clarity): of 9 visible elements on this
+            // screen only the button responded — the background video, the headline and
+            // the three stat numbers all read as tappable and did nothing, and this page
+            // was second-worst on the site for clicks that go nowhere. The screen does
+            // not scroll, so there is nothing else a tap here could have meant.
+            // The footer link keeps its own behaviour.
+            gate.addEventListener('click', (e) => {
+                if (e.target.closest('a')) return;
+                dismiss();
+            });
         });
     }
 

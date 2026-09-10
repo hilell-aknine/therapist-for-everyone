@@ -194,6 +194,9 @@
 
         .founder-card p:last-child { margin-bottom: 0; }
 
+        /* A closed card opens on a click anywhere inside it, so it has to say so. */
+        .founder-card:not(.expanded) { cursor: pointer; }
+
         .founder-more {
             max-height: 0; overflow: hidden;
             transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -517,6 +520,25 @@
             btn.setAttribute('aria-expanded', expanded);
             btn.firstChild.textContent = expanded ? 'סגור ' : 'קרא עוד ';
         }
+
+        // The whole card is the affordance, not just the small "קרא עוד" link.
+        // Measured 10.09.2026 (Clarity): 22 visitors produced 49 clicks that did
+        // nothing on this page — the 120px portrait and the founder's name read as
+        // tappable and had no handler at all. Opening on a card click removes that.
+        // Two deliberate limits: an already-open card only closes via its own button,
+        // so a click while reading never collapses the text mid-paragraph; and a click
+        // that ends a text selection is a selection, not a tap.
+        document.querySelectorAll('.founder-card').forEach(card => {
+            const btn = card.querySelector('.read-more-btn');
+            if (!btn) return;
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('a, button')) return;
+                if (card.classList.contains('expanded')) return;
+                const sel = window.getSelection && window.getSelection();
+                if (sel && String(sel).length) return;
+                toggleFounder(btn);
+            });
+        });
 
         // Scroll reveal
         const revealObserver = new IntersectionObserver((entries) => {

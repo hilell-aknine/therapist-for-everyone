@@ -16,7 +16,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Quick Reference
 ```
-Project: Therapists for Everyone (בית המטפלים — פורטל מטפלים לכולם)
+Project: בית המטפלים — פורטל מטפלים לכולם
+English name: Therapist Home  (decided 2026-08-27 — the name on certificates, logo and all English-facing copy.
+                               "Therapists for Everyone" is the old alias — do not use it in new work.)
 Stack: Static HTML/JS + Supabase + Vercel
 Live: https://www.therapist-home.com/
 Repo: https://github.com/hilell-aknine/therapist-for-everyone

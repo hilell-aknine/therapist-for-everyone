@@ -37,7 +37,9 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 // project. A study invitation is not urgent enough to justify waiting for a paid line.
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'בית המטפלים <no-reply@therapist-home.com>'
-const REPLY_TO = Deno.env.get('EMAIL_REPLY_TO') || 'htjewelry.a474@gmail.com'
+// Learner-facing mail must never route back to Hillel's personal inbox (decided
+// 2026-08-03). See send-email for the same rule.
+const REPLY_TO = Deno.env.get('EMAIL_REPLY_TO') || 'terapyistforeveryone@gmail.com'
 const GMAIL_API_URL = Deno.env.get('GMAIL_API_URL') || ''
 const GMAIL_API_TOKEN = Deno.env.get('GMAIL_API_TOKEN') || ''
 

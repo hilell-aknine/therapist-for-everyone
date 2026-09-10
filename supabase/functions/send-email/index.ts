@@ -31,7 +31,10 @@ const GMAIL_API_URL = Deno.env.get('GMAIL_API_URL')!
 const GMAIL_API_TOKEN = Deno.env.get('GMAIL_API_TOKEN')!
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const RESEND_FROM = Deno.env.get('RESEND_FROM') || 'בית המטפלים <no-reply@therapist-home.com>'
-const REPLY_TO = Deno.env.get('EMAIL_REPLY_TO') || 'htjewelry.a474@gmail.com'
+// Learner-facing mail must never route back to Hillel's personal inbox (decided
+// 2026-08-03). The project mailbox is the only correct reply address, and this repo
+// is public — a personal address must not sit here as a fallback either.
+const REPLY_TO = Deno.env.get('EMAIL_REPLY_TO') || 'terapyistforeveryone@gmail.com'
 
 const SENDER_NAME = 'בית המטפלים'
 const MAX_SUBJECT = 200

@@ -3227,7 +3227,24 @@ body.game-fullscreen #game-container {
 /* ═══════════════════════════════════════
    Stats Screen
    ═══════════════════════════════════════ */
-.stats-screen { padding-bottom: var(--space-10); }
+.stats-screen { padding-bottom: var(--space-10); position: relative; }
+
+/* assets/game/bg/stats-bg.jpg is a soft teal-and-gold particle field drawn for this
+   screen and never used. It goes behind the cards as atmosphere, not as a picture:
+   a fixed pseudo-element at low opacity, faded out toward the bottom so the numbers
+   stay the thing you read. pointer-events:none so it can never eat a tap. */
+.stats-screen::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: url('../assets/game/bg/stats-bg.jpg') center / cover no-repeat;
+    opacity: .30;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 55%, transparent 100%);
+}
+@media (prefers-reduced-motion: reduce) { .stats-screen::before { opacity: .22; } }
 
 .stats-title {
     font-family: var(--font-heading);
@@ -3583,6 +3600,41 @@ body.game-fullscreen #game-container {
    ═══════════════════════════════════════ */
 .learning-path-header {
     margin-bottom: var(--space-2);
+}
+
+/* The module banner. assets/game/banners/ holds a 1024x576 cover per module and none
+   of the seven had ever been shown — the module screen opened on an emoji and a line
+   of text. The artwork sits behind the title with a dark gradient scrim over it, so
+   the Hebrew headline and the progress bar keep their contrast no matter how bright
+   the cover is. A missing file leaves the gradient alone, which is still a clean
+   dark panel, so the master course (which has no banners) degrades quietly. */
+.learning-path-header.has-banner {
+    position: relative;
+    margin: 0 calc(var(--space-4) * -1) var(--space-3);
+    padding: var(--space-6) var(--space-4) var(--space-4);
+    min-height: 132px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+}
+
+.learning-path-header.has-banner h2 {
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,.65);
+    margin-bottom: var(--space-2);
+}
+
+.learning-path-header.has-banner .learning-path-progress {
+    color: rgba(255,255,255,.88);
+}
+
+@media (max-width: 380px) {
+    .learning-path-header.has-banner { min-height: 112px; padding-top: var(--space-5); }
 }
 
 .learning-path-header h2 {

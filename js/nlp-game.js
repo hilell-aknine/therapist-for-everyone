@@ -2108,8 +2108,11 @@ ${answers.action || ''}`;
             <button class="back-btn" onclick="game.transitionTo(function() { game.renderHomeScreen() })">
                 → חזרה
             </button>
-            <div class="learning-path-header">
-                <h2>${this.currentModule.icon} ${this.currentModule.title}</h2>
+            <div class="learning-path-header has-banner"
+                 style="background-image:
+                    linear-gradient(to top, rgba(0,26,32,.96) 0%, rgba(0,26,32,.80) 42%, rgba(0,26,32,.42) 100%),
+                    url('../assets/game/banners/module-${moduleId}.jpg')">
+                <h2>${this.currentModule.title}</h2>
                 <div class="learning-path-progress">
                     <span>${completedCount}/${totalCount} שיעורים</span>
                     <div class="learning-path-progress-bar">

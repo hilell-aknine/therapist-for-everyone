@@ -143,6 +143,14 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
     </div>
   </div>
 
+  <div class="sec" id="secFreq">
+    <h2><i class="fa-solid fa-gauge-simple-low"></i> כמה פעמים?</h2>
+    <div class="chips" id="freq">
+      <div class="chip f" data-f="custom">לפי מה שבחרתי</div>
+      <div class="chip f" data-f="weekly">פעם בשבוע בלבד</div>
+    </div>
+  </div>
+
   <div class="summary" id="summary"></div>
   <button class="save" id="saveBtn"><i class="fa-solid fa-check"></i> שמירה</button>
   <div class="note" id="skipNote" style="display:none"><a href="course-library-v2.html?completed=1" style="color:var(--text-muted)">דילוג — כניסה לפורטל בלי תזכורות</a></div>
@@ -195,14 +203,30 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
     if(c) c.classList.add('on');
     else if(!presetHours.includes(h)) $('customHour').value = String(h).padStart(2,'0')+':00';
   });
+  // Single-select: "לפי מה שבחרתי" is the default when nothing was saved before.
+  const savedFreq = prefs.freq === 'weekly' ? 'weekly' : 'custom';
+  document.querySelector(`#freq .chip[data-f="${savedFreq}"]`).classList.add('on');
+
+  // Bookkeeping the server writes on every send. collect() rebuilds reminder_prefs from
+  // scratch, so without carrying these forward a save would erase them — and erasing
+  // last_sent_at silently resets the weekly cap, letting a "once a week" learner get a
+  // second message the same day.
+  const carry = { last_sent: prefs.last_sent, last_sent_at: prefs.last_sent_at, nudge_i: prefs.nudge_i };
+
   $('loader').style.display='none'; $('card').style.display='';
   dim(); render();
 
   // --- interactions ---
-  function dim(){ const off=!$('on').checked; $('secGoal').classList.toggle('off',off); $('secDays').classList.toggle('off',off); $('secHours').classList.toggle('off',off); }
+  function dim(){ const off=!$('on').checked; $('secGoal').classList.toggle('off',off); $('secDays').classList.toggle('off',off); $('secHours').classList.toggle('off',off); $('secFreq').classList.toggle('off',off); }
   function toggleChip(e){ if(e.target.classList.contains('chip')){ e.target.classList.toggle('on'); render(); } }
+  function pickChip(e){
+    if(!e.target.classList.contains('chip')) return;
+    document.querySelectorAll('#freq .chip').forEach(c=>c.classList.remove('on'));
+    e.target.classList.add('on'); render();
+  }
   $('days').addEventListener('click', toggleChip);
   $('hours').addEventListener('click', toggleChip);
+  $('freq').addEventListener('click', pickChip);
   $('on').addEventListener('change', ()=>{ dim(); render(); });
   $('customHour').addEventListener('change', render);
 
@@ -210,13 +234,18 @@ body{font-family:var(--font-body);color:var(--text-primary);min-height:100vh;pad
     const days=[...document.querySelectorAll('#days .chip.on')].map(c=>+c.dataset.d).sort((a,b)=>a-b);
     const hours=[...document.querySelectorAll('#hours .chip.on')].map(c=>+c.dataset.h);
     const ch=$('customHour').value; if(ch){ const h=parseInt(ch.split(':')[0],10); if(!hours.includes(h)) hours.push(h); }
-    return { on: $('on').checked, goal: $('goal').value.trim(), days, hours: hours.sort((a,b)=>a-b) };
+    const freqChip=document.querySelector('#freq .chip.on');
+    const freq=freqChip ? freqChip.dataset.f : 'custom';
+    return Object.assign({}, carry, { on: $('on').checked, goal: $('goal').value.trim(), days, hours: hours.sort((a,b)=>a-b), freq });
   }
   function render(){
     const s=$('summary'); const p=collect();
     if(!p.on){ s.textContent='התזכורות כבויות.'; return; }
     if(!p.days.length||!p.hours.length){ s.textContent='בחר/י לפחות יום אחד ושעה אחת.'; return; }
-    s.innerHTML='נשלח לך תזכורת בימי <b>'+p.days.map(d=>DAY[d]).join(', ')+'</b> בשעות <b>'+p.hours.map(h=>String(h).padStart(2,'0')+':00').join(', ')+'</b>.';
+    const when='בימי <b>'+p.days.map(d=>DAY[d]).join(', ')+'</b> בשעות <b>'+p.hours.map(h=>String(h).padStart(2,'0')+':00').join(', ')+'</b>';
+    s.innerHTML = p.freq==='weekly'
+      ? 'נשלח לך <b>תזכורת אחת בשבוע לכל היותר</b>, בהזדמנות הראשונה '+when+'.'
+      : 'נשלח לך תזכורת '+when+'.';
   }
 
   // --- save ---

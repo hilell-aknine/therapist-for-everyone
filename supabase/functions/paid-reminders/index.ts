@@ -33,6 +33,18 @@ function normalizePhone(raw: string | null | undefined): string | null {
   return d.length >= 11 ? d : null
 }
 
+// "פעם בשבוע בלבד" gate. The day/hour chips say WHEN a reminder may fire; this caps HOW
+// OFTEN. Someone who picked three days still gets at most one message per 7 days.
+// Reads the ISO stamp written on every send, and falls back to the older hour-key
+// ("2026-09-10T17") so learners who set this before the stamp existed are still capped.
+function daysSinceLastSend(prefs: Record<string, unknown>): number {
+  const iso = typeof prefs.last_sent_at === 'string' ? prefs.last_sent_at : ''
+  const legacy = typeof prefs.last_sent === 'string' ? prefs.last_sent + ':00:00' : ''
+  const t = Date.parse(iso) || Date.parse(legacy)
+  if (!t) return Infinity
+  return (Date.now() - t) / 86400000
+}
+
 function israelNow(): { day: number; hour: number; key: string } {
   const il = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jerusalem' }))
   const key = `${il.getFullYear()}-${String(il.getMonth() + 1).padStart(2, '0')}-${String(il.getDate()).padStart(2, '0')}T${String(il.getHours()).padStart(2, '0')}`
@@ -42,8 +54,25 @@ function israelNow(): { day: number; hour: number; key: string } {
 // Claude Sonnet — write the warm, personal reminder. Falls back to a template on failure.
 const PORTAL_LINK = 'https://www.therapist-home.com/pages/course-library-v2.html'
 
-async function writeMessage(name: string, goal: string, next: NextLesson | null, audience: 'master' | 'free' = 'master'): Promise<string> {
-  const optout = '\n\n(להפסקת התזכורות אפשר להשיב "הסר".)'
+// Every reminder ends with a line that asks for an answer.
+// This is not decoration. The line that sends these reminders had a history of pure
+// outbound traffic with no inbound conversation, which is the pattern that gets a
+// WhatsApp number reported and blocked. A reminder that pulls a short reply turns each
+// send into a two-way thread, and it also tells us who still wants these at all.
+// Rotated per user so the fifth reminder does not read like a machine.
+// All three are gender-neutral in writing — we do not store the learner's gender.
+const CLOSERS = [
+  'עדיין רוצה לקבל את התזכורות האלה?\nמספיק להשיב כן.\nאם בא לך להפסיק, מספיק לכתוב הסר.',
+  'רגע לפני שאני ממשיך, התזכורות עדיין עוזרות לך?\nכן או לא, ואני מסתדר.\nלהפסקה מלאה מספיק לכתוב הסר.',
+  'מה שלומך עם הלמידה?\nאפילו מילה אחת בתשובה עוזרת לי לדעת אם להמשיך לתזכר.\nלהפסקה מספיק לכתוב הסר.',
+]
+
+function closerFor(prefs: Record<string, unknown>): { text: string; nextIndex: number } {
+  const i = Number(prefs.nudge_i) || 0
+  return { text: '\n\n' + CLOSERS[i % CLOSERS.length], nextIndex: (i + 1) % CLOSERS.length }
+}
+
+async function writeMessage(name: string, goal: string, next: NextLesson | null, audience: 'master' | 'free' = 'master', optout = '\n\n' + CLOSERS[0]): Promise<string> {
   // Template fallback (also used when no AI key)
   const tmpl = audience === 'free'
     ? `היי ${name} 🙏\nבחרת שאזכיר לך לחזור ללמוד — אז הנה תזכורת קטנה 😊\nכמה דקות לימוד היום יקרבו אותך${goal ? ' ל' + goal : ' למטרה שלך'}.\nהפורטל מחכה לך: ${PORTAL_LINK}\n— הלל`
@@ -129,7 +158,8 @@ serve(async (req) => {
         const days = p.days.map((d: number) => DAY_HE[d] || d).join(',')
         const hours = p.hours.map((h: number) => String(h).padStart(2, '0') + ':00').join(',')
         const goal = (p.goal || '').trim()
-        on.push(`• ${name}${goal ? ' — ' + goal : ''}\n   ימים ${days} · שעות ${hours}`)
+        const freq = p.freq === 'weekly' ? ' · פעם בשבוע' : ''
+        on.push(`• ${name}${goal ? ' — ' + goal : ''}\n   ימים ${days} · שעות ${hours}${freq}`)
       } else if (r.role === 'paid_customer') { off.push(name) }
     }
     const msg = `🔔 סטטוס תזכורות אישיות (👑 = מאסטר)\n\n` +
@@ -156,6 +186,7 @@ serve(async (req) => {
     if (!Array.isArray(p.days) || !p.days.includes(day)) continue
     if (!Array.isArray(p.hours) || !p.hours.includes(hour)) continue
     if (p.last_sent === hourKey) continue
+    if (p.freq === 'weekly' && daysSinceLastSend(p) < 7) continue
     const phone = normalizePhone(r.phone)
     if (!phone) continue
     due.push({ id: r.id, name: (r.full_name || '').trim().split(' ')[0], phone, role: r.role || '', prefs: p })
@@ -168,11 +199,16 @@ serve(async (req) => {
     const isMaster = c.role === 'paid_customer' || c.role === 'admin'
     const next = isMaster ? await nextMasterLesson(db, c.id) : null
     const goal = await userGoal(db, c.id, c.prefs.goal as string | undefined)
-    const msg = await writeMessage(c.name, goal, next, isMaster ? 'master' : 'free')
-    if (dry) { results.push({ name: c.name, next: next?.title || '(finished)', goal, preview: msg }); continue }
+    const closer = closerFor(c.prefs)
+    const msg = await writeMessage(c.name, goal, next, isMaster ? 'master' : 'free', closer.text)
+    const freq = c.prefs.freq === 'weekly' ? 'weekly' : 'custom'
+    if (dry) { results.push({ name: c.name, next: next?.title || '(finished)', goal, freq, preview: msg }); continue }
     const ok = await sendWhatsApp(c.phone, msg)
-    if (ok) await db.from('profiles').update({ reminder_prefs: { ...c.prefs, last_sent: hourKey } }).eq('id', c.id)
-    results.push({ name: c.name, next: next?.title || '(finished)', sent: ok })
+    // last_sent_at feeds the weekly cap; nudge_i rotates the closing question.
+    if (ok) await db.from('profiles').update({
+      reminder_prefs: { ...c.prefs, last_sent: hourKey, last_sent_at: new Date().toISOString(), nudge_i: closer.nextIndex },
+    }).eq('id', c.id)
+    results.push({ name: c.name, next: next?.title || '(finished)', freq, sent: ok })
   }
 
   return json({ israel: { day, hour, hourKey }, candidates: (rows || []).length, due: due.length, results })

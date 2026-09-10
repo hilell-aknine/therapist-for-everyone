@@ -188,7 +188,14 @@ def main():
     if only_old:
         print(f"⚠️ מפגשים שקיימים רק בישנה ולכן לא ימופו: {only_old}")
     if not changed:
-        print("אין מפגש שהשתנה. אין מה למפות.")
+        print("אין מפגש שהשתנה בין שתי הגרסאות. אין מה למפות.")
+        if args.old_ref == "origin/master":
+            print(
+                "\n💡 שים לב: ברירת המחדל היא origin/master, ואחרי שדחפת את החיתוך\n"
+                "   היא כבר מכילה אותו. הצבע על הקומיט שלפני החיתוך:\n"
+                "     git log --oneline -- " + TS_PATH + "\n"
+                "     py scripts/remap_master_progress.py --old-ref <hash שלפני>^"
+            )
         return
     print(f"מפגשים שנחתכו מחדש: {sorted(changed)}\n")
 

@@ -26,9 +26,14 @@
 
 הרצה
 ----
+    set BVM_ENV_FILE=<נתיב לקובץ ה-env עם SUPABASE_SERVICE_KEY>
     py scripts/remap_master_progress.py                 # יבש, לא כותב כלום
     py scripts/remap_master_progress.py --apply         # כותב
     py scripts/remap_master_progress.py --apply --purge-orphans
+
+⚠️ להריץ **אחרי** פריסת ה-Edge Function עם החיתוך החדש, לא לפניה. כל עוד
+הפונקציה הישנה חיה, הפרקים הישנים הם הפרקים האמיתיים ומיפוי מוקדם יסמן
+ללומדים פרקים שעדיין לא קיימים אצלם.
 
 תמיד נשמר גיבוי JSON של כל שורות המאסטר של הלומדים המושפעים לפני כתיבה,
 תחת scripts/journey_state/ (התיקייה ב-gitignore, היא מכילה נתוני לומדים).
@@ -48,7 +53,6 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 TS_PATH = "supabase/functions/get-master-lessons/index.ts"
-ENV_PATH = r"C:\Users\saraa\.secrets\onedrive\beit-vmetaplim_.env.local"
 COURSE_TYPE = "nlp-master"
 STATE_DIR = os.path.join(HERE, "journey_state")
 
@@ -90,15 +94,34 @@ def parse_master_modules(src: str):
 
 # ------------------------------------------------------------------ supabase
 
-def load_env():
-    cfg = {}
-    with open(ENV_PATH, encoding="utf-8-sig") as fh:
+def _load_env_file(path):
+    """טוען קובץ env לתוך os.environ בלי לדרוס ערך שכבר הוגדר."""
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8-sig") as fh:
         for line in fh:
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:
                 k, v = line.split("=", 1)
-                cfg[k.strip()] = v.strip()
-    return cfg["SUPABASE_URL"].rstrip("/"), cfg["SUPABASE_SERVICE_KEY"]
+                os.environ.setdefault(k.strip(), v.strip())
+
+
+def load_env():
+    """אותה קונבנציה כמו backup-supabase.py: משתני סביבה, ואז .env.local
+    בשורש הפרויקט. הריפו ציבורי ולכן אין כאן שום נתיב או מפתח קשיח.
+    למי שמריץ מקומית ומחזיק את הסודות מחוץ לפרויקט: אפשר להצביע על הקובץ
+    עם BVM_ENV_FILE, או פשוט לייצא SUPABASE_SERVICE_KEY לפני ההרצה."""
+    _load_env_file(os.environ.get("BVM_ENV_FILE", ""))
+    _load_env_file(os.path.join(REPO, ".env.local"))
+
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_SERVICE_KEY")
+    if not url or not key:
+        raise SystemExit(
+            "חסרים SUPABASE_URL / SUPABASE_SERVICE_KEY.\n"
+            "הגדר אותם כמשתני סביבה, או הצבע על קובץ env עם BVM_ENV_FILE."
+        )
+    return url.rstrip("/"), key
 
 
 class Rest:

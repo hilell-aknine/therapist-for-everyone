@@ -51,7 +51,24 @@
     document.body.appendChild(warningBanner);
   }
 
+  /* האם מתנגן כרגע מדיה מקומית (<video>/<audio>)?
+     רשת ביטחון בלבד, לווידאו מתארח-עצמית בעתיד. שיעורי הפורטל יושבים
+     ב-iframe של יוטיוב ואי אפשר לקרוא אותם מכאן — בשבילם הדף מדווח
+     בעצמו דרך SessionGuard.ping(). */
+  function localMediaPlaying() {
+    try {
+      const els = document.querySelectorAll('video, audio');
+      for (const el of els) {
+        if (!el.paused && !el.ended && el.readyState > 2) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
   async function doLogout() {
+    // 🔴 צפייה בסרטון אינה תזוזת עכבר. בלי הבדיקה הזו לומד שפותח שיעור
+    // של חצי שעה ופשוט צופה מנותק באמצע. אם מתנגנת מדיה — דוחים.
+    if (localMediaPlaying()) { resetTimers(); return; }
     clearTimers();
     removeWarningBanner();
     try {
@@ -115,6 +132,17 @@
       });
     }
   }
+
+  /* ── דיווח פעילות מבחוץ ────────────────────────────────────────
+     דף שיודע על פעילות אמיתית שאינה מגע פיזי (בעיקר: סרטון שמתנגן
+     ב-iframe של יוטיוב, שלא ניתן לקריאה מכאן) קורא ל-ping כדי לאפס
+     את הטיימר. עדיף על "השהיית השומר": אם הדף מפסיק לדווח, הספירה
+     ממשיכה מעצמה ואי אפשר להשאיר סשן פתוח לנצח בטעות.
+     קריאה לפני שהשומר הופעל, או בעמוד ללא session, אינה עושה דבר. */
+  window.SessionGuard = {
+    ping: function () { resetTimers(); },
+    get active() { return guardActive; }
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

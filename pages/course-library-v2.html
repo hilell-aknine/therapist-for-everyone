@@ -3670,7 +3670,10 @@
       }
     } catch(_){}
   }
-  function stopPosPoll(){ if (_posPoll){ clearInterval(_posPoll); _posPoll=null; } }
+  function stopPosPoll(){ if (_posPoll){ clearInterval(_posPoll); _posPoll=null; _lastPolledTime = -1; } }
+  // הדגימה הקודמת של getCurrentTime. אם הזמן התקדם בין שתי דגימות, הסרטון
+  // באמת מתנגן — וזה מה שמדווח ל-session-guard כפעילות.
+  let _lastPolledTime = -1;
   function startPosPoll(){
     stopPosPoll();
     _posPoll = setInterval(() => {
@@ -3678,6 +3681,15 @@
         if (_ytPlayer && _ytPlayer.getCurrentTime){
           const t = _ytPlayer.getCurrentTime();
           const d = _ytPlayer.getDuration ? _ytPlayer.getDuration() : 0;
+          /* 🔴 צפייה בשיעור אינה תזוזת עכבר, מקלדת, גלילה או מגע — כלומר
+             מבחינת השומר האוטומטי היא נראית כמו נטישה. לומד שפותח שיעור
+             של חצי שעה ופשוט צופה היה מקבל אזהרה בדקה 13 ומנותק בדקה 15.
+             הזמן שהתקדם מאז הדגימה הקודמת הוא ההוכחה היחידה שהוא באמת
+             שם. סרטון מושהה אינו מקדם את הזמן, ולכן אינו מאריך את הסשן. */
+          if (_lastPolledTime >= 0 && t > _lastPolledTime + 0.5){
+            try { if (window.SessionGuard) window.SessionGuard.ping(); } catch(_){}
+          }
+          _lastPolledTime = t;
           if (t > 0 && _curLessonId){
             if (d && t > d - 15) clearPos(_curLessonId);  // near the end → don't resume next time
             else savePos(_curLessonId, t);
@@ -5667,6 +5679,21 @@
     document.getElementById('masterViewerDownload').style.display = 'none';
     viewer.classList.add('is-open');
   }
+
+  /* 🔴 מציג המאסטר מציג שני דברים שנצרכים בישיבה שקטה: שיעור וידאו וחוברת
+     PDF. בשניהם אין תזוזת עכבר, ולכן השומר האוטומטי (15 דק') היה מנתק לקוח
+     משלם באמצע.
+     בניגוד לשיעורי הפרקטישנר, כאן הווידאו הוא iframe פשוט בלי enablejsapi
+     ואי אפשר לדעת מכאן אם הוא מתנגן או מושהה. לכן הקריטריון הוא "המציג
+     פתוח". המחיר: מציג שנשאר פתוח ונשכח ישאיר את הסשן חי. זה מקובל, כי
+     המסך כולו נמצא מאחורי תשלום, וסגירת המציג עוצרת את הדיווח מיידית.
+     להיפוך: מחיקת הבלוק הזה. */
+  setInterval(function(){
+    try {
+      const v = document.getElementById('masterViewer');
+      if (v && v.classList.contains('is-open') && window.SessionGuard) window.SessionGuard.ping();
+    } catch(_){}
+  }, 60000);
 
   function closeMasterViewer(){
     const viewer = document.getElementById('masterViewer');

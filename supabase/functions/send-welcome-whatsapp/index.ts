@@ -70,25 +70,35 @@ function firstName(full: string | null | undefined): string {
   return tok || 'חבר/ה'
 }
 
+// Reply-first welcome. Rewritten 2026-09-10 on Hillel's instruction: the wording must
+// invite an answer so the line builds two-way conversations instead of one-way blasts,
+// which is what gets a WhatsApp number reported and blocked.
+// Deliberate choices — do not "improve" them back:
+//   * The question comes BEFORE the group link. A link to someone who never wrote to us
+//     is the single strongest spam signal.
+//   * Signed by a named person, not "צוות". Broadcast tone invites reports.
+//   * No promo language ("מבצעים מיוחדים" was removed) for the same reason.
+//   * Gender-neutral throughout (נרשמת / הגעת / רוצה / לכתוב are identical in writing
+//     for male and female), because we do not store the learner's gender.
+//   * The opt-out stays visible. An easy way out is what stops a report.
 const WELCOME_TEMPLATE = (name: string) => `היי ${name} 👋
 
-הצעד שעשית עכשיו, ההרשמה לפורטל, הוא משמעותי יותר ממה שנדמה לך.
+אני הלל מבית המטפלים.
+ראיתי שנרשמת לפורטל.
+רציתי לומר שלום באופן אישי.
 
-אתה לא רק תקבל ידע. אתה תקבל כלים שמשנים את הדרך שבה אתה חושב, מגיב ומתקשר. אנשים שעוברים את התהליך הזה ברצינות מספרים שזה אחד הדברים הכי משמעותיים שעשו לעצמם.
+שאלה אחת קטנה לפני הכל:
+מה הביא אותך לכאן?
+מילה אחת מספיקה.
 
-יש דרך אחת להפוך את הלמידה הזאת לאמיתית. הקהילה השקטה שלנו:
+אני קורא כל תשובה שמגיעה.
+זה עוזר לי לכוון אותך לחומר הנכון בשבילך.
+
+כשבא לך, יש גם קהילה שקטה בוואטסאפ.
+בלי ספאם. רק שאלות אמיתיות ותובנות של אנשים שבתהליך:
 https://chat.whatsapp.com/Lp3MNZ7fmGu8dmUzaUluyx
 
-בפנים יש:
-• עדכונים חשובים על מבצעים מיוחדים
-• חלל שקט לשתף תובנות, לשאול שאלות אמיתיות, ולקבל פידבק
-• בלי ספאם. רק תוכן
-
-מחכים לראות אותך מעבר לקלעים.
-
-צוות בית המטפלים
-
-לביטול הודעות, ענה הסר`
+לא רוצה לקבל הודעות? מספיק לכתוב הסר`
 
 // Resolve phone → real WhatsApp chatId.
 // Critical: many Israeli numbers register with WhatsApp Business and return

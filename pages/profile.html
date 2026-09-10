@@ -732,7 +732,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/pwa/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/pwa/favicon-16.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="בית המטפלים">
 <link rel="stylesheet" href="/css/install-prompt.css">
@@ -1222,36 +1222,19 @@
                     resumeCard.style.display = '';
                 }
 
-                // Streak: count consecutive recent days with progress
-                const streakDays = calculateStreak(actual);
-                document.getElementById('stat-streak').textContent = streakDays;
+                // Streak: single source (CourseProgress.getStudyStreak) — Israel
+                // calendar days, and a streak that ended yesterday is still alive
+                // until midnight. Previously computed here in browser-local time,
+                // which showed 0 every morning until the first lesson of the day
+                // and disagreed with the portal.
+                try {
+                    const st = await CourseProgress.getStudyStreak();
+                    if (st) document.getElementById('stat-streak').textContent = st.days;
+                } catch (_) {}
 
             } catch (err) {
                 console.error('Progress load error:', err);
             }
-        }
-
-        function calculateStreak(progressItems) {
-            const completedDates = progressItems
-                .filter(p => p.completed && p.completed_at)
-                .map(p => new Date(p.completed_at).toDateString());
-            const uniqueDates = [...new Set(completedDates)].sort((a, b) => new Date(b) - new Date(a));
-            if (!uniqueDates.length) return 0;
-
-            let streak = 0;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            for (let i = 0; i < uniqueDates.length; i++) {
-                const checkDate = new Date(today);
-                checkDate.setDate(checkDate.getDate() - i);
-                if (uniqueDates.includes(checkDate.toDateString())) {
-                    streak++;
-                } else {
-                    break;
-                }
-            }
-            return streak;
         }
 
         // ===== Notebook =====

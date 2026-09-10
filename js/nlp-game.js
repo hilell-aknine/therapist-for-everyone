@@ -629,7 +629,7 @@ class StoryGame {
 
         // Init game
         try {
-            this.updateStreak();
+            this.recomputeStreak();   // derive from real practice; never bump on open
             this.recoverHearts();
             this.updateStatsDisplay();
             this.startHeartTimer();
@@ -1282,45 +1282,81 @@ class StoryGame {
     // ═══════════════════════════════════════
     // Streak
     // ═══════════════════════════════════════
-    updateStreak() {
-        const today = new Date().toDateString();
-        const lastPlay = this.playerData.lastPlayDate;
+    // Israel calendar date ('YYYY-MM-DD') of a given instant. The whole streak is
+    // measured in Israel days so an exercise answered at 01:00 belongs to that day.
+    ilDay(date) {
+        return new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(date || new Date());
+    }
 
-        if (lastPlay) {
-            const lastDate = new Date(lastPlay);
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
+    // Calendar arithmetic on 'YYYY-MM-DD'. Built at 12:00 local so a DST jump in the
+    // player's own timezone can never skip or duplicate a day.
+    shiftDay(ymd, delta) {
+        const [y, m, d] = ymd.split('-').map(Number);
+        const t = new Date(y, m - 1, d + delta, 12);
+        return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+    }
 
-            if (lastPlay === today) {
-                // already played today
-            } else if (lastDate.toDateString() === yesterday.toDateString()) {
-                this.playerData.streak++;
-                this.playerData.lastPlayDate = today;
-                this.savePlayerData();
-            } else {
-                this.playerData.streak = 1;
-                this.playerData.lastPlayDate = today;
-                this.savePlayerData();
-            }
-        } else {
-            this.playerData.streak = 1;
-            this.playerData.lastPlayDate = today;
-            this.savePlayerData();
+    // ── The streak is DERIVED, never incremented ──────────────────────────────
+    // A streak day = a day on which the player actually ANSWERED an exercise.
+    // It is recomputed from weeklyActivity (the real practice ledger, already
+    // persisted to nlp_game_players.weekly_activity), so:
+    //   • merely opening the game no longer inflates it (the old code bumped the
+    //     streak on init, which is why the DB held streaks for players who had not
+    //     touched the game in months);
+    //   • a stale streak expires by itself instead of staying frozen in the DB;
+    //   • the number cannot drift from the data it claims to describe.
+    // Same rule as the portal: a streak that ended yesterday stays alive until
+    // midnight, so nobody is reset to 0 at 07:00 for not having practiced yet.
+    // NOTE: pre-2026-08 ledger keys were written in UTC, newer ones in Israel time.
+    // Both are 'YYYY-MM-DD' so the walk below is unaffected.
+    recomputeStreak() {
+        const activity = this.playerData.weeklyActivity || {};
+        const days = new Set(Object.keys(activity).filter(k => (activity[k] || 0) > 0));
+
+        const today = this.ilDay();
+        let streak = 0;
+        if (days.size) {
+            let cursor = days.has(today) ? today : this.shiftDay(today, -1);
+            while (days.has(cursor)) { streak++; cursor = this.shiftDay(cursor, -1); }
         }
 
-        // Track longest streak
-        if (this.playerData.streak > (this.playerData.longestStreak || 0)) {
-            this.playerData.longestStreak = this.playerData.streak;
-            this.savePlayerData();
-        }
+        // Last day actually practiced — what "last played" should mean. Accounts
+        // that predate the ledger keep whatever date they already had: recomputing
+        // must correct an inflated number, never erase history it cannot see.
+        const lastPlayDate = days.size
+            ? Array.from(days).sort().pop()
+            : (this.playerData.lastPlayDate || null);
+        // longestStreak is a record: never lower it just because the ledger is
+        // shorter than the player's history (accounts predate weeklyActivity).
+        const longest = Math.max(streak, this.playerData.longestStreak || 0);
+
+        const changed = streak !== this.playerData.streak
+            || lastPlayDate !== this.playerData.lastPlayDate
+            || longest !== (this.playerData.longestStreak || 0);
+
+        this.playerData.streak = streak;
+        this.playerData.lastPlayDate = lastPlayDate;
+        this.playerData.longestStreak = longest;
+
+        if (changed) this.savePlayerData();
+        return streak;
     }
 
     // ═══════════════════════════════════════
     // Stats Display
     // ═══════════════════════════════════════
+    // Every day the player ever practiced. Only grows, so it is what the header
+    // leads with; the fragile consecutive-days number lives in the stats screen.
+    practiceDays() {
+        const activity = this.playerData.weeklyActivity || {};
+        return Object.keys(activity).filter(k => (activity[k] || 0) > 0).length;
+    }
+
     updateStatsDisplay() {
         document.getElementById('xp-value').textContent = this.playerData.xp;
-        document.getElementById('streak-value').textContent = this.playerData.streak;
+        document.getElementById('streak-value').textContent = this.practiceDays();
         this.renderHearts();
     }
 
@@ -3501,8 +3537,8 @@ ${answers.action || ''}`;
         if (xpEl) {
             this.animateCountUp(xpEl, oldXP, this.playerData.xp, 500);
         }
-        // Update other stats (streak, hearts)
-        document.getElementById('streak-value').textContent = this.playerData.streak;
+        // Update other stats (practice days, hearts)
+        document.getElementById('streak-value').textContent = this.practiceDays();
         this.renderHearts();
 
         if (this.playerData.level > oldLevel) {
@@ -3610,10 +3646,19 @@ ${answers.action || ''}`;
     // Stats Tracking
     // ═══════════════════════════════════════
     updateExerciseStats(isCorrect, moduleId) {
-        // Weekly activity
-        const today = new Date().toISOString().split('T')[0];
+        // Weekly activity = the practice ledger the streak is derived from.
+        // Keyed by ISRAEL day (was UTC, which pushed late-evening practice onto
+        // tomorrow's square and could hand out a streak day for the wrong date).
+        const today = this.ilDay();
         if (!this.playerData.weeklyActivity) this.playerData.weeklyActivity = {};
         this.playerData.weeklyActivity[today] = (this.playerData.weeklyActivity[today] || 0) + 1;
+
+        // Answering is what earns the day, so the flame goes up right here.
+        const before = this.playerData.streak;
+        this.recomputeStreak();
+        if (this.playerData.streak !== before) {
+            try { this.updateStatsDisplay(); } catch (_) {}
+        }
 
         // Module accuracy
         if (!this.playerData.moduleAccuracy) this.playerData.moduleAccuracy = {};
@@ -3652,18 +3697,18 @@ ${answers.action || ''}`;
         const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
         const weekData = [];
         let maxActivity = 1;
+        const todayKey = this.ilDay();   // read the ledger with the same key it is written with
         for (let i = 6; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const key = d.toISOString().split('T')[0];
+            const key = this.shiftDay(todayKey, -i);
+            const [ky, km, kd] = key.split('-').map(Number);
             const count = (pd.weeklyActivity && pd.weeklyActivity[key]) || 0;
             if (count > maxActivity) maxActivity = count;
-            weekData.push({ day: dayNames[d.getDay()], count, key });
+            weekData.push({ day: dayNames[new Date(ky, km - 1, kd, 12).getDay()], count, key });
         }
 
         const weeklyBarsHtml = weekData.map(w => {
             const height = Math.max(4, (w.count / maxActivity) * 100);
-            const isToday = w.key === new Date().toISOString().split('T')[0];
+            const isToday = w.key === todayKey;
             return `
                 <div class="weekly-bar-wrapper">
                     <div class="weekly-bar ${isToday ? 'today' : ''}" style="height: ${height}%">
@@ -3722,10 +3767,15 @@ ${answers.action || ''}`;
         // Dynamic benchmark hints
         const levelInfo = this.getLevelProgressInfo();
         const xpHint = levelInfo.xpToNext > 0 ? `עוד ${levelInfo.xpToNext} XP לרמה ${(pd.level || 1) + 1}` : 'רמה מקסימלית!';
-        const streakHint = pd.streak === 0 ? 'השלם שיעור כדי להתחיל' :
-            pd.streak < 7 ? 'שמור על הסטריק, היכנס מחר!' : 'כל הכבוד! המשך ככה';
-        const longestHint = longestStreak < 7 ? 'המטרה הבאה: 7 ימים רצופים' :
-            longestStreak < 30 ? 'המטרה הבאה: 30 ימים רצופים!' : 'התמדה אגדית!';
+        // Practice days is the number that keeps growing; the streak sits beside it
+        // and carries the personal record in its hint instead of a separate card.
+        const practiceDays = this.practiceDays();
+        const practiceHint = practiceDays === 0 ? 'התרגיל הראשון פותח את המונה' :
+            practiceDays === 1 ? 'יום אחד על הלוח. השני תמיד הכי קשה' :
+            `${practiceDays} ימים שבהם באמת התאמנת`;
+        const streakHint = pd.streak === 0
+            ? (longestStreak > 0 ? `השיא שלך: ${longestStreak} ימים ברצף` : 'תרגיל אחד היום פותח רצף')
+            : (longestStreak > pd.streak ? `השיא שלך: ${longestStreak} ימים ברצף` : 'זה השיא שלך. תרגיל אחד מחר ותשבור אותו');
         const lessonsHint = totalLessons === 0 ? 'השלם שיעור ראשון כדי להתחיל' :
             totalLessons < 10 ? `עוד ${10 - totalLessons} שיעורים לתג "בדרך הנכונה"` :
             `${totalLessons}/51 שיעורים הושלמו`;
@@ -3742,14 +3792,14 @@ ${answers.action || ''}`;
                         <div class="stats-card-hint">${xpHint}</div>
                     </div>
                     <div class="stats-card">
-                        <div class="stats-card-value">${pd.streak}</div>
-                        <div class="stats-card-label">🔥 סטריק נוכחי</div>
-                        <div class="stats-card-hint">${streakHint}</div>
+                        <div class="stats-card-value">${practiceDays}</div>
+                        <div class="stats-card-label">📅 ימי אימון</div>
+                        <div class="stats-card-hint">${practiceHint}</div>
                     </div>
                     <div class="stats-card">
-                        <div class="stats-card-value">${longestStreak}</div>
-                        <div class="stats-card-label">🏆 סטריק שיא</div>
-                        <div class="stats-card-hint">${longestHint}</div>
+                        <div class="stats-card-value">${pd.streak}</div>
+                        <div class="stats-card-label">🔥 רצף נוכחי</div>
+                        <div class="stats-card-hint">${streakHint}</div>
                     </div>
                     <div class="stats-card">
                         <div class="stats-card-value">${totalLessons}</div>

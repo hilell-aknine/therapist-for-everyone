@@ -1089,19 +1089,26 @@ class StoryGame {
     }
 
     renderOnboardingStep() {
+        // Each step carries the branded artwork that was drawn for it. The emoji stays
+        // as an onerror fallback only — assets/game/onboarding/ has existed since the
+        // game shipped and was never wired to anything, so these three screens greeted
+        // every new learner with a system emoji instead of the course's own art.
         const steps = [
             {
                 icon: '🧠',
+                art: '../assets/game/onboarding/step1.jpg',
                 title: this.courseId === 'master' ? 'ברוכים הבאים ל-NLP Master!' : 'ברוכים הבאים למשחק ה-NLP!',
                 text: 'כאן תלמדו איך המוח עובד ואיך "לתכנת" אותו מחדש (תכנות נוירו-לשוני), בדרך כיפית ואינטראקטיבית, צעד אחרי צעד.'
             },
             {
                 icon: '👨‍🏫',
+                art: '../assets/game/onboarding/step2.jpg',
                 title: 'הכירו את רם, המנטור שלכם',
                 text: 'רם ילווה אתכם בכל שלב: ייתן טיפים, עידוד, ויעזור לכם להבין איך המוח עובד ואיך לתכנת אותו מחדש.'
             },
             {
                 icon: '🚀',
+                art: '../assets/game/onboarding/step3.jpg',
                 title: 'בואו נתחיל!',
                 text: 'תרגלו תרגילים, צברו XP, שמרו על סטריק יומי ופתחו הישגים. מוכנים להפוך לפרקטישנרים?'
             }
@@ -1110,7 +1117,8 @@ class StoryGame {
         const step = steps[this.onboardingStep];
         const content = document.getElementById('onboarding-step-content');
         content.innerHTML = `
-            <span class="onboarding-icon">${step.icon}</span>
+            <img class="onboarding-art" src="${step.art}" alt="" aria-hidden="true"
+                 onerror="this.outerHTML='<span class=\\'onboarding-icon\\'>${step.icon}</span>'">
             <h2>${step.title}</h2>
             <p>${step.text}</p>
         `;
@@ -2929,7 +2937,13 @@ ${answers.action || ''}`;
         const label = this.getComboLabel(count);
         const popup = document.createElement('div');
         popup.className = 'combo-popup';
-        popup.innerHTML = `<div class="combo-label">${label}</div><div class="combo-count">x${count} 🔥 +${bonus} XP</div>`;
+        // combo-3.jpg / combo-5.jpg were drawn for these two tiers and never used.
+        // Below a 3-streak there is no artwork, so the flame emoji still stands in there.
+        const comboArt = count >= 5 ? 'combo-5' : (count >= 3 ? 'combo-3' : null);
+        const mark = comboArt
+            ? `<img class="combo-art" src="../assets/game/feedback/${comboArt}.jpg" alt="" aria-hidden="true" onerror="this.outerHTML='🔥'">`
+            : '🔥';
+        popup.innerHTML = `<div class="combo-label">${label}</div><div class="combo-count">x${count} ${mark} +${bonus} XP</div>`;
         document.body.appendChild(popup);
         setTimeout(() => popup.classList.add('show'), 50);
         setTimeout(() => {
@@ -3181,7 +3195,11 @@ ${answers.action || ''}`;
             ? this.getRandomMessage(this.mentorMessages.correctAnswer)
             : this.getRandomMessage(this.mentorMessages.wrongAnswer);
 
-        document.getElementById('feedback-icon').textContent = isCorrect ? '🎉' : '😅';
+        // assets/game/feedback/ was drawn for exactly this moment and had never been
+        // referenced anywhere in the code. The emoji remains as an onerror fallback.
+        const fbIcon = document.getElementById('feedback-icon');
+        fbIcon.innerHTML = `<img class="feedback-art" src="../assets/game/feedback/${isCorrect ? 'correct' : 'wrong'}.jpg"
+             alt="" aria-hidden="true" onerror="this.parentNode.textContent='${isCorrect ? '🎉' : '😅'}'">`;
         document.getElementById('feedback-title').textContent = mentorMessage;
 
         // Animate mentor avatar
@@ -3607,10 +3625,22 @@ ${answers.action || ''}`;
     // ═══════════════════════════════════════
     // Modals
     // ═══════════════════════════════════════
+    // Puts drawn artwork in the modal's icon slot, falling back to the emoji the slot
+    // used before if the file is missing. Only the modals that actually have art call
+    // this; the rest keep their glyph rather than get a generic picture.
+    setModalArt(src, fallbackEmoji) {
+        const el = document.getElementById('modal-icon');
+        if (!el) return;
+        el.innerHTML = `<img class="modal-art" src="${src}" alt="" aria-hidden="true"
+             onerror="this.parentNode.textContent='${fallbackEmoji}'">`;
+    }
+
     showNoHeartsModal() {
         const modal = document.getElementById('modal-overlay');
         this._modalKind = 'no-hearts';
-        document.getElementById('modal-icon').textContent = '💙';
+        // The hardest moment in the game gets the artwork drawn for it rather than a
+        // blue heart glyph. assets/game/screens/no-hearts.jpg had never been referenced.
+        this.setModalArt('../assets/game/screens/no-hearts.jpg', '💙');
         document.getElementById('modal-title').textContent = 'רוצים להמשיך?';
         document.getElementById('modal-text').textContent = 'טעויות הן חלק מהלמידה. אפשר לקחת אוויר ולחזור, או פשוט להמשיך לתרגל.';
 

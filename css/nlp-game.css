@@ -234,7 +234,16 @@ main,
     margin-bottom: 0;
 }
 
+/* The gradient moved off .logo and onto the text span. background-clip:text with a
+   transparent text fill is a text-only effect, and leaving it on a container that now
+   also holds an <img> is asking for the mark to be clipped away on some engines. */
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo span {
     font-family: var(--font-heading);
     font-size: 20px;
     font-weight: 800;
@@ -243,6 +252,19 @@ main,
     -webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: -0.5px;
+}
+
+/* The brand mark. The artwork carries its own deep-petrol ground, which is the same
+   family as the header, so it is masked to a rounded square and given a hairline gold
+   rim to read as a mark rather than as a pasted photo. */
+.logo-mark {
+    width: 30px; height: 30px; flex: 0 0 auto;
+    border-radius: 9px; object-fit: cover; display: block;
+    box-shadow: 0 0 0 1px rgba(212,175,55,.32);
+}
+@media (max-width: 380px) {
+    .logo-mark { width: 26px; height: 26px; border-radius: 8px; }
+    .logo span { font-size: 18px; }
 }
 
 .stats-bar {
@@ -1361,6 +1383,22 @@ main,
     font-size: 26px;
 }
 
+/* Branded artwork in place of the emoji. The art is square with a dark petrol
+   ground, so it is masked to a circle and given a faint gold rim to sit on the
+   panel rather than float on it. Sized up from the 26px emoji because a drawn
+   mark needs more room than a glyph to read at all. */
+.feedback-art {
+    width: 40px; height: 40px; flex: 0 0 auto;
+    border-radius: 50%; object-fit: cover; display: block;
+    box-shadow: 0 0 0 1px rgba(212,175,55,.35), 0 2px 10px rgba(0,0,0,.35);
+}
+
+.combo-art {
+    width: 22px; height: 22px; border-radius: 50%; object-fit: cover;
+    display: inline-block; vertical-align: -5px; margin: 0 2px;
+    box-shadow: 0 0 0 1px rgba(212,175,55,.4);
+}
+
 .feedback-title {
     font-family: var(--font-heading);
     font-size: 18px;
@@ -1758,6 +1796,15 @@ main,
 .modal-icon {
     font-size: 52px;
     margin-bottom: var(--space-3);
+}
+
+/* Drawn artwork in the modal icon slot. Rounded rather than circular so it reads as
+   a scene, not a badge — the badges elsewhere in the game are the circular ones. */
+.modal-art {
+    width: 116px; height: 116px;
+    display: block; margin: 0 auto;
+    border-radius: 22px; object-fit: cover;
+    box-shadow: 0 0 0 1px rgba(212,175,55,.25), 0 8px 24px rgba(0,0,0,.4);
 }
 
 .modal-title {
@@ -2896,6 +2943,18 @@ main,
     font-size: 64px;
     margin-bottom: var(--space-4);
     display: block;
+}
+
+/* The drawn step artwork. Bigger than the 64px emoji it replaces, because this is
+   the first screen a new learner ever sees and it is the only thing on it. */
+.onboarding-art {
+    width: 148px; height: 148px;
+    display: block; margin: 0 auto var(--space-4);
+    border-radius: 26px; object-fit: cover;
+    box-shadow: 0 0 0 1px rgba(212,175,55,.28), 0 10px 30px rgba(0,0,0,.4);
+}
+@media (max-width: 380px) {
+    .onboarding-art { width: 118px; height: 118px; border-radius: 20px; }
 }
 
 .onboarding-step h2 {
@@ -4922,8 +4981,14 @@ video.welcome-gate-hero {
     /* Container */
     .container { padding: 14px var(--space-4); }
 
-    /* Header — compact on mobile */
-    .logo { display: none; }
+    /* Header — compact on mobile.
+       The wordmark still goes, it costs more width than the stats bar can spare. The
+       mark stays: it is 24px, and it is the only brand presence on the screen for the
+       36% of learners who are on a phone, who until now saw a header with no identity
+       on it at all. */
+    .logo { display: flex; }
+    .logo span { display: none; }
+    .logo-mark { width: 24px; height: 24px; border-radius: 7px; }
     .stats-bar { gap: 2px; flex-wrap: nowrap; min-width: 0; }
     .stat-item { font-size: 10px; padding: 2px var(--space-1); min-width: 0; flex-shrink: 1; }
     .stat-item .icon { font-size: 13px; }

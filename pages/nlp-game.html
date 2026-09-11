@@ -225,7 +225,15 @@
 
     <!-- Welcome Gate -->
     <div id="welcome-gate" class="welcome-gate">
-        <video src="../assets/game/welcome-video.mp4" autoplay muted loop playsinline class="welcome-gate-hero"></video>
+        <!-- No src and no autoplay on purpose. The splash only shows on a learner's FIRST
+             visit, but an autoplaying <video src> downloads on EVERY visit even while the
+             gate is display:none — measured 11.09.2026 on production: 9.14 MB pulled down
+             by a returning visitor who never sees this screen. The poster paints instantly
+             and showWelcomeGateAndWait() attaches the real source only when the gate is
+             actually about to be displayed. -->
+        <video id="welcome-gate-video" data-src="../assets/game/welcome-video.mp4"
+               poster="../assets/game/welcome-poster.webp"
+               preload="none" muted loop playsinline class="welcome-gate-hero"></video>
         <div class="welcome-gate-content">
             <div class="welcome-gate-brand">
                 <span class="welcome-gate-brand-text">בית המטפלים</span>
@@ -276,7 +284,7 @@
         <!-- Game Header (stats bar) -->
         <header class="header" id="app-header" style="display: none;" data-area="game/header" data-src="pages/nlp-game.html (#app-header) + js/nlp-game.js">
             <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="logo"><img class="logo-mark" src="../assets/game/brand/logo-mark-128.png" srcset="../assets/game/brand/logo-mark-128.png 1x, ../assets/game/brand/logo-mark-256.png 2x" alt="" aria-hidden="true" onerror="this.outerHTML='🧠 '"><span>משחק NLP</span></div>
+                <div class="logo"><img class="logo-mark" src="../assets/game/brand/logo-mark-64.webp" srcset="../assets/game/brand/logo-mark-64.webp 1x, ../assets/game/brand/logo-mark-96.webp 2x" width="30" height="30" decoding="async" alt="" aria-hidden="true" onerror="this.outerHTML='🧠 '"><span>משחק NLP</span></div>
                 <div class="stats-bar">
                     <div class="stat-item xp">
                         <span class="icon">⭐</span>
@@ -429,7 +437,7 @@
     <script src="../js/nlp-game-data-m7.js?v=20260805-1"></script>
     <script src="../js/nlp-game-data.js"></script>
     <script src="../js/nlp-game-knowledge.js"></script>
-    <script src="../js/nlp-game.js?v=20260805-1"></script>
+    <script src="../js/nlp-game.js?v=20260911-1"></script>
     <script src="../js/nlp-game-leaderboard.js?v=20260722-2"></script>
     <script>
         // Theme toggle

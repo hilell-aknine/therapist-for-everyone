@@ -539,6 +539,16 @@ class StoryGame {
 
             gate.style.display = 'flex';
 
+            // Attach the background loop only now. The <video> ships with no src so a
+            // returning visitor, who returns above this line, never pays for it. The
+            // poster is already painted, so the screen is never empty while it loads.
+            const vid = document.getElementById('welcome-gate-video');
+            if (vid && !vid.src && vid.dataset.src) {
+                vid.src = vid.dataset.src;
+                const p = vid.play();
+                if (p && p.catch) p.catch(() => { /* autoplay refused — the poster stands in */ });
+            }
+
             // Animate elements in sequence
             setTimeout(() => gate.classList.add('active'), 50);
 

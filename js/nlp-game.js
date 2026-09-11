@@ -542,11 +542,19 @@ class StoryGame {
             // Attach the background loop only now. The <video> ships with no src so a
             // returning visitor, who returns above this line, never pays for it. The
             // poster is already painted, so the screen is never empty while it loads.
+            // Order matters. Calling play() straight after assigning src on a
+            // preload="none" element makes Chrome abort the first fetch and start a
+            // second one — measured on production 11.09.2026, two full 206 responses,
+            // 1.45 MB for a 727 KB file. Lifting preload first and playing on canplay
+            // keeps it to a single download.
             const vid = document.getElementById('welcome-gate-video');
             if (vid && !vid.src && vid.dataset.src) {
+                vid.preload = 'auto';
+                vid.addEventListener('canplay', () => {
+                    const pr = vid.play();
+                    if (pr && pr.catch) pr.catch(() => { /* autoplay refused — the poster stands in */ });
+                }, { once: true });
                 vid.src = vid.dataset.src;
-                const p = vid.play();
-                if (p && p.catch) p.catch(() => { /* autoplay refused — the poster stands in */ });
             }
 
             // Animate elements in sequence

@@ -28,6 +28,12 @@
 
         var refreshing = false;
 
+        // Was this page already under a service worker when it loaded?
+        // This is the difference between "an update took over" (reload is right) and
+        // "the worker installed for the first time and claimed me" (reload is a bug).
+        // Read it now, before anything can claim the page.
+        var hadControllerAtLoad = !!navigator.serviceWorker.controller;
+
         function showUpdateBanner(waitingWorker) {
             try {
                 if (document.getElementById('pwa-update-bar')) return;
@@ -101,6 +107,17 @@
 
         navigator.serviceWorker.addEventListener('controllerchange', function () {
             if (refreshing) return;
+            // A first-ever visitor arrives with no controller. The worker installs,
+            // calls skipWaiting() + clients.claim(), and controllerchange fires even
+            // though nothing was updated — reloading here made every new visitor load
+            // the whole page twice. Measured 11.09.2026 on the game: two full document
+            // loads and the splash video fetched twice, 1.45 MB for a 727 KB file.
+            // An update, by contrast, always happens on a page that already had a
+            // controller, and there the reload is exactly what we want.
+            if (!hadControllerAtLoad) {
+                debug('first install claimed this page — not reloading');
+                return;
+            }
             refreshing = true;
             location.reload();
         });

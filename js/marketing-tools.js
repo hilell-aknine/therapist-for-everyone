@@ -330,6 +330,19 @@ function initializeTracking() {
     injectSessionRecording();
 }
 
+// Single entry point, so the tags are injected exactly once no matter which path
+// asks for them: the idle timer, a consent click, or a real tracked action.
+// Measured 11.09.2026 on the game page: the Meta Pixel and its signals config are
+// 188 KB over the wire, the heaviest thing on the page and more than all seven
+// module data files combined. None of it renders anything or is needed to play, yet
+// it was being fetched at DOMContentLoaded, ahead of the game itself. Nothing about
+// WHAT is collected changes here — only when the request goes out.
+function ensureTrackingStarted() {
+    if (window.__trackingStarted) return;
+    window.__trackingStarted = true;
+    initializeTracking();
+}
+
 // ============================================================================
 // COOKIE CONSENT BANNER — Israeli law compliant (accept all / essential only)
 // ============================================================================
@@ -412,7 +425,7 @@ function createConsentBanner() {
         setUserConsent('all');
         dismissBanner();
         if (window.PopupManager) window.PopupManager.dismiss('cookie_consent');
-        initializeTracking();
+        ensureTrackingStarted();
     });
 
     document.getElementById('cookie-essential-only').addEventListener('click', function() {
@@ -448,6 +461,8 @@ function createCookieSettingsButton() {
 
 window.trackEvent = function(eventName, eventParams = {}) {
     if (!hasUserConsented() || !MARKETING_CONFIG.TRACKING_ENABLED) return;
+    // A real action beats the idle timer: load the tags now rather than drop the event.
+    ensureTrackingStarted();
     if (window.gtag && MARKETING_CONFIG.GA4_ID !== 'G-XXXXXXXXXX') {
         gtag('event', eventName, eventParams);
     }
@@ -735,10 +750,20 @@ window.saveCapiBrowserData = async function (linkedTable, linkedId, email, event
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 1) Initialize tracking FIRST. With implicit consent, this fires for everyone
-    //    except explicit opt-outs. injectMetaPixel() is idempotent — skipped if
-    //    free-portal.html (or another page) already initialized the pixel inline in <head>.
-    initializeTracking();
+    // 1) Initialize tracking, but off the critical path. With implicit consent this
+    //    still fires for everyone except explicit opt-outs, and PageView is still sent
+    //    on every visit — it simply goes out once the browser is idle instead of
+    //    competing with the page the visitor is waiting for. The 2.5s timeout is the
+    //    ceiling, not the target; on a normal load it runs well before that.
+    //    Any real tracked action calls ensureTrackingStarted() itself, so an event in
+    //    the first second is never lost.
+    //    injectMetaPixel() stays idempotent — skipped if free-portal.html (or another
+    //    page) already initialized the pixel inline in <head>.
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(ensureTrackingStarted, { timeout: 2500 });
+    } else {
+        setTimeout(ensureTrackingStarted, 1200);
+    }
 
     // 2) Show informational banner once if user hasn't made a choice yet.
     //    The banner is informational — it does NOT gate tracking. Tracking is already on.

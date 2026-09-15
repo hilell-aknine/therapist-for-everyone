@@ -13,7 +13,7 @@
    אסטרטגיה: network-first לכל בקשה נתפסת. רשת קודם, קאש רק כשאין רשת.
    ============================================================================ */
 
-const CACHE_NAME = 'bvm-shell-v9';   // ⬅️ מעלים בכל שינוי קוד. קודם: bvm-shell-v8, v7, v6, v5, v4, v3, v2, v1
+const CACHE_NAME = 'bvm-shell-v10';  // ⬅️ מעלים בכל שינוי קוד. קודם: bvm-shell-v9, v8, v7, v6, v5, v4, v3, v2, v1
 
 /* מעטפת האתר + נכסי משחק ה-NLP (הרשימה המקורית, נשמרה במלואה).
    addAll הוא אטומי — קובץ אחד שנופל מפיל את כל ההתקנה, ולכן כאן נכנסים
@@ -36,6 +36,7 @@ const ASSETS_TO_CACHE = [
     '/js/pwa-register.js',
     '/js/install-prompt.js',
     '/js/session-guard.js',
+    '/js/clips-catalog.js',
 
     // ── משחק ה-NLP (הרשימה שהייתה כאן קודם) ─────────────────────
     '/pages/nlp-game.html',

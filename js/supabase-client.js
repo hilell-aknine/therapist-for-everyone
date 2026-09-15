@@ -479,11 +479,16 @@
 
                 // 4) Three head-only COUNT queries. completed=true excludes the
                 //    last_watched_* bookkeeping rows (those carry completed=false).
+                //    'nlp-clips' is excluded on purpose: a two-minute clip from the
+                //    micro-lesson feed is real learning and DOES feed the streak, but
+                //    counting it here would turn "השלמת N שיעורים השבוע" into a number
+                //    that no longer means lessons.
                 const base = () => supabaseClient
                     .from('course_progress')
                     .select('*', { count: 'exact', head: true })
                     .eq('user_id', user.id)
-                    .eq('completed', true);
+                    .eq('completed', true)
+                    .neq('course_type', 'nlp-clips');
 
                 const [thisRes, lastRes, allRes] = await Promise.all([
                     base().gte('completed_at', thisISO),

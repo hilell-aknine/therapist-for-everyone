@@ -728,7 +728,11 @@
   .lms-bnav{ display:none; }
   @media (max-width: 900px){
     .lms-bnav{
-      display:grid; grid-template-columns: repeat(3, 1fr); gap:.15rem;
+      /* Column count follows the number of VISIBLE buttons instead of being hardcoded.
+         It was repeat(3, 1fr); adding the feed as a fourth item silently pushed
+         "שותפים" off the right edge at 360px — no overflow, no scrollbar, the link
+         simply was not there. Caught in a 360px render, not by reading the markup. */
+      display:grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap:.15rem;
       position: fixed; left:0; right:0; bottom:0; z-index: 90;
       background: rgba(10,40,46,.96);
       backdrop-filter: blur(18px) saturate(180%);
@@ -765,6 +769,7 @@
   body.view-ambassador .lms-amb{ display:flex; }
   body.view-ambassador .lms-welcome,
   body.view-ambassador .lms-player,
+  body.view-ambassador .lms-feed,
   body.view-ambassador .lms-master{ display:none; }
 
   .lms-amb-bar{
@@ -887,6 +892,7 @@
   body.view-buddy .lms-welcome,
   body.view-buddy .lms-player,
   body.view-buddy .lms-amb,
+  body.view-buddy .lms-feed,
   body.view-buddy .lms-master,
   body.view-buddy .lms-master-sales{ display:none; }
 
@@ -974,11 +980,101 @@
   }
   .lms-bd-phone{ direction:ltr; text-align:right; unicode-bidi:isolate; font-weight:700; color:#fff; }
 
+  /* ==================== MICRO-LESSON FEED ("בשתי דקות") ==================== */
+  .lms-feed{ display:none; flex-direction:column; gap:.9rem; width:100%; max-width:760px; min-width:0; margin-inline:auto; container-type: inline-size; }
+  body.view-feed .lms-feed{ display:flex; }
+  body.view-feed .lms-welcome,
+  body.view-feed .lms-player,
+  body.view-feed .lms-amb,
+  body.view-feed .lms-buddy,
+  body.view-feed .lms-master,
+  body.view-feed .lms-master-sales{ display:none; }
+
+  /* Same trap as the buddy view: the UA rule for [hidden] loses to every class below,
+     so "hidden" panels render anyway. Restore hidden to meaning hidden. */
+  .lms-feed [hidden]{ display:none !important; }
+
+  .lms-feed__filters{ display:flex; gap:.4rem; overflow-x:auto; padding-bottom:.2rem; scrollbar-width:none; }
+  .lms-feed__filters::-webkit-scrollbar{ display:none; }
+  .lms-feed__chip{
+    flex:none; cursor:pointer; font-family:inherit; font-size:.8rem; font-weight:600;
+    padding:.42rem .85rem; border-radius:999px; white-space:nowrap;
+    border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:var(--text-muted);
+    transition:background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .lms-feed__chip[aria-selected="true"]{
+    background:rgba(212,175,55,.18); border-color:rgba(212,175,55,.45); color:var(--accent-gold-hover);
+  }
+  .lms-feed__chip .lms-feed__chipn{ opacity:.65; font-weight:500; margin-inline-start:.25rem; }
+
+  .lms-feed__stage{
+    position:relative; width:100%; aspect-ratio:16/9; border-radius:16px; overflow:hidden;
+    background:#000; box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  .lms-feed__stage iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+  /* The unlock button IS the autoplay gesture. Browsers block unmuted autoplay without
+     a prior user gesture, so without this the feed dies silently on the very first clip. */
+  .lms-feed__unlock{
+    position:absolute; inset:0; width:100%; height:100%; cursor:pointer; border:0; padding:0;
+    display:grid; place-items:center; gap:.6rem; font-family:inherit; color:#fff;
+    background:rgba(0,0,0,.55); backdrop-filter:blur(2px);
+  }
+  .lms-feed__unlock img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-1; opacity:.5; }
+  .lms-feed__unlock span{ display:grid; place-items:center; gap:.5rem; }
+  .lms-feed__unlock i{
+    width:64px; height:64px; border-radius:50%; display:grid; place-items:center; font-size:1.3rem;
+    background: linear-gradient(135deg, var(--accent-gold-hover) 0%, var(--accent-gold) 100%);
+    color:var(--text-on-gold); box-shadow:0 8px 24px rgba(212,164,55,.4);
+  }
+  .lms-feed__unlock strong{ font-size:.95rem; font-weight:700; }
+
+  .lms-feed__meta{ display:flex; flex-direction:column; gap:.45rem; }
+  .lms-feed__src{ font-size:.74rem; color:var(--text-muted); display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+  .lms-feed__meta h2{
+    margin:0; font-family:'Frank Ruhl Libre','Heebo',serif; font-size:1.15rem; line-height:1.4; color:#fff;
+  }
+  .lms-feed__hook{ margin:0; font-size:.88rem; line-height:1.6; color:var(--text-muted); }
+  .lms-feed__bar{ height:4px; border-radius:999px; background:rgba(255,255,255,.1); overflow:hidden; }
+  .lms-feed__bar span{
+    display:block; height:100%; width:0; border-radius:999px; transition:width .25s linear;
+    background: linear-gradient(90deg, var(--accent-gold-hover), var(--accent-gold));
+  }
+  .lms-feed__counter{ font-size:.74rem; color:var(--text-muted); }
+
+  .lms-feed__actions{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+  .lms-feed__btn{
+    cursor:pointer; font-family:inherit; font-size:.84rem; font-weight:700; text-decoration:none;
+    padding:.6rem 1rem; border-radius:10px; display:inline-flex; align-items:center; gap:.4rem;
+    border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:#fff;
+  }
+  .lms-feed__btn:disabled{ opacity:.35; cursor:default; }
+  .lms-feed__btn--gold{
+    border-color:transparent; color:var(--text-on-gold);
+    background: linear-gradient(135deg, var(--accent-gold-hover) 0%, var(--accent-gold) 100%);
+  }
+  .lms-feed__full{ margin-inline-start:auto; font-size:.8rem; }
+
+  .lms-feed__end{
+    display:flex; flex-direction:column; gap:.8rem; align-items:center; text-align:center;
+    padding:1.8rem 1.2rem; border:1px dashed rgba(255,255,255,.16); border-radius:16px;
+  }
+  .lms-feed__end h3{ margin:0; font-family:'Frank Ruhl Libre','Heebo',serif; font-size:1.2rem; color:#fff; }
+  .lms-feed__end p{ margin:0; font-size:.86rem; line-height:1.6; color:var(--text-muted); }
+  .lms-feed__end .lms-feed__actions{ justify-content:center; }
+
+  @media (max-width: 560px){
+    .lms-feed__stage{ border-radius:12px; }
+    .lms-feed__meta h2{ font-size:1.02rem; }
+    .lms-feed__full{ margin-inline-start:0; width:100%; justify-content:center; }
+  }
+
   /* ==================== MASTER VIEW ==================== */
   .lms-master{ display:none; flex-direction:column; gap:1rem; container-type: inline-size; }
   body.view-master .lms-master{ display:flex; }
   body.view-master .lms-welcome,
   body.view-master .lms-player,
+  body.view-master .lms-feed,
   body.view-master .lms-amb{ display:none; }
 
   /* ==================== MASTER SALES (admin-only preview) ==================== */
@@ -988,6 +1084,7 @@
   body.view-master-sales .lms-welcome,
   body.view-master-sales .lms-player,
   body.view-master-sales .lms-amb,
+  body.view-master-sales .lms-feed,
   body.view-master-sales .lms-master{ display:none; }
   .lms-ms-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:.9rem; }
   .lms-ms-topic{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); border-top:3px solid var(--accent-gold-hover,#D4AF37); border-radius:14px; padding:1rem 1.1rem; }
@@ -1573,6 +1670,9 @@
      the LCP element. The hash already tells us where we are, so paint it now
      and let the auth check catch up. Anything private stays gated as before. */
   if (location.hash === '#master-sales') document.body.classList.add('view-master-sales');
+  /* Same reasoning for the micro-lesson feed: it is public, and it is often the
+     first thing a visitor ever loads, so paint the view before the auth check. */
+  if (location.hash.indexOf('#feed') === 0) document.body.classList.add('view-feed');
 </script>
 
 <div class="frame">
@@ -2022,6 +2122,47 @@
         <div id="buddyToast" class="lms-bd-empty" hidden></div>
       </div><!-- /.lms-buddy -->
 
+      <!-- ===== Micro-lesson feed — "בשתי דקות" ===== -->
+      <div class="lms-feed">
+        <header class="lms-amb-bar">
+          <button class="lms-pl-bar__back" type="button" id="feedBack" aria-label="חזרה לסקירה" title="חזרה"><i class="fa-solid fa-arrow-right"></i></button>
+          <div class="lms-amb-bar__title">
+            <h1 class="lms-amb-bar__h"><i class="fa-solid fa-bolt" style="color:var(--accent-gold-hover);margin-inline-end:.4rem;"></i>בשתי דקות</h1>
+            <div class="lms-amb-bar__sub" id="feedSub">רעיון אחד שלם מתוך הקורס, בלי להתחייב לשיעור מלא</div>
+          </div>
+        </header>
+
+        <div class="lms-feed__filters" id="feedFilters" role="tablist" aria-label="סינון לפי נושא"></div>
+
+        <div class="lms-feed__stage" id="feedStage">
+          <div id="feedMount"></div>
+          <button class="lms-feed__unlock" type="button" id="feedUnlock" hidden>
+            <img id="feedUnlockThumb" src="" alt="" loading="lazy">
+            <span>
+              <i class="fa-solid fa-play"></i>
+              <strong id="feedUnlockLabel">התחל לצפות</strong>
+            </span>
+          </button>
+        </div>
+
+        <div class="lms-feed__meta" id="feedMeta">
+          <div class="lms-feed__src" id="feedSrc"></div>
+          <h2 id="feedTitle"></h2>
+          <p class="lms-feed__hook" id="feedHook"></p>
+          <div class="lms-feed__bar"><span id="feedBarFill"></span></div>
+          <div class="lms-feed__counter" id="feedCounter"></div>
+        </div>
+
+        <div class="lms-feed__actions" id="feedActions">
+          <button class="lms-feed__btn" type="button" id="feedPrev"><i class="fa-solid fa-chevron-right"></i> הקודם</button>
+          <button class="lms-feed__btn lms-feed__btn--gold" type="button" id="feedNext">הבא <i class="fa-solid fa-chevron-left"></i></button>
+          <a class="lms-feed__btn lms-feed__full" id="feedFull" href="#"><i class="fa-solid fa-graduation-cap"></i> צפה בשיעור המלא</a>
+        </div>
+
+        <div class="lms-feed__end" id="feedEnd" hidden></div>
+        <div class="lms-bd-empty" id="feedEmpty" hidden>עוד אין כאן קטעים. חוזרים בקרוב.</div>
+      </div><!-- /.lms-feed -->
+
       <div class="lms-master">
         <header class="lms-amb-bar">
           <button class="lms-pl-bar__back" type="button" id="masterBack" aria-label="חזרה לסקירה" title="חזרה"><i class="fa-solid fa-arrow-right"></i></button>
@@ -2214,10 +2355,18 @@
     <i class="fa-solid fa-list-check"></i>
     <span>שיעורים</span>
   </button>
+  <!-- The feed's whole audience is the person who will not open a 30-minute lesson.
+       That person is on a phone, and the sidebar here is a drawer they have to go
+       looking for — so the bottom bar is the entry point that decides whether this
+       feature gets used at all. Hidden until the catalog has clips. -->
+  <a class="lms-bnav__btn" href="#feed" data-nav="feed" id="bnavFeed" style="display:none;">
+    <i class="fa-solid fa-bolt"></i>
+    <span>בשתי דקות</span>
+    <span class="lms-bnav__badge">חדש</span>
+  </a>
   <a class="lms-bnav__btn" href="#ambassador" data-nav="ambassador" id="bnavAmbassador">
     <i class="fa-solid fa-heart"></i>
     <span>שותפים</span>
-    <span class="lms-bnav__badge">חדש</span>
   </a>
 </nav>
 
@@ -2517,6 +2666,7 @@
 <script src="../js/popup-manager.js"></script>
 <script src="../js/supabase-client.js"></script>
 <script src="../js/session-guard.js"></script>
+<script src="../js/clips-catalog.js"></script>
 <script>
 (function(){
   const params = new URLSearchParams(location.search);
@@ -3128,8 +3278,12 @@
     if (devBypass) return true;
     // Guest pass: the Master SALES view (#master-sales) is a public marketing page —
     // anyone may see it and buy (purchase does not require portal registration).
+    // The micro-lesson feed (#feed, #feed/<topic>) is public for the same reason in
+    // reverse: it is cut from the FREE practitioner course, which anyone may already
+    // watch, and it is the cheapest possible first taste of the portal. A guest's clip
+    // progress lives in localStorage only — nothing is written for them.
     // Everything else in the portal still requires login.
-    const guestSalesPass = location.hash === '#master-sales';
+    const guestSalesPass = location.hash === '#master-sales' || location.hash.indexOf('#feed') === 0;
     try {
       const client = window.supabaseClient || (window.SUPABASE_CONFIG && window.supabase
         ? window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey)
@@ -3819,13 +3973,21 @@
     // Keep the always-visible "watch on YouTube" escape hatch pointed at the current lesson.
     const ytLink = document.getElementById('plYtLink'); if (ytLink) ytLink.href = 'https://www.youtube.com/watch?v=' + lesson.id;
     const saved = getSavedPos(lesson.id);
+    // One-shot handover from the micro-lesson feed: "צפה בשיעור המלא" must land on the
+    // moment the clip was taken from. It outranks the saved position for THIS load only,
+    // and is cleared immediately so the next visit resumes normally. Deliberately not
+    // written through savePos() — that would move the learner's real resume point.
+    const pendingStart = Number.isFinite(window._pendingLessonStart) ? window._pendingLessonStart : null;
+    window._pendingLessonStart = null;
     // Workshop chapters carry a fixed `start`; otherwise resume from the saved position.
-    const startSec = Number.isFinite(lesson.start) ? lesson.start : (saved > 10 ? saved : 0);
+    const startSec = Number.isFinite(lesson.start) ? lesson.start
+      : (pendingStart !== null ? pendingStart : (saved > 10 ? saved : 0));
     // Completion is gated on REAL watch time via _armWatchTracker — NOT a blind page-load timer.
     // (The old setTimeout(...,45000) marked lessons "done" at 0:00 without any watching.)
     if (completionTimer){ clearTimeout(completionTimer); completionTimer = null; }
     _watchedSecs = 0; stopWatchClock();
-    if (!Number.isFinite(lesson.start) && saved > 10){ try { showCelebToast(`ממשיך מ-${fmtTime(saved)}`); } catch(_){} }
+    if (pendingStart !== null){ try { showCelebToast(`מתחילים מהנקודה של הקטע`); } catch(_){} }
+    else if (!Number.isFinite(lesson.start) && saved > 10){ try { showCelebToast(`ממשיך מ-${fmtTime(saved)}`); } catch(_){} }
     loadYtApi();
     stopPosPoll();
     // Tear down any previous player so the fresh iframe isn't shadowed by a stale YT.Player wrapper.
@@ -3886,6 +4048,11 @@
       <a class="lms-sb-item lms-sb-item--active" href="#" aria-current="page" data-nav="welcome">
         <span class="lms-sb-item__icon"><i class="fa-solid fa-house"></i></span>
         <span class="lms-sb-item__label">ברוך הבא לפורטל</span>
+      </a>
+      <a class="lms-sb-item" href="#feed" data-nav="feed" id="sbFeedItem" style="${_feedHasClips() ? '' : 'display:none;'}">
+        <span class="lms-sb-item__icon"><i class="fa-solid fa-bolt"></i></span>
+        <span class="lms-sb-item__label">בשתי דקות</span>
+        <span class="lms-sb-item__badge" style="background:rgba(212,175,55,.2);color:var(--accent-gold-hover);">חדש</span>
       </a>
       <a class="lms-sb-item" href="#buddy" data-nav="buddy" id="sbBuddyItem">
         <span class="lms-sb-item__icon"><i class="fa-solid fa-user-group"></i></span>
@@ -4063,7 +4230,7 @@
   function setCourse(c){
     if (c !== 'nlp-master' && c !== 'nlp-practitioner' && c !== 'nlp-techniques') return;
     if ((c === 'nlp-master' || c === 'nlp-techniques') && !_isPaidCustomer) return;
-    if (c === courseType){ document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales','view-buddy'); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+    if (c === courseType){ document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales','view-buddy','view-feed'); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); return; }
     courseType = c;
     modules = (c === 'nlp-master') ? getMasterAsModules() : (c === 'nlp-techniques') ? getTechniquesAsModules() : PRACTITIONER_MODULES;
     totalLessons = modules.reduce((s, m) => s + m.lessons.length, 0);
@@ -4078,7 +4245,7 @@
     if (mtl) mtl.textContent = (c === 'nlp-master') ? 'חזרה לפרקטישנר' : 'קורס המאסטר';
     const ttl2 = document.getElementById('techTabLabel');
     if (ttl2) ttl2.textContent = (c === 'nlp-techniques') ? 'חזרה לפרקטישנר' : 'טכניקות פרקטישנר';
-    document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales','view-buddy');
+    document.body.classList.remove('view-player','view-ambassador','view-master','view-master-sales','view-buddy','view-feed');
     try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
     renderAll();
     // Re-hydrate the new course's completed lessons + last-watched position from the DB,
@@ -4280,7 +4447,7 @@
     if (iframe) iframe.src = 'about:blank';
   }
   function showWelcome(skipPush){
-    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales', 'view-buddy');
+    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales', 'view-buddy', 'view-feed');
     clearVideoState();
     if (!skipPush && location.hash) history.pushState(null, '', location.pathname + location.search);
     renderAll();
@@ -4294,7 +4461,7 @@
     const mod = modules[m];
     const lesson = mod.lessons[l];
 
-    document.body.classList.remove('view-master-sales', 'view-buddy');
+    document.body.classList.remove('view-master-sales', 'view-buddy', 'view-feed');
     document.body.classList.add('view-player');
     document.getElementById('plTitle').textContent = lesson.title;
     document.getElementById('plSub').innerHTML = `מודול ${mod.id}: ${escapeHtml(mod.title)} <span class="lms-hero__bull">•</span> <bdi>${lesson.duration}</bdi> דק׳`;
@@ -4748,6 +4915,482 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
   }
 
+  /* ===================== Micro-lesson feed — "בשתי דקות" =====================
+     A clip is a time range inside a lesson video we already publish. The feed plays
+     that range and nothing else, then rolls straight into the next one.
+
+     Three decisions here are load-bearing, and each one is a reaction to something
+     that already went wrong in this portal:
+
+     1. ITS OWN PLAYER. The lesson player's ENDED handler calls markLessonCompleted()
+        for the WHOLE lesson, and clearVideoState() blanks #plIframe on every view
+        switch. Sharing _ytPlayer would mark a 27-minute lesson finished every time a
+        90-second clip ran out.
+     2. ONE PLAYER INSTANCE, REUSED. Unmuted autoplay needs a user gesture. The first
+        tap unlocks it, and every later clip arrives via loadVideoById on that SAME
+        instance so the unlock carries. Rebuilding the iframe per clip is a fresh
+        autoplay decision and gets blocked from clip 2 onward on iOS.
+     3. THE END IS POLLED, NOT TRUSTED. YouTube's &end= is unreliable, so we watch the
+        clock ourselves, with a wall-clock backstop for the case the IFrame API never
+        answers at all — the documented PWA/in-app-webview failure this portal already
+        hit once on the master player.                                             */
+  var FEED_POLL_MS = 250;
+  var FEED_DONE_RATIO = 0.7;      // share of the clip that must actually play to count
+  var _feedPlayer = null, _feedList = [], _feedIdx = 0, _feedTopic = 'all';
+  var _feedPoll = null, _feedBackstop = null, _feedUnlocked = false;
+  var _feedWatched = 0, _feedLastT = -1, _feedAdvancing = false;
+  var _feedLastPing = 0, _feedLastSnap = 0, _feedReady = false, _feedStops = [];
+  var _clipsDone = (function(){
+    try { return new Set(JSON.parse(localStorage.getItem('completedClips') || '[]')); }
+    catch(_){ return new Set(); }
+  })();
+
+  function _feedCatalog(){ return window.ClipsCatalog || null; }
+  function _feedHasClips(){
+    var c = _feedCatalog();
+    return !!(c && c.all().length);
+  }
+  function _feedCur(){ return _feedList[_feedIdx] || null; }
+
+  // Resolve a clip's source lesson inside the FREE course, by video id rather than by
+  // stored indices — a catalog rebuilt after the module list shifts must not deep-link
+  // a learner into the wrong lesson.
+  function _feedFindLesson(videoId){
+    for (var m = 0; m < PRACTITIONER_MODULES.length; m++){
+      var ls = PRACTITIONER_MODULES[m].lessons;
+      for (var l = 0; l < ls.length; l++){
+        if (ls[l].id === videoId) return { m: m, l: l, mod: PRACTITIONER_MODULES[m], lesson: ls[l] };
+      }
+    }
+    return null;
+  }
+
+  function _feedStopTimers(){
+    if (_feedPoll){ clearInterval(_feedPoll); _feedPoll = null; }
+    if (_feedBackstop){ clearTimeout(_feedBackstop); _feedBackstop = null; }
+  }
+
+  function stopFeed(){
+    _feedStopTimers();
+    try { if (_feedPlayer && _feedPlayer.pauseVideo) _feedPlayer.pauseVideo(); } catch(_){}
+    try { if (_feedPlayer && _feedPlayer.destroy) _feedPlayer.destroy(); } catch(_){}
+    _feedPlayer = null; _feedReady = false; _feedUnlocked = false;
+    var mount = document.getElementById('feedMount');
+    if (mount) mount.innerHTML = '';
+  }
+
+  async function markClipCompleted(clip){
+    if (!clip || _clipsDone.has(clip.id)) return;
+    _clipsDone.add(clip.id);
+    try { localStorage.setItem('completedClips', JSON.stringify(Array.from(_clipsDone))); } catch(_){}
+    // Deliberately NOT markLessonCompleted(): that one pushes the whole lesson into
+    // completedLessons and fires PopupManager.notifyLessonComplete(), which is the
+    // master upsell. At one clip every two minutes that is a popup storm. The streak
+    // still moves, because getStudyStreak() counts any completed row regardless of
+    // course_type — which is exactly the point of the feed.
+    if (!devBypass && window.CourseProgress){
+      try {
+        await window.CourseProgress.markVideoWatched(
+          window.ClipsCatalog.progressKey(clip), 'nlp-clips', clip.module);
+      } catch(_){ /* guests have no session; localStorage above is their whole record */ }
+    }
+    try { refreshStudyStreak(); } catch(_){}
+    _feedPaintProgress();
+  }
+
+  function _feedPaintProgress(){
+    var counter = document.getElementById('feedCounter');
+    if (!counter) return;
+    var done = _feedList.filter(function(c){ return _clipsDone.has(c.id); }).length;
+    // <bdi> is not decoration: bare digits inside an RTL sentence reorder, and
+    // "3 מתוך 12" renders as "12 מתוך 3" without it.
+    counter.innerHTML = 'קטע <bdi>' + (_feedIdx + 1) + '</bdi> מתוך <bdi>' + _feedList.length + '</bdi>'
+      + ' · הושלמו <bdi>' + done + '</bdi>';
+  }
+
+  function _feedPaintMeta(){
+    var clip = _feedCur();
+    if (!clip) return;
+    var cat = _feedCatalog();
+    var src = _feedFindLesson(clip.videoId);
+    document.getElementById('feedTitle').textContent = clip.title || '';
+    document.getElementById('feedHook').textContent = clip.hook || '';
+    var secs = Math.round(cat.duration(clip));
+    document.getElementById('feedSrc').innerHTML =
+      '<i class="fa-regular fa-clock"></i> <bdi>' + Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2,'0') + '</bdi>'
+      + (src ? ' <span class="lms-hero__bull">•</span> מתוך: ' + escapeHtml(src.lesson.title) : '')
+      + (_clipsDone.has(clip.id) ? ' <span class="lms-hero__bull">•</span> <i class="fa-solid fa-check" style="color:var(--accent-gold-hover)"></i> נצפה' : '');
+    document.getElementById('feedBarFill').style.width = '0%';
+    var full = document.getElementById('feedFull');
+    if (full && src) full.setAttribute('href', '#m' + (src.m + 1) + 'l' + (src.l + 1));
+    document.getElementById('feedPrev').disabled = _feedIdx === 0;
+    _feedPaintProgress();
+  }
+
+  function _feedShowUnlock(label){
+    var clip = _feedCur(), btn = document.getElementById('feedUnlock');
+    if (!btn || !clip) return;
+    document.getElementById('feedUnlockThumb').src = _feedCatalog().thumb(clip);
+    document.getElementById('feedUnlockLabel').textContent = label || 'התחל לצפות';
+    btn.hidden = false;
+  }
+
+  function _feedTick(){
+    var clip = _feedCur();
+    if (!clip || !_feedPlayer || !_feedPlayer.getCurrentTime) return;
+    var t;
+    try { t = _feedPlayer.getCurrentTime(); } catch(_){ return; }
+    if (!isFinite(t)) return;
+
+    // Real playback evidence: time that actually moved since the previous sample.
+    // A paused or buffering video does not advance the clock, so nothing is credited.
+    if (_feedLastT >= 0 && t > _feedLastT && (t - _feedLastT) < 1.5){
+      _feedWatched += (t - _feedLastT);
+      var now = Date.now();
+      // Watching a video is not mousemove/keydown/scroll. Without this ping the session
+      // guard logs a learner out mid-feed — the exact bug that was fixed for lessons.
+      if (now - _feedLastPing > 60000 && window.SessionGuard && window.SessionGuard.ping){
+        _feedLastPing = now;
+        try { window.SessionGuard.ping(); } catch(_){}
+      }
+    }
+    _feedLastT = t;
+
+    var span = clip.end - clip.start;
+    var fill = document.getElementById('feedBarFill');
+    if (fill) fill.style.width = Math.max(0, Math.min(100, ((t - clip.start) / span) * 100)) + '%';
+
+    if (t >= clip.end - 0.15){ _feedAdvance(true); return; }
+    // Dragged out of the window: pull back once, not in a loop, so replaying inside
+    // the clip still works.
+    if (t < clip.start - 2 && Date.now() - _feedLastSnap > 1000){
+      _feedLastSnap = Date.now();
+      try { _feedPlayer.seekTo(clip.start, true); } catch(_){}
+    }
+  }
+
+  function _feedArm(){
+    _feedStopTimers();
+    var clip = _feedCur();
+    if (!clip) return;
+    _feedPoll = setInterval(_feedTick, FEED_POLL_MS);
+
+    /* Backstop for the case the IFrame API never answers at all, which this portal has
+       already hit inside PWA / in-app webviews. Without it the feed sits on a dead frame
+       forever.
+
+       But it counts WALL-CLOCK, and a learner who pauses to write something down is not
+       a dead player. Armed naively it would yank them into the next clip mid-note. So
+       when it fires it checks the actual playhead: only a player still sitting at the
+       clip's start never started, and anything else gets a fresh window sized to what is
+       really left. Pausing also disarms it outright (see onStateChange). */
+    function fire(){
+      var t = null;
+      try { t = _feedPlayer && _feedPlayer.getCurrentTime ? _feedPlayer.getCurrentTime() : null; } catch(_){}
+      if (t === null || t <= clip.start + 0.5){ _feedAdvance(false); return; }
+      _feedBackstop = setTimeout(fire, Math.max(0, clip.end - t) * 1000 + 8000);
+    }
+    _feedBackstop = setTimeout(fire, (clip.end - clip.start) * 1000 + 8000);
+  }
+
+  function _feedAdvance(reachedEnd){
+    if (_feedAdvancing) return;
+    _feedAdvancing = true;
+    _feedStopTimers();
+    var clip = _feedCur();
+    // Overshoot ledger. "The clip stops at the right second" is the one claim this whole
+    // feature rests on, and it cannot be verified by reading the code — only by measuring
+    // where the player actually was when the guard fired. Dev-only, see window._feedDebug.
+    if (devBypass && clip){
+      var at = null;
+      try { at = _feedPlayer && _feedPlayer.getCurrentTime ? _feedPlayer.getCurrentTime() : null; } catch(_){}
+      _feedStops.push({ id: clip.id, end: clip.end, at: at,
+                        overshoot: at === null ? null : +(at - clip.end).toFixed(2),
+                        reachedEnd: !!reachedEnd, watched: +_feedWatched.toFixed(1) });
+    }
+    setTimeout(function(){ _feedAdvancing = false; }, 400);
+    if (clip && reachedEnd && _feedWatched >= (clip.end - clip.start) * FEED_DONE_RATIO){
+      markClipCompleted(clip);
+    }
+    if (_feedIdx + 1 >= _feedList.length){ _feedShowEnd(); return; }
+    _feedIdx += 1;
+    _feedPlay();
+  }
+
+  function _feedPlay(){
+    var clip = _feedCur();
+    if (!clip) return;
+    _feedWatched = 0; _feedLastT = -1;
+    document.getElementById('feedEnd').hidden = true;
+    document.getElementById('feedMeta').hidden = false;
+    document.getElementById('feedActions').hidden = false;
+    document.getElementById('feedStage').hidden = false;
+    _feedPaintMeta();
+
+    if (!_feedPlayer){ _feedShowUnlock('התחל לצפות'); return; }
+    document.getElementById('feedUnlock').hidden = true;
+    try {
+      _feedPlayer.loadVideoById({ videoId: clip.videoId, startSeconds: clip.start });
+    } catch(_){
+      _feedShowUnlock('המשך');
+      return;
+    }
+    _feedArm();
+    // If nothing started within 1.5s, offer the gesture again instead of freezing.
+    setTimeout(function(){
+      try {
+        if (_feedPlayer && _feedPlayer.getPlayerState && _feedPlayer.getPlayerState() === -1){
+          _feedShowUnlock('המשך');
+        }
+      } catch(_){}
+    }, 1500);
+  }
+
+  function _feedBuildPlayer(onReady){
+    var mount = document.getElementById('feedMount');
+    var clip = _feedCur();
+    if (!mount || !clip) return;
+    mount.innerHTML = '<div id="feedPlayerHost"></div>';
+    loadYtApi();
+    var tries = 0;
+    (function attach(){
+      if (window.YT && window.YT.Player){
+        try {
+          _feedPlayer = new YT.Player('feedPlayerHost', {
+            host: 'https://www.youtube-nocookie.com',
+            videoId: clip.videoId,
+            playerVars: { rel:0, modestbranding:1, start: Math.floor(clip.start),
+                          autoplay:0, playsinline:1, origin: location.origin },
+            events: {
+              onReady: function(){ _feedReady = true; if (onReady) onReady(); },
+              onStateChange: function(e){
+                if (e.data === YT.PlayerState.PLAYING){ _feedArm(); document.getElementById('feedUnlock').hidden = true; }
+                // Pausing disarms both timers. The poll is harmless while paused (the
+                // playhead does not move, so nothing is credited and nothing advances),
+                // but the wall-clock backstop would eventually fire on a learner who
+                // stopped to take a note.
+                if (e.data === YT.PlayerState.PAUSED){ _feedStopTimers(); }
+                if (e.data === YT.PlayerState.ENDED){ _feedAdvance(true); }
+              },
+              // 100/101/150 = private, removed, or embedding disabled by the owner.
+              // Nothing we can do inside the feed — skip rather than strand the learner.
+              onError: function(e){
+                var c = e && e.data;
+                if (c === 100 || c === 101 || c === 150) _feedAdvance(false);
+              }
+            }
+          });
+        } catch(_){ _feedShowUnlock('נסה שוב'); }
+        return;
+      }
+      if (tries++ < 40) setTimeout(attach, 150);
+      else _feedShowUnlock('נסה שוב');
+    })();
+  }
+
+  function _feedShowEnd(){
+    _feedStopTimers();
+    try { if (_feedPlayer && _feedPlayer.pauseVideo) _feedPlayer.pauseVideo(); } catch(_){}
+    var done = _feedList.filter(function(c){ return _clipsDone.has(c.id); }).length;
+    var cat = _feedCatalog();
+    // Offer the next topic that still has something unwatched, not a silent loop back
+    // to clip 1 — a feed that restarts itself reads as a bug.
+    var nextTopic = cat.activeTopics().filter(function(t){
+      return t.key !== _feedTopic && cat.byTopic(t.key).some(function(c){ return !_clipsDone.has(c.id); });
+    })[0];
+    var last = _feedList[_feedList.length - 1];
+    var src = last ? _feedFindLesson(last.videoId) : null;
+    var isGuest = !(window.supabaseClient && _feedSignedIn);
+    document.getElementById('feedMeta').hidden = true;
+    document.getElementById('feedActions').hidden = true;
+    document.getElementById('feedStage').hidden = true;
+    document.getElementById('feedEnd').innerHTML =
+      '<h3>סיימת את הסדרה</h3>'
+      + '<p>צפית ב-<bdi>' + done + '</bdi> מתוך <bdi>' + _feedList.length + '</bdi> קטעים'
+      + (isGuest ? '. פתח חשבון חינם כדי לשמור את הרצף שלך.' : '.') + '</p>'
+      + '<div class="lms-feed__actions">'
+      + (nextTopic ? '<button class="lms-feed__btn lms-feed__btn--gold" type="button" data-feed-topic="' + nextTopic.key + '">המשך ל' + escapeHtml(nextTopic.label) + '</button>' : '')
+      + (src ? '<a class="lms-feed__btn" href="#m' + (src.m + 1) + 'l' + (src.l + 1) + '" data-feed-full="1">לשיעור המלא</a>' : '')
+      + (isGuest ? '<a class="lms-feed__btn" href="free-portal.html" data-feed-signup="1">פתיחת חשבון</a>' : '')
+      + '<button class="lms-feed__btn" type="button" data-feed-restart="1">מהתחלה</button>'
+      + '</div>';
+    document.getElementById('feedEnd').hidden = false;
+  }
+  var _feedSignedIn = false;
+
+  function _feedRenderFilters(){
+    var box = document.getElementById('feedFilters');
+    var cat = _feedCatalog();
+    if (!box || !cat) return;
+    var topics = cat.activeTopics();
+    // One topic is not a filter, it is noise.
+    if (topics.length < 2){ box.hidden = true; return; }
+    box.hidden = false;
+    var html = '<button class="lms-feed__chip" role="tab" data-topic="all" aria-selected="'
+      + (_feedTopic === 'all') + '">הכול<span class="lms-feed__chipn">' + cat.all().length + '</span></button>';
+    topics.forEach(function(t){
+      html += '<button class="lms-feed__chip" role="tab" data-topic="' + t.key + '" aria-selected="'
+        + (_feedTopic === t.key) + '">' + escapeHtml(t.label)
+        + '<span class="lms-feed__chipn">' + t.count + '</span></button>';
+    });
+    box.innerHTML = html;
+  }
+
+  function _feedLoadList(topic, keepPlayer){
+    var cat = _feedCatalog();
+    _feedTopic = topic || 'all';
+    _feedList = cat ? cat.byTopic(_feedTopic) : [];
+    _feedRenderFilters();
+    var empty = document.getElementById('feedEmpty');
+    if (!_feedList.length){
+      if (empty) empty.hidden = false;
+      document.getElementById('feedStage').hidden = true;
+      document.getElementById('feedMeta').hidden = true;
+      document.getElementById('feedActions').hidden = true;
+      return;
+    }
+    if (empty) empty.hidden = true;
+    // Land on the first thing this person has not seen, so returning to the feed
+    // never replays what they already finished.
+    var first = _feedList.findIndex(function(c){ return !_clipsDone.has(c.id); });
+    _feedIdx = first < 0 ? 0 : first;
+    if (!keepPlayer){ stopFeed(); }
+    _feedPlay();
+  }
+
+  function showFeedView(skipPush){
+    document.body.classList.remove('view-player', 'view-master', 'view-master-sales', 'view-ambassador', 'view-buddy');
+    document.body.classList.add('view-feed');
+    clearVideoState();
+    var topic = (location.hash.match(/^#feed\/([a-z_]+)$/) || [])[1] || 'all';
+    if (!skipPush && location.hash.indexOf('#feed') !== 0){
+      history.pushState(null, '', '#feed' + (topic === 'all' ? '' : '/' + topic));
+    }
+    _feedLoadList(topic);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setupFeed(){
+    var root = document.querySelector('.lms-feed');
+    if (!root || !_feedCatalog()) return;
+    // The sidebar item is built as a string in renderSidebarNav(); the bottom-bar one is
+    // static markup, so it is revealed here. Both stay hidden while the catalog is empty.
+    var bnav = document.getElementById('bnavFeed');
+    if (bnav && _feedHasClips()) bnav.style.display = '';
+
+    // Knowing whether this is a guest only changes the end-of-feed copy, so it is
+    // resolved lazily and never blocks the feed from playing.
+    (async function(){
+      try {
+        var c = window.supabaseClient;
+        if (!c) return;
+        var r = await c.auth.getSession();
+        _feedSignedIn = !!(r && r.data && r.data.session);
+      } catch(_){}
+    })();
+
+    document.getElementById('feedUnlock').addEventListener('click', function(){
+      // THIS CLICK IS THE AUTOPLAY GESTURE. playVideo() must be called synchronously
+      // inside the handler, or the browser will not treat it as user-initiated.
+      document.getElementById('feedUnlock').hidden = true;
+      _feedUnlocked = true;
+      if (!_feedPlayer){
+        _feedBuildPlayer(function(){
+          try { _feedPlayer.playVideo(); } catch(_){}
+          _feedArm();
+        });
+      } else {
+        try { _feedPlayer.playVideo(); } catch(_){}
+        _feedArm();
+      }
+    });
+
+    document.getElementById('feedNext').addEventListener('click', function(){
+      // Skipping is not watching: no completion is credited here.
+      _feedStopTimers();
+      if (_feedIdx + 1 >= _feedList.length){ _feedShowEnd(); return; }
+      _feedIdx += 1; _feedPlay();
+    });
+    document.getElementById('feedPrev').addEventListener('click', function(){
+      if (_feedIdx === 0) return;
+      _feedStopTimers();
+      _feedIdx -= 1; _feedPlay();
+    });
+    document.getElementById('feedBack').addEventListener('click', function(){ stopFeed(); showWelcome(); });
+
+    document.getElementById('feedFilters').addEventListener('click', function(e){
+      var chip = e.target.closest('.lms-feed__chip');
+      if (!chip) return;
+      var topic = chip.dataset.topic;
+      try { history.replaceState(null, '', '#feed' + (topic === 'all' ? '' : '/' + topic)); } catch(_){}
+      _feedLoadList(topic, true);
+    });
+
+    document.getElementById('feedEnd').addEventListener('click', function(e){
+      var t = e.target.closest('[data-feed-topic]');
+      if (t){
+        try { history.replaceState(null, '', '#feed/' + t.dataset.feedTopic); } catch(_){}
+        _feedLoadList(t.dataset.feedTopic, true);
+        return;
+      }
+      if (e.target.closest('[data-feed-restart]')){
+        _feedIdx = 0; _feedPlay();
+        return;
+      }
+      var full = e.target.closest('[data-feed-full]');
+      if (full){ e.preventDefault(); _feedGoToFullLesson(full.getAttribute('href')); }
+    });
+
+    document.getElementById('feedFull').addEventListener('click', function(e){
+      e.preventDefault();
+      _feedGoToFullLesson(this.getAttribute('href'));
+    });
+
+    // Leaving the feed has to kill the feed's player, or a learner who taps a lesson
+    // keeps hearing a clip behind it. Every view switch in this portal is "change the
+    // body class", in eight different places, and a ninth will be added one day. So
+    // instead of a stopFeed() call at each site that someone has to remember, watch the
+    // class itself: the moment view-feed is gone, the player goes with it.
+    try {
+      new MutationObserver(function(){
+        if (!document.body.classList.contains('view-feed') && _feedPlayer) stopFeed();
+      }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    } catch(_){}
+
+    // Test surface, localhost + ?dev=1 only (devBypass is already restricted to
+    // localhost). Lets the end-guard be measured instead of assumed.
+    if (devBypass){
+      window._feedDebug = {
+        stops: function(){ return _feedStops; },
+        state: function(){
+          var c = _feedCur(), t = null;
+          try { t = _feedPlayer && _feedPlayer.getCurrentTime ? _feedPlayer.getCurrentTime() : null; } catch(_){}
+          return { idx: _feedIdx, total: _feedList.length, id: c && c.id,
+                   start: c && c.start, end: c && c.end, t: t,
+                   watched: +_feedWatched.toFixed(1),
+                   playerState: (function(){ try { return _feedPlayer.getPlayerState(); } catch(_){ return null; } })() };
+        },
+        seek: function(sec){ try { _feedPlayer.seekTo(sec, true); } catch(_){} },
+        pause: function(){ try { _feedPlayer.pauseVideo(); } catch(_){} },
+        play: function(){ try { _feedPlayer.playVideo(); } catch(_){} },
+        timers: function(){ return { poll: !!_feedPoll, backstop: !!_feedBackstop }; }
+      };
+    }
+  }
+
+  // Jump into the full lesson AT the clip's moment. The start is handed over through
+  // _pendingLessonStart rather than by writing a saved position, because overwriting
+  // pos_<videoId> would move the learner's real resume point in that lesson.
+  function _feedGoToFullLesson(href){
+    var clip = _feedCur();
+    var m = (href || '').match(/#m(\d+)l(\d+)/);
+    if (!m || !clip) return;
+    stopFeed();
+    if (courseType !== 'nlp-practitioner'){ setCourse('nlp-practitioner'); }
+    window._pendingLessonStart = Math.floor(clip.start);
+    selectLesson(parseInt(m[1],10) - 1, parseInt(m[2],10) - 1);
+  }
+
   // ===== Resources =====
   function renderResources(){
     if (currentModuleIndex < 0) return;
@@ -4824,7 +5467,7 @@
 
   // ===== Ambassador view =====
   async function showAmbassadorView(skipPush){
-    document.body.classList.remove('view-player', 'view-master', 'view-master-sales', 'view-buddy');
+    document.body.classList.remove('view-player', 'view-master', 'view-master-sales', 'view-buddy', 'view-feed');
     document.body.classList.add('view-ambassador');
     clearVideoState();
     if (!skipPush && location.hash !== '#ambassador') history.pushState(null, '', '#ambassador');
@@ -4960,7 +5603,7 @@
   }
 
   async function showBuddyView(skipPush){
-    document.body.classList.remove('view-player', 'view-master', 'view-master-sales', 'view-ambassador');
+    document.body.classList.remove('view-player', 'view-master', 'view-master-sales', 'view-ambassador', 'view-feed');
     document.body.classList.add('view-buddy');
     clearVideoState();
     if (!skipPush && location.hash !== '#buddy') history.pushState(null, '', '#buddy');
@@ -5438,7 +6081,7 @@
       console.info('Master access requires paid membership.');
       return;
     }
-    document.body.classList.remove('view-player', 'view-ambassador', 'view-master-sales', 'view-buddy');
+    document.body.classList.remove('view-player', 'view-ambassador', 'view-master-sales', 'view-buddy', 'view-feed');
     document.body.classList.add('view-master');
     clearVideoState();
     if (!skipPush && location.hash !== '#master') history.pushState(null, '', '#master');
@@ -5448,7 +6091,7 @@
 
   // ===== Master SALES view (upsell landing page — open to all portal members) =====
   function showMasterSalesView(skipPush){
-    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales', 'view-buddy');
+    document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales', 'view-buddy', 'view-feed');
     document.body.classList.add('view-master-sales');
     if (typeof clearVideoState === 'function') clearVideoState();
     if (!skipPush && location.hash !== '#master-sales') history.pushState(null, '', '#master-sales');
@@ -5761,6 +6404,7 @@
         return true;
       }
     }
+    if (location.hash.indexOf('#feed') === 0){ showFeedView(true); return true; }
     if (location.hash === '#buddy'){ showBuddyView(true); return true; }
     if (location.hash === '#ambassador'){ showAmbassadorView(true); return true; }
     if (location.hash === '#master-sales'){ showMasterSalesView(true); return true; }
@@ -5814,9 +6458,10 @@
         }
       }
       // In-page nav (sidebar items + partners CTA + resource cards)
-      const navAnchor = e.target.closest('a[data-nav], a[href="#ambassador"], a[href="#master"], a[href="#buddy"]');
+      const navAnchor = e.target.closest('a[data-nav], a[href="#ambassador"], a[href="#master"], a[href="#buddy"], a[href^="#feed"]');
       if (navAnchor){
         const target = navAnchor.getAttribute('data-nav') || navAnchor.getAttribute('href').replace('#','');
+        if (target === 'feed' || target.indexOf('feed/') === 0){ e.preventDefault(); showFeedView(); return; }
         if (target === 'buddy'){ e.preventDefault(); showBuddyView(); return; }
         if (target === 'ambassador'){ e.preventDefault(); showAmbassadorView(); return; }
         if (target === 'master-sales'){ e.preventDefault(); showMasterSalesView(); return; }
@@ -5842,6 +6487,7 @@
     setupAi();
     setupGameBtn();
     setupPracticeClips();
+    setupFeed();
     setupLessonNav();
     setupAmbassador();
     setupBuddy();

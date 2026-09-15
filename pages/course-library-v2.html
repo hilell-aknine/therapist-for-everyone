@@ -1013,10 +1013,85 @@
   }
   .lms-feed__stage iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
 
+  /* Story-style segment bar. This is what makes the view read as short-form BEFORE
+     anything plays: ten thin segments say "ten short things" at a glance, where a single
+     long scrubber says "one long thing". It replaces YouTube's bar, which was removed
+     with controls:0 because it advertised the 27-minute source instead of the clip. */
+  /* Everything lives in ONE zone at the TOP. The lesson videos carry BURNED-IN Hebrew
+     subtitles along the bottom edge, so a control strip down there covers the words the
+     learner is reading — measured in a real 390px render, not guessed. */
+  /* Click shield. controls:0 removes YouTube's bar, but a tap or hover on the iframe
+     still summons YouTube's own chrome — title, channel name, logo, "more videos". The
+     shield takes every pointer event so the player is driven ONLY by the buttons here.
+     Same idea as the curtain on the plyr branch, minus the dependency. */
+  .lms-feed__shield{
+    position:absolute; inset:0; z-index:2; cursor:pointer; background:transparent;
+    border:0; padding:0; -webkit-tap-highlight-color:transparent;
+  }
+  .lms-feed__top{
+    position:absolute; top:0; left:0; right:0; z-index:3;
+    padding:8px 8px 14px;
+    /* Opaque, not a wash: this band has to HIDE YouTube's title bar, not tint it. */
+    background:linear-gradient(to bottom,
+      rgba(2,26,31,.97) 0%, rgba(2,26,31,.95) 62%, rgba(2,26,31,.55) 82%, rgba(2,26,31,0) 100%);
+  }
+  .lms-feed__segs{
+    display:flex; gap:3px; pointer-events:none; margin-bottom:8px;
+  }
+  .lms-feed__seg{
+    flex:1 1 0; min-width:0; height:3px; border-radius:2px;
+    background:rgba(255,255,255,.28); overflow:hidden;
+  }
+  .lms-feed__seg i{
+    display:block; height:100%; width:0; border-radius:2px;
+    background:var(--accent-gold-hover);
+  }
+  .lms-feed__seg.is-done i{ width:100%; background:rgba(255,255,255,.75); }
+
+  /* Bottom strip: clip-relative time only. "0:14 / 2:05" is the honest number here —
+     the source video's own duration is never shown, because it is not what is playing. */
+  .lms-feed__hud{
+    display:flex; align-items:center; gap:.55rem;
+  }
+  .lms-feed__pp{
+    flex:none; width:30px; height:30px; border-radius:50%; cursor:pointer; border:0;
+    display:grid; place-items:center; font-size:.72rem;
+    background:rgba(255,255,255,.18); color:#fff; backdrop-filter:blur(6px);
+  }
+  .lms-feed__pp:hover{ background:rgba(255,255,255,.26); }
+  .lms-feed__time{
+    font-size:.78rem; font-weight:600; color:#fff; font-variant-numeric:tabular-nums;
+    text-shadow:0 1px 3px rgba(0,0,0,.6); direction:ltr;
+  }
+  .lms-feed__srcbadge{
+    margin-inline-start:auto; font-size:.7rem; color:rgba(255,255,255,.8);
+    text-shadow:0 1px 3px rgba(0,0,0,.6); white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis; max-width:52%;
+  }
+  @media (max-width: 420px){
+    .lms-feed__srcbadge{ display:none; }
+  }
+
   /* The unlock button IS the autoplay gesture. Browsers block unmuted autoplay without
      a prior user gesture, so without this the feed dies silently on the very first clip. */
+  /* Pausing is the one moment YouTube paints its own overlay — big glyph, logo and a
+     "watch more" card — straight over the frame. This covers it, so a pause looks like a
+     pause in THIS product. */
+  .lms-feed__paused{
+    position:absolute; inset:0; z-index:4; display:grid; place-items:center; gap:.6rem;
+    background:rgba(2,26,31,.88); cursor:pointer; border:0; padding:0;
+    color:#fff; font-family:inherit;
+  }
+  .lms-feed__paused i{
+    width:60px; height:60px; border-radius:50%; display:grid; place-items:center; font-size:1.2rem;
+    background:linear-gradient(135deg, var(--accent-gold-hover) 0%, var(--accent-gold) 100%);
+    color:var(--text-on-gold);
+  }
+  .lms-feed__paused span{ font-size:.86rem; font-weight:700; }
+
   .lms-feed__unlock{
     position:absolute; inset:0; width:100%; height:100%; cursor:pointer; border:0; padding:0;
+    z-index:5;
     display:grid; place-items:center; gap:.6rem; font-family:inherit; color:#fff;
     background:rgba(0,0,0,.55); backdrop-filter:blur(2px);
   }
@@ -2136,6 +2211,19 @@
 
         <div class="lms-feed__stage" id="feedStage">
           <div id="feedMount"></div>
+          <button class="lms-feed__shield" type="button" id="feedShield" aria-label="השהה או המשך"></button>
+          <div class="lms-feed__top">
+            <div class="lms-feed__segs" id="feedSegs" aria-hidden="true"></div>
+            <div class="lms-feed__hud" id="feedHud" hidden>
+              <button class="lms-feed__pp" type="button" id="feedPP" aria-label="השהה"><i class="fa-solid fa-pause"></i></button>
+              <span class="lms-feed__time" id="feedTime">0:00 / 0:00</span>
+              <span class="lms-feed__srcbadge" id="feedSrcBadge"></span>
+            </div>
+          </div>
+          <button class="lms-feed__paused" type="button" id="feedPaused" hidden>
+            <i class="fa-solid fa-play"></i>
+            <span>לחץ כדי להמשיך</span>
+          </button>
           <button class="lms-feed__unlock" type="button" id="feedUnlock" hidden>
             <img id="feedUnlockThumb" src="" alt="" loading="lazy">
             <span>
@@ -2149,7 +2237,6 @@
           <div class="lms-feed__src" id="feedSrc"></div>
           <h2 id="feedTitle"></h2>
           <p class="lms-feed__hook" id="feedHook"></p>
-          <div class="lms-feed__bar"><span id="feedBarFill"></span></div>
           <div class="lms-feed__counter" id="feedCounter"></div>
         </div>
 
@@ -4977,6 +5064,7 @@
     _feedPlayer = null; _feedReady = false; _feedUnlocked = false;
     var mount = document.getElementById('feedMount');
     if (mount) mount.innerHTML = '';
+    _feedHud(false);
   }
 
   async function markClipCompleted(clip){
@@ -5008,11 +5096,37 @@
       + ' · הושלמו <bdi>' + done + '</bdi>';
   }
 
+  function _fmtClock(s){
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  // Ten thin segments instead of one long scrubber. Rebuilt on every clip change so the
+  // count always matches the active filter, not the whole catalog.
+  function _feedPaintSegs(){
+    var box = document.getElementById('feedSegs');
+    if (!box) return;
+    box.innerHTML = _feedList.map(function(c, i){
+      return '<span class="lms-feed__seg' + (i < _feedIdx ? ' is-done' : '') + '"><i></i></span>';
+    }).join('');
+  }
+
+  function _feedSegFill(){
+    var segs = document.getElementById('feedSegs');
+    var seg = segs && segs.children[_feedIdx];
+    return seg ? seg.firstChild : null;
+  }
+
   function _feedPaintMeta(){
     var clip = _feedCur();
     if (!clip) return;
     var cat = _feedCatalog();
     var src = _feedFindLesson(clip.videoId);
+    _feedPaintSegs();
+    var badge = document.getElementById('feedSrcBadge');
+    if (badge) badge.textContent = src ? src.lesson.title : '';
+    var t = document.getElementById('feedTime');
+    if (t) t.textContent = '0:00 / ' + _fmtClock(cat.duration(clip));
     document.getElementById('feedTitle').textContent = clip.title || '';
     document.getElementById('feedHook').textContent = clip.hook || '';
     var secs = Math.round(cat.duration(clip));
@@ -5020,11 +5134,32 @@
       '<i class="fa-regular fa-clock"></i> <bdi>' + Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2,'0') + '</bdi>'
       + (src ? ' <span class="lms-hero__bull">•</span> מתוך: ' + escapeHtml(src.lesson.title) : '')
       + (_clipsDone.has(clip.id) ? ' <span class="lms-hero__bull">•</span> <i class="fa-solid fa-check" style="color:var(--accent-gold-hover)"></i> נצפה' : '');
-    document.getElementById('feedBarFill').style.width = '0%';
+    var f0 = _feedSegFill(); if (f0) f0.style.width = '0%';
     var full = document.getElementById('feedFull');
     if (full && src) full.setAttribute('href', '#m' + (src.m + 1) + 'l' + (src.l + 1));
     document.getElementById('feedPrev').disabled = _feedIdx === 0;
     _feedPaintProgress();
+  }
+
+  // The strip only makes sense once something is actually playing; before that the
+  // unlock button owns the whole stage.
+  function _feedHud(show, playing){
+    var hud = document.getElementById('feedHud');
+    if (!hud) return;
+    hud.hidden = !show;
+    var scrim = document.getElementById('feedPaused');
+    if (scrim) scrim.hidden = !(show && !playing);
+    var btn = document.getElementById('feedPP');
+    if (!btn) return;
+    btn.innerHTML = '<i class="fa-solid fa-' + (playing ? 'pause' : 'play') + '"></i>';
+    btn.setAttribute('aria-label', playing ? 'השהה' : 'נגן');
+  }
+
+  function _feedToggle(){
+    if (!_feedPlayer) return;
+    var st = null;
+    try { st = _feedPlayer.getPlayerState(); } catch(_){}
+    try { st === 1 ? _feedPlayer.pauseVideo() : _feedPlayer.playVideo(); } catch(_){}
   }
 
   function _feedShowUnlock(label){
@@ -5057,8 +5192,12 @@
     _feedLastT = t;
 
     var span = clip.end - clip.start;
-    var fill = document.getElementById('feedBarFill');
-    if (fill) fill.style.width = Math.max(0, Math.min(100, ((t - clip.start) / span) * 100)) + '%';
+    var elapsed = Math.max(0, Math.min(span, t - clip.start));
+    var fill = _feedSegFill();
+    if (fill) fill.style.width = (elapsed / span) * 100 + '%';
+    var clock = document.getElementById('feedTime');
+    // Clip-relative, always. The source video's own clock is never surfaced.
+    if (clock) clock.textContent = _fmtClock(elapsed) + ' / ' + _fmtClock(span);
 
     if (t >= clip.end - 0.15){ _feedAdvance(true); return; }
     // Dragged out of the window: pull back once, not in a loop, so replaying inside
@@ -5127,8 +5266,10 @@
     document.getElementById('feedStage').hidden = false;
     _feedPaintMeta();
 
-    if (!_feedPlayer){ _feedShowUnlock('התחל לצפות'); return; }
+    if (!_feedPlayer){ _feedHud(false); _feedShowUnlock('התחל לצפות'); return; }
     document.getElementById('feedUnlock').hidden = true;
+    // Clear the pause scrim across the clip change; PLAYING will re-evaluate it.
+    var scrim = document.getElementById('feedPaused'); if (scrim) scrim.hidden = true;
     try {
       _feedPlayer.loadVideoById({ videoId: clip.videoId, startSeconds: clip.start });
     } catch(_){
@@ -5159,17 +5300,27 @@
           _feedPlayer = new YT.Player('feedPlayerHost', {
             host: 'https://www.youtube-nocookie.com',
             videoId: clip.videoId,
-            playerVars: { rel:0, modestbranding:1, start: Math.floor(clip.start),
+            // controls:0 is the whole point of this view. With YouTube's own bar visible
+            // the learner sees a 27-minute scrubber under a 2-minute clip, and the
+            // promise the page just made is broken before they press play. Removing it
+            // means the feed must draw its own progress — see the segment bar below.
+            // disablekb + fs keep the arrow keys and fullscreen from escaping the window.
+            playerVars: { rel:0, controls:0, disablekb:1, fs:0, iv_load_policy:3,
+                          modestbranding:1, start: Math.floor(clip.start),
                           autoplay:0, playsinline:1, origin: location.origin },
             events: {
               onReady: function(){ _feedReady = true; if (onReady) onReady(); },
               onStateChange: function(e){
-                if (e.data === YT.PlayerState.PLAYING){ _feedArm(); document.getElementById('feedUnlock').hidden = true; }
+                if (e.data === YT.PlayerState.PLAYING){
+                  _feedArm();
+                  document.getElementById('feedUnlock').hidden = true;
+                  _feedHud(true, true);
+                }
                 // Pausing disarms both timers. The poll is harmless while paused (the
                 // playhead does not move, so nothing is credited and nothing advances),
                 // but the wall-clock backstop would eventually fire on a learner who
                 // stopped to take a note.
-                if (e.data === YT.PlayerState.PAUSED){ _feedStopTimers(); }
+                if (e.data === YT.PlayerState.PAUSED){ _feedStopTimers(); _feedHud(true, false); }
                 if (e.data === YT.PlayerState.ENDED){ _feedAdvance(true); }
               },
               // 100/101/150 = private, removed, or embedding disabled by the owner.
@@ -5304,6 +5455,10 @@
         _feedArm();
       }
     });
+
+    document.getElementById('feedPP').addEventListener('click', _feedToggle);
+    document.getElementById('feedShield').addEventListener('click', _feedToggle);
+    document.getElementById('feedPaused').addEventListener('click', _feedToggle);
 
     document.getElementById('feedNext').addEventListener('click', function(){
       // Skipping is not watching: no completion is credited here.

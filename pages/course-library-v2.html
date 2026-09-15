@@ -1785,7 +1785,13 @@
   if (location.hash === '#master-sales') document.body.classList.add('view-master-sales');
   /* Same reasoning for the micro-lesson feed: it is public, and it is often the
      first thing a visitor ever loads, so paint the view before the auth check. */
-  if (location.hash.indexOf('#feed') === 0) document.body.classList.add('view-feed');
+  /* ?view=feed is the redirect-safe twin of #feed. A fragment never reaches the server,
+     so any hop through a login or an SSO gate silently drops it and the visitor lands on
+     the welcome screen instead of the thing they were sent to. The query param survives
+     that round trip. Same for a shared or shortened link that gets rewritten. */
+  if (location.hash.indexOf('#feed') === 0 || /[?&]view=feed\b/.test(location.search)) {
+    document.body.classList.add('view-feed');
+  }
 </script>
 
 <div class="frame">
@@ -3413,7 +3419,9 @@
     // watch, and it is the cheapest possible first taste of the portal. A guest's clip
     // progress lives in localStorage only — nothing is written for them.
     // Everything else in the portal still requires login.
-    const guestSalesPass = location.hash === '#master-sales' || location.hash.indexOf('#feed') === 0;
+    const guestSalesPass = location.hash === '#master-sales'
+      || location.hash.indexOf('#feed') === 0
+      || /[?&]view=feed\b/.test(location.search);   // redirect-safe twin, see the head script
     try {
       const client = window.supabaseClient || (window.SUPABASE_CONFIG && window.supabase
         ? window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey)
@@ -6680,6 +6688,14 @@
       }
     }
     if (location.hash.indexOf('#feed') === 0){ showFeedView(true); return true; }
+    // Entered via ?view=feed (a link that survived a redirect). Normalise to the hash so
+    // every later route, share and back-button behaves like any other feed visit.
+    if (!location.hash && /[?&]view=feed\b/.test(location.search)){
+      var qTopic = (location.search.match(/[?&]topic=([a-z_]+)/) || [])[1];
+      try { history.replaceState(null, '', '#feed' + (qTopic ? '/' + qTopic : '')); } catch(_){}
+      showFeedView(true);
+      return true;
+    }
     if (location.hash === '#buddy'){ showBuddyView(true); return true; }
     if (location.hash === '#ambassador'){ showAmbassadorView(true); return true; }
     if (location.hash === '#master-sales'){ showMasterSalesView(true); return true; }

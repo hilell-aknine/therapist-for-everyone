@@ -86,6 +86,25 @@ ${buddy}, שנמצא/ת בערך באותו מקום כמוך בקורס, ביק
 ${PORTAL_LINK}` + OPT_OUT_LINE
   }
 
+  // 3 days on, still no answer. Sent ONCE per request, ever — the unique index on
+  // (request_id, user_id, kind) is what guarantees it, not this code.
+  // The closing line asks them to open the screen even when the answer is no: that is
+  // the acknowledgement, and buddy_incoming() logs it as `incoming_viewed`. It is a
+  // truer signal than a reply, because it proves they saw the actual request.
+  if (kind === 'reminder') {
+    return head +
+`היי ${name},
+
+${buddy} עדיין מחכה לתשובה שלך.
+
+זה יושב אצלך שלושה ימים, ואני מניח שזה פשוט נבלע. אין פה שום לחץ: גם "לא" זו תשובה טובה, והיא משחררת את ${buddy} להתחבר למישהו אחר.
+
+לראות ולהחליט:
+${PORTAL_LINK}
+
+ואם אין לך זמן עכשיו, רק תיכנס/י לרגע לקישור כדי שנדע שראית.` + OPT_OUT_LINE
+  }
+
   return head +
 `היי ${name},
 
@@ -97,9 +116,16 @@ ${PORTAL_LINK}` + OPT_OUT_LINE
 }
 
 function subjectFor(kind: string, other: string): string {
-  return kind === 'request'
-    ? `${other || 'לומד/ת בפורטל'} מבקש/ת ללמוד איתך`
-    : `${other || 'לומד/ת בפורטל'} אישר/ה — אתם מחוברים`
+  if (kind === 'request')  return `${other || 'לומד/ת בפורטל'} מבקש/ת ללמוד איתך`
+  if (kind === 'reminder') return `${other || 'לומד/ת בפורטל'} עדיין מחכה לתשובה שלך`
+  return `${other || 'לומד/ת בפורטל'} אישר/ה — אתם מחוברים`
+}
+
+// Single source for the button label. Both call sites used an inline
+// `kind === 'request' ? ... : ...`, which would have silently given a reminder the
+// "open the details" CTA — i.e. the wording of a connection that does not exist yet.
+function ctaFor(kind: string): string {
+  return (kind === 'request' || kind === 'reminder') ? 'לראות ולהחליט' : 'לפתיחת הפרטים'
 }
 
 // RTL email body. Kept to inline styles only: Gmail and most Hebrew mail clients strip
@@ -198,11 +224,12 @@ serve(async (req) => {
   if (body.test_email) {
     const to = validEmail(String(body.test_email))
     if (!to) return new Response(JSON.stringify({ error: 'invalid email' }), { status: 400 })
-    const kind = body.test_kind === 'accepted' ? 'accepted' : 'request'
+    const kind = ['accepted', 'reminder'].includes(String(body.test_kind))
+               ? String(body.test_kind) : 'request'
     const other = String(body.test_other || 'דנה')
     const msg = buildMessage(kind, String(body.test_name || 'הילל'), other, true)
     const r = await sendEmail(to, '🧪 ' + subjectFor(kind, other), msg,
-                              buildHtml(msg, kind === 'request' ? 'לראות ולהחליט' : 'לפתיחת הפרטים'))
+                              buildHtml(msg, ctaFor(kind)))
     return new Response(JSON.stringify({ test: true, kind, to, ...r }),
       { headers: { 'Content-Type': 'application/json' } })
   }
@@ -265,8 +292,7 @@ serve(async (req) => {
     const msg = buildMessage(kind, String(row.recipient_name || ''), other)
     if (dryRun) { log.push({ id, would_send_to: to, kind, preview: msg.slice(0, 80) }); continue }
 
-    const r = await sendEmail(to, subjectFor(kind, other), msg,
-                              buildHtml(msg, kind === 'request' ? 'לראות ולהחליט' : 'לפתיחת הפרטים'))
+    const r = await sendEmail(to, subjectFor(kind, other), msg, buildHtml(msg, ctaFor(kind)))
     if (r.ok) {
       await db.from('study_buddy_notifications')
         .update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', id)

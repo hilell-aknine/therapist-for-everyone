@@ -586,6 +586,20 @@
             return getOrCreateSessionId();
         },
 
+        // Log an event for a surface that is NOT a managed popup (an inline pane, a tab,
+        // a nudge strip). Same RLS path and same table the admin dashboard already reads,
+        // so in-page features stop being invisible.
+        // Why this is needed: study-buddy consent impressions were never recorded
+        // client-side — popup_events held 3 rows against 12 people who actually answered,
+        // and "how many of the eligible ever saw it" became unrecoverable. Anything we
+        // deliberately put in front of a learner gets logged here from now on.
+        // popup_id is free-form (no FK); event_type is CHECK-constrained by migration 044.
+        track(popupId, eventType) {
+            const ALLOWED = ['shown', 'dismissed', 'clicked', 'timeout'];
+            if (!popupId || ALLOWED.indexOf(eventType) === -1) return;
+            logEvent(popupId, eventType);
+        },
+
         // Force a reload of server configs (admin dashboard triggers after edit)
         reloadServerConfigs() {
             return loadServerConfigs();

@@ -4156,8 +4156,12 @@
     if (mM) mM.style.display = _isPaidCustomer ? '' : 'none';
     if (mT) mT.style.display = _isPaidCustomer ? '' : 'none';
     // Live practice carries a per-use AI cost, so it follows the same gate.
+    // 🔕 מוסתר בכוונה מ-22.09.2026. הפיצ'ר עובד ופרוס, אבל יש בו תרחיש אחד
+    // בלבד, וזו הדגמה ולא תרגול. מוחזר כשיהיו מספיק תרחישים.
+    // להחזרה: SANDBOX_LIVE = true. אין צורך בשום שינוי אחר בשום קובץ.
+    const SANDBOX_LIVE = false;
     const sbx = document.getElementById('sandboxCta');
-    if (sbx) sbx.style.display = _isPaidCustomer ? '' : 'none';
+    if (sbx) sbx.style.display = (SANDBOX_LIVE && _isPaidCustomer) ? '' : 'none';
     document.querySelectorAll('#courseMenu .lms-course-menu__item').forEach(it => {
       const on = it.dataset.course === courseType;
       it.classList.toggle('is-active', on);

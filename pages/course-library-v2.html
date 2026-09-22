@@ -678,6 +678,14 @@
   .lms-game-cta__btn{ position:relative; z-index:1; flex:none; display:inline-flex; align-items:center; gap:.55rem; padding:.85rem 1.5rem; border-radius:999px; background: linear-gradient(180deg, var(--accent-gold-hover) 0%, var(--accent-gold) 100%); color:var(--text-on-gold); font-family:inherit; font-size:.95rem; font-weight:700; text-decoration:none; box-shadow: 0 8px 20px rgba(212,164,55,.36), inset 0 1px 0 rgba(255,255,255,.45); transition: transform .2s; }
   .lms-game-cta__btn:hover{ transform: translateY(-2px); }
 
+  /* ההזמנה להתקנה היא position:fixed בתחתית עם z-index 8500, ואין שום דבר
+     שמפנה לה מקום בגוף הדף. כל עוד היה כאן כרטיס אחד זה לא הורגש, כי הוא
+     יושב גבוה. עם כרטיס שני הכפתור התחתון נוחת בדיוק מתחת לבאנר ולא ניתן
+     ללחיצה בטלפון. הריפוד נוסף רק כשהבאנר באמת פתוח, ולכן הוא נעלם עם
+     סגירתו ואינו משאיר חלל מת. נמדד במובייל 390px: הכפתור 480-529,
+     הבאנר מתחיל ב-636, ו-elementFromPoint במרכז הכפתור מחזיר את הכפתור. */
+  body:has(.ip-banner.is-open) .lms-tab-pane[data-pane="game"]{ padding-bottom: 210px; }
+
   @container (max-width: 600px){
     .lms-game-cta{ flex-direction:column; align-items:flex-start; }
     .lms-game-cta__btn{ align-self: stretch; justify-content:center; }

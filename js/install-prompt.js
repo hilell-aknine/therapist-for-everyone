@@ -245,6 +245,79 @@
     }
 
     // ========================================================================
+    // שער הטופס — אדם שממלא טופס עכשיו הוא הבעלים של המסך
+    // ========================================================================
+    // 🔴 נמדד ב-22.09.2026 בשער ה-QA, לא הוסק: מבקר חדש בטלפון שלוחץ
+    //    "אני רוצה גישה לפורטל" מדלג ל-`#register`, והדילוג עצמו חוצה את
+    //    `scrollPercent: 45` — כלומר **תנאי ההפעלה של הבאנר מתלכד בדיוק עם
+    //    הגעת המבקר לטופס ההרשמה**. `document.elementFromPoint` על מרכז שדה
+    //    הטלפון החזיר `DIV.ip-banner` ולא את ה-INPUT, ועל תיבת אישור התנאים
+    //    החזיר `BUTTON.ip-btn`. שני השדות הם חובה להרשמה, ולכן מסך ההמרה
+    //    הראשון של כל מבקר חדש בטלפון היה חסום עד שהוא מזהה את הבאנר.
+    // ⚑ למה גאומטריה ולא `#register`: אותה התנגשות קיימת בכל טופס בתחתית
+    //    מסך — חתימת חוזה, שאלון, כניסה. שער לפי מזהה אחד היה מתקן מקרה
+    //    אחד ומשאיר את השאר. וזה גם למה זה לא תיקון z-index: העלאת הבאנר
+    //    רק מחליפה מי מכסה את מי.
+    var FIELD_ZONE = 0.55;   // הבאנר חי בתחתית המסך (נמדד: 209px מתוך 844)
+
+    function fieldsInBannerZone() {
+        try {
+            var vh = window.innerHeight || 0;
+            if (!vh) return false;
+            var zoneTop = vh * FIELD_ZONE;
+            var nodes = document.querySelectorAll('input, select, textarea');
+            for (var i = 0; i < nodes.length; i++) {
+                var el = nodes[i];
+                if (el.type === 'hidden' || el.disabled || el.readOnly) continue;
+                var b = el.getBoundingClientRect();
+                if (!b.width || !b.height) continue;      // לא מוצג בפועל
+                if (b.bottom <= zoneTop) continue;        // מעל אזור הבאנר
+                if (b.top >= vh) continue;                // מתחת לקפל
+                return true;
+            }
+            return false;
+        } catch (e) { return false; }   // ספק ⇒ לא חוסמים את ההזמנה
+    }
+
+    // הבאנר כבר פתוח והמבקר גלל לתוך טופס: מפנים מקום **בלי לרשום סירוב**.
+    // hide('dismissed') היה משתיק את ההזמנה לשבועיים על גלילה תמימה.
+    //
+    // ⚑ למה שעון ולא אירוע גלילה: נמדד ב-22.09.2026 שבדף הזה נורה **אירוע
+    //    גלילה אחד בלבד על פני שתי גלילות מלאות** — קפיצת עוגן, גלילה
+    //    תכנותית ומיקוד בשדה מזיזים את הפריסה בלי לירות `scroll` אמין.
+    //    מנגנון פינוי שתלוי באירוע היה נכשל בשקט בדיוק במקרה שהוא נועד לו.
+    //    השעון רץ **רק כל עוד הבאנר פתוח** ומכבה את עצמו כשהוא נעלם.
+    var yieldTimer = null;
+
+    function startYieldWatch() {
+        if (yieldTimer) return;
+        try { yieldTimer = setInterval(yieldToForms, 300); } catch (e) {}
+    }
+
+    function stopYieldWatch() {
+        if (!yieldTimer) return;
+        try { clearInterval(yieldTimer); } catch (e) {}
+        yieldTimer = null;
+    }
+
+    function yieldToForms() {
+        try {
+            var el = document.querySelector('.ip-banner.is-open');
+            if (!el) { stopYieldWatch(); return; }
+            var shouldYield = fieldsInBannerZone();
+            if (shouldYield && el.getAttribute('data-ip-yield') !== '1') {
+                el.setAttribute('data-ip-yield', '1');
+                el.style.visibility = 'hidden';
+                el.style.pointerEvents = 'none';
+            } else if (!shouldYield && el.getAttribute('data-ip-yield') === '1') {
+                el.removeAttribute('data-ip-yield');
+                el.style.visibility = '';
+                el.style.pointerEvents = '';
+            }
+        } catch (e) {}
+    }
+
+    // ========================================================================
     // שערי הצגה
     // ========================================================================
     // 🔴 שער קשיח. **אין דרך לעקוף אותו**, גם לא דרך InstallPrompt.show()
@@ -825,6 +898,7 @@
                 if (secondsOnPage() < CFG.minSecondsOnPage) return;   // רצפת הזמן
                 if (!engaged()) return;
                 if (screenIsBusy()) return;                            // מודל אחר על המסך
+                if (fieldsInBannerZone()) return;                      // ממלא טופס עכשיו
             }
 
             if (deferred) {
@@ -843,6 +917,14 @@
                 clearTimers();
                 showFallback();
             }
+            // מרגע שמשהו על המסך — שומרים שלא ישב על טופס.
+            // 🔴 חייב לשבת **אחרי כל שלושת המסלולים** ולא בתוך אחד מהם:
+            //    נמדד ב-22.09.2026 שכשחיברתי את השומר רק למסלול `deferred`,
+            //    טעינה שבה `beforeinstallprompt` לא נורה הציגה את אותו
+            //    `.ip-banner` דרך showFallback() — בלי שומר, והבאנר חזר לכסות
+            //    את שדה הטלפון. אותה תקלה בדיוק, במסלול שלא נבדק.
+            if (shownThisSession) startYieldWatch();
+
             // שום דבר להציע בכלל (אין סרטון, ואין מסלול זמין): שקט.
         } catch (e) {
             log('שגיאה בבדיקת ההצגה', e);   // הפורטל ממשיך כרגיל
@@ -859,6 +941,7 @@
 
     var scrollTick = false;
     function onScroll() {
+        yieldToForms();        // מיידי — באנר פתוח לא ישב על טופס אפילו רבע שנייה
         if (scrollTick) return;
         scrollTick = true;
         setTimeout(function () { scrollTick = false; maybeShow(false); }, 400);
@@ -920,6 +1003,9 @@
     // API קטן לבדיקות ידניות מהקונסול. לא נדרש לתפעול השוטף.
     window.InstallPrompt = {
         show: function () { maybeShow(true); },
+        // שער הטופס — חשוף כדי שאפשר יהיה לאמת אותו בדפדפן במקום להסיק.
+        zone: function () { return { fieldsInZone: fieldsInBannerZone(), watching: !!yieldTimer }; },
+        yieldNow: function () { yieldToForms(); return document.querySelector('.ip-banner') ? document.querySelector('.ip-banner').getAttribute('data-ip-yield') : null; },
         state: function () { return { stored: loadState(), hasEvent: !!deferred, standalone: isStandalone(), iosSafari: isIOSSafari() }; },
         reset: function () {
             try { localStorage.removeItem(STATE_KEY); sessionStorage.removeItem(SESSION_KEY); } catch (e) {}

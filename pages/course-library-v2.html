@@ -1946,6 +1946,18 @@
               <i class="fa-solid fa-play"></i><span>פתח משחק</span>
             </a>
           </div>
+
+          <!-- Live practice (sandbox). Master only — it carries a per-use AI cost.
+               Revealed by refreshCourseMenu() once _isPaidCustomer is known. -->
+          <div class="lms-game-cta" id="sandboxCta" style="display:none; margin-top:1rem;">
+            <div class="lms-game-cta__copy">
+              <div class="lms-game-cta__t"><i class="fa-solid fa-comments" style="color:var(--accent-gold-hover); margin-inline-end:.4rem;"></i>תרגול חי מול מטופלת</div>
+              <p class="lms-game-cta__s">לא שאלות אמריקאיות. שיחה אמיתית עם מטופלת שנפתחת רק כששואלים נכון, ובסוף תחקיר עם השורה שהייתה עובדת במקום השורה שכתבת.</p>
+            </div>
+            <a class="lms-game-cta__btn" id="sandboxBtn" href="sandbox.html">
+              <i class="fa-solid fa-play"></i><span>היכנס לחדר</span>
+            </a>
+          </div>
         </div>
       </div><!-- /.lms-player -->
 
@@ -4135,6 +4147,9 @@
     const mT = document.getElementById('courseMenuTech');
     if (mM) mM.style.display = _isPaidCustomer ? '' : 'none';
     if (mT) mT.style.display = _isPaidCustomer ? '' : 'none';
+    // Live practice carries a per-use AI cost, so it follows the same gate.
+    const sbx = document.getElementById('sandboxCta');
+    if (sbx) sbx.style.display = _isPaidCustomer ? '' : 'none';
     document.querySelectorAll('#courseMenu .lms-course-menu__item').forEach(it => {
       const on = it.dataset.course === courseType;
       it.classList.toggle('is-active', on);

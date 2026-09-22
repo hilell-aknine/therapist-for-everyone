@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#003B46">
+    <meta name="robots" content="noindex, nofollow">
+    <title>תרגול חי — בית המטפלים</title>
+    <meta name="description" content="תרגול מיומנויות NLP מול מטופלת מדומה, בזמן אמת.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="manifest" href="../manifest.json">
+    <link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon-180.png">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;700&display=swap" rel="stylesheet">
+
+    <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/accessibility.css">
+    <link rel="stylesheet" href="../css/sandbox.css?v=20260919-1">
+</head>
+<body class="sbx-body">
+
+<!-- ── top bar ─────────────────────────────────────────────────────────── -->
+<div class="sbx-bar">
+    <h1 class="sbx-bar-title" id="sbx-bar-title">תרגול חי</h1>
+    <div class="sbx-bar-right">
+        <span class="sbx-turns" id="sbx-turns" hidden></span>
+        <button type="button" class="sbx-iconbtn" id="sbx-exit" title="יציאה מהתרגול" hidden>✕</button>
+        <a class="sbx-iconbtn" href="course-library-v2.html" title="חזרה לספרייה"
+           style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">←</a>
+    </div>
+</div>
+
+<div class="sbx-wrap">
+
+    <!-- ── catalog ─────────────────────────────────────────────────────── -->
+    <section id="sbx-catalog" class="sbx-screen active">
+        <div class="sbx-card">
+            <p class="sbx-eyebrow">תרגול מעשי</p>
+            <h2 class="sbx-h1">מטופלת שלא משתפת פעולה בקלות</h2>
+            <p class="sbx-lead">
+                לא שאלות אמריקאיות. שיחה אמיתית, עם מטופלת שנפתחת רק כשאתה שואל נכון.
+                בסוף תקבל תחקיר עם השורה שהייתה עובדת במקום השורה שכתבת.
+            </p>
+        </div>
+        <div id="sbx-list" style="margin-top:1.25rem"></div>
+    </section>
+
+    <!-- ── briefing ────────────────────────────────────────────────────── -->
+    <section id="sbx-briefing" class="sbx-screen">
+        <div class="sbx-card">
+            <p class="sbx-eyebrow">חדר הכנה</p>
+            <h2 class="sbx-h1" id="sbx-b-title"></h2>
+            <p class="sbx-lead" id="sbx-b-intro"></p>
+
+            <div class="sbx-mission">
+                <strong>המשימה שלך</strong>
+                <p id="sbx-b-mission"></p>
+            </div>
+
+            <p class="sbx-eyebrow">אסור</p>
+            <ul class="sbx-rules" id="sbx-b-rules"></ul>
+
+            <p class="sbx-eyebrow">נמדד</p>
+            <div class="sbx-measured" id="sbx-b-measured"></div>
+
+            <div id="sbx-briefing-err"></div>
+
+            <button type="button" class="sbx-btn full" id="sbx-start">התחל את התרגול</button>
+            <p class="sbx-note">
+                יש לך <b id="sbx-b-budget">12</b> תורות.
+                היא לא תעזור לך ולא תשבח אותך, בדיוק כמו בחדר אמיתי.
+                זה תרגול ולא הדרכה קלינית, ואינו תחליף לעבודה עם מטופל תחת ליווי.
+            </p>
+            <button type="button" class="sbx-btn ghost full" id="sbx-b-back" style="margin-top:.6rem">חזרה</button>
+        </div>
+    </section>
+
+    <!-- ── session ─────────────────────────────────────────────────────── -->
+    <section id="sbx-session" class="sbx-screen">
+        <div class="sbx-rail" id="sbx-rail"></div>
+        <div class="sbx-chat" id="sbx-chat"></div>
+
+        <div class="sbx-composer" style="position:sticky;bottom:0">
+            <button type="button" class="sbx-iconbtn" id="sbx-hint" title="רמז" style="height:48px;width:48px">💡</button>
+            <div style="flex:1;position:relative;display:flex">
+                <textarea class="sbx-input" id="sbx-input" rows="1" maxlength="700"
+                          placeholder="מה אתה אומר לה?" aria-label="ההודעה שלך למטופלת"></textarea>
+                <span class="sbx-count" id="sbx-count"></span>
+            </div>
+            <button type="button" class="sbx-send" id="sbx-send" disabled aria-label="שלח">➤</button>
+        </div>
+    </section>
+
+    <!-- ── debrief ─────────────────────────────────────────────────────── -->
+    <section id="sbx-debrief" class="sbx-screen">
+        <div class="sbx-verdict" id="sbx-verdict">
+            <div class="sbx-verdict-icon" id="sbx-v-icon"></div>
+            <h2 id="sbx-v-title"></h2>
+            <p id="sbx-v-sub"></p>
+        </div>
+
+        <div id="sbx-d-body"></div>
+
+        <div class="sbx-actions">
+            <button type="button" class="sbx-btn gold" id="sbx-again">לנסות שוב</button>
+            <button type="button" class="sbx-btn ghost" id="sbx-back-list">תרחיש אחר</button>
+        </div>
+    </section>
+
+</div>
+
+<!-- Scripts: the 3-link chain. supabase-client.js is what exposes window.Auth
+     and window.supabaseClient — a page that skips it fails silently. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/sandbox.js?v=20260919-1"></script>
+<script src="../js/marketing-tools.js"></script>
+
+<script>
+    // The turn counter and exit button only mean anything inside a session.
+    (function () {
+        var sess = document.getElementById('sbx-session');
+        var obs = new MutationObserver(function () {
+            var on = sess.classList.contains('active');
+            document.getElementById('sbx-turns').hidden = !on;
+            document.getElementById('sbx-exit').hidden = !on;
+        });
+        obs.observe(sess, { attributes: true, attributeFilter: ['class'] });
+    })();
+</script>
+</body>
+</html>

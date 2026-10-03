@@ -600,6 +600,27 @@
     white-space: pre-wrap; word-break: break-word;
   }
   .lms-ai-msg--user .lms-ai-msg__bubble{ background: linear-gradient(135deg, rgba(230,198,90,.18), rgba(212,164,55,.10)); border-color: rgba(212,175,55,.28); color:#3D2C0A; }
+  /* Formatted (Markdown) bot replies — 2026-10-03 */
+  .lms-ai-msg__bubble--md{ white-space: normal; text-align: start; }
+  .lms-ai-msg__bubble--md > :first-child{ margin-top:0; }
+  .lms-ai-msg__bubble--md > :last-child{ margin-bottom:0; }
+  .lms-ai-msg__bubble--md p{ margin:.45rem 0; }
+  .lms-ai-msg__bubble--md .ai-md-h{ margin:.8rem 0 .35rem; font-family:'Heebo',sans-serif; font-size:.95rem; font-weight:700; line-height:1.35; color:var(--text-on-light-strong); }
+  .lms-ai-msg__bubble--md .ai-md-h--major{ font-size:1.02rem; }
+  .lms-ai-msg__bubble--md strong{ font-weight:700; color:var(--text-on-light-strong); }
+  .lms-ai-msg__bubble--md ul, .lms-ai-msg__bubble--md ol{ margin:.4rem 0; padding-inline-start:1.3rem; padding-inline-end:0; }
+  .lms-ai-msg__bubble--md li{ margin:.2rem 0; }
+  .lms-ai-msg__bubble--md blockquote{ margin:.55rem 0; padding:.45rem .8rem; border-inline-start:3px solid var(--accent-gold); background:rgba(212,175,55,.08); border-radius:8px; color:var(--text-on-light-body); }
+  .lms-ai-msg__bubble--md blockquote p{ margin:.15rem 0; }
+  .lms-ai-msg__bubble--md hr{ border:0; border-top:1px solid rgba(15,61,62,.12); margin:.7rem 0; }
+  .lms-ai-msg__bubble--md code{ font-family:ui-monospace,Consolas,monospace; font-size:.85em; background:rgba(15,61,62,.07); padding:.05rem .3rem; border-radius:4px; }
+  .lms-ai-msg__bubble--md pre{ margin:.5rem 0; padding:.6rem .75rem; background:rgba(15,61,62,.06); border-radius:8px; overflow-x:auto; white-space:pre; }
+  .lms-ai-msg__bubble--md pre code{ background:none; padding:0; }
+  .lms-ai-msg__bubble--md a{ color:var(--accent-gold-deep, #8a6d12); text-decoration:underline; }
+  .lms-ai-msg__bubble--md .ai-md-table{ margin:.55rem 0; overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:100%; }
+  .lms-ai-msg__bubble--md table{ border-collapse:collapse; width:100%; font-size:.86rem; line-height:1.4; }
+  .lms-ai-msg__bubble--md th, .lms-ai-msg__bubble--md td{ border:1px solid rgba(15,61,62,.14); padding:.35rem .55rem; text-align:start; vertical-align:top; }
+  .lms-ai-msg__bubble--md th{ background:rgba(15,61,62,.06); font-weight:700; color:var(--text-on-light-strong); }
   .lms-ai-msg__bubble.is-typing{ display:inline-flex; gap:.3rem; }
   .lms-ai-msg__bubble.is-typing span{ width:6px; height:6px; border-radius:50%; background:var(--text-on-light-strong); opacity:.4; animation: typing 1.4s infinite ease-in-out; }
   .lms-ai-msg__bubble.is-typing span:nth-child(2){ animation-delay:.2s; }
@@ -3714,6 +3735,90 @@
   function lessonHash(m, l){ return `course-library.html#m${m+1}l${l+1}`; }
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+  // ===== AI reply → safe formatted HTML (2026-10-03) =====
+  // The tutor answers in Markdown (## headings, | tables |, > quotes, **bold**, ---). It used to be
+  // printed raw. XSS model: every line is HTML-escaped FIRST; afterwards the only markup that can
+  // appear is the fixed tag set emitted below, wrapping already-escaped text. Links are limited to
+  // http(s). No external library, so no CDN to pin or to go down.
+  function mdInline(s){
+    let t = escapeHtml(s);
+    const codes = [];
+    t = t.replace(/`([^`]+)`/g, (_, c) => { codes.push(c); return `\u0000${codes.length - 1}\u0000`; });
+    t = t.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/__(.+?)__/g, '<strong>$1</strong>');
+    t = t.replace(/(^|[^*\w])\*(?!\s)([^*]+?)\*(?!\w)/g, '$1<em>$2</em>');
+    t = t.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[+i]}</code>`);
+    return t;
+  }
+  function renderAiMarkdown(src){
+    const lines = String(src == null ? '' : src).replace(/\r\n?/g, '\n').split('\n');
+    const out = [];
+    const isTableSep = l => /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(l) && l.includes('-');
+    const splitRow = l => l.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+    const ulRe = /^\s*[-*•+]\s+(.*)$/, olRe = /^\s*(\d+)[.)]\s+(.*)$/;
+    let i = 0;
+    while (i < lines.length){
+      const line = lines[i];
+      if (!line.trim()){ i++; continue; }
+      // fenced code
+      if (/^\s*```/.test(line)){
+        const buf = []; i++;
+        while (i < lines.length && !/^\s*```/.test(lines[i])) buf.push(lines[i++]);
+        i++;
+        out.push(`<pre dir="auto"><code>${escapeHtml(buf.join('\n'))}</code></pre>`);
+        continue;
+      }
+      // heading
+      let m = line.match(/^\s*(#{1,6})\s+(.*?)\s*#*\s*$/);
+      if (m){ out.push(`<h4 class="ai-md-h${m[1].length <= 2 ? ' ai-md-h--major' : ''}">${mdInline(m[2])}</h4>`); i++; continue; }
+      // horizontal rule
+      if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(line)){ out.push('<hr>'); i++; continue; }
+      // table: a row with pipes followed by a |---| separator
+      if (line.includes('|') && i + 1 < lines.length && isTableSep(lines[i + 1])){
+        const head = splitRow(line); i += 2;
+        const rows = [];
+        while (i < lines.length && lines[i].includes('|') && lines[i].trim()) rows.push(splitRow(lines[i++]));
+        out.push('<div class="ai-md-table"><table><thead><tr>' + head.map(c => `<th>${mdInline(c)}</th>`).join('') +
+          '</tr></thead><tbody>' + rows.map(r => '<tr>' + head.map((_, k) => `<td>${mdInline(r[k] || '')}</td>`).join('') + '</tr>').join('') +
+          '</tbody></table></div>');
+        continue;
+      }
+      // blockquote (consecutive > lines, rendered recursively)
+      if (/^\s*>/.test(line)){
+        const buf = [];
+        while (i < lines.length && /^\s*>/.test(lines[i])) buf.push(lines[i++].replace(/^\s*>\s?/, ''));
+        out.push(`<blockquote>${renderAiMarkdown(buf.join('\n'))}</blockquote>`);
+        continue;
+      }
+      // lists (a single blank line between items keeps the same list)
+      if (ulRe.test(line) || olRe.test(line)){
+        const ordered = olRe.test(line);
+        const re = ordered ? olRe : ulRe;
+        const start = ordered ? parseInt(line.match(olRe)[1], 10) : 1;
+        const items = [];
+        while (i < lines.length){
+          const mm = lines[i].match(re);
+          if (mm){ items.push(ordered ? mm[2] : mm[1]); i++; continue; }
+          if (!lines[i].trim() && i + 1 < lines.length && re.test(lines[i + 1])){ i++; continue; }
+          if (lines[i].trim() && /^\s{2,}\S/.test(lines[i]) && items.length){ items[items.length - 1] += '\n' + lines[i].trim(); i++; continue; }
+          break;
+        }
+        const tag = ordered ? 'ol' : 'ul';
+        out.push(`<${tag}${ordered && start !== 1 ? ` start="${start}"` : ''}>` + items.map(it => `<li>${it.split('\n').map(mdInline).join('<br>')}</li>`).join('') + `</${tag}>`);
+        continue;
+      }
+      // paragraph: consecutive plain lines joined with <br>
+      const buf = [];
+      while (i < lines.length && lines[i].trim() && !/^\s*(#{1,6}\s|>|```)/.test(lines[i]) && !/^\s*([-*_])(\s*\1){2,}\s*$/.test(lines[i])
+             && !ulRe.test(lines[i]) && !olRe.test(lines[i]) && !(lines[i].includes('|') && i + 1 < lines.length && isTableSep(lines[i + 1]))){
+        buf.push(mdInline(lines[i])); i++;
+      }
+      if (buf.length) out.push(`<p>${buf.join('<br>')}</p>`);
+      else { out.push(`<p>${mdInline(line)}</p>`); i++; }
+    }
+    return out.join('');
+  }
+
   function renderProgress(){
     const completed = completedLessons.length;
     const pct = totalLessons ? Math.round((completed / totalLessons) * 100) : 0;
@@ -5101,7 +5206,11 @@
     const div = document.createElement('div');
     div.className = `lms-ai-msg lms-ai-msg--${role}`;
     const icon = role === 'user' ? 'fa-solid fa-user' : 'fa-solid fa-robot';
-    div.innerHTML = `<div class="lms-ai-msg__avatar"><i class="${icon}"></i></div><div class="lms-ai-msg__bubble">${escapeHtml(text)}</div>`;
+    // Bot replies are Markdown → rendered (escape-first, see renderAiMarkdown). User text stays plain.
+    const body = role === 'bot'
+      ? `<div class="lms-ai-msg__bubble lms-ai-msg__bubble--md" dir="auto">${renderAiMarkdown(text)}</div>`
+      : `<div class="lms-ai-msg__bubble">${escapeHtml(text)}</div>`;
+    div.innerHTML = `<div class="lms-ai-msg__avatar"><i class="${icon}"></i></div>${body}`;
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;
   }

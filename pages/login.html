@@ -1,392 +1,544 @@
 <!DOCTYPE html>
-<!-- v2026-02-28 -->
+<!-- v2026-05-12 · Apple Liquid Glass Edition -->
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, viewport-fit=cover">
-
-    <meta name="theme-color" content="#003B46">
+    <meta name="theme-color" content="#04161b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon-180.png">
-    <title>התחברות למערכת | בית המטפלים</title>
+    <title>התחברות | בית המטפלים</title>
     <meta name="description" content="התחברות למערכת בית המטפלים — כניסה לאזור האישי.">
-    <meta property="og:title" content="התחברות — בית המטפלים">
-    <meta property="og:description" content="התחברות למערכת בית המטפלים">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.therapist-home.com/pages/login.html">
-    <meta property="og:image" content="https://www.therapist-home.com/assets/logo.png">
-    <meta property="og:locale" content="he_IL">
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="../css/accessibility.css">
-    <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
-    <link rel="stylesheet" href="../css/theme.css">
-    <script src="../js/theme-toggle.js" defer></script>
+    <link rel="canonical" href="https://www.therapist-home.com/pages/login.html">
+
     <style>
+        /* ===== GLASS TOKEN SYSTEM ===== */
         :root {
-            /* === Theme Bridge — all colors from theme.css === */
-            --bg: var(--t-bg);
-            --card: var(--t-bg-card);
-            --border: var(--t-border);
-            --text: var(--t-text);
-            --text-secondary: var(--t-text-secondary);
-            --gold: var(--t-gold);
-            --gold-light: var(--t-gold-light);
-            --danger: var(--t-danger);
-            --success: var(--t-success);
+            --petrol-deep:   #04161b;
+            --petrol-bg:     #062831;
+            --petrol-mid:    #0a3d48;
+            --petrol-hi:     #15525d;
+            --teal:          #2F8592;
+            --teal-bright:   #3FAABB;
+            --gold:          #D4AF37;
+            --gold-light:    #E6C65A;
+            --frost:         #E8F1F2;
+
+            --g-surface:       rgba(255,255,255,.06);
+            --g-border:        rgba(255,255,255,.14);
+
+            --lg-blur-soft:  14px;
+            --lg-blur-med:   22px;
+            --lg-blur-heavy: 40px;
+            --lg-sat:        180%;
+
+            --lg-tint-light:  rgba(255,255,255,.055);
+            --lg-tint-medium: rgba(255,255,255,.09);
+            --lg-tint-strong: rgba(255,255,255,.13);
+            --lg-tint-gold:   rgba(212,175,55,.1);
+
+            --lg-edge:        rgba(255,255,255,.15);
+            --lg-edge-bright: rgba(255,255,255,.26);
+            --lg-edge-inner:  inset 0 0 0 1px rgba(255,255,255,.06);
+
+            --lg-specular:        linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.05) 28%, transparent 55%);
+            --lg-specular-soft:   linear-gradient(180deg, rgba(255,255,255,.14) 0%, transparent 45%);
+            --lg-specular-crystal:linear-gradient(155deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.08) 22%, transparent 45%);
+
+            --lg-shadow-sm: 0 4px 14px rgba(0,0,0,.2),  0 1px 2px rgba(0,0,0,.22);
+            --lg-shadow-md: 0 12px 32px rgba(0,0,0,.3),  0 2px 6px rgba(0,0,0,.24);
+            --lg-shadow-lg: 0 28px 60px rgba(0,0,0,.4),  0 6px 14px rgba(0,0,0,.3);
+
+            --lg-r-outer: 24px;
+            --lg-r-inner: 16px;
+            --lg-r-pill:  999px;
+
+            --danger: #f87171;
+            --success: #34d399;
+
+            /* ===== MOTION TOKENS (mirrors theme.css; this page is self-contained) ===== */
+            --ease-standard:   cubic-bezier(.2, 0, 0, 1);
+            --ease-decelerate: cubic-bezier(.16, 1, .3, 1);
+            --ease-accelerate: cubic-bezier(.4, 0, 1, 1);
+            --ease-emphasis:   cubic-bezier(.34, 1.4, .5, 1);
+            --ease-anticipate: cubic-bezier(.5, -0.35, .7, .45);
+            --dur-1: .12s; --dur-2: .2s; --dur-3: .32s; --dur-4: .5s; --dur-5: .7s;
+            --stagger: 60ms;
         }
 
-        /* iOS / Safari Optimization */
-        html { -webkit-text-size-adjust: 100%; }
-
-        input, button, select, textarea {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            font-size: 16px;
-            touch-action: manipulation;
-        }
-
-        button {
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-            body {
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
 
         body {
-            font-family: 'Heebo', sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family:'Heebo', sans-serif;
+            background: var(--petrol-deep);
+            color: #fff;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
 
-        .login-container {
-            width: 100%;
-            max-width: 440px;
-            padding: 1rem;
+        input, button, select, textarea {
+            -webkit-appearance: none;
+            font-size: 16px;
+            touch-action: manipulation;
+        }
+        button { -webkit-tap-highlight-color: transparent; }
+
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            body { padding-bottom: env(safe-area-inset-bottom); }
         }
 
-        .login-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2.5rem;
-            opacity: 0;
-            animation: cardRise var(--dur-4, .5s) var(--ease-decelerate, cubic-bezier(.16,1,.3,1)) forwards;
+        /* ===== ATMOSPHERIC BACKGROUND ===== */
+        .atmos {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
         }
-
-        @keyframes cardRise {
-            from { opacity: 0; transform: translateY(20px) scale(.985); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
+        .atmos__base {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 15% 10%,  rgba(230,198,90,.18), transparent 50%),
+                radial-gradient(ellipse at 85% 90%,  rgba(47,133,146,.36), transparent 55%),
+                radial-gradient(ellipse at 75% 20%,  rgba(63,170,187,.16), transparent 42%),
+                radial-gradient(ellipse at 20% 80%,  rgba(139,75,12,.20),  transparent 48%),
+                linear-gradient(160deg, #041d22 0%, #062831 38%, #0a3d48 78%, #0d4a56 100%);
         }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .login-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+        .atmos__blob {
+            position: absolute;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
+            filter: blur(120px);
+            mix-blend-mode: screen;
+            will-change: transform;
+        }
+        .atmos__blob--a { width:520px; height:520px; background:#E6C65A; opacity:.28; top:-160px; inset-inline-end:-160px; animation:floatA 26s ease-in-out infinite; }
+        .atmos__blob--b { width:460px; height:460px; background:#2F8592; opacity:.38; bottom:-180px; inset-inline-start:-150px; animation:floatB 32s ease-in-out infinite; }
+        .atmos__blob--c { width:360px; height:360px; background:#3FAABB; opacity:.18; top:38%; inset-inline-start:44%; animation:floatC 38s ease-in-out infinite; }
+        .atmos__blob--d { width:300px; height:300px; background:#D4AF37; opacity:.14; top:62%; inset-inline-end:22%; animation:floatD 28s ease-in-out infinite; }
+
+        @keyframes floatA { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-50px,40px) scale(1.08)} }
+        @keyframes floatB { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(60px,-40px) scale(1.06)} }
+        @keyframes floatC { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-70px,-50px) scale(1.12)} }
+        @keyframes floatD { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,60px) scale(.92)} }
+
+        .atmos__grid {
+            position: absolute;
+            inset: 0;
+            opacity: .05;
+            mix-blend-mode: overlay;
+            background-image:
+                linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+        }
+        .atmos__grain {
+            position: absolute;
+            inset: 0;
+            opacity: .04;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/></svg>");
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .atmos__blob { animation: none; }
+            .login-wrap,
+            .login-card > .login-header,
+            .login-card > .auth-tabs,
+            .login-card > .auth-form-panel.active,
+            .login-card > .divider,
+            .login-card > .btn-google,
+            .alert.show { animation: none !important; opacity: 1 !important; transform: none !important; }
+            .btn-primary, .btn-google, .form-group input { transition: none !important; }
         }
 
-        .login-icon i {
-            font-size: 1.5rem;
-            color: var(--bg);
-        }
-
-        .login-header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .login-header p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .form-group input {
+        /* ===== GLASS CARD ===== */
+        .login-wrap {
+            position: relative;
+            z-index: 1;
             width: 100%;
-            padding: 0.9rem 1rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-family: inherit;
-            font-size: 1rem;
-            transition: border-color var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1)),
-                        box-shadow var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1));
+            max-width: 460px;
+            padding: 1.25rem;
+            animation: cardIn var(--dur-4) var(--ease-emphasis) both;
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px var(--gold-glow, rgba(212,175,55,.18));
+        @keyframes cardIn {
+            from { opacity:0; transform:translateY(24px) scale(.965); }
+            to   { opacity:1; transform:translateY(0)    scale(1);   }
         }
 
-        .form-group input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.6;
+        /* Staggered content reveal inside the card */
+        .login-card > .login-header,
+        .login-card > .auth-tabs,
+        .login-card > .auth-form-panel.active,
+        .login-card > .divider,
+        .login-card > .btn-google {
+            opacity: 0;
+            animation: contentRise var(--dur-3) var(--ease-decelerate) forwards;
         }
+        .login-card > .login-header   { animation-delay: calc(var(--stagger) * 1); }
+        .login-card > .auth-tabs      { animation-delay: calc(var(--stagger) * 2); }
+        .login-card > .auth-form-panel.active { animation-delay: calc(var(--stagger) * 3); }
+        .login-card > .divider        { animation-delay: calc(var(--stagger) * 4); }
+        .login-card > .btn-google     { animation-delay: calc(var(--stagger) * 5); }
 
-        .error-message {
-            background: rgba(248, 81, 73, 0.1);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-            animation: msgRise var(--dur-3, .32s) var(--ease-decelerate, cubic-bezier(.16,1,.3,1)) both;
-        }
-
-        @keyframes msgRise {
-            from { opacity: 0; transform: translateY(-6px); }
+        @keyframes contentRise {
+            from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        .success-message {
-            background: rgba(63, 185, 80, 0.1);
-            border: 1px solid var(--success);
-            color: var(--success);
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            display: none;
+        .login-card {
+            background: var(--lg-tint-medium);
+            backdrop-filter: blur(var(--lg-blur-heavy)) saturate(var(--lg-sat));
+            -webkit-backdrop-filter: blur(var(--lg-blur-heavy)) saturate(var(--lg-sat));
+            border: 1px solid var(--lg-edge-bright);
+            border-radius: var(--lg-r-outer);
+            box-shadow: var(--lg-shadow-lg), var(--lg-edge-inner);
+            padding: 2.5rem 2rem;
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
         }
-
-        .success-message.show {
-            display: block;
-            animation: msgRise var(--dur-3, .32s) var(--ease-decelerate, cubic-bezier(.16,1,.3,1)) both;
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            border: none;
-            border-radius: 8px;
-            color: var(--bg);
-            font-family: inherit;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1)), box-shadow var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn-login:active:not(:disabled) {
-            transform: scale(.97);
-            transition-duration: var(--dur-1, .12s);
-        }
-
-        .btn-login:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Divider */
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .divider::before,
-        .divider::after {
+        /* Specular highlight top */
+        .login-card::before {
             content: '';
-            flex: 1;
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: var(--lg-specular);
+        }
+        /* Gold top border line */
+        .login-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            inset-inline: 0;
             height: 1px;
-            background: var(--border);
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,.55), transparent);
+            border-radius: inherit;
         }
 
-        .divider span {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-
-        /* Google Button */
-        .btn-google {
-            width: 100%;
-            padding: 0.9rem 1rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-family: inherit;
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all var(--dur-2, .2s) var(--ease-standard, cubic-bezier(.2,0,0,1));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.7rem;
-        }
-
-        .btn-google:hover {
-            border-color: var(--text-secondary);
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-1px);
-        }
-
-        .btn-google:active {
-            transform: scale(.97);
-            transition-duration: var(--dur-1, .12s);
-        }
-
-        .btn-google svg {
-            width: 20px;
-            height: 20px;
-        }
-
+        /* ===== BACK LINK ===== */
         .back-link {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+            margin-bottom: 1.25rem;
+            color: rgba(255,255,255,.5);
+            text-decoration: none;
+            font-size: .82rem;
+            transition: color .2s;
+        }
+        .back-link:hover { color: var(--gold-light); }
+        .site-credit { margin: 1.1rem 0 0; text-align: center; font-size: .78rem; color: rgba(232,241,242,.5); }
+        .site-credit a { color: inherit; text-decoration: none; font-weight: 600; }
+        .site-credit a:hover { color: var(--gold-light); }
+        .back-link i { font-size: .75rem; }
+
+        /* ===== HEADER ===== */
+        .login-header {
             text-align: center;
-            margin-top: 1.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
+            margin-bottom: 1.75rem;
         }
-
-        .back-link:hover {
-            color: var(--gold);
-        }
-
-        .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top-color: var(--bg);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .back-to-portal {
+        .brand-row {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
+            gap: .55rem;
             margin-bottom: 1rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.85rem;
-            transition: color 0.2s;
         }
-        .back-to-portal:hover { color: var(--gold); }
-        .login-brand {
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+        }
+        .brand-name {
+            font-size: .9rem;
+            font-weight: 600;
+            color: var(--gold-light);
+            letter-spacing: -.01em;
+        }
+        .login-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto .9rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(230,198,90,.5), rgba(212,175,55,.32));
+            border: 1px solid rgba(230,198,90,.35);
+            box-shadow: 0 8px 24px rgba(212,175,55,.22), inset 0 1px 0 rgba(255,255,255,.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            color: var(--gold);
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
+            position: relative;
         }
-        .login-brand i { font-size: 1.2rem; }
+        .login-icon::before {
+            content:'';
+            position:absolute;
+            inset:0;
+            border-radius:50%;
+            background: var(--lg-specular-crystal);
+            pointer-events:none;
+        }
+        .login-icon i {
+            font-size: 1.4rem;
+            color: #1a1205;
+            position: relative;
+        }
+        .login-title {
+            font-family: 'Frank Ruhl Libre', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: .3rem;
+            letter-spacing: -.02em;
+        }
+        .login-subtitle {
+            font-size: .82rem;
+            color: rgba(255,255,255,.45);
+            font-weight: 400;
+        }
 
-        /* Tabs */
+        /* ===== TABS ===== */
         .auth-tabs {
             display: flex;
-            background: rgba(255,255,255,0.06);
-            border-radius: 8px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 12px;
             margin-bottom: 1.5rem;
-            overflow: hidden;
+            padding: 4px;
+            gap: 4px;
         }
         .auth-tab {
             flex: 1;
-            padding: 0.7rem;
+            padding: .62rem;
             text-align: center;
-            font-size: 0.95rem;
+            font-size: .88rem;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: rgba(255,255,255,.45);
             cursor: pointer;
             border: none;
             background: transparent;
-            font-family: inherit;
-            transition: all 0.2s;
+            font-family: 'Heebo', sans-serif;
+            border-radius: 9px;
+            transition: all .25s;
+            position: relative;
         }
         .auth-tab.active {
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            color: var(--bg);
-            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(230,198,90,.55), rgba(212,175,55,.38));
+            color: #1a1205;
+            box-shadow: 0 4px 14px rgba(212,175,55,.25), inset 0 1px 0 rgba(255,255,255,.22);
         }
         .auth-form-panel { display: none; }
         .auth-form-panel.active { display: block; }
 
-        /* Reduced-motion safety net (page-local; theme.css also covers globally) */
-        @media (prefers-reduced-motion: reduce) {
-            .login-card,
-            .error-message.show,
-            .success-message.show { animation: none !important; opacity: 1 !important; }
-            .btn-login, .btn-google { transition: none !important; }
+        /* ===== ALERTS ===== */
+        .alert {
+            padding: .8rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-size: .85rem;
+            display: none;
+            align-items: flex-start;
+            gap: .55rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .alert.show {
+            display: flex;
+            animation: alertRise var(--dur-3) var(--ease-decelerate) both;
+        }
+        @keyframes alertRise {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .alert--error {
+            background: rgba(248,113,113,.12);
+            border: 1px solid rgba(248,113,113,.3);
+            color: #fca5a5;
+        }
+        .alert--success {
+            background: rgba(52,211,153,.1);
+            border: 1px solid rgba(52,211,153,.28);
+            color: #6ee7b7;
+        }
+        .alert i { margin-top: 1px; flex-shrink:0; }
+
+        /* ===== FORM ===== */
+        .form-group {
+            margin-bottom: 1.1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: .42rem;
+            font-size: .8rem;
+            font-weight: 500;
+            color: rgba(255,255,255,.5);
+            letter-spacing: .02em;
+        }
+        .form-group input {
+            width: 100%;
+            padding: .85rem 1rem;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Heebo', sans-serif;
+            font-size: .95rem;
+            font-weight: 400;
+            transition: border-color .2s, background .2s, box-shadow .2s;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: rgba(212,175,55,.55);
+            background: rgba(255,255,255,.09);
+            box-shadow: 0 0 0 3px rgba(212,175,55,.12);
+        }
+        .form-group input::placeholder {
+            color: rgba(255,255,255,.22);
+        }
+
+        .hint {
+            font-size: .78rem;
+            color: rgba(255,255,255,.32);
+            margin: -.2rem 0 .8rem;
+            line-height: 1.5;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-primary {
+            width: 100%;
+            padding: .95rem 1rem;
+            background: linear-gradient(135deg, rgba(230,198,90,.62), rgba(212,175,55,.44));
+            border: 1px solid rgba(230,198,90,.4);
+            border-radius: 13px;
+            color: #1a1205;
+            font-family: 'Heebo', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s, background .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .55rem;
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            box-shadow: 0 8px 22px rgba(212,175,55,.28), inset 0 1px 0 rgba(255,255,255,.22);
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(212,175,55,.38), inset 0 1px 0 rgba(255,255,255,.28);
+            background: linear-gradient(135deg, rgba(230,198,90,.74), rgba(212,175,55,.56));
+        }
+        .btn-primary:active:not(:disabled) { transform: scale(.97); transition-duration: var(--dur-1); }
+        .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            margin: 1.25rem 0;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,.1);
+        }
+        .divider span {
+            color: rgba(255,255,255,.28);
+            font-size: .78rem;
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: .85rem 1rem;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 13px;
+            color: rgba(255,255,255,.75);
+            font-family: 'Heebo', sans-serif;
+            font-size: .9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .65rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+        }
+        .btn-google:hover {
+            background: rgba(255,255,255,.1);
+            border-color: rgba(255,255,255,.22);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .btn-google:active { transform: scale(.97); transition-duration: var(--dur-1); }
+        .btn-google svg { width: 20px; height: 20px; flex-shrink:0; }
+
+        .footer-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.25rem;
+            color: rgba(255,255,255,.3);
+            text-decoration: none;
+            font-size: .8rem;
+            transition: color .2s;
+        }
+        .footer-link:hover { color: var(--gold-light); }
+
+        /* ===== SPINNER ===== */
+        .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(26,18,5,.3);
+            border-top-color: #1a1205;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 480px) {
+            .login-card { padding: 2rem 1.5rem; }
+            .login-title { font-size: 1.35rem; }
+        }
+
+        @media (prefers-reduced-transparency: reduce) {
+            .login-card, .form-group input, .btn-google, .alert {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+            .login-card { background: rgba(10,40,46,.95) !important; }
         }
     </style>
-
-    <!-- === SEO Tags (auto-generated) === -->
-    <link rel="canonical" href="https://www.therapist-home.com/pages/login.html">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="התחברות — בית המטפלים">
-    <meta name="twitter:description" content="התחברות למערכת בית המטפלים">
-    <meta name="twitter:image" content="https://www.therapist-home.com/assets/logo.png">
-    <!-- === /SEO Tags === -->
 
 <!-- ═══ PWA · בית המטפלים · נוסף 2026-08-29 ═══ -->
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -394,413 +546,334 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/pwa/favicon-16.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="בית המטפלים">
+<link rel="stylesheet" href="../css/accessibility.css">
 <link rel="stylesheet" href="/css/install-prompt.css">
 <script defer src="/js/pwa-register.js"></script>
 <script defer src="/js/install-prompt.js"></script>
 </head>
 <body>
-    <div class="login-container">
-        <a href="../index.html" class="back-to-portal">
-            <i class="fa-solid fa-arrow-right"></i>
+
+<!-- Atmospheric Background -->
+<div class="atmos">
+    <div class="atmos__base"></div>
+    <div class="atmos__blob atmos__blob--a"></div>
+    <div class="atmos__blob atmos__blob--b"></div>
+    <div class="atmos__blob atmos__blob--c"></div>
+    <div class="atmos__blob atmos__blob--d"></div>
+    <div class="atmos__grid"></div>
+    <div class="atmos__grain"></div>
+</div>
+
+<!-- Login Card -->
+<div class="login-wrap">
+
+    <a href="../index.html" class="back-link">
+        <i class="fa-solid fa-chevron-right"></i>
+        חזרה לאתר הראשי
+    </a>
+
+    <div class="login-card">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="brand-row">
+                <img src="../assets/logo.png" alt="בית המטפלים" class="brand-logo" onerror="this.style.display='none'">
+                <span class="brand-name">בית המטפלים</span>
+            </div>
+            <div class="login-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h1 class="login-title">ברוכים הבאים</h1>
+            <p class="login-subtitle">מערכת הלמידה — בית המטפלים</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login')">התחברות</button>
+            <button class="auth-tab" onclick="switchAuthTab('signup')">הרשמה</button>
+        </div>
+
+        <!-- Alerts -->
+        <div class="alert alert--error" id="error-message">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="error-text">פרטי התחברות שגויים</span>
+        </div>
+        <div class="alert alert--success" id="success-message">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="success-text"></span>
+        </div>
+
+        <!-- LOGIN PANEL -->
+        <div class="auth-form-panel active" id="login-panel">
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">כתובת אימייל</label>
+                    <input type="email" id="login-email" name="email" required placeholder="example@email.com" autocomplete="email" dir="ltr">
+                </div>
+                <p class="hint">נשלח לך קישור התחברות למייל — בלי צורך בסיסמה ✨</p>
+                <button type="submit" class="btn-primary" id="login-btn">
+                    <span class="btn-text">שלחו לי קישור</span>
+                    <div class="spinner" id="login-spinner"></div>
+                </button>
+            </form>
+        </div>
+
+        <!-- SIGNUP PANEL -->
+        <div class="auth-form-panel" id="signup-panel">
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="signup-name">שם מלא</label>
+                    <input type="text" id="signup-name" name="full_name" required placeholder="השם המלא שלך" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">כתובת אימייל</label>
+                    <input type="email" id="signup-email" name="email" required placeholder="example@email.com" autocomplete="email" dir="ltr">
+                </div>
+                <div class="form-group">
+                    <label for="signup-phone">מספר טלפון</label>
+                    <input type="tel" id="signup-phone" name="phone" required placeholder="05X-XXXXXXX" autocomplete="tel" dir="ltr" inputmode="tel" pattern="^0[2-9]\d{7,8}$" title="מספר טלפון ישראלי תקין">
+                </div>
+                <p class="hint">נשלח לך קישור אישור למייל — בלי סיסמה ✨</p>
+                <button type="submit" class="btn-primary" id="signup-btn">
+                    <span class="btn-text">הרשמה לפורטל</span>
+                    <div class="spinner" id="signup-spinner"></div>
+                </button>
+            </form>
+        </div>
+
+        <!-- Divider + Google -->
+        <div class="divider"><span>או</span></div>
+        <button class="btn-google" id="google-btn" onclick="signInWithGoogle()">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            כניסה עם Google
+        </button>
+
+        <a href="../index.html" class="footer-link">
+            <i class="fa-solid fa-chevron-right" style="font-size:.7rem; margin-left:.3rem;"></i>
             חזרה לאתר הראשי
         </a>
-        <div class="login-card">
-            <div class="login-header">
-                <div class="login-brand">
-                    <img src="../assets/logo.png" alt="בית המטפלים" class="logo-img logo-img--sm" style="vertical-align:middle">
-                    בית המטפלים
-                </div>
-                <div class="login-icon">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <h1>ברוכים הבאים</h1>
-                <p>מערכת הלמידה - בית המטפלים</p>
-            </div>
-
-            <!-- Tabs -->
-            <div class="auth-tabs">
-                <button class="auth-tab active" onclick="switchAuthTab('login')">התחברות</button>
-                <button class="auth-tab" onclick="switchAuthTab('signup')">הרשמה</button>
-            </div>
-
-            <!-- Error/Success Messages -->
-            <div class="error-message" id="error-message">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span id="error-text">פרטי התחברות שגויים</span>
-            </div>
-
-            <div class="success-message" id="success-message">
-                <i class="fa-solid fa-circle-check"></i>
-                <span id="success-text"></span>
-            </div>
-
-            <!-- LOGIN FORM (Magic Link — no password needed) -->
-            <div class="auth-form-panel active" id="login-panel">
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login-email">אימייל</label>
-                        <input type="email" id="login-email" name="email" required placeholder="example@email.com" autocomplete="email">
-                    </div>
-
-                    <p style="font-size: 0.85rem; color: var(--text-muted, #888); margin: -0.3rem 0 0.8rem; line-height: 1.5;">
-                        נשלח לך קישור התחברות למייל — בלי צורך בסיסמה ✨
-                    </p>
-
-                    <button type="submit" class="btn-login" id="login-btn">
-                        <span class="btn-text">שלחו לי קישור</span>
-                        <div class="spinner" id="login-spinner"></div>
-                    </button>
-                </form>
-            </div>
-
-            <!-- SIGNUP FORM -->
-            <div class="auth-form-panel" id="signup-panel">
-                <form id="signup-form">
-                    <div class="form-group">
-                        <label for="signup-name">שם מלא *</label>
-                        <input type="text" id="signup-name" name="full_name" required placeholder="השם המלא שלך" autocomplete="name">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="signup-email">אימייל *</label>
-                        <input type="email" id="signup-email" name="email" required placeholder="example@email.com" autocomplete="email">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="signup-phone">טלפון *</label>
-                        <input type="tel" id="signup-phone" name="phone" required placeholder="05X-XXXXXXX" autocomplete="tel" dir="ltr" inputmode="tel" pattern="^0[2-9]\d{7,8}$" title="מספר טלפון ישראלי תקין">
-                    </div>
-
-                    <p style="font-size: 0.85rem; color: var(--text-muted, #888); margin: -0.3rem 0 0.8rem; line-height: 1.5;">
-                        נשלח לך קישור למייל לאישור ההרשמה — בלי סיסמה ✨
-                    </p>
-
-                    <button type="submit" class="btn-login" id="signup-btn">
-                        <span class="btn-text">הרשמה</span>
-                        <div class="spinner" id="signup-spinner"></div>
-                    </button>
-                </form>
-            </div>
-
-            <!-- Divider -->
-            <div class="divider">
-                <span>או</span>
-            </div>
-
-            <!-- Google OAuth -->
-            <button class="btn-google" id="google-btn" onclick="signInWithGoogle()">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                כניסה עם Google
-            </button>
-            <a href="../index.html" class="back-link">
-                <i class="fa-solid fa-arrow-right"></i>
-                חזרה לאתר הראשי
-            </a>
-        </div>
+        <p class="site-credit">נוצר ע"י הילל אקנין · לפרויקטים: <a href="tel:+972549116092" dir="ltr">054-9116092</a></p>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/supabase-config.js"></script>
-    <script src="../js/supabase-client.js"></script>
-    <script>
-        // ===== Tab Switching =====
-        function switchAuthTab(tab) {
-            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.auth-form-panel').forEach(p => p.classList.remove('active'));
-            document.getElementById('error-message').classList.remove('show');
-            document.getElementById('success-message').classList.remove('show');
-
-            if (tab === 'login') {
-                document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
-                document.getElementById('login-panel').classList.add('active');
-            } else {
-                document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
-                document.getElementById('signup-panel').classList.add('active');
-            }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script>
+    // ===== Tab Switching =====
+    function switchAuthTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-form-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('error-message').classList.remove('show');
+        document.getElementById('success-message').classList.remove('show');
+        if (tab === 'login') {
+            document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
+            document.getElementById('login-panel').classList.add('active');
+        } else {
+            document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
+            document.getElementById('signup-panel').classList.add('active');
         }
+    }
 
-        // Check if already logged in (with delay for OAuth token parsing)
-        (async function() {
-            await new Promise(r => setTimeout(r, 300));
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                await savePendingProfile(session.user);
-                await redirectLoggedInUser(session.user);
-            }
-        })();
-
-        // Safety net: catch OAuth/magic-link redirect
-        supabaseClient.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session?.user) {
-                await savePendingProfile(session.user);
-                await redirectLoggedInUser(session.user);
-            }
-        });
-
-        // Save phone/name from signup form (stored in localStorage before magic link)
-        async function savePendingProfile(user) {
-            const pendingPhone = localStorage.getItem('pending_phone');
-            const pendingName = localStorage.getItem('pending_name');
-            if (pendingPhone || pendingName) {
-                try {
-                    const update = {};
-                    if (pendingPhone) update.phone = pendingPhone;
-                    if (pendingName) update.full_name = pendingName;
-                    await supabaseClient.from('profiles').update(update).eq('id', user.id);
-                    localStorage.removeItem('pending_phone');
-                    localStorage.removeItem('pending_name');
-
-                    // Transactional welcome WhatsApp — fire-and-forget, never blocks login.
-                    // Only fires when we just persisted a phone. Idempotent server-side
-                    // (profiles.whatsapp_welcome_sent_at).
-                    // keepalive: true survives the redirectLoggedInUser navigation.
-                    if (pendingPhone && window.SUPABASE_CONFIG?.url) {
-                        try {
-                            fetch(`${window.SUPABASE_CONFIG.url}/functions/v1/enqueue-welcome`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'apikey': window.SUPABASE_CONFIG.anonKey
-                                },
-                                body: JSON.stringify({ profile_id: user.id }),
-                                keepalive: true
-                            }).catch(() => {});
-                        } catch (err) { /* non-critical */ }
-                    }
-                } catch (e) { /* will be caught by questionnaire */ }
-            }
+    // Check if already logged in
+    (async function() {
+        await new Promise(r => setTimeout(r, 300));
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+            await savePendingProfile(session.user);
+            await redirectLoggedInUser(session.user);
         }
+    })();
 
-        // Show error
-        function showError(text) {
-            const el = document.getElementById('error-message');
-            document.getElementById('error-text').textContent = text;
-            el.classList.add('show');
-            document.getElementById('success-message').classList.remove('show');
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+            await savePendingProfile(session.user);
+            await redirectLoggedInUser(session.user);
         }
+    });
 
-        // Show success
-        function showSuccess(text) {
-            const el = document.getElementById('success-message');
-            document.getElementById('success-text').textContent = text;
-            el.classList.add('show');
-            document.getElementById('error-message').classList.remove('show');
-        }
-
-        // Set loading state
-        function setLoading(btnId, spinnerId, loading, loadingText, defaultText) {
-            const btn = document.getElementById(btnId);
-            const spinner = document.getElementById(spinnerId);
-            const btnText = btn.querySelector('.btn-text');
-
-            btn.disabled = loading;
-            spinner.style.display = loading ? 'block' : 'none';
-            btnText.textContent = loading ? (loadingText || 'מתחבר...') : (defaultText || 'התחברות');
-        }
-
-        // Redirect based on role (or returnUrl if available)
-        async function redirectLoggedInUser(user, role) {
-            // Check for returnUrl first — send user back where they came from
-            const returnUrl = sessionStorage.getItem('returnUrl');
-            if (returnUrl) {
-                sessionStorage.removeItem('returnUrl');
-                window.location.href = returnUrl;
-                return;
-            }
-
-            // Fetch profile (role + phone)
-            let phone = null;
-            if (!role) {
-                try {
-                    const { data: profile } = await supabaseClient
-                        .from('profiles')
-                        .select('role, phone')
-                        .eq('id', user.id)
-                        .single();
-                    role = profile?.role || 'student_lead';
-                    phone = profile?.phone || null;
-                } catch (err) {
-                    role = 'student_lead';
-                }
-            }
-
-            switch (role) {
-                case 'admin':
-                    // Admin lands in the portal like everyone else; CRM is one click away
-                    // from the portal header (admin-only icon) — per Hillel 2026-06-10.
-                    window.location.href = 'course-library-v2.html';
-                    break;
-                case 'therapist':
-                    window.location.href = '../therapist-dashboard.html';
-                    break;
-                case 'patient':
-                    window.location.href = '../patient-dashboard.html';
-                    break;
-                case 'student_lead':
-                default:
-                    // Check questionnaire + phone completion
-                    let questionnaireDone = !!localStorage.getItem('portal_questionnaire_done');
-                    if (!questionnaireDone) {
-                        // Double-check in DB (localStorage can be cleared on logout)
-                        try {
-                            const { data: qData } = await supabaseClient
-                                .from('portal_questionnaires')
-                                .select('id')
-                                .eq('user_id', user.id)
-                                .limit(1);
-                            if (qData && qData.length > 0) {
-                                localStorage.setItem('portal_questionnaire_done', 'true');
-                                questionnaireDone = true;
-                            }
-                        } catch (e) { /* let them through on error */ }
-                    }
-
-                    // Missing questionnaire → complete profile
-                    if (!questionnaireDone) {
-                        window.location.href = 'portal-questionnaire.html';
-                        return;
-                    }
-                    window.location.href = 'course-library.html';
-                    break;
-            }
-        }
-
-        // Handle LOGIN form (Magic Link — no password)
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const email = document.getElementById('login-email').value.trim();
-
-            document.getElementById('error-message').classList.remove('show');
-            setLoading('login-btn', 'login-spinner', true, 'שולח...', 'שלחו לי קישור');
-
+    async function savePendingProfile(user) {
+        const pendingPhone = localStorage.getItem('pending_phone');
+        const pendingName  = localStorage.getItem('pending_name');
+        if (pendingPhone || pendingName) {
             try {
-                // Send magic link only to EXISTING users. shouldCreateUser:false
-                // makes Supabase itself reject unknown emails — no anonymous
-                // profiles read (which would require the public-SELECT RLS hole).
-                const { error } = await supabaseClient.auth.signInWithOtp({
-                    email,
-                    options: {
-                        shouldCreateUser: false,
-                        emailRedirectTo: 'https://www.therapist-home.com/pages/login.html'
-                    }
-                });
+                const update = {};
+                if (pendingPhone) update.phone     = pendingPhone;
+                if (pendingName)  update.full_name = pendingName;
+                await supabaseClient.from('profiles').update(update).eq('id', user.id);
+                localStorage.removeItem('pending_phone');
+                localStorage.removeItem('pending_name');
 
-                if (error) {
-                    // Supabase returns a signup-disabled / user-not-found style error
-                    // when the email isn't registered.
-                    const msg = (error.message || '').toLowerCase();
-                    if (msg.includes('signups not allowed') || msg.includes('not allowed') || msg.includes('user not found') || error.status === 422) {
-                        showError('האימייל לא נמצא במערכת — צריך להירשם קודם');
-                    } else {
-                        showError('שגיאה בשליחת הקישור — נסו שוב');
-                    }
-                    setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
+                // Transactional welcome WhatsApp — fire-and-forget, never blocks login.
+                // Only fires when we just persisted a phone. Idempotent server-side
+                // (profiles.whatsapp_welcome_sent_at).
+                // keepalive: true survives the redirectLoggedInUser navigation.
+                if (pendingPhone && window.SUPABASE_CONFIG?.url) {
+                    try {
+                        fetch(`${window.SUPABASE_CONFIG.url}/functions/v1/enqueue-welcome`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'apikey': window.SUPABASE_CONFIG.anonKey
+                            },
+                            body: JSON.stringify({ profile_id: user.id }),
+                            keepalive: true
+                        }).catch(() => {});
+                    } catch (err) { /* non-critical */ }
+                }
+            } catch (e) {}
+        }
+    }
+
+    function showError(text) {
+        const el = document.getElementById('error-message');
+        document.getElementById('error-text').textContent = text;
+        el.classList.add('show');
+        document.getElementById('success-message').classList.remove('show');
+    }
+
+    function showSuccess(text) {
+        const el = document.getElementById('success-message');
+        document.getElementById('success-text').textContent = text;
+        el.classList.add('show');
+        document.getElementById('error-message').classList.remove('show');
+    }
+
+    function setLoading(btnId, spinnerId, loading, loadingText, defaultText) {
+        const btn     = document.getElementById(btnId);
+        const spinner = document.getElementById(spinnerId);
+        const btnText = btn.querySelector('.btn-text');
+        btn.disabled = loading;
+        spinner.style.display  = loading ? 'block' : 'none';
+        btnText.textContent    = loading ? (loadingText || 'מתחבר...') : (defaultText || 'שלחו לי קישור');
+    }
+
+    async function redirectLoggedInUser(user, role) {
+        const returnUrl = sessionStorage.getItem('returnUrl');
+        if (returnUrl) {
+            sessionStorage.removeItem('returnUrl');
+            window.location.href = returnUrl;
+            return;
+        }
+        let phone = null;
+        if (!role) {
+            try {
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('role, phone')
+                    .eq('id', user.id)
+                    .single();
+                role  = profile?.role || 'student_lead';
+                phone = profile?.phone || null;
+            } catch (err) { role = 'student_lead'; }
+        }
+        switch (role) {
+            case 'admin':     window.location.href = 'course-library-v2.html'; break;
+            case 'therapist': window.location.href = '../therapist-dashboard.html'; break;
+            case 'patient':   window.location.href = '../patient-dashboard.html'; break;
+            case 'student_lead':
+            default:
+                let questionnaireDone = !!localStorage.getItem('portal_questionnaire_done');
+                if (!questionnaireDone) {
+                    try {
+                        const { data: qData } = await supabaseClient
+                            .from('portal_questionnaires')
+                            .select('id')
+                            .eq('user_id', user.id)
+                            .limit(1);
+                        if (qData && qData.length > 0) {
+                            localStorage.setItem('portal_questionnaire_done', 'true');
+                            questionnaireDone = true;
+                        }
+                    } catch (e) {}
+                }
+                if (!questionnaireDone) {
+                    window.location.href = 'portal-questionnaire.html';
                     return;
                 }
-
-                showSuccess('קישור התחברות נשלח למייל! בדקו את תיבת הדואר 📧');
-                setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
-
-            } catch (error) {
-                console.error('Login error:', error);
-                showError('שגיאה בשליחת הקישור — נסו שוב');
-                setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
-            }
-        });
-
-        // Handle SIGNUP form (Magic Link — no password)
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const fullName = document.getElementById('signup-name').value.trim();
-            const email = document.getElementById('signup-email').value.trim();
-            const phone = document.getElementById('signup-phone').value.trim().replace(/[-\s]/g, '');
-
-            if (!fullName || !email || !phone) {
-                showError('נא למלא את כל השדות');
-                return;
-            }
-
-            // Validate Israeli phone
-            if (!/^0[2-9]\d{7,8}$/.test(phone)) {
-                showError('נא להזין מספר טלפון ישראלי תקין');
-                return;
-            }
-
-            document.getElementById('error-message').classList.remove('show');
-            setLoading('signup-btn', 'signup-spinner', true, 'נרשם...', 'הרשמה');
-
-            try {
-                // Send magic link (signInWithOtp creates user if doesn't exist)
-                const { error } = await supabaseClient.auth.signInWithOtp({
-                    email,
-                    options: {
-                        data: { full_name: fullName, phone: phone },
-                        emailRedirectTo: 'https://www.therapist-home.com/pages/login.html'
-                    }
-                });
-
-                if (error) throw error;
-
-                // Save phone+name to profiles (in case trigger doesn't catch it)
-                // Use service-role or upsert — this may fail for new users without ID,
-                // so we'll also save in the questionnaire step
-                showSuccess('קישור הרשמה נשלח למייל! לחצו על הקישור כדי להיכנס 📧');
-                setLoading('signup-btn', 'signup-spinner', false, null, 'הרשמה');
-
-                // Store phone temporarily so we can save it after they click the link
-                localStorage.setItem('pending_phone', phone);
-                localStorage.setItem('pending_name', fullName);
-
-            } catch (error) {
-                console.error('Signup error:', error);
-
-                if (error.message.includes('already registered')) {
-                    showError('כתובת האימייל כבר רשומה — נסו להתחבר בטאב השמאלי');
-                } else {
-                    showError('שגיאה בהרשמה — נסו שוב');
-                }
-
-                setLoading('signup-btn', 'signup-spinner', false, null, 'הרשמה');
-            }
-        });
-
-        // Handle Google OAuth
-        async function signInWithGoogle() {
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: 'https://www.therapist-home.com/pages/login.html'
-                    }
-                });
-
-                if (error) throw error;
-
-            } catch (error) {
-                console.error('Google auth error:', error);
-                showError('שגיאה בהתחברות עם Google - נסו שוב');
-            }
+                window.location.href = 'course-library.html';
         }
-    </script>
+    }
 
-    <!-- Marketing & Analytics -->
-    <script src="../js/marketing-tools.js"></script>
-    <!-- Site Credit Footer -->
-    <style>
-      .site-credit { background: #E8F1F2; text-align: center; padding: 14px 16px; font-size: 13px; color: #003B46; border-top: 1px solid rgba(0, 59, 70, 0.08); font-family: 'Heebo', sans-serif; direction: rtl; width: 100%; box-sizing: border-box; margin: 0; }
-      .site-credit p { margin: 0; line-height: 1.6; }
-      .site-credit a { color: #003B46; text-decoration: none; font-weight: 600; }
-      .site-credit a:hover { text-decoration: underline; }
-    </style>
-    <footer class="site-credit" role="contentinfo">
-      <p>נוצר ע"י הילל אקנין · לפרויקטים: <a href="tel:+972549116092" dir="ltr">054-9116092</a></p>
-    </footer>
-  </body>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim();
+        document.getElementById('error-message').classList.remove('show');
+        setLoading('login-btn', 'login-spinner', true, 'שולח...', 'שלחו לי קישור');
+        try {
+            // shouldCreateUser:false → Supabase rejects unknown emails itself,
+            // so no anonymous profiles read (which required the public-SELECT RLS hole).
+            const { error } = await supabaseClient.auth.signInWithOtp({
+                email,
+                options: { shouldCreateUser: false, emailRedirectTo: 'https://www.therapist-home.com/pages/login.html' }
+            });
+            if (error) {
+                const msg = (error.message || '').toLowerCase();
+                if (msg.includes('signups not allowed') || msg.includes('not allowed') || msg.includes('user not found') || error.status === 422) {
+                    showError('האימייל לא נמצא במערכת — צריך להירשם קודם');
+                } else {
+                    showError('שגיאה בשליחת הקישור — נסו שוב');
+                }
+                setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
+                return;
+            }
+            showSuccess('קישור התחברות נשלח למייל! בדקו את תיבת הדואר 📧');
+            setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
+        } catch (error) {
+            showError('שגיאה בשליחת הקישור — נסו שוב');
+            setLoading('login-btn', 'login-spinner', false, null, 'שלחו לי קישור');
+        }
+    });
+
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('signup-name').value.trim();
+        const email    = document.getElementById('signup-email').value.trim();
+        const phone    = document.getElementById('signup-phone').value.trim().replace(/[-\s]/g, '');
+        if (!fullName || !email || !phone) { showError('נא למלא את כל השדות'); return; }
+        if (!/^0[2-9]\d{7,8}$/.test(phone)) { showError('נא להזין מספר טלפון ישראלי תקין'); return; }
+        document.getElementById('error-message').classList.remove('show');
+        setLoading('signup-btn', 'signup-spinner', true, 'נרשם...', 'הרשמה לפורטל');
+        try {
+            const { error } = await supabaseClient.auth.signInWithOtp({
+                email,
+                options: {
+                    data: { full_name: fullName, phone: phone },
+                    emailRedirectTo: 'https://www.therapist-home.com/pages/login.html'
+                }
+            });
+            if (error) throw error;
+            showSuccess('קישור הרשמה נשלח למייל! לחצו על הקישור כדי להיכנס 📧');
+            setLoading('signup-btn', 'signup-spinner', false, null, 'הרשמה לפורטל');
+            localStorage.setItem('pending_phone', phone);
+            localStorage.setItem('pending_name', fullName);
+        } catch (error) {
+            if (error.message.includes('already registered')) {
+                showError('כתובת האימייל כבר רשומה — נסו להתחבר בטאב השמאלי');
+            } else {
+                showError('שגיאה בהרשמה — נסו שוב');
+            }
+            setLoading('signup-btn', 'signup-spinner', false, null, 'הרשמה לפורטל');
+        }
+    });
+
+    async function signInWithGoogle() {
+        try {
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: 'https://www.therapist-home.com/pages/login.html' }
+            });
+            if (error) throw error;
+        } catch (error) {
+            showError('שגיאה בהתחברות עם Google — נסו שוב');
+        }
+    }
+</script>
+
+<script src="../js/marketing-tools.js"></script>
+</body>
 </html>

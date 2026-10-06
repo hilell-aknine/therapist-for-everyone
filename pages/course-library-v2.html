@@ -551,6 +551,10 @@
   .lms-notes-status.is-saved{ color:var(--text-on-light-strong); animation: notesSavedPulse .45s ease; }
   @keyframes notesSavedPulse{ 0%{ transform:scale(.88); opacity:.45; } 45%{ transform:scale(1.06); opacity:1; } 100%{ transform:scale(1); opacity:1; } }
   .lms-notes-status.is-error{ color:#C62828; }
+  .lms-notes-pdf{ display:inline-flex; align-items:center; gap:.4rem; padding:.4rem .8rem; border-radius:999px; border:1px solid rgba(0,59,70,.18); background:rgba(255,255,255,.6); color:var(--text-on-light-strong); font:inherit; font-weight:600; cursor:pointer; transition:background .2s, border-color .2s; }
+  .lms-notes-pdf:hover{ background:#fff; border-color: rgba(212,175,55,.55); }
+  .lms-notes-pdf:disabled{ opacity:.6; cursor:default; }
+  .lms-notes-pdf i{ color:#C62828; }
 
   /* AI MENTOR PANE */
   .lms-ai-card{
@@ -1911,7 +1915,7 @@
             <textarea class="lms-notes-textarea" id="notesArea" placeholder="כתבו כאן את ההערות שלכם לשיעור — תובנות, שאלות, ציטוטים מעוררי השראה…" aria-label="הערות לשיעור"></textarea>
             <div class="lms-notes-foot">
               <span class="lms-notes-status" id="notesStatus"><i class="fa-regular fa-circle"></i> מוכן</span>
-              <span>שמירה אוטומטית כל כמה שניות</span>
+              <button type="button" class="lms-notes-pdf" id="notesPdfBtn" title="הורדת ההערות של השיעור כקובץ PDF"><i class="fa-solid fa-file-pdf"></i> הורדה כ-PDF</button>
             </div>
           </div>
         </div>
@@ -4584,7 +4588,69 @@
       setNotesStatus('saved');
     } catch(e){ setNotesStatus('error'); }
   }
+  // Notes → PDF (restored from the v1 portal, where it was lost in the v2 move).
+  // html2pdf loads only on first click; it rasterises the page, so Hebrew/RTL
+  // renders exactly as on screen instead of relying on PDF font shaping.
+  // The tiny letter-spacing on the sheet is load-bearing: with 0, html2canvas paints
+  // RTL text word-by-word and swallows spaces / shifts punctuation; any non-zero value
+  // makes it paint each glyph at its measured position.
+  let _html2pdfLoading = null;
+  function loadHtml2Pdf(){
+    if (window.html2pdf) return Promise.resolve();
+    if (!_html2pdfLoading){
+      _html2pdfLoading = new Promise((res, rej) => {
+        const sc = document.createElement('script');
+        sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js';
+        sc.onload = () => res(); sc.onerror = () => { _html2pdfLoading = null; rej(new Error('html2pdf failed to load')); };
+        document.head.appendChild(sc);
+      });
+    }
+    return _html2pdfLoading;
+  }
+  async function exportNotesToPDF(){
+    const btn = document.getElementById('notesPdfBtn');
+    const content = (document.getElementById('notesArea').value || '').trim();
+    if (!content){ btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> אין עדיין הערות להורדה'; setTimeout(()=>{ btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> הורדה כ-PDF'; }, 2200); return; }
+    const mod = modules[currentModuleIndex];
+    const lesson = mod.lessons[currentLessonIndex];
+    const date = new Intl.DateTimeFormat('he-IL', { timeZone:'Asia/Jerusalem', day:'numeric', month:'long', year:'numeric' }).format(new Date());
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> מכין קובץ…';
+    try {
+      await loadHtml2Pdf();
+      const box = document.createElement('div');
+      box.innerHTML = `
+        <div dir="rtl" style="font-family:'Heebo',Arial,sans-serif;padding:36px 40px;color:#333;text-align:right;max-width:700px;margin:0 auto;background:#fff;letter-spacing:.01px;">
+          <div style="background:#003B46;border-radius:10px;padding:22px 28px;margin-bottom:28px;border-top:3px solid #D4AF37;">
+            <div style="font-size:11px;margin-bottom:6px;color:rgba(255,255,255,.85);">בית המטפלים · ההערות שלי</div>
+            <h1 style="margin:0;font-size:22px;font-weight:700;line-height:1.4;color:#fff;">${escapeHtml(lesson.title)}</h1>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding-bottom:16px;margin-bottom:24px;border-bottom:1px solid #e0e0e0;font-size:12px;color:#888;">
+            <span>${escapeHtml(mod.title)} · שיעור ${currentLessonIndex + 1} מתוך ${mod.lessons.length}</span>
+            <span>${date}</span>
+          </div>
+          <div style="font-size:14px;line-height:1.8;white-space:pre-wrap;">${escapeHtml(content)}</div>
+          <div style="margin-top:40px;padding-top:14px;border-top:1px solid #e0e0e0;font-size:10px;color:#aaa;">בית המטפלים · פורטל הלמידה</div>
+        </div>`;
+      const safe = String(lesson.title).replace(/[^֐-׿a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '_') || 'שיעור';
+      await window.html2pdf().set({
+        margin: [8, 6, 8, 6],
+        filename: `הערות_${safe}.pdf`,
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      }).from(box).save();
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> הקובץ ירד';
+    } catch(e){
+      console.error('Notes PDF export failed:', e);
+      btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ההורדה נכשלה, נסו שוב';
+    }
+    btn.disabled = false;
+    setTimeout(()=>{ btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> הורדה כ-PDF'; }, 2500);
+  }
+
   function setupNotes(){
+    document.getElementById('notesPdfBtn').addEventListener('click', exportNotesToPDF);
     const area = document.getElementById('notesArea');
     area.addEventListener('input', () => {
       updateNotesWordCount();

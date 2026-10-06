@@ -511,32 +511,29 @@
             margin: 0 0 1.1rem;
         }
         .q-consent-body strong { color: var(--brand-primary); }
-        .q-consent-toggle {
+        .q-consent-actions {
             display: flex;
+            flex-direction: column;
+            align-items: stretch;
             gap: 0.6rem;
-            justify-content: center;
-            margin-bottom: 1rem;
         }
-        .q-consent-btn {
-            flex: 1;
-            max-width: 160px;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            border: 1.5px solid var(--brand-primary);
+        .q-consent-skip {
             background: transparent;
-            color: var(--brand-primary);
-            font-size: 0.88rem;
+            border: none;
+            padding: 0.7rem 1rem;
+            color: var(--brand-text-soft);
+            font-size: 0.9rem;
             font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 3px;
             cursor: pointer;
-            transition: background 0.2s, color 0.2s;
             font-family: 'Heebo', sans-serif;
         }
-        .q-consent-btn.active {
-            background: var(--brand-primary);
-            color: #fff;
-        }
+        .q-consent-skip:hover { color: var(--brand-primary); }
+        .q-consent-enter:disabled, .q-consent-skip:disabled { opacity: 0.6; cursor: default; }
         .q-consent-enter {
             display: inline-flex;
+            justify-content: center;
             align-items: center;
             gap: 0.45rem;
             background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
@@ -798,20 +795,17 @@
                 </div>
                 <p class="q-consent-body">
                     ראינו שהדבר שעוזר ביותר ללומדים לסיים הוא <strong>תזכורת קצרה בזמן שנוח לך</strong> —
-                    מותאמת לסיבה שלך ללמוד. בשלב הבא תבחר/י בדיוק באיזה ימים ובאיזו שעה. ניתן לבטל בכל עת.
+                    מותאמת לסיבה שלך ללמוד. בלחיצה על "כן" תבחר/י בדיוק באיזה ימים ובאיזו שעה. ניתן לבטל בכל עת.
                 </p>
-                <div class="q-consent-toggle">
-                    <button id="consentYes" class="q-consent-btn active" aria-pressed="true">
-                        כן, שלחו לי 📲
+                <div class="q-consent-actions">
+                    <button type="button" id="consentYes" class="q-consent-enter">
+                        <i class="fa-solid fa-bell"></i>
+                        כן, אני רוצה תזכורות
                     </button>
-                    <button id="consentNo" class="q-consent-btn" aria-pressed="false">
-                        לא תודה
+                    <button type="button" id="consentNo" class="q-consent-skip">
+                        לא תודה, ישר לפורטל הלמידה
                     </button>
                 </div>
-                <button id="enterPortalBtn" class="q-consent-enter">
-                    <i class="fa-solid fa-play"></i>
-                    כניסה לפורטל הלמידה
-                </button>
             </div>
         </div>
     </div>
@@ -1140,40 +1134,37 @@
         }
 
         consentBlock.classList.add('visible');
-        let _consentChoice = true; // default: yes
 
+        // Nothing is pre-selected: each button is the decision itself and says
+        // where it leads. Yes → pick days + hours (onboarding mode continues to
+        // the portal after saving). No → straight to the portal.
         const btnYes = document.getElementById('consentYes');
         const btnNo  = document.getElementById('consentNo');
-        const btnEnter = document.getElementById('enterPortalBtn');
 
-        function setChoice(val) {
-            _consentChoice = val;
-            btnYes.setAttribute('aria-pressed', val ? 'true' : 'false');
-            btnYes.classList.toggle('active', val);
-            btnNo.setAttribute('aria-pressed', val ? 'false' : 'true');
-            btnNo.classList.toggle('active', !val);
-        }
-
-        btnYes.addEventListener('click', () => setChoice(true));
-        btnNo.addEventListener('click', () => setChoice(false));
-
-        btnEnter.addEventListener('click', async () => {
-            btnEnter.disabled = true;
-            btnEnter.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        async function decide(consent, btn) {
+            btnYes.disabled = btnNo.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             if (questionnaireId) {
+                // Owners have no UPDATE policy on portal_questionnaires (by design —
+                // the row carries caller notes), so the consent goes through an RPC
+                // that touches only the consent columns of the caller's own row.
                 try {
-                    await supabaseClient
-                        .from('portal_questionnaires')
-                        .update({ whatsapp_reminders_consent: _consentChoice })
-                        .eq('id', questionnaireId);
-                } catch (e) { /* non-critical — don't block portal entry on save failure */ }
+                    const { error } = await supabaseClient.rpc('set_my_reminders_consent', {
+                        p_questionnaire_id: questionnaireId,
+                        p_consent: consent
+                    });
+                    if (error) console.error('Reminder consent not saved:', error);
+                } catch (e) {
+                    console.error('Reminder consent not saved:', e); // don't block portal entry
+                }
             }
-            // Said yes → let them pick exactly which days + hours (onboarding mode
-            // continues to the portal after saving). Said no → straight to the portal.
-            window.location.href = _consentChoice
+            window.location.href = consent
                 ? 'reminder-settings.html?onboarding=1'
                 : 'course-library-v2.html?completed=1';
-        });
+        }
+
+        btnYes.addEventListener('click', () => decide(true, btnYes));
+        btnNo.addEventListener('click', () => decide(false, btnNo));
     }
 
     // Enter key = next step (except in textareas)

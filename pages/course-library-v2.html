@@ -3499,9 +3499,11 @@
     // watch, and it is the cheapest possible first taste of the portal. A guest's clip
     // progress lives in localStorage only — nothing is written for them.
     // Everything else in the portal still requires login.
+    // The feed pass only applies while the catalog actually has approved clips.
+    const _feedOpen = !!(window.ClipsCatalog && window.ClipsCatalog.all().length);
     const guestSalesPass = location.hash === '#master-sales'
-      || location.hash.indexOf('#feed') === 0
-      || /[?&]view=feed\b/.test(location.search);   // redirect-safe twin, see the head script
+      || (_feedOpen && (location.hash.indexOf('#feed') === 0
+      || /[?&]view=feed\b/.test(location.search)));   // redirect-safe twin, see the head script
     try {
       const client = window.supabaseClient || (window.SUPABASE_CONFIG && window.supabase
         ? window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey)
@@ -7008,6 +7010,12 @@
         return true;
       }
     }
+    // No approved clips = the feed is closed. Drop the link and fall through to the
+    // normal home route instead of painting an empty feed.
+    if ((location.hash.indexOf('#feed') === 0 || /[?&]view=feed\b/.test(location.search)) && !_feedHasClips()){
+      document.body.classList.remove('view-feed');
+      try { history.replaceState(null, '', location.pathname); } catch(_){}
+    }
     if (location.hash.indexOf('#feed') === 0){ showFeedView(true); return true; }
     // Entered via ?view=feed (a link that survived a redirect). Normalise to the hash so
     // every later route, share and back-button behaves like any other feed visit.
@@ -7073,7 +7081,7 @@
       const navAnchor = e.target.closest('a[data-nav], a[href="#ambassador"], a[href="#master"], a[href="#buddy"], a[href^="#feed"]');
       if (navAnchor){
         const target = navAnchor.getAttribute('data-nav') || navAnchor.getAttribute('href').replace('#','');
-        if (target === 'feed' || target.indexOf('feed/') === 0){ e.preventDefault(); showFeedView(); return; }
+        if ((target === 'feed' || target.indexOf('feed/') === 0) && _feedHasClips()){ e.preventDefault(); showFeedView(); return; }
         if (target === 'buddy'){ e.preventDefault(); showBuddyView(); return; }
         if (target === 'ambassador'){ e.preventDefault(); showAmbassadorView(); return; }
         if (target === 'master-sales'){ e.preventDefault(); showMasterSalesView(); return; }

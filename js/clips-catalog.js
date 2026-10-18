@@ -33,60 +33,8 @@
     habits: 'הרגלים ושינוי'
   };
 
-      /* CLIPS:BEGIN — everything between these markers is rewritten by build_catalog.py */
-  /* ⚠️ PREVIEW BUILD — contains clips Hillel has NOT approved. Rebuild without
-     --preview before this ships. */
+        /* CLIPS:BEGIN — everything between these markers is rewritten by build_catalog.py */
   var CLIPS = [
-    { id: "c-m1l4-0000", videoId: "fo90wrXPJjQ",
-      start: 0.0, end: 125.2,
-      title: "איך נולדה שיטת ה-NLP",
-      hook: "שני חוקרים שאלו מה הופך מטפל למצוין, ומהתשובה נולדה שיטה שלמה",
-      topic: "foundations", module: 1, lessonIdx: 3, order: 1 },
-    { id: "c-m1l4-0206", videoId: "fo90wrXPJjQ",
-      start: 206.0, end: 297.4,
-      title: "מסימן קריאה לסימן שאלה",
-      hook: "הדברים שאתה הכי בטוח בהם לגבי עצמך הם בדיוק אלה ששווה לפתוח מחדש",
-      topic: "foundations", module: 1, lessonIdx: 3, order: 2 },
-    { id: "c-m1l4-0320", videoId: "fo90wrXPJjQ",
-      start: 319.5, end: 417.6,
-      title: "המחיר של לגלות שהאמנת בשקר",
-      hook: "עשרים שנה האמנת במשהו, ואז מתברר שזה לא נכון. זה לא חינם",
-      topic: "beliefs", module: 1, lessonIdx: 3, order: 3 },
-    { id: "c-m1l4-0625", videoId: "fo90wrXPJjQ",
-      start: 625.1, end: 722.7,
-      title: "המפה היא לא השטח",
-      hook: "ההורים שלו לא התנגדו לעסק, הם ניסו להגן עליו. אותה התנהגות, שתי מפות",
-      topic: "presuppositions", module: 1, lessonIdx: 3, order: 4 },
-    { id: "c-m1l4-0733", videoId: "fo90wrXPJjQ",
-      start: 733.2, end: 866.2,
-      title: "ניסוי הלימון",
-      hook: "דמיינת לימון וחשת טעם חמוץ. המוח לא הבדיל בין דמיון למציאות",
-      topic: "presuppositions", module: 1, lessonIdx: 3, order: 5 },
-    { id: "c-m1l4-1232", videoId: "fo90wrXPJjQ",
-      start: 1232.0, end: 1356.0,
-      title: "חזרתיות היא אם כל המיומנויות",
-      hook: "ללמוד אופנוע הילוכים נראה בלתי אפשרי, עד שכל חלק נהיה אוטומטי בנפרד",
-      topic: "habits", module: 1, lessonIdx: 3, order: 6 },
-    { id: "c-m3l5-0168", videoId: "_8wvtMUInNg",
-      start: 168.2, end: 271.8,
-      title: "מטרה שאי אפשר למדוד היא משאלה",
-      hook: "\"אני רוצה להיות יותר עשיר\" זו לא מטרה. בלי ספציפיות אין דרך לדעת שהגעת",
-      topic: "goals", module: 3, lessonIdx: 4, order: 7 },
-    { id: "c-m3l5-0615", videoId: "_8wvtMUInNg",
-      start: 614.6, end: 680.8,
-      title: "מיקוד שליטה פנימי",
-      hook: "כל מטרה שמתחילה ב\"ברגע שהוא ישתנה\" כבר יצאה מהידיים שלך",
-      topic: "goals", module: 3, lessonIdx: 4, order: 8 },
-    { id: "c-m3l5-0772", videoId: "_8wvtMUInNg",
-      start: 772.3, end: 891.5,
-      title: "כשההרס העצמי משרת משהו",
-      hook: "שאלה אחת חשפה מה היא באמת מפסידה אם תחלים, והתשובה הייתה אמא שלה",
-      topic: "beliefs", module: 3, lessonIdx: 4, order: 9 },
-    { id: "c-m3l5-0925", videoId: "_8wvtMUInNg",
-      start: 924.7, end: 1014.3,
-      title: "למה קשה להפסיק לעשן דווקא בצבא",
-      hook: "הוא לא מכור לניקוטין, הוא מפחד להישאר לבד כששאר החבר'ה יוצאים לעשן",
-      topic: "beliefs", module: 3, lessonIdx: 4, order: 10 }
   ];
   /* CLIPS:END */
 

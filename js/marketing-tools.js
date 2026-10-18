@@ -323,8 +323,31 @@ function injectSessionRecording() {
     document.head.appendChild(clarityScript);
 }
 
+// After Google sign-in or a magic link, Supabase lands on login.html with the session
+// in the URL fragment (#access_token=...&refresh_token=...&provider_token=...).
+// Every tag below reports the full page URL, so starting them on that URL ships live
+// login tokens to Microsoft / Google / Meta. Measured 18.10.2026: 824 such URLs in
+// the Clarity export, 27.06 to 18.10, all on pages/login.html.
+// Rule: no tag starts while the URL carries tokens. Supabase strips the fragment once
+// it has read the session, and the page redirects right after, so we wait for that
+// and give up on this page view if it never happens.
+const AUTH_TOKEN_IN_URL = /(^|[#&?])(access_token|refresh_token|provider_token)=/;
+
+function urlCarriesAuthTokens() {
+    return AUTH_TOKEN_IN_URL.test(window.location.hash) || AUTH_TOKEN_IN_URL.test(window.location.search);
+}
+
 function initializeTracking() {
     if (!MARKETING_CONFIG.TRACKING_ENABLED || !hasUserConsented()) return;
+    if (urlCarriesAuthTokens()) {
+        let waited = 0;
+        const timer = setInterval(() => {
+            waited += 250;
+            if (!urlCarriesAuthTokens()) { clearInterval(timer); initializeTracking(); }
+            else if (waited >= 10000) clearInterval(timer);
+        }, 250);
+        return;
+    }
     injectGoogleAnalytics();
     injectMetaPixel();
     injectSessionRecording();

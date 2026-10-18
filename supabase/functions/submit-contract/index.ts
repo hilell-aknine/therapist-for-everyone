@@ -131,7 +131,15 @@ serve(async (req) => {
       auth: { persistSession: false },
     })
 
-    // ---- Validate subscription_id exists (if provided) ----
+    // ---- subscription_id is required: a signature must belong to a subscription ----
+    if (!subscription_id) {
+      return new Response(
+        JSON.stringify({ error: 'Missing subscription' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // ---- Validate subscription_id exists ----
     if (subscription_id) {
       const { data: sub, error: subErr } = await supabase
         .from('subscriptions')

@@ -49,7 +49,7 @@ const entityReloadFn = {
     leads: () => { loadLeads(); updateCounts(); },
     'contact-leads': () => { loadContactLeads(); },
     'questionnaires': () => { loadQuestionnaires(); },
-    'pipeline': () => { loadPipeline(); updateCounts(); }
+    'pipeline': () => { if (typeof loadPipeline === 'function') loadPipeline(); updateCounts(); }
 };
 
 // Generic single delete — opens confirmation modal

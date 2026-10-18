@@ -74,11 +74,14 @@ async function logout() {
 
 async function loadAllData() {
     if (window._userProfileRole === 'sales_rep') {
-        await loadPipeline();
+        if (typeof loadPipeline === 'function') await loadPipeline();
     } else {
         // Load attribution first so source chips render correctly on first paint
         await loadAttributionMap();
-        const results = await Promise.allSettled([loadPatients(), loadTherapists(), loadMatches(), loadLeads(), loadContactLeads(), loadQuestionnaires(), loadPipeline(), loadPortalQuestionnaires()]);
+        // patients/therapists/matches/questionnaires and the pipeline were removed
+        // with the move to a course-only business (3b5a0c1). Calling loadPipeline()
+        // here threw a ReferenceError before allSettled ran, so the counters stayed 0.
+        const results = await Promise.allSettled([loadLeads(), loadContactLeads(), loadPortalQuestionnaires()]);
         const failed = results.filter(r => r.status === 'rejected');
         if (failed.length > 0) {
             console.warn(`⚠️ ${failed.length}/${results.length} data loads failed:`, failed.map(r => r.reason?.message || r.reason));

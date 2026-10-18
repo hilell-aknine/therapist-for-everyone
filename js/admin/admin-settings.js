@@ -1027,6 +1027,16 @@ async function toggleAutomation(id, isEnabled) {
 // SALES REP MANAGEMENT
 // ===================
 
+// loadSalesReps lived in admin-pipeline.js, which the page no longer loads
+// (pipeline removed in 3b5a0c1). Kept here so the settings tab stops throwing.
+var salesRepsCache = window.salesRepsCache || [];
+
+async function loadSalesReps() {
+    if (window._userProfileRole !== 'admin') return;
+    const { data } = await db.from('profiles').select('id, full_name, email').eq('role', 'sales_rep');
+    salesRepsCache = data || [];
+}
+
 async function loadSalesRepManager() {
     if (window._userProfileRole !== 'admin') {
         const section = document.getElementById('sales-rep-section');
@@ -1133,7 +1143,7 @@ async function removeSalesRep(profileId, name) {
         showToast(`${name} הוסר מאנשי המכירות`, 'success');
         await loadSalesReps();
         renderSalesReps();
-        loadPipeline();
+        if (typeof loadPipeline === 'function') loadPipeline();
     } catch (err) {
         showToast('שגיאה: ' + err.message, 'error');
     }
@@ -1161,11 +1171,25 @@ async function loadPermissionsManager() {
 
     try {
         // Fetch all users with access + their profile info
+        // No FK between crm_bot_access and profiles, so an embedded profiles!inner(...)
+        // returns 400 (PGRST200). Fetch both and join here.
         const { data, error } = await db.from('crm_bot_access')
-            .select('user_id, role, category_access, profiles!inner(email, full_name, role)')
+            .select('user_id, role, category_access')
             .order('created_at', { ascending: true });
         if (error) throw error;
-        permUsersCache = data || [];
+        const ids = (data || []).map(r => r.user_id);
+        let profileMap = {};
+        if (ids.length) {
+            const { data: profs, error: pErr } = await db.from('profiles')
+                .select('id, email, full_name, role')
+                .in('id', ids);
+            if (pErr) throw pErr;
+            (profs || []).forEach(p => { profileMap[p.id] = p; });
+        }
+        // Keep the old !inner semantics: drop access rows with no profile.
+        permUsersCache = (data || [])
+            .filter(r => profileMap[r.user_id])
+            .map(r => ({ ...r, profiles: profileMap[r.user_id] }));
         renderPermissions();
     } catch (err) {
         /* Permissions load error handled by UI */

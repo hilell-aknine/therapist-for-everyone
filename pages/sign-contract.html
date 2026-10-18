@@ -172,6 +172,7 @@
         // Turnstile invisible widget
         let turnstileWidgetId = null;
         window.onloadTurnstileCallback = function () {
+            if (!document.getElementById('turnstile-container')) return; // no-token screen
             turnstileWidgetId = turnstile.render('#turnstile-container', {
                 sitekey: TURNSTILE_SITE_KEY,
                 size: 'invisible',
@@ -196,6 +197,20 @@
         // Get token from URL: ?token=SUBSCRIPTION_ID
         const urlParams = new URLSearchParams(window.location.search);
         const subToken = urlParams.get('token');
+
+        // Without a personal link there is no subscription to attach the signature to,
+        // so don't show a form that would create an orphan contract.
+        const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!subToken || !UUID_RE.test(subToken)) {
+            document.querySelector('.container').innerHTML =
+                '<div class="success-msg" style="display:block;border-color:#f59e0b;">' +
+                '<i class="fa-solid fa-link-slash" style="color:#b45309;"></i>' +
+                '<h2>הקישור חסר או לא תקין</h2>' +
+                '<p>כדי לחתום על ההסכם צריך את הקישור האישי שקיבלת מאיתנו.</p>' +
+                '<p style="margin-top:1rem;font-size:0.85rem;color:#666;">אם הקישור לא עובד, כתבו לנו ונשלח קישור חדש.</p>' +
+                '</div>';
+            throw new Error('sign-contract: missing or invalid token');
+        }
 
         // === Load contract text ===
         (async function loadContract() {

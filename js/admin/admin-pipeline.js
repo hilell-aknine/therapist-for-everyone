@@ -10,7 +10,7 @@ const PIPELINE_STAGES = {
     'closed_lost': 'לא קנה'
 };
 
-let salesRepsCache = [];
+var salesRepsCache = [];
 
 async function loadSalesReps() {
     if (window._userProfileRole !== 'admin') return;

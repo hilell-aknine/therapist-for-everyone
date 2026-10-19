@@ -435,9 +435,26 @@ export function adjustInitialMetrics(init: Metrics, scenarioDifficulty: number, 
 
 // ── Training mode: one line, no extra model call ─────────────────────────────
 
-export function coachNote(resolved: ResolvedSkill, move: string, judgeNote: string): string {
+export function coachNote(resolved: ResolvedSkill, move: string, judgeNote: string, female = true): string {
   const def = resolved.moves.find(x => x.id === move)
-  if (def?.coach) return def.coach
+  if (def?.coach) return genderize(def.coach, female)
   if (move === 'neutral') return judgeNote || 'התור לא קידם ולא הזיק. חזור למשימה.'
   return judgeNote || ''
+}
+
+// ── Gendered text ─────────────────────────────────────────────────────────────
+// Registry lines are written once for both genders ("המטופל/ת", "לו/ה",
+// "יסכים/תסכים"). Ram must speak about THIS patient, so the slash forms are
+// resolved before anything reaches the learner.
+//   short suffix  "מרגיש/ה" → מרגישה · "המטופל/ת" → המטופלת · "לו/ה" → לה
+//   two full words "הוא/היא", "יסכים/תסכים" → pick one
+export function genderize(text: string, female: boolean): string {
+  return (text || '').replace(/([\u0590-\u05FF]+)\/([\u0590-\u05FF]+)/g, (_m, a: string, b: string) => {
+    if (b.length <= 2) {
+      if (!female) return a
+      if (a.endsWith('ו') && b === 'ה') return a.slice(0, -1) + 'ה'
+      return a + b
+    }
+    return female ? b : a
+  })
 }

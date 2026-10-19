@@ -4,7 +4,7 @@
 
 import { assert, assertEquals, assertFalse } from 'https://deno.land/std@0.224.0/assert/mod.ts'
 import { applyTurn, MOVES, normalizeEvaluation, parseEvaluation, preClassify, type Spec } from './engine.ts'
-import { adjustInitialMetrics, coachNote, learnerDifficulty, resolveSkill, SKILLS } from './skills.ts'
+import { adjustInitialMetrics, coachNote, genderize, learnerDifficulty, resolveSkill, SKILLS } from './skills.ts'
 import { actorStable, debriefPrompt, isFemale, judgePrompt } from './prompts.ts'
 
 const reframeSpec = {
@@ -153,4 +153,20 @@ Deno.test('a judge answer cut by the token limit keeps its verdict, at capped co
   assertEquals(p.secondary_moves, ['counter_example'])
   assert((p.confidence as number) <= 0.6)
   assertEquals(parseEvaluation('{"rule_hits": ["x"'), null)
+})
+
+Deno.test('Ram speaks about this patient: slash forms resolve by gender', () => {
+  assertEquals(genderize('המטופל/ת יסכים/תסכים בנימוס', true), 'המטופלת תסכים בנימוס')
+  assertEquals(genderize('המטופל/ת יסכים/תסכים בנימוס', false), 'המטופל יסכים בנימוס')
+  assertEquals(genderize('תן לו/ה להרגיש שהבנת. הוא/היא מרגיש/ה', true), 'תן לה להרגיש שהבנת. היא מרגישה')
+  assertEquals(genderize('תן לו/ה להרגיש שהבנת. הוא/היא מרגיש/ה', false), 'תן לו להרגיש שהבנת. הוא מרגיש')
+  for (const key of Object.keys(SKILLS)) {
+    for (const mv of resolveSkill(key, {}).moves) {
+      for (const t of [mv.hint, mv.coach]) {
+        if (!t) continue
+        assertFalse(genderize(t, true).includes('/'), `${key}.${mv.id}: ${t}`)
+        assertFalse(genderize(t, false).includes('/'), `${key}.${mv.id}: ${t}`)
+      }
+    }
+  }
 })

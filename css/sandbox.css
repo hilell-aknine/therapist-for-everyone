@@ -372,3 +372,73 @@ html, body { margin: 0; max-width: 100%; overflow-x: hidden; }
 @media (prefers-reduced-motion: reduce) {
     .sbx-screen.active { animation: none; }
 }
+
+/* ── Virtual Ram ─────────────────────────────────────────────────────────── */
+/* The mentor the learner already knows from the lessons opens the exercise and
+   speaks every coaching line, so feedback reads as a person beside you. */
+.sbx-ram-intro {
+    display: flex; gap: .85rem; align-items: flex-start; margin-bottom: 1rem;
+}
+.sbx-ram-face {
+    width: 56px; height: 56px; flex: none; border-radius: 50%; object-fit: cover;
+    border: 2px solid var(--sbx-gold-strong); box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+}
+.sbx-ram-say {
+    flex: 1; min-width: 0; position: relative;
+    background: var(--sbx-gold-soft); border: 1px solid var(--sbx-gold-line);
+    border-radius: 16px; border-start-start-radius: 6px; padding: .65rem .9rem;
+}
+.sbx-ram-say p { margin: .15rem 0 0; line-height: 1.6; font-size: .95rem; }
+.sbx-ram-name { font-weight: 700; font-size: .8rem; color: var(--sbx-gold); }
+
+.sbx-coach.sbx-ram { gap: .6rem; align-items: flex-start; padding: .55rem .8rem; }
+.sbx-ram-mini {
+    width: 32px; height: 32px; flex: none; border-radius: 50%; object-fit: cover;
+    border: 1.5px solid var(--sbx-gold-line);
+}
+.sbx-ram-body { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+.sbx-coach.good .sbx-ram-name { color: var(--sbx-good); }
+.sbx-coach.bad .sbx-ram-name { color: var(--sbx-bad); }
+.sbx-coach.tip { border-style: dashed; }
+
+/* ── Three steps ─────────────────────────────────────────────────────────── */
+.sbx-steps {
+    list-style: none; counter-reset: step; margin: .4rem 0 1rem; padding: 0;
+    display: flex; flex-direction: column; gap: .55rem;
+}
+.sbx-steps li {
+    counter-increment: step; display: flex; gap: .65rem; align-items: flex-start;
+    line-height: 1.6; font-size: .97rem;
+}
+.sbx-steps li::before {
+    content: counter(step); flex: none; width: 26px; height: 26px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .85rem;
+    background: var(--sbx-gold-strong); color: #0b2a30;
+}
+.sbx-steps b { color: var(--t-text); }
+.sbx-avoid {
+    margin: 0 0 1rem; font-size: .88rem; line-height: 1.6;
+    color: var(--t-text-secondary);
+}
+.sbx-avoid b { color: var(--sbx-gold); }
+
+/* "Ask Ram" button in the composer */
+.sbx-askram, .sbx-hintbtn.sbx-askram {
+    width: auto;
+    height: 44px; padding: 0 .7rem; flex: none; border-radius: 12px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: var(--sbx-gold-soft); border: 1px solid var(--sbx-gold-line);
+    color: var(--t-text); font-family: inherit; font-weight: 700; font-size: .85rem;
+}
+.sbx-askram img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+.sbx-askram:disabled { opacity: .45; cursor: default; }
+
+/* What the lesson taught, shown before the task (Hillel, 19.10.2026). */
+.sbx-learned {
+    margin: 0 0 1rem; padding: .7rem .9rem; border-radius: 12px;
+    background: var(--sbx-glass-2); border: 1px solid var(--sbx-glass-line);
+    border-inline-start: 3px solid var(--sbx-gold-strong);
+}
+.sbx-learned b { display: block; font-size: .8rem; color: var(--sbx-gold); margin-bottom: .2rem; }
+.sbx-learned p { margin: 0; line-height: 1.6; font-size: .93rem; }

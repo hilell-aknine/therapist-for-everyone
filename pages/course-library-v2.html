@@ -708,6 +708,10 @@
   .sbx-lesson::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,.08) 0%, transparent 50%); }
   .sbx-lesson > *{ position:relative; z-index:1; }
   .sbx-lesson__head{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+  .sbx-lesson__ram{ width:28px; height:28px; border-radius:50%; object-fit:cover; border:1.5px solid rgba(212,175,55,.55); }
+  .sbx-lesson__learned{ padding:.7rem .85rem; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); }
+  .sbx-lesson__learned b{ display:block; font-size:.8rem; color:var(--accent-gold-hover); margin-bottom:.2rem; }
+  .sbx-lesson__learned p{ margin:0; font-size:.92rem; line-height:1.6; color:rgba(255,255,255,.88); }
   .sbx-lesson__eyebrow{ display:inline-flex; align-items:center; gap:.45rem; font-size:.78rem; font-weight:700; letter-spacing:.02em; color:var(--accent-gold-hover); }
   .sbx-lesson__done{ display:inline-flex; align-items:center; gap:.35rem; padding:.22rem .6rem; border-radius:999px; font-size:.75rem; font-weight:700; color:var(--text-on-gold); background: linear-gradient(180deg, var(--accent-gold-hover), var(--accent-gold)); }
   .sbx-lesson__done[hidden]{ display:none; }
@@ -2222,28 +2226,31 @@
         </div>
 
         <div class="lms-tab-pane" data-pane="resources">
-          <div class="lms-res-grid" id="resGrid"></div>
-        </div>
-
-        <div class="lms-tab-pane" data-pane="game">
-          <!-- מעבדת אימון קלינית: תרחיש תרגול חי לשיעור הנוכחי. מוצג רק כשיש
-               תרחיש מפורסם לשיעור הזה (sim_catalog). התוכן נבנה ב-renderSandboxCard. -->
+          <!-- תרגול עם רם: תרחיש תרגול חי לשיעור הנוכחי, בחומרי העזר של השיעור.
+               מוצג רק כשיש תרחיש מפורסם לשיעור (sim_catalog). נבנה ב-renderSandboxCard. -->
           <div class="sbx-lesson" id="sandboxCard" hidden>
             <div class="sbx-lesson__head">
-              <span class="sbx-lesson__eyebrow"><i class="fa-solid fa-user-doctor"></i>מעבדת אימון קלינית</span>
+              <span class="sbx-lesson__eyebrow"><img class="sbx-lesson__ram" src="../assets/mentor-ram.webp" alt="" width="28" height="28">תרגול עם רם</span>
               <span class="sbx-lesson__done" id="sandboxDone" hidden><i class="fa-solid fa-check"></i>תורגל</span>
             </div>
-            <div class="sbx-lesson__t" id="sandboxTitle"></div>
+            <div class="sbx-lesson__learned" id="sandboxLearnedWrap">
+              <b id="sandboxLearnedLabel">מה למדת בשיעור הזה</b>
+              <p id="sandboxLearned"></p>
+            </div>
+            <div class="sbx-lesson__t" id="sandboxTitle">עכשיו תתרגל את זה מול מטופל</div>
             <div class="sbx-lesson__patient" id="sandboxPatient"></div>
             <p class="sbx-lesson__mission" id="sandboxMission"></p>
             <div class="sbx-lesson__foot">
               <span class="sbx-lesson__meta" id="sandboxMeta"></span>
               <a class="lms-game-cta__btn" id="sandboxBtn" href="sandbox.html">
-                <i class="fa-solid fa-comments"></i><span id="sandboxBtnLabel">להיכנס לחדר</span>
+                <i class="fa-solid fa-comments"></i><span id="sandboxBtnLabel">להתחיל לתרגל</span>
               </a>
             </div>
           </div>
+          <div class="lms-res-grid" id="resGrid"></div>
+        </div>
 
+        <div class="lms-tab-pane" data-pane="game">
           <div class="lms-game-cta">
             <div class="lms-game-cta__copy">
               <div class="lms-game-cta__t"><i class="fa-solid fa-gamepad" style="color:var(--accent-gold-hover); margin-inline-end:.4rem;"></i>משחק תרגול NLP</div>
@@ -6137,7 +6144,7 @@
   }
   async function renderSandboxCard(){
     const card = document.getElementById('sandboxCard');
-    const tab = document.querySelector('.lms-tab[data-tab="game"]');
+    const tab = document.querySelector('.lms-tab[data-tab="resources"]');
     const setDot = on => {
       if (!tab) return;
       let dot = tab.querySelector('.lms-tab__dot');
@@ -6156,17 +6163,23 @@
 
     const br = row.briefing || {};
     const female = (row.patient_gender || 'f') !== 'm';
-    document.getElementById('sandboxTitle').textContent = row.title || '';
+    // Context first: what the lesson taught, then the practice. The card lives
+    // under the lesson's own materials, so it must read as part of the lesson.
+    const lessonTitle = (modules[m] && modules[m].lessons[l] && modules[m].lessons[l].title) || '';
+    document.getElementById('sandboxLearnedLabel').textContent = lessonTitle ? `מה למדת בשיעור "${lessonTitle}"` : 'מה למדת בשיעור הזה';
+    document.getElementById('sandboxLearned').textContent = row.lesson_reference || '';
+    document.getElementById('sandboxLearnedWrap').hidden = !row.lesson_reference;
+    document.getElementById('sandboxTitle').textContent = female ? 'עכשיו תתרגל את זה מול מטופלת' : 'עכשיו תתרגל את זה מול מטופל';
     const who = [row.patient_name, br.patient_age ? (female ? 'בת ' : 'בן ') + br.patient_age : '', br.patient_occupation || '']
       .filter(Boolean).map(escapeHtml).join(' · ');
     document.getElementById('sandboxPatient').innerHTML = who
       ? `<b>${female ? 'המטופלת' : 'המטופל'}:</b> ${who}` : (br.patient_intro ? escapeHtml(br.patient_intro) : '');
-    document.getElementById('sandboxMission').textContent = br.mission || '';
+    document.getElementById('sandboxMission').textContent = br.mission ? 'המטרה שלך: ' + br.mission : '';
     document.getElementById('sandboxMission').hidden = !br.mission;
     const best = row.best_score != null ? ` · הציון הכי טוב שלך: ${row.best_score}` : '';
-    document.getElementById('sandboxMeta').textContent = `${row.turn_budget} מהלכים · ציון מעבר ${row.passing_score || 75}${best}`;
+    document.getElementById('sandboxMeta').textContent = `כ-5 דקות · רם לידך לאורך כל הדרך${best}`;
     document.getElementById('sandboxDone').hidden = !row.passed;
-    document.getElementById('sandboxBtnLabel').textContent = row.attempts ? 'לתרגל שוב' : 'להיכנס לחדר';
+    document.getElementById('sandboxBtnLabel').textContent = row.attempts ? 'לתרגל שוב' : 'להתחיל לתרגל';
     document.getElementById('sandboxBtn').href = 'sandbox.html?scenario=' + encodeURIComponent(row.slug);
     card.hidden = false;
     setDot(!row.passed);

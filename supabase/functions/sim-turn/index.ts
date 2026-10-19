@@ -22,7 +22,7 @@ import {
 } from '../_shared/sim/engine.ts'
 import { actorStable, actorVolatile, isFemale, judgePrompt, patientName, SUMMARY_PROMPT } from '../_shared/sim/prompts.ts'
 import {
-  adjustInitialMetrics, coachNote, learnerDifficulty, resolveSkill,
+  adjustInitialMetrics, coachNote, genderize, learnerDifficulty, resolveSkill,
 } from '../_shared/sim/skills.ts'
 import {
   AI_MONTHLY_CAP_ILS, callClaude, callGemini, callOpenRouter, corsHeaders,
@@ -274,7 +274,7 @@ serve(async (req) => {
     const def = resolved.moves.find(x => x.id === applied.evaluation.move)
     return json({
       ...(isTrain ? {
-        coach_note: coachNote(resolved, applied.evaluation.move, applied.evaluation.one_line_note),
+        coach_note: coachNote(resolved, applied.evaluation.move, applied.evaluation.one_line_note, female),
         coach_tone: def ? (def.polarity > 0 ? 'good' : def.polarity < 0 ? 'bad' : 'neutral') : 'neutral',
       } : {}),
       reply: patientText,
@@ -332,7 +332,9 @@ async function handleStart(admin: any, userId: string, isPaid: boolean, isAdmin:
   const spec = scen.spec as Spec
   const resolved = resolveSkill(scen.primary_skill, spec)
   const opening = String((spec.patient as Record<string, unknown>).opening_line || '')
-  const mode = body.mode === 'exam' ? 'exam' : 'train'
+  // Training only, by Hillel's decision (19.10.2026): Ram is always beside the
+  // learner. The exam path stays in the schema but is not offered.
+  const mode = 'train'
 
   // Level: the same patient, harder to reach for a learner who is ahead.
   let experience: string | null = null
@@ -410,7 +412,7 @@ async function handleHint(admin: any, userId: string, body: Json, cors: Record<s
     !unlocked.includes(f.id) && !(f.unlock_when.requires || []).some(r => !unlocked.includes(r)))
 
   const MOVE_HINT: Record<string, string> = Object.fromEntries(
-    resolved.moves.filter(x => x.hint).map(x => [x.id, x.hint as string]))
+    resolved.moves.filter(x => x.hint).map(x => [x.id, genderize(x.hint as string, f)]))
 
   let text = 'המשך לחקור. אל תציע פתרון.'
   if (next) {

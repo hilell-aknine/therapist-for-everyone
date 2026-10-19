@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="../css/v2/theme.css">
     <link rel="stylesheet" href="../css/v2/theme-bvm.css">
     <link rel="stylesheet" href="../css/accessibility.css">
-    <link rel="stylesheet" href="../css/sandbox.css?v=20261019-1">
+    <link rel="stylesheet" href="../css/sandbox.css?v=20261019-2">
 </head>
 <body class="sbx-body">
 
@@ -60,53 +60,45 @@
 
     <!-- ── briefing (case dossier) ─────────────────────────────────────── -->
     <section id="sbx-briefing" class="sbx-screen" aria-label="תיק המטופל">
+        <!-- Ram opens the exercise: one voice the learner already knows from the
+             lessons, instead of a form full of labels. -->
+        <div class="sbx-card sbx-ram-intro">
+            <img class="sbx-ram-face" src="../assets/mentor-ram.webp" alt="רם" width="56" height="56">
+            <div class="sbx-ram-say">
+                <span class="sbx-ram-name">רם</span>
+                <p id="sbx-b-ramline">היי, אני רם. בוא נתרגל את מה שלמדת בשיעור. אני אהיה פה לידך כל הפגישה.</p>
+            </div>
+        </div>
+
         <div class="sbx-card sbx-dossier">
             <div class="sbx-dossier-head">
                 <div class="sbx-avatar" id="sbx-b-avatar" aria-hidden="true"></div>
                 <div class="sbx-dossier-id">
-                    <p class="sbx-eyebrow" id="sbx-b-skill">תיק מטופל</p>
+                    <p class="sbx-eyebrow" id="sbx-b-skill">מי מגיע לפגישה</p>
                     <h2 class="sbx-h1" id="sbx-b-title"></h2>
                     <p class="sbx-dossier-who" id="sbx-b-who"></p>
                 </div>
             </div>
-
             <p class="sbx-lead" id="sbx-b-intro"></p>
 
-            <div class="sbx-mission">
-                <strong>המשימה שלך</strong>
-                <p id="sbx-b-mission"></p>
+            <div class="sbx-learned" id="sbx-b-learned-wrap" hidden>
+                <b id="sbx-b-learned-label">מה למדת בשיעור</b>
+                <p id="sbx-b-learned"></p>
             </div>
 
-            <div class="sbx-cols">
-                <div class="sbx-col" id="sbx-b-rules-wrap">
-                    <p class="sbx-eyebrow">אסור</p>
-                    <ul class="sbx-rules" id="sbx-b-rules"></ul>
-                </div>
-                <div class="sbx-col" id="sbx-b-measured-wrap">
-                    <p class="sbx-eyebrow">נמדד</p>
-                    <div class="sbx-measured" id="sbx-b-measured"></div>
-                </div>
-            </div>
+            <p class="sbx-eyebrow">מה עושים? שלושה צעדים</p>
+            <ol class="sbx-steps">
+                <li><b>קרא</b> <span id="sbx-b-step1">מה המטופל אומר בפתיחה.</span></li>
+                <li><b>המטרה שלך:</b> <span id="sbx-b-mission"></span></li>
+                <li><b>כתוב</b> <span id="sbx-b-step3">משפט או שניים בכל פעם, כמו בפגישה אמיתית.</span></li>
+            </ol>
 
-            <p class="sbx-eyebrow">איך לתרגל</p>
-            <div class="sbx-modes" role="radiogroup" aria-label="מצב תרגול">
-                <button type="button" class="sbx-mode is-on" data-mode="train" role="radio" aria-checked="true">
-                    <span class="sbx-mode-t">אימון</span>
-                    <span class="sbx-mode-s">הערה קצרה אחרי כל תור</span>
-                </button>
-                <button type="button" class="sbx-mode" data-mode="exam" role="radio" aria-checked="false">
-                    <span class="sbx-mode-t">מבחן</span>
-                    <span class="sbx-mode-s">משוב רק בסוף, כמו בחדר אמיתי</span>
-                </button>
-            </div>
+            <p class="sbx-avoid" id="sbx-b-rules-wrap"><b>חשוב:</b> <span id="sbx-b-rules"></span></p>
+            <div id="sbx-b-measured-wrap" hidden><div id="sbx-b-measured"></div></div>
 
             <div id="sbx-briefing-err"></div>
 
-            <button type="button" class="sbx-btn gold full" id="sbx-start">להיכנס לחדר</button>
-            <p class="sbx-note" id="sbx-b-note">
-                יש לך <b id="sbx-b-budget">12</b> מהלכים. ציון מעבר: <b id="sbx-b-pass">75</b>.
-                זה תרגול ולא הדרכה קלינית, ואינו תחליף לעבודה עם מטופל תחת ליווי.
-            </p>
+            <button type="button" class="sbx-btn gold full" id="sbx-start">להתחיל את הפגישה</button>
             <button type="button" class="sbx-btn ghost full" id="sbx-b-back">לכל התרגולים</button>
         </div>
     </section>
@@ -117,7 +109,7 @@
         <div class="sbx-chat" id="sbx-chat" aria-live="polite"></div>
 
         <div class="sbx-composer">
-            <button type="button" class="sbx-iconbtn sbx-hintbtn" id="sbx-hint" title="רמז" aria-label="רמז">💡</button>
+            <button type="button" class="sbx-hintbtn sbx-askram" id="sbx-hint" title="לבקש טיפ מרם" aria-label="לבקש טיפ מרם"><img src="../assets/mentor-ram.webp" alt="" width="24" height="24"><span>טיפ</span></button>
             <div class="sbx-inputwrap">
                 <textarea class="sbx-input" id="sbx-input" rows="1" maxlength="700"
                           placeholder="מה אתה אומר?" aria-label="ההודעה שלך"></textarea>
@@ -154,7 +146,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase-config.js"></script>
 <script src="../js/supabase-client.js"></script>
-<script src="../js/sandbox.js?v=20261019-1"></script>
+<script src="../js/sandbox.js?v=20261019-2"></script>
 <script src="../js/marketing-tools.js"></script>
 </body>
 </html>

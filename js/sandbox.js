@@ -193,7 +193,10 @@
         $('sbx-bar-title').textContent = row.title || 'תרגול חי';
         $('sbx-b-title').textContent = state.patient.name;
         $('sbx-b-avatar').textContent = (state.patient.name || '?').trim().charAt(0);
-        $('sbx-b-skill').textContent = row.title ? 'תיק מטופל · ' + row.title : 'תיק מטופל';
+        $('sbx-b-skill').textContent = 'מי מגיע לפגישה';
+        $('sbx-b-ramline').textContent = 'היי, אני רם. עכשיו נתרגל את מה שלמדת בשיעור. '
+            + 'אני אהיה פה לידך כל הפגישה, ואגיד לך מה עבד ומה לא.';
+        $('sbx-b-step1').textContent = g('מה ' + state.patient.name + ' אומרת בפתיחה.', 'מה ' + state.patient.name + ' אומר בפתיחה.');
 
         var who = [];
         if (br.patient_age) who.push(g('בת ', 'בן ') + br.patient_age);
@@ -204,28 +207,19 @@
         $('sbx-b-intro').textContent = br.patient_intro || '';
         $('sbx-b-mission').textContent = br.mission || '';
 
-        var rules = $('sbx-b-rules');
-        rules.innerHTML = '';
-        (br.rules || []).forEach(function (r) {
-            var li = document.createElement('li');
-            li.textContent = r;
-            rules.appendChild(li);
-        });
-        $('sbx-b-rules-wrap').hidden = !(br.rules || []).length;
+        // One short line instead of a list. The rules are kept verbatim: stripping
+        // "אין ל..." mechanically leaves broken Hebrew ("במונחים מקצועיים").
+        var short = (br.rules || []).map(function (r) { return String(r).replace(/[.]\s*$/, ''); }).filter(Boolean);
+        $('sbx-b-rules').textContent = short.join(' · ');
+        $('sbx-b-rules-wrap').hidden = !short.length;
 
-        var chips = $('sbx-b-measured');
-        chips.innerHTML = '';
-        (br.measured || []).forEach(function (m) {
-            var s = document.createElement('span');
-            s.className = 'sbx-chip';
-            s.textContent = m;
-            chips.appendChild(s);
-        });
-        $('sbx-b-measured-wrap').hidden = !(br.measured || []).length;
+        // "נמדד" chips removed by Hillel's call: too much for a first screen.
 
-        $('sbx-b-budget').textContent = row.turn_budget;
-        $('sbx-b-pass').textContent = state.passingScore;
-        setMode(state.mode);
+
+        // The lesson this practice belongs to, in one line, before the task.
+        $('sbx-b-learned').textContent = row.lesson_reference || '';
+        $('sbx-b-learned-wrap').hidden = !row.lesson_reference;
+        state.mode = 'train';
         show('briefing');
     }
 
@@ -246,10 +240,10 @@
         btn.disabled = true;
         btn.textContent = 'פותח את החדר…';
 
-        var d = await api('sim-turn', { action: 'start', scenario_slug: state.scenarioSlug, mode: state.mode });
+        var d = await api('sim-turn', { action: 'start', scenario_slug: state.scenarioSlug, mode: 'train' });
         state.busy = false;
         btn.disabled = false;
-        btn.textContent = 'להיכנס לחדר';
+        btn.textContent = 'להתחיל את הפגישה';
         if (!d) return;
         if (d.error) { fail(d.error); return; }
 
@@ -271,6 +265,7 @@
         renderMetrics(d.metrics);
         renderProgress(0);
         addMsg('pt', state.patient.name, d.opening);
+        addRam(g('קרא מה היא אמרה, וכתוב לה משפט אחד. אני פה איתך.', 'קרא מה הוא אמר, וכתוב לו משפט אחד. אני פה איתך.'), 'neutral');
         setTurns(0);
         enableComposer(true);
         show('session');
@@ -340,18 +335,22 @@
         return wrap;
     }
 
-    function addCoach(note, tone) {
+    // Virtual Ram: every coaching line and every tip comes from him, with his
+    // face, so the learner hears one familiar mentor and not a system message.
+    function addRam(note, tone) {
         if (!note) return;
         var chat = $('sbx-chat');
         var d = document.createElement('div');
-        var cls = tone === 'good' ? 'good' : tone === 'bad' ? 'bad' : '';
-        d.className = 'sbx-coach ' + cls;
-        var ico = tone === 'good' ? '✓' : tone === 'bad' ? '!' : '·';
-        d.innerHTML = '<span class="sbx-coach-ico" aria-hidden="true">' + ico + '</span>'
-            + '<span><span class="sr-only">הערת אימון: </span>' + esc(note) + '</span>';
+        var cls = tone === 'good' ? 'good' : tone === 'bad' ? 'bad' : tone === 'tip' ? 'tip' : '';
+        d.className = 'sbx-coach sbx-ram ' + cls;
+        var mark = tone === 'good' ? ' ✓' : tone === 'bad' ? ' ·  שים לב' : tone === 'tip' ? ' ·  טיפ' : '';
+        d.innerHTML = '<img class="sbx-ram-mini" src="../assets/mentor-ram.webp" alt="" width="32" height="32">'
+            + '<div class="sbx-ram-body"><span class="sbx-ram-name">רם' + esc(mark) + '</span>'
+            + '<span><span class="sr-only">רם אומר: </span>' + esc(note) + '</span></div>';
         chat.appendChild(d);
         d.scrollIntoView({ block: 'end', behavior: 'smooth' });
     }
+    function addCoach(note, tone) { addRam(note, tone); }
 
     function addReveal() {
         var chat = $('sbx-chat');
@@ -440,7 +439,7 @@
         state.busy = false;
         if (!d) return;
         if (d.error) { addMsg('sys', '', d.error); return; }
-        addMsg('hint', 'רמז', d.hint);
+        addRam(d.hint, 'tip');
     }
 
     // ── debrief ─────────────────────────────────────────────────────────────
@@ -620,7 +619,7 @@
     }
 
     async function boot() {
-        try { var m = localStorage.getItem('sbx-mode'); if (m) state.mode = m === 'exam' ? 'exam' : 'train'; } catch (e) { /* */ }
+        state.mode = 'train';   // training only (Hillel, 19.10.2026)
         $('sbx-back-lesson').href = backToLessonHref();
         $('sbx-back-top').href = backToLessonHref();
 

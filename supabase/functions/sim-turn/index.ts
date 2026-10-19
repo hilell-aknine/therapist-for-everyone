@@ -20,7 +20,10 @@ import {
   preClassify, shouldSummarize, turnsToSummarize,
   type Evaluation, type GatedFact, type Metrics, type Spec, type TurnRow,
 } from '../_shared/sim/engine.ts'
-import { actorStable, actorVolatile, judgePrompt, SUMMARY_PROMPT } from '../_shared/sim/prompts.ts'
+import { actorStable, actorVolatile, isFemale, judgePrompt, patientName, SUMMARY_PROMPT } from '../_shared/sim/prompts.ts'
+import {
+  adjustInitialMetrics, coachNote, learnerDifficulty, resolveSkill,
+} from '../_shared/sim/skills.ts'
 import {
   AI_MONTHLY_CAP_ILS, callClaude, callGemini, callOpenRouter, corsHeaders,
   HAIKU_MODEL, logUsage, monthlyCostShekel, SONNET_MODEL, todayIsrael,
@@ -109,7 +112,7 @@ serve(async (req) => {
     if (BREAK_CHARACTER_RE.test(studentText)) {
       return json({
         rejected: true,
-        reply: 'מירב היא לא מודל ואי אפשר לדבר איתה על זה. חזור לשיחה.',
+        reply: 'זה אדם בתרגול, לא מודל. חזור לשיחה.',
       }, 200, cors)
     }
 
@@ -120,12 +123,18 @@ serve(async (req) => {
     if (sess.status !== 'in_session') return json({ error: 'הסשן כבר הסתיים.', status: sess.status }, 409, cors)
 
     const { data: scen } = await admin.from('sim_scenarios')
-      .select('id, spec, difficulty, turn_budget, title, primary_skill')
+      .select('id, spec, difficulty, turn_budget, title, primary_skill, passing_score')
       .eq('id', sess.scenario_id).maybeSingle()
     if (!scen) return json({ error: 'תרחיש לא נמצא.' }, 404, cors)
 
-    const spec = scen.spec as Spec
+    const resolved = resolveSkill(scen.primary_skill, scen.spec)
+    // The engine reads scoring_rules from the spec; hand it the merged rules
+    // (skill defaults + the scenario's own numbers) without touching the stored row.
+    const spec = { ...(scen.spec as Spec), scoring_rules: resolved.scoring_rules } as Spec
     const turnBudget = Number(scen.turn_budget) || 12
+    const difficulty = Number(sess.difficulty) || Number(scen.difficulty) || 1
+    const female = isFemale(spec)
+    const name = patientName(spec)
 
     // ── budget ceiling: block, never degrade ─────────────────────────────────
     if (!isAdmin && (await monthlyCostShekel(admin)) >= AI_MONTHLY_CAP_ILS) {
@@ -152,15 +161,19 @@ serve(async (req) => {
     // ── evaluating ───────────────────────────────────────────────────────────
     // Layer 0 first: obvious moves are decided in code, identically every time,
     // and skip the judge call entirely.
-    const forced = preClassify(studentText)
+    const forced = preClassify(studentText, {
+      jargonExempt: resolved.jargon_exempt,
+      allowDirectives: resolved.allow_directives,
+    })
     let evaluation: Evaluation
     let judgeProvider = 'regex'
 
     if (forced) {
       evaluation = normalizeEvaluation(null, 'regex', forced)
     } else {
-      const jp = judgePrompt(spec, metrics, unlocked, candidates, lastPatientLine, studentText)
-      let jr = await callClaude(HAIKU_MODEL, jp, '', [{ role: 'user', content: 'סווג.' }], 500, 0.1)
+      const jp = judgePrompt(spec, metrics, unlocked, candidates, lastPatientLine, studentText, resolved)
+      // 900: Hebrew is token-heavy and a judge cut at 500 lost its verdict.
+      let jr = await callClaude(HAIKU_MODEL, jp, '', [{ role: 'user', content: 'סווג.' }], 900, 0.1)
       if (!jr) jr = await callGemini(jp, [{ role: 'user', content: 'סווג.' }], 0.1)
       if (!jr) jr = await callOpenRouter(jp, [{ role: 'user', content: 'סווג.' }])
       if (!jr) {
@@ -172,7 +185,7 @@ serve(async (req) => {
       promptIn += jr.promptTokens; promptOut += jr.completionTokens
       await logUsage(admin, user.id, jr.provider === 'haiku' ? 'sim-judge' : 'sim-judge-free',
         jr.promptTokens, jr.completionTokens)
-      evaluation = normalizeEvaluation(parseEvaluation(jr.text), 'model')
+      evaluation = normalizeEvaluation(parseEvaluation(jr.text), 'model', undefined, resolved.moveIds)
     }
 
     // ── applying: the only place the world changes ───────────────────────────
@@ -180,7 +193,8 @@ serve(async (req) => {
       spec,
       { metrics, unlocked, flags: (sess.flags || {}) as Record<string, number>, turn_count: sess.turn_count },
       evaluation,
-      Number(scen.difficulty) || 1,
+      difficulty,
+      resolved.flag_on_move,
     )
     const newTurnCount = Number(sess.turn_count) + 1
     const outcome = checkTerminal(
@@ -198,6 +212,7 @@ serve(async (req) => {
       unlockedFacts,
       applied.newly_unlocked,
       Math.max(0, turnBudget - newTurnCount),
+      female,
     )
     const convo = buildConvo(String(sess.rolling_summary || ''), turns, studentText)
 
@@ -206,7 +221,7 @@ serve(async (req) => {
     if (!ar) {
       // Deliberately NOT degrading to a weak model. A badly played patient
       // teaches wrong patterns, which is worse than a retry. Turn not consumed.
-      return json({ error: 'מירב לא זמינה כרגע. נסה שוב בעוד רגע, התור לא נספר.' }, 503, cors)
+      return json({ error: `${name} לא ${female ? 'זמינה' : 'זמין'} כרגע. נסה שוב בעוד רגע, התור לא נספר.` }, 503, cors)
     }
     promptIn += ar.promptTokens; promptOut += ar.completionTokens
     await logUsage(admin, user.id, 'sim-actor', ar.promptTokens, ar.completionTokens)
@@ -230,7 +245,7 @@ serve(async (req) => {
     const allTurns: TurnRow[] = [...turns, { turn_index: newTurnCount, student_text: studentText, patient_text: patientText }]
     if (shouldSummarize(allTurns)) {
       const old = turnsToSummarize(allTurns)
-        .map(t => `${t.student_text ? 'מטפל: ' + t.student_text + '\n' : ''}מירב: ${t.patient_text}`)
+        .map(t => `${t.student_text ? 'מטפל: ' + t.student_text + '\n' : ''}${name}: ${t.patient_text}`)
         .join('\n')
       const sr = await callClaude(HAIKU_MODEL, SUMMARY_PROMPT, '', [{ role: 'user', content: old }], 200, 0.2)
       if (sr) {
@@ -250,10 +265,18 @@ serve(async (req) => {
       ...(outcome ? { status: 'ended', outcome, ended_at: new Date().toISOString() } : {}),
     }).eq('id', sessionId)
 
-    // NOTE: the move classification is deliberately NOT returned mid-session.
-    // Showing "give_advice" live would teach the learner to game the classifier
-    // instead of reading the patient. It all surfaces in the debrief.
+    // Exam mode (the original design): the move classification is NOT returned
+    // mid-session. Showing "give_advice" live would teach the learner to game the
+    // classifier instead of reading the patient; it all surfaces in the debrief.
+    // Training mode adds ONE coaching line derived from the judgement that was
+    // already computed — no extra model call — and still never the raw label.
+    const isTrain = sess.mode !== 'exam'
+    const def = resolved.moves.find(x => x.id === applied.evaluation.move)
     return json({
+      ...(isTrain ? {
+        coach_note: coachNote(resolved, applied.evaluation.move, applied.evaluation.one_line_note),
+        coach_tone: def ? (def.polarity > 0 ? 'good' : def.polarity < 0 ? 'bad' : 'neutral') : 'neutral',
+      } : {}),
       reply: patientText,
       metrics: applied.metrics,
       unlocked_count: applied.unlocked.length,
@@ -278,7 +301,7 @@ async function handleStart(admin: any, userId: string, isPaid: boolean, isAdmin:
   if (!slug) return json({ error: 'חסר תרחיש.' }, 400, cors)
 
   const { data: scen } = await admin.from('sim_scenarios')
-    .select('id, version, spec, turn_budget, title, course_type, is_published')
+    .select('id, version, spec, turn_budget, title, course_type, is_published, primary_skill, difficulty, passing_score')
     .eq('slug', slug).eq('is_published', true)
     .order('version', { ascending: false }).limit(1).maybeSingle()
   if (!scen) return json({ error: 'תרחיש לא נמצא.' }, 404, cors)
@@ -307,13 +330,33 @@ async function handleStart(admin: any, userId: string, isPaid: boolean, isAdmin:
     .eq('user_id', userId).eq('status', 'in_session')
 
   const spec = scen.spec as Spec
+  const resolved = resolveSkill(scen.primary_skill, spec)
   const opening = String((spec.patient as Record<string, unknown>).opening_line || '')
+  const mode = body.mode === 'exam' ? 'exam' : 'train'
+
+  // Level: the same patient, harder to reach for a learner who is ahead.
+  let experience: string | null = null
+  try {
+    const { data: q } = await admin.from('course_questionnaires')
+      .select('experience_level').eq('user_id', userId)
+      .order('created_at', { ascending: false }).limit(1).maybeSingle()
+    experience = q?.experience_level ?? null
+  } catch { /* the questionnaire is optional; level falls back to scores alone */ }
+  const { data: recent } = await admin.from('sim_sessions')
+    .select('overall_score').eq('user_id', userId).not('overall_score', 'is', null)
+    .order('started_at', { ascending: false }).limit(5)
+  const scenDifficulty = Number(scen.difficulty) || 1
+  const difficulty = learnerDifficulty(scenDifficulty, experience,
+    (recent || []).map((r: { overall_score: number }) => Number(r.overall_score)))
+  const metricsInit = adjustInitialMetrics(spec.metrics_init, scenDifficulty, difficulty)
 
   const { data: created, error: insErr } = await admin.from('sim_sessions').insert({
     user_id: userId,
     scenario_id: scen.id,
     scenario_version: scen.version,
-    metrics: spec.metrics_init,
+    metrics: metricsInit,
+    mode,
+    difficulty,
   }).select('id, metrics').single()
   if (insErr || !created) return json({ error: 'לא הצלחנו לפתוח סשן.' }, 500, cors)
 
@@ -323,7 +366,7 @@ async function handleStart(admin: any, userId: string, isPaid: boolean, isAdmin:
     student_text: '',
     patient_text: opening,
     evaluation: { move: 'opening', source: 'scenario' },
-    metrics_after: spec.metrics_init,
+    metrics_after: metricsInit,
   })
 
   return json({
@@ -331,7 +374,13 @@ async function handleStart(admin: any, userId: string, isPaid: boolean, isAdmin:
     title: scen.title,
     briefing: spec.briefing,
     opening,
-    metrics: spec.metrics_init,
+    metrics: metricsInit,
+    mode,
+    difficulty,
+    skill: { key: resolved.skill.key, label: resolved.skill.label },
+    labels: resolved.labels,
+    patient: { name: patientName(spec), gender: isFemale(spec) ? 'f' : 'm' },
+    passing_score: Number(scen.passing_score) || 75,
     total_facts: (spec.gated_facts || []).length,
     unlocked_count: 0,
     turns_left: Number(scen.turn_budget) || 12,
@@ -350,31 +399,29 @@ async function handleHint(admin: any, userId: string, body: Json, cors: Record<s
     .eq('id', sessionId).eq('user_id', userId).maybeSingle()
   if (!sess || sess.status !== 'in_session') return json({ error: 'סשן לא פעיל.' }, 409, cors)
 
-  const { data: scen } = await admin.from('sim_scenarios').select('spec').eq('id', sess.scenario_id).maybeSingle()
+  const { data: scen } = await admin.from('sim_scenarios').select('spec, primary_skill').eq('id', sess.scenario_id).maybeSingle()
   const spec = (scen?.spec || {}) as Spec
+  const resolved = resolveSkill(scen?.primary_skill, spec)
+  const f = isFemale(spec)
   const unlocked: string[] = sess.unlocked_facts || []
   const metrics = sess.metrics as Metrics
 
   const next = (spec.gated_facts || []).find(f =>
     !unlocked.includes(f.id) && !(f.unlock_when.requires || []).some(r => !unlocked.includes(r)))
 
-  const MOVE_HINT: Record<string, string> = {
-    challenge_universal: 'היא אמרה מילה שמכסה את כולם. החזר לה אותה כשאלה.',
-    specify_time: 'שאל מתי זה קרה בפעם האחרונה.',
-    specify_context: 'שאל איפה, או באיזה מצב בדיוק, זה קורה.',
-    specify_behavior: 'שאל מה בדיוק נעשה שם. התנהגות שאפשר לראות, לא רגש.',
-    reflect_back: 'קח מילה שלה ותחזיר אותה לה מילה במילה.',
-    pace_emotion: 'לפני שאתה חוקר, תן לה להרגיש שהבנת מה עובר עליה.',
-  }
+  const MOVE_HINT: Record<string, string> = Object.fromEntries(
+    resolved.moves.filter(x => x.hint).map(x => [x.id, x.hint as string]))
 
   let text = 'המשך לחקור. אל תציע פתרון.'
   if (next) {
     const move = next.unlock_when.moves[0]
     text = MOVE_HINT[move] || text
     if (next.unlock_when.min_rapport != null && metrics.rapport < next.unlock_when.min_rapport) {
-      text = 'היא עדיין לא איתך. תן לה להרגיש שהבנת, לפני שאתה מבקש עוד פרט.'
+      text = f ? 'היא עדיין לא איתך. תן לה להרגיש שהבנת, לפני שאתה מבקש עוד פרט.'
+               : 'הוא עדיין לא איתך. תן לו להרגיש שהבנת, לפני שאתה מבקש עוד פרט.'
     } else if (next.unlock_when.max_resistance != null && metrics.resistance > next.unlock_when.max_resistance) {
-      text = 'היא בהגנה. רד מהלחץ, שקף לה מה שאמרה, ואז תחזור לחקור.'
+      text = f ? 'היא בהגנה. רד מהלחץ, שקף לה מה שאמרה, ואז תחזור לחקור.'
+               : 'הוא בהגנה. רד מהלחץ, שקף לו מה שאמר, ואז תחזור לחקור.'
     }
   }
 

@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#003B46">
+    <meta name="theme-color" content="#06181D">
     <meta name="robots" content="noindex, nofollow">
-    <title>תרגול חי — בית המטפלים</title>
-    <meta name="description" content="תרגול מיומנויות NLP מול מטופלת מדומה, בזמן אמת.">
+    <title>מעבדת אימון קלינית | בית המטפלים</title>
+    <meta name="description" content="תרגול חי של מיומנויות NLP מול מטופל מדומה, עם משוב מותאם לרמה שלך.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,44 +14,62 @@
     <link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon-180.png">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;700&display=swap" rel="stylesheet">
 
-    <script>(function(){var t=localStorage.getItem('beit-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
-    <link rel="stylesheet" href="../css/theme.css">
+    <!-- Dark by default, like the course library the learner arrives from.
+         An explicit choice of "light" on the toggle is remembered. -->
+    <script>(function(){var t=null;try{t=localStorage.getItem('beit-theme')}catch(e){}if(t!=='light')document.documentElement.setAttribute('data-theme','dark')})();</script>
+    <link rel="stylesheet" href="../css/v2/theme.css">
+    <link rel="stylesheet" href="../css/v2/theme-bvm.css">
     <link rel="stylesheet" href="../css/accessibility.css">
-    <link rel="stylesheet" href="../css/sandbox.css?v=20260919-1">
+    <link rel="stylesheet" href="../css/sandbox.css?v=20261019-1">
 </head>
 <body class="sbx-body">
 
-<!-- ── top bar ─────────────────────────────────────────────────────────── -->
-<div class="sbx-bar">
-    <h1 class="sbx-bar-title" id="sbx-bar-title">תרגול חי</h1>
-    <div class="sbx-bar-right">
-        <span class="sbx-turns" id="sbx-turns" hidden></span>
-        <button type="button" class="sbx-iconbtn" id="sbx-exit" title="יציאה מהתרגול" hidden>✕</button>
-        <a class="sbx-iconbtn" href="course-library-v2.html" title="חזרה לספרייה"
-           style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">←</a>
-    </div>
-</div>
+<div class="sbx-atmos" aria-hidden="true"><span></span><span></span></div>
 
-<div class="sbx-wrap">
+<!-- ── top bar ─────────────────────────────────────────────────────────── -->
+<header class="sbx-bar">
+    <a class="sbx-brand" href="course-library-v2.html" title="חזרה לספרייה">
+        <img src="../assets/logo-square.png" alt="בית המטפלים" width="36" height="36">
+    </a>
+    <div class="sbx-bar-mid">
+        <span class="sbx-bar-eyebrow">מעבדת אימון קלינית</span>
+        <h1 class="sbx-bar-title" id="sbx-bar-title">תרגול חי</h1>
+    </div>
+    <div class="sbx-bar-end">
+        <span class="sbx-turns" id="sbx-turns" hidden></span>
+        <a class="sbx-backlink" id="sbx-back-top" href="course-library-v2.html" aria-label="חזרה לשיעורים">→ לשיעורים</a>
+        <button type="button" class="sbx-iconbtn" id="sbx-theme" title="מצב תצוגה" aria-label="החלפת מצב תצוגה">◐</button>
+        <button type="button" class="sbx-iconbtn" id="sbx-exit" title="יציאה מהתרגול" aria-label="יציאה מהתרגול" hidden>✕</button>
+    </div>
+</header>
+
+<main class="sbx-wrap">
 
     <!-- ── catalog ─────────────────────────────────────────────────────── -->
-    <section id="sbx-catalog" class="sbx-screen active">
-        <div class="sbx-card">
+    <section id="sbx-catalog" class="sbx-screen" aria-label="רשימת התרגולים">
+        <div class="sbx-card sbx-hero">
             <p class="sbx-eyebrow">תרגול מעשי</p>
-            <h2 class="sbx-h1">מטופלת שלא משתפת פעולה בקלות</h2>
+            <h2 class="sbx-h1">כל שיעור, מטופל אחד שצריך אותך</h2>
             <p class="sbx-lead">
-                לא שאלות אמריקאיות. שיחה אמיתית, עם מטופלת שנפתחת רק כשאתה שואל נכון.
-                בסוף תקבל תחקיר עם השורה שהייתה עובדת במקום השורה שכתבת.
+                לא שאלות אמריקאיות. שיחה אמיתית, עם מטופל שנפתח רק כשמיישמים נכון את מה שנלמד בשיעור.
+                בסוף מקבלים תחקיר עם המשפט שהיה עובד במקום המשפט שנכתב.
             </p>
         </div>
-        <div id="sbx-list" style="margin-top:1.25rem"></div>
+        <div id="sbx-list" class="sbx-list"></div>
     </section>
 
-    <!-- ── briefing ────────────────────────────────────────────────────── -->
-    <section id="sbx-briefing" class="sbx-screen">
-        <div class="sbx-card">
-            <p class="sbx-eyebrow">חדר הכנה</p>
-            <h2 class="sbx-h1" id="sbx-b-title"></h2>
+    <!-- ── briefing (case dossier) ─────────────────────────────────────── -->
+    <section id="sbx-briefing" class="sbx-screen" aria-label="תיק המטופל">
+        <div class="sbx-card sbx-dossier">
+            <div class="sbx-dossier-head">
+                <div class="sbx-avatar" id="sbx-b-avatar" aria-hidden="true"></div>
+                <div class="sbx-dossier-id">
+                    <p class="sbx-eyebrow" id="sbx-b-skill">תיק מטופל</p>
+                    <h2 class="sbx-h1" id="sbx-b-title"></h2>
+                    <p class="sbx-dossier-who" id="sbx-b-who"></p>
+                </div>
+            </div>
+
             <p class="sbx-lead" id="sbx-b-intro"></p>
 
             <div class="sbx-mission">
@@ -59,34 +77,50 @@
                 <p id="sbx-b-mission"></p>
             </div>
 
-            <p class="sbx-eyebrow">אסור</p>
-            <ul class="sbx-rules" id="sbx-b-rules"></ul>
+            <div class="sbx-cols">
+                <div class="sbx-col" id="sbx-b-rules-wrap">
+                    <p class="sbx-eyebrow">אסור</p>
+                    <ul class="sbx-rules" id="sbx-b-rules"></ul>
+                </div>
+                <div class="sbx-col" id="sbx-b-measured-wrap">
+                    <p class="sbx-eyebrow">נמדד</p>
+                    <div class="sbx-measured" id="sbx-b-measured"></div>
+                </div>
+            </div>
 
-            <p class="sbx-eyebrow">נמדד</p>
-            <div class="sbx-measured" id="sbx-b-measured"></div>
+            <p class="sbx-eyebrow">איך לתרגל</p>
+            <div class="sbx-modes" role="radiogroup" aria-label="מצב תרגול">
+                <button type="button" class="sbx-mode is-on" data-mode="train" role="radio" aria-checked="true">
+                    <span class="sbx-mode-t">אימון</span>
+                    <span class="sbx-mode-s">הערה קצרה אחרי כל תור</span>
+                </button>
+                <button type="button" class="sbx-mode" data-mode="exam" role="radio" aria-checked="false">
+                    <span class="sbx-mode-t">מבחן</span>
+                    <span class="sbx-mode-s">משוב רק בסוף, כמו בחדר אמיתי</span>
+                </button>
+            </div>
 
             <div id="sbx-briefing-err"></div>
 
-            <button type="button" class="sbx-btn full" id="sbx-start">התחל את התרגול</button>
-            <p class="sbx-note">
-                יש לך <b id="sbx-b-budget">12</b> תורות.
-                היא לא תעזור לך ולא תשבח אותך, בדיוק כמו בחדר אמיתי.
+            <button type="button" class="sbx-btn gold full" id="sbx-start">להיכנס לחדר</button>
+            <p class="sbx-note" id="sbx-b-note">
+                יש לך <b id="sbx-b-budget">12</b> מהלכים. ציון מעבר: <b id="sbx-b-pass">75</b>.
                 זה תרגול ולא הדרכה קלינית, ואינו תחליף לעבודה עם מטופל תחת ליווי.
             </p>
-            <button type="button" class="sbx-btn ghost full" id="sbx-b-back" style="margin-top:.6rem">חזרה</button>
+            <button type="button" class="sbx-btn ghost full" id="sbx-b-back">לכל התרגולים</button>
         </div>
     </section>
 
     <!-- ── session ─────────────────────────────────────────────────────── -->
-    <section id="sbx-session" class="sbx-screen">
+    <section id="sbx-session" class="sbx-screen" aria-label="השיחה">
         <div class="sbx-rail" id="sbx-rail"></div>
-        <div class="sbx-chat" id="sbx-chat"></div>
+        <div class="sbx-chat" id="sbx-chat" aria-live="polite"></div>
 
-        <div class="sbx-composer" style="position:sticky;bottom:0">
-            <button type="button" class="sbx-iconbtn" id="sbx-hint" title="רמז" style="height:48px;width:48px">💡</button>
-            <div style="flex:1;position:relative;display:flex">
+        <div class="sbx-composer">
+            <button type="button" class="sbx-iconbtn sbx-hintbtn" id="sbx-hint" title="רמז" aria-label="רמז">💡</button>
+            <div class="sbx-inputwrap">
                 <textarea class="sbx-input" id="sbx-input" rows="1" maxlength="700"
-                          placeholder="מה אתה אומר לה?" aria-label="ההודעה שלך למטופלת"></textarea>
+                          placeholder="מה אתה אומר?" aria-label="ההודעה שלך"></textarea>
                 <span class="sbx-count" id="sbx-count"></span>
             </div>
             <button type="button" class="sbx-send" id="sbx-send" disabled aria-label="שלח">➤</button>
@@ -94,42 +128,33 @@
     </section>
 
     <!-- ── debrief ─────────────────────────────────────────────────────── -->
-    <section id="sbx-debrief" class="sbx-screen">
-        <div class="sbx-verdict" id="sbx-verdict">
-            <div class="sbx-verdict-icon" id="sbx-v-icon"></div>
-            <h2 id="sbx-v-title"></h2>
-            <p id="sbx-v-sub"></p>
+    <section id="sbx-debrief" class="sbx-screen" aria-label="התחקיר">
+        <div class="sbx-card sbx-verdict" id="sbx-verdict">
+            <div class="sbx-ring" id="sbx-ring" aria-hidden="true"></div>
+            <div class="sbx-verdict-copy">
+                <p class="sbx-eyebrow" id="sbx-v-outcome"></p>
+                <h2 class="sbx-h1" id="sbx-v-title"></h2>
+                <p class="sbx-lead" id="sbx-v-sub"></p>
+            </div>
         </div>
 
         <div id="sbx-d-body"></div>
 
         <div class="sbx-actions">
-            <button type="button" class="sbx-btn gold" id="sbx-again">לנסות שוב</button>
-            <button type="button" class="sbx-btn ghost" id="sbx-back-list">תרחיש אחר</button>
+            <button type="button" class="sbx-btn gold" id="sbx-again">נסה שוב לחידוד המיומנות</button>
+            <a class="sbx-btn ghost" id="sbx-back-lesson" href="course-library-v2.html">חזרה לשיעור</a>
+            <button type="button" class="sbx-btn ghost" id="sbx-back-list">תרגול אחר</button>
         </div>
     </section>
 
-</div>
+</main>
 
 <!-- Scripts: the 3-link chain. supabase-client.js is what exposes window.Auth
      and window.supabaseClient — a page that skips it fails silently. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase-config.js"></script>
 <script src="../js/supabase-client.js"></script>
-<script src="../js/sandbox.js?v=20260919-1"></script>
+<script src="../js/sandbox.js?v=20261019-1"></script>
 <script src="../js/marketing-tools.js"></script>
-
-<script>
-    // The turn counter and exit button only mean anything inside a session.
-    (function () {
-        var sess = document.getElementById('sbx-session');
-        var obs = new MutationObserver(function () {
-            var on = sess.classList.contains('active');
-            document.getElementById('sbx-turns').hidden = !on;
-            document.getElementById('sbx-exit').hidden = !on;
-        });
-        obs.observe(sess, { attributes: true, attributeFilter: ['class'] });
-    })();
-</script>
 </body>
 </html>

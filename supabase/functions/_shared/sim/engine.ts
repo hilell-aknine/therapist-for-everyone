@@ -32,7 +32,11 @@ export const MOVES = [
   'neutral',
 ] as const
 
-export type Move = typeof MOVES[number]
+// The chunk-down move list. Kept as the default so the original scenario and its
+// tests behave exactly as before; every other skill passes its own list from
+// skills.ts (resolveSkill). A move is just a string id the scenario's
+// scoring_rules and gated_facts refer to.
+export type Move = string
 
 export type Metrics = {
   rapport: number
@@ -128,19 +132,48 @@ const ADVICE_RE =
 // and flagging someone for saying a name would be worse than missing a why.
 const WHY_RE = /(^|[\s,.!?"'״׳])ו?(למה|מדוע)([\s?,.!]|$)/
 
-export function preClassify(text: string): Move | null {
+// "למה" is also "to what": "ביחס למה?", "בהשוואה למה?" are the meta-model's
+// comparative-deletion question, and "למה את מתכוונת?" means "what do you mean".
+// Both are exactly what the learner should say. Found by the self-play gate
+// (19.10.2026): the good learner was being punished for the textbook move.
+const NOT_WHY_BEFORE = /(ביחס|בהשוואה|יחסית|בניגוד|בדומה|בהתאם|קשור|מתייחס|מתייחסת|הכוונה|שייך)\s*$/
+const NOT_WHY_AFTER = /^\s*(את|אתה|אתם|אתן)?\s*(מתכוו|התכוו)|^\s*הכוונה|^\s*בדיוק\s*(את|אתה)?\s*(מתכוו|התכוו)/
+
+function isWhyQuestion(t: string): boolean {
+  const re = new RegExp(WHY_RE.source, 'g')
+  let m: RegExpExecArray | null
+  while ((m = re.exec(t)) !== null) {
+    const start = m.index + m[1].length          // where the optional ו + word begins
+    const word = m[2]
+    const afterWord = t.slice(t.indexOf(word, start) + word.length)
+    if (NOT_WHY_BEFORE.test(t.slice(0, start))) continue
+    if (word === 'למה' && NOT_WHY_AFTER.test(afterWord)) continue
+    return true
+  }
+  return false
+}
+
+export type PreClassifyOpts = {
+  jargonExempt?: string[]     // terms this drill teaches the learner to say out loud
+  allowDirectives?: boolean   // guided-process drills: "תדמייני" is the technique, not advice
+}
+
+export function preClassify(text: string, opts: PreClassifyOpts = {}): Move | null {
   const t = (text || '').trim()
   if (!t) return null
+  const exempt = (opts.jargonExempt || []).map(x => x.toLowerCase())
 
   // Order matters. Naming the technique is the worst move even inside an
   // otherwise good question, and "למה שלא תדברי איתה" is advice wearing a
   // why-question costume — so advice is tested before why.
   const lowered = t.toLowerCase()
   for (const term of JARGON_TERMS) {
-    if (lowered.includes(term.toLowerCase())) return 'jargon'
+    const lt = term.toLowerCase()
+    if (exempt.includes(lt)) continue
+    if (lowered.includes(lt)) return 'jargon'
   }
-  if (ADVICE_RE.test(t)) return 'give_advice'
-  if (WHY_RE.test(t)) return 'why_question'
+  if (!opts.allowDirectives && ADVICE_RE.test(t)) return 'give_advice'
+  if (isWhyQuestion(t)) return 'why_question'
   return null
 }
 
@@ -152,27 +185,46 @@ export function parseEvaluation(raw: string): Partial<Evaluation> | null {
   let s = raw.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim()
   const first = s.indexOf('{')
   const last = s.lastIndexOf('}')
-  if (first === -1 || last === -1 || last <= first) return null
+  if (first === -1) return null
+  if (last === -1 || last <= first) return salvageTruncated(raw)
   s = s.slice(first, last + 1)
   try {
     const o = JSON.parse(s)
     if (!o || typeof o !== 'object') return null
     return o as Partial<Evaluation>
   } catch {
-    return null
+    return salvageTruncated(raw)
   }
+}
+
+// A judge answer cut off by the token limit still carries its verdict in the
+// first lines. Losing it turned a correct move into "neutral" (found by the
+// self-play gate, 19.10.2026). Only the decisive fields are recovered; the
+// confidence is capped so a half-read answer never opens a gated fact on its own.
+function salvageTruncated(raw: string): Partial<Evaluation> | null {
+  const move = raw.match(/"move"\s*:\s*"([a-z_]+)"/)
+  if (!move) return null
+  const conf = raw.match(/"confidence"\s*:\s*([0-9.]+)/)
+  const sec = raw.match(/"secondary_moves"\s*:\s*\[([^\]]*)\]/)
+  return {
+    move: move[1],
+    secondary_moves: sec ? (sec[1].match(/"([a-z_]+)"/g) || []).map(x => x.replace(/"/g, '')) : [],
+    confidence: conf ? Math.min(Number(conf[1]), 0.6) : 0.5,
+  } as Partial<Evaluation>
 }
 
 export function normalizeEvaluation(
   parsed: Partial<Evaluation> | null,
   source: 'regex' | 'model',
   forcedMove?: Move,
+  allowed: readonly string[] = MOVES,
 ): Evaluation {
   const moveRaw = forcedMove ?? (parsed?.move as string)
-  const move: Move = (MOVES as readonly string[]).includes(moveRaw) ? moveRaw as Move : 'neutral'
+  // A regex-forced move is always legal: it comes from the universal set.
+  const move: Move = (forcedMove || allowed.includes(moveRaw)) && moveRaw ? moveRaw : 'neutral'
 
   const secondary = Array.isArray(parsed?.secondary_moves)
-    ? (parsed!.secondary_moves as string[]).filter(m => (MOVES as readonly string[]).includes(m)) as Move[]
+    ? (parsed!.secondary_moves as string[]).filter(m => allowed.includes(m))
     : []
 
   const deltas: Partial<Metrics> = {}
@@ -205,6 +257,12 @@ export function normalizeEvaluation(
 
 // ── Layer 2: apply the turn ─────────────────────────────────────────────────
 
+export const DEFAULT_FLAG_ON_MOVE: Record<string, string> = {
+  give_advice: 'advice_count',
+  why_question: 'why_count',
+  jargon: 'jargon_count',
+}
+
 export type ApplyResult = {
   metrics: Metrics
   unlocked: string[]
@@ -218,6 +276,7 @@ export function applyTurn(
   state: SessionState,
   evaluation: Evaluation,
   difficulty: number,
+  flagOnMove: Record<string, string> = DEFAULT_FLAG_ON_MOVE,
 ): ApplyResult {
   const halved = evaluation.confidence < LOW_CONFIDENCE
 
@@ -257,9 +316,8 @@ export function applyTurn(
   // Flags — counters the failure conditions read.
   const flags: Flags = { ...state.flags }
   const bump = (k: string) => { flags[k] = (Number(flags[k]) || 0) + 1 }
-  if (evaluation.move === 'give_advice') bump('advice_count')
-  if (evaluation.move === 'why_question') bump('why_count')
-  if (evaluation.move === 'jargon') bump('jargon_count')
+  const flagName = flagOnMove[evaluation.move]
+  if (flagName) bump(flagName)
 
   // Unlocks. At most one per turn — two excellent sentences in a row open one
   // now and one next turn, so the patient never dumps her whole story at once.

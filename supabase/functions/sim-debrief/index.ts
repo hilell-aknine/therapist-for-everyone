@@ -13,7 +13,8 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 import { parseEvaluation, type Spec } from '../_shared/sim/engine.ts'
-import { debriefPrompt } from '../_shared/sim/prompts.ts'
+import { debriefPrompt, patientName } from '../_shared/sim/prompts.ts'
+import { resolveSkill } from '../_shared/sim/skills.ts'
 import {
   AI_MONTHLY_CAP_ILS, callClaude, corsHeaders, logUsage, monthlyCostShekel, SONNET_MODEL,
 } from '../_shared/sim/llm.ts'
@@ -56,9 +57,17 @@ serve(async (req) => {
     if (sess.status === 'in_session') return json({ error: 'הסשן עוד פתוח.' }, 409, cors)
 
     const { data: scen } = await admin.from('sim_scenarios')
-      .select('spec, turn_budget, title').eq('id', sess.scenario_id).maybeSingle()
+      .select('spec, turn_budget, title, primary_skill, passing_score, video_id, module_id, lesson_id')
+      .eq('id', sess.scenario_id).maybeSingle()
     if (!scen) return json({ error: 'תרחיש לא נמצא.' }, 404, cors)
     const spec = scen.spec as Spec
+    const resolved = resolveSkill(scen.primary_skill, spec)
+    const name = patientName(spec)
+    const passingScore = Number(scen.passing_score) || 75
+    const durationSeconds = sess.ended_at && sess.started_at
+      ? Math.max(0, Math.round((Date.parse(sess.ended_at) - Date.parse(sess.started_at)) / 1000))
+      : null
+    const zeroScores = Object.fromEntries([...resolved.score_keys.map(k => k.key), 'overall'].map(k => [k, 0]))
 
     const { data: turns } = await admin.from('sim_turns')
       .select('turn_index, student_text, patient_text, evaluation, metrics_after')
@@ -68,26 +77,31 @@ serve(async (req) => {
     if (rows.length <= 1) {
       const empty = {
         headline: 'הסשן נסגר לפני שהתחיל.',
-        scores: { rapport_building: 0, chunk_down: 0, language_discipline: 0, pacing: 0, overall: 0 },
+        scores: zeroScores,
+        score_labels: resolved.score_keys,
         strengths: [], growth_edges: [], replay_suggestion: null,
+        missed_opportunities: [], actionable_takeaway: '',
+        overall_score: 0, passed: false, passing_score: passingScore,
         outcome: sess.outcome, turns_used: sess.turn_count,
         facts_unlocked: sess.unlocked_facts || [], facts_missed: [],
         target_achieved: false, hint_count: Number((sess.flags || {}).hint_count) || 0,
       }
-      await admin.from('sim_sessions').update({ debrief: empty, status: 'debriefed' }).eq('id', session_id)
+      await admin.from('sim_sessions')
+        .update({ debrief: empty, status: 'debriefed', overall_score: 0, passed: false, duration_seconds: durationSeconds })
+        .eq('id', session_id)
       return json({ debrief: empty }, 200, cors)
     }
 
     // The transcript the reviewer sees includes the machinery, so its feedback
     // is anchored to what actually happened rather than to its own re-reading.
     const transcript = rows.map(t => {
-      if (t.turn_index === 0) return `[פתיחה]\nמירב: ${t.patient_text}`
+      if (t.turn_index === 0) return `[פתיחה]\n${name}: ${t.patient_text}`
       const ev = (t.evaluation || {}) as Record<string, unknown>
       const m = (t.metrics_after || {}) as Record<string, number>
       const unlockedNow = ev.unlocked_now ? ` | נפתח: ${ev.unlocked_now}` : ''
       return `[תור ${t.turn_index} | סיווג: ${ev.move}${unlockedNow} | `
-        + `ראפור ${m.rapport} התנגדות ${m.resistance} עומק ${m.emotional_depth} פירוט ${m.specificity}]\n`
-        + `מטפל: ${t.student_text}\nמירב: ${t.patient_text}`
+        + `ראפור ${m.rapport} התנגדות ${m.resistance} עומק ${m.emotional_depth} ${resolved.labels.specificity} ${m.specificity}]\n`
+        + `מטפל: ${t.student_text}\n${name}: ${t.patient_text}`
     }).join('\n\n')
 
     const facts = spec.gated_facts || []
@@ -113,21 +127,54 @@ serve(async (req) => {
       return json({ debrief: partial, budget_blocked: true }, 200, cors)
     }
 
-    const sys = debriefPrompt(spec, OUTCOME_HE[sess.outcome] || String(sess.outcome), Number(scen.turn_budget) || 12)
-    let res = await callClaude(SONNET_MODEL, sys, '', [{ role: 'user', content: transcript }], 1400, 0.4)
-    if (!res) res = await callClaude(SONNET_MODEL, sys, '', [{ role: 'user', content: transcript }], 1400, 0.4)
+    const sys = debriefPrompt(spec, OUTCOME_HE[sess.outcome] || String(sess.outcome), Number(scen.turn_budget) || 12, resolved)
+    // 3000, not 1400: the per-lesson debrief carries more fields (missed
+    // opportunities, takeaway, three metrics) and Hebrew is token-heavy. At 1400
+    // the JSON was cut mid-object and every debrief failed to parse (19.10.2026).
+    // A cut or malformed answer gets one more attempt before giving up.
+    const DEBRIEF_MAX_TOKENS = 3000
+    let parsed: Record<string, unknown> | null = null
+    let res = null
+    for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
+      res = await callClaude(SONNET_MODEL, sys, '', [{ role: 'user', content: transcript }], DEBRIEF_MAX_TOKENS, 0.4)
+      if (!res) continue
+      await logUsage(admin, user.id, 'sim-debrief', res.promptTokens, res.completionTokens)
+      parsed = parseEvaluation(res.text) as Record<string, unknown> | null
+      if (!parsed) console.error('[sim-debrief] unparseable', res.completionTokens, res.text.slice(-120))
+    }
     if (!res) return json({ error: 'התחקיר לא זמין כרגע. הסשן נשמר, אפשר לנסות שוב.' }, 503, cors)
-
-    await logUsage(admin, user.id, 'sim-debrief', res.promptTokens, res.completionTokens)
-
-    const parsed = parseEvaluation(res.text) as Record<string, unknown> | null
     if (!parsed) return json({ error: 'התחקיר חזר בפורמט לא תקין. נסה שוב.' }, 502, cors)
 
     // Everything countable is computed here, not taken from the model. The model
     // writes the words; the engine owns the facts.
+    //
+    // Passing needs BOTH: the engine's outcome is success (the target was really
+    // reached) AND the reviewer's overall score clears the bar. A session that
+    // did not reach the target is capped just under the bar, so the stored number
+    // can never contradict `passed` in the admin dashboard.
+    const scores = (parsed.scores && typeof parsed.scores === 'object') ? parsed.scores as Record<string, unknown> : {}
+    const clamp100 = (v: unknown) => Math.max(0, Math.min(100, Math.round(Number(v) || 0)))
+    let overallScore = clamp100(scores.overall)
+    const reachedTarget = sess.outcome === 'success'
+    if (!reachedTarget) overallScore = Math.min(overallScore, passingScore - 1)
+    const passed = reachedTarget && overallScore >= passingScore
+    const pm = (parsed.metrics && typeof parsed.metrics === 'object') ? parsed.metrics as Record<string, unknown> : {}
+    const strList = (v: unknown, n: number) => Array.isArray(v) ? v.slice(0, n).map(String) : []
+
     const debrief = {
       headline: String(parsed.headline || ''),
-      scores: parsed.scores || null,
+      scores: { ...scores, overall: overallScore },
+      score_labels: resolved.score_keys,
+      metrics: {
+        rapport_calibration: clamp100(pm.rapport_calibration),
+        linguistic_precision: clamp100(pm.linguistic_precision),
+        technique_application: clamp100(pm.technique_application),
+      },
+      overall_score: overallScore,
+      passed,
+      passing_score: passingScore,
+      missed_opportunities: strList(parsed.missed_opportunities, 3),
+      actionable_takeaway: String(parsed.actionable_takeaway || ''),
       strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 3) : [],
       growth_edges: Array.isArray(parsed.growth_edges) ? parsed.growth_edges.slice(0, 3) : [],
       replay_suggestion: parsed.replay_suggestion || null,
@@ -143,8 +190,25 @@ serve(async (req) => {
     }
 
     await admin.from('sim_sessions')
-      .update({ debrief, status: 'debriefed', tokens_in: Number(sess.tokens_in) + res.promptTokens, tokens_out: Number(sess.tokens_out) + res.completionTokens })
+      .update({
+        debrief, status: 'debriefed',
+        overall_score: overallScore, passed, duration_seconds: durationSeconds,
+        tokens_in: Number(sess.tokens_in) + res.promptTokens,
+        tokens_out: Number(sess.tokens_out) + res.completionTokens,
+      })
       .eq('id', session_id)
+
+    // "תורגל ✓" — an event in the shared completion log, never a write to
+    // course_progress (that table means "watched the video", and the progress
+    // bar and streak read it).
+    if (passed) {
+      const lessonIdentifier = scen.video_id
+        || (scen.module_id != null && scen.lesson_id != null ? `${scen.module_id}-${scen.lesson_id}` : null)
+      if (lessonIdentifier) {
+        await admin.from('lesson_completion_events')
+          .insert({ user_id: user.id, lesson_identifier: lessonIdentifier, source: 'sandbox' })
+      }
+    }
 
     return json({ debrief }, 200, cors)
 

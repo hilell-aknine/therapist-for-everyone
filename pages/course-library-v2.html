@@ -694,6 +694,35 @@
   .lms-res-card__t{ font-size:.95rem; font-weight:700; color:var(--text-on-light-strong); }
   .lms-res-card__s{ font-size:.78rem; color:var(--text-on-light-muted); margin-top:.2rem; }
 
+  /* SANDBOX LESSON CARD — מעבדת אימון קלינית */
+  .sbx-lesson{
+    position:relative; isolation:isolate; overflow:hidden;
+    display:flex; flex-direction:column; gap:.55rem;
+    padding:1.35rem 1.5rem; margin-bottom:1rem; border-radius:20px;
+    background: linear-gradient(180deg, rgba(8,32,38,.72), rgba(6,22,28,.62));
+    backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border:1px solid rgba(212,175,55,.28);
+    box-shadow: 0 12px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .sbx-lesson[hidden]{ display:none !important; }
+  .sbx-lesson::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,.08) 0%, transparent 50%); }
+  .sbx-lesson > *{ position:relative; z-index:1; }
+  .sbx-lesson__head{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+  .sbx-lesson__eyebrow{ display:inline-flex; align-items:center; gap:.45rem; font-size:.78rem; font-weight:700; letter-spacing:.02em; color:var(--accent-gold-hover); }
+  .sbx-lesson__done{ display:inline-flex; align-items:center; gap:.35rem; padding:.22rem .6rem; border-radius:999px; font-size:.75rem; font-weight:700; color:var(--text-on-gold); background: linear-gradient(180deg, var(--accent-gold-hover), var(--accent-gold)); }
+  .sbx-lesson__done[hidden]{ display:none; }
+  .sbx-lesson__t{ font-family:'Frank Ruhl Libre',serif; font-size:clamp(1.15rem,2.6cqw,1.4rem); font-weight:700; color:#fff; line-height:1.3; }
+  .sbx-lesson__patient{ font-size:.88rem; color:var(--text-muted); }
+  .sbx-lesson__patient b{ color:var(--text-primary); font-weight:600; }
+  .sbx-lesson__mission{ font-size:.92rem; color:var(--text-primary); line-height:1.55; margin:0; padding:.7rem .85rem; border-radius:12px; background:rgba(212,175,55,.06); border-inline-start:3px solid rgba(212,175,55,.55); }
+  .sbx-lesson__foot{ display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-top:.25rem; }
+  .sbx-lesson__meta{ font-size:.8rem; color:var(--text-muted); }
+  .lms-tab__dot{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent-gold-hover); margin-inline-start:.35rem; box-shadow:0 0 0 3px rgba(242,199,102,.18); vertical-align:middle; }
+  .lms-sb-lesson__sbx{ flex:none; font-size:.62rem; color:var(--accent-gold-hover); margin-inline-start:.25rem; }
+  @container (max-width: 600px){
+    .sbx-lesson__foot .lms-game-cta__btn{ flex:1 1 100%; justify-content:center; }
+  }
+
   /* GAME PANE */
   .lms-game-cta{
     position:relative; isolation:isolate;
@@ -2197,6 +2226,24 @@
         </div>
 
         <div class="lms-tab-pane" data-pane="game">
+          <!-- מעבדת אימון קלינית: תרחיש תרגול חי לשיעור הנוכחי. מוצג רק כשיש
+               תרחיש מפורסם לשיעור הזה (sim_catalog). התוכן נבנה ב-renderSandboxCard. -->
+          <div class="sbx-lesson" id="sandboxCard" hidden>
+            <div class="sbx-lesson__head">
+              <span class="sbx-lesson__eyebrow"><i class="fa-solid fa-user-doctor"></i>מעבדת אימון קלינית</span>
+              <span class="sbx-lesson__done" id="sandboxDone" hidden><i class="fa-solid fa-check"></i>תורגל</span>
+            </div>
+            <div class="sbx-lesson__t" id="sandboxTitle"></div>
+            <div class="sbx-lesson__patient" id="sandboxPatient"></div>
+            <p class="sbx-lesson__mission" id="sandboxMission"></p>
+            <div class="sbx-lesson__foot">
+              <span class="sbx-lesson__meta" id="sandboxMeta"></span>
+              <a class="lms-game-cta__btn" id="sandboxBtn" href="sandbox.html">
+                <i class="fa-solid fa-comments"></i><span id="sandboxBtnLabel">להיכנס לחדר</span>
+              </a>
+            </div>
+          </div>
+
           <div class="lms-game-cta">
             <div class="lms-game-cta__copy">
               <div class="lms-game-cta__t"><i class="fa-solid fa-gamepad" style="color:var(--accent-gold-hover); margin-inline-end:.4rem;"></i>משחק תרגול NLP</div>
@@ -2204,18 +2251,6 @@
             </div>
             <a class="lms-game-cta__btn" id="gameBtn" href="nlp-game.html">
               <i class="fa-solid fa-play"></i><span>פתח משחק</span>
-            </a>
-          </div>
-
-          <!-- Live practice (sandbox). Master only — it carries a per-use AI cost.
-               Revealed by refreshCourseMenu() once _isPaidCustomer is known. -->
-          <div class="lms-game-cta" id="sandboxCta" style="display:none; margin-top:1rem;">
-            <div class="lms-game-cta__copy">
-              <div class="lms-game-cta__t"><i class="fa-solid fa-comments" style="color:var(--accent-gold-hover); margin-inline-end:.4rem;"></i>תרגול חי מול מטופלת</div>
-              <p class="lms-game-cta__s">לא שאלות אמריקאיות. שיחה אמיתית עם מטופלת שנפתחת רק כששואלים נכון, ובסוף תחקיר עם השורה שהייתה עובדת במקום השורה שכתבת.</p>
-            </div>
-            <a class="lms-game-cta__btn" id="sandboxBtn" href="sandbox.html">
-              <i class="fa-solid fa-play"></i><span>היכנס לחדר</span>
             </a>
           </div>
         </div>
@@ -4413,7 +4448,7 @@
         return `
           <a class="${cls}" href="${lessonHash(mIdx, lIdx)}"${ariaCurrent}>
             <span class="lms-sb-lesson__status">${status}</span>
-            <span class="lms-sb-lesson__title">${highlight(les.title)}</span>
+            <span class="lms-sb-lesson__title">${highlight(les.title)}</span>${simPracticedMark(mIdx, lIdx)}
             <span class="lms-sb-lesson__dur"><bdi>${les.duration}</bdi></span>
           </a>`;
       }).join('');
@@ -4579,13 +4614,10 @@
     const mT = document.getElementById('courseMenuTech');
     if (mM) mM.style.display = _isPaidCustomer ? '' : 'none';
     if (mT) mT.style.display = _isPaidCustomer ? '' : 'none';
-    // Live practice carries a per-use AI cost, so it follows the same gate.
-    // 🔕 מוסתר בכוונה מ-22.09.2026. הפיצ'ר עובד ופרוס, אבל יש בו תרחיש אחד
-    // בלבד, וזו הדגמה ולא תרגול. מוחזר כשיהיו מספיק תרחישים.
-    // להחזרה: SANDBOX_LIVE = true. אין צורך בשום שינוי אחר בשום קובץ.
-    const SANDBOX_LIVE = false;
-    const sbx = document.getElementById('sandboxCta');
-    if (sbx) sbx.style.display = (SANDBOX_LIVE && _isPaidCustomer) ? '' : 'none';
+    // The practice card follows the lesson, not a global flag: it shows only when
+    // a published scenario exists for this lesson (master ones only once the paid
+    // role is known, which is why this runs again from here).
+    try { renderSandboxCard(); } catch(_){}
     document.querySelectorAll('#courseMenu .lms-course-menu__item').forEach(it => {
       const on = it.dataset.course === courseType;
       it.classList.toggle('is-active', on);
@@ -4808,6 +4840,7 @@
     renderResources();
     renderLessonPractice();
     if (window.gameBtnUpdater) window.gameBtnUpdater();
+    renderSandboxCard();
 
     // Persist last-watched
     if (window.CourseProgress && !devBypass){
@@ -6061,6 +6094,84 @@
       alert('חוברת הקורס זמינה למי שרכש את הקורס.');
     }
   };
+  // ===== מעבדת אימון קלינית (sandbox per lesson) =====
+  // One sim_catalog call per page load. The catalog carries the lesson each
+  // scenario belongs to (1-based module/lesson) and whether this learner passed it.
+  // Not cached while logged out, so a login later in the visit still loads it.
+  let _simCatalog = null;
+  let _simCatalogP = null;
+  function simCourseKey(){
+    return courseType === 'nlp-practitioner' ? 'practitioner'
+         : courseType === 'nlp-master' ? 'master' : null;
+  }
+  function loadSimCatalog(){
+    if (_simCatalog) return Promise.resolve(_simCatalog);
+    if (_simCatalogP) return _simCatalogP;
+    _simCatalogP = (async () => {
+      try {
+        const c = window.supabaseClient;
+        if (!c) return [];
+        const { data: { session } } = await c.auth.getSession();
+        if (!session) return [];
+        const r = await c.rpc('sim_catalog');
+        if (r.error){ console.warn('[sandbox] sim_catalog:', r.error.message); return []; }
+        _simCatalog = r.data || [];
+        // The sidebar was drawn before the catalog arrived; redraw once for the ✓ marks.
+        if (_simCatalog.some(x => x.passed) && typeof renderSidebarNav === 'function'){
+          try { renderSidebarNav(document.getElementById('sbSearch')?.value || ''); } catch(_){}
+        }
+        return _simCatalog;
+      } catch(e){ return []; }
+      finally { _simCatalogP = null; }
+    })();
+    return _simCatalogP;
+  }
+  function simScenarioFor(mIdx, lIdx){
+    const key = simCourseKey();
+    if (!key || !_simCatalog) return null;
+    return _simCatalog.find(r => r.course_type === key && r.module_id === mIdx + 1 && r.lesson_id === lIdx + 1) || null;
+  }
+  function simPracticedMark(mIdx, lIdx){
+    const row = simScenarioFor(mIdx, lIdx);
+    return row && row.passed ? '<span class="lms-sb-lesson__sbx" title="תורגל במעבדת האימון"><i class="fa-solid fa-flask"></i></span>' : '';
+  }
+  async function renderSandboxCard(){
+    const card = document.getElementById('sandboxCard');
+    const tab = document.querySelector('.lms-tab[data-tab="game"]');
+    const setDot = on => {
+      if (!tab) return;
+      let dot = tab.querySelector('.lms-tab__dot');
+      if (on && !dot){ dot = document.createElement('span'); dot.className = 'lms-tab__dot'; dot.setAttribute('aria-hidden', 'true'); tab.appendChild(dot); }
+      if (!on && dot) dot.remove();
+    };
+    if (!card) return;
+    const m = currentModuleIndex, l = currentLessonIndex;
+    const key = simCourseKey();
+    if (m < 0 || !key || (key === 'master' && !_isPaidCustomer)){ card.hidden = true; setDot(false); return; }
+    await loadSimCatalog();
+    // The learner may have moved on while the catalog was loading.
+    if (m !== currentModuleIndex || l !== currentLessonIndex) return;
+    const row = simScenarioFor(m, l);
+    if (!row){ card.hidden = true; setDot(false); return; }
+
+    const br = row.briefing || {};
+    const female = (row.patient_gender || 'f') !== 'm';
+    document.getElementById('sandboxTitle').textContent = row.title || '';
+    const who = [row.patient_name, br.patient_age ? (female ? 'בת ' : 'בן ') + br.patient_age : '', br.patient_occupation || '']
+      .filter(Boolean).map(escapeHtml).join(' · ');
+    document.getElementById('sandboxPatient').innerHTML = who
+      ? `<b>${female ? 'המטופלת' : 'המטופל'}:</b> ${who}` : (br.patient_intro ? escapeHtml(br.patient_intro) : '');
+    document.getElementById('sandboxMission').textContent = br.mission || '';
+    document.getElementById('sandboxMission').hidden = !br.mission;
+    const best = row.best_score != null ? ` · הציון הכי טוב שלך: ${row.best_score}` : '';
+    document.getElementById('sandboxMeta').textContent = `${row.turn_budget} מהלכים · ציון מעבר ${row.passing_score || 75}${best}`;
+    document.getElementById('sandboxDone').hidden = !row.passed;
+    document.getElementById('sandboxBtnLabel').textContent = row.attempts ? 'לתרגל שוב' : 'להיכנס לחדר';
+    document.getElementById('sandboxBtn').href = 'sandbox.html?scenario=' + encodeURIComponent(row.slug);
+    card.hidden = false;
+    setDot(!row.passed);
+  }
+
   function setupGameBtn(){
     window.gameBtnUpdater = () => {
       const btn = document.getElementById('gameBtn');

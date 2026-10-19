@@ -108,7 +108,8 @@ async function monthlyCostShekel(supabaseAdmin: any): Promise<number> {
     .gte('date', monthStartIsrael())
   let pt = 0, ct = 0
   for (const r of (data || []) as Array<{ prompt_tokens?: number; completion_tokens?: number }>) {
-    pt += Number(r.prompt_tokens) || 0; ct += Number(r.completion_tokens) || 0
+    // negative rows must not lower the ceiling (19.10.2026)
+    pt += Math.max(0, Number(r.prompt_tokens) || 0); ct += Math.max(0, Number(r.completion_tokens) || 0)
   }
   return ((pt * SONNET_IN_USD + ct * SONNET_OUT_USD) / 1_000_000) * USD_ILS
 }

@@ -362,6 +362,32 @@ async function handleStart(admin: any, userId: string, isPaid: boolean, isAdmin:
   }).select('id, metrics').single()
   if (insErr || !created) return json({ error: 'לא הצלחנו לפתוח סשן.' }, 500, cors)
 
+  // Quota, second look. The count above is check-then-insert, so N parallel
+  // starts all saw "under quota" and all got a session (verified live
+  // 19.10.2026: 8 parallel starts → 8 sessions, 6 open at once). Now that this
+  // row exists, keep it only if it is among the first DAILY_SESSIONS of today;
+  // otherwise remove it and refuse. A normal learner, one start at a time, is
+  // never affected.
+  if (!isAdmin) {
+    const since = `${todayIsrael()}T00:00:00+03:00`
+    const { data: firstToday } = await admin.from('sim_sessions')
+      .select('id').eq('user_id', userId).gte('started_at', since)
+      .order('started_at', { ascending: true }).order('id', { ascending: true })
+      .limit(DAILY_SESSIONS)
+    const kept = (firstToday || []).some((r: { id: string }) => r.id === created.id)
+    if (!kept) {
+      await admin.from('sim_sessions').delete().eq('id', created.id)
+      return json({
+        error: `${DAILY_SESSIONS} סשנים ליום. תרגול טוב מתעכל, לא נצבר. נתראה מחר.`,
+        quota: true,
+      }, 429, cors)
+    }
+    // Same race left several sessions open at once; keep only this one.
+    await admin.from('sim_sessions')
+      .update({ status: 'ended', outcome: 'abandoned', ended_at: new Date().toISOString() })
+      .eq('user_id', userId).eq('status', 'in_session').neq('id', created.id)
+  }
+
   await admin.from('sim_turns').insert({
     session_id: created.id,
     turn_index: 0,

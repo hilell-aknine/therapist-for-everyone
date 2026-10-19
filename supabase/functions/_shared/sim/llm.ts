@@ -199,12 +199,15 @@ export async function monthlyCostShekel(admin: any): Promise<number> {
   const { data } = await admin
     .from('ai_chat_usage')
     .select('prompt_tokens, completion_tokens')
-    .in('source', ['chat-sonnet', 'mentor-sonnet', 'sim-actor', 'sim-judge', 'sim-debrief'])
+    // 'sim-summary' is a paid Haiku call too; it was missing from the ceiling.
+    .in('source', ['chat-sonnet', 'mentor-sonnet', 'sim-actor', 'sim-judge', 'sim-summary', 'sim-debrief'])
     .gte('date', monthStartIsrael())
   let pt = 0, ct = 0
   for (const r of (data || []) as Array<{ prompt_tokens?: number; completion_tokens?: number }>) {
-    pt += Number(r.prompt_tokens) || 0
-    ct += Number(r.completion_tokens) || 0
+    // Defense in depth: a negative counter must never pull the total down and
+    // silently switch the ceiling off (19.10.2026).
+    pt += Math.max(0, Number(r.prompt_tokens) || 0)
+    ct += Math.max(0, Number(r.completion_tokens) || 0)
   }
   return ((pt * SONNET_IN_USD + ct * SONNET_OUT_USD) / 1_000_000) * USD_ILS
 }

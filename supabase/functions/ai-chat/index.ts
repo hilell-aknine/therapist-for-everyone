@@ -263,7 +263,7 @@ async function monthlyCostShekel(supabaseAdmin: any): Promise<number> {
     .in('source', ['chat-sonnet', 'mentor-sonnet'])
     .gte('date', since)
   let pt = 0, ct = 0
-  for (const r of (data || []) as Array<{ prompt_tokens?: number; completion_tokens?: number }>) { pt += Number(r.prompt_tokens) || 0; ct += Number(r.completion_tokens) || 0 }
+  for (const r of (data || []) as Array<{ prompt_tokens?: number; completion_tokens?: number }>) { pt += Math.max(0, Number(r.prompt_tokens) || 0); ct += Math.max(0, Number(r.completion_tokens) || 0) }  // negative rows must not lower the ceiling (19.10.2026)
   const usd = (pt * SONNET_IN_USD + ct * SONNET_OUT_USD) / 1_000_000
   return usd * USD_ILS
 }

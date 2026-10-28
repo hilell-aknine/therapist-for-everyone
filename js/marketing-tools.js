@@ -392,11 +392,14 @@ function createConsentBanner() {
             position: fixed;
             bottom: 0;
             left: 0;
-            width: 100%;
+            right: 0;
+            width: auto;
+            max-width: 100vw;
+            box-sizing: border-box;
             background: rgba(0,59,70,0.95);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            z-index: 9999;
+            z-index: 10001; /* above the admin assistant button (10000), which hid "ביטול מעקב" */
             padding: 8px 16px;
             display: flex;
             align-items: center;
@@ -409,7 +412,7 @@ function createConsentBanner() {
             transition: transform 0.3s ease-out;
         }
         #cookie-consent-banner.hiding { transform: translateY(100%); }
-        .cc-text { color: rgba(255,255,255,0.8); }
+        .cc-text { color: rgba(255,255,255,0.8); min-width: 0; }
         .cc-link { color: #D4AF37; text-decoration: none; }
         .cc-link:hover { text-decoration: underline; }
         .cc-btns { display: flex; gap: 6px; flex-shrink: 0; }
@@ -428,7 +431,8 @@ function createConsentBanner() {
         .cc-yes { background: #D4AF37; color: #003B46; }
         .cc-no { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.3); }
         @media (max-width: 480px) {
-            #cookie-consent-banner { font-size: 11px; gap: 8px; padding: 7px 12px; }
+            #cookie-consent-banner { font-size: 11px; gap: 6px 8px; padding: 7px 12px; flex-wrap: wrap; }
+            .cc-text { flex: 1 1 100%; text-align: center; }
             .cc-btn { padding: 4px 10px; font-size: 10px; }
         }
     `;

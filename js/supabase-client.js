@@ -607,6 +607,18 @@
                 }, { onConflict: 'user_id,video_id', ignoreDuplicates: false });
         },
 
+        // Real PLAYING seconds since the last flush, added server-side to this lesson's
+        // watched_seconds (request 6, 29.10.2026). Fire-and-forget; capped at 120/call.
+        async addWatchTime(videoId, courseType, seconds) {
+            const secs = Math.round(Number(seconds) || 0);
+            if (!videoId || secs < 1) return;
+            await supabaseClient.rpc('add_watch_seconds', {
+                p_video_id: videoId,
+                p_course_type: courseType || 'nlp-practitioner',
+                p_seconds: secs
+            });
+        },
+
         async getPositions() {
             const user = await Auth.getCurrentUser();
             if (!user) return {};

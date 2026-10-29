@@ -2804,9 +2804,9 @@
     <button type="button" class="lms-modal__close" aria-label="סגור" onclick="closeMasterPitch()">×</button>
     <div class="lmsmp-kicker"><i class="fa-solid fa-crown"></i> מילה מרם</div>
     <h2 id="lmsMasterPitchTitle" class="lmsmp-h">המחיר הזה לא יישאר ככה הרבה זמן</h2>
-    <p class="lmsmp-text">ה-<bdi>MASTER</bdi> היום ב-1,900 ש״ח + בונוסים, במקום ה-11,600 ששילמתי. זו לא הצעה קבועה — היא נסגרת. אם זה מדבר אליכם, זה הרגע.</p>
+    <p class="lmsmp-text">ה-<bdi>MASTER</bdi> היום ב-1,900 ש״ח + בונוסים, במקום 6,200 ש״ח. זו לא הצעה קבועה — היא נסגרת. אם זה מדבר אליכם, זה הרגע.</p>
     <div class="lmsmp-offer">
-      <div class="lmsmp-offer-top">היום בלבד · במקום <s>11,600 ש״ח</s> ששילמתי</div>
+      <div class="lmsmp-offer-top">היום בלבד · במקום <s>6,200 ש״ח</s></div>
       <div class="lmsmp-price">1,900 <small>ש״ח</small></div>
       <div class="lmsmp-bonus"><i class="fa-solid fa-gift"></i> + בונוסים שווים ממני</div>
     </div>
@@ -3563,6 +3563,8 @@
         location.replace('free-portal.html');
         return false;
       }
+      // One row per learner per Israel day: first/last time + page loads (request 6).
+      try { client.rpc('log_portal_visit').then(() => {}, () => {}); } catch(_){}
       try {
         recordWeeklyVisit();
         const streak = consecutiveWeekStreak();
@@ -4162,6 +4164,7 @@
   }
   /** Persist wherever the player is right now. Called before we tear the player down. */
   function flushPos(){
+    flushWatch();
     try {
       if (_ytPlayer && _ytPlayer.getCurrentTime && _curLessonId){
         const t = _ytPlayer.getCurrentTime();
@@ -4188,6 +4191,9 @@
              שם. סרטון מושהה אינו מקדם את הזמן, ולכן אינו מאריך את הסשן. */
           if (_lastPolledTime >= 0 && t > _lastPolledTime + 0.5){
             try { if (window.SessionGuard) window.SessionGuard.ping(); } catch(_){}
+            // Same proof of real playback feeds the per-lesson watch time. Capped at 6s per
+            // 5s tick so a forward seek is not counted as watching.
+            addWatch(Math.min(t - _lastPolledTime, 6));
           }
           _lastPolledTime = t;
           if (t > 0 && _curLessonId){
@@ -4197,6 +4203,24 @@
         }
       } catch(_){}
     }, 5000);
+  }
+  // ── Watch time per lesson (request 6, 29.10.2026) ──
+  // Seconds of real playback, banked to course_progress.watched_seconds every ~30s and
+  // whenever the lesson is paused, switched or left (flushPos). Unlike _watchedSecs below
+  // it keeps counting after the 80% completion mark.
+  let _watchPending = 0, _watchPendingId = null, _watchPendingCt = null;
+  function flushWatch(){
+    const secs = Math.round(_watchPending), id = _watchPendingId, ct = _watchPendingCt;
+    _watchPending = 0;
+    if (!id || secs < 1) return;
+    try { if (window.CourseProgress && window.CourseProgress.addWatchTime) window.CourseProgress.addWatchTime(id, ct, secs).catch(() => {}); } catch(_){}
+  }
+  function addWatch(sec){
+    if (!_curLessonId || !(sec > 0)) return;
+    if (_watchPendingId && _watchPendingId !== _curLessonId) flushWatch();
+    _watchPendingId = _curLessonId; _watchPendingCt = courseType;
+    _watchPending += sec;
+    if (_watchPending >= 30) flushWatch();
   }
   let _watchClock = null, _watchedSecs = 0;
   function stopWatchClock(){ if (_watchClock){ clearInterval(_watchClock); _watchClock = null; } }

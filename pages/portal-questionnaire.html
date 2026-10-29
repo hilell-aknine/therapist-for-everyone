@@ -553,6 +553,31 @@
             box-shadow: 0 6px 22px rgba(212, 175, 55, 0.45);
         }
 
+        /* ── Calendar picker (after "כן") ── */
+        .q-cal { display: flex; flex-direction: column; align-items: stretch; gap: 0.6rem; text-align: center; }
+        .q-cal[hidden], .q-consent-actions[hidden] { display: none; }
+        .q-cal-label { font-size: 0.9rem; font-weight: 700; color: var(--brand-primary); margin-top: 0.2rem; }
+        .q-cal-days { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; }
+        .q-cal-day {
+            min-width: 40px; padding: 0.5rem 0.6rem; border-radius: 999px;
+            border: 1px solid rgba(0, 59, 70, 0.25); background: #fff; color: var(--brand-primary);
+            font-family: 'Heebo', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+        }
+        .q-cal-day.on { background: var(--brand-primary); border-color: var(--brand-primary); color: #fff; }
+        .q-cal-time {
+            align-self: center; width: 140px; padding: 0.55rem 0.7rem; border-radius: 10px;
+            border: 1px solid rgba(0, 59, 70, 0.25); font-family: 'Heebo', sans-serif; font-size: 1rem;
+            text-align: center; color: var(--brand-primary); background: #fff;
+        }
+        .q-cal-hint { font-size: 0.8rem; color: var(--brand-text-soft); }
+        .q-cal-btn { text-decoration: none; }
+        .q-cal-btn.is-disabled, .q-cal-alt.is-disabled { opacity: 0.45; pointer-events: none; box-shadow: none; }
+        .q-cal-alt {
+            font-size: 0.85rem; color: var(--brand-primary); text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .q-cal-done { font-size: 0.85rem; color: #1d7a46; font-weight: 600; }
+
         /* Spinner */
         .q-spinner {
             display: inline-block;
@@ -794,17 +819,43 @@
                     <span class="q-consent-stat__label">בלבד מסיימים קורס</span>
                 </div>
                 <p class="q-consent-body">
-                    ראינו שהדבר שעוזר ביותר ללומדים לסיים הוא <strong>תזכורת קצרה בזמן שנוח לך</strong> —
-                    מותאמת לסיבה שלך ללמוד. בלחיצה על "כן" תבחר/י בדיוק באיזה ימים ובאיזו שעה. ניתן לבטל בכל עת.
+                    ראינו שהדבר שעוזר ביותר ללומדים לסיים הוא <strong>זמן קבוע ללמידה</strong>.
+                    בלחיצה על "כן" תבחר/י באילו ימים ובאיזו שעה, וזה ייכנס ליומן גוגל שלך עם תזכורת.
                 </p>
-                <div class="q-consent-actions">
+                <div class="q-consent-actions" id="calAsk">
                     <button type="button" id="consentYes" class="q-consent-enter">
-                        <i class="fa-solid fa-bell"></i>
-                        כן, אני רוצה תזכורות
+                        <i class="fa-regular fa-calendar-plus"></i>
+                        כן, לקבוע זמן לימוד ביומן
                     </button>
                     <button type="button" id="consentNo" class="q-consent-skip">
                         לא תודה, ישר לפורטל הלמידה
                     </button>
+                </div>
+
+                <!-- Calendar picker — revealed after "כן". No server automation: the learner
+                     owns the reminder inside their own calendar. -->
+                <div class="q-cal" id="calPick" hidden>
+                    <div class="q-cal-label">באילו ימים?</div>
+                    <div class="q-cal-days" id="calDays">
+                        <button type="button" class="q-cal-day" data-d="0">א׳</button>
+                        <button type="button" class="q-cal-day" data-d="1">ב׳</button>
+                        <button type="button" class="q-cal-day" data-d="2">ג׳</button>
+                        <button type="button" class="q-cal-day" data-d="3">ד׳</button>
+                        <button type="button" class="q-cal-day" data-d="4">ה׳</button>
+                        <button type="button" class="q-cal-day" data-d="5">ו׳</button>
+                        <button type="button" class="q-cal-day" data-d="6">ש׳</button>
+                    </div>
+                    <label class="q-cal-label" for="calTime">באיזו שעה?</label>
+                    <input type="time" id="calTime" class="q-cal-time" value="20:00" step="900">
+                    <div class="q-cal-hint">20 דקות של לימוד, עם תזכורת 10 דקות לפני.</div>
+                    <a id="calGoogle" class="q-consent-enter q-cal-btn is-disabled" href="#" target="_blank" rel="noopener" aria-disabled="true">
+                        <i class="fa-brands fa-google"></i>
+                        הוספה ליומן גוגל
+                    </a>
+                    <a id="calIcs" class="q-cal-alt is-disabled" href="#" download="zman-limud-beit-hametaplim.ics" aria-disabled="true">
+                        יש לי יומן אחר (אייפון, אאוטלוק)
+                    </a>
+                    <button type="button" id="calEnter" class="q-consent-skip">כניסה לפורטל הלמידה</button>
                 </div>
             </div>
         </div>
@@ -1135,36 +1186,148 @@
 
         consentBlock.classList.add('visible');
 
-        // Nothing is pre-selected: each button is the decision itself and says
-        // where it leads. Yes → pick days + hours (onboarding mode continues to
-        // the portal after saving). No → straight to the portal.
+        // Nothing is pre-selected: each button is the decision itself.
+        // Yes → pick days + time and add a recurring event to the learner's own
+        // calendar (no server-side reminder automation). No → straight to the portal.
+        // The choice is recorded in profiles.reminder_prefs.calendar so Hillel can
+        // count yes / no / actually-added. It deliberately does NOT touch
+        // whatsapp_reminders_consent: a calendar slot is not consent to WhatsApp.
         const btnYes = document.getElementById('consentYes');
         const btnNo  = document.getElementById('consentNo');
+        const PORTAL = 'course-library-v2.html?completed=1';
 
-        async function decide(consent, btn) {
-            btnYes.disabled = btnNo.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            if (questionnaireId) {
-                // Owners have no UPDATE policy on portal_questionnaires (by design —
-                // the row carries caller notes), so the consent goes through an RPC
-                // that touches only the consent columns of the caller's own row.
-                try {
-                    const { error } = await supabaseClient.rpc('set_my_reminders_consent', {
-                        p_questionnaire_id: questionnaireId,
-                        p_consent: consent
-                    });
-                    if (error) console.error('Reminder consent not saved:', error);
-                } catch (e) {
-                    console.error('Reminder consent not saved:', e); // don't block portal entry
-                }
+        async function recordCalendar(patch) {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) return;
+                const { data } = await supabaseClient.from('profiles')
+                    .select('reminder_prefs').eq('id', user.id).maybeSingle();
+                const prefs = (data && data.reminder_prefs) || { on: false };
+                prefs.calendar = Object.assign({}, prefs.calendar, patch);
+                const { error } = await supabaseClient.from('profiles')
+                    .update({ reminder_prefs: prefs }).eq('id', user.id);
+                if (error) console.error('Calendar choice not saved:', error);
+            } catch (e) {
+                console.error('Calendar choice not saved:', e); // never block portal entry
             }
-            window.location.href = consent
-                ? 'reminder-settings.html?onboarding=1'
-                : 'course-library-v2.html?completed=1';
         }
 
-        btnYes.addEventListener('click', () => decide(true, btnYes));
-        btnNo.addEventListener('click', () => decide(false, btnNo));
+        btnNo.addEventListener('click', async () => {
+            btnYes.disabled = btnNo.disabled = true;
+            btnNo.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            await recordCalendar({ choice: 'no', decided_at: new Date().toISOString() });
+            window.location.href = PORTAL;
+        });
+
+        btnYes.addEventListener('click', () => {
+            recordCalendar({ choice: 'yes', decided_at: new Date().toISOString() });
+            document.getElementById('calAsk').hidden = true;
+            document.getElementById('calPick').hidden = false;
+        });
+
+        setupCalendarPicker(recordCalendar, PORTAL);
+    }
+
+    // ── Calendar links: Google template URL + .ics for every other calendar ──
+    function setupCalendarPicker(recordCalendar, portalPath) {
+        const BYDAY = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+        const LESSON_URL = 'https://www.therapist-home.com/pages/course-library-v2.html';
+        const TITLE = 'זמן לימוד NLP · בית המטפלים';
+        const DETAILS = 'הזמן שקבעת לעצמך ללמוד. נכנסים לשיעור הבא כאן: ' + LESSON_URL;
+        const MINUTES = 20;
+
+        const daysEl = document.getElementById('calDays');
+        const timeEl = document.getElementById('calTime');
+        const gBtn   = document.getElementById('calGoogle');
+        const icsBtn = document.getElementById('calIcs');
+        let icsUrl = null;
+
+        const pad = n => String(n).padStart(2, '0');
+        const stamp = (d, h, m) => d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + 'T' + pad(h) + pad(m) + '00';
+
+        function selection() {
+            const days = [...daysEl.querySelectorAll('.q-cal-day.on')].map(b => +b.dataset.d);
+            const [h, m] = (timeEl.value || '20:00').split(':').map(Number);
+            return { days, h, m };
+        }
+
+        // First chosen weekday on/after today (today only if the time hasn't passed).
+        function firstDate(days, h, m) {
+            const now = new Date();
+            for (let i = 0; i < 8; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, h, m);
+                if (days.includes(d.getDay()) && d > now) return d;
+            }
+        }
+
+        function render() {
+            const { days, h, m } = selection();
+            const ready = days.length > 0;
+            [gBtn, icsBtn].forEach(a => {
+                a.classList.toggle('is-disabled', !ready);
+                a.setAttribute('aria-disabled', String(!ready));
+            });
+            if (!ready) { gBtn.href = icsBtn.href = '#'; return; }
+
+            const start = firstDate(days, h, m);
+            const end = new Date(start.getTime() + MINUTES * 60000);
+            const rrule = 'RRULE:FREQ=WEEKLY;BYDAY=' + days.map(d => BYDAY[d]).join(',');
+            const s = stamp(start, start.getHours(), start.getMinutes());
+            const e = stamp(end, end.getHours(), end.getMinutes());
+
+            // Local wall-clock time + ctz keeps the slot at the same hour across DST.
+            gBtn.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+                + '&text=' + encodeURIComponent(TITLE)
+                + '&details=' + encodeURIComponent(DETAILS)
+                + '&dates=' + s + '/' + e
+                + '&ctz=Asia/Jerusalem'
+                + '&recur=' + encodeURIComponent(rrule);
+
+            const ics = [
+                'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//therapist-home//study-slot//HE', 'CALSCALE:GREGORIAN',
+                'BEGIN:VTIMEZONE', 'TZID:Asia/Jerusalem',
+                'BEGIN:DAYLIGHT', 'TZOFFSETFROM:+0200', 'TZOFFSETTO:+0300', 'TZNAME:IDT', 'DTSTART:19700327T020000',
+                'RRULE:FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=23,24,25,26,27,28,29;BYDAY=FR', 'END:DAYLIGHT',
+                'BEGIN:STANDARD', 'TZOFFSETFROM:+0300', 'TZOFFSETTO:+0200', 'TZNAME:IST', 'DTSTART:19701025T020000',
+                'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU', 'END:STANDARD',
+                'END:VTIMEZONE',
+                'BEGIN:VEVENT',
+                'UID:' + Date.now() + '-' + Math.random().toString(36).slice(2) + '@therapist-home.com',
+                'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''),
+                'DTSTART;TZID=Asia/Jerusalem:' + s,
+                'DTEND;TZID=Asia/Jerusalem:' + e,
+                rrule,
+                'SUMMARY:' + TITLE,
+                'DESCRIPTION:' + DETAILS,
+                'URL:' + LESSON_URL,
+                'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + TITLE, 'TRIGGER:-PT10M', 'END:VALARM',
+                'END:VEVENT', 'END:VCALENDAR'
+            ].join('\r\n');
+            if (icsUrl) URL.revokeObjectURL(icsUrl);
+            icsUrl = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+            icsBtn.href = icsUrl;
+        }
+
+        function added(kind) {
+            const { days, h, m } = selection();
+            recordCalendar({ added_via: kind, added_at: new Date().toISOString(), days, time: pad(h) + ':' + pad(m) });
+            const enter = document.getElementById('calEnter');
+            enter.textContent = 'נוסף? מעולה. כניסה לפורטל הלמידה';
+            enter.className = 'q-consent-enter';
+        }
+
+        daysEl.addEventListener('click', ev => {
+            const b = ev.target.closest('.q-cal-day');
+            if (!b) return;
+            b.classList.toggle('on');
+            b.setAttribute('aria-pressed', b.classList.contains('on'));
+            render();
+        });
+        timeEl.addEventListener('change', render);
+        gBtn.addEventListener('click', () => added('google'));
+        icsBtn.addEventListener('click', () => added('ics'));
+        document.getElementById('calEnter').addEventListener('click', () => { window.location.href = portalPath; });
+        render();
     }
 
     // Enter key = next step (except in textareas)

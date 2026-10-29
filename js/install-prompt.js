@@ -54,9 +54,12 @@
         dwellSeconds: 30,
 
         // עמודים שההזמנה לא נכנסת אליהם (כלי ניהול, מסכי כניסה, מסמכים פנימיים).
+        // החלטת הלל 29.10.2026: ההזמנה רק אחרי שתהליך ההרשמה הסתיים לגמרי,
+        // ולכן כל מסכי ההרשמה (הרשמה, אישור תנאים, שאלון) מוחרגים.
         excludePaths: [
             '/admin', 'admin.html', 'admin-v2.html', 'admin-4fa6eb0937.html',
             'login.html', 'login-v2.html', 'dev-login-local.html',
+            'free-portal', 'legal-gate.html', 'portal-questionnaire.html',
             'popup-preview.html', '404.html', 'פנקס-'
         ],
 

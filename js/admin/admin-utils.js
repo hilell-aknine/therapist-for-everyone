@@ -11,6 +11,7 @@ const VIEW_GROUPS = {
     'paid':     { views: ['paid'], header: null, default: 'paid' },
     'ai-cost':  { views: ['ai-cost'], header: null, default: 'ai-cost' },
     'sandbox':  { views: ['sandbox'], header: null, default: 'sandbox' },
+    'master-sales-stats': { views: ['master-sales-stats'], header: null, default: 'master-sales-stats' },
     'mentor-insights': { views: ['mentor-insights'], header: null, default: 'mentor-insights' },
     'referrals':{ views: ['referrals'], header: null, default: 'referrals' },
     'popups':   { views: ['popups'], header: null, default: 'popups' },
@@ -69,6 +70,7 @@ function switchView(view) {
     if (view === 'paid' || group.default === 'paid') loadPaidCustomers();
     if (view === 'ai-cost') { if (typeof loadAiCost === 'function') loadAiCost(); }
     if (view === 'sandbox') { if (typeof loadSandboxAdmin === 'function') loadSandboxAdmin(); }
+    if (view === 'master-sales-stats') { if (typeof loadMasterSales === 'function') loadMasterSales(); }
     if (view === 'mentor-insights') { if (typeof loadInsights === 'function') loadInsights(); }
     if (view === 'referrals' || group.default === 'referrals') loadReferralAnalytics();
     if (view === 'popups' || group.default === 'popups') loadPopupConfigs();

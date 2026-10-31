@@ -3183,7 +3183,7 @@
     // page (showMasterSalesView, open to all portal members) carries the video,
     // Ram's letter, price and the "קניתם אותי" buy button → Cardcom. showMasterSalesView
     // lives in the main portal IIFE (separate scope) — reachable only via window.
-    if (typeof window.showMasterSalesView === 'function') window.showMasterSalesView();
+    if (typeof window.showMasterSalesView === 'function') window.showMasterSalesView(false, 'popup_training_cta');
     else location.hash = '#master-sales';
   }
 
@@ -3273,7 +3273,7 @@
       window.PopupManager.close('engaged_master_offer');
     }
     hideEngagedOffer();
-    if (typeof window.showMasterSalesView === 'function') window.showMasterSalesView();
+    if (typeof window.showMasterSalesView === 'function') window.showMasterSalesView(false, 'popup_engaged_offer');
     else location.hash = '#master-sales';
   }
 
@@ -3300,7 +3300,7 @@
     hideMasterPitch();
     // CTA → the in-portal Master sales page. showMasterSalesView lives in the main
     // portal IIFE (separate scope) — reachable only via window.
-    if (typeof window.showMasterSalesView === 'function') window.showMasterSalesView();
+    if (typeof window.showMasterSalesView === 'function') window.showMasterSalesView(false, 'popup_welcome_pitch');
     else location.hash = '#master-sales';
   }
 
@@ -6843,13 +6843,69 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // ===== Master SALES view counter (request 8, 31.10.2026) =====
+  // Every open of the sales page and every click on a buy button becomes one row in
+  // master_sales_events, through the log_master_sales_event RPC. The server decides
+  // whether the viewer is a registered learner (auth.uid()); the browser only says
+  // where they came from. Telemetry must never break the page or hold up a buyer,
+  // so every failure is swallowed.
+  let _msLastSource = 'unknown';
+  let _msFirstRoute = true;
+  function _msVisitorId(){
+    const KEY = 'ms_visitor_id';
+    try {
+      let v = localStorage.getItem(KEY);
+      if (!v || !/^[A-Za-z0-9-]{8,40}$/.test(v)){
+        v = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+          : 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+        localStorage.setItem(KEY, v);
+      }
+      return v;
+    } catch(_){
+      if (!window._msVid) window._msVid = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+      return window._msVid;
+    }
+  }
+  // Where a visitor who LANDED directly on #master-sales came from: an explicit
+  // ?from=<tag> on the link wins, then a campaign tag, then another site, else a typed/saved link.
+  function _msLandingSource(){
+    try {
+      const qs = new URLSearchParams(location.search);
+      const from = (qs.get('from') || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
+      if (from) return 'link_' + from;
+      if (qs.get('utm_source')) return 'campaign';
+      const ref = document.referrer ? new URL(document.referrer).hostname : '';
+      if (ref && ref !== location.hostname) return 'external_site';
+    } catch(_){}
+    return 'direct_link';
+  }
+  async function logMasterSalesEvent(event, source){
+    try {
+      const client = window.supabaseClient || (window.SUPABASE_CONFIG && window.supabase
+        ? window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey) : null);
+      if (!client) return;
+      let utm = null, ref = null;
+      try { utm = new URLSearchParams(location.search).get('utm_source'); } catch(_){}
+      try { const h = document.referrer ? new URL(document.referrer).hostname : ''; if (h && h !== location.hostname) ref = h; } catch(_){}
+      await client.rpc('log_master_sales_event', {
+        p_event: event, p_source: source || 'unknown', p_visitor: _msVisitorId(), p_utm: utm, p_referrer: ref
+      });
+    } catch(_){}
+  }
+
   // ===== Master SALES view (upsell landing page — open to all portal members) =====
-  function showMasterSalesView(skipPush){
+  // source: who opened it — 'sidebar', 'popup_<id>', 'back_forward', or the landing source.
+  function showMasterSalesView(skipPush, source){
+    const wasOpen = document.body.classList.contains('view-master-sales');
     document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales', 'view-buddy', 'view-feed');
     document.body.classList.add('view-master-sales');
     if (typeof clearVideoState === 'function') clearVideoState();
     if (!skipPush && location.hash !== '#master-sales') history.pushState(null, '', '#master-sales');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!wasOpen){
+      _msLastSource = source || 'unknown';
+      logMasterSalesEvent('view', _msLastSource);
+    }
   }
 
   // ===== YouTube facades — swap the thumbnail for the real player on click =====
@@ -6913,7 +6969,12 @@
       showCheckoutSoonToast('עמוד הרכישה ייפתח עם ההשקה 🚀');
       return;
     }
-    try { await trackMasterCheckout(); } catch(_){}
+    // Count the click (with the source of the view it came from) alongside the ad
+    // trackers. Both are capped by the race inside / here so the buyer never waits long.
+    await Promise.all([
+      (async () => { try { await trackMasterCheckout(); } catch(_){} })(),
+      Promise.race([logMasterSalesEvent('checkout_click', _msLastSource), new Promise(r => setTimeout(r, 800))])
+    ]);
     window.location.href = MASTER_CHECKOUT_URL;
   }
   // Cross-IIFE consumers (training_cta + master_welcome_pitch modals live in the
@@ -7149,6 +7210,7 @@
 
   // ===== Hash routing =====
   function handleHash(skipPush){
+    const _firstRoute = _msFirstRoute; _msFirstRoute = false;
     const m = location.hash.match(/^#m(\d+)l(\d+)$/);
     if (m){
       const mIdx = parseInt(m[1],10) - 1;
@@ -7175,7 +7237,13 @@
     }
     if (location.hash === '#buddy'){ showBuddyView(true); return true; }
     if (location.hash === '#ambassador'){ showAmbassadorView(true); return true; }
-    if (location.hash === '#master-sales'){ showMasterSalesView(true); return true; }
+    if (location.hash === '#master-sales'){
+      // The head script pre-paints the sales view on a direct landing; clear it so the
+      // landing still counts as a view (same task, so nothing repaints in between).
+      if (_firstRoute) document.body.classList.remove('view-master-sales');
+      showMasterSalesView(true, _firstRoute ? _msLandingSource() : 'back_forward');
+      return true;
+    }
     if (location.hash === '#master'){ setCourse('nlp-master'); return true; }
     if (location.hash === '#master-workbooks'){ showMasterView(true); return true; }
     showWelcome(true);
@@ -7232,7 +7300,7 @@
         if ((target === 'feed' || target.indexOf('feed/') === 0) && _feedHasClips()){ e.preventDefault(); showFeedView(); return; }
         if (target === 'buddy'){ e.preventDefault(); showBuddyView(); return; }
         if (target === 'ambassador'){ e.preventDefault(); showAmbassadorView(); return; }
-        if (target === 'master-sales'){ e.preventDefault(); showMasterSalesView(); return; }
+        if (target === 'master-sales'){ e.preventDefault(); showMasterSalesView(false, 'sidebar'); return; }
         if (target === 'master'){ e.preventDefault(); setCourse('nlp-master'); return; }
         if (target === 'master-workbooks'){ e.preventDefault(); showMasterView(); return; }
         if (target === 'welcome'){ e.preventDefault(); showWelcome(); return; }

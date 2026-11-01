@@ -1413,6 +1413,32 @@
   .lms-celeb-card h3{ margin:.2rem 0; color:#fff; font-size:1.3rem; }
   .lms-celeb-card p{ margin:.4rem 0 0; color:var(--text-muted); line-height:1.6; }
   .lms-celeb-xp{ margin-top:1rem; font-weight:800; color:var(--accent-gold-hover); }
+  /* Lesson quiz (01.11.2026): 3 questions + "wow" after the first lessons */
+  .lms-qz-card{ max-width:460px; max-height:calc(100dvh - 2rem); overflow-y:auto; text-align:right; }
+  .lms-qz-top{ display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.9rem; color:var(--text-muted); font-size:.85rem; }
+  .lms-qz-dots{ display:flex; gap:.35rem; }
+  .lms-qz-dots i{ width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.18); display:block; }
+  .lms-qz-dots i.on{ background:var(--accent-gold-hover); }
+  .lms-qz-skip{ background:none; border:0; color:var(--text-muted); font:inherit; font-size:.85rem; text-decoration:underline; cursor:pointer; padding:.3rem; }
+  .lms-qz-ctx{ margin:0 0 .4rem; color:var(--text-muted); font-size:.9rem; line-height:1.55; }
+  .lms-qz-q{ margin:0 0 1rem; color:#fff; font-size:1.12rem; line-height:1.55; font-weight:700; }
+  .lms-qz-opts{ display:flex; flex-direction:column; gap:.5rem; }
+  .lms-qz-opt{ font:inherit; font-size:.98rem; text-align:right; line-height:1.45; padding:.8rem 1rem; border-radius:14px; cursor:pointer; min-height:48px;
+    background:rgba(255,255,255,.05); border:1.5px solid rgba(255,255,255,.14); color:var(--text-primary); transition:background .15s, border-color .15s; }
+  .lms-qz-opt:hover:not(:disabled){ border-color:rgba(242,199,102,.55); }
+  .lms-qz-opt:disabled{ cursor:default; }
+  .lms-qz-opt.is-ok{ background:rgba(46,204,113,.16); border-color:#2ecc71; color:#fff; }
+  .lms-qz-opt.is-bad{ background:rgba(231,76,60,.14); border-color:#e74c3c; }
+  .lms-qz-opt.is-dim{ opacity:.55; }
+  .lms-qz-fb{ margin-top:.9rem; padding:.85rem 1rem; border-radius:14px; font-size:.93rem; line-height:1.6; color:var(--text-primary); }
+  .lms-qz-fb b{ display:block; margin-bottom:.2rem; font-size:1rem; }
+  .lms-qz-fb.ok{ background:rgba(46,204,113,.12); border-inline-start:3px solid #2ecc71; }
+  .lms-qz-fb.bad{ background:rgba(242,199,102,.10); border-inline-start:3px solid var(--accent-gold-hover); }
+  .lms-qz-next{ display:block; width:100%; margin-top:1rem; }
+  .lms-qz-score{ font-size:3.2rem; font-weight:900; line-height:1; color:var(--accent-gold-hover); text-align:center; margin:.2rem 0 .4rem; direction:ltr; }
+  .lms-qz-terms{ display:flex; flex-wrap:wrap; justify-content:center; gap:.4rem; margin-top:1rem; }
+  .lms-qz-terms span{ font-size:.82rem; padding:.3rem .7rem; border-radius:999px; background:rgba(242,199,102,.10); border:1px solid rgba(242,199,102,.35); color:var(--text-primary); }
+  .lms-qz-terms-h{ text-align:center; margin-top:1rem; font-size:.85rem; color:var(--text-muted); }
   /* Study day card (01.11.2026): after lessons 1-3, until the learner adds it */
   .lms-sd-card{ max-width:440px; max-height:calc(100dvh - 2rem); overflow-y:auto; text-align:right;
     --sd-text:var(--text-primary); --sd-soft:var(--text-muted); --sd-accent:var(--accent-gold-hover); --sd-on:#04232a;
@@ -4107,6 +4133,144 @@
     document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape'){ close(); document.removeEventListener('keydown', esc); } });
     requestAnimationFrame(() => ov.classList.add('is-in'));
   }
+  // ===================== Lesson quiz (01.11.2026) =====================
+  // The first QUIZ_LESSONS lessons of the free course end with 3 short questions and a
+  // "wow" screen. Questions are the practice game's own exercises for that lesson
+  // (js/nlp-game-data-m<N>.js, written from Ram's transcripts), matched by lesson title,
+  // so no new content is invented here. Logged to popup_events as 'lesson_quiz':
+  // shown / clicked (finished, variant = score) / dismissed (skipped).
+  const QUIZ_LESSONS = 3;
+  const QUIZ_TYPES = ['multiple-choice', 'fill-blank', 'scenario'];
+  let _quizOfferNow = false;
+  const _gameDataLoads = {};
+  function globalLessonIndex(m, l){
+    let n = 0;
+    for (let i = 0; i < m; i++) n += (modules[i] && modules[i].lessons.length) || 0;
+    return n + l;
+  }
+  function quizEligible(m, l){
+    try {
+      if (devBypass || courseType === 'nlp-master') return false;
+      if (globalLessonIndex(m, l) >= QUIZ_LESSONS) return false;
+      return !localStorage.getItem('qz_done_' + modules[m].lessons[l].id);
+    } catch(_){ return false; }
+  }
+  function loadGameModule(n){
+    const name = 'MODULE_' + n;
+    if (window[name]) return Promise.resolve(window[name]);
+    if (_gameDataLoads[n]) return _gameDataLoads[n];
+    _gameDataLoads[n] = new Promise(resolve => {
+      const sc = document.createElement('script');
+      sc.src = '../js/nlp-game-data-m' + n + '.js';
+      // The data files declare `const MODULE_N`, which does not land on window.
+      sc.onload = () => { try { resolve(window[name] || (0, eval)(name)); } catch(_){ resolve(null); } };
+      sc.onerror = () => resolve(null);
+      document.head.appendChild(sc);
+    });
+    return _gameDataLoads[n];
+  }
+  const _normTitle = t => String(t || '').replace(/[׳'"`״׳]/g, '').replace(/\s+/g, ' ').trim();
+  async function quizForLesson(m, l){
+    const mod = modules[m], les = mod && mod.lessons[l];
+    if (!les) return null;
+    const data = await loadGameModule(mod.id);
+    const gl = data && data.lessons && data.lessons.find(x => _normTitle(x.title) === _normTitle(les.title));
+    if (!gl || !Array.isArray(gl.exercises)) return null;
+    const qs = gl.exercises.filter(e => QUIZ_TYPES.includes(e.type) && Array.isArray(e.options)
+      && Number.isInteger(e.correct) && e.options[e.correct] != null).slice(0, 3);
+    if (qs.length < 3) return null;
+    return { qs, terms: (gl.reading && gl.reading.keyTerms) || [] };
+  }
+  function logQuiz(lessonId, ev, variant){
+    try {
+      supabaseClient.auth.getUser().then(({ data }) => {
+        if (!data || !data.user) return;
+        supabaseClient.from('popup_events').insert({ popup_id: 'lesson_quiz', event_type: ev, variant: variant || null,
+          user_id: data.user.id, lesson_identifier: lessonId }).then(() => {}, () => {});
+      });
+    } catch(_){}
+  }
+  async function showLessonQuiz(m, l, after){
+    const les = modules[m] && modules[m].lessons[l];
+    let quiz = null;
+    try { quiz = await quizForLesson(m, l); } catch(_){}
+    if (!quiz){ after(); return; }
+    const lessonId = les.id;
+    try { localStorage.setItem('qz_done_' + lessonId, '1'); } catch(_){}
+    logQuiz(lessonId, 'shown');
+    const ov = document.createElement('div'); ov.className = 'lms-celeb-modal';
+    ov.innerHTML = '<div class="lms-celeb-card lms-qz-card" role="dialog" aria-modal="true" aria-label="3 שאלות קצרות על השיעור"></div>';
+    document.body.appendChild(ov);
+    const card = ov.querySelector('.lms-qz-card');
+    let idx = 0, score = 0, closed = false;
+    function close(skipped){
+      if (closed) return; closed = true;
+      if (skipped) logQuiz(lessonId, 'dismissed', idx + '/3');
+      ov.classList.remove('is-in'); setTimeout(() => ov.remove(), 300);
+      document.removeEventListener('keydown', esc);
+      setTimeout(after, 320);
+    }
+    function esc(e){ if (e.key === 'Escape') close(true); }
+    function dots(){ return '<div class="lms-qz-dots">' + [0,1,2].map(i => `<i class="${i <= idx ? 'on' : ''}"></i>`).join('') + '</div>'; }
+    function renderQ(){
+      const q = quiz.qs[idx];
+      const text = q.type === 'fill-blank' && q.template ? `${q.question} <bdi>${escapeHtml(q.template).replace('___', '______')}</bdi>` : escapeHtml(q.question);
+      card.innerHTML = `
+        <div class="lms-qz-top"><span>שאלה ${idx + 1} מתוך 3 · על השיעור שסיימת</span>${dots()}</div>
+        ${q.context ? `<p class="lms-qz-ctx">${escapeHtml(q.context)}</p>` : ''}
+        <p class="lms-qz-q">${q.type === 'fill-blank' ? text : text}</p>
+        <div class="lms-qz-opts">${q.options.map((o, i) => `<button type="button" class="lms-qz-opt" data-i="${i}">${escapeHtml(o)}</button>`).join('')}</div>
+        <div class="lms-qz-after"></div>
+        ${idx === 0 ? '<button type="button" class="lms-sd-skip lms-qz-skipbtn">דילוג על השאלות</button>' : ''}`;
+      const sk = card.querySelector('.lms-qz-skipbtn'); if (sk) sk.onclick = () => close(true);
+      card.querySelectorAll('.lms-qz-opt').forEach(btn => btn.onclick = () => answer(+btn.dataset.i));
+      card.scrollTop = 0;
+    }
+    function answer(i){
+      const q = quiz.qs[idx], ok = i === q.correct;
+      if (ok) score++;
+      card.querySelectorAll('.lms-qz-opt').forEach(b => {
+        const j = +b.dataset.i; b.disabled = true;
+        if (j === q.correct) b.classList.add('is-ok');
+        else if (j === i) b.classList.add('is-bad');
+        else b.classList.add('is-dim');
+      });
+      const why = ok ? (q.explanation || '') : ((Array.isArray(q.wrongExplanations) && q.wrongExplanations[i]) || q.explanation || '');
+      const last = idx === quiz.qs.length - 1;
+      card.querySelector('.lms-qz-after').innerHTML = `
+        <div class="lms-qz-fb ${ok ? 'ok' : 'bad'}"><b>${ok ? 'בדיוק! ✓' : 'כמעט. התשובה מסומנת בירוק'}</b>${escapeHtml(why)}</div>
+        <button type="button" class="lms-celeb-btn lms-qz-next">${last ? 'לתוצאה שלך' : 'לשאלה הבאה'}</button>`;
+      const sk = card.querySelector('.lms-qz-skipbtn'); if (sk) sk.remove();
+      const nx = card.querySelector('.lms-qz-next');
+      nx.onclick = () => { if (last) wow(); else { idx++; renderQ(); } };
+      if (ok){ try { playChime(); } catch(_){} }
+      setTimeout(() => { try { nx.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch(_){} }, 50);
+    }
+    function wow(){
+      logQuiz(lessonId, 'clicked', score + '/3');
+      const W = {
+        3: ['וואו! הבנת את השיעור 🎯', 'כל התשובות נכונות. ככה צפייה הופכת ללמידה.'],
+        2: ['יפה מאוד! 👏', 'תפסת את רוב הרעיונות, וההסבר על השאלה שפספסת כבר נחקק.'],
+        1: ['התחלה טובה 💪', 'כל הסבר שקראת עכשיו הוא עוד משהו שנחקק. ככה לומדים.'],
+        0: ['עשית את הצעד 💪', 'כל הסבר שקראת עכשיו הוא עוד משהו שנחקק. ככה לומדים.']
+      }[score];
+      if (score >= 2){ try { fireConfetti(); } catch(_){} }
+      const terms = quiz.terms.slice(0, 6);
+      card.innerHTML = `
+        <div class="lms-qz-score">${score}/3</div>
+        <h3>${W[0]}</h3>
+        <p style="text-align:center">${W[1]}</p>
+        ${terms.length ? `<div class="lms-qz-terms-h">מושגים שלמדת בשיעור הזה</div><div class="lms-qz-terms">${terms.map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+        <button type="button" class="lms-celeb-btn lms-qz-next">ממשיכים 🚀</button>`;
+      card.querySelector('.lms-qz-next').onclick = () => close(false);
+      card.scrollTop = 0;
+    }
+    ov.addEventListener('click', e => { if (e.target === ov) close(true); });
+    document.addEventListener('keydown', esc);
+    renderQ();
+    requestAnimationFrame(() => ov.classList.add('is-in'));
+  }
+
   // ===================== Study day (01.11.2026) =====================
   // One weekly slot in the learner's own calendar, habit-stacked onto a moment that
   // already happens. Offered after lessons 1, 2 and 3 of the free course, at most once a
@@ -4191,6 +4355,18 @@
     else if (modDone)                  ms = { icon:'fa-layer-group',      title:'מודול הושלם! 🏅',    text:`סיימת את "${modules[m].title}". ממשיכים הלאה.` };
     else if (done === 1)               ms = { icon:'fa-flag',             title:'הצעד הראשון! 🚀',    text:'התחלת את המסע — כל שיעור מקרב אותך לשליטה מלאה.' };
     else if (Math.round(pct*100) === 50) ms = { icon:'fa-star-half-stroke', title:'חצי הדרך! 💪',     text:'עברת את אמצע הקורס. התמדה מנצחת.' };
+    if (_quizOfferNow){
+      const sd = _sdOfferNow; _quizOfferNow = false; _sdOfferNow = false;
+      // After the quiz: the study-day card if it is due, otherwise the usual milestone
+      // and the end-of-lesson popups that were held back for the quiz.
+      const after = () => {
+        if (sd){ showStudyDayModal(done); return; }
+        if (ms) showMilestoneModal(ms, lvl);
+        else { try { if (window.PopupManager) window.PopupManager.notifyLessonComplete(); } catch(_){} }
+      };
+      setTimeout(() => showLessonQuiz(m, l, after), 350);
+      return;
+    }
     if (_sdOfferNow){ _sdOfferNow = false; setTimeout(() => showStudyDayModal(done), 350); return; }
     if (ms) setTimeout(() => showMilestoneModal(ms, lvl), 350);
     else showCelebToast(`+${XP_PER_LESSON} XP · רמה ${lvl.level}`);
@@ -5063,19 +5239,22 @@
     // Study day: after lessons 1-3 the calendar card takes this completion's one slot,
     // so the learner never gets it stacked on top of the Master pitch.
     _sdOfferNow = !alreadyDone && shouldOfferStudyDay(completedLessons.length);
+    // Lesson quiz: the first lessons end with 3 questions and a "wow" screen.
+    _quizOfferNow = !alreadyDone && quizEligible(m, l);
+    const _slotTaken = _sdOfferNow || _quizOfferNow;
     if (window.PopupManager){
       window.PopupManager.setLessonContext(lessonId);
       window.PopupManager.setLessonCount(completedLessons.length);
-      if (!_sdOfferNow) window.PopupManager.notifyLessonComplete();
+      if (!_slotTaken) window.PopupManager.notifyLessonComplete();
     }
 
     try {
       const weeklyCount = recordLessonCompletion();
-      if (weeklyCount === 2 && window.PopupManager && !_sdOfferNow){
+      if (weeklyCount === 2 && window.PopupManager && !_slotTaken){
         setTimeout(() => window.PopupManager.request('top_percentile_v2'), 600);
       }
       // share_prompt: fires after 3rd completed lesson (authenticated users)
-      if (completedLessons.length >= 3 && window.PopupManager){
+      if (completedLessons.length >= 3 && window.PopupManager && !_slotTaken){
         setTimeout(() => window.PopupManager.request('share_prompt'), 2000);
       }
     } catch(_){}

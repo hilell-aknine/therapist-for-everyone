@@ -1413,6 +1413,13 @@
   .lms-celeb-card h3{ margin:.2rem 0; color:#fff; font-size:1.3rem; }
   .lms-celeb-card p{ margin:.4rem 0 0; color:var(--text-muted); line-height:1.6; }
   .lms-celeb-xp{ margin-top:1rem; font-weight:800; color:var(--accent-gold-hover); }
+  /* Study day card (01.11.2026): after lessons 1-3, until the learner adds it */
+  .lms-sd-card{ max-width:440px; max-height:calc(100dvh - 2rem); overflow-y:auto; text-align:right;
+    --sd-text:var(--text-primary); --sd-soft:var(--text-muted); --sd-accent:var(--accent-gold-hover); --sd-on:#04232a;
+    --sd-line:rgba(242,199,102,.35); --sd-field:rgba(255,255,255,.06); --sd-note:rgba(242,199,102,.10); --sd-gold:var(--accent-gold-hover); --sd-ok:#7ee2a8; }
+  .lms-sd-card h3{ text-align:center; }
+  .lms-sd-card .sd-time{ color-scheme:dark; }
+  .lms-sd-skip{ display:block; margin:1rem auto 0; background:none; border:0; color:var(--text-muted); font:inherit; font-size:.9rem; text-decoration:underline; cursor:pointer; padding:.5rem; }
   .lms-celeb-btn{ margin-top:1.3rem; background:linear-gradient(135deg,var(--accent-gold-hover),var(--accent-gold)); color:#04232a; font-weight:800; border:0; padding:.8rem 2rem; border-radius:999px; cursor:pointer; font-size:1rem; }
 
   .lms-master-section{ background: linear-gradient(180deg, rgba(8,32,38,.62), rgba(6,22,28,.52)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border:1px solid rgba(255,255,255,.10); border-radius:18px; padding:1.4rem 1.5rem; box-shadow: 0 10px 24px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08); }
@@ -2923,6 +2930,7 @@
 <script src="../js/marketing-tools.js"></script>
 <script src="../js/popup-manager.js"></script>
 <script src="../js/supabase-client.js"></script>
+<script src="../js/study-day.js?v=1"></script>
 <script src="../js/session-guard.js"></script>
 <script src="../js/clips-catalog.js"></script>
 <script>
@@ -3673,6 +3681,7 @@
   function completedKey(){ return courseType === 'nlp-master' ? 'completedLessons_master' : courseType === 'nlp-techniques' ? 'completedLessons_techniques' : 'completedLessons'; }
   let completedLessons = JSON.parse(localStorage.getItem(completedKey()) || '[]');
   let lastWatched = null;
+  let _hydrateP = null;   // resolves once server progress is merged (#continue waits for it)
   let currentModuleIndex = -1;
   let currentLessonIndex = -1;
   let completionTimer = null;
@@ -4098,6 +4107,80 @@
     document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape'){ close(); document.removeEventListener('keydown', esc); } });
     requestAnimationFrame(() => ov.classList.add('is-in'));
   }
+  // ===================== Study day (01.11.2026) =====================
+  // One weekly slot in the learner's own calendar, habit-stacked onto a moment that
+  // already happens. Offered after lessons 1, 2 and 3 of the free course, at most once a
+  // day, until it is added or skipped twice. State: profiles.reminder_prefs.calendar.
+  let _sdOfferNow = false;
+  let _sdState = { added: false, skips: 0 };
+  async function loadStudyDayState(){
+    try {
+      if (devBypass || !supabaseClient) return;
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) return;
+      const { data } = await supabaseClient.from('profiles').select('reminder_prefs').eq('id', user.id).maybeSingle();
+      const cal = (data && data.reminder_prefs && data.reminder_prefs.calendar) || {};
+      _sdState = { added: !!cal.added_at, skips: +cal.portal_skips || 0 };
+    } catch(_){}
+  }
+  function shouldOfferStudyDay(done){
+    try {
+      if (!window.StudyDay || devBypass) return false;
+      if (courseType === 'nlp-master') return false;
+      if (done < 1 || done > 3) return false;
+      if (_sdState.added || _sdState.skips >= 2) return false;
+      if (localStorage.getItem('sd_added') === '1') return false;
+      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' });
+      if (localStorage.getItem('sd_offered_day') === today) return false;
+      localStorage.setItem('sd_offered_day', today);
+      return true;
+    } catch(_){ return false; }
+  }
+  function showStudyDayModal(done){
+    const title = done === 1 ? 'הצעד הראשון! 🚀' : `כבר ${done} שיעורים מאחוריך 💪`;
+    const ov = document.createElement('div'); ov.className = 'lms-celeb-modal';
+    ov.innerHTML = `
+      <div class="lms-celeb-card lms-sd-card" role="dialog" aria-modal="true" aria-labelledby="sdTitle">
+        <div class="lms-celeb-badge"><i class="fa-regular fa-calendar-check"></i></div>
+        <h3 id="sdTitle">${title}</h3>
+        <p style="text-align:center;margin-bottom:1rem">עכשיו נקבע לזה יום קבוע בשבוע.</p>
+        <div id="sdMount"></div>
+        <button type="button" class="lms-sd-skip">אולי בפעם אחרת</button>
+      </div>`;
+    document.body.appendChild(ov);
+    const skip = ov.querySelector('.lms-sd-skip');
+    let added = false;
+    function esc(e){ if (e.key === 'Escape') close(); }
+    function close(){
+      if (!added){
+        _sdState.skips += 1;
+        window.StudyDay.record(supabaseClient, { portal_skips: _sdState.skips, portal_last_skip: new Date().toISOString() });
+      }
+      ov.classList.remove('is-in'); setTimeout(() => ov.remove(), 300);
+      document.removeEventListener('keydown', esc);
+    }
+    window.StudyDay.mount(ov.querySelector('#sdMount'), {
+      source: 'lesson_' + done,
+      onRecord: patch => window.StudyDay.record(supabaseClient, patch),
+      onAdded: () => {
+        added = true; _sdState.added = true;
+        try { localStorage.setItem('sd_added', '1'); } catch(_){}
+        skip.textContent = 'סגירה וחזרה ללמידה';
+      }
+    });
+    skip.onclick = close;
+    ov.addEventListener('click', e => { if (e.target === ov) close(); });
+    document.addEventListener('keydown', esc);
+    requestAnimationFrame(() => ov.classList.add('is-in'));
+  }
+  async function continueFromLink(){
+    try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
+    try { if (_hydrateP) await _hydrateP; } catch(_){}
+    const next = getNextLesson();
+    if (next.allDone){ showWelcome(true); return; }
+    selectLesson(next.m, next.l);
+  }
+
   function celebrateCompletion(m, l){
     fireConfetti(); playChime();
     const done = completedLessons.length, total = totalLessons || 0, pct = total ? done/total : 0;
@@ -4108,6 +4191,7 @@
     else if (modDone)                  ms = { icon:'fa-layer-group',      title:'מודול הושלם! 🏅',    text:`סיימת את "${modules[m].title}". ממשיכים הלאה.` };
     else if (done === 1)               ms = { icon:'fa-flag',             title:'הצעד הראשון! 🚀',    text:'התחלת את המסע — כל שיעור מקרב אותך לשליטה מלאה.' };
     else if (Math.round(pct*100) === 50) ms = { icon:'fa-star-half-stroke', title:'חצי הדרך! 💪',     text:'עברת את אמצע הקורס. התמדה מנצחת.' };
+    if (_sdOfferNow){ _sdOfferNow = false; setTimeout(() => showStudyDayModal(done), 350); return; }
     if (ms) setTimeout(() => showMilestoneModal(ms, lvl), 350);
     else showCelebToast(`+${XP_PER_LESSON} XP · רמה ${lvl.level}`);
   }
@@ -4976,15 +5060,18 @@
     // Keep PopupManager's lesson context + count current, then run the
     // server-driven 'lesson_complete' trigger scan. setLessonCount() and
     // notifyLessonComplete() were entirely missing on v2 (audit-2026-06-01, P1).
+    // Study day: after lessons 1-3 the calendar card takes this completion's one slot,
+    // so the learner never gets it stacked on top of the Master pitch.
+    _sdOfferNow = !alreadyDone && shouldOfferStudyDay(completedLessons.length);
     if (window.PopupManager){
       window.PopupManager.setLessonContext(lessonId);
       window.PopupManager.setLessonCount(completedLessons.length);
-      window.PopupManager.notifyLessonComplete();
+      if (!_sdOfferNow) window.PopupManager.notifyLessonComplete();
     }
 
     try {
       const weeklyCount = recordLessonCompletion();
-      if (weeklyCount === 2 && window.PopupManager){
+      if (weeklyCount === 2 && window.PopupManager && !_sdOfferNow){
         setTimeout(() => window.PopupManager.request('top_percentile_v2'), 600);
       }
       // share_prompt: fires after 3rd completed lesson (authenticated users)
@@ -7235,6 +7322,9 @@
       showFeedView(true);
       return true;
     }
+    // #continue: the link inside the learner's weekly calendar event (js/study-day.js).
+    // Same target as the "המשך ללמוד" button: the unfinished lesson at the saved second.
+    if (location.hash === '#continue'){ continueFromLink(); return true; }
     if (location.hash === '#buddy'){ showBuddyView(true); return true; }
     if (location.hash === '#ambassador'){ showAmbassadorView(true); return true; }
     if (location.hash === '#master-sales'){
@@ -7328,8 +7418,9 @@
     setupAmbassador();
     setupBuddy();
     setupMaster();
-    hydrateProgress();
+    _hydrateP = hydrateProgress();
     await checkPaidRole();
+    loadStudyDayState();
     // Study buddy: learn whether this person was already asked for consent (the flag
     // the popup's condition reads) and surface a badge if someone is waiting on them.
     // Deliberately not awaited — a slow RPC must never delay the portal rendering.

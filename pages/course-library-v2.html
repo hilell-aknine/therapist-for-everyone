@@ -4345,7 +4345,29 @@
     selectLesson(next.m, next.l);
   }
 
+  // The watch clock marks a lesson done at 80% of real playback, i.e. while Ram is still
+  // talking. The quiz and the study-day card must not land on a running video, so in that
+  // case they wait for the end of the video (or the learner going back home). A manual
+  // "סמן כהושלם" is the learner saying "I'm done": it shows at once and pauses the video.
+  let _pendingEndFlow = null, _manualComplete = false;
+  function isLessonPlaying(){
+    try { const st = _ytPlayer && _ytPlayer.getPlayerState ? _ytPlayer.getPlayerState() : -1; return st === 1 || st === 3; } catch(_){ return false; }
+  }
+  function pauseLesson(){ try { if (isLessonPlaying()) _ytPlayer.pauseVideo(); } catch(_){} }
+  function runPendingEndFlow(){
+    if (!_pendingEndFlow) return;
+    const f = _pendingEndFlow; _pendingEndFlow = null;
+    setTimeout(f, 400);
+  }
   function celebrateCompletion(m, l){
+    const manual = _manualComplete; _manualComplete = false;
+    if ((_quizOfferNow || _sdOfferNow) && !manual && isLessonPlaying()){
+      const q = _quizOfferNow, sd = _sdOfferNow; _quizOfferNow = false; _sdOfferNow = false;
+      _pendingEndFlow = () => { _quizOfferNow = q; _sdOfferNow = sd; _manualComplete = true; celebrateCompletion(m, l); };
+      try { showCelebToast('✓ השיעור נשמר כהושלם'); } catch(_){}
+      return;
+    }
+    if (_quizOfferNow || _sdOfferNow) pauseLesson();
     fireConfetti(); playChime();
     const done = completedLessons.length, total = totalLessons || 0, pct = total ? done/total : 0;
     const lvl = getLevelInfo();
@@ -4512,7 +4534,7 @@
                 else { stopWatchClock(); }
                 // Pausing is the single most common way a learner leaves a lesson — persist there.
                 if (e.data === YT.PlayerState.PAUSED) flushPos();
-                if (e.data === YT.PlayerState.ENDED){ if (_curLessonId) clearPos(_curLessonId); markLessonCompleted(m, l); }
+                if (e.data === YT.PlayerState.ENDED){ if (_curLessonId) clearPos(_curLessonId); Promise.resolve(markLessonCompleted(m, l)).then(runPendingEndFlow); }
               },
               // Only a genuine "embedding disabled by owner" (101/150) or missing/private video (100)
               // should surface the YouTube hand-off. Generic player errors (2/5) false-fire inside
@@ -4548,7 +4570,7 @@
           onStateChange: (e) => {
             if (e.data === YT.PlayerState.BUFFERING || e.data === YT.PlayerState.PLAYING) _hideLoading();
             if (e.data === YT.PlayerState.PLAYING) startPosPoll();
-            if (e.data === YT.PlayerState.ENDED){ if (_curLessonId) clearPos(_curLessonId); markLessonCompleted(_curML.m, _curML.l); }
+            if (e.data === YT.PlayerState.ENDED){ if (_curLessonId) clearPos(_curLessonId); Promise.resolve(markLessonCompleted(_curML.m, _curML.l)).then(runPendingEndFlow); }
           }
         }
       });
@@ -5081,6 +5103,7 @@
     if (iframe) iframe.src = 'about:blank';
   }
   function showWelcome(skipPush){
+    runPendingEndFlow();
     document.body.classList.remove('view-player', 'view-ambassador', 'view-master', 'view-master-sales', 'view-buddy', 'view-feed');
     clearVideoState();
     if (!skipPush && location.hash) history.pushState(null, '', location.pathname + location.search);
@@ -5089,6 +5112,7 @@
   // Inline onclick handlers resolve against window — expose (this IIFE is a separate scope).
   window.showWelcome = showWelcome;
   function selectLesson(m, l, skipPush){
+    _pendingEndFlow = null;
     if (!modules[m] || !modules[m].lessons[l]) return;
     currentModuleIndex = m;
     currentLessonIndex = l;
@@ -5191,6 +5215,7 @@
       if (completedLessons.includes(key)){
         completedLessons = completedLessons.filter(k => k !== key);
       } else {
+        _manualComplete = true;
         markLessonCompleted(currentModuleIndex, currentLessonIndex);
         return;
       }

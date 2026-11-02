@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>הסרה מרשימת המיילים | בית המטפלים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root { --petrol:#003B46; --teal:#00606B; --frost:#E8F1F2; --gold:#D4AF37; --ink:#0f2a30; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+         padding:16px; font-family:'Heebo',Arial,sans-serif; color:var(--ink);
+         background:linear-gradient(160deg,var(--frost) 0%,#fff 60%); }
+  .card { width:100%; max-width:440px; background:rgba(255,255,255,.85); backdrop-filter:blur(14px);
+          border:1px solid rgba(0,59,70,.12); border-top:3px solid var(--gold); border-radius:18px;
+          padding:32px 24px; text-align:center; box-shadow:0 18px 40px rgba(0,59,70,.10); }
+  h1 { font-family:'Frank Ruhl Libre',serif; color:var(--petrol); font-size:26px; margin:0 0 12px; }
+  p  { font-size:16px; line-height:1.7; margin:0 0 10px; }
+  .muted { color:#5b6f74; font-size:14px; }
+  a.btn { display:inline-block; margin-top:18px; background:var(--petrol); color:#fff; text-decoration:none;
+          padding:12px 22px; border-radius:10px; font-weight:600; }
+  a.btn:focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
+</style>
+</head>
+<body>
+<main class="card" aria-live="polite">
+  <h1 id="title">רגע אחד…</h1>
+  <p id="msg">מעדכנים את ההעדפות שלך.</p>
+  <p class="muted" id="note" hidden>מיילים שקשורים לחשבון עצמו, כמו קישור כניסה, ימשיכו להגיע.</p>
+  <a class="btn" href="course-library-v2.html">לפורטל הלמידה</a>
+</main>
+<script>
+(async function () {
+  var q = new URLSearchParams(location.search);
+  var u = q.get('u') || '', s = q.get('s') || '';
+  var title = document.getElementById('title'), msg = document.getElementById('msg');
+  function show(t, m, note) { title.textContent = t; msg.textContent = m; document.getElementById('note').hidden = !note; }
+  if (!u || !s) { show('הקישור לא שלם', 'נסו לפתוח שוב את הקישור מתוך המייל.', false); return; }
+  try {
+    var res = await fetch('https://eimcudmlfjlyxjyrdcgc.supabase.co/functions/v1/email-unsubscribe', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ u: u, s: s })
+    });
+    var data = await res.json().catch(function () { return {}; });
+    if (res.ok && data.ok) show('הוסרת מהרשימה', 'לא נשלח לך יותר תזכורות ועדכונים במייל.', true);
+    else if (data.error === 'invalid_link') show('הקישור לא תקין', 'נסו לפתוח שוב את הקישור מתוך המייל, או פשוט השיבו למייל במילה "הסר".', false);
+    else show('משהו השתבש', 'נסו שוב בעוד כמה דקות, או פשוט השיבו למייל במילה "הסר".', false);
+  } catch (e) {
+    show('אין חיבור כרגע', 'נסו שוב בעוד כמה דקות, או פשוט השיבו למייל במילה "הסר".', false);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1007,6 +1007,17 @@
             </label>
           </div>
 
+          <!-- Marketing consent: separate, optional, NOT pre-checked (anti-spam law).
+               The exact wording is stored with the consent, so keep data-wording in
+               sync with the visible text if either is ever edited. -->
+          <div class="sg-field">
+            <label class="sg-terms-label">
+              <input type="checkbox" id="reg-marketing-checkbox"
+                     data-wording="אשמח לקבל מבית המטפלים עדכונים, תכנים והצעות במייל ובוואטסאפ. אפשר להסיר בכל רגע.">
+              <span>אשמח לקבל מבית המטפלים עדכונים, תכנים והצעות במייל ובוואטסאפ. אפשר להסיר בכל רגע.</span>
+            </label>
+          </div>
+
           <div id="turnstile-container"></div>
 
           <button type="submit" class="sg-btn-primary" id="regSubmitBtn">
@@ -1178,7 +1189,13 @@
             const autoPassword = generateSecurePassword();
             const { data, error } = await supabaseClient.auth.signUp({
                 email, password: autoPassword,
-                options: { data: { full_name: fullName, phone } }
+                options: { data: {
+                    full_name: fullName, phone,
+                    // Recorded server-side by the on_auth_user_marketing_consent trigger
+                    // into marketing_consents (with the wording and a server timestamp).
+                    marketing_consent: !!(document.getElementById('reg-marketing-checkbox') || {}).checked,
+                    consent_wording: (document.getElementById('reg-marketing-checkbox') || { dataset: {} }).dataset.wording || ''
+                } }
             });
             if (error) throw error;
 

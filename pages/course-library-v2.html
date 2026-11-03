@@ -362,6 +362,15 @@
   .lms-hero__video-scrim{ position:absolute; inset:0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,.65) 100%); transition: background var(--dur-base) var(--ease-out); }
   .lms-hero__video:hover .lms-hero__video-scrim{ background: linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.78) 100%); }
   .lms-hero__video-caption{ position:absolute; left:12px; right:12px; bottom:10px; padding:.4rem .7rem; border-radius:8px; background: rgba(255,255,255,.08); backdrop-filter: blur(10px) saturate(180%); -webkit-backdrop-filter: blur(10px) saturate(180%); border:1px solid rgba(255,255,255,.12); color:var(--text-primary); font-size:.72rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; }
+  /* Desktop: the next-lesson block is the main action on the home screen, so it gets more room (03.11.2026). */
+  @media (min-width: 901px){
+    .lms-hero{ grid-template-columns: minmax(0, 1fr) clamp(220px, 42%, 520px); gap:2rem; padding:2.25rem; }
+    .lms-hero__eyebrow{ font-size:.9rem; }
+    .lms-hero__title{ font-size: clamp(2rem, 3vw, 2.7rem); }
+    .lms-hero__sub{ font-size:1rem; }
+    .lms-hero__cta{ width:320px; height:60px; font-size:1.15rem; }
+    .lms-hero__video{ min-height:300px; }
+  }
   @media (max-width: 420px){ .lms-hero{ grid-template-columns: 1fr; gap:1rem; padding:1.25rem; } .lms-hero__cta{ width:100%; } .lms-hero__video{ min-height:160px; } }
   @container (max-width: 720px){
     .lms-hero__title{ font-size: clamp(1.15rem, 4.2cqw, 1.4rem); line-height:1.18; }
@@ -1351,6 +1360,8 @@
   /* Compact "המסע שלך" — ~40% shorter than the original (smaller padding, cards, ring, badges). */
   /* ── Weekly learning card (השבוע מול שבוע שעבר) ── sits inside .lms-welcome,
      so it inherits the parent's hide-on-subview behavior automatically. */
+  /* The weekly card was removed from the home screen (Hillel, 03.11.2026). */
+  #weeklyStatsCard{ display:none !important; }
   .lms-weekly{ position:relative; overflow:hidden; display:flex; align-items:center; gap:1rem;
     background:linear-gradient(180deg, rgba(233,185,73,.07), rgba(255,255,255,.02));
     border:1px solid rgba(242,199,102,.24); border-radius:14px; padding:1rem 1.1rem; }
@@ -4862,7 +4873,8 @@
   function renderAll(){
     renderProgress();
     renderHero();
-    renderWeeklyStats();   // async, fire-and-forget; manages its own show/hide
+    // renderWeeklyStats(): the weekly card was removed from the home screen (Hillel, 03.11.2026).
+    // The card stays hidden; the function is kept in case it comes back.
     refreshStudyStreak();  // async, fire-and-forget; repaints the flame when it lands
     renderStats();
     renderJourney();

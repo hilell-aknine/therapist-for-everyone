@@ -83,7 +83,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            /* Was overflow:hidden, which cut the bottom of the card on laptop screens
+               (Google button out of reach without zooming out). 03.11.2026 */
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding-block: 24px 80px;
         }
 
         input, button, select, textarea {
@@ -94,7 +98,7 @@
         button { -webkit-tap-highlight-color: transparent; }
 
         @supports (padding-bottom: env(safe-area-inset-bottom)) {
-            body { padding-bottom: env(safe-area-inset-bottom); }
+            body { padding-bottom: max(80px, env(safe-area-inset-bottom)); }
         }
 
         /* ===== ATMOSPHERIC BACKGROUND ===== */

@@ -1362,6 +1362,25 @@
      so it inherits the parent's hide-on-subview behavior automatically. */
   /* The weekly card was removed from the home screen (Hillel, 03.11.2026). */
   #weeklyStatsCard{ display:none !important; }
+  .lms-mcard{ display:flex; align-items:center; gap:1rem; padding:1rem 1.1rem; border-radius:14px;
+    background:linear-gradient(180deg, rgba(47,133,146,.16), rgba(255,255,255,.02));
+    border:1px solid rgba(47,133,146,.45); }
+  .lms-mcard[hidden]{ display:none !important; }
+  .lms-mcard__icon{ flex:none; width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+    font-size:1.05rem; color:#fff; background:linear-gradient(135deg, #2F8592, #00606B); }
+  .lms-mcard__body{ flex:1 1 auto; min-width:0; text-align:start; }
+  .lms-mcard__eyebrow{ font-size:.78rem; color:#7fc3cc; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lms-mcard__title{ margin:.15rem 0 .1rem; font-family:var(--font-display); font-size:1.08rem; font-weight:800; color:#fff; line-height:1.3; }
+  .lms-mcard__sub{ margin:0; font-size:.85rem; color:var(--text-muted); line-height:1.4; }
+  .lms-mcard__actions{ flex:none; display:flex; flex-direction:column; align-items:stretch; gap:.35rem; }
+  .lms-mcard__cta{ border:0; cursor:pointer; padding:.6rem 1rem; border-radius:999px; font:inherit; font-weight:700; font-size:.9rem;
+    color:var(--text-on-gold); background:linear-gradient(135deg, var(--accent-gold-hover), var(--accent-gold)); white-space:nowrap; }
+  .lms-mcard__later{ border:0; background:none; cursor:pointer; font:inherit; font-size:.8rem; color:var(--text-muted); padding:.25rem; }
+  .lms-mcard__later:hover{ color:#fff; }
+  @media (max-width:560px){
+    .lms-mcard{ flex-wrap:wrap; }
+    .lms-mcard__actions{ width:100%; flex-direction:row; justify-content:space-between; align-items:center; }
+  }
   .lms-weekly{ position:relative; overflow:hidden; display:flex; align-items:center; gap:1rem;
     background:linear-gradient(180deg, rgba(233,185,73,.07), rgba(255,255,255,.02));
     border:1px solid rgba(242,199,102,.24); border-radius:14px; padding:1rem 1.1rem; }
@@ -2087,6 +2106,23 @@
           <div class="lms-hero__video-scrim"></div>
           <span class="lms-hero__video-caption" id="heroCaption">השיעור הבא</span>
         </button>
+      </section>
+
+      <!-- Master card (10.11.2026). The only road to #master-sales used to be popups
+           (0 clicks out of 18) and a sidebar item that unlocks after module 3. This is a
+           quiet card, not a popup: nothing to dismiss, no daily popup cap. Rules live in
+           renderMasterCard(). -->
+      <section class="lms-mcard" id="masterCard" aria-label="המאסטר" hidden>
+        <div class="lms-mcard__icon" aria-hidden="true"><i class="fa-solid fa-people-arrows"></i></div>
+        <div class="lms-mcard__body">
+          <div class="lms-mcard__eyebrow" id="masterCardEyebrow">השלב הבא</div>
+          <h2 class="lms-mcard__title">רוצה לתרגל את זה באמת?</h2>
+          <p class="lms-mcard__sub">במאסטר מתרגלים מול רם את מה שלמדת כאן בתיאוריה.</p>
+        </div>
+        <div class="lms-mcard__actions">
+          <button type="button" class="lms-mcard__cta" id="masterCardCta">לראות מה יש במאסטר</button>
+          <button type="button" class="lms-mcard__later" id="masterCardLater">לא עכשיו</button>
+        </div>
       </section>
 
       <section class="lms-weekly" id="weeklyStatsCard" aria-label="הלמידה שלך השבוע" hidden>
@@ -4870,9 +4906,58 @@
     host.hidden = false;
   }
 
+  // ===== Master card on the home screen (10.11.2026) =====
+  // Shown on the free course from the 3rd completed lesson. "לא עכשיו" hides it for 7 days.
+  // Never for a paying customer (admins keep it as a preview). Click opens #master-sales
+  // with source 'library_card', so the admin counter shows it apart from the popups.
+  const MCARD_MIN_LESSONS = 3;
+  const MCARD_SNOOZE_KEY = 'mcard_snooze_until';
+  function lastCompletedPractitionerLesson(){
+    for (let m = modules.length - 1; m >= 0; m--){
+      for (let l = modules[m].lessons.length - 1; l >= 0; l--){
+        if (completedLessons.includes(`${m}-${l}`)) return modules[m].lessons[l];
+      }
+    }
+    return null;
+  }
+  function renderMasterCard(){
+    const card = document.getElementById('masterCard');
+    if (!card) return;
+    let show = courseType === 'nlp-practitioner' && !(_isPaidCustomer && !_isAdmin);
+    if (show){
+      const done = completedLessons.filter(k => /^\d+-\d+$/.test(k)).length;
+      if (done < MCARD_MIN_LESSONS) show = false;
+    }
+    if (show){
+      try { if (Number(localStorage.getItem(MCARD_SNOOZE_KEY) || 0) > Date.now()) show = false; } catch(_){}
+    }
+    const last = show ? lastCompletedPractitionerLesson() : null;
+    if (!last) { card.hidden = true; return; }
+    document.getElementById('masterCardEyebrow').textContent = `השלב הבא אחרי: ${String(last.title).trim()}`;
+    card.hidden = false;
+    // one 'shown' row per day, not per repaint
+    try {
+      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' });
+      if (localStorage.getItem('mcard_shown_day') !== today){
+        localStorage.setItem('mcard_shown_day', today);
+        if (window.PopupManager && window.PopupManager.track) window.PopupManager.track('master_library_card', 'shown');
+      }
+    } catch(_){}
+    document.getElementById('masterCardCta').onclick = () => {
+      try { window.PopupManager && window.PopupManager.track && window.PopupManager.track('master_library_card', 'clicked'); } catch(_){}
+      showMasterSalesView(false, 'library_card');
+    };
+    document.getElementById('masterCardLater').onclick = () => {
+      try { localStorage.setItem(MCARD_SNOOZE_KEY, String(Date.now() + 7 * 864e5)); } catch(_){}
+      try { window.PopupManager && window.PopupManager.track && window.PopupManager.track('master_library_card', 'dismissed'); } catch(_){}
+      card.hidden = true;
+    };
+  }
+
   function renderAll(){
     renderProgress();
     renderHero();
+    renderMasterCard();
     // renderWeeklyStats(): the weekly card was removed from the home screen (Hillel, 03.11.2026).
     // The card stays hidden; the function is kept in case it comes back.
     refreshStudyStreak();  // async, fire-and-forget; repaints the flame when it lands
@@ -7102,6 +7187,8 @@
         if (!_isAdmin){
           const ms = document.getElementById('sbMasterSalesItem');
           if (ms) ms.style.display = 'none';
+          const mc = document.getElementById('masterCard');
+          if (mc) mc.hidden = true;
         }
         const mt = document.getElementById('masterTab');
         if (mt) mt.style.display = 'inline-flex';

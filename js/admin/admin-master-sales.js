@@ -11,6 +11,7 @@ const MS_SOURCE_HE = {
     sidebar: 'תפריט הצד בפורטל',
     popup_welcome_pitch: 'חלון "מילה מרם" (כניסה ראשונה)',
     popup_training_cta: 'חלון "מוכן להעמיק" (אחרי שיעור)',
+    library_card: 'כרטיס "השלב הבא" במסך הבית של הספרייה',
     popup_engaged_offer: 'הצעה ללומד פעיל (5 שיעורים ומעלה)',
     direct_link: 'קישור ישיר / שמור',
     campaign: 'קמפיין (קישור עם utm)',

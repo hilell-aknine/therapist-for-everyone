@@ -3418,6 +3418,8 @@
       if (sub)   sub.textContent   = 'התחברו כדי לקבל גישה לכל התכנים הבונוס';
     }
     modal.hidden = false;
+    // 16.11.2026: only dismissals were logged (55, never a "shown"), so the modal's reach was unknown.
+    try { if (window.PopupManager && PopupManager.track) PopupManager.track(_lmsActiveAuthPopup, 'shown'); } catch(_){}
   }
   function closeLmsAuthModal(){
     const modal = document.getElementById('lmsAuthModal');
@@ -4178,8 +4180,14 @@
         <button type="button" class="lms-celeb-btn">ממשיכים 🚀</button>
       </div>`;
     document.body.appendChild(ov);
-    const close = () => { ov.classList.remove('is-in'); setTimeout(() => ov.remove(), 300); };
-    ov.querySelector('.lms-celeb-btn').onclick = close;
+    // 16.11.2026: the milestone modal was never logged, so module-end moments were invisible in popup_events.
+    const MS_IDS = { 'fa-flag':'milestone_first_lesson', 'fa-layer-group':'milestone_module', 'fa-star-half-stroke':'milestone_half', 'fa-trophy':'milestone_course' };
+    const msId = MS_IDS[ms.icon] || 'milestone_other';
+    const track = (t) => { try { if (window.PopupManager && PopupManager.track) PopupManager.track(msId, t); } catch(_){} };
+    track('shown');
+    let closed = false;
+    const close = (how) => { if (closed) return; closed = true; track(how === 'button' ? 'clicked' : 'dismissed'); ov.classList.remove('is-in'); setTimeout(() => ov.remove(), 300); };
+    ov.querySelector('.lms-celeb-btn').onclick = () => close('button');
     ov.addEventListener('click', e => { if (e.target === ov) close(); });
     document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape'){ close(); document.removeEventListener('keydown', esc); } });
     requestAnimationFrame(() => ov.classList.add('is-in'));

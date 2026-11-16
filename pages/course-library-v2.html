@@ -2721,8 +2721,11 @@
   <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
   <div class="lms-toast__icon">🔥</div>
   <div class="lms-toast__body">
-    <strong data-streak-title>זה השבוע השני ברציפות שאתה נכנס!</strong>
-    <p data-pc-message>רק 20% מהנרשמים שומרים על רצף כזה. אל תעצור עכשיו!</p>
+    <strong data-streak-title>שבוע שני ברצף שחזרת לפורטל</strong>
+    <!-- No data-pc-message on purpose: this toast states only what was measured
+         (weeks with a portal visit). An admin-edited text once claimed "only 20%"
+         (real: 1.6%) and "ומתקדם" (progress is not checked) — 16.11.2026. -->
+    <p>ההתמדה הזו היא מה שמזיז את השינוי.</p>
   </div>
 </div>
 
@@ -3655,8 +3658,9 @@
         if (streak >= 2 && window.PopupManager){
           const titleEl = document.querySelector('#lmsToastStreak [data-streak-title]');
           if (titleEl){
-            const ordinal = streak === 2 ? 'השני' : streak === 3 ? 'השלישי' : 'ה-' + streak;
-            titleEl.textContent = 'זה השבוע ' + ordinal + ' ברציפות שאתה נכנס!';
+            const ORD = ['', '', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שביעי', 'שמיני', 'תשיעי', 'עשירי'];
+            const label = ORD[streak] ? 'שבוע ' + ORD[streak] : 'שבוע ' + streak;
+            titleEl.textContent = label + ' ברצף שחזרת לפורטל';
           }
           setTimeout(() => window.PopupManager.request('weekly_streak_v2'), 1500);
         }

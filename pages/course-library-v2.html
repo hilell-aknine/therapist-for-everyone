@@ -1789,6 +1789,8 @@
   .lmsmp-price { font-family:'Frank Ruhl Libre',serif; font-weight:900; color:var(--accent-gold-hover); font-size:clamp(40px,12vw,52px); line-height:1; }
   .lmsmp-price small { font-size:.42em; font-weight:800; margin-inline-start:.12em; }
   .lmsmp-bonus { font-size:13px; font-weight:700; color:var(--text-primary); margin-top:.3rem; }
+  .lmsmp-incl{list-style:none;margin:.9rem 0 .2rem;padding:0;display:grid;gap:.35rem;text-align:start;font-size:.9rem;color:var(--text-secondary,#b4cdd1)}
+  .lmsmp-incl i{color:var(--accent-gold,#D4AF37);width:1.1em;margin-inline-end:.35rem}
   .lmsmp-bonus i { color:var(--accent-gold); }
   .lmsmp-cta { display:flex; align-items:center; justify-content:center; gap:.55rem; width:100%; background:var(--accent-gold); color:var(--text-on-gold); border:1px solid var(--accent-gold); font-family:inherit; font-weight:800; font-size:15.5px; padding:13px 16px; border-radius:var(--radius-md); cursor:pointer; transition:background .2s, transform .12s ease, box-shadow .2s; box-shadow:0 8px 22px rgba(233,185,73,.32); }
   .lmsmp-cta:hover { background:var(--accent-gold-hover); transform:translateY(-2px); box-shadow:0 12px 28px rgba(233,185,73,.42); }
@@ -2909,18 +2911,27 @@
     <!-- The headline is rendered here, NOT from popup_configs: it carries the learner's
          live lesson count, and a stale number from the DB would be worse than no popup.
          The body copy and CTA text ARE admin-editable (data-pc-*). -->
-    <h2 id="lmsEngagedTitle" class="lmsmp-h">סיימת <span id="lmsEngagedCount">5</span> שיעורים. אתה כבר לא רק מתעניין.</h2>
+    <h2 id="lmsEngagedTitle" class="lmsmp-h">סיימת <span id="lmsEngagedCount">5</span> שיעורים. זה כבר לא רק עניין של סקרנות.</h2>
     <p class="lmsmp-text" data-pc-message>
-      רוב מי שנרשם לפורטל עוצר אחרי שיעור אחד. אתה לא. הגעת רחוק מספיק כדי לדעת
-      שהשיטה הזו עובדת עליך — והמאסטר הוא בדיוק המקום שבו זה הופך מ״הבנתי״ ל״אני יודע לעשות״.
+      רוב מי שנרשם לפורטל עוצר אחרי שיעור אחד. הגעת רחוק מספיק כדי לדעת
+      שהשיטה הזו עובדת עליך, והמאסטר הוא בדיוק המקום שבו זה הופך מ״הבנתי״ ל״עשיתי״.
     </p>
     <div class="lmsmp-offer">
       <div class="lmsmp-offer-top">במקום <s>6,200 ש״ח</s> · הנחה 70%</div>
       <div class="lmsmp-price">1,900 <small>ש״ח</small></div>
       <div class="lmsmp-bonus"><i class="fa-solid fa-credit-card"></i> או ב-5 תשלומים של 380 ש״ח</div>
     </div>
+    <!-- 16.11.2026: what the Master includes, from the sales page package list. Before this the
+         popup showed only a price, with no word about the practitioner recordings or the workshops. -->
+    <ul class="lmsmp-incl">
+      <li><i class="fa-solid fa-check"></i> קורס המאסטר המלא</li>
+      <li><i class="fa-solid fa-check"></i> כל הטכניקות המוקלטות של הפרקטישנר והמאסטר</li>
+      <li><i class="fa-solid fa-check"></i> 2 חוברות טכניקות ליישום</li>
+      <li><i class="fa-solid fa-gift"></i> סדנת מסרים מרגשות + סדנת סגנונות תקשורת</li>
+      <li><i class="fa-solid fa-gift"></i> כלי AI לתרגול ויישום</li>
+    </ul>
     <button type="button" class="lmsmp-cta" onclick="engagedOfferCta()"><i class="fa-solid fa-crown"></i> <span data-pc-cta>קחו אותי למאסטר</span></button>
-    <button type="button" class="lmsmp-link" onclick="closeEngagedOffer()">לא עכשיו, אני ממשיך ללמוד</button>
+    <button type="button" class="lmsmp-link" onclick="closeEngagedOffer()">לא עכשיו, אחזור לשיעור הבא</button>
   </div>
 </div>
 
@@ -3161,6 +3172,7 @@
       hide: () => hideEngagedOffer(),
       maxPerDay: 1,
       cooldownMs: 3*24*60*60*1000,    // every 3 days, vs 1 day for the generic one
+      cooldownScope: 'self',          // 16.11.2026: 3 days since THIS offer, not since any popup
       condition: () => {
         try {
           const u = window.PopupManager.getUser ? window.PopupManager.getUser() : {};
@@ -3283,7 +3295,11 @@
   function fillPersonalTokens(text, vars){
     return String(text || '')
       .replace(/\{\{\s*lessons\s*\}\}/g, vars.lessons)
-      .replace(/\{\{\s*name\s*\}\}/g, vars.name || '');
+      .replace(/\{\{\s*name\s*\}\}/g, vars.name || '')
+      // 16.11.2026: gendered copy. {{g:זכר|נקבה}} or {{g:זכר|נקבה|ניטרלי}}. Gender comes from the
+      // learner's own sign-up questionnaire; unknown gets the neutral form (or the male one if none given).
+      .replace(/\{\{\s*g:([^|}]*)\|([^|}]*)(?:\|([^}]*))?\}\}/g, (all, mText, fText, nText) =>
+        vars.gender === 'f' ? fText : vars.gender === 'm' ? mText : (nText != null ? nText : mText));
   }
 
   function showEngagedOffer(){
@@ -3298,7 +3314,7 @@
 
     if (count < ENGAGED_MIN_LESSONS_UI) return;   // never lie about the number
 
-    const vars = { lessons: count, name: name };
+    const vars = { lessons: count, name: name, gender: window._portalGender || '' };
     let content = {};
     try { content = (window.PopupManager.getContent && window.PopupManager.getContent('engaged_master_offer')) || {}; } catch(_){}
 
@@ -7164,6 +7180,11 @@
         const fn = (profile && profile.full_name ? String(profile.full_name).trim().split(/\s+/)[0] : '');
         window._portalFirstName = fn && fn.length <= 20 ? fn : '';
       } catch(_){ window._portalFirstName = ''; }
+      // Gender for gendered popup copy ({{g:..|..}}), from the learner's own questionnaire row
+      // (RLS auth_read_own_portal_q). Not awaited: until it lands the popup uses the neutral form.
+      supabaseClient.from('portal_questionnaires').select('gender').eq('user_id', user.id).limit(1)
+        .then(({ data }) => { const g = data && data[0] && data[0].gender; window._portalGender = g === 'אישה' ? 'f' : g === 'גבר' ? 'm' : ''; })
+        .catch(() => {});
       // Feed the REAL role into PopupManager so audience targeting is accurate.
       // authGate() optimistically set role='student_lead' before the profile loaded;
       // now that we know the true role, refresh it. This is what makes the

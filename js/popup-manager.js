@@ -171,6 +171,9 @@
         saveHistory(h);
     }
 
+    // Minimum gap after any popup before a self-scoped popup may show (no back-to-back stacking).
+    const SELF_SCOPE_GAP_MS = 60 * 1000;
+
     function getLastShownTime() {
         const h = loadHistory();
         let latest = 0;
@@ -380,10 +383,24 @@
 
             // Cooldown
             const cooldown = reg.cooldownMs || DEFAULT_COOLDOWN_MS;
-            const timeSinceLast = Date.now() - getLastShownTime();
-            if (timeSinceLast < cooldown) {
-                setTimeout(() => processQueue(), cooldown - timeSinceLast + 50);
-                break;
+            if (reg.cooldownScope === 'self') {
+                // 16.11.2026: the cooldown counts from THIS popup's last show, not from any popup.
+                // engaged_master_offer waited 3 days since ANY popup, and active learners get the
+                // weekly streak toast on load, so the offer never fired (last shown 03.09).
+                // In its own cooldown it is dropped, not parked at the head of the queue.
+                const own = (loadHistory()[id] || {}).lastShown || 0;
+                if (Date.now() - own < cooldown) { queue.shift(); continue; }
+                const sinceAny = Date.now() - getLastShownTime();
+                if (sinceAny < SELF_SCOPE_GAP_MS) {
+                    setTimeout(() => processQueue(), SELF_SCOPE_GAP_MS - sinceAny + 50);
+                    break;
+                }
+            } else {
+                const timeSinceLast = Date.now() - getLastShownTime();
+                if (timeSinceLast < cooldown) {
+                    setTimeout(() => processQueue(), cooldown - timeSinceLast + 50);
+                    break;
+                }
             }
 
             // Engagement: daily limits

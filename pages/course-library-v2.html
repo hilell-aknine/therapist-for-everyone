@@ -2127,6 +2127,24 @@
         </div>
       </section>
 
+      <!-- In-portal marketing consent (16.11.2026). Only 8 learners had a documented opt-in
+           (the signup checkbox exists since 02.11), and the anti-spam law needs one before any
+           offer by email or WhatsApp. Asking inside the product is allowed; messaging to ask
+           is not. The exact wording is saved with the consent: keep CONSENT_WORDING in sync
+           with the visible text. Rules live in renderConsentCard(). -->
+      <section class="lms-mcard lms-ccard" id="consentCard" aria-label="עדכונים מבית המטפלים" hidden>
+        <div class="lms-mcard__icon" aria-hidden="true"><i class="fa-regular fa-envelope-open"></i></div>
+        <div class="lms-mcard__body">
+          <div class="lms-mcard__eyebrow">ללומדים בלבד</div>
+          <h2 class="lms-mcard__title" id="consentCardTitle">רוצה שנעדכן אותך?</h2>
+          <p class="lms-mcard__sub" id="consentCardSub">סדנאות חינמיות, תכנים חדשים והצעות ללומדים, במייל ובוואטסאפ. אפשר להסיר בכל רגע.</p>
+        </div>
+        <div class="lms-mcard__actions">
+          <button type="button" class="lms-mcard__cta" id="consentCardYes">כן, תעדכנו אותי</button>
+          <button type="button" class="lms-mcard__later" id="consentCardLater">לא עכשיו</button>
+        </div>
+      </section>
+
       <section class="lms-weekly" id="weeklyStatsCard" aria-label="הלמידה שלך השבוע" hidden>
         <div class="lms-weekly__glow" aria-hidden="true"></div>
         <div class="lms-weekly__icon" id="weeklyIcon"><i class="fa-solid fa-chart-line"></i></div>
@@ -4982,10 +5000,74 @@
     };
   }
 
+  // ===== Marketing consent card (16.11.2026) =====
+  // Shown to signed-in learners whose latest marketing_consents row is not granted.
+  // "כן" writes through set_my_marketing_consent (SECURITY DEFINER, own row only) with the
+  // exact wording; "לא עכשיו" only snoozes locally for 14 days and records nothing.
+  // Exactly what the card shows (title + text + button), because a consent is judged
+  // against the words the person actually saw.
+  const CONSENT_WORDING = 'בית המטפלים: רוצה שנעדכן אותך? סדנאות חינמיות, תכנים חדשים והצעות ללומדים, במייל ובוואטסאפ. אפשר להסיר בכל רגע. [כן, תעדכנו אותי]';
+  const CCARD_SNOOZE_KEY = 'ccard_snooze_until';
+  let _consentState = null;   // null = not checked yet, 'granted' | 'not_granted' | 'unknown'
+  let _consentChecking = false;
+  async function loadConsentState(){
+    if (_consentState || _consentChecking || !supabaseClient) return;
+    _consentChecking = true;
+    try {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) { _consentState = 'unknown'; return; }
+      const { data, error } = await supabaseClient.from('marketing_consents')
+        .select('granted').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1);
+      if (error) { _consentState = 'unknown'; return; }   // fail closed: no card
+      _consentState = (data && data[0] && data[0].granted) ? 'granted' : 'not_granted';
+    } catch(_){ _consentState = 'unknown'; }
+    finally { _consentChecking = false; renderConsentCard(); }
+  }
+  function renderConsentCard(){
+    const card = document.getElementById('consentCard');
+    if (!card) return;
+    if (_consentState === null){ card.hidden = true; loadConsentState(); return; }
+    let show = _consentState === 'not_granted';
+    if (show){ try { if (Number(localStorage.getItem(CCARD_SNOOZE_KEY) || 0) > Date.now()) show = false; } catch(_){} }
+    if (!show){ card.hidden = true; return; }
+    card.hidden = false;
+    try {
+      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' });
+      if (localStorage.getItem('ccard_shown_day') !== today){
+        localStorage.setItem('ccard_shown_day', today);
+        if (window.PopupManager && window.PopupManager.track) window.PopupManager.track('consent_card', 'shown');
+      }
+    } catch(_){}
+    const yes = document.getElementById('consentCardYes');
+    yes.onclick = async () => {
+      yes.disabled = true;
+      try {
+        const { error } = await supabaseClient.rpc('set_my_marketing_consent', { p_granted: true, p_source: 'portal_card', p_wording: CONSENT_WORDING });
+        if (error) throw error;
+        _consentState = 'granted';
+        try { window.PopupManager && window.PopupManager.track && window.PopupManager.track('consent_card', 'clicked'); } catch(_){}
+        document.getElementById('consentCardTitle').textContent = 'מעולה, נעדכן אותך 🙂';
+        document.getElementById('consentCardSub').textContent = 'אפשר להסיר בכל רגע מכל הודעה שנשלח.';
+        card.querySelector('.lms-mcard__actions').style.display = 'none';   // [hidden] loses to the class's display:flex
+        setTimeout(() => { card.hidden = true; }, 3500);
+      } catch(_){
+        // Never confirm a write that failed.
+        yes.disabled = false;
+        document.getElementById('consentCardSub').textContent = 'משהו לא נשמר. אפשר לנסות שוב.';
+      }
+    };
+    document.getElementById('consentCardLater').onclick = () => {
+      try { localStorage.setItem(CCARD_SNOOZE_KEY, String(Date.now() + 14 * 864e5)); } catch(_){}
+      try { window.PopupManager && window.PopupManager.track && window.PopupManager.track('consent_card', 'dismissed'); } catch(_){}
+      card.hidden = true;
+    };
+  }
+
   function renderAll(){
     renderProgress();
     renderHero();
     renderMasterCard();
+    renderConsentCard();
     // renderWeeklyStats(): the weekly card was removed from the home screen (Hillel, 03.11.2026).
     // The card stays hidden; the function is kept in case it comes back.
     refreshStudyStreak();  // async, fire-and-forget; repaints the flame when it lands

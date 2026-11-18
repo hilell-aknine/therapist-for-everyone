@@ -2749,18 +2749,6 @@
   </div>
 </div>
 
-<!-- video_toast: shows 60s after guest starts watching a lesson -->
-<div id="lmsToastVideo" class="lms-toast" role="status" aria-live="polite" data-popup-id="video_toast" hidden>
-  <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
-  <div class="lms-toast__icon">🎬</div>
-  <div class="lms-toast__body">
-    <strong data-pc-title>אהבת את השיעור?</strong>
-    <p>הירשמו חינם כדי לקבל גישה לכל הקורס.
-      <button type="button" onclick="openLmsAuthModal('modal')" style="display:inline;background:none;border:none;color:var(--accent-gold);font-family:inherit;font-size:inherit;cursor:pointer;padding:0;text-decoration:underline;">להירשם</button>
-    </p>
-  </div>
-</div>
-
 <!-- share_prompt: fires after lesson_complete (3+ lessons) -->
 <div id="lmsToastShare" class="lms-toast" role="status" aria-live="polite" data-popup-id="share_prompt" hidden>
   <button type="button" class="lms-toast__close" aria-label="סגור" onclick="hideLmsToast('lmsToastShare');if(window.PopupManager)window.PopupManager.dismiss('share_prompt');">×</button>
@@ -2776,16 +2764,6 @@
         <i class="fa-solid fa-link"></i> העתקת קישור
       </button>
     </div>
-  </div>
-</div>
-
-<!-- referral_toast: fires when new referrals detected in ambassador tab -->
-<div id="lmsToastReferral" class="lms-toast" role="status" aria-live="polite" data-popup-id="referral_toast" hidden>
-  <button type="button" class="lms-toast__close" aria-label="סגור">×</button>
-  <div class="lms-toast__icon">🎉</div>
-  <div class="lms-toast__body">
-    <strong data-pc-title>יש לכם הפניה חדשה!</strong>
-    <p data-pc-message>מישהו שהפניתם הצטרף לפורטל. כל הכבוד!</p>
   </div>
 </div>
 
@@ -3619,35 +3597,12 @@
       show: () => openLmsAuthModal('modal'),
       hide: () => closeLmsAuthModal()
     });
-    window.PopupManager.register('auth_wall', {
-      priority: 2, category: 'critical', targetAudience: 'unauthenticated',
-      show: () => openLmsAuthModal('wall'),
-      hide: () => closeLmsAuthModal()
-    });
-    window.PopupManager.register('ai_questionnaire', {
-      priority: 3, category: 'engagement', targetAudience: 'free_user',
-      show: () => openLmsQuestionnaire(),
-      hide: () => closeLmsQuestionnaire(),
-      maxPerDay: 1,
-      condition: () => { try { return localStorage.getItem('questionnaireCompleted') !== 'true'; } catch { return true; } }
-    });
-    window.PopupManager.register('video_toast', {
-      priority: 5, category: 'info', targetAudience: 'unauthenticated',
-      show: () => showLmsToast('lmsToastVideo', 12000),
-      hide: () => hideLmsToast('lmsToastVideo')
-    });
     window.PopupManager.register('share_prompt', {
       priority: 4, category: 'engagement', targetAudience: 'free_user',
       show: () => showLmsToast('lmsToastShare', 15000),
       hide: () => hideLmsToast('lmsToastShare'),
       maxPerDay: 1,
       cooldownMs: 5 * 60 * 1000
-    });
-    window.PopupManager.register('referral_toast', {
-      priority: 5, category: 'info', targetAudience: 'authenticated',
-      show: () => showLmsToast('lmsToastReferral', 6000),
-      hide: () => hideLmsToast('lmsToastReferral'),
-      maxPerDay: 2
     });
   }
   registerPortedPopups();
@@ -4469,7 +4424,7 @@
     if (pct >= 1)                      ms = { icon:'fa-trophy',           title:'סיימת את הקורס! 🎉', text:'כל הכבוד — השלמת את כל השיעורים. אלוף אמיתי.' };
     else if (modDone)                  ms = { icon:'fa-layer-group',      title:'מודול הושלם! 🏅',    text:`סיימת את "${modules[m].title}". ממשיכים הלאה.` };
     else if (done === 1)               ms = { icon:'fa-flag',             title:'הצעד הראשון! 🚀',    text:'התחלת את המסע — כל שיעור מקרב אותך לשליטה מלאה.' };
-    else if (Math.round(pct*100) === 50) ms = { icon:'fa-star-half-stroke', title:'חצי הדרך! 💪',     text:'עברת את אמצע הקורס. התמדה מנצחת.' };
+    else if (total && done === Math.ceil(total/2)) ms = { icon:'fa-star-half-stroke', title:'חצי הדרך! 💪',     text:'עברת את אמצע הקורס. התמדה מנצחת.' };
     if (_quizOfferNow){
       const sd = _sdOfferNow; _quizOfferNow = false; _sdOfferNow = false;
       // After the quiz: the study-day card if it is due, otherwise the usual milestone
@@ -5336,24 +5291,6 @@
 
     // #4 Resume-aware video load — נגן ישיר (ה-facade בוטל: גרם ל-iframe להישאר על about:blank)
     loadLessonVideo(lesson, m, l);
-
-    // video_toast: for unauthenticated guests, fire after 60s of watching
-    if (_videoToastTimer) clearTimeout(_videoToastTimer);
-    _videoToastTimer = null;
-    if (!devBypass && window.PopupManager){
-      // Check auth state asynchronously; only fire toast for guests
-      (async () => {
-        try {
-          const client = window.supabaseClient;
-          const { data: { session } } = client ? await client.auth.getSession() : { data: { session: null } };
-          if (!session){
-            _videoToastTimer = setTimeout(() => {
-              if (window.PopupManager) window.PopupManager.request('video_toast');
-            }, 60000);
-          }
-        } catch {}
-      })();
-    }
 
     refreshCompleteBtn();
     refreshNavBtns();
